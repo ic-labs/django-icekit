@@ -1,6 +1,6 @@
 # Overview
 
-TODO
+A modular content CMS by [Interaction Consortium].
 
 ## Table of Contents
 
@@ -40,3 +40,4 @@ to see your latest edits is refresh your browser.
 [Contributing]: contributing.md
 [Markdown]: http://daringfireball.net/projects/markdown/
 [MkDocs]: http://mkdocs.org
+[Interaction Consortium]: http://interaction.net.au
