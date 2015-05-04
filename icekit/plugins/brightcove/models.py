@@ -1,8 +1,10 @@
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItem
+from icekit.utils import implementation
 
 
+# Ensure django-brightcove dependency is installed.
 try:
     from django_brightcove.fields import BrightcoveField
 except ImportError:
@@ -11,6 +13,9 @@ except ImportError:
             'Please install `django_brightcove`to use the icekit.plugins.brightcove plugin.'
         )
     )
+
+# Ensure required settings for django-brightcove have been defined.
+implementation.check_settings(['BRIGHTCOVE_TOKEN', 'BRIGHTCOVE_PLAYER', ])
 
 
 @python_2_unicode_compatible
