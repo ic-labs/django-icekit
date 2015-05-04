@@ -26,13 +26,6 @@ class BrightcoveItem(ContentItem):
     The BrightcoveField is a django specific implementation to allow
     the embedding of videos. It anticipates the video ID will be used
     as a lookup value.
-
-    In the template to be rendered you will need to include:
-    <script
-        type="text/javascript"
-        src="http://admin.brightcove.com/js/BrightcoveExperiences.js"
-    >
-    </script>
     """
     video = BrightcoveField(
         help_text=_('Provide the video ID from the brightcove video.')
