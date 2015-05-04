@@ -8,3 +8,9 @@ Admin configuration for ``icekit`` app.
 from django.contrib import admin
 
 from icekit import models
+
+
+class MediaCategoryAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(models.MediaCategory, MediaCategoryAdmin)
