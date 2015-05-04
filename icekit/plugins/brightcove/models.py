@@ -43,4 +43,4 @@ class BrightcoveItem(ContentItem):
         verbose_name_plural = _('Brightcove Videos')
 
     def __str__(self):
-        return str(self.image)
+        return str(self.video)
