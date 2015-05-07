@@ -19,4 +19,8 @@ setuptools.setup(
         'tox',
         'WebTest',
     ],
+    extras_require={
+        'dev': ['ipdb', 'ipython'],
+        'postgres': ['psycopg2'],
+    },
 )
