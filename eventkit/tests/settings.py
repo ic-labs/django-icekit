@@ -31,3 +31,8 @@ ROOT_URLCONF = 'eventkit.urls'
 SECRET_KEY = 'secret-key'
 STATIC_URL = '/static/'
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+USE_TZ = True
+
+# DYNAMIC FIXTURES ############################################################
+
+DDF_FILL_NULLABLE_FIELDS = False
