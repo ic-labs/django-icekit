@@ -44,7 +44,10 @@ def default_ends():
 
 class AbstractBaseModel(models.Model):
     """
-    Abstract base model.
+    Abstract base model with common fields and methods for all models.
+
+    Add ``created`` and ``modified`` timestamp fields. Update the ``modified``
+    field automatically on save.
     """
 
     created = models.DateTimeField(
