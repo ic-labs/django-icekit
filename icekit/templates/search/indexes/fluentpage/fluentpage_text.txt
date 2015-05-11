@@ -1,0 +1,6 @@
+{% load fluent_contents_tags search_tags %}
+{{ object.title }}
+{{ object.user.get_full_name }}
+{# As fluent requires a request object to process the page place holders we need to fake a request object here #}
+{% fake_request %}
+{% page_placeholder object "main" role="m" %}
