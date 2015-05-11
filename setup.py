@@ -19,4 +19,7 @@ setuptools.setup(
         'tox',
         'WebTest',
     ],
+    extras_require={
+        'search': ['django-haystack', ]
+    }
 )
