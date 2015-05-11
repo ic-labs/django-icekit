@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Internal Server Error (500){% endblock %}
+
+{% block body %}
+	<div class="jumbotron interal-server-error">
+		<h1>Sorry, something went wrong</h1>
+		<p><strong>What's happening?</strong> We have probably made a mistake that wasn't immediately obvious until now.</p>
+		<p>We've already been sent an automatic email about this, and will fix the problem as soon as possible.</p>
+		<h2>Some options in the meantime</h2>
+		<ol>
+			<li>What you did might have worked, but the problem came when we tried to tell you about it. If you're expecting an email, or a change to some information, check to see whether the email was sent, or the information was changed.</li>
+			<li>Try and do whatever you did again (you never know).</li>
+			<li>Go to the <a href="/">home page</a> or <a href="http://www.google.com">Google</a> and then look for links to the information you want. Sure, that's probably on this page, but you could get lucky.</li>
+		</ol>
+	</div>
+{% endblock %}

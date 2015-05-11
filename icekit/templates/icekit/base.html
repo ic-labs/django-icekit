@@ -1,0 +1,120 @@
+{% load compress %}
+
+{% block doctype %}<!DOCTYPE html>{% endblock %}
+<html lang="{% block html_lang %}en{% endblock %}" {% block html_attributes %}{% endblock %}>
+	<head {% block head_attributes %}prefix="og: http://ogp.me/ns#"{% endblock %}>
+		{% block head %}
+			<!-- Hello. We're the Interaction Consortium (http://interaction.net.au) -->
+			<!-- We made this. -->
+			<title>{% block title %}{% if title %}{{ title }} - {% endif %}{{ SITE_NAME }}{% endblock %}</title>
+
+			{% block meta %}
+				<meta charset="utf-8">
+				<meta http-equiv="X-UA-Compatible" content="IE=edge">
+				<meta name="description" content="{% block meta_description %}{% endblock %}">
+				<meta name="viewport" content="{% block meta_viewport %}width=device-width, initial-scale=1{% endblock %}">
+
+				{% block open_graph %}
+					<meta property="og:title" content="{% block og_title %}{% if title %}{{ title }} - {% endif %}{{ SITE_NAME }}{% endblock %}">
+					<meta property="og:type" content="{% block og_type %}website{% endblock %}">
+					<meta property="og:image" content="{% block og_image %}{% endblock %}">
+					<meta property="og:site_name" content="{% block og_site_name %}{{ SITE_NAME }}{% endblock %}">
+					<meta property="og:description" content="{% block og_description %}{% endblock %}">
+				{% endblock %}
+
+				{% if DEBUG %}
+					<meta name="robots" content="noindex">
+				{% endif %}
+			{% endblock %}
+
+			{% block head_css %}
+				{# CSS files hosted externally #}
+				{% block external_css %}{% endblock %}
+				{# Base CSS files #}
+				{% compress css file %}
+					{% block base_css %}
+						<link rel="stylesheet" href="{% static "bootstrap/dist/css/bootstrap.css" %}">
+						<link rel="stylesheet" href="{% static "font-awesome/css/font-awesome.css" %}">
+					{% endblock %}
+				{% endcompress %}
+				{# Extra CSS files - section/page specific, etc #}
+				{% compress css file %}
+					{% block css %}{% endblock %}
+				{% endcompress %}
+			{% endblock %}
+
+			{# Only put JS here if you need to block rendering, otherwise put it in the `js` block #}
+			{% block head_js %}
+				{% compress js file %}
+					<script src="{% static "modernizr/modernizr.js" %}"></script>
+				{% endcompress %}
+				<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+				<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+				<!--[if lt IE 9]>
+					<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+					<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+				<![endif]-->
+			{% endblock %}
+
+			{% block analytics %}
+				{% include 'icekit/analytics.html' %}
+			{% endblock %}
+		{% endblock %}
+	</head>
+	<body class="{% block body_class %}{% endblock %}" {% block body_attributes %}{% endblock %}>
+		{% block body %}
+			<div class="container-fluid main-header">
+				<div class="container">
+					{% block header %}{% endblock %}
+				</div>
+			</div>
+
+			<div class="container-fluid main-navigation">
+				<div class="container">
+					{% block navigation %}{% endblock %}
+				</div>
+			</div>
+
+			<div class="container-fluid main-messages">
+				<div class="container">
+					{% block messages %}
+						{% include "icekit/messages.html" %}
+					{% endblock %}
+				</div>
+			</div>
+
+			<div class="container-fluid main-content">
+				<div class="container">
+					{% block content %}{% endblock %}
+				</div>
+			</div>
+
+			<div class="container-fluid main-footer">
+				<div class="container">
+					{% block footer %}{% endblock %}
+				</div>
+			</div>
+		{% endblock %}
+
+		{% block body_js %}
+			{# JS files hosted externally #}
+			{% block external_js %}{% endblock %}
+			{# Base JS files #}
+			{% compress js file %}
+				{% block base_js %}
+					<script>
+						window.context = window.context || {};
+						window.context.DEBUG = {% if DEBUG %}true{% else %}false{% endif %};
+					</script>
+					<script src="{% static "jquery/dist/jquery.js" %}"></script>
+					<script src="{% static "bootstrap/dist/js/bootstrap.js" %}"></script>
+					<script src="{% static "lodash/lodash.js" %}"></script>
+				{% endblock %}
+			{% endcompress %}
+			{# Extra JS files - section/page specific, etc #}
+			{% compress js file %}
+				{% block js %}{% endblock %}
+			{% endcompress %}
+		{% endblock %}
+	</body>
+</html>
