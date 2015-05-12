@@ -29,6 +29,7 @@ INSTALLED_APPS = (
     'icekit.plugins.image',
     'fluent_contents',
     'fluent_pages',
+    'bootstrap3',
 )
 
 MIDDLEWARE_CLASSES = (

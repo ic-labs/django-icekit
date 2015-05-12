@@ -7,6 +7,7 @@ setuptools.setup(
     version=__version__,
     packages=setuptools.find_packages(),
     install_requires=[
+        'bootstrap3',
         'coverage',
         'django-dynamic-fixture',
         'django-fluent-pages[flatpage,fluentpage,redirectnode]',
