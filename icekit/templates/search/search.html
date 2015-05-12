@@ -25,13 +25,21 @@
 		{% endfor %}
 
 		{% if page.has_previous or page.has_next %}
-			<nav>
-				<ul class="pager">
+			<nav class="text-center">
+				<ul class="pagination">
 					<li class="previous{% if not page.has_previous %} disabled{% endif %}">
 						<a href="{% if page.has_previous %}?q={{ query }}&amp;page={{ page.previous_page_number }}{% endif %}">
 							<span aria-hidden="true">&larr;</span> Previous
 						</a>
 					</li>
+					{% for pagination_number in page.paginator.page_range %}
+						<li {% if pagination_number == page.number %}class="active" {% endif %}>
+							<a href="?q={{ query }}&amp;page={{ pagination_number }}">
+								{{ pagination_number }}
+								{% if pagination_number == page.number %}<span class="sr-only">(current)</span>{% endif %}
+							</a>
+						</li>
+					{% endfor %}
 					<li class="next{% if not page.has_next %} disabled{% endif %}">
 						<a href="{% if page.has_next %}?q={{ query }}&amp;page={{ page.next_page_number }}{% endif %}">
 							<span aria-hidden="true">&rarr;</span> Next
