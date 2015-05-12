@@ -34,16 +34,41 @@ class Models(WebTest):
         """
         Test repeating events.
         """
-        count = 0
-        # Create event with daily repeat expression.
-        self.assertEqual(models.Event.objects.count(), count)
-        event = G(models.Event, repeat_expression='0 0 * * *')
-        count += 1
-        # Create repeat events.
-        self.assertEqual(models.Event.objects.count(), count)
-        event.create_repeat_events()
-        count += models.REPEAT_LIMIT.days
-        self.assertEqual(models.Event.objects.count(), count)
+        # Start with no events.
+        self.assertEqual(models.Event.objects.count(), 0)
+
+        # Create an event with a daily repeat expression.
+        event = G(
+            models.Event,
+            repeat_expression='FREQ=DAILY;INTERVAL=1;COUNT=20')
+        self.assertEqual(models.Event.objects.count(), 1)
+
+        # Propagate to repeat events.
+        event.propagate()
+        self.assertEqual(event.get_repeat_events().count(), 19)
+
+        # Update an event and decouple from repeat events.
+        event2 = event.get_repeat_events()[15]
+        event2.title = 'event 2'
+        event2.repeat_expression = None
+        event2.save()
+        self.assertEqual(event.get_repeat_events().count(), 18)
+        self.assertEqual(event2.get_repeat_events().count(), 0)
+
+        # Update an event and propagate.
+        event3 = event.get_repeat_events()[10]
+        event3.title = 'event 3'
+        event3.save(propagate=True)
+        self.assertEqual(event.get_repeat_events().count(), 10)
+        self.assertEqual(event3.get_repeat_events().count(), 19)  # Should be 9, not 19, because count rule is being reset.
+
+        # Update an event's repeat expression and propagate.
+        event4 = event.get_repeat_events()[5]
+        event4.repeat_expression = 'FREQ=DAILY;INTERVAL=1;COUNT=3'
+        event4.save(propagate=True)
+        self.assertEqual(event.get_repeat_events().count(), 5)
+        self.assertEqual(event3.get_repeat_events().count(), 19)  # Should be 9, not 19, because count rule is being reset.
+        self.assertEqual(event4.get_repeat_events().count(), 2)
 
 
 class Views(WebTest):

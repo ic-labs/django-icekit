@@ -4,10 +4,11 @@ Models for ``eventkit`` app.
 
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
 
-from datetime import datetime, timedelta
+from datetime import timedelta
+from dateutil.rrule import rrulestr
+import six
 
-from croniter import croniter
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from polymorphic import PolymorphicModel
 
@@ -86,9 +87,11 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
     all_day = models.BooleanField(default=False)
     starts = models.DateTimeField(default=default_starts)
     ends = models.DateTimeField(default=default_ends)
-    repeat_expression = models.CharField(
-        help_text='A cron expression that defines when this event repeats.',
+    repeat_expression = models.TextField(
+        help_text='An RFC2445 expression that defines when this event '
+                  'repeats.',
         max_length=255,
+        null=True,
     )
     end_repeat = models.DateTimeField(
         help_text='If empty, this event will repeat indefinitely.',
@@ -99,22 +102,60 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         abstract = True
         unique_together = ('starts', 'original')
 
+    def __init__(self, *args, **kwargs):
+        """
+        Store repeat field values.
+        """
+        super(AbstractEvent, self).__init__(*args, **kwargs)
+        self._store_repeat_fields()
+
+    def _repeat_fields_changed(self, fields=None):
+        """
+        Return ``True`` if the given field (or any field, if None) has changed.
+        """
+        fields = fields or self.REPEAT_FIELDS
+        if isinstance(fields, six.text_type):
+            fields = [fields]
+        for field in fields:
+            if getattr(self, field) != self._repeat_fields[field]:
+                return True
+        return False
+
+    def _store_repeat_fields(self):
+        """
+        Store repeat values so we can detect and propagate changes.
+        """
+        self._repeat_fields = {
+            k: getattr(self, k) for k in self.REPEAT_FIELDS
+        }
+
     def create_repeat_events(self):
         """
-        Create repeat events. This does not create a new distinct set of
-        events or modify any existing events. New events will have the same
-        original as this event.
+        Create missing repeat events according to the repeat expression, up
+        until the configured limit.
         """
         assert self.pk, 'Cannot create repeat events before an event is saved.'
+        rruleset = self.get_rruleset()
+        # Exclude existing events.
+        rruleset.exdate(self.starts)
+        existing = self \
+            .get_repeat_events() \
+            .values_list('starts', flat=True)
+        for starts in existing:
+            rruleset.exdate(starts)
+        # Create missing events, up until the configured limit.
+        end_repeat = timezone.now() + REPEAT_LIMIT
         original = self.original or self
         defaults = {
             field: getattr(self, field) for field in self.REPEAT_FIELDS
         }
-        for starts in self.get_repeat_occurrences():
-            defaults['ends'] = starts + self.duration
-            type(self).objects.get_or_create(
-                original=original, starts=starts, defaults=defaults
-            )
+        for starts in rruleset:
+            if starts > end_repeat:
+                break
+            ends = starts + self.duration
+            event = type(self)(
+                original=original, starts=starts, ends=ends, **defaults)
+            super(AbstractEvent, event).save()  # Bypass automatic propagation.
 
     @property
     def duration(self):
@@ -123,62 +164,56 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         """
         return self.ends - self.starts
 
-    def get_repeat_occurrences(self):
+    def get_repeat_events(self):
         """
-        Return an iterator of datetime objects for occurrences as specified in
-        ``repeat_expression``.
+        Return a queryset of repeat events, not including this event.
         """
-        assert self.repeat_expression, (
-            'Cannot get repeat occurrences without a repeat expression.')
-        end_repeat = self.end_repeat or timezone.now() + REPEAT_LIMIT
-        items = croniter(self.repeat_expression, self.starts)
-        while True:
-            starts = items.get_next(datetime)
-            if starts > end_repeat:
-                break
-            yield starts
-
-    def update_future_events(self):
-        """
-        Update future events to match this event. This creates a new set of
-        events with this event as their original.
-        """
-        assert self.pk, 'Cannot update future events before an event is saved.'
-        # Use `self.original` (if defined) when fetching existing events to
-        # update, and `self` when updating or creating new events.
+        # Fallback to `self` if `self.original` is not defined, which is the
+        # case for the first event in a set.
         original = self.original or self
-        # Get an iterator of existing events, so we can get the next event
-        # while iterating repeat occurrences.
-        existing_events = type(self).objects \
-            .select_for_update() \
+        # Assume that PK order will always match chronological order.
+        repeat_events = type(self).objects \
             .filter(original=original, pk__gt=self.pk) \
-            .order_by('pk') \
-            .iterator()
-        # Iterate repeat occurrences, update existing future events first, then
-        # create new events.
-        defaults = {
-            field: getattr(self, field) for field in self.REPEAT_FIELDS
-        }
-        for starts in self.get_repeat_occurrences():
-            defaults['ends'] = starts + self.duration
-            try:
-                event = existing_events.next()
-            except StopIteration:
-                # No more to update. Create a new event.
-                type(self).objects.create(original=self, **defaults)
-            else:
-                # Update existing event.
-                event.original = self
-                for field, value in defaults.iteritems():
-                    setattr(event, field, value)
-                event.save()
-        # Delete any additional existing events that were not updated.
-        for event in existing_events:
-            event.delete()
-        # Now that this event is itself a new original with its own set of
-        # repeat events, decouple it from its old original.
+            .order_by('pk')
+        return repeat_events
+
+    def get_rruleset(self):
+        """
+        Return an ``rruleset`` object for this event's repeat expression.
+        """
+        # TODO: Allow the selection of a repeat expression from a list of
+        # presets as well.
+        assert self.repeat_expression, (
+            'Cannot get rruleset without a repeat expression.')
+        rruleset = rrulestr(
+            self.repeat_expression, dtstart=self.starts, forceset=True)
+        return rruleset
+
+    @transaction.atomic
+    def save(self, propagate=False, *args, **kwargs):
+        """
+        When changes are detected, propagate or decouple from repeat events.
+        """
+        # Do not unset `original` before propagating changes. The field is
+        # needed by `get_repeat_events()`.
+        if not propagate and self._repeat_fields_changed():
         self.original = None
-        self.save()
+        super(AbstractEvent, self).save(*args, **kwargs)
+        if propagate and self._repeat_fields_changed():
+            self.propagate()
+        self._store_repeat_fields()
+
+    @transaction.atomic
+    def propagate(self):
+        """
+        Propagate changes to existing repeat events. This will create a new set
+        of repeat events with this event as the original.
+        """
+        # TODO: Handle `COUNT=N` rules being reset.
+        self.get_repeat_events().delete()
+        self.original = None
+        super(AbstractEvent, self).save()  # Bypass automatic propagation.
+        self.create_repeat_events()
 
 
 class Event(AbstractEvent):
