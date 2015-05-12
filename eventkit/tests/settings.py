@@ -19,7 +19,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django_nose',
     'eventkit',
-    'eventkit.tests'
+    'eventkit.tests',
 )
 
 MIDDLEWARE_CLASSES = (
