@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 %}
+
+{% block content %}
+	<div class='page-header'>
+		<h2>Log in to {{ SITE_NAME }}</h2>
+	</div>
+
+	<form method='post' action='{% url "django.contrib.auth.views.login" %}'>
+		{% csrf_token %}
+		{% bootstrap_form form %}
+		<button type='submit' class='btn btn-primary'>Login</button>
+		<input type='hidden' name='next' value='{{ next }}' />
+	</form>
+	<p class='forgotten'>
+		<a href='{% url "django.contrib.auth.views.password_reset" %}'>
+			Forgotten your password?
+		</a>
+	</p>
+
+	</div>
+
+{% endblock %}

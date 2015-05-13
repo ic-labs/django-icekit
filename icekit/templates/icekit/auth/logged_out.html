@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<div class='page-header'>
+		<h2>Successfully logged out</h2>
+	</div>
+	<p>Thanks for spending some quality time with the Web site today.
+	<p><a href='{% url "login" %}'>Log in again</a></p>
+{% endblock %}
