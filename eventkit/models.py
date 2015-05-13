@@ -218,7 +218,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
             if self.pk and (self.repeat_expression or propagate):
                 self.propagate()
             # Always decouple from repeat events when changes are detected.
-        self.original = None
+            self.original = None
         already_saved = bool(self.pk)
         super(AbstractEvent, self).save(*args, **kwargs)
         # Always propagate new repeat events.
@@ -243,7 +243,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         self.original = None
         # Do not try to create repeat events when no repeat expression is set.
         if self.repeat_expression:
-        self.create_repeat_events()
+            self.create_repeat_events()
 
 
 class Event(AbstractEvent):
