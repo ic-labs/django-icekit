@@ -7,6 +7,7 @@ Tests for ``eventkit`` app.
 from datetime import datetime, timedelta
 
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 from django_dynamic_fixture import G
 from django_webtest import WebTest
 
@@ -30,45 +31,97 @@ class Models(WebTest):
         obj.save()
         self.assertNotEqual(obj.modified, modified)
 
-    def test_Event(self):
+    def test_Event_propagation(self):
         """
-        Test repeating events.
+        Test repeat event propagation.
         """
+        # Set `end_repeat` to 19 days after the first event starts, so we have
+        # 20 events in total.
+        starts = time.round_datetime(
+            when=timezone.now(),
+            precision=timedelta(days=1),
+            rounding=time.ROUND_DOWN)
+        ends = starts + models.DEFAULT_ENDS_DELTA
+        end_repeat = starts + timedelta(days=19)
+
         # Start with no events.
         self.assertEqual(models.Event.objects.count(), 0)
 
-        # Create an event with a daily repeat expression.
+        # Create an event with a daily repeat expression. Repeat events are
+        # created automatically.
         event = G(
             models.Event,
-            repeat_expression='FREQ=DAILY;INTERVAL=1;COUNT=20')
-        self.assertEqual(models.Event.objects.count(), 1)
+            title='event',
+            starts=starts,
+            ends=ends,
+            repeat_expression='FREQ=DAILY;INTERVAL=1',
+            end_repeat=end_repeat,
+        )
+        self.assertEqual(event.get_repeat_events().count(), 19)  # 20d - e1
+        self.assertEqual(models.Event.objects.count(), 20)  # e1+19r
 
-        # Propagate to repeat events.
-        event.propagate()
+        # Saving without making changes doesn't propagate anything.
+        event.save()
         self.assertEqual(event.get_repeat_events().count(), 19)
+        self.assertEqual(models.Event.objects.count(), 20)
 
-        # Update an event and decouple from repeat events.
+        # Delete a few repeat events and recreate to simulate the extension of
+        # events that repeat further into the than the configured limit.
+        self.assertEqual(len(event.missing_repeat_events), 0)
+        models.Event.objects \
+            .filter(pk__in=event.get_repeat_events()[15:]) \
+            .delete()
+        self.assertEqual(len(event.missing_repeat_events), 4)
+        event.create_repeat_events()
+        self.assertEqual(len(event.missing_repeat_events), 0)
+
+        # Removing a repeat expression will not propagate by default.
         event2 = event.get_repeat_events()[15]
-        event2.title = 'event 2'
+        # event2.title = 'event 2'
         event2.repeat_expression = None
         event2.save()
-        self.assertEqual(event.get_repeat_events().count(), 18)
+        self.assertEqual(event.get_repeat_events().count(), 18)  # r19 - e2
         self.assertEqual(event2.get_repeat_events().count(), 0)
+        self.assertEqual(models.Event.objects.count(), 20)  # e1+18r + e2
 
-        # Update an event and propagate.
+        # To remove a repeat expression and delete repeat events, pass
+        # `propagate=True` to `save()`.
         event3 = event.get_repeat_events()[10]
-        event3.title = 'event 3'
+        # event3.title = 'event 3'
+        event3.repeat_expression = None
         event3.save(propagate=True)
-        self.assertEqual(event.get_repeat_events().count(), 10)
-        self.assertEqual(event3.get_repeat_events().count(), 19)  # Should be 9, not 19, because count rule is being reset.
+        self.assertEqual(event.get_repeat_events().count(), 10)  # r18 - e3+7r
+        self.assertEqual(event2.get_repeat_events().count(), 0)
+        self.assertEqual(event3.get_repeat_events().count(), 0)
+        self.assertEqual(models.Event.objects.count(), 13)  # e1+10r + e2 + e3
 
-        # Update an event's repeat expression and propagate.
+        # Changes to repeat expression are always propagated.
         event4 = event.get_repeat_events()[5]
-        event4.repeat_expression = 'FREQ=DAILY;INTERVAL=1;COUNT=3'
-        event4.save(propagate=True)
-        self.assertEqual(event.get_repeat_events().count(), 5)
-        self.assertEqual(event3.get_repeat_events().count(), 19)  # Should be 9, not 19, because count rule is being reset.
-        self.assertEqual(event4.get_repeat_events().count(), 2)
+        # event4.title = 'event 4'
+        event4.repeat_expression = 'FREQ=DAILY;INTERVAL=2'
+        event4.save()
+        self.assertEqual(event.get_repeat_events().count(), 5)  # 10r - e4+4r
+        self.assertEqual(event2.get_repeat_events().count(), 0)
+        self.assertEqual(event3.get_repeat_events().count(), 0)
+        self.assertEqual(event4.get_repeat_events().count(), 6)  # 20d - e1+5r = 14d / 2 - e4
+        self.assertEqual(models.Event.objects.count(), 15)  # e1+5r, e2, e3, e4+6r
+
+    def test_Event_change_detection(self):
+        """
+        Test that changes to event repeat fields are detected.
+        """
+        # Create an event.
+        event = G(models.Event)
+        self.assertFalse(event._repeat_fields_changed())
+        # Change a field.
+        event.title = 'title'
+        # Check for changes in all fields and specific fields, given as string
+        # and list values.
+        self.assertTrue(event._repeat_fields_changed())
+        self.assertTrue(event._repeat_fields_changed('title'))
+        self.assertFalse(event._repeat_fields_changed('repeat_expression'))
+        self.assertTrue(event._repeat_fields_changed(
+            ['title', 'repeat_expression']))
 
 
 class Views(WebTest):

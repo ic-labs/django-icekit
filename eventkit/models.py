@@ -114,7 +114,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         Return ``True`` if the given field (or any field, if None) has changed.
         """
         fields = fields or self.REPEAT_FIELDS
-        if isinstance(fields, six.text_type):
+        if isinstance(fields, six.string_types):
             fields = [fields]
         for field in fields:
             if getattr(self, field) != self._repeat_fields[field]:
@@ -129,29 +129,18 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
             k: getattr(self, k) for k in self.REPEAT_FIELDS
         }
 
+    @transaction.atomic
     def create_repeat_events(self):
         """
         Create missing repeat events according to the repeat expression, up
         until the configured limit.
         """
         assert self.pk, 'Cannot create repeat events before an event is saved.'
-        rruleset = self.get_rruleset()
-        # Exclude existing events.
-        rruleset.exdate(self.starts)
-        existing = self \
-            .get_repeat_events() \
-            .values_list('starts', flat=True)
-        for starts in existing:
-            rruleset.exdate(starts)
-        # Create missing events, up until the configured limit.
-        end_repeat = timezone.now() + REPEAT_LIMIT
         original = self.original or self
         defaults = {
             field: getattr(self, field) for field in self.REPEAT_FIELDS
         }
-        for starts in rruleset:
-            if starts > end_repeat:
-                break
+        for starts in self.missing_repeat_events:
             ends = starts + self.duration
             event = type(self)(
                 original=original, starts=starts, ends=ends, **defaults)
@@ -168,6 +157,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         """
         Return a queryset of repeat events, not including this event.
         """
+        assert self.pk, 'Cannot get repeat events before an event is saved.'
         # Fallback to `self` if `self.original` is not defined, which is the
         # case for the first event in a set.
         original = self.original or self
@@ -189,18 +179,52 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
             self.repeat_expression, dtstart=self.starts, forceset=True)
         return rruleset
 
+    @property
+    def missing_repeat_events(self):
+        """
+        Return a list of datetime objects for missing repeat events, up to the
+        configured limit.
+        """
+        rruleset = self.get_rruleset()
+        # Exclude existing events.
+        rruleset.exdate(self.starts)
+        existing = self \
+            .get_repeat_events() \
+            .values_list('starts', flat=True)
+        for starts in existing:
+            rruleset.exdate(starts)
+        # Yield the `starts` datetime for each missing event.
+        end_repeat = self.end_repeat or timezone.now() + REPEAT_LIMIT
+        missing = []
+        # There is always at least one occurrence, even when it already exceeds
+        # `end_repeat`. Don't complain about partial branch coverage.
+        for starts in rruleset:  # pragma: no branch
+            if starts > end_repeat:
+                break
+            missing.append(starts)
+        return missing
+
     @transaction.atomic
     def save(self, propagate=False, *args, **kwargs):
         """
-        When changes are detected, propagate or decouple from repeat events.
+        When changes are detected, decouple from repeat events. If a repeat
+        expression is set or ``propagate=True``, repeat events will be updated.
         """
-        # Do not unset `original` before propagating changes. The field is
-        # needed by `get_repeat_events()`.
-        if not propagate and self._repeat_fields_changed():
+        # Perform some gymnastics to avoid saving twice. An event needs to be
+        # saved already to propagate, but we need to unset `original` after
+        # propagation to decouple from repeat events.
+        if self._repeat_fields_changed():
+            # Propagate changes.
+            if self.pk and (self.repeat_expression or propagate):
+                self.propagate()
+            # Always decouple from repeat events when changes are detected.
         self.original = None
+        already_saved = bool(self.pk)
         super(AbstractEvent, self).save(*args, **kwargs)
-        if propagate and self._repeat_fields_changed():
+        # Always propagate new repeat events.
+        if not already_saved and self.repeat_expression:
             self.propagate()
+        # Update stored fields.
         self._store_repeat_fields()
 
     @transaction.atomic
@@ -209,10 +233,16 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         Propagate changes to existing repeat events. This will create a new set
         of repeat events with this event as the original.
         """
+        assert self.pk, (
+            'Cannot propagate changes to repeat events before an event is '
+            'saved.')
         # TODO: Handle `COUNT=N` rules being reset.
         self.get_repeat_events().delete()
+        # Decouple AFTER deleting repeat events. We need the `original` field
+        # to get repeat events.
         self.original = None
-        super(AbstractEvent, self).save()  # Bypass automatic propagation.
+        # Do not try to create repeat events when no repeat expression is set.
+        if self.repeat_expression:
         self.create_repeat_events()
 
 
