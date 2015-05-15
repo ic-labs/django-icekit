@@ -6,6 +6,8 @@ Tests for ``eventkit`` app.
 
 from datetime import datetime, timedelta
 
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django_dynamic_fixture import G
@@ -14,6 +16,20 @@ from django_webtest import WebTest
 from eventkit import forms, models, views
 from eventkit.utils import time
 from eventkit.tests import models as test_models
+
+
+class Admin(WebTest):
+    def setUp(self):
+        self.User = get_user_model()
+        self.superuser = G(self.User)
+        self.superuser.set_password('abc123')
+        self.client.login(**{
+            self.User.USERNAME_FIELD: self.superuser.get_username(),
+            'password': 'abc123',
+        })
+
+    def test_urls(self):
+        self.app.get(reverse('admin:eventkit_recurrencerule_changelist'))
 
 
 class Forms(WebTest):
@@ -31,6 +47,37 @@ class Models(WebTest):
         obj.save()
         self.assertNotEqual(obj.modified, modified)
 
+    def test_Event_clean(self):
+        """
+        Test model validation.
+        """
+        now = timezone.now()
+        recurrence_rule = models.RecurrenceRule.objects.get(
+            description='Daily')
+
+        # Do not unset `end_repeat` when a recurrence rule is set.
+        event = G(
+            models.Event,
+            recurrence_rule=recurrence_rule,
+            end_repeat=now,
+        )
+        event.full_clean()
+        self.assertEqual(event.end_repeat, now)
+
+        # Unset `end_repeat` if no recurrence rule is set.
+        event.recurrence_rule = None
+        event.full_clean()
+        self.assertEqual(event.end_repeat, None)
+
+        # Only one of `recurrence_rule` and `custom_recurrence_rule` can be
+        # set at the same time.
+        event.recurrence_rule = recurrence_rule
+        event.custom_recurrence_rule = 'foo'
+        message = (
+            'This field cannot be set when a recurrence rule is selected.')
+        with self.assertRaisesMessage(ValidationError, message):
+            event.full_clean()
+
     def test_Event_propagation(self):
         """
         Test repeat event propagation.
@@ -44,17 +91,21 @@ class Models(WebTest):
         ends = starts + models.DEFAULT_ENDS_DELTA
         end_repeat = starts + timedelta(days=19)
 
+        # Get a recurrence rule to use.
+        recurrence_rule = models.RecurrenceRule.objects.get(
+            description='Daily')
+
         # Start with no events.
         self.assertEqual(models.Event.objects.count(), 0)
 
-        # Create an event with a daily repeat expression. Repeat events are
+        # Create an event with a daily recurrence rule. Repeat events are
         # created automatically.
         event = G(
             models.Event,
             title='event',
             starts=starts,
             ends=ends,
-            repeat_expression='FREQ=DAILY;INTERVAL=1',
+            recurrence_rule=recurrence_rule,
             end_repeat=end_repeat,
         )
         self.assertEqual(event.get_repeat_events().count(), 19)  # 20d - e1
@@ -75,30 +126,31 @@ class Models(WebTest):
         event.create_repeat_events()
         self.assertEqual(len(event.missing_repeat_events), 0)
 
-        # Removing a repeat expression will not propagate by default.
+        # Removing a recurrence rule will not propagate by default.
         event2 = event.get_repeat_events()[15]
         # event2.title = 'event 2'
-        event2.repeat_expression = None
+        event2.recurrence_rule = None
         event2.save()
         self.assertEqual(event.get_repeat_events().count(), 18)  # r19 - e2
         self.assertEqual(event2.get_repeat_events().count(), 0)
         self.assertEqual(models.Event.objects.count(), 20)  # e1+18r + e2
 
-        # To remove a repeat expression and delete repeat events, pass
+        # To remove a recurrence rule and delete repeat events, pass
         # `propagate=True` to `save()`.
         event3 = event.get_repeat_events()[10]
         # event3.title = 'event 3'
-        event3.repeat_expression = None
+        event3.recurrence_rule = None
         event3.save(propagate=True)
         self.assertEqual(event.get_repeat_events().count(), 10)  # r18 - e3+7r
         self.assertEqual(event2.get_repeat_events().count(), 0)
         self.assertEqual(event3.get_repeat_events().count(), 0)
         self.assertEqual(models.Event.objects.count(), 13)  # e1+10r + e2 + e3
 
-        # Changes to repeat expression are always propagated.
+        # Changes to recurrence rule are always propagated.
         event4 = event.get_repeat_events()[5]
         # event4.title = 'event 4'
-        event4.repeat_expression = 'FREQ=DAILY;INTERVAL=2'
+        event4.recurrence_rule = None
+        event4.custom_recurrence_rule = 'FREQ=DAILY;INTERVAL=2'
         event4.save()
         self.assertEqual(event.get_repeat_events().count(), 5)  # 10r - e4+4r
         self.assertEqual(event2.get_repeat_events().count(), 0)
@@ -119,9 +171,9 @@ class Models(WebTest):
         # and list values.
         self.assertTrue(event._repeat_fields_changed())
         self.assertTrue(event._repeat_fields_changed('title'))
-        self.assertFalse(event._repeat_fields_changed('repeat_expression'))
+        self.assertFalse(event._repeat_fields_changed('recurrence_rule'))
         self.assertTrue(event._repeat_fields_changed(
-            ['title', 'repeat_expression']))
+            ['title', 'recurrence_rule']))
 
 
 class Views(WebTest):

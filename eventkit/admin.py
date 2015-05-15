@@ -8,3 +8,9 @@ Admin configuration for ``eventkit`` app.
 from django.contrib import admin
 
 from eventkit import models
+
+
+class RecurrenceRuleAdmin(admin.ModelAdmin):
+    model = models.RecurrenceRule
+
+admin.site.register(models.RecurrenceRule, RecurrenceRuleAdmin)

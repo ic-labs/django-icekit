@@ -8,6 +8,7 @@ from datetime import timedelta
 from dateutil.rrule import rrulestr
 import six
 
+from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import timezone
 from polymorphic import PolymorphicModel
@@ -69,6 +70,23 @@ class AbstractBaseModel(models.Model):
         super(AbstractBaseModel, self).save(*args, **kwargs)
 
 
+class RecurrenceRule(AbstractBaseModel):
+    """
+    An iCalendar (RFC2445) recurrence rule. This model allows commonly needed
+    or complex rules to be saved in advance, and then selected as needed when
+    creating events.
+    """
+    description = models.TextField(
+        help_text='Unique.',
+        max_length=255,
+        unique=True,
+    )
+    recurrence_rule = models.TextField(
+        help_text='An iCalendar (RFC2445) recurrence rule that defines when '
+                  'an event repeats.',
+    )
+
+
 class AbstractEvent(PolymorphicModel, AbstractBaseModel):
     """
     Abstract polymorphic event model, with the bare minimum fields.
@@ -78,7 +96,8 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
     REPEAT_FIELDS = (
         'title',
         'all_day',
-        'repeat_expression',
+        'recurrence_rule',
+        'custom_recurrence_rule',
         'end_repeat',
     )
 
@@ -87,13 +106,20 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
     all_day = models.BooleanField(default=False)
     starts = models.DateTimeField(default=default_starts)
     ends = models.DateTimeField(default=default_ends)
-    repeat_expression = models.TextField(
-        help_text='An RFC2445 expression that defines when this event '
-                  'repeats.',
+    recurrence_rule = models.ForeignKey(
+        'RecurrenceRule',
+        blank=True,
+        null=True,
+    )
+    custom_recurrence_rule = models.TextField(
+        blank=True,
+        help_text='A custom iCalendar (RFC2445) recurrence rule that defines '
+                  'when this event repeats.',
         max_length=255,
         null=True,
     )
     end_repeat = models.DateTimeField(
+        blank=True,
         help_text='If empty, this event will repeat indefinitely.',
         null=True,
     )
@@ -129,10 +155,24 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
             k: getattr(self, k) for k in self.REPEAT_FIELDS
         }
 
+    def clean(self):
+        """
+        Only one of ``recurrence_rule`` and ``custom_recurrence_rule`` can be
+        set. If no recurrence rule is set, unset ``end_repeat``.
+        """
+        if self.recurrence_rule and self.custom_recurrence_rule:
+            raise ValidationError({
+                'custom_recurrence_rule':
+                    'This field cannot be set when a recurrence rule is '
+                    'selected.',
+                })
+        if not self.get_recurrence_rule():
+            self.end_repeat = None
+
     @transaction.atomic
     def create_repeat_events(self):
         """
-        Create missing repeat events according to the repeat expression, up
+        Create missing repeat events according to the recurrence rule, up
         until the configured limit.
         """
         assert self.pk, 'Cannot create repeat events before an event is saved.'
@@ -153,6 +193,14 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         """
         return self.ends - self.starts
 
+    def get_recurrence_rule(self):
+        """
+        Return the selected or custom recurrence rule.
+        """
+        if self.recurrence_rule:
+            return self.recurrence_rule.recurrence_rule
+        return self.custom_recurrence_rule or None
+
     def get_repeat_events(self):
         """
         Return a queryset of repeat events, not including this event.
@@ -169,14 +217,15 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
 
     def get_rruleset(self):
         """
-        Return an ``rruleset`` object for this event's repeat expression.
+        Return an ``rruleset`` object for this event's recurrence rule.
         """
-        # TODO: Allow the selection of a repeat expression from a list of
+        # TODO: Allow the selection of a recurrence rule from a list of
         # presets as well.
-        assert self.repeat_expression, (
-            'Cannot get rruleset without a repeat expression.')
+        recurrence_rule = self.get_recurrence_rule()
+        assert recurrence_rule, (
+            'Cannot get rruleset without a recurrence rule.')
         rruleset = rrulestr(
-            self.repeat_expression, dtstart=self.starts, forceset=True)
+            recurrence_rule, dtstart=self.starts, forceset=True)
         return rruleset
 
     @property
@@ -207,22 +256,23 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
     @transaction.atomic
     def save(self, propagate=False, *args, **kwargs):
         """
-        When changes are detected, decouple from repeat events. If a repeat
-        expression is set or ``propagate=True``, repeat events will be updated.
+        When changes are detected, decouple from repeat events. If a recurrence
+        rule is set or ``propagate=True``, repeat events will be updated.
         """
+        recurrence_rule = self.get_recurrence_rule()
         # Perform some gymnastics to avoid saving twice. An event needs to be
         # saved already to propagate, but we need to unset `original` after
         # propagation to decouple from repeat events.
         if self._repeat_fields_changed():
             # Propagate changes.
-            if self.pk and (self.repeat_expression or propagate):
+            if self.pk and (recurrence_rule or propagate):
                 self.propagate()
             # Always decouple from repeat events when changes are detected.
             self.original = None
         already_saved = bool(self.pk)
         super(AbstractEvent, self).save(*args, **kwargs)
         # Always propagate new repeat events.
-        if not already_saved and self.repeat_expression:
+        if not already_saved and recurrence_rule:
             self.propagate()
         # Update stored fields.
         self._store_repeat_fields()
@@ -241,8 +291,8 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         # Decouple AFTER deleting repeat events. We need the `original` field
         # to get repeat events.
         self.original = None
-        # Do not try to create repeat events when no repeat expression is set.
-        if self.repeat_expression:
+        # Do not try to create repeat events when no recurrence rule is set.
+        if self.get_recurrence_rule():
             self.create_repeat_events()
 
 
