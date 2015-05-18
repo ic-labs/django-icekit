@@ -9,6 +9,7 @@ setuptools.setup(
     install_requires=[
         'coverage',
         'django-bootstrap3',
+        'django-brightcove',
         'django-dynamic-fixture',
         'django-fluent-pages[flatpage,fluentpage,redirectnode]',
         'django-fluent-contents',
