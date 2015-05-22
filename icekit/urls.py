@@ -13,10 +13,13 @@ from django.core.urlresolvers import reverse_lazy
 
 from . import admin_forms
 
+# Create an empty patterns to append to as all patterns can be optional.
+urlpatterns = patterns('')
+
 # HOME ############################################################################################
 # Optional home view by default. To turn off place `ICEKIT_USE_HOME_VIEW = False` in settings.
 if getattr(settings, 'ICEKIT_USE_HOME_VIEW', True):
-    urlpatterns = patterns(
+    urlpatterns += patterns(
         'icekit.views',
         url(r'^$', 'index', name='icekit_index'),
     )
