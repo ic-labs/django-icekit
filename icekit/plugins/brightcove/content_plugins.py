@@ -8,7 +8,7 @@ from . import models
 
 
 @plugin_pool.register
-class ReusableImage(ContentPlugin):
+class BrightcovePlugin(ContentPlugin):
     model = models.BrightcoveItem
     category = _('Media')
     render_template = 'icekit/plugins/brightcove/default.html'
