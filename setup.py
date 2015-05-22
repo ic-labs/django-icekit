@@ -9,7 +9,6 @@ setuptools.setup(
     install_requires=[
         'coverage',
         'django-bootstrap3',
-        'django-brightcove',
         'django-dynamic-fixture',
         'django-fluent-pages[flatpage,fluentpage,redirectnode]',
         'django-fluent-contents',
@@ -22,6 +21,7 @@ setuptools.setup(
         'WebTest',
     ],
     extras_require={
+        'brightcove': ['django-brightcove'],
         'search': ['django-haystack', ]
     }
 )
