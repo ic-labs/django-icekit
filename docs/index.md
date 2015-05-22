@@ -23,13 +23,8 @@ TODO
 
 ## HTML Docs
 
-Docs are written in [Markdown]. You can use [MkDocs] to build a static HTML
-version that you can host anywhere:
-
-    (venv)$ mkdocs build
-
-Or you can use the built-in dev server to preview your documentation as you're
-writing it:
+Docs are written in [Markdown]. You can use [MkDocs] to preview your
+documentation as you are writing it:
 
     (venv)$ mkdocs serve
 
