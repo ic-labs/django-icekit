@@ -6,13 +6,12 @@
 		{% block head %}
 			<!-- Hello. We're the Interaction Consortium (http://interaction.net.au) -->
 			<!-- We made this. -->
-			<title>{% block title %}{% if title %}{{ title }} - {% endif %}{{ SITE_NAME }}{% endblock %}</title>
 
 			{% block meta %}
 				<meta charset="utf-8">
 				<meta http-equiv="X-UA-Compatible" content="IE=edge">
-				<meta name="description" content="{% block meta_description %}{% endblock %}">
 				<meta name="viewport" content="{% block meta_viewport %}width=device-width, initial-scale=1{% endblock %}">
+				<meta name="description" content="{% block meta_description %}{% endblock %}">
 
 				{% block open_graph %}
 					<meta property="og:title" content="{% block og_title %}{% if title %}{{ title }} - {% endif %}{{ SITE_NAME }}{% endblock %}">
@@ -26,6 +25,8 @@
 					<meta name="robots" content="noindex">
 				{% endif %}
 			{% endblock %}
+
+			<title>{% block title %}{% if title %}{{ title }} - {% endif %}{{ SITE_NAME }}{% endblock %}</title>
 
 			{% block head_css %}
 				{# CSS files hosted externally #}
