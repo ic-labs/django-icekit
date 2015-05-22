@@ -13,11 +13,13 @@ from django.core.urlresolvers import reverse_lazy
 
 from . import admin_forms
 
-
-urlpatterns = patterns(
-    'icekit.views',
-    url(r'^$', 'index', name='icekit_index'),
-)
+# HOME ############################################################################################
+# Optional home view by default. To turn off place `ICEKIT_USE_HOME_VIEW = False` in settings.
+if getattr(settings, 'ICEKIT_USE_HOME_VIEW', True):
+    urlpatterns = patterns(
+        'icekit.views',
+        url(r'^$', 'index', name='icekit_index'),
+    )
 
 # ACCOUNTS ########################################################################################
 # Overwrite some admin URLS to provide admin / front end account handling separation.
