@@ -11,7 +11,7 @@ A modular content CMS by [Interaction Consortium].
 
 Install the app into your virtualenv:
 
-    (venv)$ pip install -e git+ssh://git@github.com/ixc/django-icekit.git#egg=django-icekit
+    (venv)$ pip install -e git+ssh://git@github.com/ixc/django-icekit.git#egg=django-icekit[brightcove,dev,search,test]  # Omit unwanted optional extras.
 
 Update your settings module:
 

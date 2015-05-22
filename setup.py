@@ -7,21 +7,30 @@ setuptools.setup(
     version=__version__,
     packages=setuptools.find_packages(),
     install_requires=[
-        'coverage',
         'django-bootstrap3',
-        'django-dynamic-fixture',
-        'django-fluent-pages[flatpage,fluentpage,redirectnode]',
         'django-fluent-contents',
-        'django-nose',
-        'django-webtest',
-        'mkdocs',
-        'nose-progressive',
+        'django-fluent-pages',
         'Pillow',
-        'tox',
-        'WebTest',
     ],
     extras_require={
         'brightcove': ['django-brightcove'],
-        'search': ['django-haystack', ]
-    }
+        'dev': [
+            'ipdb',
+            'ipython',
+            'mkdocs',
+        ],
+        'search': [
+            'django-haystack',
+            'django-fluent-pages[flatpage,fluentpage]',
+        ],
+        'test': [
+            'coverage',
+            'django-dynamic-fixture',
+            'django-nose',
+            'django-webtest',
+            'nose-progressive',
+            'tox',
+            'WebTest',
+        ],
+    },
 )
