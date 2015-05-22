@@ -33,6 +33,6 @@ to see your latest edits is refresh your browser.
 
 [Changelog]: changelog.md
 [Contributing]: contributing.md
+[Interaction Consortium]: http://interaction.net.au
 [Markdown]: http://daringfireball.net/projects/markdown/
 [MkDocs]: http://mkdocs.org
-[Interaction Consortium]: http://interaction.net.au
