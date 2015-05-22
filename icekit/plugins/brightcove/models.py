@@ -8,11 +8,9 @@ from icekit.utils import implementation
 try:
     from django_brightcove.fields import BrightcoveField
 except ImportError:
-    raise NotImplementedError(
-        _(
-            'Please install `django_brightcove`to use the icekit.plugins.brightcove plugin.'
-        )
-    )
+    raise NotImplementedError(_(
+        'Please install `django_brightcove` to use the '
+        '`icekit.plugins.brightcove` plugin.'))
 
 # Ensure required settings for django-brightcove have been defined.
 implementation.check_settings(['BRIGHTCOVE_TOKEN', 'BRIGHTCOVE_PLAYER', ])
