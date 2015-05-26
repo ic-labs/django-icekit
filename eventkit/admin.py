@@ -6,8 +6,27 @@ Admin configuration for ``eventkit`` app.
 # These go a long way to making the admin more usable.
 
 from django.contrib import admin
+from polymorphic.admin import \
+    PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
 
 from eventkit import models
+
+
+class EventChildAdmin(PolymorphicChildModelAdmin):
+    base_model = models.Event
+
+
+class EventAdmin(PolymorphicParentModelAdmin):
+    base_model = models.Event
+    list_filter = ('all_day', 'starts', 'ends')
+    list_display = ('__unicode__', 'all_day', 'starts', 'ends')
+    search_fields = ('title', )
+
+    def get_child_models(self):
+        # TODO: Registration system for event plugins.
+        return ()
+
+admin.site.register(models.Event, EventAdmin)
 
 
 class RecurrenceRuleAdmin(admin.ModelAdmin):
