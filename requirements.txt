@@ -1,5 +1,4 @@
 # Forked, pre-release and private dependencies.
--e .
 -e git+https://github.com/ixc/django-dynamic-fixture.git#egg=django-dynamic-fixture
 -e git+https://github.com/django-nose/django-nose.git#egg=django-nose
 -e git+https://github.com/ixc/django-timezone.git#egg=django-timezone
