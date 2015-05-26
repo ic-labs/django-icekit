@@ -13,32 +13,21 @@ from django.db import models, transaction
 from django.utils import timezone
 from polymorphic import PolymorphicModel
 
+from eventkit import settings
 from eventkit.utils import time
-
-# New events will have a default `starts` value that is rounded up to a time
-# matching this precision.
-DEFAULT_STARTS_PRECISION = timedelta(hours=1)
-
-# New events will have a default `ends` value that is this much later than
-# their `starts` value.
-DEFAULT_ENDS_DELTA = timedelta(hours=1)
-
-# Repeat events that start later than this far in the future will not be
-# created until a later date.
-REPEAT_LIMIT = timedelta(weeks=13)
 
 
 def default_starts():
     when = time.round_datetime(
         when=timezone.now(),
-        precision=DEFAULT_STARTS_PRECISION,
+        precision=settings.DEFAULT_STARTS_PRECISION,
         rounding=time.ROUND_UP,
     )
     return when
 
 
 def default_ends():
-    return default_starts() + DEFAULT_ENDS_DELTA
+    return default_starts() + settings.DEFAULT_ENDS_DELTA
 
 
 # MODELS ######################################################################
@@ -243,7 +232,8 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         for starts in existing:
             rruleset.exdate(starts)
         # Yield the `starts` datetime for each missing event.
-        end_repeat = self.end_repeat or timezone.now() + REPEAT_LIMIT
+        end_repeat = (
+            self.end_repeat or timezone.now() + settings.REPEAT_LIMIT)
         missing = []
         # There is always at least one occurrence, even when it already exceeds
         # `end_repeat`. Don't complain about partial branch coverage.
