@@ -11,6 +11,7 @@ setuptools.setup(
         'django-dynamic-fixture',
         'django-nose',
         'django-polymorphic',
+        # 'django-timezone',
         'django-webtest',
         'mkdocs',
         'nose-progressive',

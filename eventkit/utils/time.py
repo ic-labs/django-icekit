@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from django.utils import timezone
+from timezone import timezone
 
 ROUND_DOWN = 'ROUND_DOWN'
 ROUND_NEAREST = 'ROUND_NEAREST'
@@ -50,9 +50,9 @@ def round_datetime(when=None, precision=60, rounding=ROUND_NEAREST):
     # If precision is a weekday, the beginning of time must be that same day.
     when_min = when.min + timedelta(days=weekday)
     if timezone.is_aware(when):
-        delta = (when - timezone.make_aware(when_min, when.tzinfo))
-    else:
-        delta = (when - when_min)
+        when_min = \
+            timezone.datetime(tzinfo=when.tzinfo, *when_min.timetuple()[:3])
+    delta = when - when_min
     remainder = int(delta.total_seconds()) % precision
     # First round down and strip microseconds.
     when -= timedelta(seconds=remainder, microseconds=when.microsecond)
