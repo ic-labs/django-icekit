@@ -4,7 +4,6 @@ Models for ``eventkit`` app.
 
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
 
-from datetime import timedelta
 from dateutil.rrule import rrulestr
 import six
 
