@@ -10,6 +10,7 @@ import six
 
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
+from django.utils import encoding
 from polymorphic import PolymorphicModel
 from timezone import timezone
 
@@ -59,6 +60,7 @@ class AbstractBaseModel(models.Model):
         super(AbstractBaseModel, self).save(*args, **kwargs)
 
 
+@encoding.python_2_unicode_compatible
 class RecurrenceRule(AbstractBaseModel):
     """
     An iCalendar (RFC2445) recurrence rule. This model allows commonly needed
@@ -75,7 +77,11 @@ class RecurrenceRule(AbstractBaseModel):
                   'an event repeats.',
     )
 
+    def __str__(self):
+        return self.description or ''
 
+
+@encoding.python_2_unicode_compatible
 class AbstractEvent(PolymorphicModel, AbstractBaseModel):
     """
     Abstract polymorphic event model, with the bare minimum fields.
@@ -123,6 +129,9 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         """
         super(AbstractEvent, self).__init__(*args, **kwargs)
         self._store_repeat_fields()
+
+    def __str__(self):
+        return self.title
 
     def _repeat_fields_changed(self, fields=None):
         """
