@@ -1,0 +1,20 @@
+{
+  "name": "eventkit",
+  "version": "0.0.0",
+  "homepage": "https://github.com/ixc/django-eventkit",
+  "authors": [
+    "Tai Lee <real.human@mrmachine.net>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "fullcalendar": "~2.3.1",
+    "iframe-resizer": "~2.8.7"
+  }
+}

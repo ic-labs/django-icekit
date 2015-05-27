@@ -1,0 +1,38 @@
+{% load static %}
+
+<!doctype html>
+
+<link rel='stylesheet' href='{% static "eventkit/bower_components/fullcalendar/dist/fullcalendar.css" %}' />
+<style>
+	body {
+		font-family: "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
+		font-size: 12px;
+		margin: 1em;
+	}
+</style>
+<script src='{% static "eventkit/bower_components/jquery/dist/jquery.js" %}'></script>
+<script src='{% static "eventkit/bower_components/moment/moment.js" %}'></script>
+<script src='{% static "eventkit/bower_components/fullcalendar/dist/fullcalendar.js" %}'></script>
+<script src='{% static "eventkit/bower_components/iframe-resizer/src/iframeResizer.contentWindow.js" %}'></script>
+<script>
+	var eventkit = eventkit || {};
+	eventkit.jQuery = jQuery.noConflict(true);
+	(function($) {
+		$(document).ready(function() {
+			$('#calendar').fullCalendar({
+				events: '{% url "admin:eventkit_event_calendar" %}',
+				header: {
+					left: 'prev,next today',
+					center: 'title',
+					right: 'month,basicWeek,agendaWeek,agendaDay'
+				},
+				height: 'auto',
+				viewRender: function(view, element) {
+					$('.fc-agendaWeek-button').text('week (by time)');
+					$('.fc-agendaDay-button').text('day (by time)');
+				}
+			})
+		});
+	})(eventkit.jQuery);
+</script>
+<div id='calendar'></div>
