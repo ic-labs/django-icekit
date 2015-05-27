@@ -177,11 +177,13 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         defaults = {
             field: getattr(self, field) for field in self.REPEAT_FIELDS
         }
+        count = len(self.missing_repeat_events)
         for starts in self.missing_repeat_events:
             ends = starts + self.duration
             event = type(self)(
                 original=original, starts=starts, ends=ends, **defaults)
             super(AbstractEvent, event).save()  # Bypass automatic propagation.
+        return count
 
     @property
     def duration(self):
