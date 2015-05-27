@@ -20,9 +20,7 @@ def check_settings(required_settings):
 
     if not all(defined_settings):
         raise NotImplementedError(
-            _(
-                'The following settings have not been set: %s' % ', '.join(
-                    set(required_settings) - set(defined_settings)
-                )
+            'The following settings have not been set: %s' % ', '.join(
+                set(required_settings) - set(defined_settings)
             )
         )
