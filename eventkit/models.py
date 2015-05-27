@@ -172,6 +172,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         Create missing repeat events according to the recurrence rule, up
         until the configured limit.
         """
+        # TODO: Create asyncronously if celery is available?
         assert self.pk, 'Cannot create repeat events before an event is saved.'
         original = self.original or self
         defaults = {
