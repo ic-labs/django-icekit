@@ -35,8 +35,8 @@ class BrightcoveItem(ContentItem):
     )
 
     class Meta:
-        verbose_name = _('Brightcove Video')
-        verbose_name_plural = _('Brightcove Videos')
+        verbose_name = _('Brightcove video')
+        verbose_name_plural = _('Brightcove videos')
 
     def __str__(self):
         return str(self.video)

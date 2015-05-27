@@ -53,8 +53,8 @@ class ImageItem(ContentItem):
     )
 
     class Meta:
-        verbose_name = _('Reusable Image')
-        verbose_name_plural = _('Reusable Images')
+        verbose_name = _('Reusable image')
+        verbose_name_plural = _('Reusable images')
 
     def __str__(self):
         return str(self.image)
