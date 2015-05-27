@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from timezone import timezone
 
@@ -50,8 +50,9 @@ def round_datetime(when=None, precision=60, rounding=ROUND_NEAREST):
     # If precision is a weekday, the beginning of time must be that same day.
     when_min = when.min + timedelta(days=weekday)
     if timezone.is_aware(when):
-        when_min = \
-            timezone.datetime(tzinfo=when.tzinfo, *when_min.timetuple()[:3])
+        # It doesn't seem to be possible to localise the `min` datetime without
+        # raising `OverflowError`, so create a timezone aware object manually.
+        when_min = datetime(tzinfo=when.tzinfo, *when_min.timetuple()[:3])
     delta = when - when_min
     remainder = int(delta.total_seconds()) % precision
     # First round down and strip microseconds.
