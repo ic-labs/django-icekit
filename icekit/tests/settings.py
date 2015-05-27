@@ -26,10 +26,12 @@ INSTALLED_APPS = (
     'icekit',
     'icekit.tests',
     'icekit.plugins.brightcove',
+    'icekit.plugins.digital_garden_image',
     'icekit.plugins.image',
     'fluent_contents',
     'fluent_pages',
     'bootstrap3',
+    'content_browser',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -60,4 +62,12 @@ BRIGHTCOVE_PLAYER = {
         'PLAYERID': 'another_player_id',
         'PLAYERKEY': 'another_player_key',
     },
+}
+
+
+# NETX ########################################################################
+NETX = {
+    'URL': 'http://netxtest.sfmoma.org',
+    'USERNAME': '',
+    'PASSWORD': '',
 }

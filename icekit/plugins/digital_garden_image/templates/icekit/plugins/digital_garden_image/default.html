@@ -1,0 +1,10 @@
+<figure>
+	<img src="{{ instance.image.src }}" alt="{{ instance.image.name }}">
+	{% if instance.image.name %}
+		<figcaption>
+			{% if instance.image.name %}
+				{{ instance.image.name|safe }}
+			{% endif %}
+		</figcaption>
+	{% endif %}
+</figure>
