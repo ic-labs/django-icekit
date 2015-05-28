@@ -31,7 +31,13 @@
 					$('.fc-agendaWeek-button').text('week (by time)');
 					$('.fc-agendaDay-button').text('day (by time)');
 				}
-			})
+			}).on('click', 'a.fc-event', function(e) {
+				// Open links in the top frame.
+				if (self != top) {
+					e.preventDefault();
+					top.location.href = $(e.currentTarget).attr('href');
+				}
+			});
 		});
 	})(eventkit.jQuery);
 </script>
