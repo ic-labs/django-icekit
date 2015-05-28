@@ -86,10 +86,12 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
     Abstract polymorphic event model, with the bare minimum fields.
     """
 
-    # These fields will be copied when creating and updating repeat events.
-    REPEAT_FIELDS = (
+    # Changes to these fields will be propagated to repeat events.
+    MONITOR_FIELDS = (
         'title',
         'all_day',
+        'starts',
+        'ends',
         'recurrence_rule',
         'custom_recurrence_rule',
         'end_repeat',
@@ -124,32 +126,32 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
 
     def __init__(self, *args, **kwargs):
         """
-        Store repeat field values.
+        Store monitor field values.
         """
         super(AbstractEvent, self).__init__(*args, **kwargs)
-        self._store_repeat_fields()
+        self._store_monitor_fields()
 
     def __str__(self):
         return self.title
 
-    def _repeat_fields_changed(self, fields=None):
+    def _monitor_fields_changed(self, fields=None):
         """
         Return ``True`` if the given field (or any field, if None) has changed.
         """
-        fields = fields or self.REPEAT_FIELDS
+        fields = fields or self.MONITOR_FIELDS
         if isinstance(fields, six.string_types):
             fields = [fields]
         for field in fields:
-            if getattr(self, field) != self._repeat_fields[field]:
+            if getattr(self, field) != self._monitor_fields[field]:
                 return True
         return False
 
-    def _store_repeat_fields(self):
+    def _store_monitor_fields(self):
         """
-        Store repeat values so we can detect and propagate changes.
+        Store monitor field values so we can detect and propagate changes.
         """
-        self._repeat_fields = {
-            k: getattr(self, k) for k in self.REPEAT_FIELDS
+        self._monitor_fields = {
+            k: getattr(self, k) for k in self.MONITOR_FIELDS
         }
 
     def clean(self):
@@ -176,7 +178,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         assert self.pk, 'Cannot create repeat events before an event is saved.'
         original = self.original or self
         defaults = {
-            field: getattr(self, field) for field in self.REPEAT_FIELDS
+            field: getattr(self, field) for field in self.get_repeat_fields()
         }
         count = len(self.missing_repeat_events)
         for starts in self.missing_repeat_events:
@@ -214,6 +216,13 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
             .filter(original=original, pk__gt=self.pk) \
             .order_by('pk')
         return repeat_events
+
+    def get_repeat_fields(self):
+        """
+        Return a list of fields to be copied when creating repeat events.
+        """
+        fields = set(self.MONITOR_FIELDS).difference(['starts', 'ends'])
+        return fields
 
     def get_rruleset(self):
         """
@@ -264,7 +273,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         # Perform some gymnastics to avoid saving twice. An event needs to be
         # saved already to propagate, but we need to unset `original` after
         # propagation to decouple from repeat events.
-        if self._repeat_fields_changed():
+        if self._monitor_fields_changed():
             # Propagate changes.
             if self.pk and (recurrence_rule or propagate):
                 self.propagate()
@@ -276,7 +285,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         if not already_saved and recurrence_rule:
             self.propagate()
         # Update stored fields.
-        self._store_repeat_fields()
+        self._store_monitor_fields()
 
     @transaction.atomic
     def propagate(self):

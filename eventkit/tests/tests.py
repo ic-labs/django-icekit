@@ -164,15 +164,15 @@ class Models(WebTest):
         """
         # Create an event.
         event = G(models.Event)
-        self.assertFalse(event._repeat_fields_changed())
+        self.assertFalse(event._monitor_fields_changed())
         # Change a field.
         event.title = 'title'
         # Check for changes in all fields and specific fields, given as string
         # and list values.
-        self.assertTrue(event._repeat_fields_changed())
-        self.assertTrue(event._repeat_fields_changed('title'))
-        self.assertFalse(event._repeat_fields_changed('recurrence_rule'))
-        self.assertTrue(event._repeat_fields_changed(
+        self.assertTrue(event._monitor_fields_changed())
+        self.assertTrue(event._monitor_fields_changed('title'))
+        self.assertFalse(event._monitor_fields_changed('recurrence_rule'))
+        self.assertTrue(event._monitor_fields_changed(
             ['title', 'recurrence_rule']))
 
 
