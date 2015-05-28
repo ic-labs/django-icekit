@@ -13,6 +13,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
+from django.utils.translation import ugettext_lazy as _
 from polymorphic.admin import \
     PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
 from timezone import timezone
@@ -24,10 +25,31 @@ class EventChildAdmin(PolymorphicChildModelAdmin):
     base_model = models.Event
 
 
+class RepeatFilter(admin.SimpleListFilter):
+    title = _('repeat')
+    parameter_name = 'is_repeat'
+
+    YES = '1'
+    NO = '0'
+
+    def lookups(self, request, model_admin):
+        lookups = (
+            (self.YES, _('Yes')),
+            (self.NO, _('No')),
+        )
+        return lookups
+
+    def queryset(self, request, queryset):
+        if self.value() == self.YES:
+            return queryset.exclude(original=None)
+        elif self.value() == self.NO:
+            return queryset.filter(original=None)
+
+
 class EventAdmin(PolymorphicParentModelAdmin):
     base_model = models.Event
-    list_filter = ('all_day', 'starts', 'ends')
-    list_display = ('__str__', 'all_day', 'starts', 'ends')
+    list_filter = ('all_day', 'starts', 'ends', RepeatFilter)
+    list_display = ('__str__', 'all_day', 'starts', 'ends', 'is_repeat')
     search_fields = ('title', )
 
     def get_urls(self):

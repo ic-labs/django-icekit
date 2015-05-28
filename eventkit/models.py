@@ -237,6 +237,10 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
             recurrence_rule, dtstart=self.starts, forceset=True)
         return rruleset
 
+    def is_repeat(self):
+        return bool(self.original)
+    is_repeat.boolean = True
+
     @property
     def missing_repeat_events(self):
         """
