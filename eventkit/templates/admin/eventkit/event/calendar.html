@@ -22,7 +22,7 @@
 			$('#calendar').fullCalendar({
 				events: '{% url "admin:eventkit_event_calendar" %}',
 				header: {
-					left: 'prev,next today',
+					left: 'prevYear,prev,next,nextYear today',
 					center: 'title',
 					right: 'month,basicWeek,agendaWeek,agendaDay'
 				},
