@@ -27,7 +27,7 @@ class EventChildAdmin(PolymorphicChildModelAdmin):
 class EventAdmin(PolymorphicParentModelAdmin):
     base_model = models.Event
     list_filter = ('all_day', 'starts', 'ends')
-    list_display = ('__unicode__', 'all_day', 'starts', 'ends')
+    list_display = ('__str__', 'all_day', 'starts', 'ends')
     search_fields = ('title', )
 
     def get_urls(self):
