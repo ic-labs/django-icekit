@@ -81,7 +81,7 @@ class EventAdmin(PolymorphicParentModelAdmin):
             datetime.datetime.strptime(request.GET['start'], '%Y-%m-%d'), tz)
         ends = timezone.localize(
             datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d'), tz)
-        events = self.base_model.objects \
+        events = self.get_queryset(request) \
             .filter(starts__gte=starts, starts__lt=ends) \
             .values_list(
                 'id', 'original', 'title', 'all_day', 'starts', 'ends')
