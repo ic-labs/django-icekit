@@ -13,7 +13,7 @@ from django.utils import timezone
 from django_dynamic_fixture import G
 from django_webtest import WebTest
 
-from eventkit import forms, models, views
+from eventkit import forms, models, settings, views
 from eventkit.utils import time
 from eventkit.tests import models as test_models
 
@@ -88,7 +88,7 @@ class Models(WebTest):
             when=timezone.now(),
             precision=timedelta(days=1),
             rounding=time.ROUND_DOWN)
-        ends = starts + models.DEFAULT_ENDS_DELTA
+        ends = starts + settings.DEFAULT_ENDS_DELTA
         end_repeat = starts + timedelta(days=19)
 
         # Get a recurrence rule to use.
