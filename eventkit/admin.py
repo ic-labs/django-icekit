@@ -89,7 +89,10 @@ class EventAdmin(PolymorphicParentModelAdmin):
 
     def get_child_models(self):
         # TODO: Registration system for event plugins.
-        return ()
+        child_models = [
+            (models.Event, EventChildAdmin),
+        ]
+        return child_models
 
 admin.site.register(models.Event, EventAdmin)
 
