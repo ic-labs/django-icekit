@@ -4,12 +4,12 @@ Models for ``eventkit`` app.
 
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
 
-from dateutil.rrule import rrulestr
+from dateutil import rrule
 import six
 
-from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import encoding
+from django.utils.translation import ugettext_lazy as _
 from polymorphic import PolymorphicModel
 from timezone import timezone
 
@@ -30,12 +30,31 @@ def default_ends():
     return default_starts() + settings.DEFAULT_ENDS_DELTA
 
 
+# FIELDS ######################################################################
+
+
+class RecurrenceRuleField(
+        six.with_metaclass(models.SubfieldBase, models.TextField)):
+
+    description = _(
+        'An iCalendar (RFC2445) recurrence rule that defines when an event '
+        'repeats.')
+
+    def formfield(self, **kwargs):
+        from eventkit import forms  # Avoid circular import.
+        defaults = {
+            'form_class': forms.RecurrenceRuleField,
+        }
+        defaults.update(kwargs)
+        return super(RecurrenceRuleField, self).formfield(**defaults)
+
+
 # MODELS ######################################################################
 
 
 class AbstractBaseModel(models.Model):
     """
-    Abstract base model with common fields and methods for all models.
+    An abstract base model with common fields and methods for all models.
 
     Add ``created`` and ``modified`` timestamp fields. Update the ``modified``
     field automatically on save. Sort by primary key.
@@ -71,19 +90,21 @@ class RecurrenceRule(AbstractBaseModel):
         max_length=255,
         unique=True,
     )
-    recurrence_rule = models.TextField(
-        help_text='An iCalendar (RFC2445) recurrence rule that defines when '
-                  'an event repeats.',
+    recurrence_rule = RecurrenceRuleField(
+        help_text=_(
+            'An iCalendar (RFC2445) recurrence rule that defines when an '
+            'event repeats. Unique.'),
+        unique=True,
     )
 
     def __str__(self):
-        return self.description or ''
+        return self.description
 
 
 @encoding.python_2_unicode_compatible
 class AbstractEvent(PolymorphicModel, AbstractBaseModel):
     """
-    Abstract polymorphic event model, with the bare minimum fields.
+    An abstract polymorphic event model, with the bare minimum fields.
     """
 
     # Changes to these fields will be propagated to repeat events.
@@ -93,7 +114,6 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         'starts',
         'ends',
         'recurrence_rule',
-        'custom_recurrence_rule',
         'end_repeat',
     )
 
@@ -102,21 +122,17 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
     all_day = models.BooleanField(default=False)
     starts = models.DateTimeField(default=default_starts)
     ends = models.DateTimeField(default=default_ends)
-    recurrence_rule = models.ForeignKey(
-        'RecurrenceRule',
+    recurrence_rule = RecurrenceRuleField(
         blank=True,
-        null=True,
-    )
-    custom_recurrence_rule = models.TextField(
-        blank=True,
-        help_text='A custom iCalendar (RFC2445) recurrence rule that defines '
-                  'when this event repeats.',
+        help_text=_(
+            'An iCalendar (RFC2445) recurrence rule that defines when this '
+            'event repeats.'),
         max_length=255,
         null=True,
     )
     end_repeat = models.DateTimeField(
         blank=True,
-        help_text='If empty, this event will repeat indefinitely.',
+        help_text=_('If empty, this event will repeat indefinitely.'),
         null=True,
     )
 
@@ -156,23 +172,16 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
 
     def clean(self):
         """
-        Only one of ``recurrence_rule`` and ``custom_recurrence_rule`` can be
-        set. If no recurrence rule is set, unset ``end_repeat``.
+        Unset ``end_repeat`` if no recurrence rule is set.
         """
-        if self.recurrence_rule and self.custom_recurrence_rule:
-            raise ValidationError({
-                'custom_recurrence_rule':
-                    'This field cannot be set when a recurrence rule is '
-                    'selected.',
-                })
-        if not self.get_recurrence_rule():
+        if not self.recurrence_rule:
             self.end_repeat = None
 
     @transaction.atomic
     def create_repeat_events(self):
         """
-        Create missing repeat events according to the recurrence rule, up
-        until the configured limit.
+        Create missing repeat events according to the recurrence rule, up until
+        the configured limit.
         """
         # TODO: Create asyncronously if celery is available?
         assert self.pk, 'Cannot create repeat events before an event is saved.'
@@ -194,14 +203,6 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         Return the duration between ``starts`` and ``ends`` as a timedelta.
         """
         return self.ends - self.starts
-
-    def get_recurrence_rule(self):
-        """
-        Return the selected or custom recurrence rule.
-        """
-        if self.recurrence_rule:
-            return self.recurrence_rule.recurrence_rule
-        return self.custom_recurrence_rule or None
 
     def get_repeat_events(self):
         """
@@ -230,10 +231,10 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         """
         # TODO: Allow the selection of a recurrence rule from a list of
         # presets as well.
-        recurrence_rule = self.get_recurrence_rule()
+        recurrence_rule = self.recurrence_rule
         assert recurrence_rule, (
             'Cannot get rruleset without a recurrence rule.')
-        rruleset = rrulestr(
+        rruleset = rrule.rrulestr(
             recurrence_rule, dtstart=self.starts, forceset=True)
         return rruleset
 
@@ -273,7 +274,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         When changes are detected, decouple from repeat events. If a recurrence
         rule is set or ``propagate=True``, repeat events will be updated.
         """
-        recurrence_rule = self.get_recurrence_rule()
+        recurrence_rule = self.recurrence_rule
         # Perform some gymnastics to avoid saving twice. An event needs to be
         # saved already to propagate, but we need to unset `original` after
         # propagation to decouple from repeat events.
@@ -306,9 +307,11 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         # to get repeat events.
         self.original = None
         # Do not try to create repeat events when no recurrence rule is set.
-        if self.get_recurrence_rule():
+        if self.recurrence_rule:
             self.create_repeat_events()
 
 
 class Event(AbstractEvent):
-    pass
+    """
+    A concrete polymorphic event model.
+    """

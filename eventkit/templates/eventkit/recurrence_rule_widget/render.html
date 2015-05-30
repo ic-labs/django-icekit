@@ -1,0 +1,33 @@
+{{ rendered_widgets }}
+<script>
+	(function($) {
+		var options = {{ recurrence_rules|safe }};
+		var select = $('#{{ id }}_0');
+		var textarea = $('#{{ id }}_1');
+
+		// Update the selected rule to match the textarea on key up.
+		textarea.keyup(function(e) {
+			var val = $.trim(textarea.val());
+			var match = '';
+			$.each(options, function(i, recurrence_rule) {
+				if (val == recurrence_rule) {
+					match = i;
+					return false;
+				}
+			});
+			select.val(match);
+			// Update original.
+			if (match == '') {
+				textarea_original = val;
+			}
+		}).keyup();
+
+		// Save the original textarea if it contains a custom rule.
+		var textarea_original = select.val() ? '' : textarea.val();
+
+		// Update the textarea when the selected rule is changed.
+		select.change(function(e) {
+			textarea.val(options[select.val()] || textarea_original);
+		});
+	})(window.jQuery || django.jQuery);
+</script>

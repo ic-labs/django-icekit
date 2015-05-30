@@ -18,11 +18,14 @@ from polymorphic.admin import \
     PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
 from timezone import timezone
 
-from eventkit import models, settings
+from eventkit import forms, models, settings
 
 
 class EventChildAdmin(PolymorphicChildModelAdmin):
     base_model = models.Event
+    formfield_overrides = {
+        models.RecurrenceRuleField: {'widget': forms.RecurrenceRuleWidget},
+    }
 
 
 class RepeatFilter(admin.SimpleListFilter):
@@ -120,6 +123,9 @@ admin.site.register(models.Event, EventAdmin)
 
 
 class RecurrenceRuleAdmin(admin.ModelAdmin):
+    formfield_overrides = {
+        models.RecurrenceRuleField: {'widget': forms.RecurrenceRuleWidget},
+    }
     model = models.RecurrenceRule
 
 admin.site.register(models.RecurrenceRule, RecurrenceRuleAdmin)
