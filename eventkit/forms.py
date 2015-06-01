@@ -59,7 +59,7 @@ class RecurrenceRuleWidget(forms.MultiWidget):
         """
         if value:
             try:
-                pk = self.queryset.get(recurrence_rule=value)
+                pk = self.queryset.get(recurrence_rule=value).pk
             except self.queryset.model.DoesNotExist:
                 pk = None
             return [pk, value]
