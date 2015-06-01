@@ -52,8 +52,7 @@ class Models(WebTest):
         Test model validation.
         """
         now = timezone.now()
-        recurrence_rule = models.RecurrenceRule.objects.get(
-            description='Daily')
+        recurrence_rule = 'FREQ=DAILY'
 
         # Do not unset `end_repeat` when a recurrence rule is set.
         event = G(
@@ -69,15 +68,6 @@ class Models(WebTest):
         event.full_clean()
         self.assertEqual(event.end_repeat, None)
 
-        # Only one of `recurrence_rule` and `custom_recurrence_rule` can be
-        # set at the same time.
-        event.recurrence_rule = recurrence_rule
-        event.custom_recurrence_rule = 'foo'
-        message = (
-            'This field cannot be set when a recurrence rule is selected.')
-        with self.assertRaisesMessage(ValidationError, message):
-            event.full_clean()
-
     def test_Event_propagation(self):
         """
         Test repeat event propagation.
@@ -92,8 +82,7 @@ class Models(WebTest):
         end_repeat = starts + timedelta(days=19)
 
         # Get a recurrence rule to use.
-        recurrence_rule = models.RecurrenceRule.objects.get(
-            description='Daily')
+        recurrence_rule = 'FREQ=DAILY'
 
         # Start with no events.
         self.assertEqual(models.Event.objects.count(), 0)
@@ -149,8 +138,7 @@ class Models(WebTest):
         # Changes to recurrence rule are always propagated.
         event4 = event.get_repeat_events()[5]
         # event4.title = 'event 4'
-        event4.recurrence_rule = None
-        event4.custom_recurrence_rule = 'FREQ=DAILY;INTERVAL=2'
+        event4.recurrence_rule = 'FREQ=DAILY;INTERVAL=2'
         event4.save()
         self.assertEqual(event.get_repeat_events().count(), 5)  # 10r - e4+4r
         self.assertEqual(event2.get_repeat_events().count(), 0)
