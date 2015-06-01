@@ -145,8 +145,8 @@ class RecurrenceRuleField(forms.MultiValueField):
 
     def compress(self, values):
         """
-        Always return the value from the ``CharField``. Even when a preset is
-        selected, the recurrence rule is always defined in the ``CharField``.
+        Always return the value from the ``CharField``, even when a preset is
+        selected. The recurrence rule is always defined in the ``CharField``.
         """
         return values[1] or None
 

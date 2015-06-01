@@ -35,6 +35,9 @@ def default_ends():
 
 class RecurrenceRuleField(
         six.with_metaclass(models.SubfieldBase, models.TextField)):
+    """
+    A ``TextField`` subclass for iCalendar (RFC2445) recurrence rules.
+    """
 
     default_validators = [validators.recurrence_rule]
     description = _(
