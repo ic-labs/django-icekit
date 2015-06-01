@@ -1,5 +1,9 @@
 <div class="recurrence-rule-widget">
 	{{ rendered_widgets }}
+	<div id="{{ id }}_preview">
+		<table class="dates"></table>
+		<div class="error"></div>
+	</div>
 </div>
 <script>
 	(function($) {
@@ -31,5 +35,71 @@
 		select.change(function(e) {
 			textarea.val(options[select.val()] || textarea_original);
 		});
+
+		// Generate a preview of occurrences.
+		function preview(e) {
+			var table = $('#{{ id }}_preview table.dates');
+			var error = $('#{{ id }}_preview div.error');
+			$.post(
+				'{% url "admin:eventkit_recurrencerule_preview" %}',
+				{
+					recurrence_rule: textarea.val()
+				},
+				function(data, textStatus, jqXHR) {
+					if (data.occurrences) {
+						var html = makeRows(
+							$.map(data.occurrences, function(value, i) {
+								return new Date(value);
+							})
+						);
+						table.html(html).show();
+						error.hide();
+					}
+					else {
+						table.hide();
+						error.html('Preview Error: ' + data.error).show();
+					}
+				}
+			);
+		}
+		select.change(preview);
+		textarea.keyup(preview).keyup();
+
+		// See: https://github.com/jakubroztocil/rrule/blob/master/tests/demo/demo.js
+		makeRows = function(dates) {
+			var cells, cls, date, i, index, part, parts, prevParts, prevStates, rows, states;
+			prevParts = [];
+			prevStates = [];
+			index = 1;
+			rows = (function() {
+				var j, len, results;
+				results = [];
+				for (j = 0, len = dates.length; j < len; j++) {
+					date = dates[j];
+					states = [];
+					parts = date.toString().split(' ');
+					cells = (function() {
+						var l, len1, results1;
+						results1 = [];
+						for (i = l = 0, len1 = parts.length; l < len1; i = ++l) {
+							part = parts[i];
+							if (part !== prevParts[i]) {
+								states[i] = !prevStates[i];
+							} else {
+								states[i] = prevStates[i];
+							}
+							cls = states[i] ? 'a' : 'b';
+							results1.push("<td class='" + cls + "'>" + part + "</td>");
+						}
+						return results1;
+					})();
+					prevParts = parts;
+					prevStates = states;
+					results.push("<tr><td>" + (index++) + "</td>" + (cells.join('\n')) + "</tr>");
+				}
+				return results;
+			})();
+			return rows.join('\n\n');
+		};
 	})(window.jQuery || django.jQuery);
 </script>
