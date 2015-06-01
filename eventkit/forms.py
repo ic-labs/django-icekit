@@ -25,6 +25,9 @@ class RecurrenceRuleWidget(forms.MultiWidget):
         css = {
             'all': ('eventkit/css/recurrence_rule_widget.css', ),
         }
+        js = (
+            'eventkit/bower_components/lodash/lodash.js',
+        )
 
     def __init__(self, *args, **kwargs):
         """

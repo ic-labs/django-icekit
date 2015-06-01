@@ -62,8 +62,9 @@
 				}
 			);
 		}
-		select.change(preview);
-		textarea.keyup(preview).keyup();
+		var debounced_preview = _.debounce(preview, 500);
+		select.change(debounced_preview);
+		textarea.keyup(debounced_preview).keyup();
 
 		// See: https://github.com/jakubroztocil/rrule/blob/master/tests/demo/demo.js
 		makeRows = function(dates) {
