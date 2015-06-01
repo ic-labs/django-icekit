@@ -130,8 +130,9 @@ class RecurrenceRuleField(forms.MultiValueField):
         """
         Set the default fields and queryset.
         """
+        # Parse keyword arguments and pass through to each field appropriately.
         queryset = kwargs.pop('queryset', models.RecurrenceRule.objects.all())
-        max_length = kwargs.pop('max_length')
+        max_length = kwargs.pop('max_length', None)
         validators_ = kwargs.pop('validators', [validators.recurrence_rule])
         fields = (
             forms.ModelChoiceField(queryset=queryset, required=False),
