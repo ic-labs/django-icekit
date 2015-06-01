@@ -46,6 +46,7 @@
 					recurrence_rule: textarea.val()
 				},
 				function(data, textStatus, jqXHR) {
+					// Success.
 					if (data.occurrences) {
 						var html = makeRows(
 							$.map(data.occurrences, function(value, i) {
@@ -55,9 +56,15 @@
 						table.html(html).show();
 						error.hide();
 					}
+					// Failure.
+					else if (textarea.val()) {
+						table.hide();
+						error.html('Preview Error - ' + data.error).show();
+					}
+					// Nothing to preview.
 					else {
 						table.hide();
-						error.html('Preview Error: ' + data.error).show();
+						error.hide();
 					}
 				}
 			);
