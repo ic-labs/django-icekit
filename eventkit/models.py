@@ -131,7 +131,6 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         help_text=_(
             'An iCalendar (RFC2445) recurrence rule that defines when this '
             'event repeats.'),
-        max_length=255,
         null=True,
     )
     end_repeat = models.DateTimeField(
