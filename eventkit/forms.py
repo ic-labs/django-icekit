@@ -8,7 +8,7 @@ from django import forms
 from django.contrib.admin.widgets import AdminTextareaWidget
 from django.template import Context, loader
 
-from eventkit import models
+from eventkit import models, validators
 
 
 # WIDGETS #####################################################################
@@ -132,9 +132,10 @@ class RecurrenceRuleField(forms.MultiValueField):
         """
         queryset = kwargs.pop('queryset', models.RecurrenceRule.objects.all())
         max_length = kwargs.pop('max_length')
+        validators_ = kwargs.pop('validators', [validators.recurrence_rule])
         fields = (
             forms.ModelChoiceField(queryset=queryset, required=False),
-            forms.CharField(max_length=max_length),
+            forms.CharField(max_length=max_length, validators=validators_),
         )
         kwargs.setdefault('fields', fields)
         kwargs.setdefault('require_all_fields', False)

@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from polymorphic import PolymorphicModel
 from timezone import timezone
 
-from eventkit import settings
+from eventkit import settings, validators
 from eventkit.utils import time
 
 
@@ -36,6 +36,7 @@ def default_ends():
 class RecurrenceRuleField(
         six.with_metaclass(models.SubfieldBase, models.TextField)):
 
+    default_validators = [validators.recurrence_rule]
     description = _(
         'An iCalendar (RFC2445) recurrence rule that defines when an event '
         'repeats.')
