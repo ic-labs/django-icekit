@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
+from django.forms.models import fields_for_model
 from django.utils import timezone
 from django_dynamic_fixture import G
 from django_webtest import WebTest
@@ -33,8 +34,19 @@ class Admin(WebTest):
 
 
 class Forms(WebTest):
-    def test(self):
-        pass
+    def test_RecurrenceRuleField(self):
+        """
+        Test validation.
+        """
+        # Incomplete.
+        message = 'Enter a complete value.'
+        with self.assertRaisesMessage(ValidationError, message):
+            forms.RecurrenceRuleField().clean([1, None])
+
+        # Invalid.
+        message = 'Enter a valid iCalendar (RFC2445) recurrence rule.'
+        with self.assertRaisesMessage(ValidationError, message):
+            forms.RecurrenceRuleField().clean([None, 'foo'])
 
 
 class Models(WebTest):
@@ -46,6 +58,21 @@ class Models(WebTest):
         modified = obj.modified
         obj.save()
         self.assertNotEqual(obj.modified, modified)
+
+    def test_RecurrenceRuleField(self):
+        """
+        Test form field and validators.
+        """
+        # Form field.
+        fields = fields_for_model(models.Event)
+        self.assertIsInstance(
+            fields['recurrence_rule'], forms.RecurrenceRuleField)
+
+        # Validation.
+        event = models.Event(recurrence_rule='foo')
+        message = 'Enter a valid iCalendar (RFC2445) recurrence rule.'
+        with self.assertRaisesMessage(ValidationError, message):
+            event.full_clean()
 
     def test_Event_clean(self):
         """
