@@ -18,7 +18,6 @@ setuptools.setup(
         'python-dateutil',
         'pytz',
         'six',
-        'tox',
         'WebTest',
     ],
     extras_require={

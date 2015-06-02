@@ -4,25 +4,23 @@ Please follow these guidelines when making contributions to this app.
 
 ## Getting Started
 
-Get the code and setup a virtualenv:
+Clone the repository and change directory:
 
-    $ git clone git@github.com:ixc/<app_name>.git
-    $ cd <app_name>
-    $ virtualenv venv
-    $ source venv/bin/activate
-    (venv)$ pip install -r requirements.txt
+    $ git clone git@github.com:ixc/django-eventkit.git
+    $ cd django-eventkit
 
-Run the tests:
+You don't need to install the project to run tests. You just need `tox`:
 
-    # All environments, just the given environments, or just the virtualenv.
-    (venv)$ tox
-    (venv)$ tox -e django17-py27,django18-py27
-    (venv)$ ./manage.py test
+    $ pip install -U tox
+    $ tox  # All environments.
+    $ tox -e django{17,18}-py27  # Given environments.
 
-Run the test project interactively:
+If the project dependencies have been updated, rebuild the test environment:
 
-    (venv)$ ./manage.py migrate
-    (venv)$ ./manage.py runserver
+    $ tox -r
+    $ tox -e django17-py27 -r
+
+If you want to run the app interactively, follow the [installation] docs.
 
 ## Git
 
