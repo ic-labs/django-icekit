@@ -53,6 +53,13 @@ class Forms(WebTest):
 
 
 class Migrations(WebTest):
+    def test_eventkit_backwards(self):
+        """
+        Test backwards migrations.
+        """
+        call_command('migrate', 'eventkit', 'zero')
+        call_command('migrate', 'eventkit')
+
     def test_eventkit_sample_data(self):
         """
         Test ``sample_data`` migrations.
