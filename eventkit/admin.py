@@ -21,7 +21,7 @@ from polymorphic.admin import \
     PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
 from timezone import timezone
 
-from eventkit import forms, models, settings
+from eventkit import appsettings, forms, models
 
 
 class EventChildAdmin(PolymorphicChildModelAdmin):
@@ -100,8 +100,8 @@ class EventAdmin(PolymorphicParentModelAdmin):
             # Get colors based on seen index for original event, so repeat
             # events have the same color as the original. Repeat colors when
             # all have been used.
-            background, color = settings.CALENDAR_COLORS[
-                seen.index(id_) % len(settings.CALENDAR_COLORS)]
+            background, color = appsettings.CALENDAR_COLORS[
+                seen.index(id_) % len(appsettings.CALENDAR_COLORS)]
             data.append({
                 'id': id_,
                 'title': title,

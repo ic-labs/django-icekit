@@ -13,21 +13,21 @@ from django.utils.translation import ugettext_lazy as _
 from polymorphic import PolymorphicModel
 from timezone import timezone
 
-from eventkit import settings, validators
+from eventkit import appsettings, validators
 from eventkit.utils import time
 
 
 def default_starts():
     when = time.round_datetime(
         when=timezone.now(),
-        precision=settings.DEFAULT_STARTS_PRECISION,
+        precision=appsettings.DEFAULT_STARTS_PRECISION,
         rounding=time.ROUND_UP,
     )
     return when
 
 
 def default_ends():
-    return default_starts() + settings.DEFAULT_ENDS_DELTA
+    return default_starts() + appsettings.DEFAULT_ENDS_DELTA
 
 
 # FIELDS ######################################################################
@@ -261,7 +261,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
             rruleset.exdate(starts)
         # Yield the `starts` datetime for each missing event.
         end_repeat = (
-            self.end_repeat or timezone.now() + settings.REPEAT_LIMIT)
+            self.end_repeat or timezone.now() + appsettings.REPEAT_LIMIT)
         missing = []
         # There is always at least one occurrence, even when it already exceeds
         # `end_repeat`. Don't complain about partial branch coverage.

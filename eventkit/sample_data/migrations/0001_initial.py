@@ -8,7 +8,7 @@ from django_dynamic_fixture import G
 from timezone import timezone
 
 from eventkit.models import Event, RecurrenceRule
-from eventkit import settings
+from eventkit import appsettings
 from eventkit.utils import time
 
 
@@ -20,7 +20,7 @@ def forwards(apps, schema_editor):
         when=timezone.now(),
         precision=timedelta(days=1),
         rounding=time.ROUND_DOWN)
-    ends = starts + settings.DEFAULT_ENDS_DELTA
+    ends = starts + appsettings.DEFAULT_ENDS_DELTA
 
     daily = RecurrenceRule.objects.get(description='Daily')
     weekdays = RecurrenceRule.objects.get(description='Daily, Weekdays')
