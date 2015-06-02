@@ -22,12 +22,14 @@ def forwards(apps, schema_editor):
         rounding=time.ROUND_DOWN)
     ends = starts + appsettings.DEFAULT_ENDS_DELTA
 
-    daily = RecurrenceRule.objects.get(description='Daily')
-    weekdays = RecurrenceRule.objects.get(description='Daily, Weekdays')
-    weekends = RecurrenceRule.objects.get(description='Daily, Weekends')
-    weekly = RecurrenceRule.objects.get(description='Weekly')
-    monthly = RecurrenceRule.objects.get(description='Monthly')
-    yearly = RecurrenceRule.objects.get(description='Yearly')
+    recurrence_rules = dict(
+        RecurrenceRule.objects.values_list('description', 'recurrence_rule'))
+    daily = recurrence_rules['Daily']
+    weekdays = recurrence_rules['Daily, Weekdays']
+    weekends = recurrence_rules['Daily, Weekends']
+    weekly = recurrence_rules['Weekly']
+    monthly = recurrence_rules['Monthly']
+    yearly = recurrence_rules['Yearly']
 
     daily_event = G(
         Event,

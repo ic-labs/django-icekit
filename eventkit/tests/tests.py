@@ -6,10 +6,13 @@ Tests for ``eventkit`` app.
 
 from datetime import datetime, timedelta
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.forms.models import fields_for_model
+from django.test.utils import override_settings
 from django.utils import timezone
 from django_dynamic_fixture import G
 from django_webtest import WebTest
@@ -47,6 +50,17 @@ class Forms(WebTest):
         message = 'Enter a valid iCalendar (RFC2445) recurrence rule.'
         with self.assertRaisesMessage(ValidationError, message):
             forms.RecurrenceRuleField().clean([None, 'foo'])
+
+
+class Migrations(WebTest):
+    def test_eventkit_sample_data(self):
+        """
+        Test ``sample_data`` migrations.
+        """
+        INSTALLED_APPS = settings.INSTALLED_APPS + ('eventkit.sample_data', )
+        with override_settings(INSTALLED_APPS=INSTALLED_APPS):
+            call_command('migrate', 'eventkit_sample_data')
+            call_command('migrate', 'eventkit_sample_data', 'zero')
 
 
 class Models(WebTest):
