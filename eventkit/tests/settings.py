@@ -30,8 +30,9 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'eventkit.tests.urls'
 SECRET_KEY = 'secret-key'
 STATIC_URL = '/static/'
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-USE_TZ = True
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'  # Default: django.test.runner.DiscoverRunner
+TIME_ZONE = 'Australia/Sydney'  # Default: America/Chicago
+USE_TZ = True  # Default: False
 
 # DYNAMIC FIXTURES ############################################################
 
