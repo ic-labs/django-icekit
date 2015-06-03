@@ -10,6 +10,7 @@ import six
 from django.db import models, transaction
 from django.utils import encoding
 from django.utils.translation import ugettext_lazy as _
+from model_utils import FieldTracker
 from polymorphic import PolymorphicModel
 from timezone import timezone
 
@@ -143,13 +144,6 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         abstract = True
         unique_together = ('starts', 'original')
 
-    def __init__(self, *args, **kwargs):
-        """
-        Store monitor field values.
-        """
-        super(AbstractEvent, self).__init__(*args, **kwargs)
-        self._store_monitor_fields()
-
     def __str__(self):
         return self.title
 
@@ -160,18 +154,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         fields = fields or self.MONITOR_FIELDS
         if isinstance(fields, six.string_types):
             fields = [fields]
-        for field in fields:
-            if getattr(self, field) != self._monitor_fields[field]:
-                return True
-        return False
-
-    def _store_monitor_fields(self):
-        """
-        Store monitor field values so we can detect and propagate changes.
-        """
-        self._monitor_fields = {
-            k: getattr(self, k) for k in self.MONITOR_FIELDS
-        }
+        return bool(set(self.tracker.changed().keys()).intersection(fields))
 
     def clean(self):
         """
@@ -181,14 +164,14 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
             self.end_repeat = None
 
     @transaction.atomic
-    def create_repeat_events(self):
+    def create_repeat_events(self, original=None):
         """
         Create missing repeat events according to the recurrence rule, up until
         the configured limit.
         """
         # TODO: Create asyncronously if celery is available?
         assert self.pk, 'Cannot create repeat events before an event is saved.'
-        original = self.original or self
+        original = original or self.original or self
         defaults = {
             field: getattr(self, field) for field in self.get_repeat_fields()
         }
@@ -274,47 +257,94 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
     @transaction.atomic
     def save(self, propagate=False, *args, **kwargs):
         """
-        When changes are detected, decouple from repeat events. If a recurrence
-        rule is set or ``propagate=True``, repeat events will be updated.
+        Decouple from existing repeat events when monitored fields are changed,
+        so that changes to earlier events will no longer affect this event.
+        When ``propagate=True``, update or create repeat events.
         """
-        recurrence_rule = self.recurrence_rule
-        # Perform some gymnastics to avoid saving twice. An event needs to be
-        # saved already to propagate, but we need to unset `original` after
-        # propagation to decouple from repeat events.
-        if self._monitor_fields_changed():
-            # Propagate changes.
-            if self.pk and (recurrence_rule or propagate):
-                self.propagate()
-            # Always decouple from repeat events when changes are detected.
+        # Is this a new event? New events cannot be propagated until saved.
+        adding = self._state.adding
+        # Have monitored fields have changed since the last save?
+        changed = set(self.tracker.changed())
+        if changed:
+            # Propagate changes, before decoupling from existing repeat events.
+            # Once decoupled, changes can no longer be propagated.
+            if not adding:
+                if propagate:
+                    self.propagate(decouple=False)
+                elif self.recurrence_rule:
+                    # Unset existing recurrence rule automatically.
+                    if 'recurrence_rule' not in changed:
+                        self.recurrence_rule = None
+                    # If the recurrence rule was explicitly updated, raise an
+                    # exception. Decoupled events cannot be repeated.
+                    else:
+                        raise AssertionError(
+                            'Cannot update recurrence rule without '
+                            'propagating changes to repeat events.')
+                elif not changed.difference(['recurrence_rule']):
+                    raise AssertionError(
+                        'Cannot decouple event without any substantive '
+                        'changes. Removing the recurrence rule alone is a '
+                        'no-op.')
+            # Decouple from repeat events.
             self.original = None
-        already_saved = bool(self.pk)
         super(AbstractEvent, self).save(*args, **kwargs)
-        # Always propagate new repeat events.
-        if not already_saved and recurrence_rule:
-            self.propagate()
-        # Update stored fields.
-        self._store_monitor_fields()
+        # Propagate new repeat events.
+        if adding and self.recurrence_rule:
+            self.create_repeat_events()
 
     @transaction.atomic
-    def propagate(self):
+    def propagate(self, decouple=True):
         """
-        Propagate changes to existing repeat events. This will create a new set
-        of repeat events with this event as the original.
+        Propagate changes to repeat events. If the recurrence rule has not
+        changed, repeat events will be updated or created. If it has changed,
+        repeat events will be deleted and recreated. In both cases, this will
+        create a new set of repeat events with this event as the original.
         """
         assert self.pk, (
             'Cannot propagate changes to repeat events before an event is '
             'saved.')
+        assert self.tracker.changed(), (
+            'Cannot propagate when there are no changes.')
         # TODO: Handle `COUNT=N` rules being reset.
-        self.get_repeat_events().delete()
-        # Decouple AFTER deleting repeat events. We need the `original` field
-        # to get repeat events.
-        self.original = None
-        # Do not try to create repeat events when no recurrence rule is set.
-        if self.recurrence_rule:
-            self.create_repeat_events()
+        repeat_events = self.get_repeat_events()
+        if self._monitor_fields_changed(['starts', 'ends', 'recurrence_rule']):
+            # When event occurrences have changed, we cannot map old events to
+            # new events, so delete and recreate them.
+            repeat_events.delete()
+            # Only recreate repeat events if there is a recurrence rule.
+            if self.recurrence_rule:
+                # Specify a new `original` to decouple the new set of repeat
+                # events from earlier repeat events.
+                self.create_repeat_events(original=self)
+        else:
+            # Update. When the occurrences have not changed, we don't need to
+            # delete and recreate.
+            if self.end_repeat and self._monitor_fields_changed('end_repeat'):
+                # Delete excessive repeat events.
+                repeat_events.filter(starts__gt=self.end_repeat).delete()
+            self.update_repeat_events()
+        # Decouple this event from earlier repeat events and save, unless the
+        # caller will also save.
+        if decouple:
+            self.original = None
+            self.save()
+
+    @transaction.atomic
+    def update_repeat_events(self):
+        """
+        Update existing repeat events.
+        """
+        defaults = {
+            field: getattr(self, field) for field in self.get_repeat_fields()
+        }
+        defaults['original'] = self
+        self.get_repeat_events().update(**defaults)
 
 
 class Event(AbstractEvent):
     """
     A concrete polymorphic event model.
     """
+
+    tracker = FieldTracker(AbstractEvent.MONITOR_FIELDS)

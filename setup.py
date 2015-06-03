@@ -9,6 +9,7 @@ setuptools.setup(
     install_requires=[
         'coverage',
         'django-dynamic-fixture',
+        'django-model-utils',
         'django-nose',
         'django-polymorphic',
         # 'django-timezone',
