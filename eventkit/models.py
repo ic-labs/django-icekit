@@ -160,6 +160,9 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         """
         Unset ``end_repeat`` if no recurrence rule is set.
         """
+        # TODO: Do not allow a decoupled event to have a recurrence rule that
+        # is different to its original. Recouple an event when all of its
+        # monitored fields match its original.
         if not self.recurrence_rule:
             self.end_repeat = None
 
