@@ -151,7 +151,8 @@ class RecurrenceRuleField(forms.MultiValueField):
         Always return the value from the ``CharField``, even when a preset is
         selected. The recurrence rule is always defined in the ``CharField``.
         """
-        return values[1] or None
+        if values:
+            return values[1]
 
     def _get_queryset(self):
         """
