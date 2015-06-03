@@ -275,15 +275,20 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
                 if propagate:
                     self.propagate(decouple=False)
                 elif self.recurrence_rule:
-                    # Unset existing recurrence rule automatically.
-                    if 'recurrence_rule' not in changed:
-                        self.recurrence_rule = None
-                    # If the recurrence rule was explicitly updated, raise an
-                    # exception. Decoupled events cannot be repeated.
-                    else:
+                    # When occurrences have gone stale and there is still a
+                    # recurrence rule set, the changes must be propagated to
+                    # maintain consistency across repeat events.
+                    if changed.intersection([
+                            'starts', 'ends', 'recurrence_rule']):
                         raise AssertionError(
-                            'Cannot update recurrence rule without '
+                            'Cannot update occurrences without '
                             'propagating changes to repeat events.')
+                    # Unset the recurrence rule automatically when occurrences
+                    # have not gone stale.
+                    else:
+                        self.recurrence_rule = None
+                # If the only change was to remove the recurrence rule, raise
+                # an exception.
                 elif not changed.difference(['recurrence_rule']):
                     raise AssertionError(
                         'Cannot decouple event without any substantive '
