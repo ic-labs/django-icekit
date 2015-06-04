@@ -51,7 +51,7 @@ class RecurrenceRuleWidget(forms.MultiWidget):
         """
         Set choices on the ``Select`` widget.
         """
-        self.widgets[0].choices = list(value)
+        self.widgets[0].choices = value
 
     choices = property(_get_choices, _set_choices)
 
