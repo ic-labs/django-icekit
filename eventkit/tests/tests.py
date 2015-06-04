@@ -218,8 +218,8 @@ class TestEventPropagation(WebTest):
         event2 = self.event.get_repeat_events()[10]
         event2.recurrence_rule = 'FREQ=WEEKLY'
         message = (
-            'Cannot update recurrence rule without propagating changes to '
-            'repeat events.')
+            'Cannot update occurrences without propagating changes to repeat '
+            'events.')
         with self.assertRaisesMessage(AssertionError, message):
             event2.save()
 
