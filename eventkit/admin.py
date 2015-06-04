@@ -21,14 +21,21 @@ from polymorphic.admin import \
     PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
 from timezone import timezone
 
-from eventkit import appsettings, forms, models
+from eventkit import admin_forms, appsettings, forms, models
 
 
 class EventChildAdmin(PolymorphicChildModelAdmin):
+    base_form = admin_forms.BaseEventForm
     base_model = models.Event
     formfield_overrides = {
         models.RecurrenceRuleField: {'widget': forms.RecurrenceRuleWidget},
     }
+
+    def save_model(self, request, obj, form, change):
+        """
+        Propagate changes if requested.
+        """
+        obj.save(propagate=form.cleaned_data['propagate'])
 
 
 class RepeatFilter(admin.SimpleListFilter):
