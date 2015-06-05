@@ -79,16 +79,20 @@ class EventAdmin(PolymorphicParentModelAdmin):
                 'id', 'parent', 'title', 'all_day', 'starts', 'ends',
                 'is_repeat')
         data = []
-        seen = []
-        for pk, original, title, all_day, starts, ends in events:
-            id_ = original or pk
+        # Get the primary keys for all root and variation events into a list,
+        # so we can assign them and their repeat events a consistent colour.
+        seen = list(
+            models.Event.objects
+            .filter(is_repeat=False)
+            .values_list('pk', flat=True)
+            .order_by('pk'))
         for pk, parent, title, all_day, starts, ends, is_repeat in events:
             id_ = parent if is_repeat else pk
             if id_ not in seen:
                 seen.append(id_)
-            # Get colors based on seen index for original event, so repeat
-            # events have the same color as the original. Repeat colors when
-            # all have been used.
+            # Get color based on seen index for parent event, so its repeat
+            # events have the same color. Start repeating colors when they have
+            # all been used.
             background, color = appsettings.CALENDAR_COLORS[
                 seen.index(id_) % len(appsettings.CALENDAR_COLORS)]
             data.append({
