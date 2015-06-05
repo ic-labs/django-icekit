@@ -182,7 +182,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     def create_repeat_events(self, parent=None):
         """
         Create missing repeat events according to the recurrence rule, up until
-        the configured limit.
+        the configured limit. Return the number of repeat events created.
         """
         # TODO: Create asyncronously if celery is available?
         assert self.pk, 'Cannot create repeat events before an event is saved.'
@@ -214,7 +214,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
 
     def get_repeat_events(self):
         """
-        Return a queryset of repeat events, not including this event.
+        Return a queryset of (future) repeat events, not including this event.
         """
         assert self.pk, 'Cannot get repeat events before an event is saved.'
         if self.is_repeat:
@@ -281,6 +281,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         """
         Unset ``is_repeat`` when monitored fields are changed, so that
         subsequent changes to earlier events will no longer affect this event.
+
         When ``propagate=True``, update or create repeat events.
         """
         # Is this a new event? New events cannot be propagated until saved.

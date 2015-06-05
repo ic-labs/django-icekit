@@ -14,7 +14,7 @@ from eventkit.utils import time
 
 def forwards(apps, schema_editor):
     """
-    Create sample events for interactive testing.
+    Create sample events.
     """
     starts = time.round_datetime(
         when=timezone.now(),
@@ -81,6 +81,9 @@ def forwards(apps, schema_editor):
 
 
 def backwards(apps, schema_editor):
+    """
+    Delete sample events, including derivative repeat and variation events.
+    """
     titles = [
         'Daily Event',
         'Weekday Event',
