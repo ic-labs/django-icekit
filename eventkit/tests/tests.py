@@ -136,10 +136,12 @@ class Models(WebTest):
 
     def test_Event_is_repeat(self):
         event = G(models.Event, recurrence_rule='FREQ=DAILY')
-        # Original is not a repeat.
-        self.assertFalse(event.is_repeat())
-        # Repeat events are.
-        self.assertTrue(event.get_repeat_events().first().is_repeat())
+        # Root event is not a repeat event.
+        self.assertFalse(event.is_repeat)
+        # Child events are repeat events.
+        self.assertEqual(
+            event.get_children().count(),
+            event.get_children().filter(is_repeat=True).count())
 
     def test_Event_str(self):
         event = G(models.Event, title='title')
@@ -295,7 +297,7 @@ class TestEventPropagation(WebTest):
             .filter(pk__in=self.event.get_repeat_events()[5:]) \
             .delete()
         self.assertEqual(len(self.event.missing_repeat_events), 14)
-        self.event.create_repeat_events()
+        call_command('create_missing_events')
         self.assertEqual(len(self.event.missing_repeat_events), 0)
         self.assertEqual(self.event.get_repeat_events().count(), 19)
         self.assertEqual(models.Event.objects.count(), 20)

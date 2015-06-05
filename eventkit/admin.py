@@ -38,30 +38,9 @@ class EventChildAdmin(PolymorphicChildModelAdmin):
         obj.save(propagate=form.cleaned_data['propagate'])
 
 
-class RepeatFilter(admin.SimpleListFilter):
-    title = _('repeat')
-    parameter_name = 'is_repeat'
-
-    YES = '1'
-    NO = '0'
-
-    def lookups(self, request, model_admin):
-        lookups = (
-            (self.YES, _('Yes')),
-            (self.NO, _('No')),
-        )
-        return lookups
-
-    def queryset(self, request, queryset):
-        if self.value() == self.YES:
-            return queryset.exclude(original=None)
-        elif self.value() == self.NO:
-            return queryset.filter(original=None)
-
-
 class EventAdmin(PolymorphicParentModelAdmin):
     base_model = models.Event
-    list_filter = ('all_day', 'starts', 'ends', RepeatFilter)
+    list_filter = ('all_day', 'starts', 'ends', 'is_repeat')
     list_display = ('__str__', 'all_day', 'starts', 'ends', 'is_repeat')
     search_fields = ('title', )
 
@@ -97,11 +76,14 @@ class EventAdmin(PolymorphicParentModelAdmin):
         events = self.get_queryset(request) \
             .filter(starts__gte=starts, starts__lt=ends) \
             .values_list(
-                'id', 'original', 'title', 'all_day', 'starts', 'ends')
+                'id', 'parent', 'title', 'all_day', 'starts', 'ends',
+                'is_repeat')
         data = []
         seen = []
         for pk, original, title, all_day, starts, ends in events:
             id_ = original or pk
+        for pk, parent, title, all_day, starts, ends, is_repeat in events:
+            id_ = parent if is_repeat else pk
             if id_ not in seen:
                 seen.append(id_)
             # Get colors based on seen index for original event, so repeat

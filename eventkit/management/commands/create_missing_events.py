@@ -9,12 +9,10 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, *args, **options):
         verbosity = int(options.get('verbosity'))
-        # Get all original events with recurrence rules.
+        # Get all root and variation events with recurrence rules.
         events = Event.objects.filter(
-            ~Q(recurrence_rule=None) |
-            ~Q(custom_recurrence_rule='') |
-            ~Q(custom_recurrence_rule=None),
-            original=None)
+            ~Q(recurrence_rule='') | ~Q(recurrence_rule=None),
+            is_repeat=False)
         count = 0
         for event in events:
             created = event.create_repeat_events()

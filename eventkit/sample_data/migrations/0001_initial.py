@@ -89,15 +89,14 @@ def backwards(apps, schema_editor):
         'Monthly Event',
         'Yearly Event',
     ]
-    originals = Event.objects.filter(title__in=titles)
-    Event.objects.filter(
-        models.Q(pk__in=originals) | models.Q(original__in=originals)).delete()
+    samples = Event.objects.filter(title__in=titles)
+    Event.objects.filter(tree_id__in=samples.values('tree_id')).delete()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eventkit', '0004_auto_20150514_0002'),
+        ('eventkit', '0001_initial'),
     ]
 
     operations = [

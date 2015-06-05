@@ -16,7 +16,7 @@ RULES = [
 
 def forwards(apps, schema_editor):
     """
-    Create initial simple rules.
+    Create initial recurrence rules.
     """
     RecurrenceRule = apps.get_model('eventkit', 'RecurrenceRule')
     for description, recurrence_rule in RULES:
@@ -27,6 +27,9 @@ def forwards(apps, schema_editor):
 
 
 def backwards(apps, schema_editor):
+    """
+    Delete initial recurrence rules.
+    """
     RecurrenceRule = apps.get_model('eventkit', 'RecurrenceRule')
     descriptions = [d for d, rr in RULES]
     RecurrenceRule.objects.filter(description__in=descriptions).delete()
@@ -35,7 +38,7 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('eventkit', '0003_auto_20150513_2356'),
+        ('eventkit', '0001_initial'),
     ]
 
     operations = [

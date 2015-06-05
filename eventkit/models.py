@@ -11,7 +11,8 @@ from django.db import models, transaction
 from django.utils import encoding
 from django.utils.translation import ugettext_lazy as _
 from model_utils import FieldTracker
-from polymorphic import PolymorphicModel
+from polymorphic_tree.models import \
+    PolymorphicMPTTModel, PolymorphicTreeForeignKey
 from timezone import timezone
 
 from eventkit import appsettings, validators
@@ -107,7 +108,7 @@ class RecurrenceRule(AbstractBaseModel):
 
 
 @encoding.python_2_unicode_compatible
-class AbstractEvent(PolymorphicModel, AbstractBaseModel):
+class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     """
     An abstract polymorphic event model, with the bare minimum fields.
     """
@@ -122,7 +123,14 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         'end_repeat',
     )
 
-    original = models.ForeignKey('self', editable=False, null=True)
+    parent = PolymorphicTreeForeignKey(
+        'self',
+        blank=True,
+        db_index=True,
+        editable=False,
+        null=True,
+        related_name='children',
+    )
     title = models.CharField(max_length=255)
     all_day = models.BooleanField(default=False)
     starts = models.DateTimeField(default=default_starts)
@@ -139,10 +147,14 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         help_text=_('If empty, this event will repeat indefinitely.'),
         null=True,
     )
+    is_repeat = models.BooleanField(default=False, editable=False)
 
     class Meta:
         abstract = True
-        unique_together = ('starts', 'original')
+        unique_together = ('starts', 'parent')
+
+    class MPTTMeta:
+        order_insertion_by = ('starts', )
 
     def __str__(self):
         return self.title
@@ -161,20 +173,20 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         Unset ``end_repeat`` if no recurrence rule is set.
         """
         # TODO: Do not allow a decoupled event to have a recurrence rule that
-        # is different to its original. Recouple an event when all of its
-        # monitored fields match its original.
+        # is different to its parent. Recouple an event when all of its
+        # monitored fields match its parent.
         if not self.recurrence_rule:
             self.end_repeat = None
 
     @transaction.atomic
-    def create_repeat_events(self, original=None):
+    def create_repeat_events(self, parent=None):
         """
         Create missing repeat events according to the recurrence rule, up until
         the configured limit.
         """
         # TODO: Create asyncronously if celery is available?
         assert self.pk, 'Cannot create repeat events before an event is saved.'
-        original = original or self.original or self
+        parent = parent or self.parent or self
         defaults = {
             field: getattr(self, field) for field in self.get_repeat_fields()
         }
@@ -182,8 +194,15 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         for starts in self.missing_repeat_events:
             ends = starts + self.duration
             event = type(self)(
-                original=original, starts=starts, ends=ends, **defaults)
+                parent=parent,
+                starts=starts,
+                ends=ends,
+                is_repeat=True,
+                **defaults
+            )
             super(AbstractEvent, event).save()  # Bypass automatic propagation.
+        # Refresh the MPTT fields, which are now in an inconsistent state.
+        self.refresh_mptt_fields()
         return count
 
     @property
@@ -198,14 +217,18 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         Return a queryset of repeat events, not including this event.
         """
         assert self.pk, 'Cannot get repeat events before an event is saved.'
-        # Fallback to `self` if `self.original` is not defined, which is the
-        # case for the first event in a set.
-        original = self.original or self
-        # Assume that PK order will always match chronological order.
-        repeat_events = type(self).objects \
-            .filter(original=original, pk__gt=self.pk) \
-            .order_by('pk')
-        return repeat_events
+        if self.is_repeat:
+            # If this is a repeat event, return sibling repeat events that
+            # start after it.
+            events = self.get_siblings().filter(starts__gt=self.starts)
+        else:
+            # If this is not a repeat event, return child repeat events.
+            events = self.get_children()
+        # Assume that primary key order will always match chronological order,
+        # because repeat events are always created in chronological order and
+        # are deleted and recreated when propagating changes.
+        events = events.filter(is_repeat=True).order_by('pk')
+        return events
 
     def get_repeat_fields(self):
         """
@@ -226,10 +249,6 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         rruleset = rrule.rrulestr(
             recurrence_rule, dtstart=self.starts, forceset=True)
         return rruleset
-
-    def is_repeat(self):
-        return bool(self.original)
-    is_repeat.boolean = True
 
     @property
     def missing_repeat_events(self):
@@ -260,8 +279,8 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
     @transaction.atomic
     def save(self, propagate=False, *args, **kwargs):
         """
-        Decouple from existing repeat events when monitored fields are changed,
-        so that changes to earlier events will no longer affect this event.
+        Unset ``is_repeat`` when monitored fields are changed, so that
+        subsequent changes to earlier events will no longer affect this event.
         When ``propagate=True``, update or create repeat events.
         """
         # Is this a new event? New events cannot be propagated until saved.
@@ -294,8 +313,8 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
                         'Cannot decouple event without any substantive '
                         'changes. Removing the recurrence rule alone is a '
                         'no-op.')
-            # Decouple from repeat events.
-            self.original = None
+            # This is no longer a repeat event.
+            self.is_repeat = False
         super(AbstractEvent, self).save(*args, **kwargs)
         # Propagate new repeat events.
         if adding and self.recurrence_rule:
@@ -307,7 +326,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         Propagate changes to repeat events. If the recurrence rule has not
         changed, repeat events will be updated or created. If it has changed,
         repeat events will be deleted and recreated. In both cases, this will
-        create a new set of repeat events with this event as the original.
+        become a variation event.
         """
         assert self.pk, (
             'Cannot propagate changes to repeat events before an event is '
@@ -322,9 +341,9 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
             repeat_events.delete()
             # Only recreate repeat events if there is a recurrence rule.
             if self.recurrence_rule:
-                # Specify a new `original` to decouple the new set of repeat
-                # events from earlier repeat events.
-                self.create_repeat_events(original=self)
+                # Use this variation event as the new parent for its repeat
+                # events.
+                self.create_repeat_events(parent=self)
         else:
             # Update. When the occurrences have not changed, we don't need to
             # delete and recreate.
@@ -335,8 +354,26 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         # Decouple this event from earlier repeat events and save, unless the
         # caller will also save.
         if decouple:
-            self.original = None
+            self.is_repeat = False
             self.save()
+
+    def refresh_mptt_fields(self):
+        """
+        Refresh the MPTT fields on this instance from the database. Call this
+        on an instance that is in an inconsistent state after rebuilding the
+        MPTT tree.
+        """
+        event = type(self).objects.get(pk=self.pk)
+        fields = (
+            'left_attr',
+            'right_attr',
+            'tree_id_attr',
+            'level_attr',
+            'parent_attr',
+        )
+        for field in fields:
+            attr = getattr(self._mptt_meta, field)
+            setattr(self, attr, getattr(event, attr))
 
     @transaction.atomic
     def update_repeat_events(self):
@@ -346,8 +383,13 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         defaults = {
             field: getattr(self, field) for field in self.get_repeat_fields()
         }
-        defaults['original'] = self
+        defaults['parent'] = self
         self.get_repeat_events().update(**defaults)
+        # Rebuild the MPTT tree. `update()` bypasses the `MPTTModel.save()`
+        # method and leaves the tree in an inconsistent state.
+        type(self)._default_manager.partial_rebuild(self.tree_id)
+        # Refresh the MPTT fields, which are now also in an inconsistent state.
+        self.refresh_mptt_fields()
 
 
 class Event(AbstractEvent):
