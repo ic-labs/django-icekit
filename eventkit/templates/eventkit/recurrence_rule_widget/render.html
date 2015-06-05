@@ -22,18 +22,18 @@
 				}
 			});
 			select.val(match);
-			// Update original.
+			// Update custom.
 			if (match == '') {
-				textarea_original = val;
+				textarea_custom = val;
 			}
 		}).keyup();
 
-		// Save the original textarea if it contains a custom rule.
-		var textarea_original = select.val() ? '' : textarea.val();
+		// Save the custom textarea if it contains a custom rule.
+		var textarea_custom = select.val() ? '' : textarea.val();
 
 		// Update the textarea when the selected rule is changed.
 		select.change(function(e) {
-			textarea.val(options[select.val()] || textarea_original);
+			textarea.val(options[select.val()] || textarea_custom);
 		});
 
 		// Generate a preview of occurrences.
