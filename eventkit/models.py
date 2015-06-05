@@ -253,8 +253,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     @property
     def missing_repeat_events(self):
         """
-        Return a list of datetime objects for missing repeat events, up to the
-        configured limit.
+        Return a list of datetime objects for missing repeat event occurrences,
+        up to the configured limit.
         """
         rruleset = self.get_rruleset()
         # Exclude existing events.
