@@ -292,7 +292,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             # Once decoupled, changes can no longer be propagated.
             if not adding:
                 if propagate:
-                    self.propagate(decouple=False)
+                    self.propagate(save=False)
                 elif self.recurrence_rule:
                     # When occurrences have gone stale and there is still a
                     # recurrence rule set, the changes must be propagated to
@@ -321,7 +321,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             self.create_repeat_events()
 
     @transaction.atomic
-    def propagate(self, decouple=True):
+    def propagate(self, save=True):
         """
         Propagate changes to repeat events. If the recurrence rule has not
         changed, repeat events will be updated or created. If it has changed,
@@ -351,10 +351,10 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 # Delete excessive repeat events.
                 repeat_events.filter(starts__gt=self.end_repeat).delete()
             self.update_repeat_events()
-        # Decouple this event from earlier repeat events and save, unless the
-        # caller will also save.
-        if decouple:
-            self.is_repeat = False
+        # Decouple this variation event from earlier repeat events and save,
+        # unless the caller has asked us not to save.
+        self.is_repeat = False
+        if save:
             self.save()
 
     def refresh_mptt_fields(self):
