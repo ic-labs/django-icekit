@@ -147,6 +147,14 @@ class Models(WebTest):
         event = G(models.Event, title='title')
         self.assertEqual(six.text_type(event), 'title')
 
+    def test_RecurrenceRule_str(self):
+        recurrence_rule = G(
+            models.RecurrenceRule,
+            description='description',
+            recurrence_Rule='FREQ=DAILY',
+        )
+        self.assertEqual(six.text_type(recurrence_rule), 'description')
+
 
 class TestEventPropagation(WebTest):
     def setUp(self):
