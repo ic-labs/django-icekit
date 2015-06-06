@@ -309,6 +309,13 @@ class TestEventPropagation(WebTest):
         self.assertTrue(pks.issuperset(set(
             event2.get_repeat_events().values_list('pk', flat=True))))
 
+    def test_propagate_save(self):
+        # Calling `propagate(save=True)` will save the event immediately.
+        event2 = self.event.get_repeat_events()[5]
+        event2.title = 'title'
+        event2.propagate(save=True)
+        self.assertFalse(event2.tracker.has_changed('title'))
+
     def test_create_missing_events(self):
         # Delete a few repeat events to simulate "missing" events and recreate.
         self.assertEqual(len(self.event.missing_repeat_events), 0)
