@@ -257,23 +257,15 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         up to the configured limit.
         """
         rruleset = self.get_rruleset()
-        # Exclude existing events.
-        rruleset.exdate(self.starts)
-        existing = self \
-            .get_repeat_events() \
-            .values_list('starts', flat=True)
-        for starts in existing:
-            rruleset.exdate(starts)
-        # Yield the `starts` datetime for each missing event.
+        # Get `starts` for the latest repeat event, or this event.
+        starts = self.get_repeat_events() \
+            .aggregate(max=models.Max('starts'))['max'] or self.starts
+        # Limit `end_repeat` to configured maximum.
         end_repeat = (
             self.end_repeat or timezone.now() + appsettings.REPEAT_LIMIT)
-        missing = []
-        # There is always at least one occurrence, even when it already exceeds
-        # `end_repeat`. Don't complain about partial branch coverage.
-        for starts in rruleset:  # pragma: no branch
-            if starts > end_repeat:
-                break
-            missing.append(starts)
+        # `starts` and `end_repeat` are exclusive and will not be included in
+        # the occurrences.
+        missing = rruleset.between(starts, end_repeat)
         return missing
 
     @transaction.atomic
@@ -340,6 +332,17 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             # When event occurrences have changed, we cannot map old events to
             # new events, so delete and recreate them.
             repeat_events.delete()
+            # Update `end_repeat` field on parent and earlier repeat events to
+            # avoid recreating variation events.
+            if self.is_repeat:
+                # Combine earlier repeat and parent events.
+                siblings = self.get_siblings().filter(pk__lt=self.pk) | \
+                    type(self).objects.filter(pk=self.parent.pk)
+                # Update earlier repeat and parent events to the max `starts`
+                # value found.
+                end_repeat = siblings \
+                    .aggregate(max=models.Max('starts'))['max']
+                siblings.update(end_repeat=end_repeat)
             # Only recreate repeat events if there is a recurrence rule.
             if self.recurrence_rule:
                 # Use this variation event as the new parent for its repeat

@@ -153,14 +153,15 @@ class TestEventPropagation(WebTest):
         """
         Create 20 events with a daily recurrence rule.
         """
-        # Set `end_repeat` to 19 days after the first event starts, so we have
-        # 20 events in total.
         starts = time.round_datetime(
             when=timezone.now(),
             precision=timedelta(days=1),
             rounding=time.ROUND_DOWN)
         ends = starts + appsettings.DEFAULT_ENDS_DELTA
-        end_repeat = starts + timedelta(days=19)
+        # The `end_repeat` is exclusive and will not be included as an
+        # occurrence, so adding 20 days to `starts` will give us 20 occurrences
+        # in total. The root event plus 19 repeat events.
+        end_repeat = starts + timedelta(days=20)
 
         # Repeat events are created automatically for new events.
         self.event = G(
@@ -255,10 +256,11 @@ class TestEventPropagation(WebTest):
 
     def test_propagate_start_time(self):
         # To propagate, call `save(propagate=True)`. Repeat events will be
-        # recreated when the repeat occurrences are changed (start time).
+        # recreated when the occurrence parameters are changed (`starts`,
+        # `recurrence_rule`, `end_repeat`, etc.)
         event2 = self.event.get_repeat_events()[10]
         pks = set(event2.get_repeat_events().values_list('pk', flat=True))
-        event2.starts -= timedelta(minutes=30)
+        event2.starts += timedelta(minutes=30)
         event2.save(propagate=True)
         # Original repeat events reduced by 9. (19 less 10 kept.)
         self.assertEqual(self.event.get_repeat_events().count(), 10)
