@@ -292,6 +292,23 @@ class TestEventPropagation(WebTest):
         self.assertFalse(pks.intersection(set(
             event2.get_repeat_events().values_list('pk', flat=True))))
 
+    def test_propagate_end_repeat(self):
+        # Vestigial repeat events are deleted when `end_repeat` is reduced.
+        event2 = self.event.get_repeat_events()[10]
+        pks = set(event2.get_repeat_events().values_list('pk', flat=True))
+        event2.end_repeat -= timedelta(days=5)
+        event2.save(propagate=True)
+        # Original repeat events reduced by 9. (19 less 10 kept.)
+        self.assertEqual(self.event.get_repeat_events().count(), 10)
+        # Propagated. 3 repeat events (9 decoupled less 1 new original less 5
+        # vestigial deleted.)
+        self.assertEqual(event2.get_repeat_events().count(), 3)
+        # Total number of events reduced by 5.
+        self.assertEqual(models.Event.objects.count(), 15)
+        # Same primary keys for remaining repeat events.
+        self.assertTrue(pks.issuperset(set(
+            event2.get_repeat_events().values_list('pk', flat=True))))
+
     def test_create_missing_events(self):
         # Delete a few repeat events to simulate "missing" events and recreate.
         self.assertEqual(len(self.event.missing_repeat_events), 0)

@@ -352,8 +352,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             # Update. When the occurrences have not changed, we don't need to
             # delete and recreate.
             if self.end_repeat and self._monitor_fields_changed('end_repeat'):
-                # Delete excessive repeat events.
-                repeat_events.filter(starts__gt=self.end_repeat).delete()
+                # Delete vestigial repeat events.
+                repeat_events.filter(starts__gte=self.end_repeat).delete()
             self.update_repeat_events()
         # Decouple this variation event from earlier repeat events and save,
         # unless the caller has asked us not to save.
