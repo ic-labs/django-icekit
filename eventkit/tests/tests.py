@@ -182,13 +182,13 @@ class TestEventPropagation(WebTest):
         self.assertEqual(self.event.get_repeat_events().count(), 19)
 
     def test_save_no_change(self):
-        # Saving without making changes does not decouple or propagate.
+        # Saving without making changes does nothing.
         self.event.get_repeat_events()[10].save()
         self.assertEqual(self.event.get_repeat_events().count(), 19)
 
     def test_decouple(self):
-        # Decouple events by changing any monitored fields. Changes are not
-        # propagated. The recurrence rule is automatically removed.
+        # Create a variation event by changing any monitored fields. Changes
+        # are not propagated. The recurrence rule is automatically removed.
         event2 = self.event.get_repeat_events()[10]
         event2.title = 'title'
         event2.save()
@@ -238,8 +238,8 @@ class TestEventPropagation(WebTest):
             event2.save()
 
     def test_propagate(self):
-        # To propagate, call `save(propagate=True)`. Repeat events will be
-        # updated when the repeat occurrences are not changed.
+        # Repeat events will be updated instead of being recreated when the
+        # occurrence parameters are not changed.
         event2 = self.event.get_repeat_events()[10]
         pks = set(event2.get_repeat_events().values_list('pk', flat=True))
         event2.title = 'title'
@@ -255,9 +255,7 @@ class TestEventPropagation(WebTest):
             event2.get_repeat_events().values_list('pk', flat=True))))
 
     def test_propagate_start_time(self):
-        # To propagate, call `save(propagate=True)`. Repeat events will be
-        # recreated when the occurrence parameters are changed (`starts`,
-        # `recurrence_rule`, `end_repeat`, etc.)
+        # Repeat events will be recreated when `starts` is changed.
         event2 = self.event.get_repeat_events()[10]
         pks = set(event2.get_repeat_events().values_list('pk', flat=True))
         event2.starts += timedelta(minutes=30)
@@ -274,8 +272,7 @@ class TestEventPropagation(WebTest):
             event2.get_repeat_events().values_list('pk', flat=True))))
 
     def test_propagate_recurrence_rule(self):
-        # To propagate, call `save(propagate=True)`. Repeat events will be
-        # recreated when the repeat occurrences are changed (recurrence rule).
+        # Repeat events will be recreated when `recurrence_rule` is changed.
         event2 = self.event.get_repeat_events()[3]
         pks = set(event2.get_repeat_events().values_list('pk', flat=True))
         event2.recurrence_rule = 'FREQ=WEEKLY'
