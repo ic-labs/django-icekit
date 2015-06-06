@@ -391,7 +391,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         self.get_repeat_events().update(**defaults)
         # Rebuild the MPTT tree. `update()` bypasses the `MPTTModel.save()`
         # method and leaves the tree in an inconsistent state.
-        type(self)._default_manager.partial_rebuild(self.tree_id)
+        type(self)._tree_manager.partial_rebuild(self.tree_id)
         # Refresh the MPTT fields, which are now also in an inconsistent state.
         self.refresh_mptt_fields()
 
