@@ -237,7 +237,7 @@ class TestEventPropagation(WebTest):
         with self.assertRaisesMessage(AssertionError, message):
             event2.save()
 
-    def test_propagate(self):
+    def test_propagate_title(self):
         # Repeat events will be updated instead of being recreated when the
         # occurrence parameters are not changed.
         event2 = self.event.get_repeat_events()[10]
