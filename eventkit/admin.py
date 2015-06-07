@@ -20,7 +20,7 @@ from polymorphic.admin import \
     PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
 from timezone import timezone
 
-from eventkit import admin_forms, appsettings, forms, models
+from eventkit import admin_forms, appsettings, forms, models, plugins
 
 
 class EventChildAdmin(PolymorphicChildModelAdmin):
@@ -108,10 +108,15 @@ class EventAdmin(PolymorphicParentModelAdmin):
         return HttpResponse(content=data, content_type='applicaton/json')
 
     def get_child_models(self):
-        # TODO: Registration system for event plugins.
-        child_models = [
-            (models.Event, EventChildAdmin),
-        ]
+        """
+        Get child models from registered ``EventPlugin`` subclasses. Fallback
+        to the parent ``Event`` model if no plugins are registered.
+        """
+        child_models = []
+        for plugin in plugins.EventPlugin.plugins:
+            child_models.append((plugin.model, plugin.model_admin))
+        if not child_models:
+            child_models.append((models.Event, EventChildAdmin))
         return child_models
 
 admin.site.register(models.Event, EventAdmin)

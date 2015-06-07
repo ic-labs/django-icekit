@@ -151,7 +151,6 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
 
     class Meta:
         abstract = True
-        unique_together = ('starts', 'parent')
 
     class MPTTMeta:
         order_insertion_by = ('starts', )

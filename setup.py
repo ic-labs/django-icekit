@@ -23,6 +23,7 @@ setuptools.setup(
     ],
     extras_require={
         'dev': ['ipdb', 'ipython'],
+        'fluentevent': ['django-fluent-contents'],
         'postgres': ['psycopg2'],
     },
 )
