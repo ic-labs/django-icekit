@@ -14,7 +14,11 @@ class FluentEventAdmin(EventChildAdmin, PlaceholderEditorAdmin):
         """
         Get placeholder data from event template.
         """
-        template = get_template('eventkit_fluentevent/default.html')
+        if not obj:
+            template = get_template(
+                self.model._meta.get_field('layout').default)
+        else:
+            template = get_template(obj.layout)
         return get_template_placeholder_data(template)
 
 admin.site.register(FluentEvent, FluentEventAdmin)
