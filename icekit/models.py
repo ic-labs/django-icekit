@@ -9,6 +9,7 @@ from django.db import models
 from django.template.loader import get_template
 from django.utils import encoding, timezone
 from django.utils.translation import ugettext_lazy as _
+from fluent_contents.models import ContentItemRelation, PlaceholderRelation
 from fluent_pages.appsettings import FLUENT_PAGES_TEMPLATE_DIR
 from fluent_pages.models.fields import TemplateFilePathField
 
@@ -45,6 +46,23 @@ class LayoutField(
         """
         self._choices = self.plugin_class.get_plugin_choices(field=self)
         return super(LayoutField, self).formfield(**kwargs)
+
+
+# MIXINS ######################################################################
+
+
+class FluentFieldsMixin(models.Model):
+    """
+    Add ``layout``, ``contentitem_set`` and ``placeholder_set`` fields so we
+    can add modular content with ``django-fluent-contents``.
+    """
+    layout = models.ForeignKey('icekit.Layout', blank=True, null=True, related_name='+')
+
+    contentitem_set = ContentItemRelation()
+    placeholder_set = PlaceholderRelation()
+
+    class Meta:
+        abstract = True
 
 
 # MODELS ######################################################################
