@@ -16,8 +16,8 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, JsonResponse
 from django.template.response import TemplateResponse
 from django.views.decorators.csrf import csrf_exempt
-from polymorphic.admin import \
-    PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
+from icekit.admin import ChildModelPluginPolymorphicParentModelAdmin
+from polymorphic.admin import PolymorphicChildModelAdmin
 from timezone import timezone
 
 from eventkit import admin_forms, appsettings, forms, models, plugins
@@ -40,11 +40,14 @@ class EventChildAdmin(PolymorphicChildModelAdmin):
         obj.save(propagate=form.cleaned_data['propagate'])
 
 
-class EventAdmin(PolymorphicParentModelAdmin):
+class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
     base_model = models.Event
     list_filter = ('all_day', 'starts', 'ends', 'is_repeat')
     list_display = ('__str__', 'all_day', 'starts', 'ends', 'is_repeat')
     search_fields = ('title', )
+
+    child_model_plugin_class = plugins.EventPlugin
+    child_model_admin = EventChildAdmin
 
     def get_urls(self):
         """
@@ -109,18 +112,6 @@ class EventAdmin(PolymorphicParentModelAdmin):
             })
         data = json.dumps(data, cls=DjangoJSONEncoder)
         return HttpResponse(content=data, content_type='applicaton/json')
-
-    def get_child_models(self):
-        """
-        Get child models from registered ``EventPlugin`` subclasses. Fallback
-        to the parent ``Event`` model if no plugins are registered.
-        """
-        child_models = []
-        for plugin in plugins.EventPlugin.plugins:
-            child_models.append((plugin.model, plugin.model_admin))
-        if not child_models:
-            child_models.append((models.Event, EventChildAdmin))
-        return child_models
 
 admin.site.register(models.Event, EventAdmin)
 
