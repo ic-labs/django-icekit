@@ -5,11 +5,9 @@ Admin forms for ``eventkit`` app.
 from django import forms
 
 from eventkit import models
-from eventkit.forms import RecurrenceRuleField
 
 
 class BaseEventForm(forms.ModelForm):
-    recurrence_rule = RecurrenceRuleField()
     propagate = forms.BooleanField(
         help_text='Propagate changes to all future repeat events?',
         required=False,
