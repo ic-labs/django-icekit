@@ -23,5 +23,3 @@ class FluentEventAdmin(EventChildAdmin, PlaceholderEditorAdmin):
         else:
             template = obj.layout.template_name
         return get_template_placeholder_data(get_template(template))
-
-admin.site.register(FluentEvent, FluentEventAdmin)
