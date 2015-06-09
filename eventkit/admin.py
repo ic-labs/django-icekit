@@ -24,6 +24,9 @@ from eventkit import admin_forms, appsettings, forms, models, plugins
 
 
 class EventChildAdmin(PolymorphicChildModelAdmin):
+    """
+    Abstract admin class for polymorphic child event models.
+    """
     base_form = admin_forms.BaseEventForm
     base_model = models.Event
     formfield_overrides = {
