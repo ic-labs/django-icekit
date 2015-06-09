@@ -8,17 +8,20 @@ from eventkit.plugins.fluentevent.models import FluentEvent
 
 
 class FluentEventAdmin(EventChildAdmin, PlaceholderEditorAdmin):
+    change_form_template = 'icekit/admin/fluent_layouts_change_form.html'
     model = FluentEvent
+
+    class Media:
+        js = ('icekit/admin/js/fluent_layouts.js', )
 
     def get_placeholder_data(self, request, obj):
         """
-        Get placeholder data from event template.
+        Get placeholder data from layout.
         """
         if not obj:
-            template = get_template(
-                self.model._meta.get_field('layout').default)
+            template = 'eventkit_fluentevent/layouts/default.html'
         else:
-            template = get_template(obj.layout)
-        return get_template_placeholder_data(template)
+            template = obj.layout.template_name
+        return get_template_placeholder_data(get_template(template))
 
 admin.site.register(FluentEvent, FluentEventAdmin)

@@ -2,12 +2,12 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import icekit.models
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('icekit', '0002_layout'),
         ('eventkit_fluentevent', '0001_initial'),
     ]
 
@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='fluentevent',
             name='layout',
-            field=icekit.models.LayoutField(default=b'eventkit_fluentevent/layouts/default.html', max_length=255, choices=[(b'', b'')]),
+            field=models.ForeignKey(blank=True, to='icekit.Layout', null=True),
             preserve_default=True,
         ),
     ]
