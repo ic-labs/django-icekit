@@ -1,3 +1,7 @@
+"""
+Admin configuration for ``eventkit_fluentevent`` app.
+"""
+
 from icekit.admin import FluentLayoutsMixin
 
 from eventkit.admin import EventChildAdmin
