@@ -8,9 +8,38 @@ Admin configuration for ``icekit`` app.
 from django.conf.urls import url, patterns
 from django.contrib import admin
 from django.http import JsonResponse
+from django.template.loader import get_template, select_template
+from fluent_contents.admin import PlaceholderEditorAdmin
 from fluent_contents.analyzer import get_template_placeholder_data
 
 from icekit import models
+
+
+class FluentLayoutsMixin(PlaceholderEditorAdmin):
+    """
+    Mixin class for models that have a ``layout`` field and fluent content.
+    """
+
+    change_form_template = 'icekit/admin/fluent_layouts_change_form.html'
+
+    class Media:
+        js = ('icekit/admin/js/fluent_layouts.js', )
+
+    def get_placeholder_data(self, request, obj):
+        """
+        Get placeholder data from layout.
+        """
+        if not obj:
+            meta = self.model._meta
+            template = select_template([
+                '{}/{}/layouts/default.html'.format(
+                    meta.app_label, meta.model_name),
+                '{}/layouts/default.html'.format(meta.app_label),
+                'icekit/layouts/default.html',
+            ])
+        else:
+            template = get_template(obj.layout.template_name)
+        return get_template_placeholder_data(template)
 
 
 class LayoutAdmin(admin.ModelAdmin):
