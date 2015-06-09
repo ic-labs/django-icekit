@@ -29,7 +29,6 @@ setuptools.setup(
             'django-nose',
             'django-webtest',
             'nose-progressive',
-            'tox',
             'WebTest',
         ],
     },

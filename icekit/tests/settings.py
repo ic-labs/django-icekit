@@ -6,7 +6,7 @@ import os
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',
+        'NAME': ':memory:',
     }
 }
 
@@ -21,11 +21,9 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'django_brightcove',
     'django_nose',
     'icekit',
     'icekit.tests',
-    'icekit.plugins.brightcove',
     'icekit.plugins.image',
     'fluent_contents',
     'fluent_pages',
@@ -47,17 +45,3 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 FLUENT_PAGES_TEMPLATE_DIR = os.path.join(
     BASE_DIR, 'icekit', 'templates',
 )
-
-
-# BRIGHTCOVE ##################################################################
-BRIGHTCOVE_TOKEN = ''
-BRIGHTCOVE_PLAYER = {
-    'default': {
-        'PLAYERID': 'a_default_player_id',
-        'PLAYERKEY': 'a_default_player_key',
-    },
-    'single': {
-        'PLAYERID': 'another_player_id',
-        'PLAYERKEY': 'another_player_key',
-    },
-}
