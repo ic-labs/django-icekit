@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='fluentevent',
             name='layout',
-            field=models.ForeignKey(blank=True, to='icekit.Layout', null=True),
+            field=models.ForeignKey(related_name='eventkit_fluentevent_fluentevent_related', blank=True, to='icekit.Layout', null=True),
             preserve_default=True,
         ),
     ]
