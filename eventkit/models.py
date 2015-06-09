@@ -401,10 +401,3 @@ class Event(AbstractEvent):
     """
 
     tracker = FieldTracker(AbstractEvent.MONITOR_FIELDS)
-
-    def save(self, *args, **kwargs):
-        # Avoid `AttributeError: 'NoneType' object has no attribute 'tree_id'`
-        # by delaying MPTT updates. Not sure what is causing it.
-        with transaction.atomic():
-            with Event._tree_manager.delay_mptt_updates():
-                super(Event, self).save(*args, **kwargs)
