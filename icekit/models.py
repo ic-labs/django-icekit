@@ -56,7 +56,12 @@ class FluentFieldsMixin(models.Model):
     Add ``layout``, ``contentitem_set`` and ``placeholder_set`` fields so we
     can add modular content with ``django-fluent-contents``.
     """
-    layout = models.ForeignKey('icekit.Layout', blank=True, null=True, related_name='+')
+    layout = models.ForeignKey(
+        'icekit.Layout',
+        blank=True,
+        null=True,
+        related_name='%(app_label)s_%(class)s_related',
+    )
 
     contentitem_set = ContentItemRelation()
     placeholder_set = PlaceholderRelation()
