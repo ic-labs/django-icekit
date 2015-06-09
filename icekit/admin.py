@@ -30,7 +30,7 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin):
         """
         Get placeholder data from layout.
         """
-        if not obj:
+        if not obj or not obj.layout:
             meta = self.model._meta
             template = select_template([
                 '{}/{}/layouts/default.html'.format(
