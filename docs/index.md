@@ -17,6 +17,11 @@ Update your settings module:
 
     INSTALLED_APPS += ('eventkit', )
 
+Install Bower dependencies manually:
+
+    (venv)$ cd venv/src/django-eventkit/eventkit/static/eventkit
+    (venv)$ bower install
+
 ## Usage
 
 TODO
