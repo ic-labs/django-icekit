@@ -249,6 +249,13 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             recurrence_rule, dtstart=self.starts, forceset=True)
         return rruleset
 
+    def is_original(self):
+        """
+        Return ``True`` if this is an original (root) event.
+        """
+        return bool(not self.parent)
+    is_original.boolean = True
+
     def is_variation(self):
         """
         Return ``True`` if this is a variation event.

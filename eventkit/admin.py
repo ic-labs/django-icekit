@@ -18,7 +18,8 @@ from django.http import HttpResponse, JsonResponse
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
-from icekit.admin import ChildModelPluginPolymorphicParentModelAdmin
+from icekit.admin import (
+    ChildModelFilter, ChildModelPluginPolymorphicParentModelAdmin)
 from polymorphic.admin import PolymorphicChildModelAdmin
 from timezone import timezone
 
@@ -40,6 +41,31 @@ class EventChildAdmin(PolymorphicChildModelAdmin):
         Propagate changes if requested.
         """
         obj.save(propagate=form.cleaned_data['propagate'])
+
+
+class EventTypeFilter(ChildModelFilter):
+    child_model_plugin_class = plugins.EventChildModelPlugin
+
+
+class OriginalFilter(admin.SimpleListFilter):
+    title = _('is original')
+    parameter_name = 'is_original'
+
+    YES = '1'
+    NO = '0'
+
+    def lookups(self, request, model_admin):
+        lookups = (
+            (self.YES, _('Yes')),
+            (self.NO, _('No')),
+        )
+        return lookups
+
+    def queryset(self, request, queryset):
+        if self.value() == self.YES:
+            return queryset.filter(parent=None)
+        elif self.value() == self.NO:
+            return queryset.exclude(parent=None)
 
 
 class VariationFilter(admin.SimpleListFilter):
@@ -65,9 +91,12 @@ class VariationFilter(admin.SimpleListFilter):
 
 class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
     base_model = models.Event
-    list_filter = ('all_day', 'starts', 'ends', VariationFilter, 'is_repeat')
+    list_filter = (
+        'all_day', 'starts', 'ends', EventTypeFilter, OriginalFilter,
+        VariationFilter, 'is_repeat')
     list_display = (
-        '__str__', 'all_day', 'starts', 'ends', 'is_variation', 'is_repeat')
+        '__str__', 'all_day', 'starts', 'ends', 'is_original', 'is_variation',
+        'is_repeat')
     search_fields = ('title', )
 
     child_model_plugin_class = plugins.EventChildModelPlugin
