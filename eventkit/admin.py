@@ -93,10 +93,10 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
     base_model = models.Event
     list_filter = (
         'all_day', 'starts', 'ends', EventTypeFilter, OriginalFilter,
-        VariationFilter, 'is_repeat')
+        VariationFilter, 'is_repeat', 'modified')
     list_display = (
         '__str__', 'all_day', 'starts', 'ends', 'is_original', 'is_variation',
-        'is_repeat')
+        'is_repeat', 'modified')
     search_fields = ('title', )
 
     child_model_plugin_class = plugins.EventChildModelPlugin
