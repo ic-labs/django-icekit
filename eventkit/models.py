@@ -249,6 +249,13 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             recurrence_rule, dtstart=self.starts, forceset=True)
         return rruleset
 
+    def is_variation(self):
+        """
+        Return ``True`` if this is a variation event.
+        """
+        return bool(self.parent and not self.is_repeat)
+    is_variation.boolean = True
+
     @property
     def missing_repeat_events(self):
         """

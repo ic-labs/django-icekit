@@ -13,8 +13,10 @@ import six
 from django.contrib import admin
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.template.response import TemplateResponse
+from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from icekit.admin import ChildModelPluginPolymorphicParentModelAdmin
 from polymorphic.admin import PolymorphicChildModelAdmin
@@ -40,10 +42,32 @@ class EventChildAdmin(PolymorphicChildModelAdmin):
         obj.save(propagate=form.cleaned_data['propagate'])
 
 
+class VariationFilter(admin.SimpleListFilter):
+    title = _('is variation')
+    parameter_name = 'is_variation'
+
+    YES = '1'
+    NO = '0'
+
+    def lookups(self, request, model_admin):
+        lookups = (
+            (self.YES, _('Yes')),
+            (self.NO, _('No')),
+        )
+        return lookups
+
+    def queryset(self, request, queryset):
+        if self.value() == self.YES:
+            return queryset.exclude(parent=None).exclude(is_repeat=True)
+        elif self.value() == self.NO:
+            return queryset.filter(Q(parent=None) | Q(is_repeat=True))
+
+
 class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
     base_model = models.Event
-    list_filter = ('all_day', 'starts', 'ends', 'is_repeat')
-    list_display = ('__str__', 'all_day', 'starts', 'ends', 'is_repeat')
+    list_filter = ('all_day', 'starts', 'ends', VariationFilter, 'is_repeat')
+    list_display = (
+        '__str__', 'all_day', 'starts', 'ends', 'is_variation', 'is_repeat')
     search_fields = ('title', )
 
     child_model_plugin_class = plugins.EventChildModelPlugin
