@@ -46,7 +46,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
     list_display = ('__str__', 'all_day', 'starts', 'ends', 'is_repeat')
     search_fields = ('title', )
 
-    child_model_plugin_class = plugins.EventPlugin
+    child_model_plugin_class = plugins.EventChildModelPlugin
     child_model_admin = EventChildAdmin
 
     def get_urls(self):
