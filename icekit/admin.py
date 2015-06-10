@@ -29,7 +29,7 @@ class ChildModelFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         lookups = [
-            (p.content_type.pk, p.verbose_name)
+            (p.content_type.pk, p.verbose_name.capitalize())
             for p in self.child_model_plugin_class.get_plugins()
         ]
         return lookups
