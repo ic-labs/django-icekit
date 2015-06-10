@@ -15,6 +15,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
+from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
@@ -134,32 +135,47 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
         events = self.get_queryset(request) \
             .filter(starts__gte=starts, starts__lt=ends) \
             .values_list(
-                'id', 'parent', 'title', 'all_day', 'starts', 'ends',
-                'is_repeat')
+                'pk', 'title', 'all_day', 'starts', 'ends', 'is_repeat',
+                'tree_id', 'parent', 'polymorphic_ctype')
         data = []
-        # Get the primary keys for all root and variation events into a list,
-        # so we can assign them and their repeat events a consistent colour.
-        seen = list(
-            models.Event.objects
-            .filter(is_repeat=False)
-            .values_list('pk', flat=True)
-            .order_by('pk'))
-        for pk, parent, title, all_day, starts, ends, is_repeat in events:
-            id_ = parent if is_repeat else pk
-            if id_ not in seen:
-                seen.append(id_)
-            # Get color based on seen index for parent event, so its repeat
-            # events have the same color. Start repeating colors when they have
-            # all been used.
+        # Get a dict mapping the primary keys for content types to plugins, so
+        # we can get the verbose name of the plugin and a consistent colour for
+        # each event.
+        plugins_for_ctype = {
+            plugin.content_type.pk: plugin
+            for plugin in plugins.EventChildModelPlugin.get_plugins()
+        }
+        # Get the keys into a sorted list, so we can assign a consistent colour
+        # based on the index each event's content type is seen in the list.
+        seen = sorted(plugins_for_ctype.keys())
+        for (pk, title, all_day, starts, ends, is_repeat, tree_id, parent,
+             polymorphic_ctype) in events:
+            # Get color based on seen index for content type. Start repeating
+            # colors when they have all been used.
             background, color = appsettings.CALENDAR_COLORS[
-                seen.index(id_) % len(appsettings.CALENDAR_COLORS)]
+                seen.index(polymorphic_ctype) %
+                len(appsettings.CALENDAR_COLORS)]
+            # Slugify the plugin's verbose name for use as a class name.
+            classes = [slugify(
+                plugins_for_ctype[polymorphic_ctype].verbose_name)]
+            # Add a class name for the type of event.
+            if is_repeat:
+                classes.append('is-repeat')
+            elif not parent:
+                classes.append('is-original')
+            else:
+                classes.append('is-variation')
+            # Prefix class names with "fcc-" (full calander class).
+            classes = ['fcc-%s' % class_ for class_ in classes]
             data.append({
-                'id': id_,
+                'id': tree_id,
                 'title': title,
                 'allDay': all_day,
                 'start': timezone.localize(starts),
                 'end': timezone.localize(ends),
-                'url': reverse('admin:eventkit_event_change', args=[pk]),
+                'url': reverse(
+                    'admin:eventkit_event_change', args=[pk]),
+                'className': classes,
                 'color': background,
                 'textColor': color,
             })

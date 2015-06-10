@@ -5,16 +5,16 @@ from django.conf import settings
 EVENTKIT = getattr(settings, 'EVENTKIT', {})
 
 # Background and text colors for calendar view. Defaults are based on the
-# Base16 color scheme. See: https://github.com/chriskempson/base16
+# Base16 `ashes` color scheme. See: https://github.com/chriskempson/base16
 CALENDAR_COLORS = EVENTKIT.get('CALENDAR_COLOURS', [
-    ('#ab4642', '#f8f8f8'),
-    ('#dc9656', '#f8f8f8'),
-    ('#f7ca88', '#f8f8f8'),
-    ('#a1b56c', '#f8f8f8'),
-    ('#86c1b9', '#f8f8f8'),
-    ('#7cafc2', '#f8f8f8'),
-    ('#ba8baf', '#f8f8f8'),
-    ('#a16946', '#f8f8f8'),
+    ('#aec795', '#f3f4f5'),
+    ('#95c7ae', '#f3f4f5'),
+    ('#95aec7', '#f3f4f5'),
+    ('#ae95c7', '#f3f4f5'),
+    ('#c795ae', '#f3f4f5'),
+    ('#c79595', '#f3f4f5'),
+    ('#c7ae95', '#f3f4f5'),
+    ('#c7c795', '#f3f4f5'),
 ])
 
 # New events will have a default `starts` value that is rounded up to a time
