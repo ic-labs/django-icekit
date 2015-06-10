@@ -7,13 +7,41 @@ Admin configuration for ``icekit`` app.
 
 from django.conf.urls import url, patterns
 from django.contrib import admin
+from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
 from django.template.loader import get_template, select_template
+from django.utils.translation import ugettext_lazy as _
 from fluent_contents.admin import PlaceholderEditorAdmin
 from fluent_contents.analyzer import get_template_placeholder_data
 from polymorphic.admin import PolymorphicParentModelAdmin
 
 from icekit import models
+
+
+# FILTERS #####################################################################
+
+
+class ChildModelFilter(admin.SimpleListFilter):
+    title = _('type')
+    parameter_name = 'type'
+
+    child_model_plugin_class = None
+
+    def lookups(self, request, model_admin):
+        lookups = [
+            (p.content_type.pk, p.verbose_name)
+            for p in self.child_model_plugin_class.get_plugins()
+        ]
+        return lookups
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value:
+            content_type = ContentType.objects.get_for_id(value)
+            return queryset.filter(polymorphic_ctype=content_type)
+
+
+# MIXINS ######################################################################
 
 
 class FluentLayoutsMixin(PlaceholderEditorAdmin):
@@ -80,6 +108,9 @@ class ChildModelPluginPolymorphicParentModelAdmin(PolymorphicParentModelAdmin):
         }
         choices = [(ctype, labels[ctype]) for ctype, _ in choices]
         return sorted(choices, lambda a, b: cmp(a[1], b[1]))
+
+
+# MODELS ######################################################################
 
 
 class LayoutAdmin(admin.ModelAdmin):
