@@ -131,6 +131,7 @@ class Layout(AbstractBaseModel):
     )
     content_types = models.ManyToManyField(
         ContentType,
+        help_text='Types of content for which this layout will be allowed.',
     )
 
     objects = PassThroughManager.for_queryset_class(LayoutQuerySet)()
