@@ -149,6 +149,7 @@ class Layout(AbstractBaseModel):
         return get_template(self.template_name)
 
 
+@encoding.python_2_unicode_compatible
 class MediaCategory(AbstractBaseModel):
     """
     A categorisation model for Media assets.
