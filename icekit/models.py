@@ -126,6 +126,7 @@ class Layout(AbstractBaseModel):
         help_text=_('A short name to identify the layout programmatically.'),
     )
     template_name = TemplateNameField(
+        _('template'),
         plugin_class=plugins.TemplateNameFieldChoicesPlugin,
     )
     content_types = models.ManyToManyField(
