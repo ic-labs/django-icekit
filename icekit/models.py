@@ -120,11 +120,11 @@ class Layout(AbstractBaseModel):
     plugins to get template name choices instead of scanning a directory given
     in settings.
     """
+    title = models.CharField(_('title'), max_length=255)
     key = models.SlugField(
         _('key'),
         help_text=_('A short name to identify the layout programmatically.'),
     )
-    title = models.CharField(_('title'), max_length=255)
     template_name = TemplateNameField(
         plugin_class=plugins.TemplateNameFieldChoicesPlugin,
     )
