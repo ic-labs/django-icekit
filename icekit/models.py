@@ -5,7 +5,9 @@ Models for ``icekit`` app.
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
 
 import six
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models.query import QuerySet
 from django.template.loader import get_template
 from django.utils import encoding, timezone
 from django.utils.translation import ugettext_lazy as _
@@ -63,11 +65,26 @@ class FluentFieldsMixin(models.Model):
         related_name='%(app_label)s_%(class)s_related',
     )
 
-    contentitem_set = ContentItemRelation()
-    placeholder_set = PlaceholderRelation()
+    # TODO: Already present in FluentContentsPage. Make separate mixin?
+    # contentitem_set = ContentItemRelation()
+    # placeholder_set = PlaceholderRelation()
 
     class Meta:
         abstract = True
+
+
+# MANAGERS ####################################################################
+
+class TemplateQuerySet(QuerySet):
+    def available_for_model(self, instance):
+        return self.filter(
+            content_types=ContentType.objects.get_for_model(instance),
+        )
+
+
+class TemplateManager(models.Manager):
+    def get_queryset(self):
+        return TemplateQuerySet(self.model, using=self._db)
 
 
 # MODELS ######################################################################
@@ -113,6 +130,11 @@ class Layout(AbstractBaseModel):
         path=FLUENT_PAGES_TEMPLATE_DIR,
         validators=[validators.template_name],
     )
+    content_types = models.ManyToManyField(
+        ContentType,
+    )
+
+    objects = TemplateManager()
 
     class Meta:
         ordering = ('title',)

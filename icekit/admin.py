@@ -70,6 +70,16 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin):
             template = get_template(obj.layout.template_name)
         return get_template_placeholder_data(template)
 
+    def get_form(self, *args, **kwargs):
+        class Form(super(FluentLayoutsMixin, self).get_form(*args, **kwargs)):
+            def __init__(self, *args, **kwargs):
+                super(Form, self).__init__(*args, **kwargs)
+                self.fields['layout'].queryset = self.fields['layout'].queryset.available_for_model(
+                    self.Meta.model
+                )
+
+        return Form
+
 
 class ChildModelPluginPolymorphicParentModelAdmin(PolymorphicParentModelAdmin):
     """
@@ -156,10 +166,27 @@ class LayoutAdmin(admin.ModelAdmin):
         )
         return my_urls + urls
 
-admin.site.register(models.Layout, LayoutAdmin)
+    def get_form(self, *args, **kwargs):
+        ctypes = []
+        for related_object in self.model._meta.get_all_related_objects():
+            model = getattr(related_object, 'related_model', related_object.model)
+            ctypes.append(ContentType.objects.get_for_model(model).pk)
+
+        class Form(super(LayoutAdmin, self).get_form(*args, **kwargs)):
+            def __init__(self, *args, **kwargs):
+                super(Form, self).__init__(*args, **kwargs)
+                self.fields['content_types'].queryset = self.fields[
+                    'content_types'].queryset.filter(
+                    pk__in=ctypes,
+                )
+
+        return Form
 
 
 class MediaCategoryAdmin(admin.ModelAdmin):
     pass
 
+
+admin.site.register(ContentType)
+admin.site.register(models.Layout, LayoutAdmin)
 admin.site.register(models.MediaCategory, MediaCategoryAdmin)
