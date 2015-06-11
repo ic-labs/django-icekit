@@ -12,8 +12,6 @@ from django.template.loader import get_template
 from django.utils import encoding, timezone
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItemRelation, PlaceholderRelation
-from fluent_pages.appsettings import FLUENT_PAGES_TEMPLATE_DIR
-from fluent_pages.models.fields import TemplateFilePathField
 
 from icekit import plugins, validators
 
@@ -21,33 +19,34 @@ from icekit import plugins, validators
 # FIELDS ######################################################################
 
 
-class LayoutField(
+class TemplateNameField(
         six.with_metaclass(models.SubfieldBase, models.CharField)):
     """
-    A Django template name that can provide layout and placeholder data to
-    models that use `django-fluent-contents`. In forms, a ``ChoiceField`` is
-    used, with choices provided by ``LayoutFieldChoicesPlugin`` subclasses.
+    A validated template name. If a ``plugin_class`` is given, which should be
+    a ``TemplateNameFieldChoicesPlugin`` subclass, choices will be provided by
+    any registered plugins.
     """
 
     default_validators = [validators.template_name]
-    description = _('Name of a template providing layout and placeholder data')
+    description = _('Template name')
 
     def __init__(self, *args, **kwargs):
-        self.plugin_class = kwargs.pop(
-            'plugin_class', plugins.LayoutFieldChoicesPlugin)
-        # Force the admin to recognise that this field has choices, even though
-        # we don't know what they are until runtime.
-        kwargs.setdefault('choices', [('', '')])
+        self.plugin_class = kwargs.pop('plugin_class', None)
+        if self.plugin_class:
+            # Force the admin to recognise that this field has choices, even
+            # though we don't know what they are until runtime.
+            kwargs.setdefault('choices', [('', '')])
         # Use the max `max_length` by default. Template names can be long.
         kwargs.setdefault('max_length', 255)
-        super(LayoutField, self).__init__(*args, **kwargs)
+        super(TemplateNameField, self).__init__(*args, **kwargs)
 
     def formfield(self, **kwargs):
         """
-        Get choices from plugins.
+        Get choices from plugins, if necessary.
         """
-        self._choices = self.plugin_class.get_plugin_choices(field=self)
-        return super(LayoutField, self).formfield(**kwargs)
+        if self.plugin_class:
+            self._choices = self.plugin_class.get_all_choices(field=self)
+        return super(TemplateNameField, self).formfield(**kwargs)
 
 
 # MIXINS ######################################################################
@@ -125,10 +124,8 @@ class Layout(AbstractBaseModel):
         help_text=_('A short name to identify the layout programmatically.'),
     )
     title = models.CharField(_('title'), max_length=255)
-    template_name = TemplateFilePathField(
-        'template file',
-        path=FLUENT_PAGES_TEMPLATE_DIR,
-        validators=[validators.template_name],
+    template_name = TemplateNameField(
+        plugin_class=plugins.TemplateNameFieldChoicesPlugin,
     )
     content_types = models.ManyToManyField(
         ContentType,
