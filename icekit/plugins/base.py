@@ -8,13 +8,13 @@ from icekit import validators
 
 # METACLASSES #################################################################
 
-# When these are used as a metaclass for a plugin mount point, each plugin
-# subclass will register itself the mount point. Attributes and methods defined
-# on a these metaclasses will become class methods on plugin mount points.
+# When used as a metaclass for a mount point, each plugin subclass will
+# register itself with the mount point. Attributes and methods defined on a
+# metaclass will become class methods on each mount point subclass.
 
 # To iterate plugin classes, access the `plugins` attribute on the mount point.
 # To iterate plugin instances, call the `get_plugins()` method on the mount
-# point. Any arguments will be passed through to each plugin subclass.
+# point. Any arguments will be passed through to each plugin.
 
 
 class PluginMount(type):
@@ -52,11 +52,11 @@ class TemplateNameFieldChoicesPluginMount(PluginMount):
     def get_all_choices(cls, *args, **kwargs):
         """
         Validate (template), de-duplicate (by template), sort (by label) and
-        return a list of `(template, label)` choices for all plugins.
+        return a list of ``(template name, label)`` choices for all plugins.
         """
         plugins = cls.get_plugins(*args, **kwargs)
         all_choices = reduce(operator.add, [
-            plugin.get_choices() for plugin in plugins
+            plugin.choices for plugin in plugins
         ])
         choices = []
         seen = set()
@@ -78,8 +78,8 @@ class TemplateNameFieldChoicesPluginMount(PluginMount):
 
 # BASE PLUGIN MOUNT POINTS ####################################################
 
-# When these are used as base classes along with a plugin mount metaclass,
-# the resulting plugin mount will have these attributes and methods.
+# When used as base classes along with a plugin mount metaclass, the resulting
+# mount point inherit these attributes and methods.
 
 
 class BaseChildModelPlugin(object):
@@ -115,22 +115,14 @@ class BaseTemplateNameFieldChoicesPlugin(object):
 
     def __init__(self, field):
         """
-        Set ``field`` and ``templates`` attributes, with an empty list for
-        templates by default to make a return optional in the
-        ``get_templates()`` method of plugin classes.
+        Set ``field`` and ``choices`` attributes.
         """
         self.field = field
-        self.templates = self.get_templates() or []  # Make return optional.
+        self.choices = self.get_choices() or []  # Make return optional.
 
     def get_choices(self):
         """
-        Return a list of ``(value, label)`` choices for ``self.templates``,
-        with the template name as both the value and label.
+        Return a list of `(template name, label)` choices.
         """
-        return [(template, template) for template in self.templates]
-
-    def get_templates(self):
-        """
-        Return a list of template names.
-        """
-        raise NotImplemented
+        raise NotImplementedError(
+            '%r must implement a `get_choices()` method.' % self)
