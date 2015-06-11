@@ -71,13 +71,15 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin):
         return get_template_placeholder_data(template)
 
     def get_form(self, *args, **kwargs):
+        """
+        Limit layout field choices to available layouts for this model.
+        """
         class Form(super(FluentLayoutsMixin, self).get_form(*args, **kwargs)):
             def __init__(self, *args, **kwargs):
                 super(Form, self).__init__(*args, **kwargs)
-                self.fields['layout'].queryset = self.fields['layout'].queryset.available_for_model(
-                    self.Meta.model
-                )
-
+                self.fields['layout'].queryset = \
+                    self.fields['layout'].queryset.available_for_model(
+                        self.Meta.model)
         return Form
 
 
