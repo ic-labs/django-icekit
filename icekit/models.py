@@ -11,7 +11,7 @@ from django.db.models.query import QuerySet
 from django.template.loader import get_template
 from django.utils import encoding, timezone
 from django.utils.translation import ugettext_lazy as _
-from fluent_contents.models import ContentItemRelation, PlaceholderRelation
+# from fluent_contents.models import ContentItemRelation, PlaceholderRelation
 from model_utils.managers import PassThroughManager
 
 from icekit import plugins, validators
