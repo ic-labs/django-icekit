@@ -12,6 +12,7 @@ from django.template.loader import get_template
 from django.utils import encoding, timezone
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItemRelation, PlaceholderRelation
+from model_utils.managers import PassThroughManager
 
 from icekit import plugins, validators
 
@@ -72,18 +73,18 @@ class FluentFieldsMixin(models.Model):
         abstract = True
 
 
-# MANAGERS ####################################################################
-
-class TemplateQuerySet(QuerySet):
-    def available_for_model(self, instance):
-        return self.filter(
-            content_types=ContentType.objects.get_for_model(instance),
-        )
+# QUERYSETS ###################################################################
 
 
-class TemplateManager(models.Manager):
-    def get_queryset(self):
-        return TemplateQuerySet(self.model, using=self._db)
+class LayoutQuerySet(QuerySet):
+
+    def for_model(self, model):
+        """
+        Return layouts that are allowed for the given model.
+        """
+        queryset = self.filter(
+            content_types=ContentType.objects.get_for_model(model))
+        return queryset
 
 
 # MODELS ######################################################################
@@ -131,7 +132,7 @@ class Layout(AbstractBaseModel):
         ContentType,
     )
 
-    objects = TemplateManager()
+    objects = PassThroughManager.for_queryset_class(LayoutQuerySet)()
 
     class Meta:
         ordering = ('title',)

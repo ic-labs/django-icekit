@@ -78,8 +78,7 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin):
             def __init__(self, *args, **kwargs):
                 super(Form, self).__init__(*args, **kwargs)
                 self.fields['layout'].queryset = \
-                    self.fields['layout'].queryset.available_for_model(
-                        self.Meta.model)
+                    self.fields['layout'].queryset.for_model(self.Meta.model)
         return Form
 
 

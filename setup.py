@@ -10,6 +10,7 @@ setuptools.setup(
         'django-bootstrap3',
         'django-fluent-contents',
         'django-fluent-pages',
+        'django-model-utils',
         'Pillow',
     ],
     extras_require={
