@@ -74,12 +74,10 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin):
         """
         Limit layout field choices to available layouts for this model.
         """
-        class Form(super(FluentLayoutsMixin, self).get_form(*args, **kwargs)):
-            def __init__(self, *args, **kwargs):
-                super(Form, self).__init__(*args, **kwargs)
-                self.fields['layout'].queryset = \
-                    self.fields['layout'].queryset.for_model(self.Meta.model)
-        return Form
+        form_class = super(FluentLayoutsMixin, self).get_form(*args, **kwargs)
+        form_class.base_fields['layout'].queryset = \
+            form_class.base_fields['layout'].queryset.for_model(self.model)
+        return form_class
 
 
 class ChildModelPluginPolymorphicParentModelAdmin(PolymorphicParentModelAdmin):
