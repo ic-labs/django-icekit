@@ -187,6 +187,5 @@ class MediaCategoryAdmin(admin.ModelAdmin):
     pass
 
 
-admin.site.register(ContentType)
 admin.site.register(models.Layout, LayoutAdmin)
 admin.site.register(models.MediaCategory, MediaCategoryAdmin)
