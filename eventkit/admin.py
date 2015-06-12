@@ -125,8 +125,11 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
         to be loaded in an iframe.
         """
         if not request.is_ajax():
+            context = {
+                'is_popup': bool(int(request.GET.get('_popup', 0))),
+            }
             return TemplateResponse(
-                request, 'admin/eventkit/event/calendar.html')
+                request, 'admin/eventkit/event/calendar.html', context)
         tz = timezone.get(request.GET.get('timezone'))
         starts = timezone.localize(
             datetime.datetime.strptime(request.GET['start'], '%Y-%m-%d'), tz)

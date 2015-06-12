@@ -29,6 +29,12 @@
 	(function($) {
 		$(document).ready(function() {
 			$('#calendar').fullCalendar({
+				{% if is_popup %}
+					eventClick: function(calEvent, jsEvent, view) {
+						parent.opener.dismissRelatedLookupPopup(parent, calEvent.id);
+						return false;
+					},
+				{% endif %}
 				events: '{% url "admin:eventkit_event_calendar" %}',
 				header: {
 					left: 'prevYear,prev,next,nextYear today',
