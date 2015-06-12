@@ -55,6 +55,16 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin):
     class Media:
         js = ('icekit/admin/js/fluent_layouts.js', )
 
+    def formfield_for_foreignkey(self, db_field, *args, **kwargs):
+        """
+        Update queryset for ``layout`` field.
+        """
+        formfield = super(FluentLayoutsMixin, self).formfield_for_foreignkey(
+            db_field, *args, **kwargs)
+        if db_field.name == 'layout':
+            formfield.queryset = formfield.queryset.for_model(self.model)
+        return formfield
+
     def get_placeholder_data(self, request, obj):
         """
         Get placeholder data from layout.
@@ -65,15 +75,6 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin):
             template = get_template(obj.layout.template_name)
             data = get_template_placeholder_data(template)
         return data
-
-    def get_form(self, *args, **kwargs):
-        """
-        Limit layout field choices to available layouts for this model.
-        """
-        form_class = super(FluentLayoutsMixin, self).get_form(*args, **kwargs)
-        form_class.base_fields['layout'].queryset = \
-            form_class.base_fields['layout'].queryset.for_model(self.model)
-        return form_class
 
 
 class ChildModelPluginPolymorphicParentModelAdmin(PolymorphicParentModelAdmin):
