@@ -121,10 +121,6 @@ class Layout(AbstractBaseModel):
     in settings.
     """
     title = models.CharField(_('title'), max_length=255)
-    key = models.SlugField(
-        _('key'),
-        help_text=_('A short name to identify the layout programmatically.'),
-    )
     template_name = TemplateNameField(
         _('template'),
         plugin_class=plugins.TemplateNameFieldChoicesPlugin,

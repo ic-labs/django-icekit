@@ -126,7 +126,6 @@ class ChildModelPluginPolymorphicParentModelAdmin(PolymorphicParentModelAdmin):
 
 class LayoutAdmin(admin.ModelAdmin):
     model = models.Layout
-    prepopulated_fields = {'key': ('title',)}
 
     def placeholder_data_view(self, request, id):
         """
@@ -145,7 +144,6 @@ class LayoutAdmin(admin.ModelAdmin):
             status = 200
             json = {
                 'id': layout.id,
-                'key': layout.key,
                 'title': layout.title,
                 'placeholders': [p.as_dict() for p in placeholders],
             }
