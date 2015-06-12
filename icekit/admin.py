@@ -13,6 +13,7 @@ from django.template.loader import get_template, select_template
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.admin import PlaceholderEditorAdmin
 from fluent_contents.analyzer import get_template_placeholder_data
+from fluent_contents.models import PlaceholderData
 from polymorphic.admin import PolymorphicParentModelAdmin
 
 from icekit import models
@@ -59,16 +60,11 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin):
         Get placeholder data from layout.
         """
         if not obj or not obj.layout:
-            meta = self.model._meta
-            template = select_template([
-                '{}/{}/layouts/default.html'.format(
-                    meta.app_label, meta.model_name),
-                '{}/layouts/default.html'.format(meta.app_label),
-                'icekit/layouts/default.html',
-            ])
+            data = [PlaceholderData(slot='main', role='m', title='Main')]
         else:
             template = get_template(obj.layout.template_name)
-        return get_template_placeholder_data(template)
+            data = get_template_placeholder_data(template)
+        return data
 
     def get_form(self, *args, **kwargs):
         """
