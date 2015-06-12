@@ -9,7 +9,7 @@ from django.conf.urls import url, patterns
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
-from django.template.loader import get_template, select_template
+from django.template.loader import get_template
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.admin import PlaceholderEditorAdmin
 from fluent_contents.analyzer import get_template_placeholder_data
