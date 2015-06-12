@@ -169,7 +169,8 @@ class LayoutAdmin(admin.ModelAdmin):
     def get_form(self, *args, **kwargs):
         ctypes = []
         for related_object in self.model._meta.get_all_related_objects():
-            model = getattr(related_object, 'related_model', related_object.model)
+            model = getattr(
+                related_object, 'related_model', related_object.model)
             ctypes.append(ContentType.objects.get_for_model(model).pk)
 
         class Form(super(LayoutAdmin, self).get_form(*args, **kwargs)):
