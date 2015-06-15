@@ -25,6 +25,7 @@ INSTALLED_APPS = (
     'icekit',
     'icekit.tests',
     'icekit.plugins.image',
+    'icekit.plugins.slideshow',
     'fluent_contents',
     'fluent_pages',
     'bootstrap3',
