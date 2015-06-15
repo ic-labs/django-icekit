@@ -28,6 +28,7 @@
 	eventkit.jQuery = jQuery.noConflict(true);
 	(function($) {
 		$(document).ready(function() {
+			var eid;
 			$('#calendar').fullCalendar({
 				events: '{% url "admin:eventkit_event_calendar" %}',
 				header: {
@@ -39,6 +40,14 @@
 				viewRender: function(view, element) {
 					$('.fc-agendaWeek-button').text('week (by time)');
 					$('.fc-agendaDay-button').text('day (by time)');
+				},
+				eventMouseover: function(event, jsEvent, view) {
+					eid = event.id;
+					over();
+				},
+				eventMouseout: function(event, jsEvent, view) {
+				    clearTimeout(timeout);
+					$('.fc-event').css('opacity', '1');
 				}
 			}).on('click', 'a.fc-event', function(e) {
 				// Open links in the top frame.
@@ -47,6 +56,27 @@
 					top.location.href = $(e.currentTarget).attr('href');
 				}
 			});
+
+			var over = debounce(function() {
+				$('.fc-event:not(.fcc-'+eid+')').css('opacity', '0.30');
+			}, 550);
+
+			function debounce(func, wait, immediate) {
+
+				timeout = null;
+				return function() {
+					var context = this, args = arguments;
+					var later = function() {
+						timeout = null;
+						if (!immediate) func.apply(context, args);
+					};
+					var callNow = immediate && !timeout;
+					clearTimeout(timeout);
+					timeout = setTimeout(later, wait);
+					if (callNow) func.apply(context, args);
+				};
+			};
+
 		});
 	})(eventkit.jQuery);
 </script>
