@@ -1,4 +1,4 @@
-{% load fluent_contents_tags %}
+{% load fluent_contents_tags thumbnail %}
 
 {% if instance.slide_show.show_title %}
 	<h3>{{ instance.slide_show.title }}</h3>
@@ -20,7 +20,7 @@
 	<div class="carousel-inner" role="listbox">
 		{% for item in instance.slide_show.content.get_content_items %}
 			<div class="item{% if forloop.first %} active{% endif %}">
-				<img src="{{ item.image.image.url }}" alt="{{ item.image.alt_text }}">
+				<img src="{% thumbnail item.image.image 1200x0 upscale %}" alt="{{ item.image.alt_text }}">
 				{% if item.image.caption %}
 					<div class="carousel-caption">
 						{{ item.image.caption }}
