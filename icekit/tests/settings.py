@@ -23,6 +23,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django_nose',
     'icekit',
+    'icekit.response_pages',
     'icekit.tests',
     'icekit.plugins.image',
     'icekit.plugins.slideshow',

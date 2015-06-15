@@ -1,0 +1,14 @@
+{% extends 'icekit/404.html' %}
+
+{% load fluent_contents_tags %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block body %}
+	<div class="jumbotron">
+		<h1>{{ page.title }}</h1>
+		<div class="not-found">
+			{% render_placeholder page.content %}
+		</div>
+	</div>
+{% endblock %}
