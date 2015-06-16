@@ -349,8 +349,10 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             # avoid recreating variation events.
             if self.is_repeat:
                 # Combine earlier repeat and parent events.
-                siblings = self.get_siblings().filter(pk__lt=self.pk) | \
-                    type(self).objects.filter(pk=self.parent.pk)
+                siblings = type(self).objects.filter(
+                    models.Q(pk=self.parent.pk)
+                    | models.Q(parent__pk=self.parent_id, pk__lt=self.pk)
+                ).exclude(pk=self.pk)
                 # Update earlier repeat and parent events to the max `starts`
                 # value found.
                 end_repeat = siblings \
