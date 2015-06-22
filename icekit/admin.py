@@ -122,6 +122,19 @@ class ChildModelPluginPolymorphicParentModelAdmin(PolymorphicParentModelAdmin):
 class LayoutAdmin(admin.ModelAdmin):
     model = models.Layout
 
+    def _get_ctypes(self):
+        """
+        Returns all related objects for this model.
+        """
+        ctypes = []
+        for related_object in self.model._meta.get_all_related_objects():
+            model = getattr(related_object, 'related_model', related_object.model)
+            ctypes.append(ContentType.objects.get_for_model(model).pk)
+            if model.__subclasses__():
+                for child in model.__subclasses__():
+                    ctypes.append(ContentType.objects.get_for_model(child).pk)
+        return ctypes
+
     def placeholder_data_view(self, request, id):
         """
         Return placeholder data for the given layout's template.
@@ -162,12 +175,7 @@ class LayoutAdmin(admin.ModelAdmin):
         return my_urls + urls
 
     def get_form(self, *args, **kwargs):
-        ctypes = []
-        for related_object in self.model._meta.get_all_related_objects():
-            model = getattr(
-                related_object, 'related_model', related_object.model)
-            ctypes.append(ContentType.objects.get_for_model(model).pk)
-
+        ctypes = self._get_ctypes()
         class Form(super(LayoutAdmin, self).get_form(*args, **kwargs)):
             def __init__(self, *args, **kwargs):
                 super(Form, self).__init__(*args, **kwargs)
@@ -175,7 +183,6 @@ class LayoutAdmin(admin.ModelAdmin):
                     'content_types'].queryset.filter(
                     pk__in=ctypes,
                 )
-
         return Form
 
 
