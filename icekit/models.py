@@ -78,12 +78,14 @@ class FluentFieldsMixin(models.Model):
 
 class LayoutQuerySet(QuerySet):
 
-    def for_model(self, model):
+    def for_model(self, model, **kwargs):
         """
         Return layouts that are allowed for the given model.
         """
         queryset = self.filter(
-            content_types=ContentType.objects.get_for_model(model))
+            content_types=ContentType.objects.get_for_model(model),
+            **kwargs
+        )
         return queryset
 
 

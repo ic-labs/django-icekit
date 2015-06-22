@@ -12,3 +12,4 @@ class ImagePlugin(ContentPlugin):
     model = models.ImageItem
     category = _('Media')
     render_template = 'icekit/plugins/image/default.html'
+    raw_id_fields = ['image', ]
