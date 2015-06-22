@@ -12,3 +12,4 @@ class SlideShowPlugin(ContentPlugin):
     model = models.SlideShowItem
     category = _('Media')
     render_template = 'icekit/plugins/slideshow/default.html'
+    raw_id_fields = ['slide_show', ]
