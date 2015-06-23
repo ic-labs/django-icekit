@@ -36,8 +36,8 @@ class SlideShowItem(ContentItem):
     )
 
     class Meta:
-        verbose_name = _('Reusable slide show')
-        verbose_name_plural = _('Reusable slide shows')
+        verbose_name = _('Slide show')
+        verbose_name_plural = _('Slide shows')
 
     def __str__(self):
         return str(self.slide_show)
