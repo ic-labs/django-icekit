@@ -10,6 +10,6 @@ from . import models
 @plugin_pool.register
 class SlideShowPlugin(ContentPlugin):
     model = models.SlideShowItem
-    category = _('Media')
+    category = _('Image')
     render_template = 'icekit/plugins/slideshow/default.html'
     raw_id_fields = ['slide_show', ]

@@ -10,6 +10,6 @@ from . import models
 @plugin_pool.register
 class ImagePlugin(ContentPlugin):
     model = models.ImageItem
-    category = _('Media')
+    category = _('Image')
     render_template = 'icekit/plugins/image/default.html'
     raw_id_fields = ['image', ]
