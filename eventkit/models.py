@@ -403,7 +403,14 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             field: getattr(self, field) for field in self.get_repeat_fields()
         }
         defaults['parent'] = self
-        self.get_repeat_events().update(**defaults)
+        # There is an issue with TreeManager where queries return with the meta model of the
+        # first non-abstract and non-proxy model in reverse MRO order. Due to polymorphism
+        # this will be Event. So any subclasses will not be able to access the fields on the
+        # subclass only those of the Event model.
+        # ``get_repeat_events()`` uses TreeManager queries where this occurs so we can get the list
+        # of pks it would have returned and use our normal manager for the update to work around
+        # this issue.
+        type(self).objects.filter(pk__in=self.get_repeat_events()).update(**defaults)
         # Rebuild the MPTT tree. `update()` bypasses the `MPTTModel.save()`
         # method and leaves the tree in an inconsistent state.
         type(self)._tree_manager.partial_rebuild(self.tree_id)
