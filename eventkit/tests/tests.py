@@ -337,7 +337,7 @@ class TestEventPropagation(WebTest):
 class Views(WebTest):
     def test_index(self):
         response = self.app.get(reverse('eventkit_index'))
-        response.mustcontain('Hello World')
+        response.mustcontain('There are no events.')
 
 
 class Time(WebTest):
