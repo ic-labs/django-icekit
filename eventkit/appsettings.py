@@ -29,3 +29,7 @@ DEFAULT_ENDS_DELTA = EVENTKIT.get('DEFAULT_ENDS_DELTA', timedelta(hours=1))
 # Repeat events that start later than this far in the future will not be
 # created until a later date.
 REPEAT_LIMIT = EVENTKIT.get('REPEAT_LIMIT', timedelta(weeks=13))
+
+# Should the Event Admin be used from this app? This allows a custom admin to be used in in project
+# specific situations.
+USE_EVENT_ADMIN = EVENTKIT.get('USE_EVENT_ADMIN', True)

@@ -1,1 +1,14 @@
-Hello World
+{% extends 'base.html' %}
+
+{% block body %}
+	{% if events %}
+		{% for event in events %}
+			<ul>
+				<li>{{ event.title }}</li>
+			</ul>
+		{% endfor %}
+	{% else %}
+		<div>There are no events.</div>
+	{% endif %}
+{% endblock %}
+

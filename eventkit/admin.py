@@ -185,7 +185,9 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
         data = json.dumps(data, cls=DjangoJSONEncoder)
         return HttpResponse(content=data, content_type='applicaton/json')
 
-admin.site.register(models.Event, EventAdmin)
+# Allow the option not to use the EventAdmin.
+if appsettings.USE_EVENT_ADMIN:
+    admin.site.register(models.Event, EventAdmin)
 
 
 class RecurrenceRuleAdmin(admin.ModelAdmin):
