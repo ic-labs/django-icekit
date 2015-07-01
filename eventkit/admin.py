@@ -168,6 +168,8 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
                 classes.append('is-original')
             else:
                 classes.append('is-variation')
+
+            classes.append(tree_id);
             # Prefix class names with "fcc-" (full calander class).
             classes = ['fcc-%s' % class_ for class_ in classes]
             data.append({
