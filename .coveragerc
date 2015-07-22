@@ -1,6 +1,6 @@
 [run]
 branch = True
-omit = */migrations/__init__.py
+omit = */migrations/__init__.py, icekit/tests/*
 source = icekit
 
 [report]
