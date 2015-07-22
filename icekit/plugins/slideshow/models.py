@@ -5,6 +5,7 @@ from fluent_contents.models import ContentItem, PlaceholderField
 
 from . import appsettings
 
+
 @python_2_unicode_compatible
 class SlideShow(models.Model):
     """
@@ -24,6 +25,7 @@ class SlideShow(models.Model):
 
     def __str__(self):
         return str(self.title)
+
 
 @python_2_unicode_compatible
 class SlideShowItem(ContentItem):
