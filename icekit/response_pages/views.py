@@ -90,7 +90,7 @@ def server_error(request, template_name='500.html'):
     try:
         rendered_page = get_response_page(
             request,
-            http.HttpResponseForbidden,
+            http.HttpResponseServerError,
             'icekit/response_pages/500.html',
             models.RESPONSE_HTTP500
         )
