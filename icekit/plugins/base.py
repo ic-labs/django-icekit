@@ -2,6 +2,7 @@ import operator
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.utils.six.moves import reduce
 
 from icekit import validators
 
