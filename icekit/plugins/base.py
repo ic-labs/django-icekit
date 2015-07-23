@@ -73,7 +73,7 @@ class TemplateNameFieldChoicesPluginMount(PluginMount):
                 continue
             choices.append((template, label))
         # Sort by label.
-        choices = sorted(choices, lambda a, b: cmp(a[1], b[1]))
+        choices = sorted(choices, key=lambda a: (a[0], a[1]))
         return choices
 
 
