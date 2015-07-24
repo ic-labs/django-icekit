@@ -27,6 +27,7 @@ INSTALLED_APPS = (
     'fluent_pages',
     'fluent_pages.pagetypes.fluentpage',
     'icekit',
+    'icekit.plugins.child_pages',
     'icekit.plugins.faq',
     'icekit.plugins.image',
     'icekit.plugins.instagram_embed',

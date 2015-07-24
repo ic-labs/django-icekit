@@ -1,0 +1,9 @@
+{% if instance.get_child_pages %}
+	<div class="child-pages">
+		<ul>
+			{% for child in instance.get_child_pages %}
+				<li><a href="{{ child.get_absolute_url }}">{{ child }}</a></li>
+			{% endfor %}
+		</ul>
+	</div>
+{% endif %}
