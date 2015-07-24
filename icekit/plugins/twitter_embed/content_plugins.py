@@ -17,7 +17,7 @@ class TwitterEmbedPlugin(ContentPlugin):
     fieldsets = (
         (
             None, {
-                'fields': ('url', )
+                'fields': ('twitter_url', )
             }
         ),
     )

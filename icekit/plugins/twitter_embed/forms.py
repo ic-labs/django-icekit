@@ -4,11 +4,11 @@ from fluent_contents.forms import ContentItemForm
 
 
 class TwitterEmbedAdminForm(ContentItemForm):
-    def clean_url(self):
+    def clean_twitter_url(self):
         """
         Make sure the URL provided matches the twitter URL format.
         """
-        url = self.cleaned_data['url']
+        url = self.cleaned_data['twitter_url']
 
         if url:
             pattern = re.compile(r'https?://(www\.)?twitter.com/\S+/status(es)?/\S+')

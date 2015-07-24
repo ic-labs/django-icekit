@@ -32,7 +32,7 @@ class TwitterEmbedItem(ContentItem):
         verbose_name = _('Twitter Embed')
 
     def __str__(self):
-        return str('Twitter Embed: %s' % self.url)
+        return str('Twitter Embed: %s' % self.twitter_url)
 
     def clean(self, *args, **kwargs):
         """
@@ -59,7 +59,7 @@ class TwitterEmbedItem(ContentItem):
 
         :return: Dict of data if successful or String if error.
         """
-        r = requests.get('https://api.twitter.com/1/statuses/oembed.json?url=%s' % self.url)
+        r = requests.get('https://api.twitter.com/1/statuses/oembed.json?url=%s' % self.twitter_url)
         if r.status_code in [200, 404]:
             return json.loads(r.content)
         return r.content
