@@ -13,7 +13,7 @@ class InstagramEmbedItem(ContentItem):
     """
     An embeded instagram image.
     """
-    url = models.URLField()
+    url = models.URLField(verbose_name=_('URL'))
 
     # Data return from OEmbed API call.
     provider_url = models.CharField(max_length=512, blank=True)
