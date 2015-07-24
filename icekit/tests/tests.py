@@ -16,9 +16,11 @@ from fluent_pages.models import PageLayout
 from fluent_pages.pagetypes.fluentpage.models import FluentPage
 from icekit.plugins.faq.models import FAQItem
 from icekit.plugins.image.models import ImageItem, Image
+from icekit.plugins.instagram_embed.models import InstagramEmbedItem
 from icekit.plugins.quote.models import QuoteItem
 from icekit.plugins.reusable_quote.models import Quote, ReusableQuoteItem
 from icekit.plugins.slideshow.models import SlideShow, SlideShowItem
+from icekit.plugins.twitter_embed.models import TwitterEmbedItem
 from icekit.response_pages.models import ResponsePage
 
 from icekit.utils import fluent_contents, implementation
@@ -93,6 +95,16 @@ class Models(WebTest):
             self.page_1,
             slide_show=self.slide_show_1,
         )
+        self.twitter_response_1 = fluent_contents.create_content_instance(
+            TwitterEmbedItem,
+            self.page_1,
+            twitter_url='http://twitter.com/asdf/status/sdfsdfsdf'
+        )
+        self.instagram_embed_1 = fluent_contents.create_content_instance(
+            InstagramEmbedItem,
+            self.page_1,
+            url='http://instagram.com/p/adasdads'
+        )
 
     def test_BaseModel(self):
         """
@@ -107,7 +119,7 @@ class Models(WebTest):
         content_instances = self.page_1.placeholder_set.all()[0].get_content_items()
         anticipated_content_instances = [
             self.image_item_1, self.faq_item_1, self.quote_item_1, self.reusable_quote_item_1,
-            self.slide_show_item_1,
+            self.slide_show_item_1, self.twitter_response_1, self.instagram_embed_1,
         ]
         if apps.is_installed('icekit.plugins.brightcove'):
             anticipated_content_instances.append(self.brightcove_item_1)
