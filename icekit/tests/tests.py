@@ -21,7 +21,7 @@ from icekit.plugins.reusable_quote.models import Quote, ReusableQuoteItem
 from icekit.plugins.slideshow.models import SlideShow, SlideShowItem
 from icekit.response_pages.models import ResponsePage
 
-from icekit.utils import fluent_contents
+from icekit.utils import fluent_contents, implementation
 
 from icekit import models, validators
 from icekit.tests import models as test_models
@@ -215,3 +215,8 @@ class TestValidators(WebTest):
         self.assertIsNone(validators.template_name('icekit/layouts/default.html'))
         with self.assertRaises(exceptions.ValidationError):
             validators.template_name('ssdf')
+
+    def test_check_settings(self):
+        self.assertEqual(implementation.check_settings(['SITE_ID', ]), None)
+        with self.assertRaises(NotImplementedError):
+            implementation.check_settings(['NO_SUCH_SETTING', ])
