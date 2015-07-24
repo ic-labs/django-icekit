@@ -33,6 +33,7 @@ INSTALLED_APPS = (
     'icekit.plugins.quote',
     'icekit.plugins.reusable_quote',
     'icekit.plugins.slideshow',
+    'icekit.plugins.twitter_embed',
     'icekit.response_pages',
     'icekit.tests',
 )
