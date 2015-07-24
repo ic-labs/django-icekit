@@ -11,7 +11,7 @@ class InstagramEmbedAdminForm(ContentItemForm):
         url = self.cleaned_data['url']
 
         if url:
-            pattern = re.compile(r'https?://instagr.?am(.com)?/p/')
+            pattern = re.compile(r'https?://instagr(\.am|am\.com)/p/\S+')
             if not pattern.match(url):
                 raise forms.ValidationError('Please provide a valid instagram link.')
 
