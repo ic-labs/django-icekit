@@ -43,6 +43,8 @@ class TwitterEmbedItem(ContentItem):
 
         # If a dict is returned assume it is the JSON data returned from twitter.
         if isinstance(twitter_data, dict):
+            if 'errors' in twitter_data.keys():
+                raise exceptions.ValidationError(twitter_data['errors'][0]['message'])
             # Set each of the data attributes.
             for key in twitter_data.keys():
                 setattr(self, key, twitter_data[key])
@@ -58,7 +60,7 @@ class TwitterEmbedItem(ContentItem):
         :return: Dict of data if successful or String if error.
         """
         r = requests.get('https://api.twitter.com/1/statuses/oembed.json?url=%s' % self.url)
-        if r.status_code is 200:
+        if r.status_code in [200, 404]:
             return json.loads(r.content)
         return r.content
 
