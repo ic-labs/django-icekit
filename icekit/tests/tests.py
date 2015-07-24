@@ -22,6 +22,7 @@ from icekit.plugins.slideshow.models import SlideShow, SlideShowItem
 from icekit.response_pages.models import ResponsePage
 
 from icekit.utils import fluent_contents, implementation
+from icekit.utils.admin import mixins
 
 from icekit import models, validators
 from icekit.tests import models as test_models
@@ -220,3 +221,12 @@ class TestValidators(WebTest):
         self.assertEqual(implementation.check_settings(['SITE_ID', ]), None)
         with self.assertRaises(NotImplementedError):
             implementation.check_settings(['NO_SUCH_SETTING', ])
+
+    def test_thumbnail_admin_mixin(self):
+        class TestThumbnail(object):
+            test = 'test-result'
+        admin_mixin = mixins.ThumbnailAdminMixin()
+        self.assertEqual(admin_mixin.get_thumbnail_source(None), None)
+        admin_mixin.thumbnail_field = 'test'
+        self.assertEqual(admin_mixin.get_thumbnail_source(TestThumbnail()), 'test-result')
+        self.assertEqual(admin_mixin.thumbnail(TestThumbnail()), '')
