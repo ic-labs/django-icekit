@@ -21,6 +21,9 @@ setuptools.setup(
             'ipython',
             'mkdocs',
         ],
+        'forms': [
+            'django-forms-builder',
+        ],
         'search': [
             'django-haystack',
             'django-fluent-pages[flatpage,fluentpage]',
