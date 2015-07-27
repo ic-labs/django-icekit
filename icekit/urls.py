@@ -158,5 +158,5 @@ if getattr(settings, 'ICEKIT_USE_LOGIN', True):
 
 # HAYSTACK ########################################################################################
 # Add built in support for haystack if in installed apps.
-if apps.is_installed('haystack'):
+if apps.is_installed('haystack') and not getattr(settings, 'ICEKIT_USE_SEARCH_URL', False):
     urlpatterns += patterns('', url(r'^search/', include('haystack.urls')),)
