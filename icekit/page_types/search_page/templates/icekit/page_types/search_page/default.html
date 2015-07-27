@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% load bootstrap3 fluent_contents_tags %}
+
+{% block content %}
+	<div class="page-header">
+		<h2>Search</h2>
+	</div>
+
+	{% page_placeholder instance 'main' title='Main' role='m' fallback=True %}
+
+	<form method="get" class="search-form" action=".">
+		{% bootstrap_form form %}
+		<button type="submit" class="btn btn-primary">Search</button>
+	</form>
+
+	{% if query %}
+		<div class="page-header">
+			<h3>Results for <small>&ldquo;{{ query }}&rdquo;</small></h3>
+		</div>
+		{% for result in page.object_list %}
+			<p>
+				<a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a>
+			</p>
+		{% empty %}
+			<p>No results found.</p>
+		{% endfor %}
+
+		{% if page.has_previous or page.has_next %}
+			<nav class="text-center">
+				<ul class="pagination">
+					<li class="previous{% if not page.has_previous %} disabled{% endif %}">
+						<a href="{% if page.has_previous %}?q={{ query }}&amp;page={{ page.previous_page_number }}{% endif %}">
+							<span aria-hidden="true">&larr;</span> Previous
+						</a>
+					</li>
+					{% for pagination_number in page.paginator.page_range %}
+						<li {% if pagination_number == page.number %}class="active" {% endif %}>
+							<a href="?q={{ query }}&amp;page={{ pagination_number }}">
+								{{ pagination_number }}
+								{% if pagination_number == page.number %}<span class="sr-only">(current)</span>{% endif %}
+							</a>
+						</li>
+					{% endfor %}
+					<li class="next{% if not page.has_next %} disabled{% endif %}">
+						<a href="{% if page.has_next %}?q={{ query }}&amp;page={{ page.next_page_number }}{% endif %}">
+							<span aria-hidden="true">&rarr;</span> Next
+						</a>
+					</li>
+				</ul>
+			</nav>
+		{% endif %}
+	{% else %}
+		{# Show some example queries to run, maybe query syntax, something else? #}
+	{% endif %}
+{% endblock %}

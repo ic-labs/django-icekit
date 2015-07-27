@@ -27,7 +27,9 @@ INSTALLED_APPS = (
     'fluent_contents',
     'fluent_pages',
     'fluent_pages.pagetypes.fluentpage',
+    'haystack',
     'icekit',
+    'icekit.page_types.search_page',
     'icekit.plugins.child_pages',
     'icekit.plugins.faq',
     'icekit.plugins.image',
@@ -68,3 +70,9 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
 ]
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
+    },
+}
