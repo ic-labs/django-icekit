@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core import exceptions
 from django.core.urlresolvers import reverse
+from django.utils import six
 from django_dynamic_fixture import G
 from django_webtest import WebTest
 from fluent_contents.models import Placeholder
@@ -64,14 +65,14 @@ class Forms(WebTest):
 
     def test_password_reset_form(self):
         self.assertEqual(
-            admin_forms.PasswordResetForm().get_users(self.user_1.email).next(),
+            six.next(admin_forms.PasswordResetForm().get_users(self.user_1.email)),
             self.user_1
         )
         with self.assertRaises(StopIteration):
-            admin_forms.PasswordResetForm().get_users(self.user_2.email).next()
+            six.next(admin_forms.PasswordResetForm().get_users(self.user_2.email))
 
         with self.assertRaises(StopIteration):
-            admin_forms.PasswordResetForm().get_users(self.user_3.email).next()
+            six.next(admin_forms.PasswordResetForm().get_users(self.user_3.email))
 
 
 class Models(WebTest):
