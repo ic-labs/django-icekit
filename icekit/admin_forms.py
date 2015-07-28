@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordResetForm
 
 
@@ -19,4 +20,13 @@ class PasswordResetForm(PasswordResetForm):
         :param email: Textual email address.
         :return: List of users.
         """
-        return (u for u in super(PasswordResetForm, self).get_users(email) if u.is_staff)
+        # Django 1.8 supports this feature.
+        if hasattr(super(PasswordResetForm, self), 'get_users'):
+            return (
+                u for u in super(PasswordResetForm, self).get_users(email)
+                if u.is_staff and u.is_active
+            )
+
+        # Django Django < 1.8 support we can do this manually.
+        active_users = get_user_model()._default_manager.filter(email__iexact=email, is_active=True)
+        return (u for u in active_users if u.has_usable_password() and u.is_staff and u.is_active)

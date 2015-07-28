@@ -5,6 +5,7 @@ Tests for ``icekit`` app.
 # WebTest API docs: http://webtest.readthedocs.org/en/latest/api.html
 from django.apps import apps
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core import exceptions
@@ -26,7 +27,7 @@ from icekit.response_pages.models import ResponsePage
 from icekit.utils import fluent_contents, implementation
 from icekit.utils.admin import mixins
 
-from icekit import models, validators
+from icekit import admin_forms, models, validators
 from icekit.tests import models as test_models
 
 # Conditional imports
@@ -39,8 +40,38 @@ User = get_user_model()
 
 
 class Forms(WebTest):
-    def test(self):
-        pass
+    def setUp(self):
+        self.user_1 = G(
+            User,
+            is_staff=True,
+            is_active=True,
+        )
+        self.user_1.password = make_password('test_password123')
+        self.user_1.save()
+        self.user_2 = G(
+            User,
+            is_active=True,
+        )
+        self.user_2.password = make_password('test_password123')
+        self.user_2.save()
+        self.user_3 = G(
+            User,
+            is_active=False,
+            is_staff=True,
+        )
+        self.user_3.password = make_password('test_password123')
+        self.user_3.save()
+
+    def test_password_reset_form(self):
+        self.assertEqual(
+            admin_forms.PasswordResetForm().get_users(self.user_1.email).next(),
+            self.user_1
+        )
+        with self.assertRaises(StopIteration):
+            admin_forms.PasswordResetForm().get_users(self.user_2.email).next()
+
+        with self.assertRaises(StopIteration):
+            admin_forms.PasswordResetForm().get_users(self.user_3.email).next()
 
 
 class Models(WebTest):
