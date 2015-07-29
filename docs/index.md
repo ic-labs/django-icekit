@@ -19,7 +19,31 @@ Update your settings module:
 
 ## Usage
 
-TODO
+If you need a basic Page that supports our upgraded Layout system, just use LayoutPage.
+
+Add the LayoutPage to your settings' Page Types definition:
+
+    INSTALLED_APPS += (
+        # Page types.
+        # [...] existing page types
+        'icekit.page_types.layout_page',
+    )
+
+Run the migrations for the page type:
+
+    (venv)$ ./manage.py migrate
+
+**Optional** You may wish to switch off the default Fluent Page as it uses the primitive file-based templates for layouts. Your Page Types config would therefore look something like:
+
+    INSTALLED_APPS = (
+        # [...]
+
+        # Page types.
+        # 'fluent_pages.pagetypes.flatpage',
+        # 'fluent_pages.pagetypes.fluentpage',
+        'fluent_pages.pagetypes.redirectnode',
+        'icekit.page_types.layout_page',
+    )
 
 ## HTML Docs
 
