@@ -12,3 +12,8 @@ class LayoutPagePlugin(FluentContentsPagePlugin):
     model = models.LayoutPage
     model_admin = admin.LayoutPageAdmin
 
+    def get_render_template(self, request, fluentpage, **kwargs):
+        # Allow subclasses to easily override it by specifying `render_template` after all.
+        # The default, is to use the template_path from the layout object.
+        return self.render_template or fluentpage.layout.template_name
+
