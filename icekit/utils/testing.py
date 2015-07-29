@@ -2,9 +2,11 @@
 import glob
 import os
 import uuid
-from django.core.files.base import ContentFile
+
 from PIL import Image
-from StringIO import StringIO
+
+from django.core.files.base import ContentFile
+from django.utils import six
 
 
 def new_test_image():
@@ -21,7 +23,7 @@ def new_test_image():
     :return: Image name and image content file.
     """
     image_name = 'test-{}.png'.format(uuid.uuid4())
-    image_buf = StringIO()
+    image_buf = six.StringIO()
     image = Image.new('RGBA', size=(50, 50), color=(256, 0, 0))
     image.save(image_buf, 'png')
     image_buf.seek(0)
