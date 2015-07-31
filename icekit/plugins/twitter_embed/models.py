@@ -61,7 +61,8 @@ class TwitterEmbedItem(ContentItem):
         """
         r = requests.get('https://api.twitter.com/1/statuses/oembed.json?url=%s' % self.twitter_url)
         if r.status_code in [200, 404]:
-            return json.loads(r.content)
+            # Force the decode here for python-3 support..
+            return json.loads(r.content.decode('utf-8'))
         return r.content
 
     def get_default_embed(self):
