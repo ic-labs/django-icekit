@@ -33,6 +33,7 @@ setuptools.setup(
             'django-dynamic-fixture',
             'django-nose',
             'django-webtest',
+            'mock',
             'nose-progressive',
             'WebTest',
         ],

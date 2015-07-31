@@ -16,14 +16,18 @@ from django_webtest import WebTest
 from fluent_contents.models import Placeholder
 from fluent_pages.models import PageLayout
 from fluent_pages.pagetypes.fluentpage.models import FluentPage
+from forms_builder.forms.models import Form
 from icekit.plugins.faq.models import FAQItem
 from icekit.plugins.image.models import ImageItem, Image
 from icekit.plugins.instagram_embed.models import InstagramEmbedItem
 from icekit.plugins.quote.models import QuoteItem
+from icekit.plugins.reusable_form.models import FormItem
 from icekit.plugins.reusable_quote.models import Quote, ReusableQuoteItem
 from icekit.plugins.slideshow.models import SlideShow, SlideShowItem
+from icekit.plugins.twitter_embed.forms import TwitterEmbedAdminForm
 from icekit.plugins.twitter_embed.models import TwitterEmbedItem
 from icekit.response_pages.models import ResponsePage
+from mock import patch
 
 from icekit.utils import fluent_contents, implementation
 from icekit.utils.admin import mixins
@@ -74,11 +78,23 @@ class Forms(WebTest):
         with self.assertRaises(StopIteration):
             six.next(admin_forms.PasswordResetForm().get_users(self.user_3.email))
 
+    def test_twitter_embed_admin_form(self):
+        twitter_url= 'https://twitter.com/Interior/status/463440424141459456'
+        teaf = TwitterEmbedAdminForm({'twitter_url': 'http://test.com/', })
+        teaf.full_clean()
+        self.assertEqual(teaf.errors['twitter_url'], ['Please provide a valid twitter link.'])
+        teaf = TwitterEmbedAdminForm({
+            'twitter_url': twitter_url
+        })
+        teaf.full_clean()
+        self.assertEqual(teaf.cleaned_data['twitter_url'], twitter_url)
+
 
 class Models(WebTest):
     def setUp(self):
         self.site = G(Site)
         self.user_1 = G(User)
+        self.form_1 = G(Form)
         if apps.is_installed('icekit.plugins.brightcove'):
             self.brightcove_video_1 = G(BrightcoveItems)
         self.image_1 = G(Image)
@@ -137,6 +153,11 @@ class Models(WebTest):
             self.page_1,
             url='http://instagram.com/p/adasdads'
         )
+        self.reusable_form_1 = fluent_contents.create_content_instance(
+            FormItem,
+            self.page_1,
+            form=self.form_1,
+        )
 
     def test_BaseModel(self):
         """
@@ -152,6 +173,7 @@ class Models(WebTest):
         anticipated_content_instances = [
             self.image_item_1, self.faq_item_1, self.quote_item_1, self.reusable_quote_item_1,
             self.slide_show_item_1, self.twitter_response_1, self.instagram_embed_1,
+            self.reusable_form_1,
         ]
         if apps.is_installed('icekit.plugins.brightcove'):
             anticipated_content_instances.append(self.brightcove_item_1)
@@ -170,6 +192,11 @@ class Models(WebTest):
             self.assertEqual(str(self.brightcove_item_1), str(self.brightcove_video_1))
 
         self.assertEqual(str(self.faq_item_1), self.faq_item_1.question)
+        self.assertEqual(
+            str(self.twitter_response_1),
+            'Twitter Embed: %s' % self.twitter_response_1.twitter_url
+        )
+        self.assertEqual(str(self.reusable_form_1), self.reusable_form_1.form.title)
 
     def test_layout_queryset_for_model(self):
         layouts = models.Layout.objects.for_model(self.page_1)
@@ -184,6 +211,48 @@ class Models(WebTest):
             template.name if hasattr(template, 'name') else template.template.name,
             'icekit/layouts/default.html'
         )
+
+    def test_twitter_embed_item(self):
+        initial_twitter_url = self.twitter_response_1.twitter_url
+        self.twitter_response_1.twitter_url = 'https://twitter.com/Interior/status/' \
+                                              '463440424141459456'
+        self.twitter_response_1.url = ''
+        self.assertEqual(self.twitter_response_1.url, '')
+        self.twitter_response_1.clean()
+        self.assertEqual(
+            self.twitter_response_1.url,
+            'https://twitter.com/Interior/statuses/463440424141459456'
+        )
+        self.assertEqual(
+            self.twitter_response_1.get_default_embed(),
+            self.twitter_response_1.html
+        )
+        self.twitter_response_1.html = ''
+        self.assertEqual(
+            self.twitter_response_1.get_default_embed(),
+            ''
+        )
+        with self.assertRaises(exceptions.ValidationError):
+            self.twitter_response_1.twitter_url = 'https://twitter.com/Interior/status/not-real'
+            self.twitter_response_1.clean()
+
+        with self.assertRaises(exceptions.ValidationError):
+            self.twitter_response_1.twitter_url = 'http://test.com/'
+            self.twitter_response_1.clean()
+
+        self.twitter_response_1.twitter_url = initial_twitter_url
+
+        with patch.object(TwitterEmbedItem, 'fetch_twitter_data', return_value=''):
+            tei = TwitterEmbedItem(twitter_url='http://www.google.com')
+            with self.assertRaises(exceptions.ValidationError):
+                tei.full_clean()
+
+        with patch('requests.api.request') as mock_get:
+            mock_get.status_code = 500
+
+            tei = TwitterEmbedItem(twitter_url='http://www.google.com')
+            with self.assertRaises(exceptions.ValidationError):
+                tei.full_clean()
 
 
 class Views(WebTest):
@@ -253,6 +322,22 @@ class Views(WebTest):
         response = self.app.get(reverse('500'), expect_errors=500)
         self.assertEqual(response.status_code, 500)
         response.mustcontain(self.response_page_2.title)
+
+        self.response_page_1.is_active = False
+        self.response_page_1.save()
+        response = self.app.get(reverse('404'), expect_errors=404)
+        response.mustcontain(
+            '<h1>Not Found</h1><p>The requested URL /404/ was not found on this server.</p>'
+        )
+        self.response_page_1.is_active = True
+        self.response_page_1.save()
+
+        self.response_page_2.is_active = False
+        self.response_page_2.save()
+        response = self.app.get(reverse('500'), expect_errors=500)
+        response.mustcontain('<h1>Server Error (500)</h1>')
+        self.response_page_2.is_active = True
+        self.response_page_2.save()
 
 
 class TestValidators(WebTest):
