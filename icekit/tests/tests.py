@@ -79,7 +79,7 @@ class Forms(WebTest):
             six.next(admin_forms.PasswordResetForm().get_users(self.user_3.email))
 
     def test_twitter_embed_admin_form(self):
-        twitter_url= 'https://twitter.com/Interior/status/463440424141459456'
+        twitter_url = 'https://twitter.com/Interior/status/463440424141459456'
         teaf = TwitterEmbedAdminForm({'twitter_url': 'http://test.com/', })
         teaf.full_clean()
         self.assertEqual(teaf.errors['twitter_url'], ['Please provide a valid twitter link.'])
