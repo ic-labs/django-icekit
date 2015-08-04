@@ -29,11 +29,13 @@ INSTALLED_APPS = (
     'fluent_pages.pagetypes.fluentpage',
     'haystack',
     'icekit',
+    'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
     'icekit.plugins.child_pages',
     'icekit.plugins.faq',
     'icekit.plugins.image',
     'icekit.plugins.instagram_embed',
+    'icekit.plugins.map',
     'icekit.plugins.quote',
     'icekit.plugins.reusable_quote',
     'icekit.plugins.reusable_form',
@@ -52,6 +54,7 @@ ROOT_URLCONF = 'icekit.tests.urls'
 SECRET_KEY = 'secret-key'
 STATIC_URL = '/static/'
 # TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
