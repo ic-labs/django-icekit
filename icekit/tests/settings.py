@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'icekit.plugins.instagram_embed',
     'icekit.plugins.map',
     'icekit.plugins.page_anchor',
+    'icekit.plugins.page_anchor_list',
     'icekit.plugins.quote',
     'icekit.plugins.reusable_quote',
     'icekit.plugins.reusable_form',
