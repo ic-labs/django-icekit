@@ -1,0 +1,3 @@
+{% for anchor in instance.get_anchors %}
+	<a href="#{{ anchor.anchor_name|slugify }}-{{ anchor.id }}">{{ anchor }}</a>
+{% endfor %}
