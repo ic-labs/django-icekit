@@ -22,7 +22,7 @@ class MapItemTestCase(WebTest):
             'b2d18fb93fed35'
         self.layout_1 = G(
             Layout,
-            template_name='icekit/page_types/layout_page/default.html',
+            template_name='layout_page/layoutpage/layouts/default.html',
         )
         self.layout_1.content_types.add(
             ContentType.objects.get_for_model(LayoutPage))
