@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	{% for post in object_list %}
+		<h2>
+			<a href="{% url 'blog:detail' post.pk %}">{{ post.title }}</a>
+		</h2>
+		{{ post.body }}
+
+		<figure>
+			<img src="{{ post.photo.image.url }}" alt="{{ post.photo.alt_text }}" />
+
+			{% if post.photo.title or post.photo.caption %}
+				<figcaption>
+					{% if post.photo.title %}
+						<h3>{{ post.photo.title }}</h3>
+					{% endif %}
+					{% if post.photo.caption %}
+						{{ post.photo.caption|safe }}
+					{% endif %}
+				</figcaption>
+			{% endif %}
+		</figure>
+	{% empty %}
+		<p>No posts to display</p>
+	{% endfor %}
+{% endblock content %}
