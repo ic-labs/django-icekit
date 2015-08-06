@@ -1,0 +1,44 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('fluent_contents', '0001_initial'),
+        ('icekit', '0005_remove_layout_key'),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='Image',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('image', models.ImageField(upload_to=b'uploads/images/', verbose_name='Image field')),
+                ('alt_text', models.CharField(help_text="A description of the image for users who don't see images.", max_length=255)),
+                ('title', models.CharField(help_text='The title is shown in the caption.', max_length=255, blank=True)),
+                ('caption', models.TextField(blank=True)),
+                ('is_active', models.BooleanField(default=True)),
+                ('admin_notes', models.TextField(help_text='Internal notes for administrators only.', blank=True)),
+                ('categories', models.ManyToManyField(related_name='icekit_image_related', to='icekit.MediaCategory', blank=True)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='ImageItem',
+            fields=[
+                ('contentitem_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='fluent_contents.ContentItem')),
+                ('image', models.ForeignKey(help_text='An image from the image library.', to='icekit.Image')),
+            ],
+            options={
+                'db_table': 'contentitem_icekit_imageitem',
+                'verbose_name': 'Image',
+                'verbose_name_plural': 'Images',
+            },
+            bases=('fluent_contents.contentitem',),
+        ),
+    ]
