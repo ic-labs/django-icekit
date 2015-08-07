@@ -31,12 +31,18 @@ def create_content_instance(content_plugin_class, test_page, placeholder_name='m
     ct = ContentType.objects.get_for_model(type(test_page))
 
     # Create the actual plugin instance.
-    content_instance = content_plugin_class.objects.create(
-        parent_type=ct,
-        parent_id=test_page.id,
-        placeholder=placeholder,
-        **kwargs
-    )
+    try:
+        content_instance = content_plugin_class.objects.create(
+            parent_type=ct,
+            parent_id=test_page.id,
+            placeholder=placeholder,
+            **kwargs
+        )
+    except TypeError:
+        raise Exception(
+            'Could not create content item instance, ensure you '
+            'have all required field values for the Model.'
+        )
     return content_instance
 
 # END Fluent Contents Helper Functions #############################################################
