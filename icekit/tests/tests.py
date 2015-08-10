@@ -20,6 +20,8 @@ from forms_builder.forms.models import Form
 from icekit.plugins.faq.models import FAQItem
 from icekit.plugins.image.models import ImageItem, Image
 from icekit.plugins.instagram_embed.models import InstagramEmbedItem
+from icekit.plugins.map.models import MapItem
+from icekit.plugins.map_with_text.models import MapWithTextItem
 from icekit.plugins.quote.models import QuoteItem
 from icekit.plugins.reusable_form.models import FormItem
 from icekit.plugins.reusable_quote.models import Quote, ReusableQuoteItem
@@ -158,6 +160,20 @@ class Models(WebTest):
             self.page_1,
             form=self.form_1,
         )
+        self.map_1 = fluent_contents.create_content_instance(
+            MapItem,
+            self.page_1,
+            share_url='https://www.google.com.au/maps/place/The+Interaction+Consortium/'
+                      '@-33.8884315,151.2006512,17z/data=!3m1!4b1!4m2!3m1!1s0x6b12b1d842ee9aa9:'
+                      '0xb0a19ac433ef0be8'
+        )
+        self.map_with_text_1 = fluent_contents.create_content_instance(
+            MapWithTextItem,
+            self.page_1,
+            share_url='https://www.google.com.au/maps/place/The+Interaction+Consortium/'
+                      '@-33.8884315,151.2006512,17z/data=!3m1!4b1!4m2!3m1!1s0x6b12b1d842ee9aa9:'
+                      '0xb0a19ac433ef0be8'
+        )
 
     def test_BaseModel(self):
         """
@@ -173,7 +189,7 @@ class Models(WebTest):
         anticipated_content_instances = [
             self.image_item_1, self.faq_item_1, self.quote_item_1, self.reusable_quote_item_1,
             self.slide_show_item_1, self.twitter_response_1, self.instagram_embed_1,
-            self.reusable_form_1,
+            self.reusable_form_1, self.map_1, self.map_with_text_1,
         ]
         if apps.is_installed('icekit.plugins.brightcove'):
             anticipated_content_instances.append(self.brightcove_item_1)
