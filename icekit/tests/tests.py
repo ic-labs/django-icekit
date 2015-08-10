@@ -18,6 +18,7 @@ from fluent_pages.models import PageLayout
 from fluent_pages.pagetypes.fluentpage.models import FluentPage
 from forms_builder.forms.models import Form
 from icekit.plugins.faq.models import FAQItem
+from icekit.plugins.horizontal_rule.models import HorizontalRuleItem
 from icekit.plugins.image.models import ImageItem, Image
 from icekit.plugins.instagram_embed.models import InstagramEmbedItem
 from icekit.plugins.map.models import MapItem
@@ -174,6 +175,10 @@ class Models(WebTest):
                       '@-33.8884315,151.2006512,17z/data=!3m1!4b1!4m2!3m1!1s0x6b12b1d842ee9aa9:'
                       '0xb0a19ac433ef0be8'
         )
+        self.horizontal_rule_1 = fluent_contents.create_content_instance(
+            HorizontalRuleItem,
+            self.page_1
+        )
 
     def test_BaseModel(self):
         """
@@ -189,7 +194,7 @@ class Models(WebTest):
         anticipated_content_instances = [
             self.image_item_1, self.faq_item_1, self.quote_item_1, self.reusable_quote_item_1,
             self.slide_show_item_1, self.twitter_response_1, self.instagram_embed_1,
-            self.reusable_form_1, self.map_1, self.map_with_text_1,
+            self.reusable_form_1, self.map_1, self.map_with_text_1, self.horizontal_rule_1,
         ]
         if apps.is_installed('icekit.plugins.brightcove'):
             anticipated_content_instances.append(self.brightcove_item_1)

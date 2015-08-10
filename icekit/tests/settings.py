@@ -33,6 +33,7 @@ INSTALLED_APPS = (
     'icekit.page_types.search_page',
     'icekit.plugins.child_pages',
     'icekit.plugins.faq',
+    'icekit.plugins.horizontal_rule',
     'icekit.plugins.image',
     'icekit.plugins.instagram_embed',
     'icekit.plugins.map',
