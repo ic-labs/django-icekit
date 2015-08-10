@@ -1,8 +1,10 @@
 {% if instance.loc %}
-	<div class="embed-responsive embed-responsive-16by9">
-		<iframe class="embed-responsive-item" src="http://maps.google.com/maps?q={{ instance.place_name }}&loc:{{ instance.loc }}&z=15&output=embed"
-			frameborder="0" style="border:0" allowfullscreen>
-		</iframe>
+	<div class="col-sm-12">
+		<div class="embed-responsive embed-responsive-16by9">
+			<iframe class="embed-responsive-item" src="http://maps.google.com/maps?q={{ instance.place_name }}&loc:{{ instance.loc }}&z=15&output=embed"
+				frameborder="0" style="border:0" allowfullscreen>
+			</iframe>
+		</div>
 	</div>
 {% else %}
 	Map cannot be displayed
