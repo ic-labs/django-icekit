@@ -1,12 +1,15 @@
+from django.apps import apps
+from django.conf import settings
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
+from django.db.models.query import QuerySet
+from django.utils.six import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
-from django.utils import six
 
 from django_extensions.db.models import AutoSlugField, TimeStampedModel
 from fluent_contents.models import ContentItem
-
+from polymorphic import PolymorphicModel
 from icekit.plugins.image.models import Image
+from model_utils.managers import PassThroughManager
 
 
 @python_2_unicode_compatible
@@ -90,32 +93,32 @@ class EventRangeMixin(models.Model):
         return str('%s - %s' % (self.start, self.end))
 
 
-class PostManager(models.Manager):
+@python_2_unicode_compatible
+class SinglePhotoMixin(models.Model):
+    photo = models.ForeignKey(
+        Image,
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return str(self.photo)
+
+
+class PostQuerySet(QuerySet):
     def all_active(self):
-        return self.get_queryset().filter(is_active=True)
+        return self.filter(is_active=True)
 
 
 @python_2_unicode_compatible
-class Post(
-    TimeStampedModel,
-    SingleCategoryMixin,
-    EventRangeMixin,
-    OptionalLocationMixin,
-):
+class AbstractBlogPost(PolymorphicModel, TimeStampedModel):
     """
-    Contains blog content, typically news about upcoming events.
-
-    ADC requires only basic content support but has some extra fields
-    to include:
-        Photo
-        Event start & end dates
-        Intro
-        Location
-        Category
+    Very basic blog post. Typically you'd want to subclass and integrate
+    the mixins provided above.
     """
-    photo = models.ForeignKey(
-        Image
-    )
     title = models.CharField(
         max_length=255,
         blank=True,
@@ -140,9 +143,8 @@ class Post(
         help_text=_('Internal notes for administrators only.'),
     )
 
-    objects = PostManager()
-
     class Meta:
+        abstract = True
         verbose_name = _('Blog Post')
         verbose_name_plural = _('Blog Posts')
         ordering = ('-created',)
@@ -151,21 +153,28 @@ class Post(
         return str(self.title)
 
 
-@python_2_unicode_compatible
-class PostItem(ContentItem):
-    """
-    A post instance
-    """
-    post = models.ForeignKey(
-        project.get_blog_class(),
-        'Post',
-        help_text=_('A blog post (unpublished items will not be visible '
-                    'to the public)'),
-    )
+class BlogPost(AbstractBlogPost):
+    objects = PassThroughManager.for_queryset_class(PostQuerySet)()
 
-    class Meta:
-        verbose_name = _('Blog Post')
-        verbose_name_plural = _('Blog Posts')
 
-    def __str__(self):
-        return str(self.post)
+default_blog_model = 'blog_tools.BlogPost'
+icekit_blog_model = getattr(settings, 'ICEKIT_BLOG_MODEL', default_blog_model)
+if icekit_blog_model == default_blog_model:
+    @python_2_unicode_compatible
+    class PostItem(ContentItem):
+        """
+        A post instance
+        """
+        post = models.ForeignKey(
+            'blog_tools.BlogPost',
+            help_text=_('A blog post (unpublished items will not be visible '
+                        'to the public)'),
+            related_name='post',
+        )
+
+        class Meta:
+            verbose_name = _('Blog Post')
+            verbose_name_plural = _('Blog Posts')
+
+        def __str__(self):
+            return str(self.post)
