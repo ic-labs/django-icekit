@@ -7,6 +7,7 @@ setuptools.setup(
     version=__version__,
     packages=setuptools.find_packages(),
     install_requires=[
+        'django_extensions',
         'django-bootstrap3',
         'django-fluent-contents',
         'django-fluent-pages',
