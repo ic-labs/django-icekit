@@ -1,4 +1,3 @@
-from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.db.models.query import QuerySet
@@ -46,6 +45,11 @@ class SingleCategoryMixin(models.Model):
 
 @python_2_unicode_compatible
 class Location(models.Model):
+    """
+    Adds a named place relation to a Blog Post.
+
+    e.g. Upcoming at <Museum of Contemporary Art> Oct 2015
+    """
     name = models.CharField(
         max_length=255,
         help_text=_('City or gallery.'),
@@ -63,6 +67,9 @@ class Location(models.Model):
 
 @python_2_unicode_compatible
 class OptionalLocationMixin(models.Model):
+    """
+    Adds an (optional) Location to Blog Post.
+    """
     location = models.ForeignKey(
         Location,
         blank=True,
@@ -95,6 +102,9 @@ class EventRangeMixin(models.Model):
 
 @python_2_unicode_compatible
 class SinglePhotoMixin(models.Model):
+    """
+    Adds a single photo to a Blog Post.
+    """
     photo = models.ForeignKey(
         Image,
         blank=True,
@@ -157,6 +167,8 @@ class BlogPost(AbstractBlogPost):
     objects = PassThroughManager.for_queryset_class(PostQuerySet)()
 
 
+# Set ICEKIT_BLOG_MODEL in your site settings to override
+# format: app_name.ModelName
 default_blog_model = 'blog_tools.BlogPost'
 icekit_blog_model = getattr(settings, 'ICEKIT_BLOG_MODEL', default_blog_model)
 if icekit_blog_model == default_blog_model:
