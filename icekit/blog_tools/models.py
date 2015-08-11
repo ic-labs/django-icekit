@@ -167,26 +167,24 @@ class BlogPost(AbstractBlogPost):
     objects = PassThroughManager.for_queryset_class(PostQuerySet)()
 
 
-# Set ICEKIT_BLOG_MODEL in your site settings to override
-# format: app_name.ModelName
-default_blog_model = 'blog_tools.BlogPost'
-icekit_blog_model = getattr(settings, 'ICEKIT_BLOG_MODEL', default_blog_model)
-if icekit_blog_model == default_blog_model:
-    @python_2_unicode_compatible
-    class PostItem(ContentItem):
-        """
-        A post instance
-        """
-        post = models.ForeignKey(
-            'blog_tools.BlogPost',
-            help_text=_('A blog post (unpublished items will not be visible '
-                        'to the public)'),
-            related_name='post',
-        )
+@python_2_unicode_compatible
+class PostItem(ContentItem):
+    """
+    A post instance.
 
-        class Meta:
-            verbose_name = _('Blog Post')
-            verbose_name_plural = _('Blog Posts')
+    This is a working, out-of-the-box blog item, but you probably want
+    to copy this and replace the FK reference in your own site.
+    """
+    post = models.ForeignKey(
+        'blog_tools.BlogPost',
+        help_text=_('A blog post (unpublished items will not be visible '
+                    'to the public)'),
+        related_name='post',
+    )
 
-        def __str__(self):
-            return str(self.post)
+    class Meta:
+        verbose_name = _('Blog Post')
+        verbose_name_plural = _('Blog Posts')
+
+    def __str__(self):
+        return str(self.post)
