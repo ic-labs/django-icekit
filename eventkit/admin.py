@@ -8,9 +8,11 @@ Admin configuration for ``eventkit`` app.
 from dateutil import rrule
 import datetime
 import json
+import logging
 import six
 
 from django.contrib import admin
+from django.contrib.contenttypes.models import ContentType
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
 from django.db.models import Q
@@ -25,6 +27,8 @@ from polymorphic.admin import PolymorphicChildModelAdmin
 from timezone import timezone
 
 from eventkit import admin_forms, appsettings, forms, models, plugins
+
+logger = logging.getLogger(__name__)
 
 
 class EventChildAdmin(PolymorphicChildModelAdmin):
@@ -135,7 +139,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
             datetime.datetime.strptime(request.GET['start'], '%Y-%m-%d'), tz)
         ends = timezone.localize(
             datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d'), tz)
-        events = self.get_queryset(request) \
+        all_events = self.get_queryset(request) \
             .filter(starts__gte=starts, starts__lt=ends) \
             .values_list(
                 'pk', 'title', 'all_day', 'starts', 'ends', 'is_repeat',
@@ -148,6 +152,23 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
             plugin.content_type.pk: plugin
             for plugin in plugins.EventChildModelPlugin.get_plugins()
         }
+        # TODO: This excludes events for which there is no corresponding plugin
+        # (e.g. plugin was enabled, events created, then plugin disabled). This
+        # might not be wise, but I'm not sure how else to handle existing
+        # events of an unknown type. If ignored here, we probably need a more
+        # generic way to ignore them everywhere.
+        events = all_events.filter(
+            polymorphic_ctype__in=plugins_for_ctype.keys())
+        if events.count() != all_events.count():
+            ignored_events = all_events.exclude(
+                polymorphic_ctype__in=plugins_for_ctype.keys())
+            ignored_ctypes = ContentType.objects \
+                .filter(pk__in=ignored_events.values('polymorphic_ctype')) \
+                .values_list('app_label', 'name')
+            logger.warn('%s events of unknown type (%s) are being ignored.' % (
+                ignored_events.count(),
+                ';'.join(['%s.%s' % ctype for ctype in ignored_ctypes]),
+            ))
         # Get the keys into a sorted list, so we can assign a consistent colour
         # based on the index each event's content type is seen in the list.
         seen = sorted(plugins_for_ctype.keys())
