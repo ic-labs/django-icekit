@@ -45,12 +45,12 @@ class Forms(WebTest):
         # Incomplete.
         message = 'Enter a complete value.'
         with self.assertRaisesMessage(ValidationError, message):
-            forms.RecurrenceRuleField().clean([1, None])
+            forms.RecurrenceRuleField().clean([1, None, None])
 
         # Invalid.
         message = 'Enter a valid iCalendar (RFC2445) recurrence rule.'
         with self.assertRaisesMessage(ValidationError, message):
-            forms.RecurrenceRuleField().clean([None, 'foo'])
+            forms.RecurrenceRuleField().clean([None, None, 'foo'])
 
 
 class Migrations(WebTest):
