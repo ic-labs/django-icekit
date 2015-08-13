@@ -1,6 +1,26 @@
-<div>
-	{{ select }}
+<p>
+	Toggle the
+	<a class="toggle" data-target="natural" href="#">natural language rule</a>,
+	<a class="toggle" data-target="natural-examples" href="#">natural language examples</a>,
+	<a class="toggle" data-target="rfc" href="#">RFC rule</a> or
+	<a class="toggle" data-target="preview" href="#">occurrence preview</a>.
+</p>
+<div class="preset">
+	{{ preset }}
 </div>
-<div>
-	{{ textarea }}
+<div class="natural">
+	{{ natural }}
+</div>
+<div class="natural-examples">
+	<p>Natural Language Examples:</p>
+	<ul>
+		<li>Every weekday</li>
+		<li>Every 2 weeks on Tuesday</li>
+		<li>Every week on Monday, Wednesday</li>
+		<li>Every month on the 2nd last Friday for 7 times</li>
+		<li>Every 6 months</li>
+	</ul>
+</div>
+<div class="rfc">
+	{{ rfc }}
 </div>
