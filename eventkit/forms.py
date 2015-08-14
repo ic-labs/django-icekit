@@ -27,6 +27,8 @@ class RecurrenceRuleWidget(forms.MultiWidget):
         }
         js = (
             'eventkit/bower_components/lodash/lodash.js',
+            'eventkit/bower_components/skveege-rrule/lib/rrule.js',
+            'eventkit/bower_components/skveege-rrule/lib/nlp.js',
         )
 
     def __init__(self, *args, **kwargs):
@@ -35,6 +37,7 @@ class RecurrenceRuleWidget(forms.MultiWidget):
         """
         widgets = kwargs.pop('widgets', (
             forms.Select,
+            AdminTextareaWidget,
             AdminTextareaWidget,
         ))
         super(RecurrenceRuleWidget, self).__init__(
@@ -65,27 +68,31 @@ class RecurrenceRuleWidget(forms.MultiWidget):
                 pk = self.queryset.get(recurrence_rule=value).pk
             except self.queryset.model.DoesNotExist:
                 pk = None
-            return [pk, value]
-        return [None, None]
+            return [pk, None, value]
+        return [None, None, None]
 
     def format_output(self, rendered_widgets):
         """
         Render the ``eventkit/recurrence_rule_widget/format_output.html``
         template with the following context:
 
-            select
+            preset
                 A choice field for preset recurrence rules.
-            textarea
-                A text field for custom recurrence rules.
+            natural
+                An input field for natural language recurrence rules.
+            rfc
+                A text field for RFC compliant recurrence rules.
 
-        The default template positions the select widget above the textarea.
+        The default template positions the ``preset`` field above the
+        ``natural`` and ``rfc`` fields.
         """
         template = loader.get_template(
             'eventkit/recurrence_rule_widget/format_output.html')
-        select, textarea = rendered_widgets
+        preset, natural, rfc = rendered_widgets
         context = Context({
-            'select': select,
-            'textarea': textarea,
+            'preset': preset,
+            'natural': natural,
+            'rfc': rfc,
         })
         return template.render(context)
 
@@ -124,8 +131,8 @@ class RecurrenceRuleWidget(forms.MultiWidget):
 class RecurrenceRuleField(forms.MultiValueField):
     """
     A ``MultiValueField`` subclass that uses a ``ModelChoiceField`` for
-    selection of preset recurrence rules and a ``CharField`` for custom
-    recurrence rules.
+    selection of preset recurrence rules and a ``CharField`` for input of
+    natural language and RFC recurrence rules.
     """
     widget = RecurrenceRuleWidget
 
@@ -139,6 +146,7 @@ class RecurrenceRuleField(forms.MultiValueField):
         validators_ = kwargs.pop('validators', [validators.recurrence_rule])
         fields = (
             forms.ModelChoiceField(queryset=queryset, required=False),
+            forms.CharField(required=False),
             forms.CharField(max_length=max_length, validators=validators_),
         )
         kwargs.setdefault('fields', fields)
@@ -148,11 +156,11 @@ class RecurrenceRuleField(forms.MultiValueField):
 
     def compress(self, values):
         """
-        Always return the value from the ``CharField``, even when a preset is
-        selected. The recurrence rule is always defined in the ``CharField``.
+        Always return the value from the RFC field, even when a preset is
+        selected. The recurrence rule is always defined in the RFC field.
         """
         if values:
-            return values[1]
+            return values[2]
 
     def _get_queryset(self):
         """

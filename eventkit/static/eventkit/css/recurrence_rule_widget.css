@@ -2,6 +2,23 @@ div.recurrence-rule-widget {
 	display: inline-block;
 }
 
+div.recurrence-rule-widget div.natural-examples,
+div.recurrence-rule-widget div.rfc,
+div.recurrence-rule-widget div.preview {
+	display: none;
+}
+
+div.recurrence-rule-widget div.natural-examples ul
+{
+	margin: 0 0 4px;
+	padding: 0;
+}
+
+div.recurrence-rule-widget div.natural-examples li {
+	list-style-type: disc;
+	margin: 0 3em;
+}
+
 div.recurrence-rule-widget table.dates {
 	background: #fff;
 	border-collapse: collapse;
