@@ -37,6 +37,7 @@ setuptools.setup(
             'mock',
             'nose-progressive',
             'WebTest',
+            'micawber',
         ],
     },
 )

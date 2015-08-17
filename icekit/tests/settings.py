@@ -25,6 +25,7 @@ INSTALLED_APPS = (
     'django_nose',
     'forms_builder.forms',
     'fluent_contents',
+    'fluent_contents.plugins.oembeditem',
     'fluent_pages',
     'fluent_pages.pagetypes.fluentpage',
     'haystack',
@@ -40,6 +41,7 @@ INSTALLED_APPS = (
     'icekit.plugins.instagram_embed',
     'icekit.plugins.map',
     'icekit.plugins.map_with_text',
+    'icekit.plugins.oembed_with_caption',
     'icekit.plugins.page_anchor',
     'icekit.plugins.page_anchor_list',
     'icekit.plugins.quote',
@@ -49,6 +51,9 @@ INSTALLED_APPS = (
     'icekit.plugins.twitter_embed',
     'icekit.response_pages',
     'icekit.tests',
+
+    # Required for oembed
+    'micawber',
 )
 
 MIDDLEWARE_CLASSES = (
