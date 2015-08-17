@@ -1,18 +1,5 @@
-from django.db import models
-
-from fluent_contents.plugins.oembeditem.models import AbstractOEmbedItem
+from . import abstract_models
 
 
-class OEmbedWithCaptionItem(AbstractOEmbedItem):
-    caption = models.TextField(
-        blank=True,
-    )
-
-    help_me_out_here = 'Online Media such as a Vimeo embed with a caption ' \
-                       'displayed with it. The video will still scale within ' \
-                       '''the responsive design, but won't stretch beyond ''' \
-                       'max width.'
-
-    class Meta:
-        verbose_name = 'Online Media with Caption'
-
+class OEmbedWithCaptionItem(abstract_models.AbstractOEmbedWithCaptionItem):
+    pass

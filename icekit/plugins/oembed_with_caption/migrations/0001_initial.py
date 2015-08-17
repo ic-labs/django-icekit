@@ -33,9 +33,10 @@ class Migration(migrations.Migration):
                 ('height', models.IntegerField(null=True, editable=False, blank=True)),
                 ('width', models.IntegerField(null=True, editable=False, blank=True)),
                 ('html', models.TextField(null=True, editable=False, blank=True)),
-                ('caption', models.TextField()),
+                ('caption', models.TextField(blank=True)),
             ],
             options={
+                'abstract': False,
                 'db_table': 'contentitem_oembed_with_caption_oembedwithcaptionitem',
                 'verbose_name': 'Online Media with Caption',
             },
