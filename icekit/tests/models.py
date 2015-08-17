@@ -2,10 +2,10 @@
 Test models for ``icekit`` app.
 """
 
-from icekit import models
+from icekit import abstract_models
 
 
-class BaseModel(models.AbstractBaseModel):
+class BaseModel(abstract_models.AbstractBaseModel):
     """
     Concrete base model.
     """

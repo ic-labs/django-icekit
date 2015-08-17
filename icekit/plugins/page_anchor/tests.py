@@ -8,7 +8,7 @@ from icekit.models import Layout
 from icekit.page_types.layout_page.models import LayoutPage
 from icekit.utils import fluent_contents
 
-from .models import PageAnchorItem
+from . import models
 
 User = get_user_model()
 
@@ -37,12 +37,12 @@ class PageAnchorItemTestCase(WebTest):
         self.page_1.status = 'p'  # Publish the page
         self.page_1.save()
         self.anchor_1 = fluent_contents.create_content_instance(
-            PageAnchorItem,
+            models.PageAnchorItem,
             self.page_1,
             anchor_name='Jump Link'
         )
         self.anchor_2 = fluent_contents.create_content_instance(
-            PageAnchorItem,
+            models.PageAnchorItem,
             self.page_1,
             anchor_name='Second Jump Link'
         )

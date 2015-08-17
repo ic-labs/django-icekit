@@ -1,7 +1,5 @@
-from django.conf.urls import patterns, url
 from fluent_pages.extensions import page_type_pool
 from fluent_pages.integration.fluent_contents.page_type_plugins import FluentContentsPagePlugin
-from fluent_pages.models import UrlNode
 
 from . import admin, models
 
@@ -16,4 +14,3 @@ class LayoutPagePlugin(FluentContentsPagePlugin):
         # Allow subclasses to easily override it by specifying `render_template` after all.
         # The default, is to use the template_path from the layout object.
         return self.render_template or fluentpage.layout.template_name
-

@@ -9,7 +9,7 @@ from icekit.page_types.layout_page.models import LayoutPage
 from icekit.utils import fluent_contents
 from icekit.plugins.page_anchor.models import PageAnchorItem
 
-from .models import PageAnchorListItem
+from . import models
 
 User = get_user_model()
 
@@ -49,7 +49,7 @@ class PageAnchorItemTestCase(WebTest):
         )
 
         self.anchor_list = fluent_contents.create_content_instance(
-            PageAnchorListItem,
+            models.PageAnchorListItem,
             self.page_1,
         )
 

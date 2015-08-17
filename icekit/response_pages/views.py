@@ -7,7 +7,7 @@ from django.template import (RequestContext, loader)
 from django.views.decorators.csrf import requires_csrf_token
 from django.views import defaults
 
-from . import models
+from . import abstract_models, models
 
 
 def get_response_page(request, return_type, template_location, response_page_type):
@@ -62,7 +62,7 @@ def page_not_found(request, template_name='404.html'):
         request,
         http.HttpResponseNotFound,
         'icekit/response_pages/404.html',
-        models.RESPONSE_HTTP404
+        abstract_models.RESPONSE_HTTP404
     )
     if rendered_page is None:
         return defaults.page_not_found(request, template_name)
@@ -92,7 +92,7 @@ def server_error(request, template_name='500.html'):
             request,
             http.HttpResponseServerError,
             'icekit/response_pages/500.html',
-            models.RESPONSE_HTTP500
+            abstract_models.RESPONSE_HTTP500
         )
         if rendered_page is not None:
             return rendered_page

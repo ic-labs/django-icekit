@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import icekit.models
+import icekit.fields
 
 
 class Migration(migrations.Migration):
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='layout',
             name='template_name',
-            field=icekit.models.TemplateNameField(max_length=255, verbose_name='template', choices=[(b'', b'')]),
+            field=icekit.fields.TemplateNameField(max_length=255, verbose_name='template', choices=[(b'', b'')]),
             preserve_default=True,
         ),
     ]

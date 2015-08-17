@@ -8,7 +8,7 @@ from icekit.models import Layout
 from icekit.page_types.layout_page.models import LayoutPage
 from icekit.utils import fluent_contents
 
-from .models import MapItem
+from . import models
 
 User = get_user_model()
 
@@ -42,7 +42,7 @@ class MapItemTestCase(WebTest):
         self.page_1.status = 'p'  # Publish the page
         self.page_1.save()
         self.map_1 = fluent_contents.create_content_instance(
-            MapItem,
+            models.MapItem,
             self.page_1,
             share_url=self.share_url
         )

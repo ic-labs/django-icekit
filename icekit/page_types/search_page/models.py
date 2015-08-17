@@ -1,6 +1,5 @@
-from fluent_pages.integration.fluent_contents import FluentContentsPage
+from . import abstract_models
 
 
-class SearchPage(FluentContentsPage):
-    class Meta:
-        verbose_name = 'Search Page'
+class SearchPage(abstract_models.AbstractSearchPage):
+    pass
