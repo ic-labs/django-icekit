@@ -4,7 +4,9 @@ from fluent_contents.plugins.oembeditem.models import AbstractOEmbedItem
 
 
 class OEmbedWithCaptionItem(AbstractOEmbedItem):
-    caption = models.TextField()
+    caption = models.TextField(
+        blank=True,
+    )
 
     help_me_out_here = 'Online Media such as a Vimeo embed with a caption ' \
                        'displayed with it. The video will still scale within ' \

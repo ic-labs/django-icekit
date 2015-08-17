@@ -15,8 +15,7 @@ re_safe = re.compile(r'[^\w_-]')
 class OEmbedWithCaptionPlugin(ContentPlugin):
     model = OEmbedWithCaptionItem
     category = _('Media')
-    admin_form_template = "admin/fluent_contents/plugins/oembeditem/admin_form.html"
-    render_template = "fluent_contents/plugins/oembed/default.html"
+    render_template = "icekit/plugins/oembed/default.html"
 
     #: Custom render template
     render_template_base = "fluent_contents/plugins/oembed/{type}.html"
@@ -24,9 +23,8 @@ class OEmbedWithCaptionPlugin(ContentPlugin):
     fieldsets = (
         (None, {
             'fields': (
-                'caption',
                 'embed_url',
-                ('embed_max_width', 'embed_max_height'),
+                'caption',
             ),
         }),
     )
