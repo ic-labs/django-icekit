@@ -64,7 +64,7 @@ class AbstractInstagramEmbedItem(ContentItem):
         """
         r = requests.get('http://api.instagram.com/publicapi/oembed/?url=%s' % self.url)
         if r.status_code is 200:
-            return json.loads(r.content)
+            return json.loads(r.content.decode())
         return r.content
 
     def get_thumbnail(self):
