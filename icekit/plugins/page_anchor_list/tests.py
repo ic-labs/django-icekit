@@ -57,3 +57,5 @@ class PageAnchorItemTestCase(WebTest):
         response = self.app.get(self.page_1.get_absolute_url())
         response.mustcontain('<a href="#jump-link-1">Jump Link</a>')
 
+    def test_str(self):
+        self.assertEqual(str(self.anchor_list), 'Page Anchor List')
