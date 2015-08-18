@@ -54,7 +54,7 @@ class AbstractInstagramEmbedItem(ContentItem):
         else:
             raise exceptions.ValidationError(instagram_data)
 
-        super(InstagramEmbedItem, self).clean(*args, **kwargs)
+        super(AbstractInstagramEmbedItem, self).clean(*args, **kwargs)
 
     def fetch_instagram_data(self):
         """
