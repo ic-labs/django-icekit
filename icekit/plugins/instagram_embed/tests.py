@@ -77,6 +77,7 @@ class InstagramEmbedItemTestCase(WebTest):
     def test_forms(self):
         class InstagramEmbedAdminForm(forms.InstagramEmbedAdminForm):
             class Meta:
+                fields = '__all__'
                 model = models.InstagramEmbedItem
 
         form = InstagramEmbedAdminForm(
@@ -99,5 +100,8 @@ class InstagramEmbedItemTestCase(WebTest):
             }
         )
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors.keys(), ['url', '__all__'])
+        self.assertEqual(len(form.errors.keys()), 2)
+        expected_keys = ['url', '__all__']
+        for key in expected_keys:
+            self.assertIn(key, form.errors.keys())
         self.assertEqual(form.errors['url'][0], 'Please provide a valid instagram link.')
