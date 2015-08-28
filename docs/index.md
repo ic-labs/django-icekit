@@ -45,6 +45,52 @@ Run the migrations for the page type:
         'icekit.page_types.layout_page',
     )
 
+## Adding Modular Content to Models
+
+You can add modular content to any model, not only hierarchical `Page` models,
+with two mixin classes:
+
+    # models.py
+
+    from icekit.abstract_models import FluentFieldsMixin
+
+    class MyModel(FluentFieldsMixin, MyModelBase):
+        ...
+
+    # admin.py
+
+    from icekit.admin import FluentLayoutsMixin
+
+    class MyModelAdmin(FluentLayoutsMixin, MyModelAdminBase):
+        ...
+
+`FluentFieldsMixin` will add a `layout` field to your model, so you'll need a
+migration for this change:
+
+    $ ./manage.py makemigrations myapp
+    $ ./manage.py migrate
+
+## Configuring Layouts
+
+The `Layout` model links a template to all the `ContentType`s that are allowed
+to use it.
+
+The template for a layout should define placeholders for modular content:
+
+    {# layouts/default.html #}
+
+    {% load fluent_contents_tags %}
+
+    <div id="main">
+        {% page_placeholder obj "main" %}
+    </div>
+    <div id="sidebar">
+        {% page_placeholder obj "sidebar" %}
+    </div>
+
+Models that have modular content will have a `layout` field in the admin change
+form, that will only show layouts for the model being edited.
+
 ## HTML Docs
 
 Docs are written in [Markdown]. You can use [MkDocs] to preview your
