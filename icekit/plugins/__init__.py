@@ -60,7 +60,7 @@ class AppModelDefaultLayoutsPlugin(TemplateNameFieldChoicesPlugin):
 
 class FileSystemLayoutsPlugin(TemplateNameFieldChoicesPlugin):
     """
-    Source layout templates from one or more directories on the file system.
+    Add templates from one or more directories on the file system.
 
     Directories can be specified in the ``ICEKIT['LAYOUT_TEMPLATES']`` setting,
     which should be a list of 3-tuples, each containing a label prefix, a
@@ -119,7 +119,7 @@ class ICEkitLayoutPlugin(TemplateNameFieldChoicesPlugin):
     def get_choices(self):
         """
         Return the default ICEkit layout template, to be sure there is always
-        at least one layout template available.
+        at least one available.
         """
         choices = [
             ('icekit/layouts/default.html', 'ICEkit: Default'),
