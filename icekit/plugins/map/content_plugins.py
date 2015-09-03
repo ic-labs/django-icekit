@@ -1,3 +1,4 @@
+from django.utils.translation import ugettext_lazy as _
 from fluent_contents.extensions import plugin_pool, ContentPlugin
 
 from . import models
