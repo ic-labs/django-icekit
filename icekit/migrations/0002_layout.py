@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 import django.utils.timezone
-import icekit.validators
-import fluent_pages.models.fields
+import icekit.fields
 
 
 class Migration(migrations.Migration):
@@ -22,7 +21,7 @@ class Migration(migrations.Migration):
                 ('modified', models.DateTimeField(default=django.utils.timezone.now, editable=False, db_index=True)),
                 ('key', models.SlugField(help_text='A short name to identify the layout programmatically.', verbose_name='key')),
                 ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('template_name', fluent_pages.models.fields.TemplateFilePathField(verbose_name=b'template file', recursive=True, match=b'.*\\.html$', validators=[icekit.validators.template_name])),
+                ('template_name', icekit.fields.TemplateNameField(max_length=255, choices=[(b'', b'')], verbose_name='template')),
             ],
             options={
                 'ordering': ('title',),

@@ -1,6 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.contrib.auth import get_user_model
+from django.core import exceptions
 
 from django_dynamic_fixture import G
 from django_webtest import WebTest
@@ -48,6 +49,13 @@ class MapItemTestCase(WebTest):
         )
         self.map_1.parse_share_url()
 
+        self.map_item = models.MapItem(
+            parent_type=ContentType.objects.get_for_model(type(self.page_1)),
+            parent_id=self.page_1.id,
+            placeholder=self.page_1.get_placeholder_by_slot('main')[0],
+            share_url=self.share_url,
+        )
+
     def test_regex_finds_values(self):
         response = self.app.get(self.page_1.get_absolute_url())
         response.mustcontain('Chippen+St,+Chippendale')
@@ -56,3 +64,21 @@ class MapItemTestCase(WebTest):
     def test_map_renders(self):
         response = self.app.get(self.page_1.get_absolute_url())
         response.mustcontain('<iframe')
+
+    def test_clean(self):
+        self.assertEqual(self.map_item.loc, '0, 0')
+        self.assertEqual(self.map_item.place_name, 'Unknown')
+        self.map_item.clean()
+        self.assertEqual(self.map_item.loc, '-33.8877043,151.2005881,17z')
+        self.assertEqual(self.map_item.place_name, 'Chippen+St,+Chippendale+NSW+2008')
+        self.map_item.share_url = 'this really should not work'
+        with self.assertRaises(exceptions.ValidationError):
+            self.map_item.clean()
+
+    def test_str(self):
+        self.assertEqual(str(self.map_1), '%s @%s' % (self.map_1.place_name, self.map_1.loc))
+        self.map_item.place_name = 'Unknown'
+        self.assertEqual(
+            str(self.map_item),
+            '%s @%s' % (self.map_item.place_name, self.map_item.loc)
+        )

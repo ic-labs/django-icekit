@@ -42,7 +42,7 @@ class AbstractMapItem(ContentItem):
         """Search the Share URL for place name and lat/lon coordinates."""
         regex = re.compile(SHARE_URL_PATTERN)
         result = regex.search(str(self.share_url))
-        if getattr(result, 'groupdict'):
+        if result and getattr(result, 'groupdict'):
             self.place_name = result.groupdict()['name']
             self.loc = result.groupdict()['loc']
         else:

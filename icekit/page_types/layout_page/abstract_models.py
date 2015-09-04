@@ -1,9 +1,9 @@
 from fluent_pages.integration.fluent_contents import FluentContentsPage
 
-from icekit.abstract_models import FluentFieldsMixin
+from icekit.abstract_models import LayoutFieldMixin
 
 
-class AbstractLayoutPage(FluentContentsPage, FluentFieldsMixin):
+class AbstractLayoutPage(FluentContentsPage, LayoutFieldMixin):
     class Meta:
         abstract = True
         verbose_name = 'Layout Page'

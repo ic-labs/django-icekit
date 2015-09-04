@@ -275,6 +275,12 @@ class Models(WebTest):
             with self.assertRaises(exceptions.ValidationError):
                 tei.full_clean()
 
+    def test_map_with_text_item(self):
+        self.assertEqual(
+            self.map_with_text_1.get_text(),
+            self.map_with_text_1.text
+        )
+
 
 class Views(WebTest):
     def setUp(self):

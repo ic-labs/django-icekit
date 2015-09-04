@@ -9,6 +9,7 @@ from django.db import models
 from django.template.loader import get_template
 from django.utils import encoding, timezone
 from django.utils.translation import ugettext_lazy as _
+from fluent_contents.models import ContentItemRelation, PlaceholderRelation
 
 from . import fields, plugins
 
@@ -16,10 +17,10 @@ from . import fields, plugins
 # MIXINS ######################################################################
 
 
-class FluentFieldsMixin(models.Model):
+class LayoutFieldMixin(models.Model):
     """
-    Add ``layout``, ``contentitem_set`` and ``placeholder_set`` fields so we
-    can add modular content with ``django-fluent-contents``.
+    Add ``layout`` field to models that already have ``contentitem_set`` and
+    ``placeholder_set`` fields.
     """
     layout = models.ForeignKey(
         'icekit.Layout',
@@ -27,6 +28,18 @@ class FluentFieldsMixin(models.Model):
         null=True,
         related_name='%(app_label)s_%(class)s_related',
     )
+
+    class Meta:
+        abstract = True
+
+
+class FluentFieldsMixin(LayoutFieldMixin):
+    """
+    Add ``layout``, ``contentitem_set`` and ``placeholder_set`` fields so we
+    can add modular content with ``django-fluent-contents``.
+    """
+    contentitem_set = ContentItemRelation()
+    placeholder_set = PlaceholderRelation()
 
     class Meta:
         abstract = True

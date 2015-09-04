@@ -14,6 +14,7 @@ class FakeRequestNode(Node):
 
         return ''
 
+
 @register.tag
 def fake_request(parser, token):
     """
