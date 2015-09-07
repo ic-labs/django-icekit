@@ -7,14 +7,15 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('map_with_text', '0003_auto_20150903_1948'),
+        ('map_with_text', '0001_initial'),
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.RemoveField(
             model_name='mapwithtextitem',
             name='mapitem_ptr',
-            field=models.OneToOneField(parent_link=True, auto_created=True, primary_key=True,
-                                       serialize=False, to='fluent_contents.ContentItem'),
+        ),
+        migrations.DeleteModel(
+            name='MapWithTextItem',
         ),
     ]
