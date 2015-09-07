@@ -2,10 +2,10 @@ from django.db import models
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.extensions import PluginHtmlField
-from icekit.plugins.map.models import MapItem
+from icekit.plugins.map.abstract_models import AbstractMapItem
 
 
-class AbstractMapWithTextItem(MapItem):
+class AbstractMapWithTextItem(AbstractMapItem):
     text = PluginHtmlField(
         _('text'),
         blank=True
