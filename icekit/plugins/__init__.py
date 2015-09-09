@@ -140,10 +140,6 @@ class ICEkitFluentContentsPagePlugin(FluentContentsPagePlugin):
     def get_render_template(self, request, fluentpage, **kwargs):
         if self.render_template:
             return self.render_template
-
         if fluentpage.layout:
             return fluentpage.layout.template_name
-
-        # If no placeholder is selected let'ss falls back to a template
-        # informing the user of this.
         return self.fallback_template
