@@ -29,8 +29,18 @@ class LayoutFieldMixin(models.Model):
         related_name='%(app_label)s_%(class)s_related',
     )
 
+    fallback_template = 'icekit/layouts/fallback_default.html'
+
     class Meta:
         abstract = True
+
+    def get_layout_template_name(self):
+        """
+        Return ``layout.template_name`` or `fallback_template``.
+        """
+        if self.layout:
+            return self.layout.template_name
+        return self.fallback_template
 
 
 class FluentFieldsMixin(LayoutFieldMixin):
