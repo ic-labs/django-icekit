@@ -135,7 +135,7 @@ class ICEkitFluentContentsPagePlugin(FluentContentsPagePlugin):
     Slight adaptation to FluentContentsPagePlugin to use a defined fallback
     template when no layout is available.
     """
-    fallback_template = "icekit/layouts/no_layout_selected.html"
+    fallback_template = 'icekit/layouts/fallback_default.html'
 
     def get_render_template(self, request, fluentpage, **kwargs):
         if self.render_template:
