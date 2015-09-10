@@ -20,6 +20,6 @@ class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
         return image.title
 
     def description(self, image):
-        return unicode(image)
+        return str(image)
 
 admin.site.register(models.Image, ImageAdmin)
