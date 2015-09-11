@@ -92,6 +92,7 @@ class AbstractLayout(AbstractBaseModel):
     template_name = fields.TemplateNameField(
         _('template'),
         plugin_class=plugins.TemplateNameFieldChoicesPlugin,
+        unique=True,
     )
     content_types = models.ManyToManyField(
         ContentType,
