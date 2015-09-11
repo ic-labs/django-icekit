@@ -49,9 +49,7 @@ class ThumbnailAdminMixin(object):
         if source:
             try:
                 from easy_thumbnails.files import get_thumbnailer
-                thumbnailer = get_thumbnailer(source)
-                thumbnail = thumbnailer.get_thumbnail(self.thumbnail_options)
-                return '<img class="thumbnail" src="{0}" />'.format(thumbnail.url)
+                from easy_thumbnails.exceptions import InvalidImageFormatError
             except ImportError:
                 logger.warning(
                     _(
@@ -59,5 +57,12 @@ class ThumbnailAdminMixin(object):
                         'icekit.utils.admin.mixins.ThumbnailAdminMixin'
                     )
                 )
+                return ''
+            try:
+                thumbnailer = get_thumbnailer(source)
+                thumbnail = thumbnailer.get_thumbnail(self.thumbnail_options)
+                return '<img class="thumbnail" src="{0}" />'.format(thumbnail.url)
+            except InvalidImageFormatError:
+                pass
         return ''
     thumbnail.allow_tags = True
