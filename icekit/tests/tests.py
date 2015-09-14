@@ -93,6 +93,40 @@ class Forms(WebTest):
         self.assertEqual(teaf.cleaned_data['twitter_url'], twitter_url)
 
 
+class Layout(WebTest):
+
+    def test_auto_add(self):
+        # No layouts.
+        self.assertEqual(models.Layout.objects.count(), 0)
+        # Create for existing template.
+        layout = models.Layout.auto_add(
+            'icekit/layouts/default.html',
+            test_models.FooWithLayout,
+        )
+        # 1 layout.
+        self.assertEqual(models.Layout.objects.count(), 1)
+        # And has 1 content type.
+        self.assertEqual(layout.content_types.count(), 1)
+        # And the content type's model name is its title.
+        self.assertEqual(layout.title, 'foo with layout')
+        # Update and add content types.
+        layout = models.Layout.auto_add(
+            'icekit/layouts/default.html',
+            test_models.FooWithLayout,
+            test_models.BarWithLayout,
+            test_models.BazWithLayout,
+        )
+        # Still only 1 layout.
+        self.assertEqual(models.Layout.objects.count(), 1)
+        # Now with 3 content types.
+        self.assertEqual(layout.content_types.count(), 3)
+        # And all model names in its title, which has been split and sorted.
+        self.assertEqual(
+            layout.title,
+            'bar with layout, baz with layout, foo with layout',
+        )
+
+
 class Models(WebTest):
     def setUp(self):
         self.site = G(Site)
