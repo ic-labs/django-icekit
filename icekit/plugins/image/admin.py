@@ -16,5 +16,6 @@ class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
     thumbnail_options = {
         'size': (150, 150),
     }
+    thumbnail_show_exceptions = True
 
 admin.site.register(models.Image, ImageAdmin)
