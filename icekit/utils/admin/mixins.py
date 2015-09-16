@@ -64,7 +64,7 @@ class ThumbnailAdminMixin(object):
                 thumbnail = thumbnailer.get_thumbnail(self.thumbnail_options)
                 return '<img class="thumbnail" src="{0}" />'.format(
                     thumbnail.url)
-            except Exception, ex:
+            except Exception as ex:
                 logger.warning(
                     _(u'`easy_thumbnails` failed to generate a thumbnail image'
                       u' for {0}'.format(source)))
