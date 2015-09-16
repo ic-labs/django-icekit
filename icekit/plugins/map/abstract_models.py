@@ -9,7 +9,10 @@ from fluent_contents.models import ContentItem
 # This will likely have to be tended as GMaps will change their
 #  Share URL format over time.
 # See tests.py
-SHARE_URL_PATTERN = r'place\/((?P<name>.+)\/)?\@(?P<loc>.+)\/'
+DETAILED_SHARE_URL_REGEXP = re.compile(
+    r'place\/((?P<name>.+)\/)?\@(?P<loc>.+)\/')
+SHORTENED_SHARE_URL_REGEXP = re.compile(r'goo\.gl\/maps\/')
+OTHER_SHARE_URL_REGEXP = re.compile(r'google\.com\/maps\/')
 
 
 @python_2_unicode_compatible
@@ -40,13 +43,17 @@ class AbstractMapItem(ContentItem):
 
     def parse_share_url(self):
         """Search the Share URL for place name and lat/lon coordinates."""
-        regex = re.compile(SHARE_URL_PATTERN)
-        result = regex.search(str(self.share_url))
-        if result and getattr(result, 'groupdict'):
-            self.place_name = result.groupdict()['name']
-            self.loc = result.groupdict()['loc']
+        share_url_str = str(self.share_url)
+        detailed_result = DETAILED_SHARE_URL_REGEXP.search(share_url_str)
+        if detailed_result and getattr(detailed_result, 'groupdict'):
+            self.place_name = detailed_result.groupdict()['name']
+            self.loc = detailed_result.groupdict()['loc']
+        elif SHORTENED_SHARE_URL_REGEXP.search(share_url_str) \
+                or OTHER_SHARE_URL_REGEXP.search(share_url_str):
+            self.place_name = 'Unknown'
+            self.loc = '0, 0'
         else:
-            raise exceptions.ValidationError('Could not parse map Share URL')
+            raise exceptions.ValidationError('Invalid map Share URL')
 
     def __str__(self):
         if self.place_name == 'Unknown':
