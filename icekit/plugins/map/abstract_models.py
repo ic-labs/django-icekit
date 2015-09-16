@@ -1,4 +1,8 @@
 import re
+try:
+    from urllib import urlopen
+except ImportError:  # Python 3
+    from urllib.request import urlopen
 
 from django.core import exceptions
 from django.db import models
@@ -11,8 +15,10 @@ from fluent_contents.models import ContentItem
 # See tests.py
 DETAILED_SHARE_URL_REGEXP = re.compile(
     r'place\/((?P<name>.+)\/)?\@(?P<loc>.+)\/')
+VIEWER_SHARE_URL_REGEXP = re.compile(
+    r'google\.com\/maps\/d\/(?P<viewer_path>.*\/viewer\?)')
+EMBED_SHARE_URL_REGEXP = re.compile(r'google\.com\/maps\/.+\/embed?')
 SHORTENED_SHARE_URL_REGEXP = re.compile(r'goo\.gl\/maps\/')
-OTHER_SHARE_URL_REGEXP = re.compile(r'google\.com\/maps\/')
 
 
 @python_2_unicode_compatible
@@ -31,7 +37,7 @@ class AbstractMapItem(ContentItem):
     )
 
     place_name = 'Unknown'
-    loc = '0, 0'
+    loc = ''
 
     class Meta:
         abstract = True
@@ -44,16 +50,38 @@ class AbstractMapItem(ContentItem):
     def parse_share_url(self):
         """Search the Share URL for place name and lat/lon coordinates."""
         share_url_str = str(self.share_url)
-        detailed_result = DETAILED_SHARE_URL_REGEXP.search(share_url_str)
-        if detailed_result and getattr(detailed_result, 'groupdict'):
-            self.place_name = detailed_result.groupdict()['name']
-            self.loc = detailed_result.groupdict()['loc']
-        elif SHORTENED_SHARE_URL_REGEXP.search(share_url_str) \
-                or OTHER_SHARE_URL_REGEXP.search(share_url_str):
+
+        # Lookup original URL for shortened URLs
+        if SHORTENED_SHARE_URL_REGEXP.search(share_url_str):
+            try:
+                result = urlopen(self.share_url)
+                self.share_url = result.url
+                share_url_str = str(self.share_url)
+            except:
+                pass
+
+        result = DETAILED_SHARE_URL_REGEXP.search(share_url_str)
+        # Parse location and lat/long from standard share URLs
+        if result and getattr(result, 'groupdict'):
+            self.place_name = result.groupdict()['name']
+            self.loc = result.groupdict()['loc']
+            return
+        # Covnert viewer-style URLs to embed versions
+        result = VIEWER_SHARE_URL_REGEXP.search(share_url_str)
+        if result and getattr(result, 'groupdict'):
+            # Convert "viewer" URL to "embed" version, e.g.
+            # https://www.google.com/maps/d/u/0/viewer?mid=zLFp8zmG_u7Y.kWM6FxvhXeUw
+            # =>
+            # https://www.google.com/maps/d/embed?mid=zLFp8zmG_u7Y.kWM6FxvhXeUw
+            self.share_url = self.share_url.replace(
+                result.groupdict()['viewer_path'], 'embed?')
+            return
+        # Accept embed-style URLs as-is
+        if EMBED_SHARE_URL_REGEXP.search(share_url_str):
             self.place_name = 'Unknown'
-            self.loc = '0, 0'
-        else:
-            raise exceptions.ValidationError('Invalid map Share URL')
+            self.loc = ''
+            return
+        raise exceptions.ValidationError('Invalid map Share URL')
 
     def __str__(self):
         if self.place_name == 'Unknown':
