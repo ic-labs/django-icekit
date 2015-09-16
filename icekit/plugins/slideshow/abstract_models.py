@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import six
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItem, PlaceholderField
@@ -27,7 +28,7 @@ class AbstractSlideShow(models.Model):
         abstract = True
 
     def __str__(self):
-        return str(self.title)
+        return self.title
 
 
 @python_2_unicode_compatible
@@ -46,4 +47,4 @@ class AbstractSlideShowItem(ContentItem):
         verbose_name_plural = _('Slide shows')
 
     def __str__(self):
-        return str(self.slide_show)
+        return six.text_type(self.slide_show)

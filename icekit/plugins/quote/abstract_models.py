@@ -18,4 +18,4 @@ class AbstractQuoteItem(ContentItem):
         verbose_name_plural = _('Quotes')
 
     def __str__(self):
-        return str(self.quote)
+        return self.quote

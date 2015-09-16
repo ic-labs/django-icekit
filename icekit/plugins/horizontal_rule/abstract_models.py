@@ -10,4 +10,4 @@ class AbstractHorizontalRuleItem(ContentItem):
         verbose_name = _('Horizontal Rule')
 
     def __str__(self):
-        return str('Horizontal Rule')
+        return 'Horizontal Rule'

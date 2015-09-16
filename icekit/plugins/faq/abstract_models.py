@@ -19,4 +19,4 @@ class AbstractFAQItem(ContentItem):
         verbose_name_plural = _('FAQs')
 
     def __str__(self):
-        return str(self.question)
+        return self.question
