@@ -30,7 +30,7 @@ from icekit.plugins.slideshow.models import SlideShow, SlideShowItem
 from icekit.plugins.twitter_embed.forms import TwitterEmbedAdminForm
 from icekit.plugins.twitter_embed.models import TwitterEmbedItem
 from icekit.response_pages.models import ResponsePage
-from mock import patch
+from mock import patch, Mock
 
 from icekit.utils import fluent_contents, implementation
 from icekit.utils.admin import mixins
@@ -84,12 +84,39 @@ class Forms(WebTest):
     def test_twitter_embed_admin_form(self):
         twitter_url = 'https://twitter.com/Interior/status/463440424141459456'
         teaf = TwitterEmbedAdminForm({'twitter_url': 'http://test.com/', })
+        initial_fetch_twitter_data = teaf.instance.fetch_twitter_data
+        teaf.instance.fetch_twitter_data = Mock(
+            return_value={
+                'errors': [{
+                    'message': 'Please provide a valid twitter link.'
+                }, ]
+            }
+        )
+
         teaf.full_clean()
+        teaf.instance.fetch_twitter_data = initial_fetch_twitter_data
         self.assertEqual(teaf.errors['twitter_url'], ['Please provide a valid twitter link.'])
         teaf = TwitterEmbedAdminForm({
             'twitter_url': twitter_url
         })
+        initial_fetch_twitter_data = teaf.instance.fetch_twitter_data
+        teaf.instance.fetch_twitter_data = Mock(
+            return_value={
+                'url': twitter_url,
+                'provider_url': '',
+                'cache_age': '',
+                'author_name': '',
+                'height': '',
+                'width': '',
+                'provider_name': '',
+                'version': '',
+                'author_url': '',
+                'type': '',
+                'html': '<p></p>',
+            }
+        )
         teaf.full_clean()
+        teaf.instance.fetch_twitter_data = initial_fetch_twitter_data
         self.assertEqual(teaf.cleaned_data['twitter_url'], twitter_url)
 
 
@@ -273,7 +300,26 @@ class Models(WebTest):
                                               '463440424141459456'
         self.twitter_response_1.url = ''
         self.assertEqual(self.twitter_response_1.url, '')
+
+        initial_fetch_twitter_data = self.twitter_response_1.fetch_twitter_data
+        self.twitter_response_1.fetch_twitter_data = Mock(
+            return_value={
+                'url': 'https://twitter.com/Interior/statuses/463440424141459456',
+                'provider_url': '',
+                'cache_age': '',
+                'author_name': '',
+                'height': '',
+                'width': '',
+                'provider_name': '',
+                'version': '',
+                'author_url': '',
+                'type': '',
+                'html': '<p></p>',
+            }
+        )
+
         self.twitter_response_1.clean()
+        self.twitter_response_1.fetch_twitter_data = initial_fetch_twitter_data
         self.assertEqual(
             self.twitter_response_1.url,
             'https://twitter.com/Interior/statuses/463440424141459456'
@@ -289,7 +335,17 @@ class Models(WebTest):
         )
         with self.assertRaises(exceptions.ValidationError):
             self.twitter_response_1.twitter_url = 'https://twitter.com/Interior/status/not-real'
+            initial_fetch_twitter_data = self.twitter_response_1.fetch_twitter_data
+            self.twitter_response_1.fetch_twitter_data = Mock(
+                return_value={
+                    'errors': [{
+                        'message': 'This did not work.'
+                    }, ]
+                }
+            )
+
             self.twitter_response_1.clean()
+            self.twitter_response_1.fetch_twitter_data = initial_fetch_twitter_data
 
         with self.assertRaises(exceptions.ValidationError):
             self.twitter_response_1.twitter_url = 'http://test.com/'
