@@ -106,6 +106,20 @@ class MapItemTestCase(WebTest):
         self.assertEqual('',
                          map_embed_url.loc)
 
+        # Edit URL converted to embed version
+        map_viewer_share_url = fluent_contents.create_content_instance(
+            models.MapItem,
+            self.page_1,
+            share_url='https://www.google.com/maps/d/edit?mid=zLFp8zmG_u7Y.kWM6FxvhXeUw&usp=sharing',
+        )
+        self.assertEqual(
+            'https://www.google.com/maps/d/embed?mid=zLFp8zmG_u7Y.kWM6FxvhXeUw&usp=sharing',
+            map_viewer_share_url.share_url)
+        self.assertEqual('Unknown',
+                         map_viewer_share_url.place_name)
+        self.assertEqual('',
+                         map_viewer_share_url.loc)
+
         # Viewer URL converted to embed version
         map_viewer_share_url = fluent_contents.create_content_instance(
             models.MapItem,

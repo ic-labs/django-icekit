@@ -15,8 +15,8 @@ from fluent_contents.models import ContentItem
 # See tests.py
 DETAILED_SHARE_URL_REGEXP = re.compile(
     r'place\/((?P<name>.+)\/)?\@(?P<loc>.+)\/')
-VIEWER_SHARE_URL_REGEXP = re.compile(
-    r'google\.com\/maps\/d\/(?P<viewer_path>.*\/viewer\?)')
+EDIT_OR_VIEW_SHARE_URL_REGEXP = re.compile(
+    r'google\.com\/maps\/d\/(?P<replacable_path>.*(viewer|edit)\?)')
 EMBED_SHARE_URL_REGEXP = re.compile(r'google\.com\/maps\/.+\/embed?')
 SHORTENED_SHARE_URL_REGEXP = re.compile(r'goo\.gl\/maps\/')
 
@@ -67,14 +67,14 @@ class AbstractMapItem(ContentItem):
             self.loc = result.groupdict()['loc']
             return
         # Covnert viewer-style URLs to embed versions
-        result = VIEWER_SHARE_URL_REGEXP.search(share_url_str)
+        result = EDIT_OR_VIEW_SHARE_URL_REGEXP.search(share_url_str)
         if result and getattr(result, 'groupdict'):
             # Convert "viewer" URL to "embed" version, e.g.
             # https://www.google.com/maps/d/u/0/viewer?mid=zLFp8zmG_u7Y.kWM6FxvhXeUw
             # =>
             # https://www.google.com/maps/d/embed?mid=zLFp8zmG_u7Y.kWM6FxvhXeUw
             self.share_url = self.share_url.replace(
-                result.groupdict()['viewer_path'], 'embed?')
+                result.groupdict()['replacable_path'], 'embed?')
             return
         # Accept embed-style URLs as-is
         if EMBED_SHARE_URL_REGEXP.search(share_url_str):
