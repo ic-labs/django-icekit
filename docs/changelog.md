@@ -1,6 +1,8 @@
 # Changelog
 
 ## 0.1 (in development)
+  * Added `SlotDescriptor` to allow slot contents to be accessed directly. Useful for templates.
+  * Initial development
 
 Features:
 
