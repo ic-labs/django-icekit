@@ -12,7 +12,7 @@ from icekit.plugins.horizontal_rule.models import HorizontalRuleItem
 User = get_user_model()
 
 
-class SlotDescriptor(WebTest):
+class PlaceholderDescriptor(WebTest):
     def setUp(self):
         self.site = G(Site)
         self.user_1 = G(User)
@@ -28,7 +28,7 @@ class SlotDescriptor(WebTest):
         )
 
     def test_descriptor(self):
-        self.assertIsInstance(FluentPage.slots, descriptors.SlotDescriptor)
+        self.assertIsInstance(FluentPage.slots, descriptors.PlaceholderDescriptor)
         self.assertFalse(hasattr(self.page_1.slots, 'main'))
         horizontal_rule_1 = fluent_contents.create_content_instance(
             HorizontalRuleItem,
@@ -39,6 +39,9 @@ class SlotDescriptor(WebTest):
             getattr(self.page_1.slots, 'fake_slot')
         horizontal_rule_1.delete()
         self.assertEqual(self.page_1.slots.main.count(), 0)
+
+        # Test that the same object is returned
+        self.assertEqual(self.page_1.slots, self.page_1.slots)
 
     def tearDown(self):
         self.page_1.delete()

@@ -2,10 +2,12 @@ from django.contrib.contenttypes.models import ContentType
 from fluent_contents.models import Placeholder
 
 
-class SlotDescriptor(object):
+class PlaceholderDescriptor(object):
     """
     Descriptor to append appropriate slot content to a `UrlNode` derivative.
     """
+    place_holder_access = None
+
     def __init__(self, model=None):
         """
         """
@@ -18,7 +20,11 @@ class SlotDescriptor(object):
         if instance is None:
             return self
 
-        return self.create_placeholder_access_object(instance)
+        if self.place_holder_access:
+            return self.place_holder_access
+
+        self.place_holder_access = self.create_placeholder_access_object(instance)
+        return self.place_holder_access
 
     def contribute_to_class(self, cls, name):
         """
@@ -35,20 +41,22 @@ class SlotDescriptor(object):
         Each placeholder created for an object will be added to a
         `PlaceHolderAccess` object as a set property.
         """
-        placeholders = self.related_model.objects.filter(
-            parent_type=ContentType.objects.get_for_model(type(instance)),
-            parent_id=instance.id,
-        )
+        related_model = self.related_model
 
         class PlaceholderAccess(object):
-            pass
+            def __getattribute__(self, name):
+                try:
+                    # Parent type, parent id and slot are set to be unique on the default
+                    # related model and therefore treated as such here.
+                    return related_model.objects.get(
+                        parent_type=ContentType.objects.get_for_model(type(instance)),
+                        parent_id=instance.id,
+                        slot=name,
+                    ).get_content_items()
+                except related_model.DoesNotExist:
+                    return super(PlaceholderAccess, self).__getattribute__(name)
 
-        obj = PlaceholderAccess()
-
-        for placeholder in placeholders:
-            setattr(obj, placeholder.slot, placeholder.get_content_items())
-
-        return obj
+        return PlaceholderAccess()
 
 
 def monkey_patch(model_class, name='slots', descriptor=None):
@@ -59,10 +67,10 @@ def monkey_patch(model_class, name='slots', descriptor=None):
     :param name: The attribute name the descriptor will be assigned to.
     :param descriptor: The descriptor instance to be used. If none is
     specified it will default to
-    ``icekit.plugins.descriptors.SlotDescriptor``.
+    ``icekit.plugins.descriptors.PlaceholderDescriptor``.
     :return: True
     """
-    rel_obj = descriptor or SlotDescriptor()
+    rel_obj = descriptor or PlaceholderDescriptor()
     rel_obj.contribute_to_class(model_class, name)
     setattr(model_class, name, rel_obj)
     return True
