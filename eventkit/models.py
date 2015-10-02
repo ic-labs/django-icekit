@@ -281,6 +281,16 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         missing = rruleset.between(starts, end_repeat)
         return missing
 
+    @property
+    def period(self):
+        """
+        Return "AM" or "PM", depending on when this event starts.
+        """
+        try:
+            return 'PM' if timezone.localize(self.starts).hour >= 12 else 'AM'
+        except AttributeError:
+            pass
+
     @transaction.atomic
     def save(self, propagate=False, *args, **kwargs):
         """
