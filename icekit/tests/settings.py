@@ -23,6 +23,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django_nose',
+    'django_wysiwyg',
     'forms_builder.forms',
     'fluent_contents',
     'fluent_contents.plugins.oembeditem',
