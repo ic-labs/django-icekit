@@ -161,12 +161,9 @@ class MapItemTestCase(WebTest):
                          map_detailed_share_url.loc)
 
         # Unrecognised share URL rejected
-        try:
+        with self.assertRaises(exceptions.ValidationError):
             fluent_contents.create_content_instance(
                 models.MapItem,
                 self.page_1,
                 share_url='https://www.google.com/',
             )
-            self.fail("Expected map creation to fail with invalid share URL error")
-        except exceptions.ValidationError:
-            pass
