@@ -11,11 +11,13 @@ class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
     filter_horizontal = ['categories', ]
     list_filter = ['categories', 'is_active', ]
     search_fields = ['title', 'alt_text', 'caption', 'admin_notes', ]
+
+    change_form_template = 'image/admin/change_form.html'
+
     # ThumbnailAdminMixin attributes
     thumbnail_field = 'image'
     thumbnail_options = {
         'size': (150, 150),
     }
-    thumbnail_show_exceptions = True
 
 admin.site.register(models.Image, ImageAdmin)
