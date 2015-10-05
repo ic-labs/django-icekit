@@ -125,7 +125,7 @@ class EventRangeMixin(models.Model):
         abstract = True
 
     def __str__(self):
-        return '%s - %s' % (self.start, self.end)
+        return '%s - %s' % (self.event_start, self.event_end)
 
 
 @python_2_unicode_compatible
