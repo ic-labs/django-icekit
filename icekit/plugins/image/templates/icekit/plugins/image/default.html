@@ -1,5 +1,8 @@
 <figure>
-	<img src="{{ instance.image.image.url }}" alt="{{ instance.image.image.alt_text }}" />
+	<img src="{{ instance.image.image.url }}"
+         alt="{{ instance.image.image.alt_text }}"
+         {% if instance.image.title %} title="{{ instance.image.title }}" {% endif %}
+    />
 
 	{% if instance.image.title or instance.image.caption %}
 		<figcaption>

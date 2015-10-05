@@ -16,12 +16,12 @@ class AbstractImage(models.Model):
     )
     alt_text = models.CharField(
         max_length=255,
-        help_text=_("A description of the image for users who don't see images."),
+        help_text=_("A description of the image for users who don't see images"),
     )
     title = models.CharField(
         max_length=255,
         blank=True,
-        help_text=_('The title is shown in the caption.'),
+        help_text=_('The title is shown in the "title" attribute'),
     )
     caption = models.TextField(
         blank=True,
