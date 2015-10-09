@@ -178,6 +178,7 @@ class LayoutAdmin(admin.ModelAdmin):
 
     def get_form(self, *args, **kwargs):
         ctypes = self._get_ctypes()
+
         class Form(super(LayoutAdmin, self).get_form(*args, **kwargs)):
             def __init__(self, *args, **kwargs):
                 super(Form, self).__init__(*args, **kwargs)
@@ -185,6 +186,7 @@ class LayoutAdmin(admin.ModelAdmin):
                     'content_types'].queryset.filter(
                     pk__in=ctypes,
                 )
+
         return Form
 
 

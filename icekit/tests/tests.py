@@ -17,6 +17,7 @@ from fluent_contents.models import Placeholder
 from fluent_pages.models import PageLayout
 from fluent_pages.pagetypes.fluentpage.models import FluentPage
 from forms_builder.forms.models import Form
+from icekit.abstract_models import LayoutFieldMixin
 from icekit.plugins.faq.models import FAQItem
 from icekit.plugins.horizontal_rule.models import HorizontalRuleItem
 from icekit.plugins.image.models import ImageItem, Image
@@ -370,6 +371,24 @@ class Models(WebTest):
             self.map_with_text_1.get_text(),
             self.map_with_text_1.text
         )
+
+    def test_incorrect_declaration_on_item(self):
+        initial_count = FAQItem.objects.count()
+        with self.assertRaises(Exception):
+            self.faq_item_1 = fluent_contents.create_content_instance(
+                FAQItem,
+                self.page_1,
+                fake='test answer',
+            )
+        self.assertEqual(FAQItem.objects.count(), initial_count)
+
+    def test_layout_field_mixin(self):
+        mixin = LayoutFieldMixin()
+        self.assertEqual(mixin.get_layout_template_name(), 'icekit/layouts/fallback_default.html')
+        mixin_layout = G(models.Layout)
+        mixin.layout = mixin_layout
+        self.assertEqual(mixin.get_layout_template_name(), mixin_layout.template_name)
+        mixin_layout.delete()
 
 
 class Views(WebTest):
