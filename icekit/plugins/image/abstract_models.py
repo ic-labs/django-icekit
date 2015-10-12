@@ -1,3 +1,4 @@
+from django.utils.safestring import mark_safe
 from django.db import models
 from django.utils import six
 from django.utils.encoding import python_2_unicode_compatible
@@ -56,6 +57,8 @@ class AbstractImageItem(ContentItem):
         help_text=_('An image from the image library.')
     )
 
+    caption_override = models.TextField(blank=True)
+
     class Meta:
         abstract = True
         verbose_name = _('Image')
@@ -63,3 +66,7 @@ class AbstractImageItem(ContentItem):
 
     def __str__(self):
         return six.text_type(self.image)
+
+    @property
+    def caption(self):
+        return mark_safe(self.caption_override or self.image.caption)

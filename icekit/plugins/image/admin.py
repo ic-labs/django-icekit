@@ -6,7 +6,7 @@ from . import models
 
 
 class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
-    list_display = ['thumbnail', 'alt_text', 'title', ]
+    list_display = ['thumbnail', 'title', 'alt_text',]
     list_display_links = ['alt_text', 'thumbnail']
     filter_horizontal = ['categories', ]
     list_filter = ['categories', 'is_active', ]

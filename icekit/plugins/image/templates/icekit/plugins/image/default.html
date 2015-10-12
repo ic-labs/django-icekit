@@ -9,8 +9,8 @@
 			{% if instance.image.title %}
 				<h3>{{ instance.image.title }}</h3>
 			{% endif %}
-			{% if instance.image.caption %}
-				{{ instance.image.caption|safe }}
+			{% if instance.caption %}
+				{{ instance.caption }}
 			{% endif %}
 		</figcaption>
 	{% endif %}
