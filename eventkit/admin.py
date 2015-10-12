@@ -100,12 +100,24 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
         'all_day', 'starts', 'ends', EventTypeFilter, OriginalFilter,
         VariationFilter, 'is_repeat', 'modified')
     list_display = (
-        '__str__', 'all_day', 'starts', 'ends', 'is_original', 'is_variation',
-        'is_repeat', 'modified')
+        '__str__', 'all_day', 'faux_starts', 'faux_ends', 'is_original',
+        'is_variation', 'is_repeat', 'modified')
     search_fields = ('title', )
 
     child_model_plugin_class = plugins.EventChildModelPlugin
     child_model_admin = EventChildAdmin
+
+    def faux_starts(self, obj):
+        if obj.all_day:
+            return obj.starts.date()
+        return obj.starts
+    faux_starts.short_description = 'Starts'
+
+    def faux_ends(self, obj):
+        if obj.all_day:
+            return obj.ends.date()
+        return obj.ends
+    faux_ends.short_description = 'Ends'
 
     def get_urls(self):
         """
