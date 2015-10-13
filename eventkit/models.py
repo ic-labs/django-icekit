@@ -211,6 +211,16 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         """
         return self.ends - self.starts
 
+    def get_originating_event(self):
+        """
+        Return the originating event. For repeat events, this will be the
+        original or variation event being repeated. For original and variation
+        events, it will be ``self``.
+        """
+        if self.is_repeat:
+            return self.parent
+        return self
+
     def get_repeat_events(self):
         """
         Return a queryset of (future) repeat events, not including this event.
