@@ -151,11 +151,31 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
             datetime.datetime.strptime(request.GET['start'], '%Y-%m-%d'), tz)
         ends = timezone.localize(
             datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d'), tz)
-        all_events = self.get_queryset(request) \
-            .filter(starts__gte=starts, starts__lt=ends) \
-            .values_list(
-                'pk', 'title', 'all_day', 'starts', 'ends', 'is_repeat',
-                'tree_id', 'parent', 'polymorphic_ctype')
+
+        all_events = self.get_queryset(request).filter(
+            Q(
+                all_day=False,
+                starts__gte=starts,
+                starts__lt=ends
+            ) | Q(
+                all_day=True,
+                starts__gte=models.faux_date(starts),
+                starts__lt=models.faux_date(ends)
+            )
+        )
+
+        for event in all_events:
+            if event.all_day:
+                # Restore all-day starts and ends back to server time zone.
+                event.starts = event.starts.replace(
+                    tzinfo=timezone.get(settings.TIME_ZONE))
+                event.ends = event.ends.replace(
+                    tzinfo=timezone.get(settings.TIME_ZONE))
+
+        all_events = all_events.values_list(
+            'pk', 'title', 'all_day', 'starts', 'ends', 'is_repeat', 'tree_id',
+            'parent', 'polymorphic_ctype')
+
         data = []
         # Get a dict mapping the primary keys for content types to plugins, so
         # we can get the verbose name of the plugin and a consistent colour for

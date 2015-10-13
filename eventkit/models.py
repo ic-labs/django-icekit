@@ -32,6 +32,14 @@ def default_ends():
     return default_starts() + appsettings.DEFAULT_ENDS_DELTA
 
 
+def faux_date(dt):
+    """
+    Given a datetime object, round its value to UTC midnight for use in e.g.
+    all day event, where time is insignificant.
+    """
+    return timezone.midnight(dt).replace(tzinfo=timezone.get('UTC'))
+
+
 # FIELDS ######################################################################
 
 
@@ -291,13 +299,6 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         except AttributeError:
             pass
 
-    def faux_date(self, dt):
-        """
-        Given a datetime object, round its value to UTC midnight for use in
-        e.g. all day event, where time is insignificant.
-        """
-        return timezone.midnight(dt).replace(tzinfo=timezone.get('UTC'))
-
     @transaction.atomic
     def save(self, propagate=False, *args, **kwargs):
         """
@@ -308,8 +309,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         """
         # Use faux date for ``starts`` and ``ends`` for all-day event.
         if self.all_day:
-            self.starts = self.faux_date(self.starts)
-            self.ends = self.faux_date(self.ends)
+            self.starts = faux_date(self.starts)
+            self.ends = faux_date(self.ends)
         # Is this a new event? New events cannot be propagated until saved.
         adding = self._state.adding
         # Have monitored fields have changed since the last save?
