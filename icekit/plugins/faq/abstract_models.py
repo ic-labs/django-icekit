@@ -1,3 +1,4 @@
+from fluent_contents.extensions import PluginHtmlField
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -9,8 +10,8 @@ class AbstractFAQItem(ContentItem):
     """
     A one off FAQ.
     """
-    question = models.TextField()
-    answer = models.TextField()
+    question = PluginHtmlField()
+    answer = PluginHtmlField()
     load_open = models.BooleanField(default=False)
 
     class Meta:
