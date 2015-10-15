@@ -69,4 +69,30 @@ class AbstractImageItem(ContentItem):
 
     @property
     def caption(self):
+        """
+        Obtains the caption override or the actual image caption.
+
+        :return: Caption text (safe).
+        """
         return mark_safe(self.caption_override or self.image.caption)
+
+    @caption.setter
+    def caption(self, value):
+        """
+        If the caption property is assigned to make it use the
+        `caption_override` field.
+
+        :param value: The caption value to be saved.
+        :return: None
+        """
+        self.caption_override = value
+
+    @caption.deleter
+    def caption(self):
+        """
+        If the caption property is to be deleted only delete the
+        caption override.
+
+        :return: None
+        """
+        self.caption_override = ''
