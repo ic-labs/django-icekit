@@ -14,24 +14,21 @@ contents so that the rendered slot output can be wrapped in appropriate tags.
 To add the descriptor directly to the model class create a property on the class and create an 
 instance of `PlaceholderDescriptor`.
 
-```
-from icekit.plugins.descriptors import PlaceholderDescriptor
+    from icekit.plugins.descriptors import PlaceholderDescriptor
 
 
-class TestFluentPage(AbstractFluentPage):
-    slots = PlaceholderDescriptor()
-```
+    class TestFluentPage(AbstractFluentPage):
+        slots = PlaceholderDescriptor()
+
 
 For external libraries a monkey patching utility is provided. Calling the monkey patch function 
 with the model class is all that is required.
 
-```
-from fluent_pages.pagetypes.fluentpage.models import FluentPage
-from icekit.plugins.descriptors import monkey_patch
+    from fluent_pages.pagetypes.fluentpage.models import FluentPage
+    from icekit.plugins.descriptors import monkey_patch
 
 
-monkey_patch(FluentPage)
-```
+    monkey_patch(FluentPage)
 
 ### Using `PlaceholderDescriptor`
 
@@ -59,9 +56,7 @@ To help with this problem some template tags have been created.
 To use any of the following tags you will need to load `icekit_tags` into your template. To do this
 at the top of your template do the following:
 
-```
-{% load icekit_tags %}
-```
+    {% load icekit_tags %}
 
 #### Template tag: `get_slot_contents`
 
@@ -72,20 +67,15 @@ In each of the below examples we will assume that we have an object named `page`
 
 To use this tag as a filter:
 
-```
-{{ page.slots|get_slot_contents:'test-main' }}
-```
+    {{ page.slots|get_slot_contents:'test-main' }}
 
 This will output the list of contents directly into your template (which is not very useful).
 
 Each of the these items can be iterated and worked on as required e.g.
 
-
-```
-{% for item in page.slots|get_slot_contents:'test-main' %}
-    {{ item }}
-{% endfor %}
-```
+    {% for item in page.slots|get_slot_contents:'test-main' %}
+        {{ item }}
+    {% endfor %}
 
 To use this template tag as a simple tag:
 
@@ -98,16 +88,12 @@ This will output the list of contents directly into your template (which is not 
 The tag will allow assignment to a variable name for use later in your template. If we wanted to
 assign the returned list into a variable named `testname` we can do the following:
 
-```
-{% get_slot_contents page.slots 'test-main' as 'testname' %}
-```
+    {% get_slot_contents page.slots 'test-main' as 'testname' %}
 
 This will then let us work on the contents later in the template e.g.
 
-```
-{% for item in testname %}
-    {{ item }}
-{% endfor %}
-```
+    {% for item in testname %}
+        {{ item }}
+    {% endfor %}
 
 If a placeholder does not exist `None` will be returned.
