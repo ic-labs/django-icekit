@@ -15,12 +15,12 @@ class ImagePlugin(ContentPlugin):
     raw_id_fields = ['image', ]
 
     def get_render_template(self, request, instance, **kwargs):
-        template = loader.select_template([
-            'icekit/plugins/image/%s_%s.html' % (
-                type(instance.parent)._meta.app_label,
-                type(instance.parent)._meta.model_name
-            ),
-            'icekit/plugins/image/%s.html' % type(
-                instance.parent)._meta.app_label,
-            'icekit/plugins/image/default.html'])
+        opts = type(instance.parent)._meta
+        template = loader.select_template(
+            [
+                'icekit/plugins/image/%s_%s.html' % (opts.app_label, opts.model_name),
+                'icekit/plugins/image/%s.html' % opts.app_label,
+                'icekit/plugins/image/default.html'
+            ]
+        )
         return template.name
