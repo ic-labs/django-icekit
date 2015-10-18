@@ -10,7 +10,7 @@ class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
     list_display_links = ['alt_text', 'thumbnail']
     filter_horizontal = ['categories', ]
     list_filter = ['categories', 'is_active', ]
-    search_fields = ['title', 'alt_text', 'caption', 'admin_notes', ]
+    search_fields = ['title', 'alt_text', 'caption', 'admin_notes', 'image']
 
     change_form_template = 'image/admin/change_form.html'
 
