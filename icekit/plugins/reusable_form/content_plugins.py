@@ -13,3 +13,4 @@ class FormPlugin(ContentPlugin):
     category = _('Forms')
     render_template = 'icekit/plugins/reusable_form/default.html'
     raw_id_fields = ['form', ]
+    cache_output = False
