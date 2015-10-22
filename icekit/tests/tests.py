@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core import exceptions
 from django.core.urlresolvers import reverse
+from django.template import TemplateSyntaxError
 from django.utils import six
 from django_dynamic_fixture import G
 from django_webtest import WebTest
@@ -18,6 +19,8 @@ from fluent_pages.models import PageLayout
 from fluent_pages.pagetypes.fluentpage.models import FluentPage
 from forms_builder.forms.models import Form
 from icekit.abstract_models import LayoutFieldMixin
+from icekit.page_types.layout_page.models import LayoutPage
+from icekit.plugins import descriptors
 from icekit.plugins.faq.models import FAQItem
 from icekit.plugins.horizontal_rule.models import HorizontalRuleItem
 from icekit.plugins.image.models import ImageItem, Image
@@ -495,3 +498,50 @@ class TestValidators(WebTest):
         admin_mixin.thumbnail_field = 'test'
         self.assertEqual(admin_mixin.get_thumbnail_source(TestThumbnail()), 'test-result')
         self.assertEqual(admin_mixin.thumbnail(TestThumbnail()), '')
+
+
+class TestIceKitTags(WebTest):
+    def test_get_slot_contents(self):
+        descriptors.monkey_patch(LayoutPage)
+        layout_1 = G(
+            models.Layout,
+            template_name='icekit/layouts/test_slot_contents.html',
+        )
+        layout_1.content_types.add(ContentType.objects.get_for_model(LayoutPage))
+        layout_1.save()
+        staff_1 = User.objects.create(
+            email='test@test.com',
+            is_staff=True,
+            is_active=True,
+            is_superuser=True,
+        )
+
+        page_1 = LayoutPage.objects.create(
+            title='Test Page',
+            slug='test-page',
+            parent_site=Site.objects.first(),
+            layout=layout_1,
+            author=staff_1,
+            status='p',  # Publish the page
+        )
+
+        hr = fluent_contents.create_content_instance(
+            HorizontalRuleItem,
+            page_1,
+            placeholder_name='test-main',
+        )
+
+        response = self.app.get(page_1.get_absolute_url())
+
+        response.mustcontain('<div class="filter">Horizontal Rule</div>')
+        response.mustcontain('<div class="tag">[<HorizontalRuleItem: Horizontal Rule>]</div>')
+        response.mustcontain('<div class="tag-as"></div>')
+        response.mustcontain('<div class="tag-render">Horizontal Rule</div>')
+        response.mustcontain('<div class="tag-fake-slot">None</div>')
+        response.mustcontain('div class="filter-fake-slot">None</div>')
+
+        layout_1.template_name = 'icekit/layouts/test_slot_contents_error.html'
+        layout_1.save()
+
+        with self.assertRaises(TemplateSyntaxError):
+            self.app.get(page_1.get_absolute_url())
