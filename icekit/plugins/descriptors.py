@@ -43,32 +43,21 @@ class PlaceholderDescriptor(object):
         """
         related_model = self.related_model
 
-        def get_related_model_objects(name, super_func):
+        def get_related_model_objects(name):
             """
             Obtains the related model objects based upon the slot name.
 
-            If the related model does not exist it will call the
-            `super_func` function with the slot name so super can be
-            called if desired or appropriate functionality implemented
-            such as raising an exception.
-
             :param name: The slot name in string form.
-            :param super_func: A function that that has not been called
-            which accepts at least one argument. The slot name will be
-            passed to the function.
-            :returns; Related model contents if they exist or what has
-            been defined in `super_func`.
+            :returns; Related model contents if they exist or it will
+            raise a `DoesNotExist` exception.
             """
-            try:
-                # Parent type, parent id and slot are set to be unique on the default
-                # related model and therefore treated as such here.
-                return related_model.objects.get(
-                    parent_type=ContentType.objects.get_for_model(type(instance)),
-                    parent_id=instance.id,
-                    slot=name,
-                ).get_content_items()
-            except related_model.DoesNotExist:
-                return super_func(name)
+            # Parent type, parent id and slot are set to be unique on the default
+            # related model and therefore treated as such here.
+            return related_model.objects.get(
+                parent_type=ContentType.objects.get_for_model(type(instance)),
+                parent_id=instance.id,
+                slot=name,
+            ).get_content_items()
 
         class PlaceholderAccess(object):
             def __getattribute__(self, name):
@@ -83,10 +72,10 @@ class PlaceholderDescriptor(object):
                 If a slot name is used that does not exist an
                 `AttributeError` will be raised.
                 """
-                return get_related_model_objects(
-                    name,
-                    super(PlaceholderAccess, self).__getattribute__
-                )
+                try:
+                    return get_related_model_objects(name)
+                except related_model.DoesNotExist:
+                    return super(PlaceholderAccess, self).__getattribute__(name)
 
             def __getitem__(self, item):
                 """
@@ -101,16 +90,10 @@ class PlaceholderDescriptor(object):
                 If a slot name is used that does not exist a
                 `KeyError` will be raised.
                 """
-                def raise_key_error(name):
-                    """
-                    Helper function to raise a `KeyError`.
-                    """
-                    raise KeyError()
-
-                return get_related_model_objects(
-                    item,
-                    raise_key_error
-                )
+                try:
+                    return get_related_model_objects(item)
+                except related_model.DoesNotExist:
+                    raise KeyError
 
         return PlaceholderAccess()
 
