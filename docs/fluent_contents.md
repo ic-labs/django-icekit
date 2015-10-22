@@ -25,10 +25,10 @@ For external libraries a monkey patching utility is provided. Calling the monkey
 with the model class is all that is required.
 
     from fluent_pages.pagetypes.fluentpage.models import FluentPage
-    from icekit.plugins.descriptors import monkey_patch
+    from icekit.plugins.descriptors import contribute_to_class
 
 
-    monkey_patch(FluentPage)
+    contribute_to_class(FluentPage)
 
 ### Using `PlaceholderDescriptor`
 

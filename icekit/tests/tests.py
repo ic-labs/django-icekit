@@ -501,7 +501,7 @@ class TestValidators(WebTest):
 
 class TestIceKitTags(WebTest):
     def test_get_slot_contents(self):
-        descriptors.monkey_patch(LayoutPage)
+        descriptors.contribute_to_class(LayoutPage)
         layout_1 = G(
             models.Layout,
             template_name='icekit/layouts/test_slot_contents.html',

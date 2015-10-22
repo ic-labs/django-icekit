@@ -98,9 +98,10 @@ class PlaceholderDescriptor(object):
         return PlaceholderAccess()
 
 
-def monkey_patch(model_class, name='slots', descriptor=None):
+def contribute_to_class(model_class, name='slots', descriptor=None):
     """
-    Monkey patching function that adds a description to a model Class.
+    Function that adds a description to a model Class.
+
     :param model_class: The model class the descriptor is to be added
     to.
     :param name: The attribute name the descriptor will be assigned to.
