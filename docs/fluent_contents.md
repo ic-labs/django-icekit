@@ -60,7 +60,7 @@ at the top of your template do the following:
 
 #### Template tag: `get_slot_contents`
 
-The tag `get_slot_contents` may be used as a filter, a simple tag or an assignment tag.
+The tag `get_slot_contents` may be used as a filter, or an assignment tag.
 
 In each of the below examples we will assume that we have an object named `page` with a 
 `PlaceholderDescriptor` on it named `slots` and a placeholder with a slot named `test-main`.
@@ -77,18 +77,10 @@ Each of the these items can be iterated and worked on as required e.g.
         {{ item }}
     {% endfor %}
 
-To use this template tag as a simple tag:
+The assignment tag will allow assignment to a variable name for use later in your template. 
+If we wanted to assign the returned list into a variable named `testname` we can do the following:
 
-```
-{% get_slot_contents page.slots 'test-main' %}
-```
-
-This will output the list of contents directly into your template (which is not very useful).
-
-The tag will allow assignment to a variable name for use later in your template. If we wanted to
-assign the returned list into a variable named `testname` we can do the following:
-
-    {% get_slot_contents page.slots 'test-main' as 'testname' %}
+    {% get_slot_contents page.slots 'test-main' as testname %}
 
 This will then let us work on the contents later in the template e.g.
 

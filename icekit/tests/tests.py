@@ -10,7 +10,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core import exceptions
 from django.core.urlresolvers import reverse
-from django.template import TemplateSyntaxError
 from django.utils import six
 from django_dynamic_fixture import G
 from django_webtest import WebTest
@@ -534,14 +533,8 @@ class TestIceKitTags(WebTest):
         response = self.app.get(page_1.get_absolute_url())
 
         response.mustcontain('<div class="filter">Horizontal Rule</div>')
-        response.mustcontain('<div class="tag">[<HorizontalRuleItem: Horizontal Rule>]</div>')
         response.mustcontain('<div class="tag-as"></div>')
         response.mustcontain('<div class="tag-render">Horizontal Rule</div>')
-        response.mustcontain('<div class="tag-fake-slot">None</div>')
+        response.mustcontain('<div class="tag-fake-slot"></div>')
+        response.mustcontain('<div class="tag-fake-slot-render">None</div>')
         response.mustcontain('div class="filter-fake-slot">None</div>')
-
-        layout_1.template_name = 'icekit/layouts/test_slot_contents_error.html'
-        layout_1.save()
-
-        with self.assertRaises(TemplateSyntaxError):
-            self.app.get(page_1.get_absolute_url())
