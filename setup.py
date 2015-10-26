@@ -29,7 +29,10 @@ if {'bdist_wheel', 'develop', 'sdist'}.intersection(sys.argv):
         print('Cleaning bower components.')
         shutil.rmtree('bower_components')
     print('Installing bower components.')
-    if subprocess.call(['bower', 'install'], stderr=sys.stderr):
+    try:
+        if subprocess.call(['bower', 'install'], stderr=sys.stderr):
+            raise RuntimeError
+    except (OSError, RuntimeError):
         print('ERROR: Unable to install bower components.', file=sys.stderr)
         exit(1)
     os.chdir(cwd)
