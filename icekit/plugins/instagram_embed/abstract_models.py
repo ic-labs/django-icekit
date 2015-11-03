@@ -37,7 +37,7 @@ class AbstractInstagramEmbedItem(ContentItem):
         verbose_name = _('Instagram Embed')
 
     def __str__(self):
-        return str('Instagram Embed: %s' % self.url)
+        return 'Instagram Embed: %s' % self.url
 
     def clean(self, *args, **kwargs):
         """

@@ -33,7 +33,7 @@ class AbstractTwitterEmbedItem(ContentItem):
         verbose_name = _('Twitter Embed')
 
     def __str__(self):
-        return str('Twitter Embed: %s' % self.twitter_url)
+        return 'Twitter Embed: %s' % self.twitter_url
 
     def clean(self, *args, **kwargs):
         """

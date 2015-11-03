@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import six
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItem
@@ -16,7 +17,7 @@ class AbstractQuote(models.Model):
         abstract = True
 
     def __str__(self):
-        return str(self.quote)
+        return self.quote
 
 
 @python_2_unicode_compatible
@@ -35,4 +36,4 @@ class AbstractReusableQuoteItem(ContentItem):
         verbose_name_plural = _('Quotes')
 
     def __str__(self):
-        return str(self.quote)
+        return six.text_type(self.quote)

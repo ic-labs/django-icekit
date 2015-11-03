@@ -29,8 +29,18 @@ class LayoutFieldMixin(models.Model):
         related_name='%(app_label)s_%(class)s_related',
     )
 
+    fallback_template = 'icekit/layouts/fallback_default.html'
+
     class Meta:
         abstract = True
+
+    def get_layout_template_name(self):
+        """
+        Return ``layout.template_name`` or `fallback_template``.
+        """
+        if self.layout:
+            return self.layout.template_name
+        return self.fallback_template
 
 
 class FluentFieldsMixin(LayoutFieldMixin):
@@ -82,6 +92,7 @@ class AbstractLayout(AbstractBaseModel):
     template_name = fields.TemplateNameField(
         _('template'),
         plugin_class=plugins.TemplateNameFieldChoicesPlugin,
+        unique=True,
     )
     content_types = models.ManyToManyField(
         ContentType,
@@ -94,6 +105,38 @@ class AbstractLayout(AbstractBaseModel):
 
     def __str__(self):
         return self.title
+
+    @classmethod
+    def auto_add(cls, template_name, *models, **kwargs):
+        """
+        Get or create a layout for the given template and add content types for
+        the given models to it. Append the verbose name of each model to the
+        title with the given ``separator`` keyword argument.
+        """
+        separator = kwargs.get('separator', ', ')
+        content_types = ContentType.objects.get_for_models(*models).values()
+        try:
+            # Get.
+            layout = cls.objects.get(template_name=template_name)
+        except cls.DoesNotExist:
+            # Create.
+            title = separator.join(sorted(
+                ct.model_class()._meta.verbose_name for ct in content_types))
+            layout = cls.objects.create(
+                template_name=template_name,
+                title=title,
+            )
+            layout.content_types.add(*content_types)
+        else:
+            title = [layout.title]
+            # Update.
+            for ct in content_types:
+                if not layout.content_types.filter(pk=ct.pk).exists():
+                    title.append(ct.model_class()._meta.verbose_name)
+            layout.title = separator.join(sorted(title))
+            layout.save()
+            layout.content_types.add(*content_types)
+        return layout
 
     def get_template(self):
         """

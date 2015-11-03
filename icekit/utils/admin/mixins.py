@@ -11,7 +11,8 @@ class ThumbnailAdminMixin(object):
 
     Specify ImageField name in `thumbnail_field`, and optionally
     override `thumbnail_options` for customisation such as sizing,
-    cropping, etc.
+    cropping, etc. If `thumbnail_show_exceptions` is truthy, exception
+    messages are returned in place of a thumbnail on failure.
 
     Plays nicely with list_display_links if you want a click-able
     thumbnail.
@@ -22,8 +23,9 @@ class ThumbnailAdminMixin(object):
 
     thumbnail_field = None
     thumbnail_options = {
-        'size': (100, 100)
+        'size': (100, 100),
     }
+    thumbnail_show_exceptions = False
 
     def get_thumbnail_source(self, obj):
         """
@@ -49,9 +51,6 @@ class ThumbnailAdminMixin(object):
         if source:
             try:
                 from easy_thumbnails.files import get_thumbnailer
-                thumbnailer = get_thumbnailer(source)
-                thumbnail = thumbnailer.get_thumbnail(self.thumbnail_options)
-                return '<img class="thumbnail" src="{0}" />'.format(thumbnail.url)
             except ImportError:
                 logger.warning(
                     _(
@@ -59,5 +58,17 @@ class ThumbnailAdminMixin(object):
                         'icekit.utils.admin.mixins.ThumbnailAdminMixin'
                     )
                 )
+                return ''
+            try:
+                thumbnailer = get_thumbnailer(source)
+                thumbnail = thumbnailer.get_thumbnail(self.thumbnail_options)
+                return '<img class="thumbnail" src="{0}" />'.format(
+                    thumbnail.url)
+            except Exception as ex:
+                logger.warning(
+                    _(u'`easy_thumbnails` failed to generate a thumbnail image'
+                      u' for {0}'.format(source)))
+                if self.thumbnail_show_exceptions:
+                    return 'Thumbnail exception: {0}'.format(ex)
         return ''
     thumbnail.allow_tags = True

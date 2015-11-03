@@ -1,3 +1,5 @@
+from mock import patch
+
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.contrib.auth import get_user_model
@@ -66,7 +68,7 @@ class MapItemTestCase(WebTest):
         response.mustcontain('<iframe')
 
     def test_clean(self):
-        self.assertEqual(self.map_item.loc, '0, 0')
+        self.assertEqual(self.map_item.loc, '')
         self.assertEqual(self.map_item.place_name, 'Unknown')
         self.map_item.clean()
         self.assertEqual(self.map_item.loc, '-33.8877043,151.2005881,17z')
@@ -82,3 +84,86 @@ class MapItemTestCase(WebTest):
             str(self.map_item),
             '%s @%s' % (self.map_item.place_name, self.map_item.loc)
         )
+
+    def test_google_map_share_url_parsing(self):
+        map_detailed_share_url = fluent_contents.create_content_instance(
+            models.MapItem,
+            self.page_1,
+            share_url='https://www.google.com.au/maps/place/The+Interaction+Consortium/'
+                      '@-33.8884315,151.2006512,17z/data=!3m1!4b1!4m2!3m1!1s0x6b12b1d842ee9aa9:'
+                      '0xb0a19ac433ef0be8'
+        )
+        self.assertEqual('The+Interaction+Consortium',
+                         map_detailed_share_url.place_name)
+        self.assertEqual('-33.8884315,151.2006512,17z',
+                         map_detailed_share_url.loc)
+
+        map_embed_url = fluent_contents.create_content_instance(
+            models.MapItem,
+            self.page_1,
+            share_url='https://www.google.com/maps/d/embed?mid=zLFp8zmG_u7Y.kWM6FxvhXeUw',
+        )
+        self.assertEqual('Unknown',
+                         map_embed_url.place_name)
+        self.assertEqual('',
+                         map_embed_url.loc)
+
+        # Edit URL converted to embed version
+        map_viewer_share_url = fluent_contents.create_content_instance(
+            models.MapItem,
+            self.page_1,
+            share_url='https://www.google.com/maps/d/edit?mid=zLFp8zmG_u7Y.kWM6FxvhXeUw&usp=sharing',
+        )
+        self.assertEqual(
+            'https://www.google.com/maps/d/embed?mid=zLFp8zmG_u7Y.kWM6FxvhXeUw&usp=sharing',
+            map_viewer_share_url.share_url)
+        self.assertEqual('Unknown',
+                         map_viewer_share_url.place_name)
+        self.assertEqual('',
+                         map_viewer_share_url.loc)
+
+        # Viewer URL converted to embed version
+        map_viewer_share_url = fluent_contents.create_content_instance(
+            models.MapItem,
+            self.page_1,
+            share_url='https://www.google.com/maps/d/u/0/viewer?mid=zLFp8zmG_u7Y.kWM6FxvhXeUw',
+        )
+        self.assertEqual(
+            'https://www.google.com/maps/d/embed?mid=zLFp8zmG_u7Y.kWM6FxvhXeUw',
+            map_viewer_share_url.share_url)
+        self.assertEqual('Unknown',
+                         map_viewer_share_url.place_name)
+        self.assertEqual('',
+                         map_viewer_share_url.loc)
+
+        # Shortened URL converted to full version
+        with patch('icekit.plugins.map.abstract_models.urlopen') as mock_urlopen:
+            # Fake URL lookup and redirect to get un-shortened URL
+            mock_urlopen.return_value.url = (
+                'https://www.google.com.au/maps/place/The+Interaction+Consortium/'
+                '@-33.8884315,151.2006512,17z/data=!3m1!4b1!4m2!3m1!1s0x6b12b1d842ee9aa9:'
+                '0xb0a19ac433ef0be8'
+            )
+
+            map_shortened_share_url = fluent_contents.create_content_instance(
+                models.MapItem,
+                self.page_1,
+                share_url='https://goo.gl/maps/P4Mlm',
+            )
+        self.assertEqual(
+            'https://www.google.com.au/maps/place/The+Interaction+Consortium/'
+            '@-33.8884315,151.2006512,17z/data=!3m1!4b1!4m2!3m1!1s0x6b12b1d842ee9aa9:'
+            '0xb0a19ac433ef0be8',
+            map_shortened_share_url.share_url)
+        self.assertEqual('The+Interaction+Consortium',
+                         map_detailed_share_url.place_name)
+        self.assertEqual('-33.8884315,151.2006512,17z',
+                         map_detailed_share_url.loc)
+
+        # Unrecognised share URL rejected
+        with self.assertRaises(exceptions.ValidationError):
+            fluent_contents.create_content_instance(
+                models.MapItem,
+                self.page_1,
+                share_url='https://www.google.com/',
+            )

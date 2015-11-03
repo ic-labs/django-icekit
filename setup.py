@@ -12,6 +12,7 @@ setuptools.setup(
         'django-fluent-contents',
         'django-fluent-pages',
         'django-model-utils',
+        'django-wysiwyg',
         'requests',
         'Pillow',
     ],

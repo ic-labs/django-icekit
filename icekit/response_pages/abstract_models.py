@@ -41,4 +41,4 @@ class AbstractResponsePage(models.Model):
         abstract = True
 
     def __str__(self):
-        return str(self.get_type_display())
+        return self.get_type_display()

@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core import exceptions
 from django_dynamic_fixture import G
 from django_webtest import WebTest
+from mock import Mock
 from icekit.models import Layout
 from icekit.page_types.layout_page.models import LayoutPage
 from icekit.utils import fluent_contents
@@ -55,22 +56,113 @@ class InstagramEmbedItemTestCase(WebTest):
         self.assertEqual(str(self.instagram_1), 'Instagram Embed: %s' % self.instagram_1.url)
 
     def test_clean(self):
+        initial_fetch_instagram_data = self.instagram_1.fetch_instagram_data
+        self.instagram_1.fetch_instagram_data = Mock(
+            return_value='Please provide a valid link.'
+        )
+
         with self.assertRaises(exceptions.ValidationError):
             self.instagram_1.clean()
 
+        self.instagram_1.fetch_instagram_data = initial_fetch_instagram_data
+        initial_fetch_instagram_data = self.instagram_2.fetch_instagram_data
+        self.instagram_2.fetch_instagram_data = Mock(
+            return_value={
+                'provider_url': 'https://instagram.com/',
+                'media_id': 'asdasdsad',
+                'version': '1.0',
+                'title': 'A title',
+                'html': '<p>html</p>',
+                'thumbnail_width': 612,
+                'height': None,
+                'width': 658,
+                'thumbnail_url': '',
+                'author_name': 'test',
+                'author_id': 2091,
+                'thumbnail_height': 612,
+                'type': 'rich',
+                'provider_name': 'Instagram',
+                'author_url': 'https://instagram.com/test'
+            }
+        )
         self.instagram_2.clean()
+        self.instagram_2.fetch_instagram_data = initial_fetch_instagram_data
         self.assertEqual(self.instagram_2.provider_url, 'https://instagram.com/')
 
     def test_get_thumbnail(self):
+        initial_fetch_instagram_data = self.instagram_2.fetch_instagram_data
+        self.instagram_2.fetch_instagram_data = Mock(
+            return_value={
+                'provider_url': 'https://instagram.com/',
+                'media_id': 'asdasdsad',
+                'version': '1.0',
+                'title': 'A title',
+                'html': '<p>html</p>',
+                'thumbnail_width': 612,
+                'height': None,
+                'width': 658,
+                'thumbnail_url': '',
+                'author_name': 'test',
+                'author_id': 2091,
+                'thumbnail_height': 612,
+                'type': 'rich',
+                'provider_name': 'Instagram',
+                'author_url': 'https://instagram.com/test'
+            }
+        )
         self.instagram_2.clean()
+        self.instagram_2.fetch_instagram_data = initial_fetch_instagram_data
+
+        initial_fetch_instagram_data = self.instagram_3.fetch_instagram_data
+        self.instagram_3.fetch_instagram_data = Mock(
+            return_value={
+                'provider_url': 'https://instagram.com/',
+                'media_id': 'asdasdsad',
+                'version': '1.0',
+                'title': 'A title',
+                'html': '<p>html</p>',
+                'thumbnail_width': 612,
+                'height': None,
+                'width': 658,
+                'thumbnail_url': 'https://thubmanil_url.com/1/',
+                'author_name': 'test',
+                'author_id': 2091,
+                'thumbnail_height': 612,
+                'type': 'rich',
+                'provider_name': 'Instagram',
+                'author_url': 'https://instagram.com/test'
+            }
+        )
         self.instagram_3.clean()
+        self.instagram_3.fetch_instagram_data = initial_fetch_instagram_data
         self.assertEqual(self.instagram_1.get_thumbnail(), '')
         self.assertEqual(self.instagram_2.get_thumbnail(), self.instagram_2.thumbnail_url)
         self.assertNotEquals(self.instagram_3.get_thumbnail(), '')
         self.assertEqual(self.instagram_3.get_thumbnail(), self.instagram_3.thumbnail_url)
 
     def test_get_default_embed(self):
+        initial_fetch_instagram_data = self.instagram_2.fetch_instagram_data
+        self.instagram_2.fetch_instagram_data = Mock(
+            return_value={
+                'provider_url': 'https://instagram.com/',
+                'media_id': 'asdasdsad',
+                'version': '1.0',
+                'title': 'A title',
+                'html': '<p>html</p>',
+                'thumbnail_width': 612,
+                'height': None,
+                'width': 658,
+                'thumbnail_url': '',
+                'author_name': 'test',
+                'author_id': 2091,
+                'thumbnail_height': 612,
+                'type': 'rich',
+                'provider_name': 'Instagram',
+                'author_url': 'https://instagram.com/test'
+            }
+        )
         self.instagram_2.clean()
+        self.instagram_2.fetch_instagram_data = initial_fetch_instagram_data
         self.assertEqual(self.instagram_1.get_default_embed(), '')
         self.assertEqual(self.instagram_2.get_default_embed(), self.instagram_2.html)
 
@@ -89,6 +181,26 @@ class InstagramEmbedItemTestCase(WebTest):
             }
         )
 
+        initial_fetch_instagram_data = form.instance.fetch_instagram_data
+        form.instance.fetch_instagram_data = Mock(
+            return_value={
+                'provider_url': 'https://instagram.com/',
+                'media_id': 'asdasdsad',
+                'version': '1.0',
+                'title': 'A title',
+                'html': '<p>html</p>',
+                'thumbnail_width': 612,
+                'height': None,
+                'width': 658,
+                'thumbnail_url': '',
+                'author_name': 'test',
+                'author_id': 2091,
+                'thumbnail_height': 612,
+                'type': 'rich',
+                'provider_name': 'Instagram',
+                'author_url': 'https://instagram.com/test'
+            }
+        )
         self.assertTrue(form.is_valid())
 
         form = InstagramEmbedAdminForm(
@@ -99,9 +211,13 @@ class InstagramEmbedItemTestCase(WebTest):
                 'url': 'https://test.com/p/5O26siFtv8/',
             }
         )
+        form.instance.fetch_instagram_data = Mock(
+            return_value='The page is not available'
+        )
         self.assertFalse(form.is_valid())
         self.assertEqual(len(form.errors.keys()), 2)
         expected_keys = ['url', '__all__']
         for key in expected_keys:
             self.assertIn(key, form.errors.keys())
         self.assertEqual(form.errors['url'][0], 'Please provide a valid instagram link.')
+        form.instance.fetch_instagram_data = initial_fetch_instagram_data

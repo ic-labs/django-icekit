@@ -5,6 +5,7 @@ from . import models
 
 
 class SlideShowAdmin(PlaceholderFieldAdmin):
+    change_form_template = 'icekit/plugins/slideshow/admin/change_form.html'
     fieldsets = (
         (
             None, {

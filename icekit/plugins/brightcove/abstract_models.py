@@ -1,3 +1,4 @@
+from django.utils import six
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItem
@@ -40,4 +41,4 @@ class AbstractBrightcoveItem(ContentItem):
         verbose_name_plural = _('Brightcove videos')
 
     def __str__(self):
-        return str(self.video)
+        return six.text_type(self.video)

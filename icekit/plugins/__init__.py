@@ -2,6 +2,9 @@ import os
 
 import six
 
+from fluent_pages.integration.fluent_contents.page_type_plugins \
+    import FluentContentsPagePlugin
+
 from icekit import appsettings
 from icekit.plugins.base import (
     BaseTemplateNameFieldChoicesPlugin, TemplateNameFieldChoicesPluginMount)
@@ -125,3 +128,18 @@ class ICEkitLayoutPlugin(TemplateNameFieldChoicesPlugin):
             ('icekit/layouts/default.html', 'ICEkit: Default'),
         ]
         return choices
+
+
+class ICEkitFluentContentsPagePlugin(FluentContentsPagePlugin):
+    """
+    Slight adaptation to FluentContentsPagePlugin to use a defined fallback
+    template when no layout is available.
+    """
+    fallback_template = 'icekit/layouts/fallback_default.html'
+
+    def get_render_template(self, request, fluentpage, **kwargs):
+        if self.render_template:
+            return self.render_template
+        if fluentpage.layout:
+            return fluentpage.layout.template_name
+        return self.fallback_template

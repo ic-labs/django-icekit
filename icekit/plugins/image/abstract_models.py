@@ -1,4 +1,6 @@
+from django.utils.safestring import mark_safe
 from django.db import models
+from django.utils import six
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItem
@@ -15,12 +17,12 @@ class AbstractImage(models.Model):
     )
     alt_text = models.CharField(
         max_length=255,
-        help_text=_("A description of the image for users who don't see images."),
+        help_text=_("A description of the image for users who don't see images"),
     )
     title = models.CharField(
         max_length=255,
         blank=True,
-        help_text=_('The title is shown in the caption.'),
+        help_text=_('The title is shown in the "title" attribute'),
     )
     caption = models.TextField(
         blank=True,
@@ -42,7 +44,7 @@ class AbstractImage(models.Model):
         abstract = True
 
     def __str__(self):
-        return str(self.alt_text)
+        return self.alt_text
 
 
 @python_2_unicode_compatible
@@ -55,10 +57,42 @@ class AbstractImageItem(ContentItem):
         help_text=_('An image from the image library.')
     )
 
+    caption_override = models.TextField(blank=True)
+
     class Meta:
         abstract = True
         verbose_name = _('Image')
         verbose_name_plural = _('Images')
 
     def __str__(self):
-        return str(self.image)
+        return six.text_type(self.image)
+
+    @property
+    def caption(self):
+        """
+        Obtains the caption override or the actual image caption.
+
+        :return: Caption text (safe).
+        """
+        return mark_safe(self.caption_override or self.image.caption)
+
+    @caption.setter
+    def caption(self, value):
+        """
+        If the caption property is assigned to make it use the
+        `caption_override` field.
+
+        :param value: The caption value to be saved.
+        :return: None
+        """
+        self.caption_override = value
+
+    @caption.deleter
+    def caption(self):
+        """
+        If the caption property is to be deleted only delete the
+        caption override.
+
+        :return: None
+        """
+        self.caption_override = ''

@@ -1,3 +1,4 @@
+from django.contrib.auth.models import AnonymousUser
 from django.template import Library, Node
 from django.test.client import RequestFactory
 
@@ -10,6 +11,7 @@ class FakeRequestNode(Node):
     def render(self, context):
         req = factory.get('/')
         req.notifications = []
+        req.user = AnonymousUser()
         context['request'] = req
 
         return ''
@@ -21,4 +23,3 @@ def fake_request(parser, token):
     Create a fake request object in the context
     """
     return FakeRequestNode()
-

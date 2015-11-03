@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import six
 from django.utils.six import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import AutoSlugField, TimeStampedModel
@@ -42,7 +43,7 @@ class AbstractBlogPost(PolymorphicModel, TimeStampedModel):
         ordering = ('-created',)
 
     def __str__(self):
-        return str(self.title)
+        return self.title
 
 
 class AbstractContentCategory(models.Model):
@@ -57,7 +58,7 @@ class AbstractContentCategory(models.Model):
     )
 
     def __str__(self):
-        return str(self.name)
+        return self.name
 
     class Meta:
         abstract = True
@@ -83,7 +84,7 @@ class AbstractLocation(models.Model):
     )
 
     def __str__(self):
-        return str(self.name)
+        return self.name
 
     class Meta:
         abstract = True
@@ -109,7 +110,7 @@ class AbstractPostItem(ContentItem):
         verbose_name_plural = _('Blog Posts')
 
     def __str__(self):
-        return str(self.post)
+        return six.text_type(self.post)
 
 
 @python_2_unicode_compatible
@@ -124,7 +125,7 @@ class EventRangeMixin(models.Model):
         abstract = True
 
     def __str__(self):
-        return str('%s - %s' % (self.start, self.end))
+        return '%s - %s' % (self.event_start, self.event_end)
 
 
 @python_2_unicode_compatible
@@ -143,8 +144,8 @@ class OptionalLocationMixin(models.Model):
 
     def __str__(self):
         if self.location:
-            return str(self.location)
-        return None
+            return six.text_type(self.location)
+        return ''
 
 
 @python_2_unicode_compatible
@@ -160,7 +161,7 @@ class SingleCategoryMixin(models.Model):
         abstract = True
 
     def __str__(self):
-        return str(self.category)
+        return six.text_type(self.category)
 
 
 @python_2_unicode_compatible
@@ -178,4 +179,6 @@ class SinglePhotoMixin(models.Model):
         abstract = True
 
     def __str__(self):
-        return str(self.photo)
+        if self.photo:
+            return six.text_type(self.photo)
+        return ''
