@@ -4,8 +4,10 @@
 <html lang="{% block html_lang %}en{% endblock %}" {% block html_attributes %}{% endblock %}>
 	<head {% block head_attributes %}prefix="og: http://ogp.me/ns#"{% endblock %}>
 		{% block head %}
+			{% block credits %}
 			<!-- Hello. We're the Interaction Consortium (http://interaction.net.au) -->
 			<!-- We made this. -->
+			{% endblock %}
 
 			{% block meta %}
 				<meta charset="utf-8">
