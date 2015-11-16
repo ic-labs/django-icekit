@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% load fluent_contents_tags icekit_tags %}
+
+{% block content %}
+	{% page_placeholder page 'test-main' title='Main' role='m' fallback=True %}
+	<div class="filter">{% for item in page.slots|get_slot_contents:'test-main' %}{{ item }}{% endfor %}</div>
+	<div class="tag-as">{% get_slot_contents page.slots 'test-main' as testname %}</div>
+	<div class="tag-render">{% for item in testname %}{{ item }}{% endfor %}</div>
+	<div class="tag-fake-slot">{% get_slot_contents page.slots 'test-main-fake' as fake %}</div>
+	<div class="tag-fake-slot-render">{{ fake }}</div>
+	<div class="filter-fake-slot">{{ page.slots|get_slot_contents:'test-main-fake' }}</div>
+{% endblock content %}

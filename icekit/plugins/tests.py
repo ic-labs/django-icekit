@@ -16,7 +16,7 @@ class PlaceholderDescriptor(WebTest):
     def setUp(self):
         self.site = G(Site)
         self.user_1 = G(User)
-        descriptors.monkey_patch(FluentPage)
+        descriptors.contribute_to_class(FluentPage)
         self.page_layout_1 = G(
             PageLayout,
             template_path='icekit/layouts/default.html',
