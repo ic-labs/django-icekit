@@ -20,11 +20,7 @@ class PlaceholderDescriptor(object):
         if instance is None:
             return self
 
-        if self.place_holder_access:
-            return self.place_holder_access
-
-        self.place_holder_access = self.create_placeholder_access_object(instance)
-        return self.place_holder_access
+        return self.create_placeholder_access_object(instance)
 
     def contribute_to_class(self, cls, name):
         """
