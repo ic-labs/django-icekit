@@ -11,9 +11,7 @@ setuptools.setup(
         'django-bootstrap3',
         'django-fluent-contents',
         'django-fluent-pages',
-        # `PassThroughManager` was removed in version 2.4 meaning we need to update our code. This
-        # should provide us the time to do so.
-        'django-model-utils<2.4',
+        'django-model-utils',
         'django-wysiwyg',
         'requests',
         'Pillow',
