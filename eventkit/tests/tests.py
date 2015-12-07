@@ -107,6 +107,7 @@ class Models(WebTest):
         event = G(
             models.Event,
             recurrence_rule=recurrence_rule,
+            all_day=True,
             end_repeat=now,
         )
         event.full_clean()
@@ -136,7 +137,7 @@ class Models(WebTest):
 
     def test_Event_get_originating_event(self):
         # Original is originating event for itself.
-        event = G(models.Event, recurrence_rule='FREQ=DAILY')
+        event = G(models.Event, recurrence_rule='FREQ=DAILY', all_day=True)
         self.assertEqual(event, event.get_originating_event())
         # Original is originating event for repeat events.
         children = event.get_children()
@@ -151,7 +152,7 @@ class Models(WebTest):
             variation, variation.get_children()[0].get_originating_event())
 
     def test_Event_is_repeat(self):
-        event = G(models.Event, recurrence_rule='FREQ=DAILY')
+        event = G(models.Event, recurrence_rule='FREQ=DAILY', all_day=True)
         # Root event is not a repeat event.
         self.assertFalse(event.is_repeat)
         # Child events are repeat events.

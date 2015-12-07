@@ -4,6 +4,7 @@ Models for ``eventkit`` app.
 
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
 
+from datetime import datetime
 from dateutil import rrule
 import six
 
@@ -12,7 +13,6 @@ from django.db.models import Q, QuerySet
 from django.utils import encoding
 from django.utils.translation import ugettext_lazy as _
 from model_utils import FieldTracker
-from model_utils.managers import PassThroughManager
 from polymorphic import PolymorphicQuerySet
 from polymorphic_tree.models import \
     PolymorphicMPTTModel, PolymorphicTreeForeignKey
@@ -284,9 +284,11 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         if self.is_repeat:
             # If this is a repeat event, return sibling repeat events that
             # start after it.
-            events = self.get_siblings().filter(
-                Q(all_day=False, starts__gt=self.starts) |
-                Q(all_day=True, date_starts__gt=timezone.date(self.starts)))
+            events = self.get_siblings()
+            if self.all_day:
+                events = events.filter(date_starts__gt=self.date_starts)
+            else:
+                events = events.filter(starts__gt=self.starts)
         else:
             # If this is not a repeat event, return child repeat events.
             events = self.get_children()
@@ -338,17 +340,22 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         up to the configured limit.
         """
         rruleset = self.get_rruleset()
+
+        # Limit `end_repeat` to configured maximum.
+        end_repeat = (
+            self.end_repeat or timezone.now() + appsettings.REPEAT_LIMIT)
+
         # Get `starts` for the latest repeat event, or this event.
         if self.all_day:
             starts = self.get_repeat_events() \
                 .aggregate(max=models.Max('date_starts'))['max'] or \
                 self.date_starts
+            starts = datetime.combine(starts, datetime.min.time())
+            end_repeat = end_repeat.replace(tzinfo=None)
         else:
             starts = self.get_repeat_events() \
                 .aggregate(max=models.Max('starts'))['max'] or self.starts
-        # Limit `end_repeat` to configured maximum.
-        end_repeat = (
-            self.end_repeat or timezone.now() + appsettings.REPEAT_LIMIT)
+
         # `starts` and `end_repeat` are exclusive and will not be included in
         # the occurrences.
         missing = rruleset.between(starts, end_repeat)
@@ -474,7 +481,10 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             # delete and recreate.
             if self.end_repeat and self._monitor_fields_changed('end_repeat'):
                 # Delete vestigial repeat events.
-                repeat_events.starts_after(self.end_repeat).delete()
+                after = timezone.localize(self.end_repeat)
+                repeat_events.filter(
+                    Q(all_day=False, starts__gte=after) |
+                    Q(all_day=True, date_starts__gte=after.date())).delete()
             self.update_repeat_events()
         # Decouple this variation event from earlier repeat events and save,
         # unless the caller has asked us not to save.
@@ -529,5 +539,5 @@ class Event(AbstractEvent):
     A concrete polymorphic event model.
     """
 
-    objects = PassThroughManager.for_queryset_class(EventQuerySet)()
+    objects = EventQuerySet.as_manager()
     tracker = FieldTracker(AbstractEvent.MONITOR_FIELDS)
