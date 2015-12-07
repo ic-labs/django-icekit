@@ -163,8 +163,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     all_day = models.BooleanField(default=False)
     starts = models.DateTimeField(blank=True, default=default_starts, null=True)
     ends = models.DateTimeField(blank=True, default=default_ends, null=True)
-    date_starts = models.DateField(blank=True)
-    date_ends = models.DateField(blank=True)
+    date_starts = models.DateField(blank=True, null=True)
+    date_ends = models.DateField(blank=True, null=True)
     recurrence_rule = RecurrenceRuleField(
         blank=True,
         help_text=_(
