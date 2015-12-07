@@ -140,7 +140,15 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
         ends = timezone.localize(
             datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d'), tz)
 
-        all_events = self.get_queryset(request).starts_between(starts, ends)
+        all_events = self.get_queryset(request) \
+            .filter(
+                Q(all_day=False, starts__gte=starts) |
+                Q(all_day=True, date_starts__gte=starts.date())
+            ) \
+            .filter(
+                Q(all_day=False, starts__lt=ends) |
+                Q(all_day=True, date_starts__lte=ends.date())
+            )
 
         all_events = all_events.values_list(
             'pk', 'title', 'all_day', 'starts', 'ends', 'date_starts',
