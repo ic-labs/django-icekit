@@ -3,6 +3,7 @@ Admin forms for ``eventkit`` app.
 """
 
 from django import forms
+from django.contrib.admin.templatetags.admin_static import static
 
 from eventkit import models
 
@@ -26,3 +27,32 @@ class BaseEventForm(forms.ModelForm):
         # always created for new events with a recurrence rule.
         if self.instance._state.adding:
             self.fields['propagate'].widget = forms.HiddenInput()
+
+    @property
+    def media(self):
+        _media = super(BaseEventForm, self).media
+        js = ['admin/FauxDateTimeWidget.js', ]
+        _media += forms.Media(js=[static('admin/js/%s' % path) for path in js])
+        return _media
+
+    def clean(self):
+        cleaned_data = super(BaseEventForm, self).clean()
+        if self.cleaned_data.get('all_day'):
+            if not self.cleaned_data.get('date_starts'):
+                self.add_error(
+                    'date_starts',
+                    self.fields.get('date_starts').error_messages['required'])
+            if not self.cleaned_data.get('date_ends'):
+                self.add_error(
+                    'date_ends',
+                    self.fields.get('date_ends').error_messages['required'])
+        else:
+            if not self.cleaned_data.get('starts'):
+                self.add_error(
+                    'starts',
+                    self.fields.get('starts').error_messages['required'])
+            if not self.cleaned_data.get('ends'):
+                self.add_error(
+                    'ends',
+                    self.fields.get('ends').error_messages['required'])
+        return cleaned_data
