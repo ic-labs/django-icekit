@@ -4,12 +4,11 @@ Models for ``eventkit`` app.
 
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
 
-from datetime import datetime
 from dateutil import rrule
 import six
 
 from django.db import models, transaction
-from django.db.models import Q, QuerySet
+from django.db.models import Q
 from django.utils import encoding
 from django.utils.translation import ugettext_lazy as _
 from model_utils import FieldTracker
@@ -149,6 +148,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         'date_ends',
         'recurrence_rule',
         'end_repeat',
+        'date_end_repeat',
     )
 
     parent = PolymorphicTreeForeignKey(
@@ -174,7 +174,12 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     )
     end_repeat = models.DateTimeField(
         blank=True,
-        help_text=_('If empty, this event will repeat indefinitely.'),
+        help_text=_('If empty, this regular event will repeat indefinitely.'),
+        null=True,
+    )
+    date_end_repeat = models.DateField(
+        blank=True,
+        help_text=_('If empty, this all-day event will repeat indefinitely.'),
         null=True,
     )
     is_repeat = models.BooleanField(default=False, editable=False)
@@ -197,13 +202,15 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
 
     def clean(self):
         """
-        Unset ``end_repeat`` if no recurrence rule is set.
+        Unset ``end_repeat`` and ``date_end_repeat`` if no recurrence rule is
+        set.
         """
         # TODO: Do not allow a decoupled event to have a recurrence rule that
         # is different to its parent. Recouple an event when all of its
         # monitored fields match its parent.
         if not self.recurrence_rule:
             self.end_repeat = None
+            self.date_end_repeat = None
 
     @transaction.atomic
     def create_repeat_events(self, parent=None):
@@ -225,8 +232,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 **defaults
             )
             if event.all_day:
-                event.date_starts = starts
-                event.date_ends = starts + self.duration
+                event.date_starts = timezone.date(starts)
+                event.date_ends = timezone.date(starts) + self.duration
             else:
                 event.starts = starts
                 event.ends = starts + self.duration
@@ -341,20 +348,23 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         """
         rruleset = self.get_rruleset()
 
-        # Limit `end_repeat` to configured maximum.
-        end_repeat = (
-            self.end_repeat or timezone.now() + appsettings.REPEAT_LIMIT)
-
-        # Get `starts` for the latest repeat event, or this event.
+        # Get `starts` for the latest repeat event, or this event and limit
+        # limit `end_repeat` to configured maximum.
         if self.all_day:
             starts = self.get_repeat_events() \
                 .aggregate(max=models.Max('date_starts'))['max'] or \
                 self.date_starts
-            starts = datetime.combine(starts, datetime.min.time())
-            end_repeat = end_repeat.replace(tzinfo=None)
+            end_repeat = self.date_end_repeat or \
+                timezone.date() + appsettings.REPEAT_LIMIT
+
+            # `rruleset.between` requires datetime arguments.
+            starts = timezone.datetime(*starts.timetuple()[:3])
+            end_repeat = timezone.datetime(*end_repeat.timetuple()[:3])
         else:
             starts = self.get_repeat_events() \
                 .aggregate(max=models.Max('starts'))['max'] or self.starts
+            end_repeat = self.end_repeat or \
+                timezone.now() + appsettings.REPEAT_LIMIT
 
         # `starts` and `end_repeat` are exclusive and will not be included in
         # the occurrences.
@@ -470,7 +480,10 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 starts_field = 'date_starts' if self.all_day else 'starts'
                 end_repeat = siblings.aggregate(
                     max=models.Max(starts_field))['max']
-                siblings.update(end_repeat=end_repeat)
+                if self.all_day:
+                    siblings.update(date_end_repeat=end_repeat)
+                else:
+                    siblings.update(end_repeat=end_repeat)
             # Only recreate repeat events if there is a recurrence rule.
             if self.recurrence_rule:
                 # Use this variation event as the new parent for its repeat
@@ -479,12 +492,18 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         else:
             # Update. When the occurrences have not changed, we don't need to
             # delete and recreate.
-            if self.end_repeat and self._monitor_fields_changed('end_repeat'):
+            if self.end_repeat and \
+                    self._monitor_fields_changed('end_repeat'):
                 # Delete vestigial repeat events.
-                after = timezone.localize(self.end_repeat)
                 repeat_events.filter(
-                    Q(all_day=False, starts__gte=after) |
-                    Q(all_day=True, date_starts__gte=after.date())).delete()
+                    all_day=False, starts__gte=self.end_repeat
+                ).delete()
+            if self.date_end_repeat and \
+                    self._monitor_fields_changed('date_end_repeat'):
+                # Delete vestigial repeat events.
+                repeat_events.filter(
+                    all_day=True, date_starts__gte=self.date_end_repeat
+                ).delete()
             self.update_repeat_events()
         # Decouple this variation event from earlier repeat events and save,
         # unless the caller has asked us not to save.

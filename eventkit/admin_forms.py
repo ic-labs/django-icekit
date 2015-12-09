@@ -3,7 +3,6 @@ Admin forms for ``eventkit`` app.
 """
 
 from django import forms
-from django.contrib.admin.templatetags.admin_static import static
 
 from eventkit import models
 
@@ -30,10 +29,9 @@ class BaseEventForm(forms.ModelForm):
 
     @property
     def media(self):
-        _media = super(BaseEventForm, self).media
-        js = ['admin/FauxDateTimeWidget.js', ]
-        _media += forms.Media(js=[static('admin/js/%s' % path) for path in js])
-        return _media
+        media = super(BaseEventForm, self).media
+        media.add_js(['admin/js/event_all_day_field.js'])
+        return media
 
     def clean(self):
         cleaned_data = super(BaseEventForm, self).clean()
