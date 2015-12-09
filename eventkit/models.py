@@ -174,7 +174,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     )
     end_repeat = models.DateTimeField(
         blank=True,
-        help_text=_('If empty, this regular event will repeat indefinitely.'),
+        help_text=_('If empty, this event will repeat indefinitely.'),
         null=True,
     )
     date_end_repeat = models.DateField(
@@ -349,7 +349,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         rruleset = self.get_rruleset()
 
         # Get `starts` for the latest repeat event, or this event and limit
-        # limit `end_repeat` to configured maximum.
+        # `end_repeat` to configured maximum.
         if self.all_day:
             starts = self.get_repeat_events() \
                 .aggregate(max=models.Max('date_starts'))['max'] or \
