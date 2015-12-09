@@ -483,7 +483,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 if self.all_day:
                     siblings.update(date_end_repeat=end_repeat)
                 else:
-                    siblings.update(end_repeat=end_repeat)
+                    siblings.update(
+                        date_end_repeat=end_repeat, end_repeat=end_repeat)
             # Only recreate repeat events if there is a recurrence rule.
             if self.recurrence_rule:
                 # Use this variation event as the new parent for its repeat
@@ -492,18 +493,20 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         else:
             # Update. When the occurrences have not changed, we don't need to
             # delete and recreate.
-            if self.end_repeat and \
-                    self._monitor_fields_changed('end_repeat'):
-                # Delete vestigial repeat events.
-                repeat_events.filter(
-                    all_day=False, starts__gte=self.end_repeat
-                ).delete()
-            if self.date_end_repeat and \
-                    self._monitor_fields_changed('date_end_repeat'):
-                # Delete vestigial repeat events.
-                repeat_events.filter(
-                    all_day=True, date_starts__gte=self.date_end_repeat
-                ).delete()
+            if self.all_day:
+                if self.date_end_repeat and \
+                        self._monitor_fields_changed('date_end_repeat'):
+                    # Delete vestigial repeat events.
+                    repeat_events.filter(
+                        all_day=True, date_starts__gte=self.date_end_repeat
+                    ).delete()
+            else:
+                if self.end_repeat and \
+                        self._monitor_fields_changed('end_repeat'):
+                    # Delete vestigial repeat events.
+                    repeat_events.filter(
+                        all_day=False, starts__gte=self.end_repeat
+                    ).delete()
             self.update_repeat_events()
         # Decouple this variation event from earlier repeat events and save,
         # unless the caller has asked us not to save.

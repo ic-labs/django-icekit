@@ -135,11 +135,12 @@ class Models(WebTest):
             ['title', 'recurrence_rule']))
 
     def test_Event_get_originating_event(self):
+        now = timezone.now()
         # Original is originating event for itself.
         event = G(
             models.Event,
-            starts=timezone.now(),
-            ends=timezone.now(),
+            starts=now,
+            ends=now,
             recurrence_rule='FREQ=DAILY')
         self.assertEqual(event, event.get_originating_event())
         # Original is originating event for repeat events.
@@ -155,10 +156,11 @@ class Models(WebTest):
             variation, variation.get_children()[0].get_originating_event())
 
     def test_Event_is_repeat(self):
+        now = timezone.now()
         event = G(
             models.Event,
-            starts=timezone.now(),
-            ends=timezone.now(),
+            starts=now,
+            ends=now,
             recurrence_rule='FREQ=DAILY')
         # Root event is not a repeat event.
         self.assertFalse(event.is_repeat)
