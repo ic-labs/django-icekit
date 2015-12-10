@@ -179,7 +179,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     )
     date_end_repeat = models.DateField(
         blank=True,
-        help_text=_('If empty, this all-day event will repeat indefinitely.'),
+        help_text=_('If empty, this event will repeat indefinitely.'),
         null=True,
     )
     is_repeat = models.BooleanField(default=False, editable=False)
@@ -484,7 +484,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                     siblings.update(date_end_repeat=end_repeat)
                 else:
                     siblings.update(
-                        date_end_repeat=end_repeat, end_repeat=end_repeat)
+                        date_end_repeat=timezone.date(end_repeat),
+                        end_repeat=end_repeat)
             # Only recreate repeat events if there is a recurrence rule.
             if self.recurrence_rule:
                 # Use this variation event as the new parent for its repeat
