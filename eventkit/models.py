@@ -322,8 +322,11 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         recurrence_rule = self.recurrence_rule
         assert recurrence_rule, (
             'Cannot get rruleset without a recurrence rule.')
+        dtstart = self.get_starts()
+        if self.all_day:
+            dtstart = timezone.datetime(*dtstart.timetuple()[:3])
         rruleset = rrule.rrulestr(
-            recurrence_rule, dtstart=self.get_starts(), forceset=True)
+            recurrence_rule, dtstart=dtstart, forceset=True)
         return rruleset
 
     def is_original(self):
@@ -391,10 +394,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
 
         When ``propagate=True``, update or create repeat events.
         """
-        if self.all_day:
-            # Remove datetime from all day events.
-            self.starts = self.ends = None
-        else:
+        if not self.all_day:
             # Auto-populate date fields for regular events, so we can order by
             # date first (which all events have) and then datetime (which only
             # some events have).
