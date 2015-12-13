@@ -4,6 +4,7 @@ Models for ``eventkit`` app.
 
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
 
+from datetime import datetime
 from dateutil import rrule
 import six
 
@@ -322,11 +323,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         recurrence_rule = self.recurrence_rule
         assert recurrence_rule, (
             'Cannot get rruleset without a recurrence rule.')
-        dtstart = self.get_starts()
-        if self.all_day:
-            dtstart = timezone.datetime(*dtstart.timetuple()[:3])
         rruleset = rrule.rrulestr(
-            recurrence_rule, dtstart=dtstart, forceset=True)
+            recurrence_rule, dtstart=self.get_starts(), forceset=True)
         return rruleset
 
     def is_original(self):
@@ -360,9 +358,9 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             end_repeat = self.date_end_repeat or \
                 timezone.date() + appsettings.REPEAT_LIMIT
 
-            # `rruleset.between` requires datetime arguments.
-            starts = timezone.datetime(*starts.timetuple()[:3])
-            end_repeat = timezone.datetime(*end_repeat.timetuple()[:3])
+            # `rruleset.between` for all-day requires naive datetime arguments.
+            starts = datetime.combine(starts, datetime.min.time())
+            end_repeat = datetime.combine(end_repeat, datetime.min.time())
         else:
             starts = self.get_repeat_events() \
                 .aggregate(max=models.Max('starts'))['max'] or self.starts
