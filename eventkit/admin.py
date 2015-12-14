@@ -147,6 +147,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
                 Q(all_day=True, date_starts__gte=starts.date())
             ) \
             .filter(
+                # Exclusive for datetime, inclusive for date.
                 Q(all_day=False, starts__lt=ends) |
                 Q(all_day=True, date_starts__lte=ends.date())
             )
@@ -206,6 +207,10 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
             classes = ['fcc-%s' % class_ for class_ in classes]
             if all_day:
                 start = date_starts
+                # `end` is exclusive according to the doc in
+                # http://fullcalendar.io/docs/event_data/Event_Object/, so
+                # we need to add 1 day to ``date_ends`` to have the end date
+                # included in the calendar.
                 end = date_ends + timedelta(days=1)
             else:
                 start = timezone.localize(starts)
