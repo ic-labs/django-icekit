@@ -26,6 +26,10 @@ class BaseEventForm(forms.ModelForm):
         # always created for new events with a recurrence rule.
         if self.instance._state.adding:
             self.fields['propagate'].widget = forms.HiddenInput()
+            self.fields['starts'].initial = models.default_starts()
+            self.fields['ends'].initial = models.default_ends()
+            self.fields['date_starts'].initial = models.default_date_starts()
+            self.fields['date_ends'].initial = models.default_date_ends()
 
     @property
     def media(self):

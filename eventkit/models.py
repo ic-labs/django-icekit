@@ -35,6 +35,14 @@ def default_ends():
     return default_starts() + appsettings.DEFAULT_ENDS_DELTA
 
 
+def default_date_starts():
+    return timezone.date()
+
+
+def default_date_ends():
+    return default_date_starts() + appsettings.DEFAULT_DATE_ENDS_DELTA
+
+
 # QUERYSETS ###################################################################
 
 class EventQuerySet(PolymorphicQuerySet):
@@ -162,8 +170,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     )
     title = models.CharField(max_length=255)
     all_day = models.BooleanField(default=False)
-    starts = models.DateTimeField(blank=True, default=default_starts, null=True)
-    ends = models.DateTimeField(blank=True, default=default_ends, null=True)
+    starts = models.DateTimeField(blank=True, null=True)
+    ends = models.DateTimeField(blank=True, null=True)
     date_starts = models.DateField(blank=True, null=True)
     date_ends = models.DateField(blank=True, null=True)
     recurrence_rule = RecurrenceRuleField(
@@ -392,7 +400,10 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
 
         When ``propagate=True``, update or create repeat events.
         """
-        if not self.all_day:
+        if self.all_day:
+            # Remove datetime from all day events.
+            self.starts = self.ends = None
+        else:
             # Auto-populate date fields for regular events, so we can order by
             # date first (which all events have) and then datetime (which only
             # some events have).
