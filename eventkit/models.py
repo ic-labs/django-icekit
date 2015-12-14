@@ -4,16 +4,14 @@ Models for ``eventkit`` app.
 
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil import rrule
 import six
 
 from django.db import models, transaction
-from django.db.models import Q
 from django.utils import encoding
 from django.utils.translation import ugettext_lazy as _
 from model_utils import FieldTracker
-from polymorphic import PolymorphicQuerySet
 from polymorphic_tree.models import \
     PolymorphicMPTTModel, PolymorphicTreeForeignKey
 from timezone import timezone
@@ -41,29 +39,6 @@ def default_date_starts():
 
 def default_date_ends():
     return default_date_starts() + appsettings.DEFAULT_DATE_ENDS_DELTA
-
-
-# QUERYSETS ###################################################################
-
-class EventQuerySet(PolymorphicQuerySet):
-
-    def starts_after(self, after):
-        after = timezone.localize(after)
-        queryset = self.filter(
-            Q(all_day=False, starts__gte=after) |
-            Q(all_day=True, date_starts__gte=after.date()))
-        return queryset
-
-    def starts_before(self, before):
-        before = timezone.localize(before)
-        # Inclusive for datetime, exclusive for date.
-        queryset = self.filter(
-            Q(all_day=False, starts__lt=before) |
-            Q(all_day=True, date_starts__lte=before.date()))
-        return queryset
-
-    def starts_between(self, after, before):
-        return self.starts_after(after).starts_before(before)
 
 
 # FIELDS ######################################################################
@@ -260,6 +235,17 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         """
         if self.all_day:
             return self.date_ends - self.date_starts
+        return self.ends - self.starts
+
+    @property
+    def display_duration(self):
+        """
+        Return the human-readable `duration`. For all-day event, the whole
+        of ``date_ends`` is accounted for in the displayed duration, so that a
+        1 day all-day event will have 1 day timedelta instead of 0.
+        """
+        if self.all_day:
+            return self.date_ends + timedelta(days=1) - self.date_starts
         return self.ends - self.starts
 
     def get_starts(self):
@@ -571,5 +557,4 @@ class Event(AbstractEvent):
     A concrete polymorphic event model.
     """
 
-    objects = EventQuerySet.as_manager()
     tracker = FieldTracker(AbstractEvent.MONITOR_FIELDS)

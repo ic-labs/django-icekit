@@ -26,8 +26,8 @@ DEFAULT_STARTS_PRECISION = EVENTKIT.get(
 # their `starts` value.
 DEFAULT_ENDS_DELTA = EVENTKIT.get('DEFAULT_ENDS_DELTA', timedelta(hours=1))
 
-# New events will have a default `date_ends` value that is this much later than
-# their `date_starts` value.
+# New events will have a default `date_ends` value of a day after their
+# `date_starts` value.
 DEFAULT_DATE_ENDS_DELTA = EVENTKIT.get(
     'DEFAULT_DATE_ENDS_DELTA', timedelta(days=1))
 

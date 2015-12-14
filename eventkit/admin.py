@@ -5,6 +5,7 @@ Admin configuration for ``eventkit`` app.
 # Define `list_display`, `list_filter` and `search_fields` for each model.
 # These go a long way to making the admin more usable.
 
+from datetime import timedelta
 from dateutil import rrule
 import datetime
 import json
@@ -205,7 +206,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
             classes = ['fcc-%s' % class_ for class_ in classes]
             if all_day:
                 start = date_starts
-                end = date_ends
+                end = date_ends + timedelta(days=1)
             else:
                 start = timezone.localize(starts)
                 end = timezone.localize(ends)
