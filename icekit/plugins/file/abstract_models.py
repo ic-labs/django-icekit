@@ -4,6 +4,7 @@ from django.template.defaultfilters import filesizeformat
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItem
+from icekit import appsettings
 
 
 @python_2_unicode_compatible
@@ -64,7 +65,7 @@ class AbstractFileItem(ContentItem):
     A file from the File model.
     """
     file = models.ForeignKey(
-        'file.File',
+        appsettings.FILE_CLASS,
         help_text=_('A file from the file library.')
     )
 
