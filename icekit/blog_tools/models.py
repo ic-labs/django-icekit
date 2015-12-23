@@ -1,5 +1,3 @@
-from model_utils.managers import PassThroughManager
-
 from . import abstract_models, managers
 
 
@@ -20,7 +18,7 @@ class Location(abstract_models.AbstractLocation):
 
 
 class BlogPost(abstract_models.AbstractBlogPost):
-    objects = PassThroughManager.for_queryset_class(managers.PostQuerySet)()
+    objects = managers.PostQuerySet.as_manager()
 
 
 class PostItem(abstract_models.AbstractPostItem):
