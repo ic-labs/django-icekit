@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core import exceptions
 from django.core.urlresolvers import reverse
+from django.test import TestCase
 from django.utils import six
 from django_dynamic_fixture import G
 from django_webtest import WebTest
@@ -37,6 +38,7 @@ from mock import patch, Mock
 
 from icekit.utils import fluent_contents, implementation
 from icekit.utils.admin import mixins
+from icekit.utils.pagination import describe_page_numbers
 
 from icekit import admin_forms, models, validators
 from icekit.tests import models as test_models
@@ -538,3 +540,48 @@ class TestIceKitTags(WebTest):
         response.mustcontain('<div class="tag-fake-slot"></div>')
         response.mustcontain('<div class="tag-fake-slot-render">None</div>')
         response.mustcontain('div class="filter-fake-slot">None</div>')
+
+
+class TestDescribePageNumbers(TestCase):
+    def test_join_words(self):
+        self.assertEqual(
+            describe_page_numbers(1, 500, 10),
+            {
+                'numbers': [1, 2, 3, 4, None, 48, 49, 50],
+                'has_previous': False,
+                'has_next': True,
+                'previous_page': 0,
+                'current_page': 1,
+                'next_page': 2,
+                'total_count': 500,
+                'per_page': 10,
+            },
+        )
+
+        self.assertEqual(
+            describe_page_numbers(10, 500, 10),
+            {
+                'numbers': [1, 2, 3, None, 7, 8, 9, 10, 11, 12, 13, None, 48, 49, 50],
+                'has_previous': True,
+                'has_next': True,
+                'previous_page': 9,
+                'current_page': 10,
+                'next_page': 11,
+                'total_count': 500,
+                'per_page': 10,
+            },
+        )
+
+        self.assertEqual(
+            describe_page_numbers(50, 500, 10),
+            {
+                'numbers': [1, 2, 3, None, 47, 48, 49, 50],
+                'has_previous': True,
+                'has_next': False,
+                'previous_page': 49,
+                'current_page': 50,
+                'next_page': 51,
+                'total_count': 500,
+                'per_page': 10,
+            },
+        )

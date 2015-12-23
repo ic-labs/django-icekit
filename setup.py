@@ -15,6 +15,7 @@ setuptools.setup(
         'django-wysiwyg',
         'requests',
         'Pillow',
+        'django-el-pagination',
     ],
     extras_require={
         'brightcove': ['django-brightcove'],
