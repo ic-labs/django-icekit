@@ -23,4 +23,10 @@ class ImagePlugin(ContentPlugin):
                 'icekit/plugins/image/default.html'
             ]
         )
+        # In Django >= 1.8 `select_template` returns and instance of
+        # `django.template.backends.django.Template` if the template exists. To obtain the
+        # `django.template.base.Template` object we need to get the `template` attribute on it.
+        # Previous versions of Django return an `django.template.base.Template` object.
+        if hasattr(template, 'template'):
+            template = template.template
         return template.name
