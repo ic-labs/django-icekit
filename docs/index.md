@@ -50,6 +50,16 @@ Add to your `setup.py`:
         ],
     )
 
+If you want to use `Django 1.7` you need to add the optional extra `django17`:
+
+    setuptools.setup(
+        ...
+        install_requires=[
+            ...
+            'django-icekit[brightcove,dev,search,test,django17]',  # Omit unwanted optional extras.
+        ],
+    )
+
 Reinstall your project to pickup the new requirements:
 
     $ pip install -e .
