@@ -24,6 +24,7 @@ setuptools.setup(
             'ipython',
             'mkdocs',
         ],
+        'django17': ['django-mptt<0.8', ],
         'forms': [
             'django-forms-builder',
         ],
