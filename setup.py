@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import sys
 
-version = '0.1.dev0'
+version = '0.1.dev1'
 
 # Convert README.md to reStructuredText.
 if {'bdist_wheel', 'sdist'}.intersection(sys.argv):
