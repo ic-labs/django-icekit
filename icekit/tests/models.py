@@ -1,6 +1,7 @@
 """
 Test models for ``icekit`` app.
 """
+from django.db import models
 
 from icekit import abstract_models
 
@@ -22,3 +23,7 @@ class BarWithLayout(abstract_models.LayoutFieldMixin):
 
 class BazWithLayout(abstract_models.LayoutFieldMixin):
     pass
+
+
+class ImageTest(models.Model):
+    image = models.ImageField(upload_to='testing/')

@@ -1,4 +1,6 @@
 language: python
+python:
+  - "3.5"
 
 install:
   - pip install tox
@@ -13,3 +15,8 @@ env:
   - TOXENV=django18-py27-brightcove
   - TOXENV=django18-py33
   - TOXENV=django18-py34
+  - TOXENV=django18-py35
+  # - TOXENV=django19-py27-brightcove
+  # - TOXENV=django19-py33
+  # - TOXENV=django19-py34
+  # - TOXENV=django19-py35

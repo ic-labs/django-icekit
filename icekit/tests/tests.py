@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core import exceptions
 from django.core.urlresolvers import reverse
+from django.test import TestCase
 from django.utils import six
 from django_dynamic_fixture import G
 from django_webtest import WebTest
@@ -18,6 +19,8 @@ from fluent_pages.models import PageLayout
 from fluent_pages.pagetypes.fluentpage.models import FluentPage
 from forms_builder.forms.models import Form
 from icekit.abstract_models import LayoutFieldMixin
+from icekit.page_types.layout_page.models import LayoutPage
+from icekit.plugins import descriptors
 from icekit.plugins.faq.models import FAQItem
 from icekit.plugins.horizontal_rule.models import HorizontalRuleItem
 from icekit.plugins.image.models import ImageItem, Image
@@ -35,6 +38,7 @@ from mock import patch, Mock
 
 from icekit.utils import fluent_contents, implementation
 from icekit.utils.admin import mixins
+from icekit.utils.pagination import describe_page_numbers
 
 from icekit import admin_forms, models, validators
 from icekit.tests import models as test_models
@@ -495,3 +499,89 @@ class TestValidators(WebTest):
         admin_mixin.thumbnail_field = 'test'
         self.assertEqual(admin_mixin.get_thumbnail_source(TestThumbnail()), 'test-result')
         self.assertEqual(admin_mixin.thumbnail(TestThumbnail()), '')
+
+
+class TestIceKitTags(WebTest):
+    def test_get_slot_contents(self):
+        descriptors.contribute_to_class(LayoutPage)
+        layout_1 = G(
+            models.Layout,
+            template_name='icekit/layouts/test_slot_contents.html',
+        )
+        layout_1.content_types.add(ContentType.objects.get_for_model(LayoutPage))
+        layout_1.save()
+        staff_1 = User.objects.create(
+            email='test@test.com',
+            is_staff=True,
+            is_active=True,
+            is_superuser=True,
+        )
+
+        page_1 = LayoutPage.objects.create(
+            title='Test Page',
+            slug='test-page',
+            parent_site=Site.objects.first(),
+            layout=layout_1,
+            author=staff_1,
+            status='p',  # Publish the page
+        )
+
+        hr = fluent_contents.create_content_instance(
+            HorizontalRuleItem,
+            page_1,
+            placeholder_name='test-main',
+        )
+
+        response = self.app.get(page_1.get_absolute_url())
+
+        response.mustcontain('<div class="filter">Horizontal Rule</div>')
+        response.mustcontain('<div class="tag-as"></div>')
+        response.mustcontain('<div class="tag-render">Horizontal Rule</div>')
+        response.mustcontain('<div class="tag-fake-slot"></div>')
+        response.mustcontain('<div class="tag-fake-slot-render">None</div>')
+        response.mustcontain('div class="filter-fake-slot">None</div>')
+
+
+class TestDescribePageNumbers(TestCase):
+    def test_join_words(self):
+        self.assertEqual(
+            describe_page_numbers(1, 500, 10),
+            {
+                'numbers': [1, 2, 3, 4, None, 48, 49, 50],
+                'has_previous': False,
+                'has_next': True,
+                'previous_page': 0,
+                'current_page': 1,
+                'next_page': 2,
+                'total_count': 500,
+                'per_page': 10,
+            },
+        )
+
+        self.assertEqual(
+            describe_page_numbers(10, 500, 10),
+            {
+                'numbers': [1, 2, 3, None, 7, 8, 9, 10, 11, 12, 13, None, 48, 49, 50],
+                'has_previous': True,
+                'has_next': True,
+                'previous_page': 9,
+                'current_page': 10,
+                'next_page': 11,
+                'total_count': 500,
+                'per_page': 10,
+            },
+        )
+
+        self.assertEqual(
+            describe_page_numbers(50, 500, 10),
+            {
+                'numbers': [1, 2, 3, None, 47, 48, 49, 50],
+                'has_previous': True,
+                'has_next': False,
+                'previous_page': 49,
+                'current_page': 50,
+                'next_page': 51,
+                'total_count': 500,
+                'per_page': 10,
+            },
+        )

@@ -38,6 +38,7 @@ setuptools.setup(
         'django-wysiwyg',
         'requests',
         'Pillow',
+        'django-el-pagination',
     ],
     extras_require={
         'brightcove': ['django-brightcove'],
@@ -46,6 +47,7 @@ setuptools.setup(
             'ipython',
             'mkdocs',
         ],
+        'django17': ['django-mptt<0.8', ],
         'forms': [
             'django-forms-builder',
         ],
