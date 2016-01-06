@@ -6,8 +6,6 @@ import shutil
 import subprocess
 import sys
 
-version = '0.1.dev1'
-
 # Convert README.md to reStructuredText.
 if {'bdist_wheel', 'sdist'}.intersection(sys.argv):
     try:
@@ -39,7 +37,7 @@ if {'bdist_wheel', 'develop', 'sdist'}.intersection(sys.argv):
 
 setuptools.setup(
     name='django-eventkit',
-    version=version,
+    use_scm_version={'version_scheme': 'post-release'},
     author='Interaction Consortium',
     author_email='studio@interaction.net.au',
     url='https://github.com/ixc/django-eventkit',
@@ -69,4 +67,5 @@ setuptools.setup(
         'fluentevent': ['django-fluent-contents'],
         'postgres': ['psycopg2'],
     },
+    setup_requires=['setuptools_scm'],
 )

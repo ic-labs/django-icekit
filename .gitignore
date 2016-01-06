@@ -6,10 +6,10 @@
 *.egg-info/
 *.py[co]
 /.coverage
+/.eggs/
 /.tox/
 /db.sqlite3
 /dist/
 /htmlcov/
 /venv/
 bower_components/
-.idea
