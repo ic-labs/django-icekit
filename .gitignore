@@ -11,3 +11,4 @@
 /htmlcov/
 /venv/
 bower_components/
+.idea

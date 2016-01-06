@@ -18,7 +18,7 @@ from django.utils import timezone
 from django_dynamic_fixture import G
 from django_webtest import WebTest
 
-from eventkit import appsettings, forms, models, views
+from eventkit import appsettings, forms, models
 from eventkit.utils import time
 from eventkit.tests import models as test_models
 
@@ -101,14 +101,15 @@ class Models(WebTest):
         Test model validation.
         """
         now = timezone.now()
+        date_now = now.date()
         recurrence_rule = 'FREQ=DAILY'
 
         # Do not unset `end_repeat` when a recurrence rule is set.
         event = G(
             models.Event,
             recurrence_rule=recurrence_rule,
-            end_repeat=now,
-        )
+            starts=now,
+            end_repeat=now)
         event.full_clean()
         self.assertEqual(event.end_repeat, now)
 
@@ -116,6 +117,21 @@ class Models(WebTest):
         event.recurrence_rule = None
         event.full_clean()
         self.assertEqual(event.end_repeat, None)
+
+        # Do not unset `date_end_repeat` when a recurrence rule is set.
+        event = G(
+            models.Event,
+            all_day=True,
+            recurrence_rule=recurrence_rule,
+            date_starts=date_now,
+            date_end_repeat=date_now)
+        event.full_clean()
+        self.assertEqual(event.date_end_repeat, now.date())
+
+        # Unset `end_repeat` if no recurrence rule is set.
+        event.recurrence_rule = None
+        event.full_clean()
+        self.assertEqual(event.date_end_repeat, None)
 
     def test_Event_change_detection(self):
         """
@@ -135,8 +151,35 @@ class Models(WebTest):
             ['title', 'recurrence_rule']))
 
     def test_Event_get_originating_event(self):
+        now = timezone.now()
+        date_now = now.date()
+
         # Original is originating event for itself.
-        event = G(models.Event, recurrence_rule='FREQ=DAILY')
+        event = G(
+            models.Event,
+            starts=now,
+            ends=now,
+            recurrence_rule='FREQ=DAILY')
+        self.assertEqual(event, event.get_originating_event())
+        # Original is originating event for repeat events.
+        children = event.get_children()
+        self.assertEqual(event, children[0].get_originating_event())
+        # Variation is originating event for itself.
+        variation = children[5]
+        variation.title = 'Variation'
+        variation.save(propagate=True)
+        self.assertEqual(variation, variation.get_originating_event())
+        # Variation is originating event for repeat events.
+        self.assertEqual(
+            variation, variation.get_children()[0].get_originating_event())
+
+        # Original is originating event for itself.
+        event = G(
+            models.Event,
+            all_day=True,
+            date_starts=date_now,
+            date_ends=date_now,
+            recurrence_rule='FREQ=DAILY')
         self.assertEqual(event, event.get_originating_event())
         # Original is originating event for repeat events.
         children = event.get_children()
@@ -151,7 +194,12 @@ class Models(WebTest):
             variation, variation.get_children()[0].get_originating_event())
 
     def test_Event_is_repeat(self):
-        event = G(models.Event, recurrence_rule='FREQ=DAILY')
+        now = timezone.now()
+        event = G(
+            models.Event,
+            starts=now,
+            ends=now,
+            recurrence_rule='FREQ=DAILY')
         # Root event is not a repeat event.
         self.assertFalse(event.is_repeat)
         # Child events are repeat events.
@@ -187,6 +235,10 @@ class TestEventPropagation(WebTest):
         # in total. The root event plus 19 repeat events.
         end_repeat = starts + timedelta(days=20)
 
+        date_starts = starts.date()
+        date_ends = ends.date()
+        date_end_repeat = end_repeat.date()
+
         # Repeat events are created automatically for new events.
         self.event = G(
             models.Event,
@@ -197,18 +249,36 @@ class TestEventPropagation(WebTest):
             end_repeat=end_repeat,
         )
 
+        # Repeat events are created automatically for new events.
+        self.all_day_event = G(
+            models.Event,
+            title='all-day event',
+            all_day=True,
+            date_starts=date_starts,
+            date_ends=date_ends,
+            recurrence_rule='FREQ=DAILY',
+            date_end_repeat=date_end_repeat,
+        )
+
     def test_create_repeat_events(self):
         # Repeat events are created automatically for new events.
-        self.assertEqual(models.Event.objects.count(), 20)
+        self.assertEqual(
+            models.Event.objects.filter(all_day=False).count(), 20)
+        self.assertEqual(
+            models.Event.objects.filter(all_day=True).count(), 20)
 
     def test_get_repeat_events(self):
         # Repeat events queryset does not include the event being repeated.
         self.assertEqual(self.event.get_repeat_events().count(), 19)
+        self.assertEqual(self.all_day_event.get_repeat_events().count(), 19)
 
     def test_save_no_change(self):
         # Saving without making changes does nothing.
         self.event.get_repeat_events()[10].save()
         self.assertEqual(self.event.get_repeat_events().count(), 19)
+
+        self.all_day_event.get_repeat_events()[10].save()
+        self.assertEqual(self.all_day_event.get_repeat_events().count(), 19)
 
     def test_decouple(self):
         # Create a variation event by changing any monitored fields. Changes
@@ -221,9 +291,25 @@ class TestEventPropagation(WebTest):
         # Decoupled, so no repeat events.
         self.assertEqual(event2.get_repeat_events().count(), 0)
         # Same total number of events.
-        self.assertEqual(models.Event.objects.count(), 20)
+        self.assertEqual(
+            models.Event.objects.filter(all_day=False).count(), 20)
         # No recurrence rule.
         self.assertIsNone(event2.recurrence_rule)
+
+        # Create a variation event by changing any monitored fields. Changes
+        # are not propagated. The recurrence rule is automatically removed.
+        event3 = self.all_day_event.get_repeat_events()[10]
+        event3.title = 'title'
+        event3.save()
+        # Original repeat events reduced by 1.
+        self.assertEqual(self.all_day_event.get_repeat_events().count(), 18)
+        # Decoupled, so no repeat events.
+        self.assertEqual(event3.get_repeat_events().count(), 0)
+        # Same total number of events.
+        self.assertEqual(
+            models.Event.objects.filter(all_day=True).count(), 20)
+        # No recurrence rule.
+        self.assertIsNone(event3.recurrence_rule)
 
     def test_decouple_and_delete(self):
         # To decouple and delete repeat events, remove the recurrence rule and
@@ -237,7 +323,22 @@ class TestEventPropagation(WebTest):
         self.assertEqual(event2.get_repeat_events().count(), 0)
         # Total number of events reduced by 8. (20 days less 10 repeats kept
         # less 2 originals.)
-        self.assertEqual(models.Event.objects.count(), 12)
+        self.assertEqual(
+            models.Event.objects.filter(all_day=False).count(), 12)
+
+        # To decouple and delete repeat events, remove the recurrence rule and
+        # call `save(propagate=True)`.
+        event3 = self.all_day_event.get_repeat_events()[10]
+        event3.recurrence_rule = None
+        event3.save(propagate=True)
+        # Original repeat events reduced by 9. (19 less 10 kept.)
+        self.assertEqual(self.all_day_event.get_repeat_events().count(), 10)
+        # Decoupled, so no repeat events.
+        self.assertEqual(event3.get_repeat_events().count(), 0)
+        # Total number of events reduced by 8. (20 days less 10 repeats kept
+        # less 2 originals.)
+        self.assertEqual(
+            models.Event.objects.filter(all_day=True).count(), 12)
 
     def test_update_recurrence_rule(self):
         # Updating the recurrence rule without propagating is not allowed.
@@ -250,6 +351,16 @@ class TestEventPropagation(WebTest):
         with self.assertRaisesMessage(AssertionError, message):
             event2.save()
 
+        # Updating the recurrence rule without propagating is not allowed.
+        # Decoupled events cannot repeat.
+        event3 = self.all_day_event.get_repeat_events()[10]
+        event3.recurrence_rule = 'FREQ=WEEKLY'
+        message = (
+            'Cannot update occurrences without propagating changes to repeat '
+            'events.')
+        with self.assertRaisesMessage(AssertionError, message):
+            event3.save()
+
     def test_remove_recurrence_rule(self):
         # Removing the recurrence rule without making any other changes is not
         # allowed. This would be a no-op.
@@ -260,6 +371,16 @@ class TestEventPropagation(WebTest):
             'the recurrence rule alone is a no-op.')
         with self.assertRaisesMessage(AssertionError, message):
             event2.save()
+
+        # Removing the recurrence rule without making any other changes is not
+        # allowed. This would be a no-op.
+        event3 = self.all_day_event.get_repeat_events()[10]
+        event3.recurrence_rule = None
+        message = (
+            'Cannot decouple event without any substantive changes. Removing '
+            'the recurrence rule alone is a no-op.')
+        with self.assertRaisesMessage(AssertionError, message):
+            event3.save()
 
     def test_propagate_title(self):
         # Repeat events will be updated instead of being recreated when the
@@ -273,10 +394,28 @@ class TestEventPropagation(WebTest):
         # Propagated. 8 repeat events (9 decoupled less 1 new original.)
         self.assertEqual(event2.get_repeat_events().count(), 8)
         # Same total number of events.
-        self.assertEqual(models.Event.objects.count(), 20)
+        self.assertEqual(
+            models.Event.objects.filter(all_day=False).count(), 20)
         # Same primary keys for updated repeat events.
         self.assertFalse(pks.difference(set(
             event2.get_repeat_events().values_list('pk', flat=True))))
+
+        # Repeat events will be updated instead of being recreated when the
+        # occurrence parameters are not changed.
+        event3 = self.all_day_event.get_repeat_events()[10]
+        pks = set(event3.get_repeat_events().values_list('pk', flat=True))
+        event3.title = 'title'
+        event3.save(propagate=True)
+        # Original repeat events reduced by 9. (19 less 10 kept.)
+        self.assertEqual(self.all_day_event.get_repeat_events().count(), 10)
+        # Propagated. 8 repeat events (9 decoupled less 1 new original.)
+        self.assertEqual(event3.get_repeat_events().count(), 8)
+        # Same total number of events.
+        self.assertEqual(
+            models.Event.objects.filter(all_day=True).count(), 20)
+        # Same primary keys for updated repeat events.
+        self.assertFalse(pks.difference(set(
+            event3.get_repeat_events().values_list('pk', flat=True))))
 
     def test_propagate_start_time(self):
         # Repeat events will be recreated when `starts` is changed.
@@ -290,10 +429,28 @@ class TestEventPropagation(WebTest):
         # 2 originals.)
         self.assertEqual(event2.get_repeat_events().count(), 8)
         # Same total number of events.
-        self.assertEqual(models.Event.objects.count(), 20)
+        self.assertEqual(
+            models.Event.objects.filter(all_day=False).count(), 20)
         # New primary keys for recreated repeat events.
         self.assertFalse(pks.intersection(set(
             event2.get_repeat_events().values_list('pk', flat=True))))
+
+        # Repeat events will be recreated when `date_starts` is changed.
+        event3 = self.all_day_event.get_repeat_events()[10]
+        pks = set(event3.get_repeat_events().values_list('pk', flat=True))
+        event3.date_starts += timedelta(days=1)
+        event3.save(propagate=True)
+        # Original repeat events reduced by 8. (19 less 10 kept.)
+        self.assertEqual(self.all_day_event.get_repeat_events().count(), 11)
+        # Propagated. 7 daily repeat events (20 days less 11 repeats kept less
+        # 2 originals.)
+        self.assertEqual(event3.get_repeat_events().count(), 7)
+        # Same total number of events.
+        self.assertEqual(
+            models.Event.objects.filter(all_day=False).count(), 20)
+        # New primary keys for recreated repeat events.
+        self.assertFalse(pks.intersection(set(
+            event3.get_repeat_events().values_list('pk', flat=True))))
 
     def test_propagate_recurrence_rule(self):
         # Repeat events will be recreated when `recurrence_rule` is changed.
@@ -308,10 +465,29 @@ class TestEventPropagation(WebTest):
         self.assertEqual(event2.get_repeat_events().count(), 2)
         # Total number of events reduced by 13. (16 repeats less 1 decoupled
         # less 2 recreated.)
-        self.assertEqual(models.Event.objects.count(), 7)
+        self.assertEqual(
+            models.Event.objects.filter(all_day=False).count(), 7)
         # New primary keys for recreated repeat events.
         self.assertFalse(pks.intersection(set(
             event2.get_repeat_events().values_list('pk', flat=True))))
+
+        # Repeat events will be recreated when `recurrence_rule` is changed.
+        event3 = self.all_day_event.get_repeat_events()[3]
+        pks = set(event3.get_repeat_events().values_list('pk', flat=True))
+        event3.recurrence_rule = 'FREQ=WEEKLY'
+        event3.save(propagate=True)
+        # Original repeat events reduced by 16. (19 less 3 kept.)
+        self.assertEqual(self.all_day_event.get_repeat_events().count(), 3)
+        # Propagated. 2 weekly repeat events (20 days less 3 repeats kept less
+        # 2 originals.)
+        self.assertEqual(event3.get_repeat_events().count(), 2)
+        # Total number of events reduced by 13. (16 repeats less 1 decoupled
+        # less 2 recreated.)
+        self.assertEqual(
+            models.Event.objects.filter(all_day=True).count(), 7)
+        # New primary keys for recreated repeat events.
+        self.assertFalse(pks.intersection(set(
+            event3.get_repeat_events().values_list('pk', flat=True))))
 
     def test_propagate_end_repeat(self):
         # Vestigial repeat events are deleted when `end_repeat` is reduced.
@@ -325,10 +501,28 @@ class TestEventPropagation(WebTest):
         # vestigial deleted.)
         self.assertEqual(event2.get_repeat_events().count(), 3)
         # Total number of events reduced by 5.
-        self.assertEqual(models.Event.objects.count(), 15)
+        self.assertEqual(
+            models.Event.objects.filter(all_day=False).count(), 15)
         # Same primary keys for remaining repeat events.
         self.assertTrue(pks.issuperset(set(
             event2.get_repeat_events().values_list('pk', flat=True))))
+
+        # Vestigial repeat events are deleted when `end_repeat` is reduced.
+        event3 = self.all_day_event.get_repeat_events()[10]
+        pks = set(event3.get_repeat_events().values_list('pk', flat=True))
+        event3.date_end_repeat -= timedelta(days=5)
+        event3.save(propagate=True)
+        # Original repeat events reduced by 9. (19 less 10 kept.)
+        self.assertEqual(self.all_day_event.get_repeat_events().count(), 10)
+        # Propagated. 3 repeat events (9 decoupled less 1 new original less 5
+        # vestigial deleted.)
+        self.assertEqual(event3.get_repeat_events().count(), 3)
+        # Total number of events reduced by 5.
+        self.assertEqual(
+            models.Event.objects.filter(all_day=True).count(), 15)
+        # Same primary keys for remaining repeat events.
+        self.assertTrue(pks.issuperset(set(
+            event3.get_repeat_events().values_list('pk', flat=True))))
 
     def test_propagate_save(self):
         # Calling `propagate(save=True)` will save the event immediately.
@@ -337,17 +531,37 @@ class TestEventPropagation(WebTest):
         event2.propagate(save=True)
         self.assertFalse(event2.tracker.has_changed('title'))
 
+        event3 = self.all_day_event.get_repeat_events()[5]
+        event3.title = 'title'
+        event3.propagate(save=True)
+        self.assertFalse(event3.tracker.has_changed('title'))
+
     def test_create_missing_events(self):
         # Delete a few repeat events to simulate "missing" events and recreate.
         self.assertEqual(len(self.event.missing_repeat_events), 0)
         models.Event.objects \
+            .filter(all_day=False) \
             .filter(pk__in=self.event.get_repeat_events()[5:]) \
             .delete()
         self.assertEqual(len(self.event.missing_repeat_events), 14)
         call_command('create_missing_events')
         self.assertEqual(len(self.event.missing_repeat_events), 0)
         self.assertEqual(self.event.get_repeat_events().count(), 19)
-        self.assertEqual(models.Event.objects.count(), 20)
+        self.assertEqual(
+            models.Event.objects.filter(all_day=False).count(), 20)
+
+        # Delete a few repeat events to simulate "missing" events and recreate.
+        self.assertEqual(len(self.all_day_event.missing_repeat_events), 0)
+        models.Event.objects \
+            .filter(all_day=True) \
+            .filter(pk__in=self.all_day_event.get_repeat_events()[5:]) \
+            .delete()
+        self.assertEqual(len(self.all_day_event.missing_repeat_events), 14)
+        call_command('create_missing_events')
+        self.assertEqual(len(self.all_day_event.missing_repeat_events), 0)
+        self.assertEqual(self.all_day_event.get_repeat_events().count(), 19)
+        self.assertEqual(
+            models.Event.objects.filter(all_day=True).count(), 20)
 
 
 class Views(WebTest):

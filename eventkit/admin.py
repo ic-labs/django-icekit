@@ -5,6 +5,7 @@ Admin configuration for ``eventkit`` app.
 # Define `list_display`, `list_filter` and `search_fields` for each model.
 # These go a long way to making the admin more usable.
 
+from datetime import timedelta
 from dateutil import rrule
 import datetime
 import json
@@ -97,11 +98,11 @@ class VariationFilter(admin.SimpleListFilter):
 class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
     base_model = models.Event
     list_filter = (
-        'all_day', 'starts', 'ends', EventTypeFilter, OriginalFilter,
+        'all_day', 'date_starts', 'date_ends', EventTypeFilter, OriginalFilter,
         VariationFilter, 'is_repeat', 'modified')
     list_display = (
-        '__str__', 'all_day', 'starts', 'ends', 'is_original', 'is_variation',
-        'is_repeat', 'modified')
+        '__str__', 'all_day', 'get_starts', 'get_ends', 'is_original',
+        'is_variation', 'is_repeat', 'modified')
     search_fields = ('title', )
 
     child_model_plugin_class = plugins.EventChildModelPlugin
@@ -139,11 +140,22 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
             datetime.datetime.strptime(request.GET['start'], '%Y-%m-%d'), tz)
         ends = timezone.localize(
             datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d'), tz)
+
         all_events = self.get_queryset(request) \
-            .filter(starts__gte=starts, starts__lt=ends) \
-            .values_list(
-                'pk', 'title', 'all_day', 'starts', 'ends', 'is_repeat',
-                'tree_id', 'parent', 'polymorphic_ctype')
+            .filter(
+                Q(all_day=False, starts__gte=starts) |
+                Q(all_day=True, date_starts__gte=starts.date())
+            ) \
+            .filter(
+                # Exclusive for datetime, inclusive for date.
+                Q(all_day=False, starts__lt=ends) |
+                Q(all_day=True, date_starts__lte=ends.date())
+            )
+
+        all_events = all_events.values_list(
+            'pk', 'title', 'all_day', 'starts', 'ends', 'date_starts',
+            'date_ends', 'is_repeat', 'tree_id', 'parent', 'polymorphic_ctype')
+
         data = []
         # Get a dict mapping the primary keys for content types to plugins, so
         # we can get the verbose name of the plugin and a consistent colour for
@@ -172,8 +184,8 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
         # Get the keys into a sorted list, so we can assign a consistent colour
         # based on the index each event's content type is seen in the list.
         seen = sorted(plugins_for_ctype.keys())
-        for (pk, title, all_day, starts, ends, is_repeat, tree_id, parent,
-             polymorphic_ctype) in events:
+        for (pk, title, all_day, starts, ends, date_starts, date_ends,
+             is_repeat, tree_id, parent, polymorphic_ctype) in events:
             # Get color based on seen index for content type. Start repeating
             # colors when they have all been used.
             background, color = appsettings.CALENDAR_COLORS[
@@ -193,12 +205,22 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
             classes.append(tree_id);
             # Prefix class names with "fcc-" (full calander class).
             classes = ['fcc-%s' % class_ for class_ in classes]
+            if all_day:
+                start = date_starts
+                # `end` is exclusive according to the doc in
+                # http://fullcalendar.io/docs/event_data/Event_Object/, so
+                # we need to add 1 day to ``date_ends`` to have the end date
+                # included in the calendar.
+                end = date_ends + timedelta(days=1)
+            else:
+                start = timezone.localize(starts)
+                end = timezone.localize(ends)
             data.append({
                 'id': tree_id,
                 'title': title,
                 'allDay': all_day,
-                'start': timezone.localize(starts),
-                'end': timezone.localize(ends),
+                'start': start,
+                'end': end,
                 'url': reverse(
                     'admin:eventkit_event_change', args=[pk]),
                 'className': classes,
