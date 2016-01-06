@@ -1,6 +1,7 @@
 language: python
 
 install:
+  - npm install -g bower
   - pip install tox
 
 script:
