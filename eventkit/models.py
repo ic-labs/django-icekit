@@ -261,7 +261,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         these criteria are not met `None` will be returned.
         """
         if self.all_day and self.date_ends and self.date_starts:
-            return self.date_ends - self.date_starts
+            return self.date_ends + timedelta(days=1) - self.date_starts
         if self.ends and self.starts:
             return self.ends - self.starts
         return None
