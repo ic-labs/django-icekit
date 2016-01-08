@@ -220,9 +220,12 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 event.date_ends = timezone.date(starts) + self.duration
             else:
                 event.starts = starts
-                event.ends = starts + self.duration
-                event.date_starts = timezone.date(event.starts)
-                event.date_ends = timezone.date(event.ends)
+                if self.duration:
+                    event.ends = starts + self.duration
+                if event.starts:
+                    event.date_starts = timezone.date(event.starts)
+                if event.ends:
+                    event.date_ends = timezone.date(event.ends)
             super(AbstractEvent, event).save()  # Bypass automatic propagation.
         # Refresh the MPTT fields, which are now in an inconsistent state.
         self.refresh_mptt_fields()
@@ -232,10 +235,19 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     def duration(self):
         """
         Return the duration between ``starts`` and ``ends`` as a timedelta.
+
+        If this is an all day event it will provide the different between
+        the dates.
+
+        As a duration semantically only means something when the start and
+        end times (or dates for an all day event) exist for an object if
+        these criteria are not met `None` will be returned.
         """
-        if self.all_day:
+        if self.all_day and self.date_ends and self.date_starts:
             return self.date_ends - self.date_starts
-        return self.ends - self.starts
+        if self.ends and self.starts:
+            return self.ends - self.starts
+        return None
 
     @property
     def display_duration(self):
@@ -243,29 +255,45 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         Return the human-readable `duration`. For all-day event, the whole
         of ``date_ends`` is accounted for in the displayed duration, so that a
         1 day all-day event will have 1 day timedelta instead of 0.
+
+        As a duration semantically only means something when the start and
+        end times (or dates for an all day event) exist for an object if
+        these criteria are not met `None` will be returned.
         """
-        if self.all_day:
-            return self.date_ends + timedelta(days=1) - self.date_starts
-        return self.ends - self.starts
+        if self.all_day and self.date_ends and self.date_starts:
+            return self.date_ends - self.date_starts
+        if self.ends and self.starts:
+            return self.ends - self.starts
+        return None
 
     def get_starts(self):
         """
         Return the start date for all day events, or the start date and time
         for other events.
+
+        If the start time / date is not set `None` will be returned as there
+        is no start.
         """
-        if self.all_day:
+        if self.all_day and self.date_starts:
             return self.date_starts
-        return self.starts
+        if self.starts:
+            return self.starts
+        return None
     get_starts.short_description = 'starts'
 
     def get_ends(self):
         """
         Return the end date for all day events, or the end date and time for
         other events.
+
+        If the end time / date is not set `None` will be returned as there
+        is no end.
         """
-        if self.all_day:
+        if self.all_day and self.date_ends:
             return self.date_ends
-        return self.ends
+        if self.ends:
+            return self.ends
+        return None
     get_ends.short_description = 'ends'
 
     def get_originating_event(self):
@@ -287,10 +315,14 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             # If this is a repeat event, return sibling repeat events that
             # start after it.
             events = self.get_siblings()
-            if self.all_day:
+            if self.all_day and self.date_starts:
                 events = events.filter(date_starts__gt=self.date_starts)
-            else:
+            elif self.starts:
                 events = events.filter(starts__gt=self.starts)
+            else:
+                # If no start date or datetime exists then there is semantically no
+                # such thing as a future events so return an empty queryset.
+                return events.none()
         else:
             # If this is not a repeat event, return child repeat events.
             events = self.get_children()
@@ -353,8 +385,9 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 timezone.date() + appsettings.REPEAT_LIMIT
 
             # `rruleset.between` for all-day requires naive datetime arguments.
-            starts = datetime.combine(starts, datetime.min.time())
-            end_repeat = datetime.combine(end_repeat, datetime.min.time())
+            if starts and end_repeat:
+                starts = datetime.combine(starts, datetime.min.time())
+                end_repeat = datetime.combine(end_repeat, datetime.min.time())
         else:
             starts = self.get_repeat_events() \
                 .aggregate(max=models.Max('starts'))['max'] or self.starts
@@ -363,15 +396,17 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
 
         # `starts` and `end_repeat` are exclusive and will not be included in
         # the occurrences.
-        missing = rruleset.between(starts, end_repeat)
-        return missing
+        if starts and end_repeat:
+            missing = rruleset.between(starts, end_repeat)
+            return missing
+        return []
 
     @property
     def period(self):
         """
         Return "AM" or "PM", depending on when this event starts.
         """
-        if self.all_day:
+        if self.all_day or not self.starts:
             return
         try:
             return 'PM' if timezone.localize(self.starts).hour >= 12 else 'AM'
@@ -393,8 +428,10 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             # Auto-populate date fields for regular events, so we can order by
             # date first (which all events have) and then datetime (which only
             # some events have).
-            self.date_starts = timezone.date(self.starts)
-            self.date_ends = timezone.date(self.ends)
+            if self.starts:
+                self.date_starts = timezone.date(self.starts)
+            if self.ends:
+                self.date_ends = timezone.date(self.ends)
         # Is this a new event? New events cannot be propagated until saved.
         adding = self._state.adding
         # Have monitored fields have changed since the last save?
