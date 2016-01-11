@@ -259,10 +259,9 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 event.date_ends = timezone.date(starts) + self.duration
             else:
                 event.starts = starts
+                event.date_starts = timezone.date(event.starts)
                 if self.duration:
                     event.ends = starts + self.duration
-                event.date_starts = timezone.date(event.starts)
-                if event.ends:
                     event.date_ends = timezone.date(event.ends)
             super(AbstractEvent, event).save()  # Bypass automatic propagation.
         # Refresh the MPTT fields, which are now in an inconsistent state.
@@ -280,7 +279,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         """
         if self.all_day and self.date_ends and self.date_starts:
             return self.date_ends - self.date_starts
-        if self.ends and self.starts:
+        if self.ends:
             return self.ends - self.starts
         return None
 
@@ -297,7 +296,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         """
         if self.all_day and self.date_ends and self.date_starts:
             return self.date_ends + timedelta(days=1) - self.date_starts
-        if self.ends and self.starts:
+        if self.ends:
             return self.ends - self.starts
         return None
 
@@ -309,7 +308,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         If the start time / date is not set `None` will be returned as there
         is no start.
         """
-        if self.all_day and self.date_starts:
+        if self.all_day:
             return self.date_starts
         return self.starts
     get_starts.short_description = 'starts'
@@ -348,7 +347,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             # If this is a repeat event, return sibling repeat events that
             # start after it.
             events = self.get_siblings()
-            if self.all_day and self.date_starts:
+            if self.all_day:
                 events = events.filter(date_starts__gt=self.date_starts)
             else:
                 events = events.filter(starts__gt=self.starts)
@@ -424,10 +423,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
 
         # `starts` and `end_repeat` are exclusive and will not be included in
         # the occurrences.
-        if starts:
-            missing = rruleset.between(starts, end_repeat)
-            return missing
-        return []
+        missing = rruleset.between(starts, end_repeat)
+        return missing
 
     @property
     def period(self):
