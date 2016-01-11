@@ -458,6 +458,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             self.date_starts = timezone.date(self.starts)
             if self.ends:
                 self.date_ends = timezone.date(self.ends)
+            else:
+                self.date_ends = None
 
         # Is this a new event? New events cannot be propagated until saved.
         adding = self._state.adding
