@@ -146,7 +146,7 @@ class Models(WebTest):
 
         self.assertIn('date_starts', cm.exception.error_dict.keys())
 
-        event.all_day = None
+        event.all_day = False
         event.starts = None
 
         with self.assertRaises(ValidationError) as cm:
