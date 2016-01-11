@@ -445,12 +445,12 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                     # recurrence rule set, the changes must be propagated to
                     # maintain consistency across repeat events.
                     if changed.intersection([
-                            'starts',
-                            'ends',
-                            'date_starts',
-                            'date_ends',
-                            'recurrence_rule',
-                        ]):
+                        'starts',
+                        'ends',
+                        'date_starts',
+                        'date_ends',
+                        'recurrence_rule',
+                    ]):
                         raise AssertionError(
                             'Cannot update occurrences without '
                             'propagating changes to repeat events.')
@@ -502,8 +502,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             if self.is_repeat:
                 # Combine earlier repeat and parent events.
                 siblings = type(self).objects.filter(
-                    models.Q(pk=self.parent.pk)
-                    | models.Q(parent__pk=self.parent_id, pk__lt=self.pk)
+                    models.Q(pk=self.parent.pk) |
+                    models.Q(parent__pk=self.parent_id, pk__lt=self.pk)
                 ).exclude(pk=self.pk)
                 # Update earlier repeat and parent events to the max `starts`
                 # value found.
