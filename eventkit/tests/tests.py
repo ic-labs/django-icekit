@@ -231,6 +231,22 @@ class Models(WebTest):
             event.get_children().count(),
             event.get_children().filter(is_repeat=True).count())
 
+    def test_Event_save(self):
+        with self.assertRaises(AssertionError) as cm:
+            models.Event.objects.create(
+                title='test title'
+            )
+
+        self.assertEqual(cm.exception.message, 'An event must have a start time.')
+
+        with self.assertRaises(AssertionError) as cm:
+            models.Event.objects.create(
+                title='test title',
+                all_day=True
+            )
+
+        self.assertEqual(cm.exception.message, 'An all day event must have a start date.')
+
     def test_Event_str(self):
         event = G(
             models.Event,
