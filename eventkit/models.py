@@ -202,7 +202,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         Create missing repeat events according to the recurrence rule, up until
         the configured limit. Return the number of repeat events created.
         """
-        # TODO: Create asyncronously if celery is available?
+        # TODO: Create asynchronously if celery is available?
         assert self.pk, 'Cannot create repeat events before an event is saved.'
         parent = parent or self.parent or self
         defaults = {
