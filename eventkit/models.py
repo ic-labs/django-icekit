@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from dateutil import rrule
 import six
 
+from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import encoding
 from django.utils.translation import ugettext_lazy as _
@@ -120,6 +121,23 @@ class RecurrenceRule(AbstractBaseModel):
 class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     """
     An abstract polymorphic event model, with the bare minimum fields.
+
+    An event relies on having start information for the event. There
+    are two different fields which can indicate the start date / time
+    which are `starts` and `date_starts`.
+
+    If the event is an all day event (`all_day` has been marked as
+    `True`) then the `date_starts` field will be required.
+
+    If the event is not an all day event then the `starts` field will
+    be required which stores the time and date of when the event
+    occurs.
+
+    There are checks for this within the models `clean` method but this
+    will not get called if the `save` method is called explicitly
+    therefore care should be taken when using the `save` method to
+    ensure the data meets these standards. Calling the `clean` method
+    explicitly is most likely the easiest way to ensure this.
     """
 
     # Changes to these fields will be propagated to repeat events.
@@ -195,6 +213,25 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         if not self.recurrence_rule:
             self.end_repeat = None
             self.date_end_repeat = None
+
+        # An event requires a start date or time. If it is an all day event it requires a start date
+        # if it is not an all day event it requires a start time.
+        if self.all_day:
+            if not self.date_starts:
+                raise ValidationError(
+                    {
+                        'date_starts': _(
+                            'If an an event is marked as `all day` it is required to have a start '
+                            'date.'
+                        )
+                    }
+                )
+        elif not self.starts:
+            raise ValidationError(
+                {
+                    'starts': _('An event requires a start time.')
+                }
+            )
 
     @transaction.atomic
     def create_repeat_events(self, parent=None):

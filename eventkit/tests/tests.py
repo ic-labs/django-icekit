@@ -133,6 +133,27 @@ class Models(WebTest):
         event.full_clean()
         self.assertEqual(event.date_end_repeat, None)
 
+        # Check validation if an all day event does not have a start date
+        event = G(
+            models.Event,
+            all_day=True,
+            recurrence_rule=recurrence_rule,
+            date_starts=None,
+            date_end_repeat=date_now)
+
+        with self.assertRaises(ValidationError) as cm:
+            event.full_clean()
+
+        self.assertIn('date_starts', cm.exception.error_dict.keys())
+
+        event.all_day = None
+        event.starts = None
+
+        with self.assertRaises(ValidationError) as cm:
+            event.full_clean()
+
+        self.assertIn('starts', cm.exception.error_dict.keys())
+
     def test_Event_change_detection(self):
         """
         Test that changes to event repeat fields are detected.
