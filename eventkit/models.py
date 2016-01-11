@@ -350,7 +350,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             events = self.get_siblings()
             if self.all_day and self.date_starts:
                 events = events.filter(date_starts__gt=self.date_starts)
-            events = events.filter(starts__gt=self.starts)
+            else:
+                events = events.filter(starts__gt=self.starts)
         else:
             # If this is not a repeat event, return child repeat events.
             events = self.get_children()
