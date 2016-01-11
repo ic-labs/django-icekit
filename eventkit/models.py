@@ -236,9 +236,6 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         """
         Return the duration between ``starts`` and ``ends`` as a timedelta.
 
-        If this is an all day event it will provide the different between
-        the dates.
-
         As a duration semantically only means something when the start and
         end times (or dates for an all day event) exist for an object if
         these criteria are not met `None` will be returned.
