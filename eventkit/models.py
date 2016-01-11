@@ -209,6 +209,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             field: getattr(self, field) for field in self.get_repeat_fields()
         }
         count = len(self.missing_repeat_events)
+        # There is an assumption that `missing_repeat_events` will return
+        # date / datetime results and never any `None` values.
         for starts in self.missing_repeat_events:
             event = type(self)(
                 parent=parent,
@@ -222,8 +224,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 event.starts = starts
                 if self.duration:
                     event.ends = starts + self.duration
-                if event.starts:
-                    event.date_starts = timezone.date(event.starts)
+                event.date_starts = timezone.date(event.starts)
                 if event.ends:
                     event.date_ends = timezone.date(event.ends)
             super(AbstractEvent, event).save()  # Bypass automatic propagation.
