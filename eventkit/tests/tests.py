@@ -15,7 +15,7 @@ from django.core.urlresolvers import reverse
 from django.forms.models import fields_for_model
 from django.test.utils import override_settings
 from django.utils import timezone
-from django_dynamic_fixture import G
+from django_dynamic_fixture import G, N
 from django_webtest import WebTest
 
 from eventkit import appsettings, forms, models
@@ -134,7 +134,7 @@ class Models(WebTest):
         self.assertEqual(event.date_end_repeat, None)
 
         # Check validation if an all day event does not have a start date
-        event = G(
+        event = N(
             models.Event,
             all_day=True,
             recurrence_rule=recurrence_rule,
@@ -159,7 +159,10 @@ class Models(WebTest):
         Test that changes to event repeat fields are detected.
         """
         # Create an event.
-        event = G(models.Event)
+        event = G(
+            models.Event,
+            starts=timezone.now()
+        )
         self.assertFalse(event._monitor_fields_changed())
         # Change a field.
         event.title = 'title'
@@ -229,7 +232,11 @@ class Models(WebTest):
             event.get_children().filter(is_repeat=True).count())
 
     def test_Event_str(self):
-        event = G(models.Event, title='title')
+        event = G(
+            models.Event,
+            title='title',
+            starts=timezone.now()
+        )
         self.assertEqual(six.text_type(event), 'title')
 
     def test_RecurrenceRule_str(self):

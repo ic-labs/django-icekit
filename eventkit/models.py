@@ -459,6 +459,11 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             self.date_starts = timezone.date(self.starts)
             if self.ends:
                 self.date_ends = timezone.date(self.ends)
+
+        if self.all_day:
+            assert self.date_starts, 'An all day event must have a start date.'
+        else:
+            assert self.starts, 'An event must have a start time.'
         # Is this a new event? New events cannot be propagated until saved.
         adding = self._state.adding
         # Have monitored fields have changed since the last save?
