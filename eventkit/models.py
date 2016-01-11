@@ -311,9 +311,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         """
         if self.all_day and self.date_starts:
             return self.date_starts
-        if self.starts:
-            return self.starts
-        return None
+        return self.starts
     get_starts.short_description = 'starts'
 
     def get_ends(self):
@@ -352,12 +350,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             events = self.get_siblings()
             if self.all_day and self.date_starts:
                 events = events.filter(date_starts__gt=self.date_starts)
-            elif self.starts:
-                events = events.filter(starts__gt=self.starts)
-            else:
-                # If no start date or datetime exists then there is semantically no
-                # such thing as a future events so return an empty queryset.
-                return events.none()
+            events = events.filter(starts__gt=self.starts)
         else:
             # If this is not a repeat event, return child repeat events.
             events = self.get_children()
@@ -420,9 +413,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 timezone.date() + appsettings.REPEAT_LIMIT
 
             # `rruleset.between` for all-day requires naive datetime arguments.
-            if starts and end_repeat:
-                starts = datetime.combine(starts, datetime.min.time())
-                end_repeat = datetime.combine(end_repeat, datetime.min.time())
+            starts = datetime.combine(starts, datetime.min.time())
+            end_repeat = datetime.combine(end_repeat, datetime.min.time())
         else:
             starts = self.get_repeat_events() \
                 .aggregate(max=models.Max('starts'))['max'] or self.starts
@@ -441,7 +433,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         """
         Return "AM" or "PM", depending on when this event starts.
         """
-        if self.all_day or not self.starts:
+        if self.all_day:
             return
         try:
             return 'PM' if timezone.localize(self.starts).hour >= 12 else 'AM'
@@ -463,8 +455,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             # Auto-populate date fields for regular events, so we can order by
             # date first (which all events have) and then datetime (which only
             # some events have).
-            if self.starts:
-                self.date_starts = timezone.date(self.starts)
+            self.date_starts = timezone.date(self.starts)
             if self.ends:
                 self.date_ends = timezone.date(self.ends)
         # Is this a new event? New events cannot be propagated until saved.
