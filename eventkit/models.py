@@ -393,7 +393,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
 
         # `starts` and `end_repeat` are exclusive and will not be included in
         # the occurrences.
-        if starts and end_repeat:
+        if starts:
             missing = rruleset.between(starts, end_repeat)
             return missing
         return []
