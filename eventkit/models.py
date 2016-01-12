@@ -304,9 +304,6 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         """
         Return the start date for all day events, or the start date and time
         for other events.
-
-        If the start time / date is not set `None` will be returned as there
-        is no start.
         """
         if self.all_day:
             return self.date_starts
