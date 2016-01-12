@@ -256,7 +256,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             )
             if event.all_day:
                 event.date_starts = timezone.date(starts)
-                event.date_ends = timezone.date(starts) + self.duration
+                if self.duration:
+                    event.date_ends = timezone.date(starts) + self.duration
             else:
                 event.starts = starts
                 event.date_starts = timezone.date(event.starts)
