@@ -237,7 +237,7 @@ class Models(WebTest):
                 title='test title'
             )
 
-        self.assertEqual(cm.exception.message, 'An event must have a start time.')
+        self.assertEqual(str(cm.exception), 'An event must have a start time.')
 
         with self.assertRaises(AssertionError) as cm:
             models.Event.objects.create(
@@ -245,7 +245,7 @@ class Models(WebTest):
                 all_day=True
             )
 
-        self.assertEqual(cm.exception.message, 'An all day event must have a start date.')
+        self.assertEqual(str(cm.exception), 'An all day event must have a start date.')
 
     def test_Event_str(self):
         event = G(
