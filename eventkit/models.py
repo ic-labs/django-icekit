@@ -277,7 +277,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         end times (or dates for an all day event) exist for an object if
         these criteria are not met `None` will be returned.
         """
-        if self.all_day and self.date_ends and self.date_starts:
+        if self.all_day and self.date_ends:
             return self.date_ends - self.date_starts
         if self.ends:
             return self.ends - self.starts
@@ -294,7 +294,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         end times (or dates for an all day event) exist for an object if
         these criteria are not met `None` will be returned.
         """
-        if self.all_day and self.date_ends and self.date_starts:
+        if self.all_day and self.date_ends:
             return self.date_ends + timedelta(days=1) - self.date_starts
         if self.ends:
             return self.ends - self.starts
