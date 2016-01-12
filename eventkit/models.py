@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from dateutil import rrule
 import six
 
+from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import encoding
 from django.utils.translation import ugettext_lazy as _
@@ -120,6 +121,23 @@ class RecurrenceRule(AbstractBaseModel):
 class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     """
     An abstract polymorphic event model, with the bare minimum fields.
+
+    An event relies on having start information for the event. There
+    are two different fields which can indicate the start date / time
+    which are `starts` and `date_starts`.
+
+    If the event is an all day event (`all_day` has been marked as
+    `True`) then the `date_starts` field will be required.
+
+    If the event is not an all day event then the `starts` field will
+    be required which stores the time and date of when the event
+    occurs.
+
+    There are checks for this within the models `clean` method but this
+    will not get called if the `save` method is called explicitly
+    therefore care should be taken when using the `save` method to
+    ensure the data meets these standards. Calling the `clean` method
+    explicitly is most likely the easiest way to ensure this.
     """
 
     # Changes to these fields will be propagated to repeat events.
@@ -196,19 +214,40 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             self.end_repeat = None
             self.date_end_repeat = None
 
+        # An event requires a start date or time. If it is an all day event it requires a start date
+        # if it is not an all day event it requires a start time.
+        if self.all_day:
+            if not self.date_starts:
+                raise ValidationError(
+                    {
+                        'date_starts': _(
+                            'If an an event is marked as `all day` it is required to have a start '
+                            'date.'
+                        )
+                    }
+                )
+        elif not self.starts:
+            raise ValidationError(
+                {
+                    'starts': _('An event requires a start time.')
+                }
+            )
+
     @transaction.atomic
     def create_repeat_events(self, parent=None):
         """
         Create missing repeat events according to the recurrence rule, up until
         the configured limit. Return the number of repeat events created.
         """
-        # TODO: Create asyncronously if celery is available?
+        # TODO: Create asynchronously if celery is available?
         assert self.pk, 'Cannot create repeat events before an event is saved.'
         parent = parent or self.parent or self
         defaults = {
             field: getattr(self, field) for field in self.get_repeat_fields()
         }
         count = len(self.missing_repeat_events)
+        # There is an assumption that `missing_repeat_events` will return
+        # date / datetime results and never any `None` values.
         for starts in self.missing_repeat_events:
             event = type(self)(
                 parent=parent,
@@ -220,9 +259,10 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 event.date_ends = timezone.date(starts) + self.duration
             else:
                 event.starts = starts
-                event.ends = starts + self.duration
                 event.date_starts = timezone.date(event.starts)
-                event.date_ends = timezone.date(event.ends)
+                if self.duration:
+                    event.ends = starts + self.duration
+                    event.date_ends = timezone.date(event.ends)
             super(AbstractEvent, event).save()  # Bypass automatic propagation.
         # Refresh the MPTT fields, which are now in an inconsistent state.
         self.refresh_mptt_fields()
@@ -232,10 +272,16 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     def duration(self):
         """
         Return the duration between ``starts`` and ``ends`` as a timedelta.
+
+        As a duration semantically only means something when the start and
+        end times (or dates for an all day event) exist for an object if
+        these criteria are not met `None` will be returned.
         """
-        if self.all_day:
+        if self.all_day and self.date_ends:
             return self.date_ends - self.date_starts
-        return self.ends - self.starts
+        if self.ends:
+            return self.ends - self.starts
+        return None
 
     @property
     def display_duration(self):
@@ -243,10 +289,16 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         Return the human-readable `duration`. For all-day event, the whole
         of ``date_ends`` is accounted for in the displayed duration, so that a
         1 day all-day event will have 1 day timedelta instead of 0.
+
+        As a duration semantically only means something when the start and
+        end times (or dates for an all day event) exist for an object if
+        these criteria are not met `None` will be returned.
         """
-        if self.all_day:
+        if self.all_day and self.date_ends:
             return self.date_ends + timedelta(days=1) - self.date_starts
-        return self.ends - self.starts
+        if self.ends:
+            return self.ends - self.starts
+        return None
 
     def get_starts(self):
         """
@@ -262,10 +314,15 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         """
         Return the end date for all day events, or the end date and time for
         other events.
+
+        If the end time / date is not set `None` will be returned as there
+        is no end.
         """
-        if self.all_day:
+        if self.all_day and self.date_ends:
             return self.date_ends
-        return self.ends
+        if self.ends:
+            return self.ends
+        return None
     get_ends.short_description = 'ends'
 
     def get_originating_event(self):
@@ -387,14 +444,20 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         When ``propagate=True``, update or create repeat events.
         """
         if self.all_day:
+            assert self.date_starts, 'An all day event must have a start date.'
             # Remove datetime from all day events.
             self.starts = self.ends = None
         else:
+            assert self.starts, 'An event must have a start time.'
             # Auto-populate date fields for regular events, so we can order by
             # date first (which all events have) and then datetime (which only
             # some events have).
             self.date_starts = timezone.date(self.starts)
-            self.date_ends = timezone.date(self.ends)
+            if self.ends:
+                self.date_ends = timezone.date(self.ends)
+            else:
+                self.date_ends = None
+
         # Is this a new event? New events cannot be propagated until saved.
         adding = self._state.adding
         # Have monitored fields have changed since the last save?
@@ -410,12 +473,12 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                     # recurrence rule set, the changes must be propagated to
                     # maintain consistency across repeat events.
                     if changed.intersection([
-                            'starts',
-                            'ends',
-                            'date_starts',
-                            'date_ends',
-                            'recurrence_rule',
-                        ]):
+                        'starts',
+                        'ends',
+                        'date_starts',
+                        'date_ends',
+                        'recurrence_rule',
+                    ]):
                         raise AssertionError(
                             'Cannot update occurrences without '
                             'propagating changes to repeat events.')
@@ -467,8 +530,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             if self.is_repeat:
                 # Combine earlier repeat and parent events.
                 siblings = type(self).objects.filter(
-                    models.Q(pk=self.parent.pk)
-                    | models.Q(parent__pk=self.parent_id, pk__lt=self.pk)
+                    models.Q(pk=self.parent.pk) |
+                    models.Q(parent__pk=self.parent_id, pk__lt=self.pk)
                 ).exclude(pk=self.pk)
                 # Update earlier repeat and parent events to the max `starts`
                 # value found.

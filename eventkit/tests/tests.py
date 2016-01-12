@@ -15,7 +15,7 @@ from django.core.urlresolvers import reverse
 from django.forms.models import fields_for_model
 from django.test.utils import override_settings
 from django.utils import timezone
-from django_dynamic_fixture import G
+from django_dynamic_fixture import G, N
 from django_webtest import WebTest
 
 from eventkit import appsettings, forms, models
@@ -133,12 +133,36 @@ class Models(WebTest):
         event.full_clean()
         self.assertEqual(event.date_end_repeat, None)
 
+        # Check validation if an all day event does not have a start date
+        event = N(
+            models.Event,
+            all_day=True,
+            recurrence_rule=recurrence_rule,
+            date_starts=None,
+            date_end_repeat=date_now)
+
+        with self.assertRaises(ValidationError) as cm:
+            event.full_clean()
+
+        self.assertIn('date_starts', cm.exception.error_dict.keys())
+
+        event.all_day = False
+        event.starts = None
+
+        with self.assertRaises(ValidationError) as cm:
+            event.full_clean()
+
+        self.assertIn('starts', cm.exception.error_dict.keys())
+
     def test_Event_change_detection(self):
         """
         Test that changes to event repeat fields are detected.
         """
         # Create an event.
-        event = G(models.Event)
+        event = G(
+            models.Event,
+            starts=timezone.now()
+        )
         self.assertFalse(event._monitor_fields_changed())
         # Change a field.
         event.title = 'title'
@@ -207,8 +231,28 @@ class Models(WebTest):
             event.get_children().count(),
             event.get_children().filter(is_repeat=True).count())
 
+    def test_Event_save(self):
+        with self.assertRaises(AssertionError) as cm:
+            models.Event.objects.create(
+                title='test title'
+            )
+
+        self.assertEqual(str(cm.exception), 'An event must have a start time.')
+
+        with self.assertRaises(AssertionError) as cm:
+            models.Event.objects.create(
+                title='test title',
+                all_day=True
+            )
+
+        self.assertEqual(str(cm.exception), 'An all day event must have a start date.')
+
     def test_Event_str(self):
-        event = G(models.Event, title='title')
+        event = G(
+            models.Event,
+            title='title',
+            starts=timezone.now()
+        )
         self.assertEqual(six.text_type(event), 'title')
 
     def test_RecurrenceRule_str(self):
