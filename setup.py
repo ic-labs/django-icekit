@@ -37,6 +37,8 @@ setuptools.setup(
         'requests',
         'Pillow',
         'django-el-pagination',
+        # Nested dependency overrides.
+        'django-polymorphic<0.8',  # Backwards incompatible. See: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
     ],
     extras_require={
         'brightcove': ['django-brightcove'],
