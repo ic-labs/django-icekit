@@ -6,6 +6,7 @@
 *.egg-info/
 *.py[co]
 /.coverage
+/.eggs/
 /.tox/
 /db.sqlite3
 /dist/

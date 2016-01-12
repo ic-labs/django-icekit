@@ -3,8 +3,6 @@ from __future__ import print_function
 import setuptools
 import sys
 
-version = '0.1.dev1'
-
 # Convert README.md to reStructuredText.
 if {'bdist_wheel', 'sdist'}.intersection(sys.argv):
     try:
@@ -20,7 +18,7 @@ if {'bdist_wheel', 'sdist'}.intersection(sys.argv):
 
 setuptools.setup(
     name='django-icekit',
-    version=version,
+    use_scm_version={'version_scheme': 'post-release'},
     author='Interaction Consortium',
     author_email='studio@interaction.net.au',
     url='https://github.com/ixc/django-icekit',
@@ -66,4 +64,5 @@ setuptools.setup(
             'micawber',
         ],
     },
+    setup_requires=['setuptools_scm'],
 )
