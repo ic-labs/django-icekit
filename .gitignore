@@ -8,6 +8,7 @@
 /.coverage
 /.tox/
 /db.sqlite3
+/dist/
 /htmlcov/
 /venv/
 .idea
