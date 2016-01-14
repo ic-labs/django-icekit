@@ -1,4 +1,5 @@
 import time
+from django import db
 from django.core.management.base import BaseCommand
 from optparse import make_option
 
@@ -23,8 +24,21 @@ class CronBaseCommand(BaseCommand):
     def handle(self, *args, **options):
         while True:
             self.task(*args, **options)
+            self.cleanup()
             self.stdout.write('Sleeping for %s min.' % options['interval'])
             time.sleep(60 * options['interval'])
+
+    def cleanup(self):
+        """
+        Performs clean-up after task is completed before it is executed again
+        in the next internal.
+        """
+        # Closes connections to all databases to avoid the long running process
+        # from holding connections indefinitely.
+        for alias, info in db.connections.databases.items():
+            # Internally db changes alias as we iterate through `items`.
+            self.stdout.write('Closing database connection: %s' % alias)
+            db.close_connection()
 
     def task(self, *args, **options):
         """
