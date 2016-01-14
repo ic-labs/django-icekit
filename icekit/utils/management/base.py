@@ -1,7 +1,10 @@
+import logging
 import time
 from django import db
 from django.core.management.base import BaseCommand
 from optparse import make_option
+
+logger = logging.getLogger(__name__)
 
 
 class CronBaseCommand(BaseCommand):
@@ -25,7 +28,7 @@ class CronBaseCommand(BaseCommand):
         while True:
             self.task(*args, **options)
             self.cleanup()
-            self.stdout.write('Sleeping for %s min.' % options['interval'])
+            logger.info('Sleeping for %s min.', options['interval'])
             time.sleep(60 * options['interval'])
 
     def cleanup(self):
@@ -36,7 +39,7 @@ class CronBaseCommand(BaseCommand):
         # Closes connections to all databases to avoid the long running process
         # from holding connections indefinitely.
         for alias in db.connections.databases:
-            self.stdout.write('Closing database connection: %s' % alias)
+            logger.info('Closing database connection: %s', alias)
             db.connections[alias].close()
 
     def task(self, *args, **options):
