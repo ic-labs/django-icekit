@@ -35,10 +35,9 @@ class CronBaseCommand(BaseCommand):
         """
         # Closes connections to all databases to avoid the long running process
         # from holding connections indefinitely.
-        for alias, info in db.connections.databases.items():
-            # Internally db changes alias as we iterate through `items`.
+        for alias in db.connections.databases:
             self.stdout.write('Closing database connection: %s' % alias)
-            db.close_connection()
+            db.connections[alias].close()
 
     def task(self, *args, **options):
         """
