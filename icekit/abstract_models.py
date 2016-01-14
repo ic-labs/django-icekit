@@ -9,7 +9,9 @@ from django.db import models
 from django.template.loader import get_template
 from django.utils import encoding, timezone
 from django.utils.translation import ugettext_lazy as _
-from fluent_contents.models import ContentItemRelation, PlaceholderRelation
+from fluent_contents.analyzer import get_template_placeholder_data
+from fluent_contents.models import \
+    ContentItemRelation, Placeholder, PlaceholderRelation
 
 from . import fields, plugins
 
@@ -54,6 +56,29 @@ class FluentFieldsMixin(LayoutFieldMixin):
     class Meta:
         abstract = True
 
+    # HACK: This is needed to work-around a `django-fluent-contents` issue
+    # where it cannot handle placeholders being added to a template after an
+    # object already has placeholder data in the database.
+    # See: https://github.com/edoburu/django-fluent-contents/pull/63
+    def add_missing_placeholders(self):
+        """
+        Add missing placeholders from templates. Return `True` if any missing
+        placeholders were created.
+        """
+        content_type = ContentType.objects.get_for_model(self)
+        result = False
+        if self.layout:
+            for data in self.layout.get_placeholder_data():
+                placeholder, created = Placeholder.objects.update_or_create(
+                    parent_type=content_type,
+                    parent_id=self.pk,
+                    slot=data.slot,
+                    defaults=dict(
+                        role=data.role,
+                        title=data.title,
+                    ))
+                result = result or created
+        return result
 
 # MODELS ######################################################################
 
@@ -137,6 +162,12 @@ class AbstractLayout(AbstractBaseModel):
             layout.save()
             layout.content_types.add(*content_types)
         return layout
+
+    def get_placeholder_data(self):
+        """
+        Return placeholder data for this layout's template.
+        """
+        return get_template_placeholder_data(self.get_template())
 
     def get_template(self):
         """

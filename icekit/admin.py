@@ -9,7 +9,6 @@ from django.conf.urls import url, patterns
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
-from django.template.loader import get_template
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.admin import PlaceholderEditorAdmin
 from fluent_contents.analyzer import get_template_placeholder_data
@@ -72,8 +71,7 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin):
         if not obj or not obj.layout:
             data = [PlaceholderData(slot='main', role='m', title='Main')]
         else:
-            template = get_template(obj.layout.template_name)
-            data = get_template_placeholder_data(template)
+            data = obj.layout.get_placeholder_data()
         return data
 
 
@@ -148,8 +146,7 @@ class LayoutAdmin(admin.ModelAdmin):
             json = {'success': False, 'error': 'Layout not found'}
             status = 404
         else:
-            template = layout.get_template()
-            placeholders = get_template_placeholder_data(template)
+            placeholders = layout.get_placeholder_data()
 
             status = 200
             json = {
