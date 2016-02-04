@@ -162,10 +162,10 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         related_name='children',
     )
     title = models.CharField(max_length=255)
-    all_day = models.BooleanField(default=False)
-    starts = models.DateTimeField(blank=True, null=True)
+    all_day = models.BooleanField(default=False, db_index=True)
+    starts = models.DateTimeField(blank=True, null=True, db_index=True)
     ends = models.DateTimeField(blank=True, null=True)
-    date_starts = models.DateField(blank=True, null=True)
+    date_starts = models.DateField(blank=True, null=True, db_index=True)
     date_ends = models.DateField(blank=True, null=True)
     recurrence_rule = RecurrenceRuleField(
         blank=True,
@@ -188,7 +188,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
 
     class Meta:
         abstract = True
-        ordering = ('date_starts', '-all_day', 'starts')
+        ordering = ('date_starts', '-all_day', 'starts', 'title', 'pk')
 
     def __str__(self):
         return self.title
