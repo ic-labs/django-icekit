@@ -101,7 +101,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
         'all_day', 'date_starts', 'date_ends', EventTypeFilter, OriginalFilter,
         VariationFilter, 'is_repeat', 'modified')
     list_display = (
-        '__str__', 'all_day', 'get_starts', 'get_ends', 'is_original',
+        '__str__', 'get_type', 'all_day', 'get_starts', 'get_ends', 'is_original',
         'is_variation', 'is_repeat', 'modified')
     search_fields = ('title', )
 
@@ -229,6 +229,10 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
             })
         data = json.dumps(data, cls=DjangoJSONEncoder)
         return HttpResponse(content=data, content_type='applicaton/json')
+
+    def get_type(self, obj):
+        return obj.get_real_concrete_instance_class()._meta.verbose_name.title()
+    get_type.short_description = "type"
 
 admin.site.register(models.Event, EventAdmin)
 
