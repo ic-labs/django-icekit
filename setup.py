@@ -11,7 +11,7 @@ setuptools.setup(
         'django-bootstrap3',
         'django-fluent-contents',
         'django-fluent-pages',
-        'django-model-utils',
+        'django-model-utils<2.4',
         'django-wysiwyg',
         'requests',
         'Pillow',
