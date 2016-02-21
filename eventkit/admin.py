@@ -124,6 +124,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
         )
         return my_urls + urls
 
+
     def calendar(self, request):
         """
         Return event data in JSON format for AJAX requests, or a calendar page
@@ -152,11 +153,6 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
                 Q(all_day=True, date_starts__lte=ends.date())
             )
 
-        all_events = all_events.values_list(
-            'pk', 'title', 'all_day', 'starts', 'ends', 'date_starts',
-            'date_ends', 'is_repeat', 'tree_id', 'parent', 'polymorphic_ctype')
-
-        data = []
         # Get a dict mapping the primary keys for content types to plugins, so
         # we can get the verbose name of the plugin and a consistent colour for
         # each event.
@@ -181,52 +177,10 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
                 ignored_events.count(),
                 ';'.join(['%s.%s' % ctype for ctype in ignored_ctypes]),
             ))
-        # Get the keys into a sorted list, so we can assign a consistent colour
-        # based on the index each event's content type is seen in the list.
-        seen = sorted(plugins_for_ctype.keys())
-        for (pk, title, all_day, starts, ends, date_starts, date_ends,
-             is_repeat, tree_id, parent, polymorphic_ctype) in events:
-            # Get color based on seen index for content type. Start repeating
-            # colors when they have all been used.
-            background, color = appsettings.CALENDAR_COLORS[
-                seen.index(polymorphic_ctype) %
-                len(appsettings.CALENDAR_COLORS)]
-            # Slugify the plugin's verbose name for use as a class name.
-            classes = [slugify(
-                plugins_for_ctype[polymorphic_ctype].verbose_name)]
-            # Add a class name for the type of event.
-            if is_repeat:
-                classes.append('is-repeat')
-            elif not parent:
-                classes.append('is-original')
-            else:
-                classes.append('is-variation')
 
-            classes.append(tree_id);
-            # Prefix class names with "fcc-" (full calander class).
-            classes = ['fcc-%s' % class_ for class_ in classes]
-            if all_day:
-                start = date_starts
-                # `end` is exclusive according to the doc in
-                # http://fullcalendar.io/docs/event_data/Event_Object/, so
-                # we need to add 1 day to ``date_ends`` to have the end date
-                # included in the calendar.
-                end = date_ends + timedelta(days=1)
-            else:
-                start = timezone.localize(starts)
-                end = timezone.localize(ends)
-            data.append({
-                'id': tree_id,
-                'title': title,
-                'allDay': all_day,
-                'start': start,
-                'end': end,
-                'url': reverse(
-                    'admin:eventkit_event_change', args=[pk]),
-                'className': classes,
-                'color': background,
-                'textColor': color,
-            })
+        data = []
+        for event in events.get_real_instances():
+            data.append(event.calendar_json())
         data = json.dumps(data, cls=DjangoJSONEncoder)
         return HttpResponse(content=data, content_type='applicaton/json')
 

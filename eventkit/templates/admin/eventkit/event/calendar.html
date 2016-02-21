@@ -2,21 +2,55 @@
 
 <!doctype html>
 
+
+
 <link rel='stylesheet' href='{% static "eventkit/bower_components/fullcalendar/dist/fullcalendar.css" %}' />
 <style>
+
+		/*# # Background and text colors for calendar view. Defaults are based on the*/
+/*# # Base16 `ashes` color scheme. See: https://github.com/chriskempson/base16*/
+/*# CALENDAR_COLORS = EVENTKIT.get('CALENDAR_COLOURS', [*/
+/*#     ('#aec795', '#f3f4f5'),*/
+/*#     ('#95c7ae', '#f3f4f5'),*/
+/*#     ('#95aec7', '#f3f4f5'),*/
+/*#     ('#ae95c7', '#f3f4f5'),*/
+/*#     ('#c795ae', '#f3f4f5'),*/
+/*#     ('#c79595', '#f3f4f5'),*/
+/*#     ('#c7ae95', '#f3f4f5'),*/
+/*#     ('#c7c795', '#f3f4f5'),*/
+/*# ])*/
+
+
 	body {
 		font-family: "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
 		font-size: 12px;
 		margin: 1em;
 	}
 
-	.fcc-is-original,
+	.fcc-color-0 { background-color: #1f78b4; }
+	.fcc-color-1 { background-color: #33a02c; }
+	.fcc-color-2 { background-color: #e31a1c; }
+	.fcc-color-3 { background-color: #ff7f00; }
+	.fcc-color-4 { background-color: #6a3d9a; }
+	.fcc-color-5 { background-color: #b15928; }
+	.fcc-color-6 { background-color: #a6cee3; }
+	.fcc-color-7 { background-color: #b2df8a; }
+	.fcc-color-8 { background-color: #fb9a99; }
+	.fcc-color-9 { background-color: #fdbf6f; }
+	.fcc-color-10 { background-color: #cab2d6; }
+	.fcc-color-11 { background-color: #ffff99; }
+
+	/*.fcc-is-original,*/
 	.fcc-is-variation {
-		background: url({% static 'eventkit/img/stripe.png' %}) repeat;
+		background-image: url({% static 'eventkit/img/stripe.png' %}) repeat;
 	}
 
 	.fcc-is-repeat {
-		background: url({% static 'eventkit/img/fade.png' %}) repeat;
+		background-image: url({% static 'eventkit/img/fade.png' %}) repeat;
+	}
+
+	.fcc-do-not-show-in-calendar, .fcc-draft {
+		opacity: 0.4;
 	}
 </style>
 <script src='{% static "eventkit/bower_components/jquery/dist/jquery.js" %}'></script>
@@ -53,7 +87,7 @@
 				},
 				eventMouseout: function(event, jsEvent, view) {
 				    clearTimeout(timeout);
-					$('.fc-event').css('opacity', '1');
+					$('.fc-event').css('opacity', '');
 				}
 			}).on('click', 'a.fc-event', function(e) {
 				// Open links in the top frame.
@@ -64,8 +98,10 @@
 			});
 
 			var over = debounce(function() {
+				// make the rolledover event more visible
+				$('.fcc-'+eid).css('opacity', '1.0');
 				$('.fc-event:not(.fcc-'+eid+')').css('opacity', '0.30');
-			}, 550);
+			}, 250);
 
 			function debounce(func, wait, immediate) {
 

@@ -9,8 +9,10 @@ from dateutil import rrule
 import six
 
 from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.utils import encoding
+from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from model_utils import FieldTracker
 from polymorphic_tree.models import \
@@ -185,6 +187,13 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         null=True,
     )
     is_repeat = models.BooleanField(default=False, editable=False)
+
+    show_in_calendar = models.BooleanField(
+        default=True,
+        help_text=_('Show this event in the public calendar'),
+    )
+
+
 
     class Meta:
         abstract = True
@@ -615,6 +624,59 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         # Refresh the MPTT fields, which are now also in an inconsistent state.
         self.refresh_mptt_fields()
 
+    def calendar_classes(self):
+        """
+        Return css classes to be used in admin calendar JSON
+        """
+        classes = [slugify(self.polymorphic_ctype.name)]
+
+        # quick-and-dirty way to get a color for the type.
+        # There are 12 colors defined in the css file
+        classes.append("color-%s" % (self.polymorphic_ctype_id % 12))
+
+        # Add a class name for the type of event.
+        if self.is_repeat:
+            classes.append('is-repeat')
+        elif not self.parent:
+            classes.append('is-original')
+        else:
+            classes.append('is-variation')
+
+        # if an event isn't published or does not have show_in_calendar ticked, indicate that it is hidden
+        if not self.show_in_calendar:
+            classes.append('do-not-show-in-calendar')
+
+        classes.append(self.tree_id)
+        # Prefix class names with "fcc-" (full calendar class).
+        classes = ['fcc-%s' % class_ for class_ in classes]
+
+        return classes
+
+    def calendar_json(self):
+        """
+        Return JSON for a single event
+        """
+        # Slugify the plugin's verbose name for use as a class name.
+        if self.all_day:
+            start = self.date_starts
+            # `end` is exclusive according to the doc in
+            # http://fullcalendar.io/docs/event_data/Event_Object/, so
+            # we need to add 1 day to ``date_ends`` to have the end date
+            # included in the calendar.
+            end = self.date_ends + timedelta(days=1)
+        else:
+            start = timezone.localize(self.starts)
+            end = timezone.localize(self.ends)
+        return {
+            'id': self.tree_id,
+            'title': self.title,
+            'allDay': self.all_day,
+            'start': start,
+            'end': end,
+            'url': reverse(
+                'admin:eventkit_event_change', args=[self.pk]),
+            'className': self.calendar_classes(),
+        }
 
 class Event(AbstractEvent):
     """
