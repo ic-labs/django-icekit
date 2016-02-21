@@ -40,16 +40,17 @@
 	.fcc-color-10 { background-color: #cab2d6; }
 	.fcc-color-11 { background-color: #ffff99; }
 
-	/*.fcc-is-original,*/
-	.fcc-is-variation {
-		background-image: url({% static 'eventkit/img/stripe.png' %}) repeat;
+	.fcc-do-not-show-in-calendar {
+		background-image: url({% static 'eventkit/img/stripe.png' %});
+		background-repeat: repeat;
 	}
 
 	.fcc-is-repeat {
-		background-image: url({% static 'eventkit/img/fade.png' %}) repeat;
+		background-image: url({% static 'eventkit/img/fade.png' %});
+		background-repeat: repeat;
 	}
 
-	.fcc-do-not-show-in-calendar, .fcc-draft {
+	.fcc-draft {
 		opacity: 0.4;
 	}
 </style>
