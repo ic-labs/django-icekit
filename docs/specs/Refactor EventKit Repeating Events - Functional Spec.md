@@ -3,6 +3,7 @@ Refactor of EventKit Repeating Events - Functional Spec
 
 Document history:
 
+* 2016-03-01 - jmurty : Revised draft following discussions with Greg and Tai and comments in https://github.com/ixc/django-eventkit/pull/9/files
 * 2016-02-18 – jmurty : Initial draft, up to technical decision point described in Occurrence Implementation Options
 
 ## Goals
@@ -12,150 +13,151 @@ We need to simplify the way EventKit stores and manages repeating events.
 Currently, repeating occurrences of events (including variations) are stored as full copies of the original event model. At best this means that all repeating events are based on a relatively heavyweight `PolymorphicMPTTModel` model, and at worst in cases like SFMOMA they are based on much richer models that include support for layouts, publishing, and other complex features.
 
 
-## Concepts
+## Concepts and Models
 
-### Event Series
+### Event Family
 
-An Event Series is a collection of events that are closely related, are all derived from a single original event, and should be treated as a whole.
+An Event Family is a collection of events that are closely related, are all derived from a single original event, and which should be treated as a whole in the system.
 
-An event series can be modelled as a tree structure, where modifications to a repeating event are descendants of the original event and repeating event occurrences may or may not be descendants.
+Currently – before the changes recommended in this document are applied – event families are modelled as a tree structure comprising originating events at the root, and repeating/variation events as descendants. All these event types are derived from the same base model, and the tree structure is exposed and managed by [django-mptt].
+
+We will simplify this significantly such that an event family will comprise:
+
+* a single Event object to store descriptive content, and *optional* time & repeat definitions
+* a set of zero or more Occurrence items to represent times the event takes place.
+
+There will no longer be a tree structure beyond a loose "derived from" relationship that we will store internally and
+which will not affect event logic or be exposed to users.
+
+MPTT tree management utilities will no longer be required, so we can remove even more complexity from the Event model.
 
 ### Event
 
-An Event is a rich representation that stores the content and date range for one or more event occurrences in an event series. There are different kinds of events that serve different purposes, described in more detail in the sections below.
+An Event stores the descriptive content of an event and provides features for managing the event and any related items in the event family.
 
-For terminology, an Event may be "one-time" or "repeating":
+Currently an Event includes a great deal of information and functionality, much of which we will remove:
 
-* a one-time event has no repeat rule, and is not really an event series. We aren't that interested in such events in this document.
-* a repeating event has a repeat rule that generates a series of one or more occurrences. 
-* an endless event is a repeating event with no end date, which goes on forever.
+* descriptive content about the event for display to website visitors (e.g. title, description, image assets, location, etc etc)
+* it is publishable
+* a required start date/time, to represent the time this particular event occurs
+* optional repeat rule and end date/time fields, to define the frequency and boundary of subordinate repeating events that will be generated from this event
+* information about the event's location in a tree structure, used to impose constraints on the behaviour and functionality of an event based on its role within an event family
+* a complex type classification based on how the event was created, its relationship with other events in an event family tree structure, and how it is intended to be used. In this type classification, an Event may be one or more of:
 
-The key roles of a capital-E Event are:
+  * "original" or "root" event: the root event in an event family, the first one created from which all other events in the family are derived
+  * "originating" or "parent" event: an event from which other child event items are derived
+  * "repeated" event: an event that represents a single occurrence in a repeating event family, where all the event's contents are copied from the originating/parent event
+  * "variation" event: an event cloned from an existing event in order to modify its content, occurrence start date/time, or repeat rule to alter a subset of occurrences within an event family.
 
-* it stores the bulk of the content to display for an event occurrence
-* it can be published [question E] (is not public by default)
-* it provides an API to help manage its related events or occurrences.
+We will simplify this such that an event will comprise only:
 
-### Original Event (Root)
+* descriptive content about the event for display to website visitors (e.g. title, description, image assets, location, etc etc)
+* it is publishable
+* *optional* start date/time, repeat rule and end date/time fields, to define the frequency and boundary of repeating Occurrences that will be generated for this event
+* a related set of zero or Occurrence items that store times the event occurs and should be displayed on a calendar. An Event may have zero occurrences, in which case it will not be displayed on a calendar.
+* if the event was cloned from another one, a loose (nullable) relationship back to the original event. This information will be merely stored for now; it will not be exposed to the user and will not imply any particular behaviour or usage of the cloned or original events.
 
-The Original Event is the root event in a series, and is the first-created event from which all other items in the series are derived.
+The key changes are:
 
-The Original Event is generally the first event in a series, though this is not guaranteed because:
+* the date/times when an event occurs are no longer stored within Events, but within Occurrences instead. And the occurrence date/times are not necessarily derived from times set in the event, they may be manually created or generated by repeat rules.
+* the start date/time that was required becomes optional, and will only be needed as part of a repeat rule definition
+* we remove all the tree structure mechanisms and restrictions, including expunging MPTT entirely
+* the only remaining intra-event relationship is the new "cloned-from" field, which is for record-keeping only
 
-* the first occurrence in a series may be cancelled/deleted or varied
-* additional occurrences that take place before the original event might be added to an event series.
+#### Repeating Event
 
-### Originating Event (Parent)
+A repeating event is one which has a repeating rule which defines the start date/time, frequency, and (optionally) end date/time of a series of times when the event should be shown on a calendar. If an end date/time is not set on a repeating event it will continue occurring forever.
 
-An Originating Event is an event from which other events in a series are directly derived.
+Currently, when an Event has a repeating rule defined it generates a set of clones of itself, where each clone has its start date/time set to the time of an occurrence in the series. This series of event objects are the children of the "originating" event that defined the repeat rule, and when they are displayed to visitors all the content is drawn from that originating event.
 
-The Original Event is also an Originating Event for any events/occurrences directly derived from that event in a series.
+Instead of event clone children we will instead use lightweight Occurrence objects to represent times when an event should be shown on a calendar. An event will manage repeating occurrences by:
 
-Aside for the Original Event, Variation Events are also originating events.
+* when a repeat rule is defined on an event, it will automatically generate a series of Occurrences via its internal RRule to represent the times the event should appear on a calendar, up to a sensible end date/time boundary (i.e. not forever for endless repeating events, or too far ahead for repeating events with far-future end date/times)
+* generating additional occurrences further into the future as-needed, e.g. when triggered to extend the range of repeating occurrences by a scheduled job
+* if a repeat rule is removed, any existing automatically-generated (but not manually modified) occurrences are deleted
+* if a repeat rule is changed, any existing automatically-generated  (but not manually modified) occurrences are deleted then the new occurrences are created
+* the event is aware of occurrences that have been **manually** created or adjusted: it never deletes or alters these occurrences
+* the event is aware of occurrences that have had their date/time adjusted manually from their original auto-generated date/time: it will avoid auto-generating new occurrences with date/times that match either the original or the updated date/time.
 
-### Occurrence (Child?)
+### Occurrence
 
-An Occurrence is a single instance of an event within an Event Series.
+An Occurrence is a new light-weight representation we will use in EventKit to store the date/time and duration when an Event should be shown on a calendar. In particular, it replaces the need to clone whole Event models just to change their date/time as is currently the case.
 
-The main purpose of Occurrences is to serve as an in-database representation for each instance in an event series so we can quickly find and display future events, rather than needing to regenerate an entire event series to find information we need.
+The main purpose of Occurrences is to serve as an in-database representation for each instance in an event family so we can quickly find and display future events, rather than needing to regenerate an entire event family to find information we need. To be absolutely clear, events will only appear in a calendar if they have at least one occurrence – an event with no occurrences is invisible in a calendar.
 
-Only a limited number of future occurrences are ever generated and stored for an event series, to avoid trying to store every instance of potentially infinite event series in the database. This job is normally performed by a scheduled cron job, which generates occurrences up to a certain point in the future.
+Aside from the time information, occurrences will store some additional information the Event will need to properly manage its occurrences.
 
-Currently all event occurrences are implemented as heavyweight copies of the original/originating event model, and are children of an originating event. The originating event is disjoint from its child occurrences.
+Occurrences have the following properties:
 
-We want to change and simplify this, so that:
+* the date/time and duration to occupy on a calendar
+* the Event that "owns" the occurrence, from which the vast bulk of content to display to visitors is drawn
+* a "status" field to capture other one-time information about an occurrence, e.g. Cancelled, Deleted, Sold-out, etc.
+* a "generated" flag, set when an occurrence is automatically generated by an Event as one of a repeating series
+* a "manual" flag, set when an occurrence is:
 
-* Occurrences can be represented by a much simpler model, with the bare minimum of fields and features necessary to represent future events in an Event Series
-* Occurrences store only minimal content [question B] and defer to their originating event to store and render information about the event (other than the exact start/end dates & times)
-* occurrences become easier to create and manage
-* occurrences use fewer resources to store and retrieve from the DB
+  * created directly by a user in the admin interface
+  * modified by a user to have a different date/time or duration
+  * modified by a user to have a different status
+* hidden **original** date/time and duration fields, set when a user adjusts the date/time or duration of an occurrence.
 
-### Variation Event (Child)
+See in Repeating Event above how these flags and fields are used to (re)generate occurrences. Note that an occurrence may be flagged as both "generated" and "manual" if it was auto-generated initially, then modified by a user. Note also  that a user can create occurrences at arbitrary date/times, there are no restrictions based on the repeat rule an event might have.
 
-A Variation event captures significant changes in a range of one or more events in an event series.
-
-Creating a variation event causes a set of occurrences in the original event series to be deleted/ignored, and replaces them with a new set of occurrences with the varying times or content.
-
-A Variation Event always has a related Originating Event, from which its initial content is cloned. The permitted date range for a variation event may also be constrained to be within the range of its originating event [question F]. A variation event may also have its own subordinate variations, for which it is the originating event [question G].
-
-Common reasons for needing a variation are:
-
-* if the usual start/end times of a repeating event need to vary for one or more occurrences
-* if important content of the event is different, such as the title or other primary fields [question C]
-* if one or more events in a series should be cancelled/deleted [question D]
-
-
-## Occurrence Implementation Changes
-
-To generate lightweight occurrences instead of event copies for each event in a series, we need to:
-
-* define an Occurrence model, and relationship with Event
-* modify the current Event model to generate Occurrences for repeating events instead of copying that event
-* ensure the Occurrences generated to include one at the same time as the originating event, so we only ever need to query for occurrences not occurrences AND the originating event
-* modify event views to find and display Occurrences instead of events, and to render the event content via the occurrence
-
-## Occurrence Implementation Options
-
-Aside from the broad changes outlined above to implement lightweight Occurrences, we need to choose between two possible approaches for generating, storing, and manipulating these occurrences.
-
-We need to figure out which of these approaches we will pursue, or an alternate approach, before we can proceed much further.
-
-### Occurrence Records are authoritative and permanent
-
-With this approach Occurrence records are generated as-needed by an event, and once they are generated and stored in the database they will never be regenerated.
-
-This approach is described in more detail in the Google Document "Eventkit architecture": https://docs.google.com/document/d/1aCGlLR1eYsR6MDrr0mx6jQytM-cHHURt37oMeS8dsWQ
-
-Advantages - flexibility for user:
-
-* our occurrence generator is relatively simple in the normal case
-* user can manually move occurrences to adjust events rather than creating variations
-* user can add arbitrary occurrences rather than extending an event's date range or creating a variation
-* user can delete arbitrary occurrences rather than creating variation/exception events
-* we could allow the user to tweak some occurrence content data, to make quick and minor alterations like override title or description of event occurrences.
-
-Disadvantages - complexity for us:
-
-* we need to track the date range for which occurrences were generated and never regenerate occurrences through that range
-* muddies the conceptual waters between a repeating event as the source of an event series, versus ad-hoc occurrences altered in such a way that they make an event series
-* unclear what we can/should do if user changes the start/end dates or repeat rules for an event? Do we: prevent that? create occurrences near & over existing ones? delete all existing occurrences?
-* unclear what we can/should do if user applies a repeating variation to an event, where the variation date range overlaps with already-generated occurrences. And what if the user then removes that variation?
-* it's an unusual approach that won't lend itself to exporting or exposing event data in the future in a standard formats such as iCal files.
-
-### Event Series RRules are authoritative and Occurrence records are ephemeral
-
-With this approach an Event has a relatively sophisticated Occurrence Generator that uses an Event's RRule representation of repeating events, along with the RRules for any subordinate Variation events, to generate Occurrences as-needed.
-
-Occurrence records in the database are purely a cache of event series information, which can be generated or re-generated as-needed. The Occurrences themselves cannot be modified directly by a user, and can only be affected by modifying Event or Variation Event records to regenerate the desired event series.
-
-This approach is partially implemented in the EventKit project branch *feature/937-prototype-rrule-as-truth* and described in the related SFMOMA ticket #937 and branch(es).
-
-Advantages:
-
-* no need to track which occurrences were generated
-* follows the approach and workflow used by existing calendaring tools
-* clearer implications for changing Event date ranges and adding/removing Variation Events: the regenerated occurrences will always correspond to what is in the Events
-* could export/expose event data in a standard format like iCal in the future.
-
-Disadvantages:
-
-* must be able to store and execute sufficiently complex RRule specifications to generate all the kinds of event series and variations we want. The RRule spec in general, or the Python implementation in particular, may be too limiting
-* user cannot make ad-hoc changes to directly add/move/delete occurrences, and must instead do so indirectly by adding/changing Event records
-* much more difficult (infeasible?) to allow the user to make minor tweaks to occurrence to override event content, like title or description.
+Regarding the "status" field, we may need both "Cancelled" and "Deleted" statuses to differentiate between occurrences that have been cancelled and should be displayed as such on a calendar ("Cancelled"), versus occurrences that have been cancelled but should not be displayed ("Deleted"). The "Deleted" status will be needed, in addition to the ability to actually delete the occurrence record from the DB, for cases where the user wants to delete/hide an occurrence that was initially auto-generated and prevent the Event from ever regenerating it.
 
 
-## Questions
+## Administration
 
-* A: Can you create an event occurrence or variation that takes place before the original event?
-* B: What content can vary and be stored in an occurrence? Any at all?
-* C: What variations in event data require creation of a full Variation Event?
-* D: Should event cancellations/deletions be represented by a Variation Event?
-* E: Confirm that event changes, especially variations, do not apply to the public calendar until an event is published
-* F: Is the date range of a variation event restricted to be within the range of its originating (parent) event?
-* G: Do/should we permit nesting of variation events? I think we are better of not doing faking this, by cloning content from an originating variation event but actually keeping the event hierarchy flat so all an original event's variations are a single level below.
+### Admin UI
 
-## TODO
+The model changes in this spec will require numerous admin changes for EventKit:
 
-* Template events
-* Event cloning
-* Admin interface implications
+* the calendar on the event listing page will show only occurrences
+* the event list on the event listing page will include all events, whether or not they have occurrences
+* display an event's occurrences on its admin detail page, probably as an inline set
+* user can manually add/delete/modify occurrences on an event's detail page
+* user adjustments permitted: adjust date/time, adjust duration, set status flag to "Cancelled" etc
+* PUBLISHING: draft/published status shown on an event, and availability of Publish button, is based on both the Event itself and any manual changes made to its occurrences. For example, manually adding an occurrence makes the draft event newer than the published one, so the publish status description should reflect this and the Publish button be made available.
+* FUTURE: user can clone an event
+
+### Publishing (SFMOMA)
+
+Events are publishable in SFMOMA, and likely will also be so in future projects even though EventKit itself has no publishing features. As such, we need to understand how publishing will interact with events.
+
+A publishable event:
+
+* is not visible to the public directly until it is published
+* its occurrences are not visible to the public until the event is published
+* manual changes to an event's occurrences are not publicly visible until the event is published
+* changes to an event's generated occurrences, such as by changing a repeat rule, are not publicly visible until published
+
+BUT to keep published events up-to-date, we will need some special handling:
+
+* the scheduled job that extends the occurrences for a repeating event applies to both draft and published copies of events, so that future occurrences are generated to populate the publicly-visible calendar.
+
+
+### Event Cloning (FUTURE)
+
+Events will be cloneable in the system, such that an event's content and settings can be easily copied into a new event where it can be adjusted and repurposed by admins.
+
+When an event is cloned, we set the "cloned-from" field of the event copy to point back to the original event as a loose nullable relationship. This relationships will be for bookkeeping purposes only for now. It will not be exposed in the site admin, and will not imply any particular behaviour or restrictions for either side of the relationship.
+
+The cloning feature combined with manual management of occurrences will enable informal but powerful management workflows for admins.
+
+Event Template:
+
+* user creates an event with commonly re-used content, and does not set a repeat rule or publish the event
+* user gives the event an obvious name, like "[Template] Museum Open Days"
+* user can then clone this "template" event as a starting-point for concrete events, adjust the title and slug, assign repeat rules and/or manual occurrences to the copy, and publish the result.
+
+Event Variation:
+
+* use clones an existing event to a copy, then adjusts its content and/or repeat rule
+* user must also set a unique slug value for the cloned event
+* user assigns a repeat rule and/or adds manual occurrences
+* user manually deletes any clashing/duplicate occurrences from the original event
+* user publishes the cloned variation event
+
+NOTE: Longer-term, the admin could include features to automate replacing one or more occurrences with a variation event, to make this easier. For now, however, it's okay for this to be an entirely manual process.
+
+
+[django-mptt]: https://github.com/django-mptt/django-mptt
