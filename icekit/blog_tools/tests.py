@@ -1,9 +1,11 @@
+from django.apps import apps
 from django.utils.timezone import now
 from django_dynamic_fixture import G
 from django_webtest import WebTest
 
 from . import abstract_models, models
-from icekit.plugins.image.models import Image
+
+Image = apps.get_model('image.Image')
 
 
 class Models(WebTest):

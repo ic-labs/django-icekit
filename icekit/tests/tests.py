@@ -23,7 +23,6 @@ from icekit.page_types.layout_page.models import LayoutPage
 from icekit.plugins import descriptors
 from icekit.plugins.faq.models import FAQItem
 from icekit.plugins.horizontal_rule.models import HorizontalRuleItem
-from icekit.plugins.image.models import ImageItem, Image
 from icekit.plugins.instagram_embed.models import InstagramEmbedItem
 from icekit.plugins.map.models import MapItem
 from icekit.plugins.map_with_text.models import MapWithTextItem
@@ -48,6 +47,8 @@ if apps.is_installed('icekit.plugins.brightcove'):
     from django_brightcove.models import BrightcoveItems
     from icekit.plugins.brightcove.models import BrightcoveItem
 
+Image = apps.get_model('image.Image')
+ImageItem = apps.get_model('image.ImageItem')
 
 User = get_user_model()
 
