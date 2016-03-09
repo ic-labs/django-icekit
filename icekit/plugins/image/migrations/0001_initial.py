@@ -24,6 +24,9 @@ class Migration(migrations.Migration):
                 ('admin_notes', models.TextField(help_text='Internal notes for administrators only.', blank=True)),
                 ('categories', models.ManyToManyField(related_name='image_image_related', to='icekit.MediaCategory', blank=True)),
             ],
+            options={
+                'db_table': 'image_image',
+            },
         ),
         migrations.CreateModel(
             name='ImageItem',
