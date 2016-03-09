@@ -5,7 +5,7 @@ from django_webtest import WebTest
 
 from . import abstract_models, models
 
-Image = apps.get_model('image.Image')
+Image = apps.get_model('icekit_plugins_image.Image')
 
 
 class Models(WebTest):

@@ -170,7 +170,7 @@ class SinglePhotoMixin(models.Model):
     Adds a single photo to a Blog Post.
     """
     photo = models.ForeignKey(
-        'image.Image',
+        'icekit_plugins_image.Image',
         blank=True,
         null=True,
     )

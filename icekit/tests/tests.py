@@ -47,8 +47,8 @@ if apps.is_installed('icekit.plugins.brightcove'):
     from django_brightcove.models import BrightcoveItems
     from icekit.plugins.brightcove.models import BrightcoveItem
 
-Image = apps.get_model('image.Image')
-ImageItem = apps.get_model('image.ImageItem')
+Image = apps.get_model('icekit_plugins_image.Image')
+ImageItem = apps.get_model('icekit_plugins_image.ImageItem')
 
 User = get_user_model()
 

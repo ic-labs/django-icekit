@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
             name='ImageItem',
             fields=[
                 ('contentitem_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='fluent_contents.ContentItem')),
-                ('image', models.ForeignKey(help_text='An image from the image library.', to='image.Image')),
+                ('image', models.ForeignKey(help_text='An image from the image library.', to='icekit_plugins_image.Image')),
             ],
             options={
                 'db_table': 'contentitem_image_imageitem',
