@@ -663,7 +663,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             # http://fullcalendar.io/docs/event_data/Event_Object/, so
             # we need to add 1 day to ``date_ends`` to have the end date
             # included in the calendar.
-            end = self.date_ends + timedelta(days=1)
+            end = (self.date_ends or self.date_starts) + timedelta(days=1)
         else:
             start = timezone.localize(self.starts)
             end = timezone.localize(self.ends)
