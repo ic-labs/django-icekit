@@ -29,7 +29,8 @@ customisation is required, without complicated database migrations.
 
     These values won't break when the app package is copied to a new location.
 
-  * Manually derive the `AppConfig.label` attribute from the full app name.
+  * Manually derive the `AppConfig.label` attribute from `AppConfig.name`,
+    e.g. by replacing `.` with `_`.
 
     By default, Django only uses the last component of the app name, which
     might result in labels that are likely to conflict with other apps.
