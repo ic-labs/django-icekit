@@ -57,4 +57,17 @@ class BaseEventForm(forms.ModelForm):
                 self.add_error(
                     'ends',
                     self.fields.get('ends').error_messages['required'])
+
+        if self.instance.id and not self.cleaned_data.get('propagate', False):
+            changed_data = set(self.changed_data)
+            intersection = changed_data & set(self.instance.PROPAGATE_FIELDS)
+            if intersection:
+                for field in intersection:
+                    self.add_error(
+                        field,
+                        'Cannot update field'
+                    )
+
+                raise forms.ValidationError('Cannot update occurrences without propagating changes to repeat events.')
+
         return cleaned_data
