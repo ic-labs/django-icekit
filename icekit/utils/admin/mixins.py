@@ -118,15 +118,41 @@ class PolymorphicAdminRawIdFix(object):
     model that you would like to be a raw id field.
     """
     
+    def _get_child_admin_site(self, rel):
+        """
+        Returns the separate AdminSite instance that django-polymorphic
+        maintains for child models.
+        
+        This admin site needs to be passed to the widget so that it passes the
+        check of whether the field is pointing to a model that's registered
+        in the admin.
+        
+        The hackiness of this implementation reflects the hackiness of the way
+        django-polymorphic does things.
+        """
+        if rel.to not in self.admin_site._registry:
+            # Go through the objects the model inherits from and find one
+            # that's registered in the main admin and has a reference to the
+            # child admin site in it attributes.
+            for parent in rel.to.mro():
+                if parent in self.admin_site._registry \
+                and hasattr(self.admin_site._registry[parent], '_child_admin_site'):
+                    return self.admin_site._registry[parent]._child_admin_site
+        return self.admin_site
+    
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         """
         Replicates the logic in ModelAdmin.forfield_for_foreignkey, replacing
-        the widget with the patched one above.
+        the widget with the patched one above, initialising it with the child
+        admin site.
         """
         db = kwargs.get('using')
         if db_field.name in self.raw_id_fields:
             kwargs['widget'] = PolymorphicForeignKeyRawIdWidget(
-                db_field.rel, self.admin_site, using=db)
+                db_field.rel,
+                admin_site=self._get_child_admin_site(db_field.rel),
+                using=db
+            )
             if 'queryset' not in kwargs:
                 queryset = self.get_field_queryset(db, db_field, request)
                 if queryset is not None:
@@ -138,12 +164,16 @@ class PolymorphicAdminRawIdFix(object):
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         """
         Replicates the logic in ModelAdmin.formfield_for_manytomany, replacing
-        the widget with the patched one above
+        the widget with the patched one above, initialising it with the child
+        admin site.
         """
         db = kwargs.get('using')
         if db_field.name in self.raw_id_fields:
             kwargs['widget'] = PolymorphicManyToManyRawIdWidget(
-                db_field.rel, self.admin_site, using=db)
+                db_field.rel,
+                admin_site=self._get_child_admin_site(db_field.rel),
+                using=db
+            )
             kwargs['help_text'] = ''
             if 'queryset' not in kwargs:
                 queryset = self.get_field_queryset(db, db_field, request)
