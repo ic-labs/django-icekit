@@ -4,12 +4,14 @@ from django.utils.six import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import AutoSlugField, TimeStampedModel
 from fluent_contents.models import ContentItem
+
 try:
     # for django-polymorphic >= 0.8
     from polymorphic.models import PolymorphicModel
-except:
+except ImportError:
     # for django-polymorphic < 0.8
     from polymorphic import PolymorphicModel
+
 
 @python_2_unicode_compatible
 class AbstractBlogPost(PolymorphicModel, TimeStampedModel):
