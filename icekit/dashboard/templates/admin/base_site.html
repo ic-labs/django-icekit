@@ -1,0 +1,19 @@
+{% extends "admin/base.html" %}
+{% load static compress %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block stylesheet %}{% endblock %}
+
+{% block extrastyle %}
+	<link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" />
+	{% compress css %}
+		<link rel="stylesheet" href="{% static 'admin/css/base.css' %}" />
+		<link type="text/less" rel="stylesheet" href="{% static 'admin/css/icekit_dashboard.less' %}" />
+	{% endcompress %}
+{% endblock %}
+
+{% block extrahead %}
+	<script src="{% static 'jquery/dist/jquery.js' %}"></script>
+	<script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
+{% endblock %}
