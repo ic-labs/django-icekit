@@ -20,7 +20,7 @@ def get_test_image(storage):
 
     Example:
 
-        with get_sample_image(obj.image_field.storage) as name:
+        with get_test_image(obj.image_field.storage) as name:
             obj.image_field = name
 
     """
