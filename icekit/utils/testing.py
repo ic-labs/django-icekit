@@ -8,14 +8,14 @@ from PIL import Image, ImageDraw
 
 
 @contextlib.contextmanager
-def get_test_image(storage):
+def get_sample_image(storage):
     """
     Context manager that creates an image with the given storage class, returns
     a storage name, and cleans up (including thumbnails) when done.
 
     Example:
 
-        with get_test_image(obj.image_field.storage) as name:
+        with get_sample_image(obj.image_field.storage) as name:
             obj.image_field = name
 
     """
