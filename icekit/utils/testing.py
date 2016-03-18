@@ -25,7 +25,7 @@ def get_sample_image(storage):
     # Create image.
     image_file = Image.new('RGBA', size=(50, 50), color=(255, 0, 0))
     ImageDraw.Draw(image_file)
-    storage_file = storage.open(storage_name, 'w')
+    storage_file = storage.open(storage_name, 'wb')
     image_file.save(storage_file, 'png')
 
     # Yield storage name.
