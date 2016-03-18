@@ -1,1 +1,1 @@
-default_app_config = 'icekit.dashboard.apps.DashboardConfig'
+default_app_config = '%s.apps.DashboardConfig' % __name__  # Portable
