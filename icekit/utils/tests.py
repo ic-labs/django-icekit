@@ -5,15 +5,15 @@ from django.conf import settings
 from django_dynamic_fixture import G
 from django_webtest import WebTest
 
-from icekit.utils.testing import get_sample_image
+from icekit.utils import testing
 from icekit.tests.models import ImageTest
 
 
 class TestingUtils(WebTest):
-    def test_get_sample_image(self):
+    def test_get_test_image(self):
         image_test = G(ImageTest)
 
-        with get_sample_image(image_test.image.storage) as image_name:
+        with testing.get_test_image(image_test.image.storage) as image_name:
             # Check that the image was created.
             image_test.image = image_name
             self.assertTrue(os.path.exists(image_test.image.path))

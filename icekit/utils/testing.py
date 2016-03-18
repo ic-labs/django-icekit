@@ -4,11 +4,13 @@ import os
 import uuid
 
 from django.conf import settings
+from nose.tools import nottest
 from PIL import Image, ImageDraw
 
 
+@nottest
 @contextlib.contextmanager
-def get_sample_image(storage):
+def get_test_image(storage):
     """
     Context manager that creates an image with the given storage class, returns
     a storage name, and cleans up (including thumbnails) when done.
