@@ -7,12 +7,23 @@ python:
   - "3.5"
 
 env:
-  - TOXENV=django17-brightcove
   - TOXENV=django17
-  - TOXENV=django18-brightcove
+  - TOXENV=django17-brightcove
   - TOXENV=django18
-  - TOXENV=django19-brightcove
+  - TOXENV=django18-brightcove
   - TOXENV=django19
+  - TOXENV=django19-brightcove
+
+matrix:
+  allow_failures:
+    - env: TOXENV=django19
+      python: "2.7"
+    - env: TOXENV=django19-brightcove
+      python: "2.7"
+    - python: "3.3"
+    - python: "3.4"
+    - python: "3.5"
+  fast_finish: true
 
 install:
   - pip install tox
