@@ -1,4 +1,4 @@
-$(function(){
+(function ($) {
 	var typeSelects = $('ul.object-tools select.type-select');
 
 	typeSelects.each(function() {
@@ -16,4 +16,4 @@ $(function(){
 			window.location = option.val();
 		}
 	});
-});
+})(window.jQuery || django.jQuery);
