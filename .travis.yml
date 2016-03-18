@@ -1,22 +1,21 @@
 language: python
+
 python:
+  - "2.7"
+  - "3.3"
+  - "3.4"
   - "3.5"
+
+env:
+  - TOXENV=django17-brightcove
+  - TOXENV=django17
+  - TOXENV=django18-brightcove
+  - TOXENV=django18
+  - TOXENV=django19-brightcove
+  - TOXENV=django19
 
 install:
   - pip install tox
 
 script:
   - tox
-
-env:
-  - TOXENV=django17-py27-brightcove
-  - TOXENV=django17-py33
-  - TOXENV=django17-py34
-  - TOXENV=django18-py27-brightcove
-  - TOXENV=django18-py33
-  - TOXENV=django18-py34
-  - TOXENV=django18-py35
-  # - TOXENV=django19-py27-brightcove
-  # - TOXENV=django19-py33
-  # - TOXENV=django19-py34
-  # - TOXENV=django19-py35
