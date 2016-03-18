@@ -37,8 +37,6 @@ setuptools.setup(
         'requests',
         'Pillow',
         'django-el-pagination',
-        # Nested dependency overrides.
-        'django-polymorphic<0.8',  # Backwards incompatible. See: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
     ],
     extras_require={
         'brightcove': ['django-brightcove'],
@@ -47,7 +45,12 @@ setuptools.setup(
             'ipython',
             'mkdocs',
         ],
-        'django17': ['django-mptt<0.8', ],
+        'django17': [
+            'django-fluent-contents<1.1',  # See: https://github.com/edoburu/django-fluent-contents/issues/67
+            'django-mptt<0.8',  # See: https://github.com/django-mptt/django-mptt/releases
+            'django-polymorphic<0.8',  # See: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
+            'Django>=1.7,<1.8',
+        ],
         'forms': [
             'django-forms-builder',
         ],
