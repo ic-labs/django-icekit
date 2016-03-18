@@ -32,20 +32,19 @@ def get_test_image(storage):
     yield storage_name
 
     # Delete thumbnails, if they exist.
-    THUMBNAIL_ROOT = os.path.join(
-        settings.MEDIA_ROOT,
-        settings.THUMBNAIL_BASEDIR,
-    )
     if hasattr(settings, 'THUMBNAIL_BASEDIR'):
+        THUMBNAIL_ROOT = os.path.join(
+            settings.MEDIA_ROOT,
+            settings.THUMBNAIL_BASEDIR,
+        )
         thumbs = glob.glob(os.path.join(THUMBNAIL_ROOT, storage_name + '*'))
         for filename in thumbs:
             os.unlink(filename)
-
-    # Delete empty thumbnail directories.
-    try:
-        os.removedirs(THUMBNAIL_ROOT)
-    except OSError:
-        pass
+        # Delete empty thumbnail directories.
+        try:
+            os.removedirs(THUMBNAIL_ROOT)
+        except OSError:
+            pass
 
     # Delete image.
     storage.delete(storage_name)

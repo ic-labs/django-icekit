@@ -92,6 +92,8 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
+THUMBNAIL_BASEDIR = 'thumbs'
+
 NOSE_ARGS = [
     '--logging-clear-handlers',  # Clear all other logging handlers
     '--nocapture',  # Don't capture stdout
