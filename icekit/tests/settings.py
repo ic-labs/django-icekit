@@ -101,3 +101,8 @@ NOSE_ARGS = [
     # '--processes=-1',  # Automatically set to the number of cores
     '--with-progressive',  # See: https://pypi.python.org/pypi/nose-progressive
 ]
+
+# TRAVIS ######################################################################
+
+if 'TRAVIS' in os.environ:
+    NOSE_ARGS.remove('--with-progressive')
