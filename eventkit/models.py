@@ -263,16 +263,15 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 is_repeat=True,
                 **defaults
             )
+            duration = self.duration or timedelta(0)
             if event.all_day:
                 event.date_starts = timezone.date(starts)
-                if self.duration:
-                    event.date_ends = timezone.date(starts) + self.duration
+                event.date_ends = event.date_starts + duration
             else:
                 event.starts = starts
                 event.date_starts = timezone.date(event.starts)
-                if self.duration:
-                    event.ends = starts + self.duration
-                    event.date_ends = timezone.date(event.ends)
+                event.ends = starts + duration
+                event.date_ends = timezone.date(event.ends)
             super(AbstractEvent, event).save()  # Bypass automatic propagation.
         # Refresh the MPTT fields, which are now in an inconsistent state.
         self.refresh_mptt_fields()
