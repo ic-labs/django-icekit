@@ -456,7 +456,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         if self.all_day:
             assert self.date_starts, 'An all day event must have a start date.'
             # Remove datetime from all day events.
-            self.starts = self.ends = None
+            self.starts = self.ends = self.end_repeat = None
         else:
             assert self.starts, 'An event must have a start time.'
             # Auto-populate date fields for regular events, so we can order by
@@ -467,7 +467,10 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 self.date_ends = timezone.date(self.ends)
             else:
                 self.date_ends = None
-
+            if self.end_repeat:
+                self.date_end_repeat = timezone.date(self.end_repeat)
+            else:
+                self.date_end_repeat = None
         # Is this a new event? New events cannot be propagated until saved.
         adding = self._state.adding
         # Have monitored fields have changed since the last save?
