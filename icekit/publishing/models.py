@@ -1,5 +1,6 @@
 from django.utils import timezone
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -123,6 +124,9 @@ class PublisherModelBase(models.Model):
                 continue
 
         return placeholder_fields
+
+    def update_modified_at(self):
+        self.publisher_modified_at = timezone.now()
 
 
 class PublisherModel(PublisherModelBase):

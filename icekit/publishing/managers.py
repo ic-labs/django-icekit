@@ -497,7 +497,7 @@ class PublisherContributeToClassManager(PublisherManager):
                     sender=type(obj), instance=obj)
 
                 # Save the change and create a revision to mark the change.
-                self.publishing_save_draft_after_publish(obj)
+                obj.publishing_save_draft_after_publish(obj)
 
                 signals.publisher_post_publish.send(
                     sender=type(obj), instance=obj)
@@ -511,6 +511,8 @@ class PublisherContributeToClassManager(PublisherManager):
             create a revision when an item is published.
             """
             draft_obj.save()
+        model.publishing_save_draft_after_publish = \
+            publishing_save_draft_after_publish
 
         def publishing_prepare_published_copy(self, draft_obj):
             """ Prepare published copy of draft prior to saving it """

@@ -23,7 +23,6 @@ class AppConfig(AppConfig):
 
     def __init__(self, *args, **kwargs):
         self.label = self.name.replace('.', '_')
-        self.publishable_models = self.get_models_to_monkey_patch()
         super(AppConfig, self).__init__(*args, **kwargs)
 
     def get_models_to_monkey_patch(self):
@@ -33,6 +32,8 @@ class AppConfig(AppConfig):
         return []
 
     def ready(self):
+        self.publishable_models = self.get_models_to_monkey_patch()
+
         # Check if `fluent_pages` is installed. If so let the "fun" begin.
         # This will help "patch" each of the managers to have the anticipated
         # manager methods.  Please note that in the `__init__.py` file there is
@@ -65,31 +66,33 @@ class AppConfig(AppConfig):
                 # Fluent base classes are not directly in type pool
                 UrlNode, Page,
             ]
+        else:
+            UrlNode = None
 
-            from .managers import (
-                PublisherManager,
-                PublisherUrlNodeManager,
-                PublisherContributeToClassManager,
-            )
+        from .managers import (
+            PublisherManager,
+            PublisherUrlNodeManager,
+            PublisherContributeToClassManager,
+        )
 
-            # For each page type plugin and associated polymorphic fields we
-            # need to patch the managers to have publishing features.
-            for klass in self.publishable_models:
-                # Replace default managers, as appropriate for UrlNode-based
-                # classes or non-UrlNode-based classes.
-                if issubclass(klass, UrlNode):
-                    klass.add_to_class(
-                        '_default_manager', PublisherUrlNodeManager())
-                    klass.add_to_class(
-                        'objects', PublisherUrlNodeManager())
-                else:
-                    klass.add_to_class(
-                        '_default_manager', PublisherManager())
-                    klass.add_to_class(
-                        'objects', PublisherManager())
-
-                # Contribute publisher attrs and methods to class
+        # For each page type plugin and associated polymorphic fields we
+        # need to patch the managers to have publishing features.
+        for klass in self.publishable_models:
+            # Replace default managers, as appropriate for UrlNode-based
+            # classes or non-UrlNode-based classes.
+            if issubclass(klass, UrlNode):
                 klass.add_to_class(
-                    '__publisher_manager', PublisherContributeToClassManager())
+                    '_default_manager', PublisherUrlNodeManager())
+                klass.add_to_class(
+                    'objects', PublisherUrlNodeManager())
+            else:
+                klass.add_to_class(
+                    '_default_manager', PublisherManager())
+                klass.add_to_class(
+                    'objects', PublisherManager())
+
+            # Contribute publisher attrs and methods to class
+            klass.add_to_class(
+                '__publisher_manager', PublisherContributeToClassManager())
 
         post_migrate.connect(create_can_publish_permission, sender=self)

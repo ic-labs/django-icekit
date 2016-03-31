@@ -42,12 +42,16 @@ setuptools.setup(
         'brightcove': [
             'django-brightcove',
         ],
+        'publishing': [
+            'django-model-settings',
+        ],
         'dev': [
             'ipdb',
             'ipython',
             'mkdocs',
         ],
         'django17': [
+            'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
             'django-fluent-contents<1.1',  # See: https://github.com/edoburu/django-fluent-contents/issues/67
             'django-mptt<0.8',  # See: https://github.com/django-mptt/django-mptt/releases
             'django-polymorphic<0.8',  # See: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28

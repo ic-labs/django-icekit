@@ -99,7 +99,6 @@ class PublisherAdminForm(forms.ModelForm):
 
 class PublisherAdmin(ModelAdmin):
     form = PublisherAdminForm
-    change_form_template = 'admin/publishing/publisher_change_form.html'
     # publish or unpublish actions sometime makes the plugins disappear from
     # page so we disable it for now, until we can investigate it further.
     # actions = (make_published, make_unpublished, )
@@ -397,13 +396,18 @@ class PublisherAdmin(ModelAdmin):
                     revert_btn = reverse(self.revert_reverse, args=(obj.pk, ))
 
                 context.update({
-                    'publish_btn_live': publish_btn,
-                    'preview_draft_btn': preview_draft_btn,
+                    'publish_btn': publish_btn,
                     'unpublish_btn': unpublish_btn,
+                    'preview_draft_btn': preview_draft_btn,
                     'revert_btn': revert_btn,
                 })
 
-        self.update_context_for_render_change_form(context, obj)
+        context.update({
+            'base_change_form_template': self.change_form_template,
+        })
+
+        # TODO Why is this hack necessary?
+        self._original_change_form_template = self.change_form_template
 
         # Use change form with fixed side panel.
         # NOTE: Some of the model fields are hidden in the main change form
@@ -419,9 +423,12 @@ class PublisherAdmin(ModelAdmin):
             "admin/publishing/publisher_change_form.html"
         ]
 
-        return super(PublisherAdmin, self).render_change_form(
+        response = super(PublisherAdmin, self).render_change_form(
             request, context,
             add=add, change=change, form_url=form_url, obj=obj)
+
+        self.change_form_template = self._original_change_form_template
+        return response
 
 
 class PublisherPublishedFilter(SimpleListFilter):

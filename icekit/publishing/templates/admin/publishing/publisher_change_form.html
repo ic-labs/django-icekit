@@ -1,6 +1,6 @@
 {% extends base_change_form_template %}
 
-{% load i18n admin_modify admin_static admin_urls comments polymorphic_admin_tags compress %}
+{% load i18n admin_modify admin_static admin_urls comments polymorphic_admin_tags compress publishing_tags %}
 
 {% block breadcrumbs %}
 	{% breadcrumb_scope base_opts %}
@@ -36,7 +36,9 @@
 	<ul class="nav nav-tabs" role="tablist">
 		<li role="presentation" class="active"><a href="#edit" aria-controls="edit" role="tab" data-toggle="tab">Edit</a></li>
 		<!--<li role="presentation"><a href="#promotion" aria-controls="promotion" role="tab" data-toggle="tab">Promotion</a></li>-->
+		{% comment %}
 		<li role="presentation"><a href="#versions" aria-controls="versions" role="tab" data-toggle="tab">Versions{% if versions %} ({{ versions.count }}){% endif %}</a></li>
+		{% endcomment %}
 		{% if has_absolute_url %}
 			<li role="presentation"><a href="{{ absolute_url }}" target="_blank">View on site <i class="fa fa-external-link"></i></a></li>
 		{% endif %}
@@ -49,12 +51,15 @@
 			<!--<div role="tabpanel" class="tab-pane" id="promotion">-->
 			<!--</div>-->
 			{% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
+			{% comment %}
 			<div role="tabpanel" class="tab-pane" id="versions"{% if versions %} data-ajax-url="{% add_preserved_filters history_url %}"{% endif %}>
 				<p>{% trans "This object doesn't have a change history. It probably wasn't added via this admin site." %}</p>
 			</div>
+			{% endcomment %}
 		</div>
 	</div>
 	<div class="content-right">
+		{% comment %}
 		<div class="panel-container">
 			<div class="panel-group nomargin" id="accordion" role="tablist" aria-multiselectable="true">
 				<div class="panel panel-default nomargin followers-panel">
@@ -115,6 +120,7 @@
 				</div>
 			</div>
 		</div>
+		{% endcomment %}
 		<div class="panel panel-default nomargin save-panel">
 			<div class="panel-heading">
 				<h3 class="panel-title">Save / Publish</h3>
@@ -145,8 +151,10 @@
 										<a href="{{ original.get_absolute_url|get_draft_url }}" target="_blank" class="btn btn-primary">Preview draft <i class="fa fa-external-link"></i></a>
 									{% endif %}
 								</div>
+								{% comment %}
 								{# Latest version is always a draft #}
 								<em><small>Draft: v{{ versions.count }}{% if published %}, Published: v{{ published.version_number }}{% endif %}</small></em>
+								{% endcomment %}
 							</p>
 						</div>
 					</div>
