@@ -2,7 +2,7 @@ from copy import deepcopy
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, \
     MultipleObjectsReturned, FieldError
-from django.db import models, transaction
+from django.db import models
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils.timezone import now
@@ -14,9 +14,7 @@ from fluent_pages.models.managers import UrlNodeQuerySet, UrlNodeManager
 from model_utils.managers import PassThroughManagerMixin
 
 from . import signals
-from .middleware import get_draft_status, get_middleware_active_status, \
-    get_current_user
-from .models import PublisherModel
+from .middleware import get_draft_status, get_middleware_active_status
 from .utils import assert_draft
 
 
@@ -391,6 +389,8 @@ class PublisherContributeToClassManager(PublisherManager):
         super(PublisherContributeToClassManager, self) \
             .contribute_to_class(model, name)
 
+        from .models import PublisherModelBase
+
         # Add these attributes to the class. These are attributes from
         # publisher to make it work.
         attributes = [
@@ -407,7 +407,7 @@ class PublisherContributeToClassManager(PublisherManager):
         ]
 
         for attr in attributes:
-            model.add_to_class(attr, getattr(PublisherModel, attr))
+            model.add_to_class(attr, getattr(PublisherModelBase, attr))
 
         # Add these methods to the class. These are methods from publisher to
         # make it work.
@@ -420,7 +420,8 @@ class PublisherContributeToClassManager(PublisherManager):
         for attr in methods:
             setattr(
                 model, attr,
-                getattr(PublisherModel, attr).__get__(model, PublisherModel))
+                getattr(PublisherModelBase, attr).__get__(
+                    model, PublisherModelBase))
 
         # Add a publish method to the class.
         @assert_draft
@@ -435,8 +436,9 @@ class PublisherContributeToClassManager(PublisherManager):
             """
             # Make sure that this object is dirty and a draft.
             if obj.is_draft and obj.is_dirty:
-                # If the object has previously been linked then patch the placeholder data and
-                # remove the previously linked object. Otherwise set the published date.
+                # If the object has previously been linked then patch the
+                # placeholder data and remove the previously linked object.
+                # Otherwise set the published date.
                 if obj.publisher_linked:
                     obj.patch_placeholders(obj)
                     # Unlink draft and published copies then delete published.
@@ -473,8 +475,8 @@ class PublisherContributeToClassManager(PublisherManager):
                 if not publish_obj.pk:
                     raise PublishingException("Failed to save published copy")
 
-                # As it is a new object we need to clone each of the translatable fields,
-                # placeholders and required relations.
+                # As it is a new object we need to clone each of the
+                # translatable fields, placeholders and required relations.
                 obj.clone_translations(obj, publish_obj)
                 obj.clone_placeholder(obj, publish_obj)
                 obj.clone_relations(obj, publish_obj)
@@ -489,13 +491,16 @@ class PublisherContributeToClassManager(PublisherManager):
                 # publish action, for use in `publisher_set_update_time`
                 obj._skip_update_publisher_modified_at = True
 
-                # Signal the pre-save hook for publication, save then signal the post publish hook.
-                signals.publisher_publish_pre_save_draft.send(sender=type(obj), instance=obj)
+                # Signal the pre-save hook for publication, save then signal
+                # the post publish hook.
+                signals.publisher_publish_pre_save_draft.send(
+                    sender=type(obj), instance=obj)
 
                 # Save the change and create a revision to mark the change.
                 self.publishing_save_draft_after_publish(obj)
 
-                signals.publisher_post_publish.send(sender=type(obj), instance=obj)
+                signals.publisher_post_publish.send(
+                    sender=type(obj), instance=obj)
                 return publish_obj
         model.publish = publish
 
@@ -512,7 +517,8 @@ class PublisherContributeToClassManager(PublisherManager):
             pass
 
         if not hasattr(model, 'publishing_prepare_published_copy'):
-            model.publishing_prepare_published_copy = publishing_prepare_published_copy
+            model.publishing_prepare_published_copy = \
+                publishing_prepare_published_copy
 
         def publishing_clone_relations(self, draft_obj):
             """
@@ -653,7 +659,8 @@ class PublisherContributeToClassManager(PublisherManager):
             Un-publish the current object.
             """
             if obj.is_draft and obj.publisher_linked:
-                signals.publisher_pre_unpublish.send(sender=type(obj), instance=obj)
+                signals.publisher_pre_unpublish.send(
+                    sender=type(obj), instance=obj)
                 # Unlink draft and published copies then delete published.
                 # NOTE: This indirect dance is necessary to avoid triggering
                 # unwanted MPTT tree structure updates via `delete`.
@@ -666,12 +673,8 @@ class PublisherContributeToClassManager(PublisherManager):
                 obj.publisher_linked = None
                 obj.publisher_published_at = None
                 obj.save()
-                # Save the change and create a revision to mark the change.
-                with transaction.atomic(), reversion.create_revision():
-                    obj.save()
-                    reversion.set_user(get_current_user())
-                    reversion.set_comment('Unpublished')
-                signals.publisher_post_unpublish.send(sender=type(obj), instance=obj)
+                signals.publisher_post_unpublish.send(
+                    sender=type(obj), instance=obj)
 
         model.unpublish = unpublish
 
@@ -680,17 +683,8 @@ class PublisherContributeToClassManager(PublisherManager):
             """
             Revert draft instance to the last published instance.
             """
-            if obj.publisher_linked:
-                version = reversion.get_for_object(obj) \
-                    .filter(revision__comment='Published') \
-                    .latest('revision__date_created')
-                version.revision.revert()
-                draft_obj = version.object
-                with transaction.atomic(), reversion.create_revision():
-                    draft_obj.save()
-                    reversion.set_user(get_current_user())
-                    reversion.set_comment('Reverted to last published.')
-                return draft_obj
+            raise Exception(
+                "TODO: Re-implement revert-to-public without reversion")
 
         model.revert_to_public = revert_to_public
 

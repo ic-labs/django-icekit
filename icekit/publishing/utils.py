@@ -7,6 +7,19 @@ from django.utils.encoding import force_bytes
 from model_settings.models import Text
 
 
+class NotDraftException(Exception):
+    pass
+
+
+def assert_draft(method):
+    def decorated(self, *args, **kwargs):
+        if not self.is_draft:
+            raise NotDraftException()
+
+        return method(self, *args, **kwargs)
+    return decorated
+
+
 def get_draft_hmac(salt, url):
     """
     Return a draft mode HMAC for the given salt and URL.
