@@ -99,7 +99,7 @@ class PublisherAdminForm(forms.ModelForm):
 
 class PublisherAdmin(ModelAdmin):
     form = PublisherAdminForm
-    change_form_template = 'publisher/change_form.html'
+    change_form_template = 'admin/publishing/publisher_change_form.html'
     # publish or unpublish actions sometime makes the plugins disappear from
     # page so we disable it for now, until we can investigate it further.
     # actions = (make_published, make_unpublished, )
@@ -163,7 +163,7 @@ class PublisherAdmin(ModelAdmin):
         if not self.has_publish_permission(self.request, obj):
             return ''
 
-        template_name = 'publisher/change_list_publish_status.html'
+        template_name = 'admin/publishing/change_list_publish_status.html'
 
         publish_btn = None
         if obj.is_dirty:
@@ -205,7 +205,7 @@ class PublisherAdmin(ModelAdmin):
     publisher_status_column.short_description = _('Is published')
 
     def publisher_publish(self, obj):
-        template_name = 'publisher/change_list_publish.html'
+        template_name = 'admin/publishing/change_list_publish.html'
 
         is_published = False
         if obj.publisher_linked and obj.is_draft:
@@ -416,7 +416,7 @@ class PublisherAdmin(ModelAdmin):
             "admin/%s/%s/publisher_change_form.html" % (
                 app_label, opts.model_name),
             "admin/%s/publisher_change_form.html" % app_label,
-            "admin/publisher_change_form.html"
+            "admin/publishing/publisher_change_form.html"
         ]
 
         return super(PublisherAdmin, self).render_change_form(

@@ -1,0 +1,16 @@
+{% load i18n %}
+<div class="col-published">
+	<label class="published-icon">
+		<img src="/static/admin/img/icon-yes.gif"{% if not is_published %} style="display:none"{% endif %}>
+		<img src="/static/admin/img/icon-no.gif"{% if is_published %} style="display:none"{% endif %}>
+	</label>
+	{% if has_publish_permission%}
+		<input type="checkbox" class="publish-checkbox" name="status-{{ object.id }}"
+		{% if is_published %} checked{% endif %}
+		value="{{ object.pk}}" data-publish="{{ publish_url }}" data-unpublish="{{ unpublish_url }}"
+		title="{% if is_published %}{% trans 'Unpublish' %}{% else %}{% trans 'Publish' %}{% endif %}"/>
+	{% endif %}
+	{% if is_published %}
+		<a href="{{ object.get_absolute_url }}?edit" title="{% trans 'View on page' %}" class="icon selector-add viewpage" id="view-page-{{object.id}}"><span>{% trans "View" %}</span></a>
+	{% endif %}
+</div>
