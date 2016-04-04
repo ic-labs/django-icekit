@@ -7,7 +7,11 @@ from django.utils.encoding import force_bytes
 from model_settings.models import Text
 
 
-class NotDraftException(Exception):
+class PublishingException(Exception):
+    pass
+
+
+class NotDraftException(PublishingException):
     pass
 
 

@@ -34,6 +34,7 @@ INSTALLED_APPS = (
     'icekit.blog_tools',
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
+    'icekit.publishing',
     'icekit.plugins.blog_post',
     'icekit.plugins.child_pages',
     'icekit.plugins.faq',
