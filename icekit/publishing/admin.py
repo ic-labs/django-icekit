@@ -2,6 +2,7 @@ import json
 
 import django
 from django import forms
+from django.apps import apps
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.conf import settings
@@ -14,6 +15,10 @@ from django.utils.encoding import force_text
 from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 from django.template import loader, Context
+
+
+def is_icekit_publishing_enabled():
+    return apps.is_installed('icekit.publishing')
 
 
 def make_published(modeladmin, request, queryset):
@@ -116,6 +121,11 @@ class PublisherAdmin(ModelAdmin):
 
     def __init__(self, model, admin_site):
         super(PublisherAdmin, self).__init__(model, admin_site)
+
+        if not self.is_publishing_enabled():
+            self.form = super(PublisherAdmin, self).form
+            self.list_display = super(PublisherAdmin, self).list_display
+
         self.request = None
         self.url_name_prefix = '%(app_label)s_%(module_name)s_' % {
             'app_label': self.model._meta.app_label,
@@ -137,6 +147,9 @@ class PublisherAdmin(ModelAdmin):
         self.changelist_reverse = '%s:%schangelist' % (
             self.admin_site.name,
             self.url_name_prefix, )
+
+    def is_publishing_enabled(self):
+        return is_icekit_publishing_enabled()
 
     def has_publish_permission(self, request, obj=None):
         """
@@ -359,6 +372,11 @@ class PublisherAdmin(ModelAdmin):
         :param form_url: The URL to use for the form submit action.
         :param obj: An object the render change form is for.
         """
+        if not self.is_publishing_enabled():
+            return super(PublisherAdmin, self).render_change_form(
+                request, context, add=add, change=change, form_url=form_url,
+                obj=obj)
+
         obj = context.get('original', None)
         if obj:
             if not self.has_publish_permission(request, obj):
