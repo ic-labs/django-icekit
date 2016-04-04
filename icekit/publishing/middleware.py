@@ -91,7 +91,6 @@ class PublisherMiddleware(object):
         return False
 
     def process_request(self, request):
-        super(PublisherMiddleware, self).process_request(request)
         # Redirect non-admin, GET method, draft mode requests, from staff users
         # (not content reviewers), that don't have a valid draft mode HMAC in
         # the querystring, to make URL sharing easy.
@@ -118,7 +117,6 @@ class PublisherMiddleware(object):
 
     @staticmethod
     def process_response(request, response):
-        response = PublisherMiddleware.process_response(request, response)
         try:
             del PublisherMiddleware._middleware_active_status[
                 current_thread()]

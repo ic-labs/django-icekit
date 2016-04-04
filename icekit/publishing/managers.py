@@ -154,18 +154,6 @@ class PublisherQuerySet(QuerySet):
         # published and draft copies of published items.
         queryset = queryset.exclude(
             publisher_is_draft=True, publisher_linked=None)
-        # Exclude by publication date on the published version of items, *not*
-        # the draft vesion, or we could get the wrong result.
-        # Exclude fields of published copy of draft items, not draft itself...
-        queryset = queryset.exclude(
-            Q(publisher_is_draft=True) & Q(
-                Q(publisher_linked__publication_date__gt=now())
-                | Q(publisher_linked__publication_end_date__lte=now())))
-        # ...and exclude fields directly on published items
-        queryset = queryset.exclude(
-            Q(publisher_is_draft=False) & Q(
-                Q(publication_date__gt=now())
-                | Q(publication_end_date__lte=now())))
         # Return the published item copies by default, or the original draft
         # copies if requested.
         if with_exchange:
@@ -274,6 +262,36 @@ class PublisherUrlNodeQuerySet(PublisherQuerySet, UrlNodeQuerySet):
     Publisher queryset features with UrlNode support and customisations.
     """
 
+    def published(self, for_user=UNSET, with_exchange=True):
+        """
+        Apply additional filtering of published items over that done in
+        `PublisherQuerySet.published` to filter based on additional publising
+        date fields used by Fluent.
+        """
+        if for_user is not UNSET:
+            return self.visible()
+
+        queryset = self.all()
+        queryset = queryset.exclude(
+            publisher_is_draft=True, publisher_linked=None)
+        # Exclude by publication date on the published version of items, *not*
+        # the draft vesion, or we could get the wrong result.
+        # Exclude fields of published copy of draft items, not draft itself...
+        queryset = queryset.exclude(
+            Q(publisher_is_draft=True) & Q(
+                Q(publisher_linked__publication_date__gt=now())
+                | Q(publisher_linked__publication_end_date__lte=now())))
+        # ...and exclude fields directly on published items
+        queryset = queryset.exclude(
+            Q(publisher_is_draft=False) & Q(
+                Q(publication_date__gt=now())
+                | Q(publication_end_date__lte=now())))
+        # Return the published item copies by default, or the original draft
+        # copies if requested.
+        if with_exchange:
+            queryset = queryset.exchange_for_published()
+        return queryset
+
     def get_for_path(self, path, language_code=None):
         """
         Return the UrlNode for the given path.
@@ -323,6 +341,9 @@ class PublisherManager(PassThroughManagerMixin, models.Manager):
     """
     Base publisher manager, without UrlNode customisations.
     """
+    queryset_class = PublisherQuerySet
+    # Tell Django that related fields also need to use this manager:
+    use_for_related_fields = True
 
     def get_queryset(self):
         return PublisherQuerySet(self.model, using=self._db).all()

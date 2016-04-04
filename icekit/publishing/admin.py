@@ -37,6 +37,80 @@ def http_json_response(data):
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
+class PublisherPublishedFilter(SimpleListFilter):
+    title = _('Published')
+    parameter_name = 'published'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('1', _('Yes')),
+            ('0', _('No'))
+        )
+
+    def queryset(self, request, queryset):
+        try:
+            value = int(self.value())
+        except TypeError:
+            return queryset
+
+        isnull = not value
+        return queryset.filter(publisher_linked__isnull=isnull)
+
+
+class PublishingStatusFilter(SimpleListFilter):
+    """
+    Filter events by published status, which will be one of:
+
+        - unpublished: item is not published; it has no published copy
+            available via the ``publisher_linked`` relationship.
+
+        - published: item is published but may or may not be up-to-date;
+            it has a published copy available via the ``publisher_linked``
+            relationship.
+
+        - out_of_date: item is published but the published copy is older
+            than the latest draft; the draft's ``publisher_modified_at`` is
+            later than this timestamp in the published copy.
+
+        - up_to_date: item is published and the published copy is based
+            on the latest draft; the draft's ``publisher_modified_at`` is
+            earlier or equal to this timestamp in the published copy.
+
+    Be aware that this queryset filtering happens after the admin queryset is
+    already filtered to include only draft copies of published items.
+    """
+    title = _('publishing status')
+    parameter_name = 'publishing_status'
+
+    UNPUBLISHED = 'unpublished'
+    PUBLISHED = 'published'
+    OUT_OF_DATE = 'out_of_date'
+    UP_TO_DATE = 'up_to_date'
+
+    def lookups(self, request, model_admin):
+        lookups = (
+            (self.UNPUBLISHED, _('Unpublished')),
+            (self.PUBLISHED, _('Published')),
+            (self.OUT_OF_DATE, _('Published & Out-of-date')),
+            (self.UP_TO_DATE, _('Published & Up-to-date')),
+        )
+        return lookups
+
+    def queryset(self, request, queryset):
+        if self.value() == 'unpublished':
+            return queryset.filter(publisher_linked__isnull=True)
+        elif self.value() == 'published':
+            return queryset.filter(publisher_linked__isnull=False)
+        elif self.value() == 'out_of_date':
+            return queryset.filter(
+                publisher_modified_at__gt=F(
+                    'publisher_linked__publisher_modified_at'))
+        elif self.value() == 'up_to_date':
+            return queryset.filter(
+                publisher_modified_at__lte=F(
+                    'publisher_linked__publisher_modified_at'))
+
+
 class PublisherAdminForm(forms.ModelForm):
     """
     The admin form that provides functionality for `Publisher`.
@@ -109,6 +183,7 @@ class PublisherAdmin(ModelAdmin):
     # actions = (make_published, make_unpublished, )
     list_display = ('publisher_object_title', 'publisher_publish',
                     'publisher_status', )
+    list_filter = (PublishingStatusFilter, PublisherPublishedFilter)
     url_name_prefix = None
 
     class Media:
@@ -125,6 +200,7 @@ class PublisherAdmin(ModelAdmin):
         if not self.is_publishing_enabled():
             self.form = super(PublisherAdmin, self).form
             self.list_display = super(PublisherAdmin, self).list_display
+            self.list_filter = super(PublisherAdmin, self).list_filter
 
         self.request = None
         self.url_name_prefix = '%(app_label)s_%(module_name)s_' % {
@@ -414,6 +490,8 @@ class PublisherAdmin(ModelAdmin):
                     revert_btn = reverse(self.revert_reverse, args=(obj.pk, ))
 
                 context.update({
+                    'is_dirty': obj.is_dirty,
+                    'has_been_published': obj.has_been_published,
                     'publish_btn': publish_btn,
                     'unpublish_btn': unpublish_btn,
                     'preview_draft_btn': preview_draft_btn,
@@ -447,77 +525,3 @@ class PublisherAdmin(ModelAdmin):
 
         self.change_form_template = self._original_change_form_template
         return response
-
-
-class PublisherPublishedFilter(SimpleListFilter):
-    title = _('Published')
-    parameter_name = 'published'
-
-    def lookups(self, request, model_admin):
-        return (
-            ('1', _('Yes')),
-            ('0', _('No'))
-        )
-
-    def queryset(self, request, queryset):
-        try:
-            value = int(self.value())
-        except TypeError:
-            return queryset
-
-        isnull = not value
-        return queryset.filter(publisher_linked__isnull=isnull)
-
-
-class PublishingStatusFilter(SimpleListFilter):
-    """
-    Filter events by published status, which will be one of:
-
-        - unpublished: item is not published; it has no published copy
-            available via the ``publisher_linked`` relationship.
-
-        - published: item is published but may or may not be up-to-date;
-            it has a published copy available via the ``publisher_linked``
-            relationship.
-
-        - out_of_date: item is published but the published copy is older
-            than the latest draft; the draft's ``publisher_modified_at`` is
-            later than this timestamp in the published copy.
-
-        - up_to_date: item is published and the published copy is based
-            on the latest draft; the draft's ``publisher_modified_at`` is
-            earlier or equal to this timestamp in the published copy.
-
-    Be aware that this queryset filtering happens after the admin queryset is
-    already filtered to include only draft copies of published items.
-    """
-    title = _('publishing status')
-    parameter_name = 'publishing_status'
-
-    UNPUBLISHED = 'unpublished'
-    PUBLISHED = 'published'
-    OUT_OF_DATE = 'out_of_date'
-    UP_TO_DATE = 'up_to_date'
-
-    def lookups(self, request, model_admin):
-        lookups = (
-            (self.UNPUBLISHED, _('Unpublished')),
-            (self.PUBLISHED, _('Published')),
-            (self.OUT_OF_DATE, _('Published & Out-of-date')),
-            (self.UP_TO_DATE, _('Published & Up-to-date')),
-        )
-        return lookups
-
-    def queryset(self, request, queryset):
-        if self.value() == 'unpublished':
-            return queryset.filter(publisher_linked__isnull=True)
-        elif self.value() == 'published':
-            return queryset.filter(publisher_linked__isnull=False)
-        elif self.value() == 'out_of_date':
-            return queryset.filter(
-                publisher_modified_at__gt=F(
-                    'publisher_linked__publisher_modified_at'))
-        elif self.value() == 'up_to_date':
-            return queryset.filter(
-                publisher_modified_at__lte=F(
-                    'publisher_linked__publisher_modified_at'))

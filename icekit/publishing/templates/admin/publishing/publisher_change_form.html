@@ -151,6 +151,7 @@
 										<a href="{{ original.get_absolute_url|get_draft_url }}" target="_blank" class="btn btn-primary">Preview draft <i class="fa fa-external-link"></i></a>
 									{% endif %}
 								</div>
+								{% if has_been_published and is_dirty %}<em><small>Published version is out-of-date</small></em>{% endif %}
 								{% comment %}
 								{# Latest version is always a draft #}
 								<em><small>Draft: v{{ versions.count }}{% if published %}, Published: v{{ published.version_number }}{% endif %}</small></em>
