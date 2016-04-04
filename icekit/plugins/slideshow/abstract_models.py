@@ -4,11 +4,13 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItem, PlaceholderField
 
+from icekit.publishing.models import PublisherModel
+
 from . import appsettings
 
 
 @python_2_unicode_compatible
-class AbstractSlideShow(models.Model):
+class AbstractSlideShow(PublisherModel):
     """
     A reusable Slide Show.
     """
