@@ -1,19 +1,23 @@
-(function ($) {
-	var typeSelects = $('ul.object-tools select.type-select');
+(function($) {
+	$(function() {
+		var typeSelects = $('ul.object-tools select.type-select');
 
-	typeSelects.each(function() {
-		var typeSelect = $(this);
-		var defaultOption = typeSelect.find('option:selected');
-		if (defaultOption.length && defaultOption.val()) {
+		typeSelects.each(function() {
+			var typeSelect = $(this);
 			var addButton = typeSelect.siblings('.js-add');
-			addButton.attr('href', defaultOption.val());
-		}
-	});
+			addButton.on('click', function() {
+				var option = typeSelect.find('option:selected');
+				if (option.length) {
+					window.location = option.val();
+				}
+			});
+		});
 
-	typeSelects.on('change', function (){
-		var option = $(this).find('option:selected');
-		if (option.length) {
-			window.location = option.val();
-		}
+		typeSelects.on('change', function (){
+			var option = $(this).find('option:selected');
+			if (option.length) {
+				window.location = option.val();
+			}
+		});
 	});
 })(window.jQuery || django.jQuery);
