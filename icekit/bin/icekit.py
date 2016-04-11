@@ -86,6 +86,11 @@ def start_template(command, template, package_name, destination=None):
     logger.debug('Executing command: %s' % ' '.join(argv))
     ManagementUtility(argv).execute()
 
+    # TODO:
+    # - chmod 755 bin/* manage.py
+    # - git init
+    # - git add -A
+    # - git commit -m 'Initial commit.'
 
 def main():
     parser = argparse.ArgumentParser(
