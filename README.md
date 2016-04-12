@@ -28,4 +28,4 @@ and will prompt for confirmation if it does.
     $ docker-compose up
 
 The first time you run this, the images for all services defined in your
-compose file will be downloaded or built.
+compose file will be downloaded or built, so it might take a while.
