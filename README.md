@@ -1,84 +1,31 @@
-# Readme
+# Getting started
 
-Docs can be found in the [docs](docs/index.md) folder.
+The easiest way to create and run an ICEkit project is with Docker. It works
+on Windows, OS X, and Linux.
 
-# Quick Start
+If you are not yet familiar with Docker, check out our [Docker Quick Start][0]
+guide and then come back here.
 
-Start a new project:
+If you are still not yet ready for Docker, check out our [Manual Setup][1]
+guide, which covers all the things that Docker would otherwise take care of.
 
-    $ curl -L http://bit.ly/django-icekit-template | bash -s {project_name}
+[0]: https://github.com/ixc/django-icekit/docs/docker-quick-start.md
+[1]: https://github.com/ixc/django-icekit/docs/manual-setup-guide.md
 
-# Run with Docker
+# Creating a new ICEkit project
 
-If you have installed [Docker Toolbox][docker-toolbox] (OS X, Windows) or
-[Docker Engine][docker-engine] and [Docker Compose][docker-compose] (Linux),
-you can run your project and all its required services with a single command:
+    $ curl -L http://bit.ly/django-icekit-template | bash -s FOO
 
+This script will create a new ICEkit project in a directory named `FOO` in the
+current working directory, ready to hack on.
+
+It might need to install 'pip' and 'virtualenv' into your global environment,
+and will prompt for confirmation if it does.
+
+# Running an ICEkit project with Docker
+
+    $ cd FOO
     $ docker-compose up
 
-Running with docker has a few more advantages beyond making it easier to get
-started, not having to install service dependencies at system level, and run
-with a more consistent environment across developers:
-
-  * Automatically update Node.js packages, Bower components, and Python
-    virtualenv when `package.json`, `bower.json`, `requirements*.txt` or
-    `setup.py` are changed.
-
-  * Automatically create a database named from your current git branch, and
-    restore a seed database (if `var/initial_data.sql` exists) into it. So you
-    can switch to feature branches and test against a recent database dump,
-    without breaking your current database.
-
-# Docker Cheat Sheet
-
-Here are the basics when getting started with Docker:
-
-    # Rebuild the project image
-    $ docker-compose build --pull
-
-    # Start all project services, building if no image is already available
-    $ docker-compose up
-
-    # Stop all project services
-    $ docker-compose stop
-
-    # List all project container names and their status
-    $ docker-compose ps -a
-
-    # Open a new shell inside a running container, using the same entrypoint
-    $ docker exec -it {container-name} entrypoint.sh bash
-
-    # Remove all stopped containers and their data volumes
-    docker rm -v $(docker ps -a -q -f status=exited)
-
-    # Remove all "dangling" images (untagged and not referenced by a container)
-    docker rmi $(docker images -f "dangling=true" -q)
-
-# Run without Docker
-
-If you're not using Docker, you will need to install the required services and
-library dependencies manually.
-
-On OS X, you can do use Homebrew:
-
-    $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    $ brew bundle
-
-Depending on how you install the required services, you might need to
-reconfigure them in `djangosite/settings/local.py`.
-
-Create a database and Python virtualenv:
-
-    $ createdb {project_name}
-    $ pip install virtualenvwrapper
-    $ mkvirtualenv -a $PWD {project_name}
-    $ pip install -e .
-
-Apply database migrations and run the project:
-
-    $ ./manage.py migrate
-    $ ./manage.py runserver
-
-[Docker Compose]:https://docs.docker.com/compose/install/
-[Docker Engine]: https://docs.docker.com/engine/installation/
-[Docker Toolbox]: https://www.docker.com/products/docker-toolbox
+The first time you run this, the images for all services defined in your
+compose file will be downloaded or built.
