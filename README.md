@@ -14,7 +14,7 @@ guide, which covers all the things that Docker would otherwise take care of.
 
 # Creating a new ICEkit project
 
-    $ curl -L http://bit.ly/django-icekit-template | bash -s FOO
+    $ bash <(curl -L http://bit.ly/django-icekit-template) FOO
 
 This script will create a new ICEkit project in a directory named `FOO` in the
 current working directory, ready to hack on.
