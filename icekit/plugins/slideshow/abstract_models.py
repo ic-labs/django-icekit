@@ -4,7 +4,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItem, PlaceholderField
 
-from icekit.publishing.models import PublisherModel
+from icekit.publishing.models import PublishingModel
 
 from . import appsettings
 
@@ -34,7 +34,7 @@ class AbstractUnpublishableSlideShow(models.Model):
 
 
 @python_2_unicode_compatible
-class AbstractSlideShow(AbstractUnpublishableSlideShow, PublisherModel):
+class AbstractSlideShow(AbstractUnpublishableSlideShow, PublishingModel):
 
     class Meta:
         abstract = True

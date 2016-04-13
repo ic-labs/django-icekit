@@ -1,12 +1,12 @@
 from django.contrib import admin
 from fluent_contents.admin import PlaceholderFieldAdmin
 
-from icekit.publishing.admin import PublisherAdmin
+from icekit.publishing.admin import PublishingAdmin
 
 from . import models
 
 
-class SlideShowAdmin(PlaceholderFieldAdmin, PublisherAdmin):
+class SlideShowAdmin(PlaceholderFieldAdmin, PublishingAdmin):
     change_form_template = 'icekit/plugins/slideshow/admin/change_form.html'
     fieldsets = (
         (

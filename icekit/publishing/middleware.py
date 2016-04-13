@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from .utils import get_draft_url, verify_draft_url
 
 
-class PublisherMiddleware(object):
+class PublishingMiddleware(object):
     """
     Publishing middleware to set status flags and apply features:
         - permit members of the "Content Reviewers" group to view drafts
@@ -34,7 +34,7 @@ class PublisherMiddleware(object):
     def is_draft_only_view(request):
         resolved = resolve(request.path)
         name = '%s.%s' % (resolved.func.__module__, resolved.func.__name__)
-        return name in PublisherMiddleware._draft_only_views
+        return name in PublishingMiddleware._draft_only_views
 
     @staticmethod
     def is_content_reviewer_user(request):
@@ -68,18 +68,18 @@ class PublisherMiddleware(object):
           requested URL, regardless of authenticated permissions.
         """
         # Admin resource requested.
-        if PublisherMiddleware.is_admin_request(request):
+        if PublishingMiddleware.is_admin_request(request):
             return True
         # Draft-only view requested.
-        if PublisherMiddleware.is_draft_only_view(request):
+        if PublishingMiddleware.is_draft_only_view(request):
             return True
         # Content reviewer made request.
-        if PublisherMiddleware.is_content_reviewer_user(request):
+        if PublishingMiddleware.is_content_reviewer_user(request):
             return True
         # Draft mode requested.
-        if PublisherMiddleware.is_draft_request(request):
+        if PublishingMiddleware.is_draft_request(request):
             # User is staff.
-            if PublisherMiddleware.is_staff_user(request):
+            if PublishingMiddleware.is_staff_user(request):
                 return True
             # Request contains a valid draft mode HMAC in the querystring.
             if verify_draft_url(request.get_full_path()):
@@ -93,47 +93,47 @@ class PublisherMiddleware(object):
         # (not content reviewers), that don't have a valid draft mode HMAC in
         # the querystring, to make URL sharing easy.
         if all([
-            not PublisherMiddleware.is_admin_request(request),
+            not PublishingMiddleware.is_admin_request(request),
             request.method == 'GET',
             is_draft,
-            PublisherMiddleware.is_staff_user(request),
-            not PublisherMiddleware.is_content_reviewer_user(request),
+            PublishingMiddleware.is_staff_user(request),
+            not PublishingMiddleware.is_content_reviewer_user(request),
             not verify_draft_url(request.get_full_path()),
         ]):
             return HttpResponseRedirect(get_draft_url(request.get_full_path()))
         # Set middleware active status.
-        PublisherMiddleware \
+        PublishingMiddleware \
             ._middleware_active_status[current_thread()] = True
         # Set current user
-        PublisherMiddleware._current_user[current_thread()] = \
+        PublishingMiddleware._current_user[current_thread()] = \
             request.user
         # Set draft status
-        PublisherMiddleware._draft_status[current_thread()] = is_draft
+        PublishingMiddleware._draft_status[current_thread()] = is_draft
         # Add draft status to request, for use in templates.
         request.IS_DRAFT = is_draft
 
     @staticmethod
     def process_response(request, response):
         try:
-            del PublisherMiddleware._middleware_active_status[
+            del PublishingMiddleware._middleware_active_status[
                 current_thread()]
         except KeyError:
             pass
         try:
-            del PublisherMiddleware._current_user[current_thread()]
+            del PublishingMiddleware._current_user[current_thread()]
         except KeyError:
             pass
         try:
-            del PublisherMiddleware._draft_status[current_thread()]
+            del PublishingMiddleware._draft_status[current_thread()]
         except KeyError:
             pass
-        return PublisherMiddleware.redirect_staff_to_draft_view_on_404(
+        return PublishingMiddleware.redirect_staff_to_draft_view_on_404(
             request, response)
 
     @staticmethod
     def get_middleware_active_status():
         try:
-            return PublisherMiddleware._middleware_active_status[
+            return PublishingMiddleware._middleware_active_status[
                 current_thread()]
         except KeyError:
             return False
@@ -141,14 +141,14 @@ class PublisherMiddleware(object):
     @staticmethod
     def get_current_user():
         try:
-            return PublisherMiddleware._current_user[current_thread()]
+            return PublishingMiddleware._current_user[current_thread()]
         except KeyError:
             return None
 
     @staticmethod
     def get_draft_status():
         try:
-            return PublisherMiddleware._draft_status[current_thread()]
+            return PublishingMiddleware._draft_status[current_thread()]
         except KeyError:
             return False
 
@@ -161,11 +161,11 @@ class PublisherMiddleware(object):
         """
         if (response.status_code == 404
                 # No point redirecting if we already have a draft request
-                and not PublisherMiddleware.is_draft_request(request)
+                and not PublishingMiddleware.is_draft_request(request)
                 # Don't mess with admin requests at all
-                and not PublisherMiddleware.is_admin_request(request)
+                and not PublishingMiddleware.is_admin_request(request)
                 # Can user view draft content if we add the 'edit' param
-                and PublisherMiddleware.is_staff_user(request)):
+                and PublishingMiddleware.is_staff_user(request)):
             # TODO Is there a sane way to check for draft version of resource
             # at this URL path, without just redirecting the user to it?
             return HttpResponseRedirect(get_draft_url(request.get_full_path()))
@@ -173,23 +173,23 @@ class PublisherMiddleware(object):
 
 
 def get_middleware_active_status():
-    return PublisherMiddleware.get_middleware_active_status()
+    return PublishingMiddleware.get_middleware_active_status()
 
 
 def get_current_user():
-    return PublisherMiddleware.get_current_user()
+    return PublishingMiddleware.get_current_user()
 
 
 def get_draft_status():
-    return PublisherMiddleware.get_draft_status()
+    return PublishingMiddleware.get_draft_status()
 
 
 def set_current_user(user):
-    PublisherMiddleware._current_user[current_thread()] = user
+    PublishingMiddleware._current_user[current_thread()] = user
 
 
 def set_draft_status(status):
-    PublisherMiddleware._draft_status[current_thread()] = status
+    PublishingMiddleware._draft_status[current_thread()] = status
 
 
 @contextmanager

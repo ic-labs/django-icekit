@@ -2,7 +2,6 @@ import json
 
 import django
 from django import forms
-from django.apps import apps
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.conf import settings
@@ -33,7 +32,7 @@ def http_json_response(data):
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
-class PublisherPublishedFilter(SimpleListFilter):
+class PublishingPublishedFilter(SimpleListFilter):
     title = _('Published')
     parameter_name = 'published'
 
@@ -50,7 +49,7 @@ class PublisherPublishedFilter(SimpleListFilter):
             return queryset
 
         isnull = not value
-        return queryset.filter(publisher_linked__isnull=isnull)
+        return queryset.filter(publishing_linked__isnull=isnull)
 
 
 class PublishingStatusFilter(SimpleListFilter):
@@ -58,18 +57,18 @@ class PublishingStatusFilter(SimpleListFilter):
     Filter events by published status, which will be one of:
 
         - unpublished: item is not published; it has no published copy
-            available via the ``publisher_linked`` relationship.
+            available via the ``publishing_linked`` relationship.
 
         - published: item is published but may or may not be up-to-date;
-            it has a published copy available via the ``publisher_linked``
+            it has a published copy available via the ``publishing_linked``
             relationship.
 
         - out_of_date: item is published but the published copy is older
-            than the latest draft; the draft's ``publisher_modified_at`` is
+            than the latest draft; the draft's ``publishing_modified_at`` is
             later than this timestamp in the published copy.
 
         - up_to_date: item is published and the published copy is based
-            on the latest draft; the draft's ``publisher_modified_at`` is
+            on the latest draft; the draft's ``publishing_modified_at`` is
             earlier or equal to this timestamp in the published copy.
 
     Be aware that this queryset filtering happens after the admin queryset is
@@ -94,22 +93,22 @@ class PublishingStatusFilter(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == 'unpublished':
-            return queryset.filter(publisher_linked__isnull=True)
+            return queryset.filter(publishing_linked__isnull=True)
         elif self.value() == 'published':
-            return queryset.filter(publisher_linked__isnull=False)
+            return queryset.filter(publishing_linked__isnull=False)
         elif self.value() == 'out_of_date':
             return queryset.filter(
-                publisher_modified_at__gt=F(
-                    'publisher_linked__publisher_modified_at'))
+                publishing_modified_at__gt=F(
+                    'publishing_linked__publishing_modified_at'))
         elif self.value() == 'up_to_date':
             return queryset.filter(
-                publisher_modified_at__lte=F(
-                    'publisher_linked__publisher_modified_at'))
+                publishing_modified_at__lte=F(
+                    'publishing_linked__publishing_modified_at'))
 
 
-class PublisherAdminForm(forms.ModelForm):
+class PublishingAdminForm(forms.ModelForm):
     """
-    The admin form that provides functionality for `Publisher`.
+    The admin form that provides functionality for `PublishingAdmin`.
 
     NOTE: Be extremely careful changing the ordering, extending or
     removing classes this class extends. This is because there is a
@@ -121,7 +120,7 @@ class PublisherAdminForm(forms.ModelForm):
         # Add request to self if available. This is to provide site support
         # with `get_current_site` calls.
         self.request = kwargs.pop('request', None)
-        super(PublisherAdminForm, self).__init__(*args, **kwargs)
+        super(PublishingAdminForm, self).__init__(*args, **kwargs)
 
     def clean(self):
         """
@@ -132,7 +131,7 @@ class PublisherAdminForm(forms.ModelForm):
 
         :return: Cleaned data.
         """
-        data = super(PublisherAdminForm, self).clean()
+        data = super(PublishingAdminForm, self).clean()
         cleaned_data = self.cleaned_data
         instance = self.instance
 
@@ -160,9 +159,9 @@ class PublisherAdminForm(forms.ModelForm):
                                                .filter(**unique_filter) \
                                                .exclude(pk=instance.pk)
 
-            if instance.publisher_linked:
+            if instance.publishing_linked:
                 existing_instances = existing_instances.exclude(
-                    pk=instance.publisher_linked.pk)
+                    pk=instance.publishing_linked.pk)
 
             if existing_instances:
                 for unique_field in unique_fields:
@@ -172,26 +171,26 @@ class PublisherAdminForm(forms.ModelForm):
         return data
 
 
-class PublisherAdmin(ModelAdmin):
-    form = PublisherAdminForm
+class PublishingAdmin(ModelAdmin):
+    form = PublishingAdminForm
     # publish or unpublish actions sometime makes the plugins disappear from
     # page so we disable it for now, until we can investigate it further.
     # actions = (make_published, make_unpublished, )
-    list_display = ('publisher_object_title', 'publisher_publish',
-                    'publisher_status', )
-    list_filter = (PublishingStatusFilter, PublisherPublishedFilter)
+    list_display = ('publishing_object_title', 'publishing_publish',
+                    'publishing_status', )
+    list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
     url_name_prefix = None
 
     class Media:
         js = (
-            'publisher/publisher.js',
+            'publishing/publishing.js',
         )
         css = {
-            'all': ('publisher/publisher.css', ),
+            'all': ('publishing/publishing.css', ),
         }
 
     def __init__(self, model, admin_site):
-        super(PublisherAdmin, self).__init__(model, admin_site)
+        super(PublishingAdmin, self).__init__(model, admin_site)
 
         self.request = None
         self.url_name_prefix = '%(app_label)s_%(module_name)s_' % {
@@ -231,11 +230,11 @@ class PublisherAdmin(ModelAdmin):
             return False
         return user_obj.has_perm('%s.can_publish' % self.opts.app_label)
 
-    def publisher_object_title(self, obj):
+    def publishing_object_title(self, obj):
         return u'%s' % obj
-    publisher_object_title.short_description = 'Title'
+    publishing_object_title.short_description = 'Title'
 
-    def publisher_status(self, obj):
+    def publishing_status(self, obj):
         if not self.has_publish_permission(self.request, obj):
             return ''
 
@@ -250,10 +249,10 @@ class PublisherAdmin(ModelAdmin):
             'publish_btn': publish_btn,
         })
         return t.render(c)
-    publisher_status.short_description = 'Last Changes'
-    publisher_status.allow_tags = True
+    publishing_status.short_description = 'Last Changes'
+    publishing_status.allow_tags = True
 
-    def publisher_status_column(self, obj):
+    def publishing_status_column(self, obj):
         """
         Returns `Published`, `Draft` or 'Draft is newer than published` HTML
         rendering depending on the current draft and published version of the
@@ -277,14 +276,14 @@ class PublisherAdmin(ModelAdmin):
         return (u'<img src="{admin}{icon}" width="10" height="10"'
                 u'alt="{title}" title="{title}" />') \
             .format(admin=admin, icon=icon, title=title)
-    publisher_status_column.allow_tags = True
-    publisher_status_column.short_description = _('Is published')
+    publishing_status_column.allow_tags = True
+    publishing_status_column.short_description = _('Is published')
 
-    def publisher_publish(self, obj):
+    def publishing_publish(self, obj):
         template_name = 'admin/publishing/change_list_publish.html'
 
         is_published = False
-        if obj.publisher_linked and obj.is_draft:
+        if obj.publishing_linked and obj.is_draft:
             is_published = True
 
         t = loader.get_template(template_name)
@@ -297,8 +296,8 @@ class PublisherAdmin(ModelAdmin):
             'unpublish_url': reverse(self.unpublish_reverse, args=(obj.pk, )),
         })
         return t.render(c)
-    publisher_publish.short_description = 'Published'
-    publisher_publish.allow_tags = True
+    publishing_publish.short_description = 'Published'
+    publishing_publish.allow_tags = True
 
     def publishing_admin_filter_for_drafts(self, qs):
         """ Remove published items from the given QS """
@@ -311,8 +310,7 @@ class PublisherAdmin(ModelAdmin):
         :param request: Django request object.
         :return: QuerySet.
         """
-        # This hack comes from `publisher` and would require significant rework
-        # by us to remove it. We can live with it for now.
+        # TODO Can we remove this hack?
         self.request = request
 
         # Obtain the full queryset defined on the registered model.
@@ -341,7 +339,7 @@ class PublisherAdmin(ModelAdmin):
     queryset = get_queryset
 
     def get_urls(self):
-        urls = super(PublisherAdmin, self).get_urls()
+        urls = super(PublishingAdmin, self).get_urls()
 
         publish_name = '%spublish' % (self.url_name_prefix, )
         unpublish_name = '%sunpublish' % (self.url_name_prefix, )
@@ -455,7 +453,7 @@ class PublisherAdmin(ModelAdmin):
                 # a published object show the unpublish button with relevant
                 # URL.
                 unpublish_btn = None
-                if obj.is_draft and obj.publisher_linked:
+                if obj.is_draft and obj.publishing_linked:
                     unpublish_btn = reverse(
                         self.unpublish_reverse, args=(obj.pk, ))
 
@@ -469,7 +467,7 @@ class PublisherAdmin(ModelAdmin):
                 # changes and a published version show a revert button to
                 # change back to the published information.
                 revert_btn = None
-                if obj.is_dirty and obj.publisher_linked:
+                if obj.is_dirty and obj.publishing_linked:
                     revert_btn = reverse(self.revert_reverse, args=(obj.pk, ))
 
                 context.update({
@@ -496,13 +494,13 @@ class PublisherAdmin(ModelAdmin):
         opts = self.model._meta
         app_label = opts.app_label
         self.change_form_template = [
-            "admin/%s/%s/publisher_change_form.html" % (
+            "admin/%s/%s/publishing_change_form.html" % (
                 app_label, opts.model_name),
-            "admin/%s/publisher_change_form.html" % app_label,
-            "admin/publishing/publisher_change_form.html"
+            "admin/%s/publishing_change_form.html" % app_label,
+            "admin/publishing/publishing_change_form.html"
         ]
 
-        response = super(PublisherAdmin, self).render_change_form(
+        response = super(PublishingAdmin, self).render_change_form(
             request, context,
             add=add, change=change, form_url=form_url, obj=obj)
 

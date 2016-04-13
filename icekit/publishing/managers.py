@@ -40,9 +40,9 @@ class DraftItemBoobyTrap(object):
         'get_published',
         'get_visible',
         # NOTE: `get_draft` is not included here to discourage getting a draft
-        'publisher_linked',
-        'publisher_linked_id',
-        'publisher_is_draft',
+        'publishing_linked',
+        'publishing_linked_id',
+        'publishing_is_draft',
         'is_published',
         'has_been_published',
         'is_draft',
@@ -50,7 +50,7 @@ class DraftItemBoobyTrap(object):
     ]
 
     def __init__(self, payload):
-        if not payload.publisher_is_draft:
+        if not payload.publishing_is_draft:
             raise ValueError(
                 "'{0}' is not a DRAFT, and only DRAFT items may be wrapped"
                 " by {1}".format(payload, self.__class__))
@@ -83,9 +83,9 @@ class DraftItemBoobyTrap(object):
         return self._draft_payload
 
 
-class PublisherQuerySet(QuerySet):
+class PublishingQuerySet(QuerySet):
     """
-    Base publisher queryset features, without UrlNode customisations.
+    Base publishing queryset features, without UrlNode customisations.
     """
 
     def visible(self):
@@ -109,7 +109,7 @@ class PublisherQuerySet(QuerySet):
         deal with only draft versions when interacting with publishable items.
         """
         queryset = self.all()
-        return queryset.filter(publisher_is_draft=True)
+        return queryset.filter(publishing_is_draft=True)
 
     def published(self, for_user=UNSET, with_exchange=True):
         """
@@ -152,7 +152,7 @@ class PublisherQuerySet(QuerySet):
         # can therefore contain both draft and published items, with both the
         # published and draft copies of published items.
         queryset = queryset.exclude(
-            publisher_is_draft=True, publisher_linked=None)
+            publishing_is_draft=True, publishing_linked=None)
         # Return the published item copies by default, or the original draft
         # copies if requested.
         if with_exchange:
@@ -180,10 +180,10 @@ class PublisherQuerySet(QuerySet):
         published_version_pks = []
         for item in self:
             # If item is draft and has a linked published copy, use that...
-            if item.publisher_is_draft and item.publisher_linked_id:
-                published_version_pks.append(item.publisher_linked_id)
+            if item.publishing_is_draft and item.publishing_linked_id:
+                published_version_pks.append(item.publishing_linked_id)
             # ...otherwise if item is already the published copy, use it.
-            elif not item.publisher_is_draft:
+            elif not item.publishing_is_draft:
                 published_version_pks.append(item.pk)
         # TODO: Salvage more attributes from the original queryset, such as
         # `annotate()`, `distinct()`, `select_related()`, `values()`, etc.
@@ -229,19 +229,19 @@ class PublisherQuerySet(QuerySet):
         if getattr(settings, 'DEBUG_PUBLISHING_ERRORS', True) \
                 and get_middleware_active_status() \
                 and not get_draft_status():
-            for item in super(PublisherQuerySet, self).iterator():
-                if not item.publisher_is_draft:
+            for item in super(PublishingQuerySet, self).iterator():
+                if not item.publishing_is_draft:
                     yield item
                 else:
                     yield DraftItemBoobyTrap(item)
         else:
-            for item in super(PublisherQuerySet, self).iterator():
+            for item in super(PublishingQuerySet, self).iterator():
                 yield item
 
     def only(self, *args, **kwargs):
         """
         Override default implementation to ensure that we *always* include the
-        `publisher_is_draft` field when `only` is invoked, to avoid eternal
+        `publishing_is_draft` field when `only` is invoked, to avoid eternal
         recursion errors if `only` is called then we check for this item
         attribute in our custom `iterator`.
 
@@ -250,21 +250,21 @@ class PublisherQuerySet(QuerySet):
         fluent_pages.urlresolvers._get_pages_of_type
         """
         field_names = args
-        if 'publisher_is_draft' not in field_names:
-            field_names += ('publisher_is_draft',)
-        return super(PublisherQuerySet, self) \
+        if 'publishing_is_draft' not in field_names:
+            field_names += ('publishing_is_draft',)
+        return super(PublishingQuerySet, self) \
             .only(*field_names, **kwargs)
 
 
-class PublisherUrlNodeQuerySet(PublisherQuerySet, UrlNodeQuerySet):
+class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
     """
-    Publisher queryset features with UrlNode support and customisations.
+    Publishing queryset features with UrlNode support and customisations.
     """
 
     def published(self, for_user=UNSET, with_exchange=True):
         """
         Apply additional filtering of published items over that done in
-        `PublisherQuerySet.published` to filter based on additional publising
+        `PublishingQuerySet.published` to filter based on additional publising
         date fields used by Fluent.
         """
         if for_user is not UNSET:
@@ -272,17 +272,17 @@ class PublisherUrlNodeQuerySet(PublisherQuerySet, UrlNodeQuerySet):
 
         queryset = self.all()
         queryset = queryset.exclude(
-            publisher_is_draft=True, publisher_linked=None)
+            publishing_is_draft=True, publishing_linked=None)
         # Exclude by publication date on the published version of items, *not*
         # the draft vesion, or we could get the wrong result.
         # Exclude fields of published copy of draft items, not draft itself...
         queryset = queryset.exclude(
-            Q(publisher_is_draft=True) & Q(
-                Q(publisher_linked__publication_date__gt=now())
-                | Q(publisher_linked__publication_end_date__lte=now())))
+            Q(publishing_is_draft=True) & Q(
+                Q(publishing_linked__publication_date__gt=now())
+                | Q(publishing_linked__publication_end_date__lte=now())))
         # ...and exclude fields directly on published items
         queryset = queryset.exclude(
-            Q(publisher_is_draft=False) & Q(
+            Q(publishing_is_draft=False) & Q(
                 Q(publication_date__gt=now())
                 | Q(publication_end_date__lte=now())))
         # Return the published item copies by default, or the original draft
@@ -306,7 +306,7 @@ class PublisherUrlNodeQuerySet(PublisherQuerySet, UrlNodeQuerySet):
             obj = self._single_site().get(
                 translations___cached_url=path,
                 translations__language_code=language_code,
-                publisher_is_draft=get_draft_status(),
+                publishing_is_draft=get_draft_status(),
             )
             # Explicitly set language to the state the object was fetched in.
             obj.set_current_language(language_code)
@@ -322,7 +322,7 @@ class PublisherUrlNodeQuerySet(PublisherQuerySet, UrlNodeQuerySet):
             objs = self._single_site().filter(
                 translations___cached_url=path,
                 translations__language_code=language_code,
-                publisher_is_draft=get_draft_status(),
+                publishing_is_draft=get_draft_status(),
             )
 
             for obj in objs:
@@ -336,23 +336,23 @@ class PublisherUrlNodeQuerySet(PublisherQuerySet, UrlNodeQuerySet):
             return obj
 
 
-class PublisherManager(PassThroughManagerMixin, models.Manager):
+class PublishingManager(PassThroughManagerMixin, models.Manager):
     """
-    Base publisher manager, without UrlNode customisations.
+    Base publishing manager, without UrlNode customisations.
     """
-    queryset_class = PublisherQuerySet
+    queryset_class = PublishingQuerySet
     # Tell Django that related fields also need to use this manager:
     use_for_related_fields = True
 
     def get_queryset(self):
-        return PublisherQuerySet(self.model, using=self._db).all()
+        return PublishingQuerySet(self.model, using=self._db).all()
 
 
-class PublisherUrlNodeManager(UrlNodeManager, PublisherManager):
+class PublishingUrlNodeManager(UrlNodeManager, PublishingManager):
     """
-    Publisher manager with UrlNode support and customisations.
+    Publishing manager with UrlNode support and customisations.
     """
-    queryset_class = PublisherUrlNodeQuerySet
+    queryset_class = PublishingUrlNodeQuerySet
 
     # We must override UrlNodeManager's `published` method here to ensure the
     # version in our queryset takes precedence, otherwise invocations directly

@@ -12,7 +12,7 @@ from fluent_contents.models import Placeholder
 from fluent_pages import appsettings
 from fluent_pages.models import UrlNode
 
-from .managers import PublisherManager, PublisherUrlNodeManager
+from .managers import PublishingManager, PublishingUrlNodeManager
 from .middleware import get_draft_status
 from .utils import PublishingException, assert_draft
 from . import signals
@@ -29,84 +29,75 @@ def create_can_publish_permission(sender, **kwargs):
             defaults=dict(name='Can Publish %s' % model.__name__))
 
 
-def custom_publisher_pre_delete(sender, **kwargs):
-    """
-    Customised version of `publisher.signals.publisher_pre_delete` that avoids
-    DoesNotExist errors in situations where an item's `publisher_linked`
-    relationship target has been deleted, but the field value has not been
-    reset to None -- a situation that can happen in reversion's temporary
-    delete-in-transaction operation when restoring and viewing a prior version.
-
-    TODO: Submit this as patch for django-model-publish project?
-    """
+def custom_publishing_pre_delete(sender, **kwargs):
     instance = kwargs.get('instance', None)
     if not instance:
         return
 
     # If the draft record is deleted, the published object should be as well
     # NOTE: Logic here varies slightly from original to guard for DoesNotExist
-    if instance.publisher_is_draft:
+    if instance.publishing_is_draft:
         try:
-            instance.publisher_linked.delete()
+            instance.publishing_linked.delete()
         except (ObjectDoesNotExist, AttributeError):
             pass
 
 
 @receiver(models.signals.pre_save)
-def publisher_set_update_time(sender, instance, **kwargs):
+def publishing_set_update_time(sender, instance, **kwargs):
     """ Update the time modified before saving a publishable object. """
-    if hasattr(instance, 'publisher_linked'):
-        # Hack to avoid updating `publisher_modified_at` field when a draft
+    if hasattr(instance, 'publishing_linked'):
+        # Hack to avoid updating `publishing_modified_at` field when a draft
         # publishable item is saved as part of a `publish` operation. This
-        # ensures that the `publisher_published_at` timestamp is later than
-        # the `publisher_modified_at` timestamp when we publish, which is vital
+        # ensures that the `publishing_published_at` timestamp is later than
+        # the `publishing_modified_at` timestamp when we publish, which is vital
         # for us to correctly detect whether a draft is "dirty".
-        if getattr(instance, '_skip_update_publisher_modified_at', False):
+        if getattr(instance, '_skip_update_publishing_modified_at', False):
             # Reset flag, in case instance is re-used (e.g. in tests)
-            instance._skip_update_publisher_modified_at = False
+            instance._skip_update_publishing_modified_at = False
             return
-        instance.publisher_modified_at = timezone.now()
+        instance.publishing_modified_at = timezone.now()
 
 
-class PublisherModel(models.Model):
+class PublishingModel(models.Model):
     """
     Model fields required to track publishing status. They can be added
     directly to models when possible, or monkey-patched into place via the
     `AppConfig` in this module.
     """
-    objects = PublisherManager()
+    objects = PublishingManager()
 
     STATE_PUBLISHED = False
     STATE_DRAFT = True
 
-    publisher_linked = models.OneToOneField(
+    publishing_linked = models.OneToOneField(
         'self',
-        related_name='publisher_draft',
+        related_name='publishing_draft',
         null=True,
         editable=False,
         on_delete=models.SET_NULL)
-    publisher_is_draft = models.BooleanField(
+    publishing_is_draft = models.BooleanField(
         default=True,
         editable=False,
         db_index=True)
-    publisher_modified_at = models.DateTimeField(
+    publishing_modified_at = models.DateTimeField(
         default=timezone.now,
         editable=False)
-    publisher_published_at = models.DateTimeField(
+    publishing_published_at = models.DateTimeField(
         null=True, editable=False)
 
-    publisher_fields = (
-        'publisher_linked',
-        'publisher_is_draft',
-        'publisher_modified_at',
-        'publisher_draft',
+    publishing_fields = (
+        'publishing_linked',
+        'publishing_is_draft',
+        'publishing_modified_at',
+        'publishing_draft',
     )
-    publisher_ignore_fields = publisher_fields + (
+    publishing_ignore_fields = publishing_fields + (
         'pk',
         'id',
-        'publisher_linked',
+        'publishing_linked',
     )
-    publisher_publish_empty_fields = (
+    publishing_publish_empty_fields = (
         'pk',
         'id',
     )
@@ -123,11 +114,11 @@ class PublisherModel(models.Model):
             return False
 
         # If the record has not been published assume dirty
-        if not self.publisher_linked:
+        if not self.publishing_linked:
             return True
 
-        if self.publisher_modified_at \
-                > self.publisher_linked.publisher_modified_at:
+        if self.publishing_modified_at \
+                > self.publishing_linked.publishing_modified_at:
             return True
 
         # Get all placeholders + their plugins to find their modified date
@@ -135,18 +126,18 @@ class PublisherModel(models.Model):
             placeholder = getattr(self, placeholder_field)
             for plugin in placeholder.get_plugins_list():
                 if plugin.changed_date \
-                        > self.publisher_linked.publisher_modified_at:
+                        > self.publishing_linked.publishing_modified_at:
                     return True
 
         return False
 
     @property
     def is_draft(self):
-        return self.publisher_is_draft == self.STATE_DRAFT
+        return self.publishing_is_draft == self.STATE_DRAFT
 
     @property
     def is_published(self):
-        return self.publisher_is_draft == self.STATE_PUBLISHED
+        return self.publishing_is_draft == self.STATE_PUBLISHED
 
     @property
     def is_visible(self):
@@ -174,7 +165,7 @@ class PublisherModel(models.Model):
         if self.is_published:
             return True
         elif self.is_draft:
-            return self.publisher_linked is not None
+            return self.publishing_linked is not None
         raise ValueError(
             "Publishable object %r is neither draft nor published" % self)
 
@@ -186,7 +177,7 @@ class PublisherModel(models.Model):
         if self.is_draft:
             return self
         elif self.is_published:
-            return self.publisher_draft
+            return self.publishing_draft
         raise ValueError(
             "Publishable object %r is neither draft nor published" % self)
 
@@ -199,7 +190,7 @@ class PublisherModel(models.Model):
         if self.is_published:
             return self
         elif self.is_draft:
-            return self.publisher_linked
+            return self.publishing_linked
         raise ValueError(
             "Publishable object %r is neither draft nor published" % self)
 
@@ -237,7 +228,7 @@ class PublisherModel(models.Model):
 
         model_fields = obj.__class__._meta.get_all_field_names()
         for field in model_fields:
-            if field in self.publisher_ignore_fields:
+            if field in self.publishing_ignore_fields:
                 continue
 
             try:
@@ -264,32 +255,32 @@ class PublisherModel(models.Model):
             # If the object has previously been linked then patch the
             # placeholder data and remove the previously linked object.
             # Otherwise set the published date.
-            if self.publisher_linked:
+            if self.publishing_linked:
                 self.patch_placeholders()
                 # Unlink draft and published copies then delete published.
                 # NOTE: This indirect dance is necessary to avoid
                 # triggering unwanted MPTT tree structure updates via
                 # `save`.
-                type(self.publisher_linked).objects \
-                    .filter(pk=self.publisher_linked.pk) \
-                    .delete()  # Instead of self.publisher_linked.delete()
+                type(self.publishing_linked).objects \
+                    .filter(pk=self.publishing_linked.pk) \
+                    .delete()  # Instead of self.publishing_linked.delete()
             else:
-                self.publisher_published_at = timezone.now()
+                self.publishing_published_at = timezone.now()
 
             # Create a new object copying all fields.
             publish_obj = deepcopy(self)
 
             # If any fields are defined not to copy set them to None.
-            for fld in self.publisher_publish_empty_fields + (
-                'urlnode_ptr_id', 'publisher_linked_id'
+            for fld in self.publishing_publish_empty_fields + (
+                'urlnode_ptr_id', 'publishing_linked_id'
             ):
                 setattr(publish_obj, fld, None)
 
             # Set the state of publication to published on the object.
-            publish_obj.publisher_is_draft = False
+            publish_obj.publishing_is_draft = False
 
             # Set the date the object should be published at.
-            publish_obj.publisher_published_at = self.publisher_published_at
+            publish_obj.publishing_published_at = self.publishing_published_at
 
             # Perform per-model preparation before saving published copy
             publish_obj.publishing_prepare_published_copy()
@@ -310,21 +301,21 @@ class PublisherModel(models.Model):
             publish_obj.publishing_clone_relations(self)
 
             # Link the published object to the draft object.
-            self.publisher_linked = publish_obj
+            self.publishing_linked = publish_obj
 
             # Flag draft instance when it is being updated as part of a
-            # publish action, for use in `publisher_set_update_time`
-            self._skip_update_publisher_modified_at = True
+            # publish action, for use in `publishing_set_update_time`
+            self._skip_update_publishing_modified_at = True
 
             # Signal the pre-save hook for publication, save then signal
             # the post publish hook.
-            signals.publisher_publish_pre_save_draft.send(
+            signals.publishing_publish_pre_save_draft.send(
                 sender=type(self), instance=self)
 
             # Save the change and create a revision to mark the change.
             self.publishing_save_draft_after_publish()
 
-            signals.publisher_post_publish.send(
+            signals.publishing_post_publish.send(
                 sender=type(self), instance=self)
             return publish_obj
 
@@ -333,22 +324,22 @@ class PublisherModel(models.Model):
         """
         Un-publish the current object.
         """
-        if self.is_draft and self.publisher_linked:
-            signals.publisher_pre_unpublish.send(
+        if self.is_draft and self.publishing_linked:
+            signals.publishing_pre_unpublish.send(
                 sender=type(self), instance=self)
             # Unlink draft and published copies then delete published.
             # NOTE: This indirect dance is necessary to avoid triggering
             # unwanted MPTT tree structure updates via `delete`.
-            type(self.publisher_linked).objects \
-                .filter(pk=self.publisher_linked.pk) \
-                .delete()  # Instead of self.publisher_linked.delete()
+            type(self.publishing_linked).objects \
+                .filter(pk=self.publishing_linked.pk) \
+                .delete()  # Instead of self.publishing_linked.delete()
             # NOTE: We update and save the object *after* deleting the
             # published version, in case the `save()` method does some
             # validation that breaks when unlinked published objects exist.
-            self.publisher_linked = None
-            self.publisher_published_at = None
+            self.publishing_linked = None
+            self.publishing_published_at = None
             self.save()
-            signals.publisher_post_unpublish.send(
+            signals.publishing_post_unpublish.send(
                 sender=type(self), instance=self)
 
     @assert_draft
@@ -424,7 +415,7 @@ class PublisherModel(models.Model):
                 # If the object referenced by the M2M is publishable we
                 # clone it only if it is a draft copy. If it is not a
                 # publishable object we also clone it (True by default).
-                if getattr(rel_obj, 'publisher_is_draft', True):
+                if getattr(rel_obj, 'publishing_is_draft', True):
                     dst.add(rel_obj)
                     # If the related object also has a published copy, we
                     # need to make sure the published copy also knows about
@@ -432,11 +423,11 @@ class PublisherModel(models.Model):
                     # when we are no longer iterating over the queryset
                     # we need to modify.
                     try:
-                        if rel_obj.publisher_linked:
+                        if rel_obj.publishing_linked:
                             published_rel_obj_copies_to_add.append(
-                                rel_obj.publisher_linked)
+                                rel_obj.publishing_linked)
                     except AttributeError:
-                        pass  # No `publisher_linked` attr to handle
+                        pass  # No `publishing_linked` attr to handle
                 else:
                     # Track related published copies, in case they have
                     # become obsolete
@@ -484,13 +475,7 @@ class PublisherModel(models.Model):
 
     @assert_draft
     def patch_placeholders(self):
-        """
-        This is a patched version from `publisher`.
-
-        The arguments have been kept consistent with the
-        `publisher` even though it does not make that much sense.
-        """
-        published_obj = self.publisher_linked
+        published_obj = self.publishing_linked
 
         for draft_placeholder, published_placeholder in zip(
                 Placeholder.objects.parent(self),
@@ -528,9 +513,6 @@ class PublisherModel(models.Model):
     def clone_placeholder(self, dst_obj):
         """
         Clone each of the placeholder items.
-
-        The arguments have been kept consistent with the
-        `publisher` even though `self` is not required.
 
         :param self: The object which does not get used...
         :param self: The object for which the placeholders are
@@ -577,8 +559,8 @@ class PublisherModel(models.Model):
                 dst_m2m.add(*src_m2m.all())
 
 
-class FluentPublisherModel(PublisherModel):
-    objects = PublisherUrlNodeManager()
+class FluentPublishingModel(PublishingModel):
+    objects = PublishingUrlNodeManager()
 
     class Meta:
         abstract = True
@@ -600,8 +582,8 @@ class FluentPublisherModel(PublisherModel):
             if self:
                 exclude_kwargs['pk__in'].append(self.pk)
 
-            if self.publisher_linked_id:
-                exclude_kwargs['pk__in'].append(self.publisher_linked_id)
+            if self.publishing_linked_id:
+                exclude_kwargs['pk__in'].append(self.publishing_linked_id)
 
             url_nodes = UrlNode.objects.filter(
                 parent=self.parent_id,
@@ -644,7 +626,7 @@ class FluentPublisherModel(PublisherModel):
 
         # Sort out this mess manually by grabbing the first root candidate
         # and converting it to draft or published copy as appropriate.
-        if self.publisher_is_draft:
+        if self.publishing_is_draft:
             return root_qs.first().get_draft()
         else:
             return root_qs.first().get_published()
@@ -654,11 +636,11 @@ class FluentPublisherModel(PublisherModel):
         Replace `mptt.models.MPTTModel.get_descendants` with a version that
         returns only draft or published copy descendants, as appopriate.
         """
-        qs = super(FluentPublisherModel, self).get_descendants(
+        qs = super(FluentPublishingModel, self).get_descendants(
             include_self=include_self)
         if not ignore_publish_status:
             try:
-                qs = qs.filter(publisher_is_draft=self.publisher_is_draft)
+                qs = qs.filter(publishing_is_draft=self.publishing_is_draft)
             except FieldError:
                 pass  # Likely an unpublishable polymorphic parent
         return qs
@@ -673,13 +655,13 @@ class FluentPublisherModel(PublisherModel):
             ascending=ascending, include_self=include_self)
         if not ignore_publish_status:
             try:
-                qs = qs.filter(publisher_is_draft=self.publisher_is_draft)
+                qs = qs.filter(publishing_is_draft=self.publishing_is_draft)
             except FieldError:
                 pass  # Likely an unpublishable polymorphic parent
         return qs
 
 
 models.signals.pre_delete.connect(
-    custom_publisher_pre_delete, PublisherModel)
+    custom_publishing_pre_delete, PublishingModel)
 models.signals.post_migrate.connect(
-    create_can_publish_permission, sender=PublisherModel)
+    create_can_publish_permission, sender=PublishingModel)
