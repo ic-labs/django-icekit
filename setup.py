@@ -73,6 +73,7 @@ setuptools.setup(
             'mock',
             'nose-progressive',
             'WebTest',
+            'django-compressor',
         ],
     },
     setup_requires=['setuptools_scm'],

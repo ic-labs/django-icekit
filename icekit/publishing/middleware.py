@@ -21,9 +21,6 @@ class PublisherMiddleware(object):
     _middleware_active_status = {}
     _current_user = {}
     _draft_only_views = [
-        # AJAX comment posting is used by staff to comment on draft object in
-        # the admin.
-        'fluent_comments.views.post_comment_ajax',
     ]
 
     @staticmethod
@@ -91,13 +88,14 @@ class PublisherMiddleware(object):
         return False
 
     def process_request(self, request):
+        is_draft = self.is_draft(request)
         # Redirect non-admin, GET method, draft mode requests, from staff users
         # (not content reviewers), that don't have a valid draft mode HMAC in
         # the querystring, to make URL sharing easy.
         if all([
             not PublisherMiddleware.is_admin_request(request),
             request.method == 'GET',
-            get_draft_status(),
+            is_draft,
             PublisherMiddleware.is_staff_user(request),
             not PublisherMiddleware.is_content_reviewer_user(request),
             not verify_draft_url(request.get_full_path()),
@@ -110,7 +108,6 @@ class PublisherMiddleware(object):
         PublisherMiddleware._current_user[current_thread()] = \
             request.user
         # Set draft status
-        is_draft = self.is_draft(request)
         PublisherMiddleware._draft_status[current_thread()] = is_draft
         # Add draft status to request, for use in templates.
         request.IS_DRAFT = is_draft

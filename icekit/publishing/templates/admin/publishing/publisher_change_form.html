@@ -1,6 +1,6 @@
 {% extends base_change_form_template %}
 
-{% load i18n admin_modify admin_static admin_urls comments polymorphic_admin_tags compress publishing_tags %}
+{% load i18n admin_modify admin_static admin_urls polymorphic_admin_tags compress publishing_tags %}
 
 {% block breadcrumbs %}
 	{% breadcrumb_scope base_opts %}
@@ -17,7 +17,9 @@
 	{{ block.super }}
 	{% compress css %}
 		<link type="text/less" rel="stylesheet" href="{% static 'admin/css/edit_page.less' %}" />
+	{% comment %}
 		<link rel="stylesheet" href="{% static 'fluent_comments/css/ajaxcomments.css' %}">
+	{% endcomment %}
 	{% endcompress %}
 {% endblock %}
 
@@ -29,7 +31,9 @@
 		var csrf_token = '{{ csrf_token }}';
 	</script>
 	<script src="{% static 'admin/js/edit_page.js' %}"></script>
+	{% comment %}
 	<script src="{% static 'admin/js/ajaxcomments.js' %}"></script>
+	{% endcomment %}
 {% endblock %}
 
 {% block content %}

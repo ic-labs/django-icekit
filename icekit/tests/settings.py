@@ -27,6 +27,7 @@ INSTALLED_APPS = (
     'forms_builder.forms',
     'fluent_contents',
     'fluent_contents.plugins.oembeditem',
+    'fluent_contents.plugins.text',
     'fluent_pages',
     'fluent_pages.pagetypes.fluentpage',
     'haystack',
@@ -57,16 +58,24 @@ INSTALLED_APPS = (
 
     # Required for oembed
     'micawber',
+
+    # Required for publishing
+    'polymorphic',
+    'model_settings',
+    'compressor',
 )
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
 )
 
 ROOT_URLCONF = 'icekit.tests.urls'
 SECRET_KEY = 'secret-key'
 STATIC_URL = '/static/'
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 
