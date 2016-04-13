@@ -7,7 +7,6 @@ from django.utils.translation import get_language
 from fluent_pages.models.managers import UrlNodeQuerySet, UrlNodeManager
 from model_utils.managers import PassThroughManagerMixin
 
-from . import signals
 from .middleware import get_draft_status, get_middleware_active_status
 from .utils import PublishingException
 

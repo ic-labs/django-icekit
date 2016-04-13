@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import FieldError, ObjectDoesNotExist, \
     MultipleObjectsReturned
 from django.db import models
+from django.dispatch import receiver
 from django.utils import timezone
 
 from fluent_contents.models import Placeholder
@@ -49,6 +50,22 @@ def custom_publisher_pre_delete(sender, **kwargs):
             instance.publisher_linked.delete()
         except (ObjectDoesNotExist, AttributeError):
             pass
+
+
+@receiver(models.signals.pre_save)
+def publisher_set_update_time(sender, instance, **kwargs):
+    """ Update the time modified before saving a publishable object. """
+    if hasattr(instance, 'publisher_linked'):
+        # Hack to avoid updating `publisher_modified_at` field when a draft
+        # publishable item is saved as part of a `publish` operation. This
+        # ensures that the `publisher_published_at` timestamp is later than
+        # the `publisher_modified_at` timestamp when we publish, which is vital
+        # for us to correctly detect whether a draft is "dirty".
+        if getattr(instance, '_skip_update_publisher_modified_at', False):
+            # Reset flag, in case instance is re-used (e.g. in tests)
+            instance._skip_update_publisher_modified_at = False
+            return
+        instance.publisher_modified_at = timezone.now()
 
 
 class PublisherModel(models.Model):
