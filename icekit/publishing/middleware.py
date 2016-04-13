@@ -17,7 +17,7 @@ class PublishingMiddleware(object):
           we do not have access to the ``request`` object.
         - set draft status flag if request context permits viewing drafts.
     """
-    _draft_status = {}
+    _draft_request_context = {}
     _middleware_active_status = {}
     _current_user = {}
     _draft_only_views = [
@@ -108,7 +108,8 @@ class PublishingMiddleware(object):
         PublishingMiddleware._current_user[current_thread()] = \
             request.user
         # Set draft status
-        PublishingMiddleware._draft_status[current_thread()] = is_draft
+        PublishingMiddleware._draft_request_context[current_thread()] = \
+            is_draft
         # Add draft status to request, for use in templates.
         request.IS_DRAFT = is_draft
 
@@ -124,14 +125,14 @@ class PublishingMiddleware(object):
         except KeyError:
             pass
         try:
-            del PublishingMiddleware._draft_status[current_thread()]
+            del PublishingMiddleware._draft_request_context[current_thread()]
         except KeyError:
             pass
         return PublishingMiddleware.redirect_staff_to_draft_view_on_404(
             request, response)
 
     @staticmethod
-    def get_middleware_active_status():
+    def is_publishing_middleware_active():
         try:
             return PublishingMiddleware._middleware_active_status[
                 current_thread()]
@@ -146,9 +147,10 @@ class PublishingMiddleware(object):
             return None
 
     @staticmethod
-    def get_draft_status():
+    def is_draft_request_context():
         try:
-            return PublishingMiddleware._draft_status[current_thread()]
+            return PublishingMiddleware._draft_request_context[
+                current_thread()]
         except KeyError:
             return False
 
@@ -172,32 +174,32 @@ class PublishingMiddleware(object):
         return response
 
 
-def get_middleware_active_status():
-    return PublishingMiddleware.get_middleware_active_status()
+def is_publishing_middleware_active():
+    return PublishingMiddleware.is_publishing_middleware_active()
+
+
+def is_draft_request_context():
+    return PublishingMiddleware.is_draft_request_context()
+
+
+def set_draft_request_context(status):
+    PublishingMiddleware._draft_request_context[current_thread()] = status
 
 
 def get_current_user():
     return PublishingMiddleware.get_current_user()
 
 
-def get_draft_status():
-    return PublishingMiddleware.get_draft_status()
-
-
 def set_current_user(user):
     PublishingMiddleware._current_user[current_thread()] = user
 
 
-def set_draft_status(status):
-    PublishingMiddleware._draft_status[current_thread()] = status
-
-
 @contextmanager
-def override_draft_status(status):
-    original = get_draft_status()
-    set_draft_status(status)
+def override_draft_request_context(status):
+    original = is_draft_request_context()
+    set_draft_request_context(status)
     yield
-    set_draft_status(original)
+    set_draft_request_context(original)
 
 
 @contextmanager
@@ -206,4 +208,3 @@ def override_current_user(user):
     set_current_user(user)
     yield
     set_current_user(original)
-

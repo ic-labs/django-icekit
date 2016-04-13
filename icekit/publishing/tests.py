@@ -22,8 +22,8 @@ from icekit.plugins.slideshow.models import SlideShow
 
 from icekit.publishing.managers import DraftItemBoobyTrap
 from icekit.publishing.middleware import PublishingMiddleware, \
-    get_middleware_active_status, get_current_user, get_draft_status, \
-    override_current_user
+    is_publishing_middleware_active, get_current_user, \
+    is_draft_request_context, override_current_user
 from icekit.publishing.utils import get_draft_hmac, verify_draft_url, \
     get_draft_url
 from icekit.publishing.tests_base import BaseAdminTest
@@ -115,7 +115,7 @@ class TestPublishingModelAndQueryset(TestCase):
 
     def test_model_get_visible(self):
         # In non-draft context...
-        with patch('icekit.publishing.models.get_draft_status') as p:
+        with patch('icekit.publishing.models.is_draft_request_context') as p:
             p.return_value = False
             # Draft-only item returns None for visible
             self.assertIsNone(self.slide_show_1.get_visible())
@@ -128,7 +128,7 @@ class TestPublishingModelAndQueryset(TestCase):
                 self.slide_show_1.publishing_linked,
                 self.slide_show_1.publishing_linked.get_visible())
         # In draft context...
-        with patch('icekit.publishing.models.get_draft_status') as p:
+        with patch('icekit.publishing.models.is_draft_request_context') as p:
             p.return_value = True
             # Published item returns its draft for visible
             self.assertEqual(
@@ -148,9 +148,11 @@ class TestPublishingModelAndQueryset(TestCase):
         self.slide_show_1.publish()
         self.assertEqual(
             [self.slide_show_1], list(SlideShow.objects.draft()))
-        # Confirm we only get draft items regardless of `get_draft_status`
+        # Confirm we only get draft items regardless of
+        # `is_draft_request_context`
         with override_settings(DEBUG=True):
-            with patch('icekit.publishing.managers.get_draft_status') as p:
+            with patch('icekit.publishing.managers'
+                       '.is_draft_request_context') as p:
                 p.return_value = False
                 self.assertEqual(
                     [self.slide_show_1], list(SlideShow.objects.draft()))
@@ -163,10 +165,10 @@ class TestPublishingModelAndQueryset(TestCase):
         self.assertEqual(
             [self.slide_show_1.publishing_linked],  # Compare published copy
             list(SlideShow.objects.published()))
-        # Confirm we only get published items regardless of `get_draft_status`
-        with patch('icekit.publishing.managers.get_draft_status') \
-                as mock_get_draft_status:
-            mock_get_draft_status.return_value = True
+        # Confirm we only get published items regardless of
+        # `is_draft_request_context`
+        with patch('icekit.publishing.managers.is_draft_request_context') as p:
+            p.return_value = True
             self.assertEqual(
                 [self.slide_show_1.publishing_linked],
                 list(SlideShow.objects.published()))
@@ -190,12 +192,12 @@ class TestPublishingModelAndQueryset(TestCase):
         self.slide_show_1.publish()
         # In draft mode, `visible` delegates to `draft`
         draft_set = set(SlideShow.objects.draft())
-        with patch('icekit.publishing.managers.get_draft_status') as p:
+        with patch('icekit.publishing.managers.is_draft_request_context') as p:
             p.return_value = True
             self.assertEqual(draft_set, set(SlideShow.objects.visible()))
         # In non-draft mode, `visible` delegates to `published`
         published_set = set(SlideShow.objects.published())
-        with patch('icekit.publishing.managers.get_draft_status') as p:
+        with patch('icekit.publishing.managers.is_draft_request_context') as p:
             p.return_value = False
             self.assertEqual(published_set, set(SlideShow.objects.visible()))
 
@@ -229,7 +231,7 @@ class TestPublishingModelAndQueryset(TestCase):
         # publishable QS in debug mode in a public request context.
         with override_settings(DEBUG=True):
             with patch('icekit.publishing.managers'
-                       '.get_middleware_active_status') as p:
+                       '.is_publishing_middleware_active') as p:
                 p.return_value = True
                 self.assertTrue(all(
                     [i.__class__ == DraftItemBoobyTrap
@@ -241,7 +243,7 @@ class TestPublishingModelAndQueryset(TestCase):
         # Confirm drafts returned as normal on iteration when not in debug mode
         with override_settings(DEBUG=False):
             with patch('icekit.publishing.managers'
-                       '.get_middleware_active_status') as p:
+                       '.is_publishing_middleware_active') as p:
                 p.return_value = True
                 self.assertTrue(all(
                     [i.__class__ != DraftItemBoobyTrap
@@ -385,13 +387,13 @@ class TestPublishingMiddleware(TestCase):
 
         # Request processing sets middleware active flag
         mw.process_request(self._request())
-        self.assertTrue(mw.get_middleware_active_status())
-        self.assertTrue(get_middleware_active_status())
+        self.assertTrue(mw.is_publishing_middleware_active())
+        self.assertTrue(is_publishing_middleware_active())
 
         # Response processing clears middleware active flag
         mw.process_response(self._request(), self.response)
-        self.assertFalse(mw.get_middleware_active_status())
-        self.assertFalse(get_middleware_active_status())
+        self.assertFalse(mw.is_publishing_middleware_active())
+        self.assertFalse(is_publishing_middleware_active())
 
     def test_middleware_current_user(self):
         mw = PublishingMiddleware()
@@ -417,36 +419,36 @@ class TestPublishingMiddleware(TestCase):
         self.assertIsNone(mw.get_current_user())
         self.assertIsNone(get_current_user())
 
-    def test_middleware_edit_param_triggers_draft_status(self):
+    def test_middleware_edit_param_triggers_draft_request_context(self):
         mw = PublishingMiddleware()
 
         # Request processing normal URL does not trigger draft status
         mw.process_request(self._request())
-        self.assertFalse(mw.get_draft_status())
-        self.assertFalse(get_draft_status())
+        self.assertFalse(mw.is_draft_request_context())
+        self.assertFalse(is_draft_request_context())
 
         # Request URL from Content Reviewers is always draft, no 'edit' req'd
         request = self._request(user=self.reviewer_user)
         mw.process_request(request)
-        self.assertTrue(mw.get_draft_status())
-        self.assertTrue(get_draft_status())
+        self.assertTrue(mw.is_draft_request_context())
+        self.assertTrue(is_draft_request_context())
 
         # Request URL with 'edit' param triggers draft for staff
         request = self._request(data={'edit': ''}, user=self.staff_1)
         mw.process_request(request)
-        self.assertTrue(mw.get_draft_status())
-        self.assertTrue(get_draft_status())
+        self.assertTrue(mw.is_draft_request_context())
+        self.assertTrue(is_draft_request_context())
 
         # Non-privileged users cannot trigger draft mode with 'edit' param
         request = self._request(data={'edit': ''}, user=self.public_user)
         mw.process_request(self._request())
-        self.assertFalse(mw.get_draft_status())
-        self.assertFalse(get_draft_status())
+        self.assertFalse(mw.is_draft_request_context())
+        self.assertFalse(is_draft_request_context())
 
         # Response processing clears draft status
         mw.process_response(self._request(), self.response)
-        self.assertFalse(mw.get_draft_status())
-        self.assertFalse(get_draft_status())
+        self.assertFalse(mw.is_draft_request_context())
+        self.assertFalse(is_draft_request_context())
 
     def test_middleware_draft_view_sets_request_flag(self):
         mw = PublishingMiddleware()

@@ -13,7 +13,7 @@ from fluent_pages import appsettings
 from fluent_pages.models import UrlNode
 
 from .managers import PublishingManager, PublishingUrlNodeManager
-from .middleware import get_draft_status
+from .middleware import is_draft_request_context
 from .utils import PublishingException, assert_draft
 from . import signals
 
@@ -147,7 +147,7 @@ class PublishingModel(models.Model):
         - for privileged users: is a draft item
         - for everyone else: is a published item
         """
-        if not get_draft_status():
+        if not is_draft_request_context():
             return self.is_published
         else:
             return self.is_draft
@@ -200,7 +200,7 @@ class PublishingModel(models.Model):
         - for privileged users: a draft items, whether published or not
         - for everyone else: the published copy of items.
         """
-        if get_draft_status():
+        if is_draft_request_context():
             return self.get_draft()
         else:
             return self.get_published()

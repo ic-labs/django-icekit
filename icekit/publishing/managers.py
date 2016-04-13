@@ -7,7 +7,8 @@ from django.utils.translation import get_language
 from fluent_pages.models.managers import UrlNodeQuerySet, UrlNodeManager
 from model_utils.managers import PassThroughManagerMixin
 
-from .middleware import get_draft_status, get_middleware_active_status
+from .middleware import is_draft_request_context, \
+    is_publishing_middleware_active
 from .utils import PublishingException
 
 
@@ -94,7 +95,7 @@ class PublishingQuerySet(QuerySet):
         - for privileged users: all draft items, whether published or not
         - for everyone else: the published copy of items.
         """
-        if get_draft_status():
+        if is_draft_request_context():
             # All draft objects, and only draft objects.
             return self.draft()
         else:
@@ -227,8 +228,8 @@ class PublishingQuerySet(QuerySet):
            should be used.
         """
         if getattr(settings, 'DEBUG_PUBLISHING_ERRORS', True) \
-                and get_middleware_active_status() \
-                and not get_draft_status():
+                and is_publishing_middleware_active() \
+                and not is_draft_request_context():
             for item in super(PublishingQuerySet, self).iterator():
                 if not item.publishing_is_draft:
                     yield item
@@ -306,7 +307,7 @@ class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
             obj = self._single_site().get(
                 translations___cached_url=path,
                 translations__language_code=language_code,
-                publishing_is_draft=get_draft_status(),
+                publishing_is_draft=is_draft_request_context(),
             )
             # Explicitly set language to the state the object was fetched in.
             obj.set_current_language(language_code)
@@ -322,7 +323,7 @@ class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
             objs = self._single_site().filter(
                 translations___cached_url=path,
                 translations__language_code=language_code,
-                publishing_is_draft=get_draft_status(),
+                publishing_is_draft=is_draft_request_context(),
             )
 
             for obj in objs:
