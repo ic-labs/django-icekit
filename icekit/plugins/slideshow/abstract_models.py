@@ -10,7 +10,7 @@ from . import appsettings
 
 
 @python_2_unicode_compatible
-class AbstractSlideShow(PublisherModel):
+class AbstractUnpublishableSlideShow(models.Model):
     """
     A reusable Slide Show.
     """
@@ -25,6 +25,16 @@ class AbstractSlideShow(PublisherModel):
         'slide_show_content',
         plugins=appsettings.SLIDE_SHOW_CONTENT_PLUGINS,
     )
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.title
+
+
+@python_2_unicode_compatible
+class AbstractSlideShow(AbstractUnpublishableSlideShow, PublisherModel):
 
     class Meta:
         abstract = True
