@@ -180,6 +180,8 @@ class PublishingAdmin(ModelAdmin):
     list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
     url_name_prefix = None
 
+    actions = ['publish', 'unpublish']
+
     class Media:
         js = (
             'publishing/publishing.js',
@@ -262,7 +264,7 @@ class PublishingAdmin(ModelAdmin):
 
     def publishing_admin_filter_for_drafts(self, qs):
         """ Remove published items from the given QS """
-        return qs.draft()
+        return qs.filter(publishing_is_draft=True)
 
     def get_queryset(self, request):
         """
@@ -467,3 +469,11 @@ class PublishingAdmin(ModelAdmin):
 
         self.change_form_template = self._original_change_form_template
         return response
+
+    def publish(self, request, qs):
+        for q in self.model.objects.get_real_instances(qs):
+            q.publish()
+
+    def unpublish(self, request, qs):
+        for q in self.model.objects.get_real_instances(qs):
+            q.unpublish()
