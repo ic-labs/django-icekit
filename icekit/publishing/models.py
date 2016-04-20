@@ -11,6 +11,7 @@ from django.utils import timezone
 from fluent_contents.models import Placeholder
 from fluent_pages import appsettings
 from fluent_pages.models import UrlNode
+from fluent_pages.integration.fluent_contents import FluentContentsPage
 
 from .managers import PublishingManager, PublishingUrlNodeManager
 from .middleware import is_draft_request_context
@@ -50,8 +51,8 @@ def publishing_set_update_time(sender, instance, **kwargs):
         # Hack to avoid updating `publishing_modified_at` field when a draft
         # publishable item is saved as part of a `publish` operation. This
         # ensures that the `publishing_published_at` timestamp is later than
-        # the `publishing_modified_at` timestamp when we publish, which is vital
-        # for us to correctly detect whether a draft is "dirty".
+        # the `publishing_modified_at` timestamp when we publish, which is
+        # vital for us to correctly detect whether a draft is "dirty".
         if getattr(instance, '_skip_update_publishing_modified_at', False):
             # Reset flag, in case instance is re-used (e.g. in tests)
             instance._skip_update_publishing_modified_at = False
@@ -61,11 +62,10 @@ def publishing_set_update_time(sender, instance, **kwargs):
 
 class PublishingModel(models.Model):
     """
-    Model fields required to track publishing status. They can be added
-    directly to models when possible, or monkey-patched into place via the
-    `AppConfig` in this module.
+    Model fields and features to implement publishing.
     """
     objects = PublishingManager()
+    _default_manager = PublishingManager()
 
     STATE_PUBLISHED = False
     STATE_DRAFT = True
@@ -559,8 +559,9 @@ class PublishingModel(models.Model):
                 dst_m2m.add(*src_m2m.all())
 
 
-class FluentPublishingModel(PublishingModel):
+class PublishableFluentContentsPage(FluentContentsPage, PublishingModel):
     objects = PublishingUrlNodeManager()
+    _default_manager = PublishingUrlNodeManager()
 
     class Meta:
         abstract = True
@@ -626,7 +627,7 @@ class FluentPublishingModel(PublishingModel):
 
         # Sort out this mess manually by grabbing the first root candidate
         # and converting it to draft or published copy as appropriate.
-        if self.publishing_is_draft:
+        if self.is_draft:
             return root_qs.first().get_draft()
         else:
             return root_qs.first().get_published()
@@ -636,7 +637,7 @@ class FluentPublishingModel(PublishingModel):
         Replace `mptt.models.MPTTModel.get_descendants` with a version that
         returns only draft or published copy descendants, as appopriate.
         """
-        qs = super(FluentPublishingModel, self).get_descendants(
+        qs = super(PublishableFluentContentsPage, self).get_descendants(
             include_self=include_self)
         if not ignore_publish_status:
             try:

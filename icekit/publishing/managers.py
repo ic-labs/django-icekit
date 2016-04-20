@@ -354,6 +354,8 @@ class PublishingUrlNodeManager(UrlNodeManager, PublishingManager):
     Publishing manager with UrlNode support and customisations.
     """
     queryset_class = PublishingUrlNodeQuerySet
+    # Tell Django that related fields also need to use this manager:
+    use_for_related_fields = True
 
     # We must override UrlNodeManager's `published` method here to ensure the
     # version in our queryset takes precedence, otherwise invocations directly
