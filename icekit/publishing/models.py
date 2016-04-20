@@ -283,7 +283,7 @@ class PublishingModel(models.Model):
             publish_obj.publishing_published_at = self.publishing_published_at
 
             # Perform per-model preparation before saving published copy
-            publish_obj.publishing_prepare_published_copy()
+            publish_obj.publishing_prepare_published_copy(self)
 
             # Save the new published object as a separate instance to self.
             publish_obj.save()
@@ -358,7 +358,7 @@ class PublishingModel(models.Model):
         """
         self.save()
 
-    def publishing_prepare_published_copy(self):
+    def publishing_prepare_published_copy(self, draft_obj):
         """ Prepare published copy of draft prior to saving it """
         pass
 
