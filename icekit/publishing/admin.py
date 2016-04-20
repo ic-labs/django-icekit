@@ -176,8 +176,7 @@ class PublishingAdmin(ModelAdmin):
     # publish or unpublish actions sometime makes the plugins disappear from
     # page so we disable it for now, until we can investigate it further.
     # actions = (make_published, make_unpublished, )
-    list_display = ('publishing_object_title', 'publishing_publish',
-                    'publishing_status', )
+    list_display = ('publishing_object_title', 'publishing_column',)
     list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
     url_name_prefix = None
 
@@ -234,70 +233,32 @@ class PublishingAdmin(ModelAdmin):
         return u'%s' % obj
     publishing_object_title.short_description = 'Title'
 
-    def publishing_status(self, obj):
-        if not self.has_publish_permission(self.request, obj):
-            return ''
-
-        template_name = 'admin/publishing/change_list_publish_status.html'
-
-        publish_btn = None
-        if obj.is_dirty:
-            publish_btn = reverse(self.publish_reverse, args=(obj.pk, ))
-
-        t = loader.get_template(template_name)
-        c = Context({
-            'publish_btn': publish_btn,
-        })
-        return t.render(c)
-    publishing_status.short_description = 'Last Changes'
-    publishing_status.allow_tags = True
-
-    def publishing_status_column(self, obj):
+    def publishing_column(self, obj):
         """
-        Returns `Published`, `Draft` or 'Draft is newer than published` HTML
-        rendering depending on the current draft and published version of the
-        publishable object.
+        Render publishing-related status icons and view links for display in
+        the admin.
         """
-        is_published_draft = obj.is_draft and obj.has_been_published
-        is_up_to_date = not obj.is_dirty
+        try:
+            published_obj_url = obj.get_absolute_url()
+            draft_obj_url = published_obj_url + '?edit'
+        except:
+            published_obj_url = draft_obj_url = None
 
-        if is_published_draft:
-            if is_up_to_date:
-                title = 'Published'
-                icon = 'icon-yes.gif'
-            else:
-                title = 'Draft is newer than published'
-                icon = 'icon-unknown.gif'
-        else:
-            title = 'Draft'
-            icon = 'icon-no.gif'
-
-        admin = settings.STATIC_URL + 'admin/img/'
-        return (u'<img src="{admin}{icon}" width="10" height="10"'
-                u'alt="{title}" title="{title}" />') \
-            .format(admin=admin, icon=icon, title=title)
-    publishing_status_column.allow_tags = True
-    publishing_status_column.short_description = _('Is published')
-
-    def publishing_publish(self, obj):
-        template_name = 'admin/publishing/change_list_publish.html'
-
-        is_published = False
-        if obj.publishing_linked and obj.is_draft:
-            is_published = True
-
+        template_name = 'admin/publishing/_change_list_publishing_column.html'
         t = loader.get_template(template_name)
         c = Context({
             'object': obj,
-            'is_published': is_published,
             'has_publish_permission':
                 self.has_publish_permission(self.request, obj),
+            'img_path': settings.STATIC_URL + 'admin/img/',
             'publish_url': reverse(self.publish_reverse, args=(obj.pk, )),
             'unpublish_url': reverse(self.unpublish_reverse, args=(obj.pk, )),
+            'published_url': published_obj_url,
+            'draft_url': draft_obj_url,
         })
         return t.render(c)
-    publishing_publish.short_description = 'Published'
-    publishing_publish.allow_tags = True
+    publishing_column.allow_tags = True
+    publishing_column.short_description = _('Publishing')
 
     def publishing_admin_filter_for_drafts(self, qs):
         """ Remove published items from the given QS """
