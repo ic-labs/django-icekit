@@ -652,7 +652,7 @@ class PublishableFluentContentsPage(FluentContentsPage, PublishingModel):
         Replace `mptt.models.MPTTModel.get_ancestors` with a version that
         returns only draft or published copy ancestors, as appopriate.
         """
-        qs = self._original_get_ancestors(
+        qs = self.super(PublishableFluentContentsPage, self).get_ancestors(
             ascending=ascending, include_self=include_self)
         if not ignore_publish_status:
             try:
