@@ -446,8 +446,23 @@ class PublishingAdmin(ModelAdmin):
             'base_change_form_template': self.change_form_template,
         })
 
-        # TODO Why is this hack necessary?
-        self._original_change_form_template = self.change_form_template
+        # Keep record of original change form template so we can bypass the
+        # custom change form template when rendering reversion-specific admin
+        # pages like revision/recover.
+        # NOTE: This must be done *before* changing `self.change_form_template`
+        # to capture the original change form template.
+        if not hasattr(self, 'original_change_form_template'):
+            if isinstance(self.change_form_template, (list, tuple)):
+                # Handle admins with a list of change form templates
+                self.original_change_form_template = \
+                    self.change_form_template[0]
+            else:
+                self.original_change_form_template = self.change_form_template
+        context['original_change_form_template'] = \
+            self.original_change_form_template
+
+        # Hook to permit subclasses to modify context in change form
+        self.update_context_for_render_change_form(context, obj)
 
         # Use change form with fixed side panel.
         # NOTE: Some of the model fields are hidden in the main change form
@@ -467,8 +482,12 @@ class PublishingAdmin(ModelAdmin):
             request, context,
             add=add, change=change, form_url=form_url, obj=obj)
 
-        self.change_form_template = self._original_change_form_template
+        # TODO Is this necessary?
+        self.change_form_template = self.original_change_form_template
         return response
+
+    def update_context_for_render_change_form(self, context, obj):
+        pass
 
     def publish(self, request, qs):
         for q in self.model.objects.get_real_instances(qs):
