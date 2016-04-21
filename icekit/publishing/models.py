@@ -81,9 +81,6 @@ class PublishingModel(models.Model):
     objects = PublishingManager()
     _default_manager = PublishingManager()
 
-    STATE_PUBLISHED = False
-    STATE_DRAFT = True
-
     publishing_linked = models.OneToOneField(
         'self',
         related_name='publishing_draft',
@@ -147,11 +144,11 @@ class PublishingModel(models.Model):
 
     @property
     def is_draft(self):
-        return self.publishing_is_draft == self.STATE_DRAFT
+        return self.publishing_is_draft
 
     @property
     def is_published(self):
-        return self.publishing_is_draft == self.STATE_PUBLISHED
+        return not self.publishing_is_draft
 
     @property
     def is_visible(self):
@@ -578,12 +575,12 @@ class PublishableFluentContentsPage(FluentContentsPage, PublishingModel):
     # TODO Must re-implement property here, not sure why...
     @property
     def is_draft(self):
-        return self.publishing_is_draft == self.STATE_DRAFT
+        return self.publishing_is_draft
 
     # TODO Must re-implement property here, not sure why...
     @property
     def is_published(self):
-        return self.publishing_is_draft == self.STATE_PUBLISHED
+        return not self.publishing_is_draft
 
     class Meta:
         abstract = True
