@@ -560,8 +560,19 @@ class PublishingModel(models.Model):
 
 
 class PublishableFluentContentsPage(FluentContentsPage, PublishingModel):
+    # TODO Default managers don't apply properly in all cases, not sure why...
     objects = PublishingUrlNodeManager()
     _default_manager = PublishingUrlNodeManager()
+
+    # TODO Must re-implement property here, not sure why...
+    @property
+    def is_draft(self):
+        return self.publishing_is_draft == self.STATE_DRAFT
+
+    # TODO Must re-implement property here, not sure why...
+    @property
+    def is_published(self):
+        return self.publishing_is_draft == self.STATE_PUBLISHED
 
     class Meta:
         abstract = True
