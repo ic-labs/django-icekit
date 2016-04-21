@@ -23,7 +23,9 @@ def create_can_publish_permission(sender, **kwargs):
     """
     Add `can_publish` permission for each of the publishable model.
     """
-    for model in sender.publishable_models:
+    for model in sender.get_models():
+        if not issubclass(model, PublishingModel):
+            continue
         content_type = ContentType.objects.get_for_model(model)
         permission, created = Permission.objects.get_or_create(
             content_type=content_type, codename='can_publish',
@@ -683,5 +685,4 @@ class PublishableFluentContentsPage(FluentContentsPage, PublishingModel):
 
 
 models.signals.pre_delete.connect(delete_published_copy_when_draft_deleted)
-models.signals.post_migrate.connect(
-    create_can_publish_permission, sender=PublishingModel)
+models.signals.post_migrate.connect(create_can_publish_permission)
