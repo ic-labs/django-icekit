@@ -570,59 +570,12 @@ class PublishingModel(models.Model):
                 dst_m2m.add(*src_m2m.all())
 
 
-class PublishableFluentContentsPage(FluentContentsPage, PublishingModel):
-    # TODO Default managers don't apply properly in all cases, not sure why...
-    objects = PublishingUrlNodeManager()
-    _default_manager = PublishingUrlNodeManager()
-
-    # TODO Must re-implement property here, not sure why...
-    @property
-    def is_draft(self):
-        return self.publishing_is_draft
-
-    # TODO Must re-implement property here, not sure why...
-    @property
-    def is_published(self):
-        return not self.publishing_is_draft
+class PublishableMPTTModelMixin(PublishingModel):
 
     class Meta:
         abstract = True
 
-    def _make_slug_unique(self, translation):
-        """
-        Custom make slug unique checked.
-        :param self: The object to which the slug is or will be
-        associated.
-        :param translation: The particular translation of the slug.
-        :return: None
-        """
-        original_slug = translation.slug
-        count = 1
-        while True:
-            exclude_kwargs = {
-                'pk__in': [],
-            }
-            if self:
-                exclude_kwargs['pk__in'].append(self.pk)
-
-            if self.publishing_linked_id:
-                exclude_kwargs['pk__in'].append(self.publishing_linked_id)
-
-            url_nodes = UrlNode.objects.filter(
-                parent=self.parent_id,
-                translations__slug=translation.slug,
-                translations__language_code=translation.language_code
-            ).exclude(**exclude_kwargs).non_polymorphic()
-
-            if appsettings.FLUENT_PAGES_FILTER_SITE_ID:
-                url_nodes = url_nodes.parent_site(self.parent_site_id)
-
-            if not url_nodes.exists():
-                break
-
-            count += 1
-            translation.slug = '%s-%d' % (original_slug, count)
-
+    # NOTE: See workaround in AppConfig to actually get this to work
     def get_root(self):
         """
         Replace default implementation of `mptt.models.MPTTModel.get_root`
@@ -682,6 +635,61 @@ class PublishableFluentContentsPage(FluentContentsPage, PublishingModel):
             except FieldError:
                 pass  # Likely an unpublishable polymorphic parent
         return qs
+
+
+class PublishableFluentContentsPage(FluentContentsPage,
+                                    PublishableMPTTModelMixin):
+    # TODO Default managers don't apply properly in all cases, not sure why...
+    objects = PublishingUrlNodeManager()
+    _default_manager = PublishingUrlNodeManager()
+
+    # TODO Must re-implement property here, not sure why...
+    @property
+    def is_draft(self):
+        return self.publishing_is_draft
+
+    # TODO Must re-implement property here, not sure why...
+    @property
+    def is_published(self):
+        return not self.publishing_is_draft
+
+    class Meta:
+        abstract = True
+
+    def _make_slug_unique(self, translation):
+        """
+        Custom make slug unique checked.
+        :param self: The object to which the slug is or will be
+        associated.
+        :param translation: The particular translation of the slug.
+        :return: None
+        """
+        original_slug = translation.slug
+        count = 1
+        while True:
+            exclude_kwargs = {
+                'pk__in': [],
+            }
+            if self:
+                exclude_kwargs['pk__in'].append(self.pk)
+
+            if self.publishing_linked_id:
+                exclude_kwargs['pk__in'].append(self.publishing_linked_id)
+
+            url_nodes = UrlNode.objects.filter(
+                parent=self.parent_id,
+                translations__slug=translation.slug,
+                translations__language_code=translation.language_code
+            ).exclude(**exclude_kwargs).non_polymorphic()
+
+            if appsettings.FLUENT_PAGES_FILTER_SITE_ID:
+                url_nodes = url_nodes.parent_site(self.parent_site_id)
+
+            if not url_nodes.exists():
+                break
+
+            count += 1
+            translation.slug = '%s-%d' % (original_slug, count)
 
 
 models.signals.pre_delete.connect(delete_published_copy_when_draft_deleted)
