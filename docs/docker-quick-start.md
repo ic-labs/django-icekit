@@ -54,8 +54,8 @@ Here are some of the most commonly used Docker commands when getting started:
     # List all containers for services in your compose file
     $ docker-compose ps -a
 
-    # Open a new shell inside an already running container
-    $ docker exec -it {container-name} entrypoint.sh bash
+    # Open a new shell inside an already running container for the `django` service
+    $ docker-compose exec django entrypoint.sh bash
 
     # Remove all stopped containers and their data volumes
     docker rm -v $(docker ps -a -q -f status=exited)
