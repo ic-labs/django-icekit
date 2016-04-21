@@ -682,6 +682,8 @@ class PublishableFluentContentsPage(FluentContentsPage, PublishingModel):
 
 
 models.signals.pre_delete.connect(
-    custom_publishing_pre_delete, PublishingModel)
+    custom_publishing_pre_delete, sender=PublishingModel)
+models.signals.pre_delete.connect(
+    custom_publishing_pre_delete, sender=PublishableFluentContentsPage)
 models.signals.post_migrate.connect(
     create_can_publish_permission, sender=PublishingModel)
