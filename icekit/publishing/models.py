@@ -44,6 +44,20 @@ def custom_publishing_pre_delete(sender, **kwargs):
             pass
 
 
+@receiver(signals.publishing_publish_save_draft)
+@receiver(signals.publishing_unpublish_save_draft)
+def save_draft_on_publish_and_unpublish(sender, instance, **kwargs):
+    """
+    Save draft instance to associate it with, or disassociate it from, its
+    published copy.
+
+    Disconnect these signal handlers and reconnect with custom versions if you
+    need more control over object saving in downstream projects, such as for
+    saving version information with 'reversion'.
+    """
+    instance.save()
+
+
 @receiver(models.signals.pre_save)
 def publishing_set_update_time(sender, instance, **kwargs):
     """ Update the time modified before saving a publishable object. """
@@ -312,8 +326,9 @@ class PublishingModel(models.Model):
             signals.publishing_publish_pre_save_draft.send(
                 sender=type(self), instance=self)
 
-            # Save the change and create a revision to mark the change.
-            self.publishing_save_draft_after_publish()
+            # Save the draft and its new relationship with the published copy
+            signals.publishing_publish_save_draft.send(
+                sender=type(self), instance=self)
 
             signals.publishing_post_publish.send(
                 sender=type(self), instance=self)
@@ -338,7 +353,11 @@ class PublishingModel(models.Model):
             # validation that breaks when unlinked published objects exist.
             self.publishing_linked = None
             self.publishing_published_at = None
-            self.save()
+
+            # Save the draft to remove its relationship with the published copy
+            signals.publishing_unpublish_save_draft.send(
+                sender=type(self), instance=self)
+
             signals.publishing_post_unpublish.send(
                 sender=type(self), instance=self)
 
@@ -349,14 +368,6 @@ class PublishingModel(models.Model):
         """
         raise Exception(
             "TODO: Re-implement revert-to-public without reversion")
-
-    def publishing_save_draft_after_publish(self):
-        """
-        Save draft object after it has been published. We do this in this
-        method to make it easier to override the save to do things like
-        create a revision when an item is published.
-        """
-        self.save()
 
     def publishing_prepare_published_copy(self, draft_obj):
         """ Prepare published copy of draft prior to saving it """
