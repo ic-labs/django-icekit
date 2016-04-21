@@ -1,22 +1,35 @@
 language: python
-python:
-  - "3.5"
+
+env:
+  - TOXENV=django17-py27-brightcove
+  - TOXENV=django17-py27
+  - TOXENV=django17-py33
+  - TOXENV=django17-py34
+  - TOXENV=django18-py27
+  - TOXENV=django18-py33
+  - TOXENV=django18-py34
+  - TOXENV=django18-py35
+  - TOXENV=django19-py27
+  - TOXENV=django19-py34
+  - TOXENV=django19-py35
+
+matrix:
+  allow_failures:
+    # - env: TOXENV=django17-py27-brightcove
+    # - env: TOXENV=django17-py27
+    # - env: TOXENV=django17-py33
+    # - env: TOXENV=django17-py34
+    # - env: TOXENV=django18-py27
+    # - env: TOXENV=django18-py33
+    # - env: TOXENV=django18-py34
+    # - env: TOXENV=django18-py35
+    - env: TOXENV=django19-py27
+    - env: TOXENV=django19-py34
+    - env: TOXENV=django19-py35
+  fast_finish: true
 
 install:
   - pip install tox
 
 script:
   - tox
-
-env:
-  - TOXENV=django17-py27-brightcove
-  - TOXENV=django17-py33
-  - TOXENV=django17-py34
-  - TOXENV=django18-py27-brightcove
-  - TOXENV=django18-py33
-  - TOXENV=django18-py34
-  - TOXENV=django18-py35
-  # - TOXENV=django19-py27-brightcove
-  # - TOXENV=django19-py33
-  # - TOXENV=django19-py34
-  # - TOXENV=django19-py35
