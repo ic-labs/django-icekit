@@ -30,9 +30,10 @@ def create_can_publish_permission(sender, **kwargs):
             defaults=dict(name='Can Publish %s' % model.__name__))
 
 
-def custom_publishing_pre_delete(sender, **kwargs):
+def delete_published_copy_when_draft_deleted(sender, **kwargs):
+    # Skip missing or unpublishable instances
     instance = kwargs.get('instance', None)
-    if not instance:
+    if not instance or not hasattr(instance, 'publishing_linked'):
         return
 
     # If the draft record is deleted, the published object should be as well
@@ -681,9 +682,6 @@ class PublishableFluentContentsPage(FluentContentsPage, PublishingModel):
         return qs
 
 
-models.signals.pre_delete.connect(
-    custom_publishing_pre_delete, sender=PublishingModel)
-models.signals.pre_delete.connect(
-    custom_publishing_pre_delete, sender=PublishableFluentContentsPage)
+models.signals.pre_delete.connect(delete_published_copy_when_draft_deleted)
 models.signals.post_migrate.connect(
     create_can_publish_permission, sender=PublishingModel)
