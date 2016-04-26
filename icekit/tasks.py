@@ -1,8 +1,13 @@
 import json
 
-from celery import shared_task
-from django.db.models.loading import get_model
+try:
+    from celery import shared_task
+except ImportError:
+    def shared_task(f):
+        f.delay = f
+        return f
 
+from django.db.models.loading import get_model
 
 @shared_task
 def store_readability_score(app_label, model_name, pk):
