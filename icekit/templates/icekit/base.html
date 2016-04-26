@@ -28,7 +28,7 @@
 				{% endif %}
 			{% endblock %}
 
-			<title>{% block title %}{% if title %}{{ title }} - {% endif %}{{ SITE_NAME }}{% endblock %}</title>
+			<title>{% block title %}{% if title %}{{ title|safe }} - {% endif %}{{ SITE_NAME|safe }}{% endblock %}</title>
 
 			{% block head_css %}
 				{# CSS files hosted externally #}
