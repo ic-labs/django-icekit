@@ -37,6 +37,7 @@ setuptools.setup(
         'django_extensions',
         'Pillow',
         'requests',
+        'nltk',
     ],
     extras_require={
         'brightcove': [
