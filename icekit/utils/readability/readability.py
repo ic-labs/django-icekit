@@ -2,11 +2,11 @@
 
 import math
 
-from utils import get_char_count
-from utils import get_words
-from utils import get_sentences
-from utils import count_syllables
-from utils import count_complex_words
+from readability_utils import get_char_count
+from readability_utils import get_words
+from readability_utils import get_sentences
+from readability_utils import count_syllables
+from readability_utils import count_complex_words
 
 
 class Readability:
