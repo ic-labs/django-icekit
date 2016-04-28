@@ -63,6 +63,9 @@ Here are some of the most commonly used Docker commands when getting started:
     # Remove all "dangling" images (untagged and not referenced by a container)
     docker rmi $(docker images -f "dangling=true" -q)
 
+    # Remove ALL images (start from scratch)
+    docker rmi $(docker images -q)
+
 [0]: https://www.docker.com/products/docker-toolbox
 [1]: https://github.com/codekitchen/dinghy
 [2]: https://docs.docker.com/engine/installation/
