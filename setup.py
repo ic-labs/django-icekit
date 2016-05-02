@@ -38,6 +38,7 @@ setuptools.setup(
         'Pillow',
         'requests',
         'nltk',
+        'unidecode',
     ],
     extras_require={
         'brightcove': [
