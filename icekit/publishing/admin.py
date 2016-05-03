@@ -15,6 +15,9 @@ from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 from django.template import loader, Context
 
+from fluent_pages.adminui.pageadmin import DefaultPageChildAdmin, \
+    _select_template_name
+
 
 def make_published(modeladmin, request, queryset):
     for row in queryset.all():
@@ -214,6 +217,20 @@ class PublishingAdmin(ModelAdmin):
         self.changelist_reverse = '%s:%schangelist' % (
             self.admin_site.name,
             self.url_name_prefix, )
+
+        self.non_publishing_change_form_template = \
+            self.find_first_available_template(self.change_form_template)
+
+    def find_first_available_template(self, template_name_list):
+        """
+        Given a list of template names, find the first one that actually exists
+        and is available.
+        """
+        if isinstance(template_name_list, basestring):
+            return template_name_list
+        else:
+            # Take advantage of fluent_pages' internal implementation
+            return _select_template_name(template_name_list)
 
     def has_publish_permission(self, request, obj=None):
         """
@@ -442,48 +459,69 @@ class PublishingAdmin(ModelAdmin):
                     'revert_btn': revert_btn,
                 })
 
+        # Make the original non-publishing template available to the publishing
+        # change form template, so it knows what base it extends.
+        # The `original_change_form_template` context variable does the same
+        # job for reversion's versioning change form template.
         context.update({
-            'base_change_form_template': self.change_form_template,
+            'non_publishing_change_form_template':
+                self.non_publishing_change_form_template,
+            'original_change_form_template':
+                self.non_publishing_change_form_template,
         })
-
-        # Keep record of original change form template so we can bypass the
-        # custom change form template when rendering reversion-specific admin
-        # pages like revision/recover.
-        # NOTE: This must be done *before* changing `self.change_form_template`
-        # to capture the original change form template.
-        if not hasattr(self, 'original_change_form_template'):
-            if isinstance(self.change_form_template, (list, tuple)):
-                # Handle admins with a list of change form templates
-                self.original_change_form_template = \
-                    self.change_form_template[0]
-            else:
-                self.original_change_form_template = self.change_form_template
-        context['original_change_form_template'] = \
-            self.original_change_form_template
 
         # Hook to permit subclasses to modify context in change form
         self.update_context_for_render_change_form(context, obj)
 
-        # Use change form with fixed side panel.
-        # NOTE: Some of the model fields are hidden in the main change form
-        # using CSS rules and are duplicated and shown in the side panel
-        # instead for better context, e.g. publication related fields are
-        # grouped into the 'Save/Publish' tab in the side panel.
-        opts = self.model._meta
-        app_label = opts.app_label
-        self.change_form_template = [
-            "admin/%s/%s/publishing_change_form.html" % (
-                app_label, opts.model_name),
-            "admin/%s/publishing_change_form.html" % app_label,
-            "admin/publishing/publishing_change_form.html"
-        ]
+        # Override this admin's change form template to point to the publishing
+        # admin page template, but only for long enough to render the change
+        # form.
+        if isinstance(self, DefaultPageChildAdmin) \
+                and isinstance(self.change_form_template, (list, tuple)):
+            # Special handling for `DefaultPageChildAdmin` subclases with
+            # multiple templates, a feature of FluentPages that is as confusing
+            # as it is helpful. In this case, find the best available template
+            # preferring publishing-specific templates and apply it via
+            # a context variable that should be respected by Fluent's base
+            # templates, which we are most likely using at this point.
+            #
+            # NOTE: Directly overriding the `change_form_template` attr here is
+            # particularly messy since it's a property getter, not a normal
+            # attr, and any normal way of overriding or updating the value will
+            # not work. If we need to do this in future instead of using the
+            # cleaner context variable, do something like this:
+            #     self._change_form_template_getter = \
+            #         type(self).change_form_template.__get__
+            #     type(self).change_form_template = <available template str>
+            # then after rendering the content, reset it back:
+            #     type(self).change_form_template = \
+            #         self._change_form_template_getter
+            opts = self.model._meta
+            app_label = opts.app_label
+            extra_change_form_templates = [
+                "admin/%s/%s/publishing_change_form.html" % (
+                    app_label, opts.model_name),
+                "admin/%s/publishing_change_form.html" % app_label,
+                "admin/publishing/publishing_change_form.html"
+            ]
+            context['default_change_form_template'] = \
+                self.find_first_available_template(
+                    extra_change_form_templates + self.change_form_template)
+            is_change_form_template_reset_required = False
+        else:
+            self.change_form_template = \
+                "admin/publishing/publishing_change_form.html"
+            is_change_form_template_reset_required = True
 
         response = super(PublishingAdmin, self).render_change_form(
             request, context,
             add=add, change=change, form_url=form_url, obj=obj)
 
-        # TODO Is this necessary?
-        self.change_form_template = self.original_change_form_template
+        # Reset change form template, is necessary
+        if is_change_form_template_reset_required:
+            self.change_form_template = \
+                self.non_publishing_change_form_template
+
         return response
 
     def update_context_for_render_change_form(self, context, obj):
