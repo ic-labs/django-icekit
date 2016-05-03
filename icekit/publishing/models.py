@@ -549,6 +549,7 @@ class PublishableMPTTModelMixin(PublishingModel):
         else:
             return root_qs.first().get_published()
 
+    # NOTE: See workaround in AppConfig to actually get this to work
     def get_descendants(self, include_self=False, ignore_publish_status=False):
         """
         Replace `mptt.models.MPTTModel.get_descendants` with a version that
@@ -557,12 +558,12 @@ class PublishableMPTTModelMixin(PublishingModel):
         qs = super(PublishableFluentContentsPage, self).get_descendants(
             include_self=include_self)
         if not ignore_publish_status:
-            try:
-                qs = qs.filter(publishing_is_draft=self.publishing_is_draft)
-            except FieldError:
-                pass  # Likely an unpublishable polymorphic parent
+            return type(self).objects.filter(
+                pk__in=qs.values_list('pk', flat=True),
+                publishing_is_draft=self.publishing_is_draft)
         return qs
 
+    # NOTE: See workaround in AppConfig to actually get this to work
     def get_ancestors(self, ascending=False, include_self=False,
                       ignore_publish_status=False):
         """
@@ -572,10 +573,9 @@ class PublishableMPTTModelMixin(PublishingModel):
         qs = super(PublishableFluentContentsPage, self).get_ancestors(
             ascending=ascending, include_self=include_self)
         if not ignore_publish_status:
-            try:
-                qs = qs.filter(publishing_is_draft=self.publishing_is_draft)
-            except FieldError:
-                pass  # Likely an unpublishable polymorphic parent
+            return type(self).objects.filter(
+                pk__in=qs.values_list('pk', flat=True),
+                publishing_is_draft=self.publishing_is_draft)
         return qs
 
 

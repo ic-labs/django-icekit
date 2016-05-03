@@ -18,3 +18,6 @@ class AppConfig(AppConfig):
         for model in apps.get_models():
             if issubclass(model, PublishableMPTTModelMixin):
                 model.get_root = PublishableMPTTModelMixin.get_root
+                model.get_ancestors = PublishableMPTTModelMixin.get_ancestors
+                model.get_descendants = \
+                    PublishableMPTTModelMixin.get_descendants
