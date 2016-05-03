@@ -16,65 +16,7 @@ from fluent_pages.integration.fluent_contents import FluentContentsPage
 from .managers import PublishingManager, PublishingUrlNodeManager
 from .middleware import is_draft_request_context
 from .utils import PublishingException, assert_draft
-from . import signals
-
-
-def create_can_publish_permission(sender, **kwargs):
-    """
-    Add `can_publish` permission for each of the publishable model.
-    """
-    for model in sender.get_models():
-        if not issubclass(model, PublishingModel):
-            continue
-        content_type = ContentType.objects.get_for_model(model)
-        permission, created = Permission.objects.get_or_create(
-            content_type=content_type, codename='can_publish',
-            defaults=dict(name='Can Publish %s' % model.__name__))
-
-
-def delete_published_copy_when_draft_deleted(sender, **kwargs):
-    # Skip missing or unpublishable instances
-    instance = kwargs.get('instance', None)
-    if not instance or not hasattr(instance, 'publishing_linked'):
-        return
-
-    # If the draft record is deleted, the published object should be as well
-    # NOTE: Logic here varies slightly from original to guard for DoesNotExist
-    if instance.publishing_is_draft:
-        try:
-            instance.publishing_linked.delete()
-        except (ObjectDoesNotExist, AttributeError):
-            pass
-
-
-@receiver(signals.publishing_publish_save_draft)
-@receiver(signals.publishing_unpublish_save_draft)
-def save_draft_on_publish_and_unpublish(sender, instance, **kwargs):
-    """
-    Save draft instance to associate it with, or disassociate it from, its
-    published copy.
-
-    Disconnect these signal handlers and reconnect with custom versions if you
-    need more control over object saving in downstream projects, such as for
-    saving version information with 'reversion'.
-    """
-    instance.save()
-
-
-@receiver(models.signals.pre_save)
-def publishing_set_update_time(sender, instance, **kwargs):
-    """ Update the time modified before saving a publishable object. """
-    if hasattr(instance, 'publishing_linked'):
-        # Hack to avoid updating `publishing_modified_at` field when a draft
-        # publishable item is saved as part of a `publish` operation. This
-        # ensures that the `publishing_published_at` timestamp is later than
-        # the `publishing_modified_at` timestamp when we publish, which is
-        # vital for us to correctly detect whether a draft is "dirty".
-        if getattr(instance, '_skip_update_publishing_modified_at', False):
-            # Reset flag, in case instance is re-used (e.g. in tests)
-            instance._skip_update_publishing_modified_at = False
-            return
-        instance.publishing_modified_at = timezone.now()
+from . import signals as publishing_signals
 
 
 class PublishingModel(models.Model):
@@ -323,14 +265,14 @@ class PublishingModel(models.Model):
 
             # Signal the pre-save hook for publication, save then signal
             # the post publish hook.
-            signals.publishing_publish_pre_save_draft.send(
+            publishing_signals.publishing_publish_pre_save_draft.send(
                 sender=type(self), instance=self)
 
             # Save the draft and its new relationship with the published copy
-            signals.publishing_publish_save_draft.send(
+            publishing_signals.publishing_publish_save_draft.send(
                 sender=type(self), instance=self)
 
-            signals.publishing_post_publish.send(
+            publishing_signals.publishing_post_publish.send(
                 sender=type(self), instance=self)
             return publish_obj
 
@@ -340,7 +282,7 @@ class PublishingModel(models.Model):
         Un-publish the current object.
         """
         if self.is_draft and self.publishing_linked:
-            signals.publishing_pre_unpublish.send(
+            publishing_signals.publishing_pre_unpublish.send(
                 sender=type(self), instance=self)
             # Unlink draft and published copies then delete published.
             # NOTE: This indirect dance is necessary to avoid triggering
@@ -355,10 +297,10 @@ class PublishingModel(models.Model):
             self.publishing_published_at = None
 
             # Save the draft to remove its relationship with the published copy
-            signals.publishing_unpublish_save_draft.send(
+            publishing_signals.publishing_unpublish_save_draft.send(
                 sender=type(self), instance=self)
 
-            signals.publishing_post_unpublish.send(
+            publishing_signals.publishing_post_unpublish.send(
                 sender=type(self), instance=self)
 
     @assert_draft
@@ -692,5 +634,196 @@ class PublishableFluentContentsPage(FluentContentsPage,
             translation.slug = '%s-%d' % (original_slug, count)
 
 
-models.signals.pre_delete.connect(delete_published_copy_when_draft_deleted)
-models.signals.post_migrate.connect(create_can_publish_permission)
+@receiver(publishing_signals.publishing_publish_save_draft)
+@receiver(publishing_signals.publishing_unpublish_save_draft)
+def save_draft_on_publish_and_unpublish(sender, instance, **kwargs):
+    """
+    Save draft instance to associate it with, or disassociate it from, its
+    published copy.
+
+    Disconnect these signal handlers and reconnect with custom versions if you
+    need more control over object saving in downstream projects, such as for
+    saving version information with 'reversion'.
+    """
+    instance.save()
+
+
+@receiver(models.signals.pre_save)
+def publishing_set_update_time(sender, instance, **kwargs):
+    """ Update the time modified before saving a publishable object. """
+    if hasattr(instance, 'publishing_linked'):
+        # Hack to avoid updating `publishing_modified_at` field when a draft
+        # publishable item is saved as part of a `publish` operation. This
+        # ensures that the `publishing_published_at` timestamp is later than
+        # the `publishing_modified_at` timestamp when we publish, which is
+        # vital for us to correctly detect whether a draft is "dirty".
+        if getattr(instance, '_skip_update_publishing_modified_at', False):
+            # Reset flag, in case instance is re-used (e.g. in tests)
+            instance._skip_update_publishing_modified_at = False
+            return
+        instance.publishing_modified_at = timezone.now()
+
+
+@receiver(models.signals.m2m_changed)
+def handle_publishable_m2m_changed(
+        sender, instance, action, reverse, model, pk_set, **kwargs):
+    """
+    Cache related published objects in `pre_clear` so they can be restored in
+    `post_clear`.
+    """
+    # Do nothing if the target model is not publishable.
+    if not issubclass(model, PublishingModel):
+        return
+    # Get the right `ManyRelatedManager`. Iterate M2Ms and compare `sender`
+    # (the through model), in case there are multiple M2Ms to the same model.
+    if reverse:
+        for rel_obj in instance._meta.get_all_related_many_to_many_objects():
+            if rel_obj.field.rel.through == sender:
+                m2m = getattr(instance, rel_obj.get_accessor_name())
+                break
+    else:
+        for field in instance._meta.many_to_many:
+            if field.rel.through == sender:
+                m2m = getattr(instance, field.attname)
+                break
+    # Cache published PKs on the instance.
+    if action == 'pre_clear':
+        instance._published_m2m_cache = set(
+            m2m.filter(publishing_is_draft=False).values_list('pk', flat=True))
+    # Add published PKs from the cache.
+    if action == 'post_clear':
+        m2m.add(*instance._published_m2m_cache)
+        del instance._published_m2m_cache
+
+
+@receiver(publishing_signals.publishing_post_publish)
+def update_fluent_cached_urls_post_publish(sender, instance, **kwargs):
+    """
+    Update Fluent cached URLs for the published copy and its descendents
+    """
+    update_fluent_cached_urls(instance.publishing_linked)
+
+
+@receiver(models.signals.post_save)
+def sync_mptt_tree_fields_from_draft_to_published_post_save(
+        sender, instance, **kwargs):
+    """
+    Post save trigger to immediately sync MPTT tree structure field changes
+    made to draft copies to their corresponding published copy.
+    """
+    mptt_opts = getattr(instance, '_mptt_meta', None)
+    published_copy = getattr(instance, 'publishing_linked', None)
+    if mptt_opts and published_copy:
+        sync_mptt_tree_fields_from_draft_to_published(instance)
+
+
+def sync_mptt_tree_fields_from_draft_to_published(draft_copy, dry_run=False):
+    """
+    Sync tree structure changes from a draft publishable object to its
+    published copy, and updates the published copy's Fluent cached URLs when
+    necessary. Or simulates doing this if ``dry_run`` is ``True``.
+
+    Syncs both actual structural changes (i.e. different parent) and MPTT's
+    fields which are a cached representation (and may or may not be correct).
+    """
+    mptt_opts = getattr(draft_copy, '_mptt_meta', None)
+    published_copy = getattr(draft_copy, 'publishing_linked', None)
+    if not mptt_opts or not published_copy:
+        return
+    # Identify changed values and prepare dict of changes to apply to DB
+    parent_changed = draft_copy.parent != published_copy.parent
+    update_kwargs = {
+        mptt_opts.parent_attr: draft_copy._mpttfield('parent'),
+        mptt_opts.tree_id_attr: draft_copy._mpttfield('tree_id'),
+        mptt_opts.left_attr: draft_copy._mpttfield('left'),
+        mptt_opts.right_attr: draft_copy._mpttfield('right'),
+        mptt_opts.level_attr: draft_copy._mpttfield('level'),
+    }
+    # Strip out DB update entries for unchanged or invalid tree fields
+    update_kwargs = dict(
+        (field, value) for field, value in update_kwargs.items()
+        if getattr(draft_copy, field) != getattr(published_copy, field)
+        # Only parent may be None, never set tree_id/left/right/level to None
+        and not (field != 'parent' and value is None)
+    )
+    # Forcibly update MPTT field values via UPDATE commands instead of normal
+    # model attr changes, which MPTT ignores when you `save`
+    if update_kwargs and not dry_run:
+        type(published_copy).objects.filter(pk=published_copy.pk).update(
+            **update_kwargs)
+
+    change_report = update_kwargs
+
+    # If real tree structure (not just MPTT fields) has changed we must
+    # regenerate the cached URLs for published copy translations.
+    if parent_changed:
+        # Make our local published obj aware of DB change made by `update`
+        published_copy.parent = draft_copy.parent
+        # Regenerate the cached URLs for published copy translations.
+        change_report.update(
+            update_fluent_cached_urls(published_copy, dry_run=dry_run))
+
+    return change_report
+
+
+def update_fluent_cached_urls(item, dry_run=False):
+    """
+    Regenerate the cached URLs for an item's translations. This is a fiddly
+    business: we use "hidden" methods instead of the public ones to avoid
+    unnecessary and unwanted slug changes to ensure uniqueness, the logic for
+    which doesn't work with our publishing.
+    """
+    change_report = {}
+    if hasattr(item, 'translations'):
+        for translation in item.translations.all():
+            item._update_cached_url(translation)
+            change_report['_cached_url'] = translation._cached_url
+            if not dry_run:
+                translation.save()
+        if not dry_run:
+            item._expire_url_caches()
+        # Also process all the item's children, in case changes to this item
+        # affect the URL that should be cached for the children. We process
+        # only draft-or-published children, according to the item's status.
+        if item.is_draft:
+            children = [child for child in item.children.all()
+                        if child.is_draft]
+        else:
+            children = [child for child in item.get_draft().children.all()
+                        if child.is_published]
+        for child in children:
+            update_fluent_cached_urls(child, dry_run=dry_run)
+            change_report[u' child %s : _cached_url' % child] = \
+                child._cached_url
+
+    return change_report
+
+
+@receiver(models.signals.pre_delete)
+def delete_published_copy_when_draft_deleted(sender, **kwargs):
+    # Skip missing or unpublishable instances
+    instance = kwargs.get('instance', None)
+    if not instance or not hasattr(instance, 'publishing_linked'):
+        return
+
+    # If the draft record is deleted, the published object should be as well
+    # NOTE: Logic here varies slightly from original to guard for DoesNotExist
+    if instance.publishing_is_draft:
+        try:
+            instance.publishing_linked.delete()
+        except (ObjectDoesNotExist, AttributeError):
+            pass
+
+
+@receiver(models.signals.post_migrate)
+def create_can_publish_permission(sender, **kwargs):
+    """
+    Add `can_publish` permission for each of the publishable model.
+    """
+    for model in sender.get_models():
+        if not issubclass(model, PublishingModel):
+            continue
+        content_type = ContentType.objects.get_for_model(model)
+        permission, created = Permission.objects.get_or_create(
+            content_type=content_type, codename='can_publish',
+            defaults=dict(name='Can Publish %s' % model.__name__))
