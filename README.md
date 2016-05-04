@@ -1,7 +1,7 @@
 # Getting started
 
-The easiest way to create and run an ICEkit project is with Docker. It works
-on Windows, OS X, and Linux.
+The easiest way to run an ICEkit project is with Docker. It works on OS X,
+Linux, and Windows.
 
 If you are not yet familiar with Docker, check out our [Docker Quick Start][0]
 guide and then come back here.
