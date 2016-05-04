@@ -17,16 +17,29 @@ Docker has many advantages over a simple Python virtualenv environment:
   * Much less (if any) downtime during deployments, because Node modules,
     Bower components and Python packages are already installed in the image.
 
-# Installation
+# Installation (OS X)
 
-On OS X and Windows, install [Docker Toolbox][0] and choose "Quick Start
-Terminal" during install.
+Install [Docker Toolbox][docker-toolbox], but do not choose either "Quick Start
+Terminal" or "Kitematic" during install.
 
-On OS X, install [Dinghy][1] for improved file sharing performance and a
-`*.docker` wildcard DNS mapped to your Docker VM.
+Install [Dinghy][dinghy] for improved file sharing performance and a `*.docker`
+wildcard DNS mapped to your Docker VM.
 
-On Linux, install [Docker Engine][1] and [Docker Compose][2]. Docker runs
-natively on Linux, so there is no need for VirtualBox or DNS mapping.
+    $ brew tap codekitchen/dinghy
+    $ brew install dinghy
+
+    # Create a new Docker VM
+    $ dinghy create --provider virtualbox  # Or `vmware`, if you have it installed
+
+    # Configure Docker to use the Docker VM
+    $ eval "$(dinghy shellinit)"
+    $ echo 'eval "$(dinghy shellinit)"' >> ~/.profile  # or `~/.bashrc`, etc.
+
+# Installation (Linux)
+
+On Linux, install [Docker Engine][docker-engine] and
+[Docker Compose][docker-compose]. Docker runs natively on Linux, so there is no
+need for VirtualBox or DNS mapping.
 
 # Cheat sheet
 
@@ -66,7 +79,7 @@ Here are some of the most commonly used Docker commands when getting started:
     # Remove ALL images (start from scratch)
     docker rmi $(docker images -q)
 
-[0]: https://www.docker.com/products/docker-toolbox
-[1]: https://github.com/codekitchen/dinghy
-[2]: https://docs.docker.com/engine/installation/
-[3]: https://docs.docker.com/compose/install/
+[dinghy]: https://github.com/codekitchen/dinghy
+[docker-compose]: https://docs.docker.com/compose/install/
+[docker-engine]: https://docs.docker.com/engine/installation/
+[docker-toolbox]: https://www.docker.com/products/docker-toolbox
