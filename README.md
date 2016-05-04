@@ -14,18 +14,20 @@ guide, which covers all the things that Docker would otherwise take care of.
 
 # Creating a new ICEkit project
 
-    $ bash <(curl -L http://bit.ly/django-icekit-template) FOO
+    $ bash <(curl -L http://bit.ly/django-icekit-template) <project_name> [destination_dir]
 
-This script will create a new ICEkit project in a directory named `FOO` in the
-current working directory, ready to hack on.
+This script will create a new ICEkit project in a directory named
+`<project_name>` in the current working directory (or `[destination_dir]`),
+ready to hack on.
 
-It might need to install 'pip' and 'virtualenv' into your global environment,
+It might need to install `pip` and `virtualenv` into your global environment,
 and will prompt for confirmation if it does.
 
 # Running an ICEkit project with Docker
 
-    $ cd FOO
+    $ cd <project_name>
     $ docker-compose up
 
-The first time you run this, the images for all services defined in your
-compose file will be downloaded or built, so it might take a while.
+Some local setup will be performed on first run, which might take a while, so
+make yourself a cup of tea. Subsequent runs will skip the local setup unless
+the project dependencies have been updated.
