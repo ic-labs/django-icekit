@@ -41,7 +41,7 @@ On Linux, install [Docker Engine][docker-engine] and
 [Docker Compose][docker-compose]. Docker runs natively on Linux, so there is no
 need for VirtualBox or DNS mapping.
 
-# Cheat sheet
+# Cheat Sheet
 
 The typical Docker workflow is:
 
