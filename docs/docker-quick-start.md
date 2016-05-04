@@ -19,7 +19,7 @@ Docker has many advantages over a simple Python virtualenv environment:
 
 # Installation
 
-On Windows and OS X, install [Docker Toolbox][0] and choose "Quick Start
+On OS X and Windows, install [Docker Toolbox][0] and choose "Quick Start
 Terminal" during install.
 
 On OS X, install [Dinghy][1] for improved file sharing performance and a
