@@ -117,19 +117,6 @@ class FileSystemLayoutsPlugin(TemplateNameFieldChoicesPlugin):
         return choices
 
 
-class ICEkitLayoutPlugin(TemplateNameFieldChoicesPlugin):
-
-    def get_choices(self):
-        """
-        Return the default ICEkit layout template, to be sure there is always
-        at least one available.
-        """
-        choices = [
-            ('icekit/layouts/default.html', 'ICEkit: Default'),
-        ]
-        return choices
-
-
 class ICEkitFluentContentsPagePlugin(FluentContentsPagePlugin):
     """
     Slight adaptation to FluentContentsPagePlugin to use a defined fallback

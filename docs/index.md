@@ -146,12 +146,6 @@ Would result in these choices::
     ('myproject/layouts/foo.html', 'My Project: foo.html')
     ('myproject/layouts/bar/baz.html', 'My Project: bar/baz.html')
 
-#### ICEkitLayoutPlugin
-
-Adds a default template, to be sure there is always at least one available:
-
-    ('icekit/layouts/default.html', 'ICEkit: Default'),
-
 #### Creating a Custom TemplateNameFieldChoicesPlugin
 
 Subclass `TemplateNameFieldChoicesPlugin` and define a `get_choices()` method
