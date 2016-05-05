@@ -221,3 +221,42 @@ class InstagramEmbedItemTestCase(WebTest):
             self.assertIn(key, form.errors.keys())
         self.assertEqual(form.errors['url'][0], 'Please provide a valid instagram link.')
         form.instance.fetch_instagram_data = initial_fetch_instagram_data
+
+        # Test valid and invalid Instagram URLs
+        for valid_url in [
+            'http://instagram.com/p/5O26siFtv8/',
+            'https://instagram.com/p/5O26siFtv8/',
+            'http://www.instagram.com/p/5O26siFtv8/',
+            'https://www.instagram.com/p/5O26siFtv8/',
+            'http://instagr.am/p/5O26siFtv8/',
+            'https://instagr.am/p/5O26siFtv8',
+            'http://www.instagr.am/p/5O26siFtv8/',
+            'https://www.instagr.am/p/5O26siFtv8',
+        ]:
+            form = InstagramEmbedAdminForm(
+                {
+                    'parent_id': self.page_1.id,
+                    'sort_order': 4,
+                    'parent_type': ContentType.objects.get_for_model(type(self.page_1)).id,
+                    'url': valid_url,
+                }
+            )
+            self.assertTrue(form.is_valid())
+
+        for invalid_url in [
+            'http://test.com/p/5O26siFtv8/',
+            'https://instagrammy.com/p/5O26siFtv8/',
+            'http://www2.instagram.com/p/5O26siFtv8/',
+            'https://www.instagram.com/x/5O26siFtv8/',
+            'http://instagr.am/p/',
+        ]:
+            form = InstagramEmbedAdminForm(
+                {
+                    'parent_id': self.page_1.id,
+                    'sort_order': 4,
+                    'parent_type': ContentType.objects.get_for_model(type(self.page_1)).id,
+                    'url': invalid_url,
+                }
+            )
+            self.assertFalse(form.is_valid())
+            self.assertEqual(form.errors['url'][0], 'Please provide a valid instagram link.')
