@@ -7,7 +7,7 @@ from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.conf import settings
 from django.conf.urls import patterns, url
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db.models import F
 from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.utils.encoding import force_text
@@ -15,8 +15,11 @@ from django.utils.html import escape
 from django.utils.translation import ugettext_lazy as _
 from django.template import loader, Context
 
+from fluent_pages.models.db import UrlNode
 from fluent_pages.adminui.pageadmin import DefaultPageChildAdmin, \
     _select_template_name
+
+from .models import PublishingModel
 
 
 def make_published(modeladmin, request, queryset):
@@ -174,63 +177,41 @@ class PublishingAdminForm(forms.ModelForm):
         return data
 
 
-class PublishingAdmin(ModelAdmin):
-    form = PublishingAdminForm
-    # publish or unpublish actions sometime makes the plugins disappear from
-    # page so we disable it for now, until we can investigate it further.
-    # actions = (make_published, make_unpublished, )
-    list_display = ('publishing_object_title', 'publishing_column',)
-    list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
-    url_name_prefix = None
+class _PublishingHelpersMixin(object):
+    """
+    Publishing implementation used for the admin of both normal publishable
+    models, and for the "parent" page admins used by Fluent which needs to
+    cope with models that may or may not implement our publishing features.
+    """
 
-    actions = ['publish', 'unpublish']
-
-    class Media:
-        js = (
-            'publishing/publishing.js',
-        )
-        css = {
-            'all': ('publishing/publishing.css', ),
-        }
-
-    def __init__(self, model, admin_site):
-        super(PublishingAdmin, self).__init__(model, admin_site)
-
+    def __init__(self, *args, **kwargs):
+        super(_PublishingHelpersMixin, self).__init__(*args, **kwargs)
         self.request = None
-        self.url_name_prefix = '%(app_label)s_%(module_name)s_' % {
-            'app_label': self.model._meta.app_label,
-            'module_name': (self.model._meta.model_name
+
+    def is_admin_for_publishable_model(self):
+        return hasattr(self, 'model') \
+                and issubclass(self.model, PublishingModel)
+
+    # TODO Cache this
+    def get_url_name_prefix(self, model=None):
+        if not model:
+            model = self.model
+        return '%(app_label)s_%(module_name)s_' % {
+            'app_label': model._meta.app_label,
+            'module_name': (model._meta.model_name
                             if django.VERSION >= (1, 7)
-                            else self.model._meta.module_name),
+                            else model._meta.module_name),
         }
 
-        # Reverse URL strings used in multiple places..
-        self.publish_reverse = '%s:%spublish' % (
-            self.admin_site.name,
-            self.url_name_prefix, )
-        self.unpublish_reverse = '%s:%sunpublish' % (
-            self.admin_site.name,
-            self.url_name_prefix, )
-        self.revert_reverse = '%s:%srevert' % (
-            self.admin_site.name,
-            self.url_name_prefix, )
-        self.changelist_reverse = '%s:%schangelist' % (
-            self.admin_site.name,
-            self.url_name_prefix, )
+    # TODO Cache this
+    def publish_reverse(self, model=None):
+        return '%s:%spublish' % (
+            self.admin_site.name, self.get_url_name_prefix(model))
 
-        self.non_publishing_change_form_template = \
-            self.find_first_available_template(self.change_form_template)
-
-    def find_first_available_template(self, template_name_list):
-        """
-        Given a list of template names, find the first one that actually exists
-        and is available.
-        """
-        if isinstance(template_name_list, basestring):
-            return template_name_list
-        else:
-            # Take advantage of fluent_pages' internal implementation
-            return _select_template_name(template_name_list)
+    # TODO Cache this
+    def unpublish_reverse(self, model=None):
+        return '%s:%sunpublish' % (
+            self.admin_site.name, self.get_url_name_prefix(model))
 
     def has_publish_permission(self, request, obj=None):
         """
@@ -248,15 +229,15 @@ class PublishingAdmin(ModelAdmin):
             return False
         return user_obj.has_perm('%s.can_publish' % self.opts.app_label)
 
-    def publishing_object_title(self, obj):
-        return u'%s' % obj
-    publishing_object_title.short_description = 'Title'
-
     def publishing_column(self, obj):
         """
         Render publishing-related status icons and view links for display in
         the admin.
         """
+        # TODO Hack to convert polymorphic objects to real instances
+        if hasattr(obj, 'get_real_instance'):
+            obj = obj.get_real_instance()
+
         try:
             published_obj_url = obj.get_absolute_url()
             draft_obj_url = published_obj_url + '?edit'
@@ -270,14 +251,68 @@ class PublishingAdmin(ModelAdmin):
             'has_publish_permission':
                 self.has_publish_permission(self.request, obj),
             'img_path': settings.STATIC_URL + 'admin/img/',
-            'publish_url': reverse(self.publish_reverse, args=(obj.pk, )),
-            'unpublish_url': reverse(self.unpublish_reverse, args=(obj.pk, )),
             'published_url': published_obj_url,
             'draft_url': draft_obj_url,
         })
+        try:
+            if isinstance(obj, PublishingModel):
+                c['publish_url'] = reverse(
+                    self.publish_reverse(type(obj)), args=(obj.pk, )),
+                c['unpublish_url'] = reverse(
+                    self.unpublish_reverse(type(obj)), args=(obj.pk, )),
+        except NoReverseMatch:
+            pass
         return t.render(c)
     publishing_column.allow_tags = True
     publishing_column.short_description = _('Publishing')
+
+
+class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
+    form = PublishingAdminForm
+    # publish or unpublish actions sometime makes the plugins disappear from
+    # page so we disable it for now, until we can investigate it further.
+    # actions = (make_published, make_unpublished, )
+    list_display = ('publishing_object_title', 'publishing_column',)
+    list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
+
+    actions = ['publish', 'unpublish']
+
+    class Media:
+        js = (
+            'publishing/publishing.js',
+        )
+        css = {
+            'all': ('publishing/publishing.css', ),
+        }
+
+    def __init__(self, model, admin_site):
+        super(PublishingAdmin, self).__init__(model, admin_site)
+
+        # Reverse URL strings used in multiple places..
+        self.revert_reverse = '%s:%srevert' % (
+            self.admin_site.name,
+            self.get_url_name_prefix(model), )
+        self.changelist_reverse = '%s:%schangelist' % (
+            self.admin_site.name,
+            self.get_url_name_prefix(model), )
+
+        self.non_publishing_change_form_template = \
+            self.find_first_available_template(self.change_form_template)
+
+    def find_first_available_template(self, template_name_list):
+        """
+        Given a list of template names, find the first one that actually exists
+        and is available.
+        """
+        if isinstance(template_name_list, basestring):
+            return template_name_list
+        else:
+            # Take advantage of fluent_pages' internal implementation
+            return _select_template_name(template_name_list)
+
+    def publishing_object_title(self, obj):
+        return u'%s' % obj
+    publishing_object_title.short_description = 'Title'
 
     def publishing_admin_filter_for_drafts(self, qs):
         """ Remove published items from the given QS """
@@ -321,9 +356,12 @@ class PublishingAdmin(ModelAdmin):
     def get_urls(self):
         urls = super(PublishingAdmin, self).get_urls()
 
-        publish_name = '%spublish' % (self.url_name_prefix, )
-        unpublish_name = '%sunpublish' % (self.url_name_prefix, )
-        revert_name = '%srevert' % (self.url_name_prefix, )
+        if not self.is_admin_for_publishable_model():
+            return urls
+
+        publish_name = '%spublish' % (self.get_url_name_prefix(), )
+        unpublish_name = '%sunpublish' % (self.get_url_name_prefix(), )
+        revert_name = '%srevert' % (self.get_url_name_prefix(), )
 
         publish_urls = patterns(
             '',
@@ -427,7 +465,7 @@ class PublishingAdmin(ModelAdmin):
                 publish_btn = None
                 if obj.is_dirty:
                     publish_btn = reverse(
-                        self.publish_reverse, args=(obj.pk, ))
+                        self.publish_reverse(type(obj)), args=(obj.pk, ))
 
                 # If the user has publishing permission, a draft object and
                 # a published object show the unpublish button with relevant
@@ -435,7 +473,7 @@ class PublishingAdmin(ModelAdmin):
                 unpublish_btn = None
                 if obj.is_draft and obj.publishing_linked:
                     unpublish_btn = reverse(
-                        self.unpublish_reverse, args=(obj.pk, ))
+                        self.unpublish_reverse(type(obj)), args=(obj.pk, ))
 
                 # By default don't show the preview draft button unless there
                 # is a `get_absolute_url` definition on the object.
@@ -484,18 +522,6 @@ class PublishingAdmin(ModelAdmin):
             # preferring publishing-specific templates and apply it via
             # a context variable that should be respected by Fluent's base
             # templates, which we are most likely using at this point.
-            #
-            # NOTE: Directly overriding the `change_form_template` attr here is
-            # particularly messy since it's a property getter, not a normal
-            # attr, and any normal way of overriding or updating the value will
-            # not work. If we need to do this in future instead of using the
-            # cleaner context variable, do something like this:
-            #     self._change_form_template_getter = \
-            #         type(self).change_form_template.__get__
-            #     type(self).change_form_template = <available template str>
-            # then after rendering the content, reset it back:
-            #     type(self).change_form_template = \
-            #         self._change_form_template_getter
             opts = self.model._meta
             app_label = opts.app_label
             extra_change_form_templates = [
@@ -507,18 +533,30 @@ class PublishingAdmin(ModelAdmin):
             context['default_change_form_template'] = \
                 self.find_first_available_template(
                     extra_change_form_templates + self.change_form_template)
-            is_change_form_template_reset_required = False
+
+            # Directly overriding the `change_form_template` attr here is
+            # particularly messy since it's a property getter, not a normal
+            # attr, and any normal way of overriding or updating the value will
+            # not work.
+            self._change_form_template_getter = \
+                type(self).change_form_template.__get__
+            type(self).change_form_template = \
+                context['default_change_form_template']
+            has_change_form_attr_getter = True
         else:
             self.change_form_template = \
                 "admin/publishing/publishing_change_form.html"
-            is_change_form_template_reset_required = True
+            has_change_form_attr_getter = False
 
         response = super(PublishingAdmin, self).render_change_form(
             request, context,
             add=add, change=change, form_url=form_url, obj=obj)
 
-        # Reset change form template, is necessary
-        if is_change_form_template_reset_required:
+        # Reset change form template
+        if has_change_form_attr_getter:
+            type(self).change_form_template = \
+                self._change_form_template_getter
+        else:
             self.change_form_template = \
                 self.non_publishing_change_form_template
 
@@ -534,3 +572,28 @@ class PublishingAdmin(ModelAdmin):
     def unpublish(self, request, qs):
         for q in self.model.objects.get_real_instances(qs):
             q.unpublish()
+
+
+class PublishingFluentPagesParentAdminMixin(_PublishingHelpersMixin):
+
+    def get_queryset(self, request):
+        """
+        Show only DRAFT Fluent page items in admin.
+
+        NOTE: We rely on the `UrlNode.status` to recognise DRAFT versus
+        PUBLISHED objects, since there the top-level `UrlNode` model and
+        queryset don't know about ICEKit publishing.
+        """
+        self.request = request
+
+        qs = super(PublishingFluentPagesParentAdminMixin, self) \
+            .get_queryset(request)
+        qs = qs.filter(status=UrlNode.DRAFT)
+        return qs
+
+    queryset = get_queryset
+
+    def status_column(self, obj):
+        return self.publishing_column(obj)
+    status_column.allow_tags = True
+    status_column.short_description = _('Publishing')
