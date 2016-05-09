@@ -562,7 +562,7 @@ class PublishableMPTTModelMixin(PublishingModel):
         Replace `mptt.models.MPTTModel.get_descendants` with a version that
         returns only draft or published copy descendants, as appopriate.
         """
-        qs = super(PublishableFluentContentsPage, self).get_descendants(
+        qs = super(type(self), self).get_descendants(
             include_self=include_self)
         if not ignore_publish_status:
             return type(self).objects.filter(
@@ -577,7 +577,7 @@ class PublishableMPTTModelMixin(PublishingModel):
         Replace `mptt.models.MPTTModel.get_ancestors` with a version that
         returns only draft or published copy ancestors, as appopriate.
         """
-        qs = super(PublishableFluentContentsPage, self).get_ancestors(
+        qs = super(type(self), self).get_ancestors(
             ascending=ascending, include_self=include_self)
         if not ignore_publish_status:
             return type(self).objects.filter(
@@ -586,25 +586,15 @@ class PublishableMPTTModelMixin(PublishingModel):
         return qs
 
 
-class PublishableFluentContentsPage(FluentContentsPage,
-                                    PublishableMPTTModelMixin):
+class PublishableUrlNodeMixin(PublishableMPTTModelMixin):
     # TODO Default managers don't apply properly in all cases, not sure why...
     objects = PublishingUrlNodeManager()
     _default_manager = PublishingUrlNodeManager()
 
-    # TODO Must re-implement property here, not sure why...
-    @property
-    def is_draft(self):
-        return self.publishing_is_draft
-
-    # TODO Must re-implement property here, not sure why...
-    @property
-    def is_published(self):
-        return not self.publishing_is_draft
-
     class Meta:
         abstract = True
 
+    # NOTE: See workaround in AppConfig to actually get this to work
     def _make_slug_unique(self, translation):
         """
         Custom make slug unique checked.
@@ -639,6 +629,26 @@ class PublishableFluentContentsPage(FluentContentsPage,
 
             count += 1
             translation.slug = '%s-%d' % (original_slug, count)
+
+
+class PublishableFluentContentsPage(FluentContentsPage,
+                                    PublishableUrlNodeMixin):
+    # TODO Default managers don't apply properly in all cases, not sure why...
+    objects = PublishingUrlNodeManager()
+    _default_manager = PublishingUrlNodeManager()
+
+    # TODO Must re-implement property here, not sure why...
+    @property
+    def is_draft(self):
+        return self.publishing_is_draft
+
+    # TODO Must re-implement property here, not sure why...
+    @property
+    def is_published(self):
+        return not self.publishing_is_draft
+
+    class Meta:
+        abstract = True
 
 
 @receiver(publishing_signals.publishing_publish_save_draft)
