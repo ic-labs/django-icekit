@@ -263,6 +263,13 @@ class PublishingModel(models.Model):
             # publish action, for use in `publishing_set_update_time`
             self._skip_update_publishing_modified_at = True
 
+            # Update Fluent's publishing status field mechanism to correspond
+            # to our own notion of publication, to help use work together more
+            # easily with Fluent Pages.
+            if isinstance(self, UrlNode):
+                self.status = UrlNode.DRAFT
+                self.publishing_linked.status = UrlNode.PUBLISHED
+
             # Signal the pre-save hook for publication, save then signal
             # the post publish hook.
             publishing_signals.publishing_publish_pre_save_draft.send(

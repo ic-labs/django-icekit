@@ -15,6 +15,12 @@ class Command(NoArgsCommand):
             node.publishing_modified_at = node.publisher_modified_at
             node.publishing_published_at = node.publisher_published_at
 
+            # Set `UrlNode.status` based on published status
+            if getattr(node, 'publisher_is_draft', True):
+                node.status = UrlNode.DRAFT
+            else:
+                node.status = UrlNode.PUBLISHED
+
             # Delete/clear legacy 'publisher_linked' field to avoid duplicate
             # key errors for new publishing system, which no longer does all
             # the fancy footwork necessary to handle the legacy `publisher`
