@@ -1,71 +1,89 @@
 {% if share_username and share_key %}
-  <a href="#" class="ruled-group-item__single-link js-share" data-toggle="modal" data-target="#shareModal">
-    {{ text }}
-    <span class="pull-right">
-      <i class="sficon large sficon-share"></i>
+  <div class="share-button js-share">
+    <span class="share-button__share">
+      <span class='share-button__text'>{{ text }}</span>
+      <a href='#' class='share-button__link js-short-url'></a>
+      <i class="sficon large sficon-share share-button__icon"></i>
     </span>
-  </a>
+    <span class="share-button__copied">Link Copied</span>
+  </div>
 
   <script>
     window.onload = function() {
-      function copyTextToClipboard(text) {
-        var textArea = document.createElement("textarea");
+      var shareButton = $('.js-share');
+      var urls = {
+        initial: window.location.href,
+        short: ''
+      };
+      var buttonClass = {
+        active: 'share-button--active',
+        generate: 'share-button--generate'
+      };
+      var copied = false;
 
-        textArea.style.position = 'fixed';
-        textArea.style.top = 0;
-        textArea.style.left = 0;
-        textArea.style.width = '2em';
-        textArea.style.height = '2em';
-        textArea.style.padding = 0;
-        textArea.style.border = 'none';
-        textArea.style.outline = 'none';
-        textArea.style.boxShadow = 'none';
-        textArea.style.background = 'transparent';
-        textArea.value = text;
+      var copyTextToClipboard = function(text) {
+        var _textArea = document.createElement("textarea");
 
-        document.body.appendChild(textArea);
+        _textArea.style.position = 'fixed';
+        _textArea.style.top = 0;
+        _textArea.style.left = 0;
+        _textArea.style.width = '2em';
+        _textArea.style.height = '2em';
+        _textArea.style.padding = 0;
+        _textArea.style.border = 'none';
+        _textArea.style.outline = 'none';
+        _textArea.style.boxShadow = 'none';
+        _textArea.style.background = 'transparent';
+        _textArea.value = text;
 
-        textArea.select();
+        document.body.appendChild(_textArea);
+
+        _textArea.select();
 
         try {
-          var successful = document.execCommand('copy');
-          if (successful) {
-            shareModal.find('.js-copy-clipboard').removeClass('hidden');
+          var _successful = document.execCommand('copy');
+          if (_successful) {
+            shareButton.addClass(buttonClass.active);
+            copied = true;
           }
         } catch (err) {
-          console.log('Oops, unable to copy');
+          console.error('Oops, unable to copy');
         }
 
-        document.body.removeChild(textArea);
+        document.body.removeChild(_textArea);
       }
 
       function share(url) {
-        var text = 'text';
-        var username = '{{ share_username }}';
-        var key = '{{ share_key }}';
+        var _username = '{{ share_username }}';
+        var _key = '{{ share_key }}';
         $.ajax({
           url: "http://api.bit.ly/v3/shorten",
           data: {
             'longUrl': url,
-            'apiKey': key,
-            'login': username
+            'apiKey': _key,
+            'login': _username
           },
           dataType: 'JSON',
           success: function (data) {
-            shareModal.find('.js-short-url').text(data.data.url).attr('href', data.data.url);
-            shortURL = data.data.url;
+            var _requestUrl = urls.short = data.data.url;
+            var _truncateUrl = _requestUrl.replace(/http[s]*:\/\//, '');
+            shareButton.find('.js-short-url')
+              .text(_truncateUrl)
+              .prop('href', urls.short);
+            shareButton.addClass(buttonClass.generate);
           }
         });
       }
 
-      var shortURL;
-      var longURL = window.location.href;
-      var shareModal = $('#shareModal');
+      share(urls.initial);
 
-      share(longURL);
-
-      $('.js-share').on('click', function () {
-        copyTextToClipboard(shortURL);
+      shareButton.on('click', function () {
+        if (copied) {
+          $(this).removeClass(buttonClass.active);
+          copied = false;
+        } else {
+          copyTextToClipboard(urls.short);
+        }
       });
     }
   </script>
