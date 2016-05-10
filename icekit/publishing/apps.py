@@ -36,10 +36,9 @@ class AppConfig(AppConfig):
         super(AppConfig, self).__init__(*args, **kwargs)
 
     def ready(self):
-        # Monkey-patch workaround for class inheritance weirdness where our
-        # model methods and attributes are getting clobbered by versions higher
+        # Monkey-patch method overrides for classes where we must do so to
+        # avoid our custom versions from getting clobbered by versions higher
         # up the inheritance hierarchy.
-        # TODO Find a way to avoid this monkey-patching hack
         for model in apps.get_models():
             # Skip any models that don't have publishing features
             if not issubclass(model, PublishingModel):
@@ -59,6 +58,17 @@ class AppConfig(AppConfig):
                     :param translation: The particular translation of the slug.
                     :return: None
                     """
+                    # Short-circuit processing of newly-published items that do
+                    # not yet have a relationship to the corresponding draft.
+                    # This avoids triggering `UrlNode._update_descendant_urls`
+                    # when it will break because we are saving a partially-
+                    # complete published item.
+                    if self.is_published:
+                        try:
+                            self.publishing_draft
+                        except type(self).publishing_draft.RelatedObjectDoesNotExist:
+                            return
+
                     original_slug = translation.slug
                     count = 1
                     while True:
