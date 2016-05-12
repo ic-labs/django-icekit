@@ -175,4 +175,20 @@ class RecurrenceRuleField(forms.MultiValueField):
         self.fields[0].queryset = self.widget.queryset = queryset
         self.widget.choices = self.fields[0].choices
 
+    def _has_changed(self, initial, data):
+        if initial is None:
+            initial = ['' for x in range(0, len(data))]
+        else:
+            if not isinstance(initial, list):
+                initial = self.widget.decompress(initial)
+
+        field, initial, data = zip(self.fields, initial, data)[-1]
+        try:
+            initial = field.to_python(initial)
+        except forms.ValidationError:
+            return True
+        if field._has_changed(initial, data):
+            return True
+        return False
+
     queryset = property(_get_queryset, _set_queryset)

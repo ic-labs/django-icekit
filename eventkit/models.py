@@ -155,6 +155,14 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         'date_end_repeat',
     )
 
+    PROPAGATE_FIELDS = [
+        'starts',
+        'ends',
+        'date_starts',
+        'date_ends',
+        'recurrence_rule',
+    ]
+
     parent = PolymorphicTreeForeignKey(
         'self',
         blank=True,
@@ -484,13 +492,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                     # When occurrences have gone stale and there is still a
                     # recurrence rule set, the changes must be propagated to
                     # maintain consistency across repeat events.
-                    if changed.intersection([
-                        'starts',
-                        'ends',
-                        'date_starts',
-                        'date_ends',
-                        'recurrence_rule',
-                    ]):
+                    if changed & set(self.PROPAGATE_FIELDS):
                         raise AssertionError(
                             'Cannot update occurrences without '
                             'propagating changes to repeat events.')
