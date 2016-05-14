@@ -176,13 +176,18 @@ class RecurrenceRuleField(forms.MultiValueField):
         self.widget.choices = self.fields[0].choices
 
     def _has_changed(self, initial, data):
+        # override to return True only if the last field has changed.
         if initial is None:
             initial = ['' for x in range(0, len(data))]
         else:
             if not isinstance(initial, list):
                 initial = self.widget.decompress(initial)
 
-        field, initial, data = zip(self.fields, initial, data)[-1]
+        try:
+            field, initial, data = zip(self.fields, initial, data)[-1]
+        except KeyError:
+            return False
+
         try:
             initial = field.to_python(initial)
         except forms.ValidationError:
