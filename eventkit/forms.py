@@ -185,7 +185,7 @@ class RecurrenceRuleField(forms.MultiValueField):
 
         try:
             field, initial, data = zip(self.fields, initial, data)[-1]
-        except KeyError:
+        except IndexError:
             return False
 
         try:
