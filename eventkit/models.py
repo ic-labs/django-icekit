@@ -155,6 +155,14 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         'date_end_repeat',
     )
 
+    PROPAGATE_FIELDS = [
+        'starts',
+        'ends',
+        'date_starts',
+        'date_ends',
+        'recurrence_rule',
+    ]
+
     parent = PolymorphicTreeForeignKey(
         'self',
         blank=True,
@@ -263,16 +271,15 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 is_repeat=True,
                 **defaults
             )
+            duration = self.duration or timedelta(0)
             if event.all_day:
                 event.date_starts = timezone.date(starts)
-                if self.duration:
-                    event.date_ends = timezone.date(starts) + self.duration
+                event.date_ends = event.date_starts + duration
             else:
                 event.starts = starts
                 event.date_starts = timezone.date(event.starts)
-                if self.duration:
-                    event.ends = starts + self.duration
-                    event.date_ends = timezone.date(event.ends)
+                event.ends = starts + duration
+                event.date_ends = timezone.date(event.ends)
             super(AbstractEvent, event).save()  # Bypass automatic propagation.
         # Refresh the MPTT fields, which are now in an inconsistent state.
         self.refresh_mptt_fields()
@@ -456,7 +463,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         if self.all_day:
             assert self.date_starts, 'An all day event must have a start date.'
             # Remove datetime from all day events.
-            self.starts = self.ends = None
+            self.starts = self.ends = self.end_repeat = None
         else:
             assert self.starts, 'An event must have a start time.'
             # Auto-populate date fields for regular events, so we can order by
@@ -467,7 +474,10 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                 self.date_ends = timezone.date(self.ends)
             else:
                 self.date_ends = None
-
+            if self.end_repeat:
+                self.date_end_repeat = timezone.date(self.end_repeat)
+            else:
+                self.date_end_repeat = None
         # Is this a new event? New events cannot be propagated until saved.
         adding = self._state.adding
         # Have monitored fields have changed since the last save?
@@ -482,13 +492,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
                     # When occurrences have gone stale and there is still a
                     # recurrence rule set, the changes must be propagated to
                     # maintain consistency across repeat events.
-                    if changed.intersection([
-                        'starts',
-                        'ends',
-                        'date_starts',
-                        'date_ends',
-                        'recurrence_rule',
-                    ]):
+                    if changed & set(self.PROPAGATE_FIELDS):
                         raise AssertionError(
                             'Cannot update occurrences without '
                             'propagating changes to repeat events.')

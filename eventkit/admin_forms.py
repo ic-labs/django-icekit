@@ -57,4 +57,29 @@ class BaseEventForm(forms.ModelForm):
                 self.add_error(
                     'ends',
                     self.fields.get('ends').error_messages['required'])
+
+        if self.instance.id and not self.cleaned_data.get('propagate', False):
+            changed_data = set(self.changed_data)
+            intersection = changed_data & set(self.instance.PROPAGATE_FIELDS)
+            if intersection:
+                for field in intersection:
+                    self.add_error(
+                        field,
+                        'Cannot update field'
+                    )
+
+                error = 'Cannot update {} or "recurrence rule" fields without propagating changes to repeat events.'
+
+                if self.cleaned_data.get('all_day'):
+                    date_fields = ['date starts', 'date ends']
+                    'starts' in intersection and date_fields.append('starts')
+                    'ends' in intersection and date_fields.append('ends')
+                else:
+                    date_fields = ['starts', 'ends']
+                    'date_starts' in intersection and date_fields.append('date starts')
+                    'date_ends' in intersection and date_fields.append('date ends')
+
+                error = error.format(', '.join(map(lambda x: '"{}"'.format(x), date_fields)))
+                raise forms.ValidationError(error)
+
         return cleaned_data
