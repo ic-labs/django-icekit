@@ -202,18 +202,40 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         help_text=_('Show this event in the public calendar'),
     )
 
-
-
     class Meta:
         abstract = True
         ordering = ('date_starts', '-all_day', 'starts', 'title', 'pk')
+
+    def __init__(self, *args, **kwargs):
+        super(AbstractEvent, self).__init__(*args, **kwargs)
+        self._attach_field_tracker()
+
+    def _attach_field_tracker(self):
+        """
+        Hack to attach a ``FieldTracker`` to this class such that it will track
+        the fields in ``MONITOR_FIELDS`` as defined on this class, or as
+        overridden in subclasses, without requiring subclasses to redefine the
+        whole ``tracker`` class attribute which is easy to forget and
+        error-prone to do.
+        """
+        if not hasattr(self.__class__, 'tracker') \
+                or self.tracker.fields != set(self.MONITOR_FIELDS):
+            # We must explicitly call all the ``FieldTracker`` methods
+            # necessary to set up the tracker because these are normally
+            # chained together by `class_prepared` and `post_init` model
+            # signals, which are only triggered when classes are first defined.
+            tracker = FieldTracker(self.MONITOR_FIELDS)
+            tracker.contribute_to_class(self.__class__, 'tracker')
+            tracker.finalize_class(self.__class__)
+            tracker.initialize_tracker(self.__class__, self)
 
     def __str__(self):
         return self.title
 
     def _monitor_fields_changed(self, fields=None):
         """
-        Return ``True`` if the given field (or any field, if None) has changed.
+        Return ``True`` if the given set of fields (or ``self.MONITOR_FIELDS``
+        if None) has changed.
         """
         fields = fields or self.MONITOR_FIELDS
         if isinstance(fields, six.string_types):
@@ -683,9 +705,9 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             'className': self.calendar_classes(),
         }
 
+
 class Event(AbstractEvent):
     """
     A concrete polymorphic event model.
     """
-
-    tracker = FieldTracker(AbstractEvent.MONITOR_FIELDS)
+    pass
