@@ -153,6 +153,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         'recurrence_rule',
         'end_repeat',
         'date_end_repeat',
+        'show_in_calendar',
     )
 
     PROPAGATE_FIELDS = [
