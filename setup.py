@@ -53,6 +53,7 @@ setuptools.setup(
         'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
         'django-mptt<0.8',  # 0.8 requires Django 1.8. See: https://github.com/django-mptt/django-mptt/releases
         'django-nose',
+        'django-polymorphic<0.8',  # EventKit is not yet compatible with API changes in 0.8+
         'django-polymorphic-tree',
         'django-timezone',
         'django-webtest',
