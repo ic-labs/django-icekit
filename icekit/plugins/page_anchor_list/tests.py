@@ -52,10 +52,11 @@ class PageAnchorItemTestCase(WebTest):
             models.PageAnchorListItem,
             self.page_1,
         )
+        self.page_1.publish()
 
     def test_renders_anchor_list(self):
-        response = self.app.get(self.page_1.get_absolute_url())
-        response.mustcontain('<a href="#jump-link-1">Jump Link</a>')
+        response = self.app.get(self.page_1.get_published().get_absolute_url())
+        response.mustcontain('<a href="#jump-link-4">Jump Link</a>')
 
     def test_str(self):
         self.assertEqual(str(self.anchor_list), 'Page Anchor List')

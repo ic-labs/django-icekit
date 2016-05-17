@@ -531,8 +531,9 @@ class TestIceKitTags(WebTest):
             page_1,
             placeholder_name='test-main',
         )
+        page_1.publish()
 
-        response = self.app.get(page_1.get_absolute_url())
+        response = self.app.get(page_1.publishing_linked.get_absolute_url())
 
         response.mustcontain('<div class="filter">Horizontal Rule</div>')
         response.mustcontain('<div class="tag-as"></div>')

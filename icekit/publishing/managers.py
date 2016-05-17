@@ -1,9 +1,7 @@
-from django.conf import settings
 from django.db import models
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils.timezone import now
-from django.utils.translation import get_language
 from fluent_pages.models.managers import UrlNodeQuerySet, UrlNodeManager
 from model_utils.managers import PassThroughManagerMixin
 
@@ -219,6 +217,33 @@ class PublishingQuerySet(QuerySet):
 
     def exchange_for_published(self):
         return _exchange_for_published(self)
+
+    # TODO: This is a copy/paste of one in .apps; make it DRY
+    def iterator(self):
+        """
+        Override default iterator to wrap returned items in a publishing
+        sanity-checker "booby trap" to lazily raise an exception if DRAFT
+        items are mistakenly returned and mis-used in a public context
+        where only PUBLISHED items should be used.
+
+        This booby trap is added when all of:
+
+        - the publishing middleware is active, and therefore able to report
+        accurately whether the request is in a drafts-permitted context
+        - the publishing middleware tells us we are not in
+        a drafts-permitted context, which means only published items
+        should be used.
+        """
+        if is_publishing_middleware_active() \
+                and not is_draft_request_context():
+            for item in super(PublishingQuerySet, self).iterator():
+                if getattr(item, 'publishing_is_draft', False):
+                    yield DraftItemBoobyTrap(item)
+                else:
+                    yield item
+        else:
+            for item in super(PublishingQuerySet, self).iterator():
+                yield item
 
     def only(self, *args, **kwargs):
         """

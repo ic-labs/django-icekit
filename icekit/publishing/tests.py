@@ -228,26 +228,24 @@ class TestPublishingModelAndQueryset(TestCase):
     def test_queryset_iterator(self):
         self.slide_show_1.publish()
         # Confirm drafts are wrapped with booby trap on iteration over
-        # publishable QS in debug mode in a public request context.
-        with override_settings(DEBUG=True):
-            with patch('icekit.publishing.managers'
-                       '.is_publishing_middleware_active') as p:
-                p.return_value = True
-                self.assertTrue(all(
-                    [i.__class__ == DraftItemBoobyTrap
-                     for i in SlideShow.objects.all() if i.is_draft]))
-                # Published items are never wrapped
-                self.assertTrue(all(
-                    [i.__class__ != DraftItemBoobyTrap
-                     for i in SlideShow.objects.all() if i.is_published]))
-        # Confirm drafts returned as normal on iteration when not in debug mode
-        with override_settings(DEBUG=False):
-            with patch('icekit.publishing.managers'
-                       '.is_publishing_middleware_active') as p:
-                p.return_value = True
-                self.assertTrue(all(
-                    [i.__class__ != DraftItemBoobyTrap
-                     for i in SlideShow.objects.all() if i.is_published]))
+        # publishable QS in a public request context.
+        with patch('icekit.publishing.managers'
+                   '.is_publishing_middleware_active') as p:
+            p.return_value = True
+            self.assertTrue(all(
+                [i.__class__ == DraftItemBoobyTrap
+                    for i in SlideShow.objects.all() if i.is_draft]))
+            # Published items are never wrapped
+            self.assertTrue(all(
+                [i.__class__ != DraftItemBoobyTrap
+                    for i in SlideShow.objects.all() if i.is_published]))
+        # Confirm drafts returned as normal on iteration when in draft context
+        with patch('icekit.publishing.managers'
+                   '.is_publishing_middleware_active') as p:
+            p.return_value = True
+            self.assertTrue(all(
+                [i.__class__ != DraftItemBoobyTrap
+                    for i in SlideShow.objects.all() if i.is_published]))
 
     def test_model_get_draft(self):
         self.slide_show_1.publish()

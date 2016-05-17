@@ -178,6 +178,10 @@ def is_publishing_middleware_active():
     return PublishingMiddleware.is_publishing_middleware_active()
 
 
+def set_publishing_middleware_active(status):
+    PublishingMiddleware._middleware_active_status[current_thread()] = status
+
+
 def is_draft_request_context():
     return PublishingMiddleware.is_draft_request_context()
 
@@ -200,6 +204,14 @@ def override_draft_request_context(status):
     set_draft_request_context(status)
     yield
     set_draft_request_context(original)
+
+
+@contextmanager
+def override_publishing_middleware_active(status):
+    original = is_publishing_middleware_active()
+    set_publishing_middleware_active(status)
+    yield
+    set_publishing_middleware_active(original)
 
 
 @contextmanager

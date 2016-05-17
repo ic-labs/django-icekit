@@ -10,8 +10,8 @@ from fluent_pages.models.managers import UrlNodeQuerySet
 
 from mptt.models import MPTTModel
 
-from .managers import PublishingQuerySet, PublishingUrlNodeManager, \
-    _exchange_for_published, DraftItemBoobyTrap
+from .managers import PublishingUrlNodeManager, _exchange_for_published, \
+    DraftItemBoobyTrap
 from .models import PublishingModel
 from .middleware import is_draft_request_context, \
     is_publishing_middleware_active
