@@ -84,6 +84,59 @@ class DraftItemBoobyTrap(object):
         return self._draft_payload
 
 
+def _exchange_for_published(qs):
+    """
+    Exchange the results in a queryset of publishable items for the
+    corresponding published copies. This means the result QS has:
+        - already published items in original QS
+        - the published copies for drafts with published versions
+        - unpublished draft items in the original QS are removed.
+
+    Unfortunately we cannot just perform a normal queryset filter operation
+    in the DB because FK/M2M relationships assigned in the site admin are
+    *always* to draft objects. Instead we exchange draft items for
+    published copies.
+    """
+    # TODO: Can this be lazily executed when a queryset is evaluated?
+    # Currently any `published()` queryset will obtain its list available
+    # published PKs when this function is called, which might not be
+    # immediately before the queryset is evaluated. It might be possible
+    # to pass a subquery instead of collecting PKs into a list to pass?
+    published_version_pks = []
+    for item in qs:
+        # If item is draft and has a linked published copy, use that...
+        if item.publishing_is_draft and item.publishing_linked_id:
+            published_version_pks.append(item.publishing_linked_id)
+        # ...otherwise if item is already the published copy, use it.
+        elif not item.publishing_is_draft:
+            published_version_pks.append(item.pk)
+    # TODO: Salvage more attributes from the original queryset, such as
+    # `annotate()`, `distinct()`, `select_related()`, `values()`, etc.
+    qs = qs.model.objects.filter(pk__in=published_version_pks)
+    # Restore ordering from original queryset.
+    qs = _order_by_pks(qs, published_version_pks)
+    return qs
+
+
+def _order_by_pks(qs, pks):
+    """
+    Adjust the given queryset to order items according to the explicit ordering
+    of PKs provided.
+
+    This is a PostgreSQL-specific DB hack, based on:
+    blog.mathieu-leplatre.info/django-create-a-queryset-from-a-list-preserving-order.html
+    """
+    pk_colname = '%s.%s' % (
+        qs.model._meta.db_table, qs.model._meta.pk.column)
+    clauses = ' '.join(
+        ['WHEN %s=%s THEN %s' % (pk_colname, pk, i)
+            for i, pk in enumerate(pks)]
+    )
+    ordering = 'CASE %s END' % clauses
+    return qs.extra(
+        select={'pk_ordering': ordering}, order_by=('pk_ordering',))
+
+
 class PublishingQuerySet(QuerySet):
     """
     Base publishing queryset features, without UrlNode customisations.
@@ -161,55 +214,7 @@ class PublishingQuerySet(QuerySet):
         return queryset
 
     def exchange_for_published(self):
-        """
-        Exchange the results in a queryset of publishable items for the
-        corresponding published copies. This means the result QS has:
-         - already published items in original QS
-         - the published copies for drafts with published versions
-         - unpublished draft items in the original QS are removed.
-
-        Unfortunately we cannot just perform a normal queryset filter operation
-        in the DB because FK/M2M relationships assigned in the site admin are
-        *always* to draft objects. Instead we exchange draft items for
-        published copies.
-        """
-        # TODO: Can this be lazily executed when a queryset is evaluated?
-        # Currently any `published()` queryset will obtain its list available
-        # published PKs when this function is called, which might not be
-        # immediately before the queryset is evaluated. It might be possible
-        # to pass a subquery instead of collecting PKs into a list to pass?
-        published_version_pks = []
-        for item in self:
-            # If item is draft and has a linked published copy, use that...
-            if item.publishing_is_draft and item.publishing_linked_id:
-                published_version_pks.append(item.publishing_linked_id)
-            # ...otherwise if item is already the published copy, use it.
-            elif not item.publishing_is_draft:
-                published_version_pks.append(item.pk)
-        # TODO: Salvage more attributes from the original queryset, such as
-        # `annotate()`, `distinct()`, `select_related()`, `values()`, etc.
-        qs = self.model.objects.filter(pk__in=published_version_pks)
-        # Restore ordering from original queryset.
-        qs = self._order_by_pks(qs, published_version_pks)
-        return qs
-
-    def _order_by_pks(self, qs, pks):
-        """
-        Adjust the given queryset (*not* self) to order items according to the
-        explicit ordering of PKs provided.
-
-        This is a PostgreSQL-specific DB hack, based on:
-        blog.mathieu-leplatre.info/django-create-a-queryset-from-a-list-preserving-order.html
-        """
-        pk_colname = '%s.%s' % (
-            self.model._meta.db_table, self.model._meta.pk.column)
-        clauses = ' '.join(
-            ['WHEN %s=%s THEN %s' % (pk_colname, pk, i)
-                for i, pk in enumerate(pks)]
-        )
-        ordering = 'CASE %s END' % clauses
-        return qs.extra(
-            select={'pk_ordering': ordering}, order_by=('pk_ordering',))
+        return _exchange_for_published(self)
 
     def iterator(self):
         """

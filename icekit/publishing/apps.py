@@ -1,6 +1,8 @@
 from django.apps import AppConfig, apps
 from django.core.exceptions import MultipleObjectsReturned
+from django.db.models.query_utils import Q
 from django.utils.translation import get_language
+from django.utils.timezone import now
 
 from fluent_pages import appsettings
 from fluent_pages.models import UrlNode
@@ -8,7 +10,7 @@ from fluent_pages.models.managers import UrlNodeQuerySet
 
 from mptt.models import MPTTModel
 
-from .managers import PublishingUrlNodeManager
+from .managers import PublishingUrlNodeManager, _exchange_for_published
 from .models import PublishingModel
 from .middleware import is_draft_request_context
 
@@ -39,6 +41,35 @@ class AppConfig(AppConfig):
         super(AppConfig, self).__init__(*args, **kwargs)
 
     def ready(self):
+
+        # Monkey-patch `UrlNodeQuerySet.published` to add filtering by
+        # publishing status and exchange of draft items to published ones.
+        # This is necessary to make publishable items available via
+        # relationship querysets where the relationship is generally to draft
+        # items but we want to get the correponding published copies.
+        @monkey_patch_override_method(UrlNodeQuerySet)
+        def published(self, for_user=None):
+            if for_user is not None and for_user.is_staff:
+                return self._single_site()
+
+            qs = self._single_site() \
+                .filter(
+                    Q(publication_date__isnull=True) |
+                    Q(publication_date__lt=now())
+                ).filter(
+                    Q(publication_end_date__isnull=True) |
+                    Q(publication_end_date__gte=now())
+                )
+
+            # Include publishable items that are published themselves, or are
+            # draft copies with a published copy.
+            items_to_include_pks = [
+                i.pk for i in qs
+                if i.is_published or getattr(i, 'has_been_published', False)
+            ]
+            qs = qs.filter(pk__in=items_to_include_pks)
+
+            return _exchange_for_published(qs)
 
         # Monkey-patch `UrlNodeQuerySet.get_for_path` to add filtering by
         # publishing status.
