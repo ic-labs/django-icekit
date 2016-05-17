@@ -230,8 +230,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         if self.tracker.fields != set(self.MONITOR_FIELDS):
             raise Exception(
                 "Fields tracked in event concrete subclass %r *must* match"
-                " match the fields listed in ``MONITOR_FIELDS`` but they do"
-                " not. Tracker fields missing: %s. Tracker extra fields: %s."
+                " the fields listed in ``MONITOR_FIELDS`` but they do not."
+                " Tracker fields missing: %s. Tracker extra fields: %s."
                 " You probably need to redefine the field tracker attribute"
                 " definition like this:\n"
                 "   tracker = FieldTracker(MONITOR_FIELDS)\n"
