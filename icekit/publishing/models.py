@@ -235,6 +235,13 @@ class PublishingModel(models.Model):
             # Set the state of publication to published on the object.
             publish_obj.publishing_is_draft = False
 
+            # Update Fluent's publishing status field mechanism to correspond
+            # to our own notion of publication, to help use work together more
+            # easily with Fluent Pages.
+            if isinstance(self, UrlNode):
+                self.status = UrlNode.DRAFT
+                publish_obj.status = UrlNode.PUBLISHED
+
             # Set the date the object should be published at.
             publish_obj.publishing_published_at = self.publishing_published_at
 
@@ -262,13 +269,6 @@ class PublishingModel(models.Model):
             # Flag draft instance when it is being updated as part of a
             # publish action, for use in `publishing_set_update_time`
             self._skip_update_publishing_modified_at = True
-
-            # Update Fluent's publishing status field mechanism to correspond
-            # to our own notion of publication, to help use work together more
-            # easily with Fluent Pages.
-            if isinstance(self, UrlNode):
-                self.status = UrlNode.DRAFT
-                self.publishing_linked.status = UrlNode.PUBLISHED
 
             # Signal the pre-save hook for publication, save then signal
             # the post publish hook.
