@@ -48,6 +48,10 @@ class DraftItemBoobyTrap(object):
         'has_been_published',
         'is_draft',
         'is_visible',
+        # Fields that need to be accessible for Fluent Pages processing
+        'pk',
+        'language_code',
+        'get_current_language',
     ]
 
     def __init__(self, payload):
@@ -215,34 +219,6 @@ class PublishingQuerySet(QuerySet):
 
     def exchange_for_published(self):
         return _exchange_for_published(self)
-
-    def iterator(self):
-        """
-        Override default iterator to wrap returned items in a publishing
-        sanity-checker "booby trap" to lazily raise an exception if DRAFT items
-        are mistakenly returned and mis-used in a public context where only
-        PUBLISHED items should be used.
-
-        This booby trap is added when all of:
-
-         - the DEBUG_PUBLISHING_ERRORS setting is unset or truthy
-         - the publishing middleware is active, and therefore able to report
-           accurately whether the request is in a drafts-permitted context
-         - the publishing middleware tells us we are not in
-           a drafts-permitted context, which means only published items
-           should be used.
-        """
-        if getattr(settings, 'DEBUG_PUBLISHING_ERRORS', True) \
-                and is_publishing_middleware_active() \
-                and not is_draft_request_context():
-            for item in super(PublishingQuerySet, self).iterator():
-                if not item.publishing_is_draft:
-                    yield item
-                else:
-                    yield DraftItemBoobyTrap(item)
-        else:
-            for item in super(PublishingQuerySet, self).iterator():
-                yield item
 
     def only(self, *args, **kwargs):
         """

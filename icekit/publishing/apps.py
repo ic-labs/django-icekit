@@ -10,9 +10,11 @@ from fluent_pages.models.managers import UrlNodeQuerySet
 
 from mptt.models import MPTTModel
 
-from .managers import PublishingUrlNodeManager, _exchange_for_published
+from .managers import PublishingQuerySet, PublishingUrlNodeManager, \
+    _exchange_for_published, DraftItemBoobyTrap
 from .models import PublishingModel
-from .middleware import is_draft_request_context
+from .middleware import is_draft_request_context, \
+    is_publishing_middleware_active
 
 
 def monkey_patch_override_method(klass):
@@ -41,6 +43,33 @@ class AppConfig(AppConfig):
         super(AppConfig, self).__init__(*args, **kwargs)
 
     def ready(self):
+
+        @monkey_patch_override_method(UrlNodeQuerySet)
+        def iterator(self):
+            """
+            Override default iterator to wrap returned items in a publishing
+            sanity-checker "booby trap" to lazily raise an exception if DRAFT
+            items are mistakenly returned and mis-used in a public context
+            where only PUBLISHED items should be used.
+
+            This booby trap is added when all of:
+
+            - the publishing middleware is active, and therefore able to report
+            accurately whether the request is in a drafts-permitted context
+            - the publishing middleware tells us we are not in
+            a drafts-permitted context, which means only published items
+            should be used.
+            """
+            if is_publishing_middleware_active() \
+                    and not is_draft_request_context():
+                for item in super(UrlNodeQuerySet, self).iterator():
+                    if getattr(item, 'publishing_is_draft', False):
+                        yield DraftItemBoobyTrap(item)
+                    else:
+                        yield item
+            else:
+                for item in super(UrlNodeQuerySet, self).iterator():
+                    yield item
 
         # Monkey-patch `UrlNodeQuerySet.published` to add filtering by
         # publishing status and exchange of draft items to published ones.
