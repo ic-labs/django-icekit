@@ -143,6 +143,9 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     """
 
     # Changes to these fields will be propagated to repeat events.
+    # WARNING: If fields are altered in a subclass the `tracker` class
+    # attribute must be redeclared in that subclass like so:
+    #     tracker = FieldTracker(MONITOR_FIELDS)
     MONITOR_FIELDS = (
         'title',
         'all_day',
@@ -207,27 +210,35 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         ordering = ('date_starts', '-all_day', 'starts', 'title', 'pk')
 
     def __init__(self, *args, **kwargs):
+        """
+        Sanity-check that the field tracker associated with this class tracks
+        exactly the same fields as the class's ``MONITOR_FIELDS`` listing.
+        This check is necessary because ``FieldTracker`` can only be declared
+        on concrete classes, and must be redeclared on any subclass where the
+        fields to track as defined in ``MONITOR_FIELDS`` are changed.
+        """
         super(AbstractEvent, self).__init__(*args, **kwargs)
-        self._attach_field_tracker()
-
-    def _attach_field_tracker(self):
-        """
-        Hack to attach a ``FieldTracker`` to this class such that it will track
-        the fields in ``MONITOR_FIELDS`` as defined on this class, or as
-        overridden in subclasses, without requiring subclasses to redefine the
-        whole ``tracker`` class attribute which is easy to forget and
-        error-prone to do.
-        """
-        if not hasattr(self.__class__, 'tracker') \
-                or self.tracker.fields != set(self.MONITOR_FIELDS):
-            # We must explicitly call all the ``FieldTracker`` methods
-            # necessary to set up the tracker because these are normally
-            # chained together by `class_prepared` and `post_init` model
-            # signals, which are only triggered when classes are first defined.
-            tracker = FieldTracker(self.MONITOR_FIELDS)
-            tracker.contribute_to_class(self.__class__, 'tracker')
-            tracker.finalize_class(self.__class__)
-            tracker.initialize_tracker(self.__class__, self)
+        # Confirm field tracker is defined at all
+        if not hasattr(self.__class__, 'tracker'):
+            raise Exception(
+                "Event concrete subclass %r *must* include a field tracker"
+                " attribute definition like this:\n"
+                "   tracker = FieldTracker(MONITOR_FIELDS)\n"
+                % type(self)
+            )
+        # Confirm field tracker's tracked fields == MONITOR_FIELDS
+        if self.tracker.fields != set(self.MONITOR_FIELDS):
+            raise Exception(
+                "Fields tracked in event concrete subclass %r *must* match"
+                " match the fields listed in ``MONITOR_FIELDS`` but they do"
+                " not. Tracker fields missing: %s. Tracker extra fields: %s."
+                " You probably need to redefine the field tracker attribute"
+                " definition like this:\n"
+                "   tracker = FieldTracker(MONITOR_FIELDS)\n"
+                % (type(self),
+                   set(self.MONITOR_FIELDS).difference(self.tracker.fields),
+                   self.tracker.fields.difference(set(self.MONITOR_FIELDS)))
+            )
 
     def __str__(self):
         return self.title
@@ -710,4 +721,4 @@ class Event(AbstractEvent):
     """
     A concrete polymorphic event model.
     """
-    pass
+    tracker = FieldTracker(AbstractEvent.MONITOR_FIELDS)
