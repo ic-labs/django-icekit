@@ -292,50 +292,6 @@ class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
             queryset = queryset.exchange_for_published()
         return queryset
 
-    def get_for_path(self, path, language_code=None):
-        """
-        Return the UrlNode for the given path.
-        The path is expected to start with an initial slash.
-
-        Raises UrlNode.DoesNotExist when the item is not found.
-        """
-        if language_code is None:
-            language_code = self._language or get_language()
-
-        # Don't normalize slashes, expect the URLs to be sane.
-        try:
-            obj = self._single_site().get(
-                translations___cached_url=path,
-                translations__language_code=language_code,
-                publishing_is_draft=is_draft_request_context(),
-            )
-            # Explicitly set language to the state the object was fetched in.
-            obj.set_current_language(language_code)
-            return obj
-        except self.model.DoesNotExist:
-            raise self.model.DoesNotExist(
-                u"No published {0} found for the path '{1}'".format(
-                    self.model.__name__, path))
-        except self.model.MultipleObjectsReturned as e:
-            # this is because storypage slugs can overlap. Just return the
-            # first one with no category, or the last one if they all have
-            # categories.
-            objs = self._single_site().filter(
-                translations___cached_url=path,
-                translations__language_code=language_code,
-                publishing_is_draft=is_draft_request_context(),
-            )
-
-            for obj in objs:
-                try:
-                    if not obj.category:
-                        break
-                except AttributeError:  # Shouldn't happen. Re-raise the error.
-                    raise e
-
-            obj.set_current_language(language_code)
-            return obj
-
 
 class PublishingManager(PassThroughManagerMixin, models.Manager):
     """

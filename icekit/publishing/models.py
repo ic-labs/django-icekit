@@ -108,6 +108,19 @@ class PublishingModel(models.Model):
         else:
             return self.is_draft
 
+    def is_within_publication_dates(obj, timestamp=None):
+        """
+        Return True if the given timestamp (or ``now()`` by default) is
+        witin any publication start/end date constraints.
+        """
+        if timestamp is None:
+            timestamp = timezone.now()
+        start_date_ok = not obj.publication_date \
+            or obj.publication_date <= timestamp
+        end_date_ok = not obj.publication_end_date \
+            or obj.publication_end_date > timestamp
+        return start_date_ok and end_date_ok
+
     @property
     def has_been_published(self):
         """

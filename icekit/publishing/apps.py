@@ -1,13 +1,16 @@
 from django.apps import AppConfig, apps
 from django.core.exceptions import MultipleObjectsReturned
+from django.utils.translation import get_language
 
 from fluent_pages import appsettings
 from fluent_pages.models import UrlNode
+from fluent_pages.models.managers import UrlNodeQuerySet
 
 from mptt.models import MPTTModel
 
 from .managers import PublishingUrlNodeManager
 from .models import PublishingModel
+from .middleware import is_draft_request_context
 
 
 def monkey_patch_override_method(klass):
@@ -36,6 +39,57 @@ class AppConfig(AppConfig):
         super(AppConfig, self).__init__(*args, **kwargs)
 
     def ready(self):
+
+        # Monkey-patch `UrlNodeQuerySet.get_for_path` to add filtering by
+        # publishing status.
+        @monkey_patch_override_method(UrlNodeQuerySet)
+        def get_for_path(self, path, language_code=None):
+            """
+            Return the UrlNode for the given path.
+            The path is expected to start with an initial slash.
+
+            Raises UrlNode.DoesNotExist when the item is not found.
+            """
+            if language_code is None:
+                language_code = self._language or get_language()
+
+            # Don't normalize slashes, expect the URLs to be sane.
+            objs = self._single_site().filter(
+                translations___cached_url=path,
+                translations__language_code=language_code,
+            )
+
+            # Filter candidate results by published status, using
+            # instance attributes instead of queryset filtering to
+            # handle unpublishable and ICEKit publishing-enabled items.
+            if is_draft_request_context():
+                objs = [obj for obj in objs
+                        if getattr(obj, 'is_draft', True)]
+            else:
+                objs = [obj for obj in objs
+                        if getattr(obj, 'is_published', True) and
+                        (not hasattr(obj, 'is_within_publication_dates') or
+                         obj.is_within_publication_dates())]
+
+            if not objs:
+                raise self.model.DoesNotExist(
+                    u"No published {0} found for the path '{1}'"
+                    .format(self.model.__name__, path))
+
+            if len(objs) > 1:
+                # TODO May need special handling for SFMOMA StoryPage slugs
+                # which can overlap. E.g. return the first one with no
+                # category, or the last one if they all have categories.
+
+                raise self.model.MultipleObjectsReturned(
+                    u"Multiple published {0} found for the path '{1}'"
+                    .format(self.model.__name__, path))
+
+            obj = objs[0]
+            # Explicitly set language to the state the object was fetched in.
+            obj.set_current_language(language_code)
+            return obj
+
         # Monkey-patch method overrides for classes where we must do so to
         # avoid our custom versions from getting clobbered by versions higher
         # up the inheritance hierarchy.
