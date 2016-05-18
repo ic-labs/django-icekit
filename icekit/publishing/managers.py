@@ -234,15 +234,23 @@ class PublishingQuerySet(QuerySet):
         a drafts-permitted context, which means only published items
         should be used.
         """
+        # Avoid double-processing draft items in our custom iterator when we
+        # are in a `PublishingQuerySet` that is also a subclass of the
+        # monkey-patched `UrlNodeQuerySet`
+        if issubclass(type(self), UrlNodeQuerySet):
+            super_without_boobytrap_iterator = super(UrlNodeQuerySet, self)
+        else:
+            super_without_boobytrap_iterator = super(PublishingQuerySet, self)
+
         if is_publishing_middleware_active() \
                 and not is_draft_request_context():
-            for item in super(PublishingQuerySet, self).iterator():
+            for item in super_without_boobytrap_iterator.iterator():
                 if getattr(item, 'publishing_is_draft', False):
                     yield DraftItemBoobyTrap(item)
                 else:
                     yield item
         else:
-            for item in super(PublishingQuerySet, self).iterator():
+            for item in super_without_boobytrap_iterator.iterator():
                 yield item
 
     def only(self, *args, **kwargs):

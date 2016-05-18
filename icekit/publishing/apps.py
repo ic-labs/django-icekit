@@ -44,6 +44,7 @@ class AppConfig(AppConfig):
 
     def ready(self):
 
+        # TODO: This is a copy/paste of one in .managers; make it DRY
         @monkey_patch_override_method(UrlNodeQuerySet)
         def iterator(self):
             """
