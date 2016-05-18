@@ -1,5 +1,6 @@
 import urlparse
 
+from django.apps import apps
 from django.http import QueryDict
 from django.utils.crypto import get_random_string, salted_hmac
 from django.utils.encoding import force_bytes
@@ -13,6 +14,15 @@ class PublishingException(Exception):
 
 class NotDraftException(PublishingException):
     pass
+
+
+def get_publishable_models():
+    from .models import PublishingModel
+    publishable_models = [
+        model for model in apps.get_models()
+        if issubclass(model, PublishingModel)
+    ]
+    return publishable_models
 
 
 def assert_draft(method):
