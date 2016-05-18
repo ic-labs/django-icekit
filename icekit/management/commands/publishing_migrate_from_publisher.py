@@ -21,10 +21,4 @@ class Command(NoArgsCommand):
             else:
                 node.status = UrlNode.PUBLISHED
 
-            # Delete/clear legacy 'publisher_linked' field to avoid duplicate
-            # key errors for new publishing system, which no longer does all
-            # the fancy footwork necessary to handle the legacy `publisher`
-            # fields.
-            node.publisher_linked = None
-
             node.save()
