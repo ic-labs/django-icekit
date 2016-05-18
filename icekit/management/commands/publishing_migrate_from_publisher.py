@@ -43,16 +43,16 @@ class Command(NoArgsCommand):
                     cursor = connection.cursor()
                     cursor.execute(
                         """
-                        SELECT t.{pk_col},
-                            publisher_linked_id,
-                            publisher_is_draft,
-                            publisher_modified_at,
-                            publisher_published_at
-                        FROM {table} t
-                        JOIN {urlnode_table} ON t.{pk_col} = {urlnode_table}.id
+                        UPDATE {table}
+                           SET publishing_linked_id = u.publisher_linked_id,
+                               publishing_is_draft = u.publisher_is_draft,
+                               publishing_modified_at = u.publisher_modified_at,
+                               publishing_published_at = u.publisher_published_at
+                          FROM {urlnode_table} AS u
+                         WHERE u.id = {table}.{pk_col}
                         """.format(pk_col=model._meta.pk.column,
-                                    table=model._meta.db_table,
-                                    urlnode_table=UrlNode._meta.db_table)
+                                   table=model._meta.db_table,
+                                   urlnode_table=UrlNode._meta.db_table)
                     )
                     continue
                 except Exception, ex:
