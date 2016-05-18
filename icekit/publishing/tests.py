@@ -15,17 +15,17 @@ from mock import patch, Mock
 
 from django_dynamic_fixture import G
 
-from fluent_pages.models import PageLayout
-from fluent_pages.pagetypes.fluentpage.models import FluentPage
-
+from icekit.models import Layout
 from icekit.plugins.slideshow.models import SlideShow
+from icekit.page_types.layout_page.models import LayoutPage
 
 from icekit.publishing.managers import DraftItemBoobyTrap
 from icekit.publishing.middleware import PublishingMiddleware, \
     is_publishing_middleware_active, get_current_user, \
-    is_draft_request_context, override_current_user
+    is_draft_request_context, override_current_user, \
+    override_draft_request_context, override_publishing_middleware_active
 from icekit.publishing.utils import get_draft_hmac, verify_draft_url, \
-    get_draft_url
+    get_draft_url, PublishingException, NotDraftException
 from icekit.publishing.tests_base import BaseAdminTest
 
 User = get_user_model()
@@ -40,8 +40,8 @@ class TestPublishingModelAndQueryset(TestCase):
     def setUp(self):
         self.site = G(Site)
         self.user_1 = G(User)
-        self.page_layout_1 = G(PageLayout)
-        self.page_1 = FluentPage.objects.create(
+        self.page_layout_1 = G(Layout)
+        self.page_1 = LayoutPage.objects.create(
             author=self.user_1,
             title='Test title',
             layout=self.page_layout_1,
@@ -57,6 +57,14 @@ class TestPublishingModelAndQueryset(TestCase):
         self.slide_show_1 = SlideShow.objects.create(
             title='Test Slideshow',
         )
+
+    def test_model_publish_assert_draft_check(self):
+        self.slide_show_1.publish()
+        try:
+            self.slide_show_1.get_published().publish()
+            self.fail("Expected NotDraftException")
+        except NotDraftException:
+            pass
 
     def test_model_publishing_status_attributes(self):
         """
@@ -141,7 +149,76 @@ class TestPublishingModelAndQueryset(TestCase):
             self.assertEqual(
                 self.slide_show_1, self.slide_show_1.get_visible())
 
-    def test_publishing_queryset_draft(self):
+    def test_model_is_visible(self):
+        with patch('icekit.publishing.models.is_draft_request_context') as p:
+            # Draft is not visible in non-draft context
+            p.return_value = False
+            self.assertFalse(self.slide_show_1.is_visible)
+            # Draft is visible in draft context
+            p.return_value = True
+            self.assertTrue(self.slide_show_1.is_visible)
+        self.slide_show_1.publish()
+        with patch('icekit.publishing.models.is_draft_request_context') as p:
+            p.return_value = False
+            # Draft is not visible in non-draft context
+            self.assertFalse(self.slide_show_1.is_visible)
+            # Published copy is visible in non-draft context
+            self.assertTrue(self.slide_show_1.publishing_linked.is_visible)
+            p.return_value = True
+            # Draft is visible in draft context
+            self.assertTrue(self.slide_show_1.is_visible)
+            # Published copy is not visible in draft context (otherwise both
+            # draft and published copies of an item could be shown)
+            self.assertFalse(self.slide_show_1.publishing_linked.is_visible)
+
+    def test_model_is_within_publication_dates(self):
+        # Empty publication start/end dates
+        self.assertTrue(self.page_1.is_within_publication_dates())
+        # Test publication start date
+        self.page_1.publication_date = timezone.now() - timedelta(seconds=1)
+        self.page_1.save()
+        self.assertTrue(self.page_1.is_within_publication_dates())
+        self.page_1.publication_date = timezone.now() + timedelta(seconds=1)
+        self.page_1.save()
+        self.assertFalse(self.page_1.is_within_publication_dates())
+        # Reset
+        self.page_1.publication_date = None
+        self.page_1.save()
+        self.assertTrue(self.page_1.is_within_publication_dates())
+        # Test publication end date
+        self.page_1.publication_end_date = timezone.now() + timedelta(seconds=1)
+        self.page_1.save()
+        self.assertTrue(self.page_1.is_within_publication_dates())
+        self.page_1.publication_end_date = timezone.now() - timedelta(seconds=1)
+        self.page_1.save()
+        self.assertFalse(self.page_1.is_within_publication_dates())
+        # Reset
+        self.page_1.publication_end_date = None
+        self.page_1.save()
+        self.assertTrue(self.page_1.is_within_publication_dates())
+        # Test both publication start and end dates against arbitrary timestamp
+        self.page_1.publication_date = timezone.now() - timedelta(seconds=1)
+        self.page_1.publication_end_date = timezone.now() + timedelta(seconds=1)
+        self.assertTrue(self.page_1.is_within_publication_dates())
+        self.assertTrue(
+            self.page_1.is_within_publication_dates(timezone.now()))
+        # Timestamp exactly at publication start date is acceptable
+        self.assertTrue(
+            self.page_1.is_within_publication_dates(
+                self.page_1.publication_date))
+        # Timestamp exactly at publication end date is not acceptable
+        self.assertFalse(
+            self.page_1.is_within_publication_dates(
+                self.page_1.publication_end_date))
+
+    def test_model_is_published(self):
+        # Only actual published copy returns True for `is_published`
+        self.assertFalse(self.slide_show_1.is_published)
+        self.slide_show_1.publish()
+        self.assertFalse(self.slide_show_1.is_published)
+        self.assertTrue(self.slide_show_1.publishing_linked.is_published)
+
+    def test_queryset_draft(self):
         self.assertEqual(
             [self.slide_show_1], list(SlideShow.objects.draft()))
         # Only draft items returned even when published
@@ -157,7 +234,7 @@ class TestPublishingModelAndQueryset(TestCase):
                 self.assertEqual(
                     [self.slide_show_1], list(SlideShow.objects.draft()))
 
-    def test_queryset_published(self):
+    def test_queryset_published_on_standard_model(self):
         self.assertEqual(
             [], list(SlideShow.objects.published()))
         self.slide_show_1.publish()
@@ -187,6 +264,37 @@ class TestPublishingModelAndQueryset(TestCase):
         self.assertEqual(
             set([self.slide_show_1.publishing_linked, self.slide_show_1]),
             set(SlideShow.objects.published(with_exchange=False)))
+
+    def test_queryset_published_on_urlnode_model(self):
+        self.assertEqual(
+            [], list(LayoutPage.objects.published()))
+        self.page_1.publish()
+        # Exchange draft items for published by default
+        self.assertEqual(
+            [self.page_1.publishing_linked],  # Compare published copy
+            list(LayoutPage.objects.published()))
+        # Confirm we only get published items regardless of
+        # `is_draft_request_context`
+        with patch('icekit.publishing.apps.is_draft_request_context') as p:
+            p.return_value = True
+            self.assertEqual(
+                [self.page_1.publishing_linked],
+                list(LayoutPage.objects.published()))
+        # Delegates to `visible` if `for_user` provided
+        with patch('icekit.publishing.managers.PublishingQuerySet.visible') \
+                as p:
+            p.return_value = 'success!'
+            self.assertEqual(
+                'success!',
+                LayoutPage.objects.published(for_user=self.staff_1))
+            self.assertEqual(
+                'success!', LayoutPage.objects.published(for_user=None))
+            self.assertEqual(
+                'success!', LayoutPage.objects.published(for_user='whatever'))
+        # Without exchange of drafts for published
+        self.assertEqual(
+            set([self.page_1.publishing_linked, self.page_1]),
+            set(LayoutPage.objects.published(with_exchange=False)))
 
     def test_queryset_visible(self):
         self.slide_show_1.publish()
@@ -225,13 +333,62 @@ class TestPublishingModelAndQueryset(TestCase):
             [p.pk for p in qs.filter(publishing_is_draft=False)],
             [p.pk for p in qs.exchange_for_published()])
 
+    def test_draft_item_booby_trap(self):
+        # Published item cannot be wrapped by DraftItemBoobyTrap
+        self.slide_show_1.publish()
+        try:
+            DraftItemBoobyTrap(self.slide_show_1.get_published())
+            self.fail("Expected ValueError wrapping a published item")
+        except ValueError, ex:
+            self.assertTrue('is not a DRAFT' in ex.message)
+
+        # Wrap draft item
+        wrapper = DraftItemBoobyTrap(self.slide_show_1)
+
+        # Check permitted fields/methods return expected results
+        self.assertEqual(self.slide_show_1, wrapper.get_draft_payload())
+        self.assertEqual(
+            self.slide_show_1.get_published(), wrapper.get_published())
+        self.assertEqual(
+            self.slide_show_1.get_visible(), wrapper.get_visible())
+        self.assertEqual(
+            self.slide_show_1.publishing_linked, wrapper.publishing_linked)
+        self.assertEqual(
+            self.slide_show_1.publishing_linked_id, wrapper.publishing_linked_id)
+        self.assertEqual(
+            self.slide_show_1.publishing_is_draft, wrapper.publishing_is_draft)
+        self.assertEqual(
+            self.slide_show_1.is_published, wrapper.is_published)
+        self.assertEqual(
+            self.slide_show_1.has_been_published, wrapper.has_been_published)
+        self.assertEqual(
+            self.slide_show_1.is_draft, wrapper.is_draft)
+        self.assertEqual(
+            self.slide_show_1.is_visible, wrapper.is_visible)
+        self.assertEqual(
+            self.slide_show_1.pk, wrapper.pk)
+
+        # Check not-permitted fields/methods raise exception
+        try:
+            wrapper.title
+            self.fail("Expected PublishingException")
+        except PublishingException, ex:
+            self.assertTrue(
+                "Illegal attempt to access 'title' on the DRAFT"
+                in ex.message)
+        try:
+            wrapper.show_title
+            self.fail("Expected PublishingException")
+        except PublishingException, ex:
+            self.assertTrue(
+                "Illegal attempt to access 'show_title' on the DRAFT"
+                in ex.message)
+
     def test_queryset_iterator(self):
         self.slide_show_1.publish()
         # Confirm drafts are wrapped with booby trap on iteration over
         # publishable QS in a public request context.
-        with patch('icekit.publishing.managers'
-                   '.is_publishing_middleware_active') as p:
-            p.return_value = True
+        with override_publishing_middleware_active(True):
             self.assertTrue(all(
                 [i.__class__ == DraftItemBoobyTrap
                     for i in SlideShow.objects.all() if i.is_draft]))
@@ -239,13 +396,22 @@ class TestPublishingModelAndQueryset(TestCase):
             self.assertTrue(all(
                 [i.__class__ != DraftItemBoobyTrap
                     for i in SlideShow.objects.all() if i.is_published]))
-        # Confirm drafts returned as normal on iteration when in draft context
-        with patch('icekit.publishing.managers'
-                   '.is_publishing_middleware_active') as p:
-            p.return_value = True
-            self.assertTrue(all(
-                [i.__class__ != DraftItemBoobyTrap
-                    for i in SlideShow.objects.all() if i.is_published]))
+            # Confirm drafts returned as normal when in draft context
+            with override_draft_request_context(True):
+                self.assertTrue(all(
+                    [i.__class__ != DraftItemBoobyTrap
+                     for i in SlideShow.objects.all() if i.is_draft]))
+
+    def test_queryset_only(self):
+        # Check `publishing_is_draft` is always included in `only` filtering
+        qs = SlideShow.objects.only('pk')
+        self.assertEqual(
+            set(['id', 'publishing_is_draft']),
+            qs.query.get_loaded_field_names()[SlideShow])
+        qs = SlideShow.objects.only('pk', 'publishing_is_draft')
+        self.assertEqual(
+            set(['id', 'publishing_is_draft']),
+            qs.query.get_loaded_field_names()[SlideShow])
 
     def test_model_get_draft(self):
         self.slide_show_1.publish()
@@ -544,14 +710,6 @@ class TestPublishingAdmin(BaseAdminTest):
     """
 
     def setUp(self):
-        self.site = G(Site)
-        self.user_1 = G(User)
-        self.page_layout_1 = G(PageLayout)
-        self.page_1 = FluentPage.objects.create(
-            author=self.user_1,
-            title='Test title',
-            layout=self.page_layout_1,
-        )
         self.staff_1 = User.objects.create(
             username='staff_1',
             is_staff=True,
@@ -586,6 +744,7 @@ class TestPublishingAdmin(BaseAdminTest):
         self.slide_show_1 = self.refresh(self.slide_show_1)
         self.assertIsNotNone(self.slide_show_1.publishing_linked)
         self.assertTrue(self.slide_show_1.has_been_published)
+        self.assertTrue(self.slide_show_1.get_published().has_been_published)
 
         # Check admin change page includes unpublish link (published item)
         response = self.app.get(
@@ -599,6 +758,12 @@ class TestPublishingAdmin(BaseAdminTest):
         self.assertTrue(
             reverse('admin:slideshow_slideshow_unpublish',
                     args=(self.slide_show_1.pk, )) in response.text)
+
+        # Publish again
+        self.slide_show_1.title += ' - changed'
+        self.slide_show_1.save()
+        self.admin_publish_item(self.slide_show_1, user=self.staff_1)
+        self.slide_show_1 = self.refresh(self.slide_show_1)
 
         # Unpublish via admin
         self.admin_unpublish_item(self.slide_show_1, user=self.staff_1)
@@ -622,42 +787,11 @@ class TestPublishingAdmin(BaseAdminTest):
                     args=(self.slide_show_1.pk, )) in response.text)
 
 
-# TODO Enable these test cases based on SFMOMA once Fluent publishing is done
-class TestFluentPublishing(TestCase):
-    """ Test publishing features and behaviour for Fluent-based items """
+class TestPublishingOfM2MRelationships(TestCase):
+    """ Test publishing works correctly with complex M2M relationships """
 
     def setUp(self):
-        self.skipTest("Publishing not yet implemented for Fluent items")
-
-    def test_queryset_published(self):
-        # Setting publication start & end dates on draft has no effect
-        self.slide_show_1.publication_date = \
-            timezone.now() + timedelta(seconds=1)
-        self.slide_show_1.publication_end_date = \
-            timezone.now() - timedelta(seconds=1)
-        self.slide_show_1.save()
-        self.assertEqual(
-            set([self.slide_show_1.publishing_linked, self.slide_show_1]),
-            set(SlideShow.objects.published(with_exchange=False)))
-        # Test publication date filtering: start date
-        self.slide_show_1.publishing_linked.publication_date = \
-            timezone.now() + timedelta(seconds=1)
-        self.slide_show_1.publishing_linked.save()
-        self.assertEqual(
-            set(), set(SlideShow.objects.published(with_exchange=False)))
-        # Test publication date filtering: end date
-        self.slide_show_1.publishing_linked.publication_date = None
-        self.slide_show_1.publishing_linked.publication_end_date = \
-            timezone.now() - timedelta(seconds=1)
-        self.slide_show_1.publishing_linked.save()
-        self.assertEqual(
-            set(), set(SlideShow.objects.published(with_exchange=False)))
-        # Test publication date filtering: clear start & end dates
-        self.slide_show_1.publishing_linked.publication_end_date = None
-        self.slide_show_1.publishing_linked.save()
-        self.assertEqual(
-            set([self.slide_show_1.publishing_linked, self.slide_show_1]),
-            set(SlideShow.objects.published(with_exchange=False)))
+        self.skipTest("Complex M2M relationships not yet present in ICEKit")
 
     # TODO Add test_m2m_handling_in_publishing_clone_relations from SFMOMA
 

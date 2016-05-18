@@ -2,14 +2,12 @@ from copy import deepcopy
 
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import FieldError, ObjectDoesNotExist, \
-    MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.dispatch import receiver
 from django.utils import timezone
 
 from fluent_contents.models import Placeholder
-from fluent_pages import appsettings
 from fluent_pages.models import UrlNode
 from fluent_pages.integration.fluent_contents import FluentContentsPage
 
@@ -135,7 +133,7 @@ class PublishingModel(models.Model):
             return True
         elif self.is_draft:
             return self.publishing_linked is not None
-        raise ValueError(
+        raise ValueError(  # pragma: no cover
             "Publishable object %r is neither draft nor published" % self)
 
     def get_draft(self):
@@ -147,7 +145,7 @@ class PublishingModel(models.Model):
             return self
         elif self.is_published:
             return self.publishing_draft
-        raise ValueError(
+        raise ValueError(  # pragma: no cover
             "Publishable object %r is neither draft nor published" % self)
 
     def get_published(self):
@@ -160,7 +158,7 @@ class PublishingModel(models.Model):
             return self
         elif self.is_draft:
             return self.publishing_linked
-        raise ValueError(
+        raise ValueError(  # pragma: no cover
             "Publishable object %r is neither draft nor published" % self)
 
     def get_visible(self):
@@ -264,7 +262,7 @@ class PublishingModel(models.Model):
             # Save the new published object as a separate instance to self.
             publish_obj.save()
             # Sanity-check that we successfully saved the published copy
-            if not publish_obj.pk:
+            if not publish_obj.pk:  # pragma: no cover
                 raise PublishingException("Failed to save published copy")
 
             # As it is a new object we need to clone each of the
@@ -323,13 +321,14 @@ class PublishingModel(models.Model):
             publishing_signals.publishing_post_unpublish.send(
                 sender=type(self), instance=self)
 
+    # TODO: Re-implement revert-to-public without reversion?
     @assert_draft
     def revert_to_public(self):
         """
         Revert draft instance to the last published instance.
         """
         raise Exception(
-            "TODO: Re-implement revert-to-public without reversion")
+            "TODO: Re-implement revert-to-public without reversion?")
 
     def publishing_prepare_published_copy(self, draft_obj):
         """ Prepare published copy of draft prior to saving it """

@@ -162,7 +162,9 @@ class AppConfig(AppConfig):
             if issubclass(model, UrlNode):
 
                 PublishingUrlNodeManager().contribute_to_class(
-                    model, 'publishing_objects')
+                    model, 'objects')
+                PublishingUrlNodeManager().contribute_to_class(
+                    model, '_default_manager')
 
                 @monkey_patch_override_method(model)
                 def _make_slug_unique(self, translation):
