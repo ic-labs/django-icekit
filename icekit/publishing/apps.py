@@ -115,11 +115,39 @@ class AppConfig(AppConfig):
                 language_code = self._language or get_language()
 
             # Don't normalize slashes, expect the URLs to be sane.
-            candidates = self._single_site().filter(
+            qs = self._single_site().filter(
                 translations___cached_url=path,
                 translations__language_code=language_code,
             )
 
+            obj = _filter_candidates_by_published_status(qs, self.model, path)
+
+            # Explicitly set language to the state the object was fetched in.
+            obj.set_current_language(language_code)
+            return obj
+
+        # Monkey-patch `UrlNodeQuerySet.best_match_for_path` to add filtering
+        # by publishing status.
+        @monkey_patch_override_method(UrlNodeQuerySet)
+        def best_match_for_path(self, path, language_code=None):
+            if language_code is None:
+                language_code = self._language or get_language()
+
+            # Based on FeinCMS:
+            paths = self._split_path_levels(path)
+
+            qs = self._single_site() \
+                    .filter(translations___cached_url__in=paths,
+                            translations__language_code=language_code) \
+                    .extra(select={'_url_length': 'LENGTH(_cached_url)'}) \
+                    .order_by('-level', '-_url_length')
+
+            obj = _filter_candidates_by_published_status(qs, self.model, path)
+
+            obj.set_current_language(language_code)
+            return obj
+
+        def _filter_candidates_by_published_status(candidates, model, path):
             # Filter candidate results by published status, using
             # instance attributes instead of queryset filtering to
             # handle unpublishable and ICEKit publishing-enabled items.
@@ -151,23 +179,20 @@ class AppConfig(AppConfig):
                             objs.add(candidate)
 
             if not objs:
-                raise self.model.DoesNotExist(
+                raise model.DoesNotExist(
                     u"No published {0} found for the path '{1}'"
-                    .format(self.model.__name__, path))
+                    .format(model.__name__, path))
 
             if len(objs) > 1:
                 # TODO May need special handling for SFMOMA StoryPage slugs
                 # which can overlap. E.g. return the first one with no
                 # category, or the last one if they all have categories.
 
-                raise self.model.MultipleObjectsReturned(
+                raise model.MultipleObjectsReturned(
                     u"Multiple published {0} found for the path '{1}'"
-                    .format(self.model.__name__, path))
+                    .format(model.__name__, path))
 
-            obj = objs.pop()
-            # Explicitly set language to the state the object was fetched in.
-            obj.set_current_language(language_code)
-            return obj
+            return objs.pop()
 
         # Monkey-patch method overrides for classes where we must do so to
         # avoid our custom versions from getting clobbered by versions higher
