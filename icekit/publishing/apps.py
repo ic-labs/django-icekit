@@ -115,7 +115,7 @@ class AppConfig(AppConfig):
                 language_code = self._language or get_language()
 
             # Don't normalize slashes, expect the URLs to be sane.
-            objs = self._single_site().filter(
+            candidates = self._single_site().filter(
                 translations___cached_url=path,
                 translations__language_code=language_code,
             )
@@ -123,14 +123,32 @@ class AppConfig(AppConfig):
             # Filter candidate results by published status, using
             # instance attributes instead of queryset filtering to
             # handle unpublishable and ICEKit publishing-enabled items.
+            objs = set()  # Set to avoid duplicates
             if is_draft_request_context():
-                objs = [obj for obj in objs
-                        if getattr(obj, 'is_draft', True)]
+                for candidate in candidates:
+                    # Keep candidates that are publishable draft copies, or
+                    # that are not publishable (i.e. they don't have the
+                    # `is_draft` attribute at all)
+                    if getattr(candidate, 'is_draft', True):
+                        objs.add(candidate)
+                    # Also keep candidates where we have the published copy and
+                    # can exchange to get the draft copy
+                    elif hasattr(candidate, 'get_draft'):
+                        objs.add(candidate.get_draft())
             else:
-                objs = [obj for obj in objs
-                        if getattr(obj, 'is_published', True) and
-                        (not hasattr(obj, 'is_within_publication_dates') or
-                         obj.is_within_publication_dates())]
+                for candidate in candidates:
+                    # Keep candidates that are published, or that are not
+                    # publishable (i.e. they don't have the `is_published`
+                    # attribute)
+                    if getattr(candidate, 'is_published', True):
+                        # Skip candidates that are not within any publication
+                        # date restrictions
+                        if (hasattr(candidate, 'is_within_publication_dates')
+                            and not candidate.is_within_publication_dates()
+                        ):
+                            pass
+                        else:
+                            objs.add(candidate)
 
             if not objs:
                 raise self.model.DoesNotExist(
@@ -146,7 +164,7 @@ class AppConfig(AppConfig):
                     u"Multiple published {0} found for the path '{1}'"
                     .format(self.model.__name__, path))
 
-            obj = objs[0]
+            obj = objs.pop()
             # Explicitly set language to the state the object was fetched in.
             obj.set_current_language(language_code)
             return obj
