@@ -566,11 +566,21 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         pass
 
     def publish(self, request, qs):
-        for q in self.model.objects.get_real_instances(qs):
+        # Convert polymorphic queryset instances to real ones if/when necessary
+        try:
+            qs = self.model.objects.get_real_instances(qs)
+        except AttributeError:
+            pass
+        for q in qs:
             q.publish()
 
     def unpublish(self, request, qs):
-        for q in self.model.objects.get_real_instances(qs):
+        # Convert polymorphic queryset instances to real ones if/when necessary
+        try:
+            qs = self.model.objects.get_real_instances(qs)
+        except AttributeError:
+            pass
+        for q in qs:
             q.unpublish()
 
 
