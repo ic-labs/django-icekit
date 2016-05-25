@@ -28,40 +28,49 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=[
-        'django_extensions',
         'django-bootstrap3',
+        'django-el-pagination',
         'django-fluent-contents',
         'django-fluent-pages',
         'django-model-utils<2.4',
         'django-wysiwyg',
-        'requests',
+        'django_extensions',
         'Pillow',
-        'django-el-pagination',
+        'requests',
+        'nltk',
+        'unidecode',
     ],
     extras_require={
-        'brightcove': ['django-brightcove'],
+        'brightcove': [
+            'django-brightcove',
+        ],
         'dev': [
             'ipdb',
             'ipython',
             'mkdocs',
         ],
-        'django17': ['django-mptt<0.8', ],
+        'django17': [
+            'django-fluent-contents<1.1',  # See: https://github.com/edoburu/django-fluent-contents/issues/67
+            'django-mptt<0.8',  # See: https://github.com/django-mptt/django-mptt/releases
+            'django-polymorphic<0.8',  # See: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
+            'Django>=1.7,<1.8',
+        ],
         'forms': [
             'django-forms-builder',
         ],
         'search': [
-            'django-haystack',
             'django-fluent-pages[flatpage,fluentpage]',
+            'django-haystack',
         ],
         'test': [
             'coverage',
             'django-dynamic-fixture',
             'django-nose',
             'django-webtest',
+            'micawber',
             'mock',
             'nose-progressive',
             'WebTest',
-            'micawber',
         ],
     },
     setup_requires=['setuptools_scm'],

@@ -3,15 +3,19 @@ Models for ``icekit`` app.
 """
 
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
-
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.template.defaultfilters import striptags
 from django.template.loader import get_template
 from django.utils import encoding, timezone
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.analyzer import get_template_placeholder_data
 from fluent_contents.models import \
     ContentItemRelation, Placeholder, PlaceholderRelation
+from fluent_contents.rendering import render_content_items
+from icekit.tasks import store_readability_score
+from icekit.utils.readability.readability import Readability
+from unidecode import unidecode
 
 from . import fields, plugins
 
@@ -79,6 +83,33 @@ class FluentFieldsMixin(LayoutFieldMixin):
                     ))
                 result = result or created
         return result
+
+
+class ReadabilityMixin(models.Model):
+    readability_score = models.DecimalField(max_digits=4, decimal_places=2, null=True)
+
+    class Meta:
+        abstract = True
+
+    def extract_text(self):
+        # return the rendered content, with HTML tags stripped.
+        html = render_content_items(request=None, items=self.contentitem_set.all())
+        return striptags(html)
+
+    def calculate_readability_score(self):
+        try:
+            return Readability(unidecode(self.extract_text())).SMOGIndex()
+        except:
+            return None
+
+    def store_readability_score(self):
+        store_readability_score.delay(self._meta.app_label, self._meta.model_name, self.pk)
+
+    def save(self, *args, **kwargs):
+        r = super(ReadabilityMixin, self).save(*args, **kwargs)
+        self.store_readability_score()
+        return r
+
 
 # MODELS ######################################################################
 

@@ -6,10 +6,10 @@ from django_extensions.db.models import AutoSlugField, TimeStampedModel
 from fluent_contents.models import ContentItem
 
 try:
-    # for django-polymorphic >= 0.8
+    # For django-polymorphic >= 0.8
     from polymorphic.models import PolymorphicModel
 except ImportError:
-    # for django-polymorphic < 0.8
+    # For django-polymorphic < 0.8
     from polymorphic import PolymorphicModel
 
 

@@ -66,8 +66,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'icekit.tests.urls'
 SECRET_KEY = 'secret-key'
 STATIC_URL = '/static/'
-# TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -92,3 +91,18 @@ HAYSTACK_CONNECTIONS = {
         'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
     },
 }
+
+THUMBNAIL_BASEDIR = 'thumbs'
+
+NOSE_ARGS = [
+    '--logging-clear-handlers',  # Clear all other logging handlers
+    '--nocapture',  # Don't capture stdout
+    '--nologcapture',  # Disable logging capture plugin
+    # '--processes=-1',  # Automatically set to the number of cores
+    '--with-progressive',  # See: https://pypi.python.org/pypi/nose-progressive
+]
+
+# TRAVIS ######################################################################
+
+if 'TRAVIS' in os.environ:
+    NOSE_ARGS.remove('--with-progressive')
