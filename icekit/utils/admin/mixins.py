@@ -190,8 +190,6 @@ class PolymorphicFluentAdminRawIdFix(PolymorphicAdminRawIdFix):
     that any Fluent inlines in the admin for the page inherit from the mixin
     above.
     
-    Note that it's already inherited by icekit.admin.FluentLayoutsMixin.
-    
     Using this as the FLUENT_PAGES_[PARENT/CHILD]_ADMIN_MIXIN setting does not
     appear to work (possibly because of explicit model_admin declarations in
     PagePlugins defining page types).
