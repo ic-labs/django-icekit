@@ -257,9 +257,9 @@ class _PublishingHelpersMixin(object):
         try:
             if isinstance(obj, PublishingModel):
                 c['publish_url'] = reverse(
-                    self.publish_reverse(type(obj)), args=(obj.pk, )),
+                    self.publish_reverse(type(obj)), args=(obj.pk, ))
                 c['unpublish_url'] = reverse(
-                    self.unpublish_reverse(type(obj)), args=(obj.pk, )),
+                    self.unpublish_reverse(type(obj)), args=(obj.pk, ))
         except NoReverseMatch:
             pass
         return t.render(c)
