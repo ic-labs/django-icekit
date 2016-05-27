@@ -5,7 +5,7 @@ library dependencies manually.
 
 First, create your project the same way as if you were using Docker:
 
-    $ bash <(curl -L http://bit.ly/django-icekit-template) FOO
+    $ bash <(curl -L http://bit.ly/ixc-project-template) FOO
 
 This only creates the source code for a new project from our template. It does
 not install any dependencies for the project.
