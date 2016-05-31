@@ -55,6 +55,7 @@ class ImageItem(WebTest):
         response = self.app.get(self.page_1.get_absolute_url())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            'icekit/plugins/image/default.html',
-            response.templates[2].name
+            [u'layout_page/layoutpage/layouts/default.html',
+             'icekit/plugins/image/default.html'],
+            [t.name for t in response.templates]
         )
