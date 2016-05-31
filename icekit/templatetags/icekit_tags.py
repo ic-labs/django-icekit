@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.template import Library
 
 
@@ -34,3 +35,12 @@ def get_slot_contents_tag(descriptor, slot_name):
     `{% get_slot_contents <slot descriptor> <slot name> as <variable_name> %}`
     """
     return get_item(descriptor, slot_name)
+
+
+@register.inclusion_tag('icekit/templatetags/link_share.html')
+def link_share(text):
+    return {
+        'text': text,
+        'share_username': getattr(settings, 'ICEKIT_SHARE_USERNAME', ''),
+        'share_key': getattr(settings, 'ICEKIT_SHARE_KEY', ''),
+    }
