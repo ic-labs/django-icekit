@@ -33,6 +33,7 @@ setuptools.setup(
         'django-fluent-contents',
         'django-fluent-pages',
         'django-model-utils',
+        'django-polymorphic<0.8',  # For compatibility with django-fluent-contents
         'django-wysiwyg',
         'django_extensions',
         'Pillow',
@@ -52,7 +53,7 @@ setuptools.setup(
         'django17': [
             'django-fluent-contents<1.1',  # See: https://github.com/edoburu/django-fluent-contents/issues/67
             'django-mptt<0.8',  # See: https://github.com/django-mptt/django-mptt/releases
-            'django-polymorphic<0.8',  # See: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
+            'django-polymorphic<0.8',  # For compatibility with Django < 1.8, see: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
             'Django>=1.7,<1.8',
         ],
         'forms': [
