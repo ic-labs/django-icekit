@@ -49,7 +49,7 @@ $(document).ready(function() {
             return;
         }
 		$.ajax({
-			url: "http://api.bit.ly/v3/shorten",
+			url: "https://api-ssl.bit.ly/v3/shorten",
 			data: {
 				'longUrl': url,
 				'apiKey': _key,
