@@ -1,4 +1,4 @@
-{% load compress %}
+{% load compress static %}
 
 {% block doctype %}<!DOCTYPE html>{% endblock %}
 <html lang="{% block html_lang %}en{% endblock %}" {% block html_attributes %}{% endblock %}>
@@ -65,6 +65,13 @@
 			{# Base JS files #}
 			{% compress js file %}
 				{% block base_js %}{% endblock %}
+				{% if ICEKIT_SHARE_USERNAME and ICEKIT_SHARE_KEY %}
+					<script language="javascript">
+						window.ICEKIT_SHARE_USERNAME = '{{ ICEKIT_SHARE_USERNAME }}';
+						window.ICEKIT_SHARE_KEY = '{{ ICEKIT_SHARE_KEY }}';
+					</script>
+					<script src="{% static "icekit/js/link_share.js" %}"></script>
+				{% endif %}
 			{% endcompress %}
 			{# Extra JS files - section/page specific, etc #}
 			{% compress js file %}
