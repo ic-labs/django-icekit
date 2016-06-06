@@ -78,4 +78,7 @@ $(document).ready(function() {
 			copyTextToClipboard(button, urls.short);
 		}
 	});
+
+	// Prevent following of A anchor link within share button
+	shareButtons.find('a').click(function(evt) {evt.preventDefault()});
 });
