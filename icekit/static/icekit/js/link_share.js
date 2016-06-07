@@ -10,44 +10,38 @@ $(document).ready(function() {
 	};
 	shareButtons.data('copied', false);
 
-	var copyTextToClipboard = function(button, text) {
-		var _textArea = document.createElement("textarea");
+	var copyTextToClipboard = function(button) {
+		var inputField = button.find('input');
 
-		_textArea.style.position = 'fixed';
-		_textArea.style.top = 0;
-		_textArea.style.left = 0;
-		_textArea.style.width = '2em';
-		_textArea.style.height = '2em';
-		_textArea.style.padding = 0;
-		_textArea.style.border = 'none';
-		_textArea.style.outline = 'none';
-		_textArea.style.boxShadow = 'none';
-		_textArea.style.background = 'transparent';
-		_textArea.value = text;
+		// Get full URL from data and replace truncated URL
+		inputField.val(inputField.data('full-url'));
 
-		document.body.appendChild(_textArea);
-
-		_textArea.select();
+		// `setSelectionRange()` is necessary for iOS for which `select()`
+		// doesn't work properly.
+		inputField.focus();
+		inputField[0].setSelectionRange(0, 9999);
 
 		try {
 			var _successful = document.execCommand('copy');
 			if (_successful) {
 				button.addClass(buttonClass.active);
 				button.data('copied', true);
+			} else {
+				// Set and show tooltip hint to copy selected link from INPUT
+				inputField.attr('title', 'Press Command + C To Copy');
+				inputField.tooltip().mouseover();
 			}
 		} catch (err) {
 			console.error('Oops, unable to copy');
 		}
-
-		document.body.removeChild(_textArea);
 	}
 
 	function prepareShareButtons(url) {
 		var _username = window.ICEKIT_SHARE_USERNAME;
 		var _key = window.ICEKIT_SHARE_KEY;
-        if (!_username || !_key) {
-            return;
-        }
+		if (!_username || !_key) {
+			return;
+		}
 		$.ajax({
 			url: "https://api-ssl.bit.ly/v3/shorten",
 			data: {
@@ -59,9 +53,8 @@ $(document).ready(function() {
 			success: function (data) {
 				var _requestUrl = urls.short = data.data.url;
 				var _truncateUrl = _requestUrl.replace(/http[s]*:\/\//, '');
-				shareButtons.find('.js-short-url')
-					.text(_truncateUrl)
-					.prop('href', urls.short);
+				// Set truncated URL in INPUT field but set full URL in data
+				shareButtons.find('input').val(_truncateUrl).data('full-url', _requestUrl);
 				shareButtons.addClass(buttonClass.generate);
 			}
 		});
@@ -75,10 +68,7 @@ $(document).ready(function() {
 			button.removeClass(buttonClass.active);
 			button.data('copied', false);
 		} else {
-			copyTextToClipboard(button, urls.short);
+			copyTextToClipboard(button);
 		}
 	});
-
-	// Prevent following of A anchor link within share button
-	shareButtons.find('a').click(function(evt) {evt.preventDefault()});
 });
