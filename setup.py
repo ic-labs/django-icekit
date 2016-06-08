@@ -28,7 +28,7 @@ if {'bdist_wheel', 'develop', 'sdist'}.intersection(sys.argv):
         shutil.rmtree('bower_components')
     print('Installing bower components.')
     try:
-        if subprocess.call(['bower', 'install'], stderr=sys.stderr):
+        if subprocess.call(['bower', 'install', '--allow-root'], stderr=sys.stderr):
             raise RuntimeError
     except (OSError, RuntimeError):
         print('ERROR: Unable to install bower components.', file=sys.stderr)
