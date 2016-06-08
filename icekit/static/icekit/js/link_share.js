@@ -12,10 +12,10 @@ $(document).ready(function() {
 		// Get full URL from data and replace truncated URL
 		inputField.val(inputField.data('full-url'));
 
-		// `setSelectionRange()` is necessary for iOS for which `select()`
-		// doesn't work properly.
-		inputField.focus();
-		inputField[0].setSelectionRange(0, 9999);
+		// `select()` is doesn't work for iOS, but that's okay because it
+		// makes the experience bad anyway and we rely on this failing later
+		// on to detect situations where we need different tooltip copy.
+		inputField.select();
 
 		try {
 			var _successful = document.execCommand('copy');
@@ -24,8 +24,20 @@ $(document).ready(function() {
 				button.data('copied', true);
 			} else {
 				// Set and show tooltip hint to copy selected link from INPUT
-				inputField.attr('title', 'Press Command + C To Copy');
+				if (inputField[0].selectionStart == inputField[0].selectionEnd) {
+					// The `select()` call above failed, we are probably on
+					// a mobile browser that doesn't support that operation.
+					inputField.attr('title', 'Select and Copy Link');
+				} else {
+					inputField.attr('title', 'Press Command + C To Copy');
+				}
+				// Trigger title tooltip to display immediately
 				inputField.tooltip().mouseover();
+				// Forcibly un-trigger title tooltip when the input field loses
+				// focus, so the tooltip will go away on iOS.
+				inputField.focusout(function() {
+					inputField.tooltip().mouseout();
+				});
 			}
 		} catch (err) {
 			console.error('Oops, unable to copy');
