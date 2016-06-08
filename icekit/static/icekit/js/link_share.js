@@ -22,22 +22,35 @@ $(document).ready(function() {
 			if (_successful) {
 				button.addClass(buttonClass.active);
 				button.data('copied', true);
+				inputField.val(inputField.data('short-url'));
 			} else {
 				// Set and show tooltip hint to copy selected link from INPUT
 				if (inputField[0].selectionStart == inputField[0].selectionEnd) {
 					// The `select()` call above failed, we are probably on
 					// a mobile browser that doesn't support that operation.
-					inputField.attr('title', 'Select and Copy Link');
+					// Replace the selected INPUT field with a plain link which
+					// should be easier to share on mobile devices.
+					var linkField = button.find('a');
+					linkField.attr("href", inputField.data('full-url'));
+					linkField.html(inputField.data('short-url'));
+					linkField.attr('title', 'Select and Copy Link');
+
+					// Unfocus and hide INPUT field
+					inputField.blur();
+					inputField.hide();
+
+					// Show link replacement field with tooltip
+					linkField.show();
+					// Trigger title tooltip to display immediately
+					linkField.tooltip().mouseover();
+					// Prevent pointless following of link back to same page
+					linkField.click(function(evt) {evt.preventDefault()});
 				} else {
+					// The `select()` call worked, so prompt user to copy.
 					inputField.attr('title', 'Press Command + C To Copy');
+					// Trigger title tooltip to display immediately
+					inputField.tooltip().mouseover();
 				}
-				// Trigger title tooltip to display immediately
-				inputField.tooltip().mouseover();
-				// Forcibly un-trigger title tooltip when the input field loses
-				// focus, so the tooltip will go away on iOS.
-				inputField.focusout(function() {
-					inputField.tooltip().mouseout();
-				});
 			}
 		} catch (err) {
 			console.error('Oops, unable to copy');
@@ -68,7 +81,8 @@ $(document).ready(function() {
 				}
 				var _shorterUrl = _shortUrl.replace(/http[s]*:\/\//, '');
 				// Set truncated URL in INPUT field but set full URL in data
-				shareButtons.find('input').val(_shorterUrl).data('full-url', _shortUrl);
+				var inputField = shareButtons.find('input');
+				inputField.val(_shorterUrl).data('short-url', _shorterUrl).data('full-url', _shortUrl);
 				shareButtons.addClass(buttonClass.generate);
 			}
 		});
