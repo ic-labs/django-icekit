@@ -1,9 +1,5 @@
 $(document).ready(function() {
 	var shareButtons = $('.js-share');
-	var urls = {
-		initial: window.location.href,
-		short: ''
-	};
 	var buttonClass = {
 		active: 'share-button--active',
 		generate: 'share-button--generate'
@@ -51,16 +47,22 @@ $(document).ready(function() {
 			},
 			dataType: 'JSON',
 			success: function (data) {
-				var _requestUrl = urls.short = data.data.url;
-				var _truncateUrl = _requestUrl.replace(/http[s]*:\/\//, '');
+				if (data.status_code !== 200) {
+					// No short link available for some reason, fall back
+					// to original URL (full link) instead
+					var _shortUrl = url;
+				} else {
+					var _shortUrl = data.data.url;
+				}
+				var _shorterUrl = _shortUrl.replace(/http[s]*:\/\//, '');
 				// Set truncated URL in INPUT field but set full URL in data
-				shareButtons.find('input').val(_truncateUrl).data('full-url', _requestUrl);
+				shareButtons.find('input').val(_shorterUrl).data('full-url', _shortUrl);
 				shareButtons.addClass(buttonClass.generate);
 			}
 		});
 	}
 
-	prepareShareButtons(urls.initial);
+	prepareShareButtons(window.location.href);
 
 	shareButtons.on('click', function () {
 		var button = $(this);
