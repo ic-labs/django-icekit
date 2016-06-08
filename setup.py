@@ -32,7 +32,8 @@ if {'bdist_wheel', 'develop', 'sdist'}.intersection(sys.argv):
             raise RuntimeError
     except (OSError, RuntimeError):
         print('ERROR: Unable to install bower components.', file=sys.stderr)
-        exit(1)
+        if {'bdist_wheel', 'sdist'}.intersection(sys.argv):
+            exit(1)
     os.chdir(cwd)
 
 setuptools.setup(
