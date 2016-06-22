@@ -98,20 +98,28 @@ def filter_featured_apps(admin_apps, request):
 
 
 @register.filter
-def get_model_list(app_list):
-    result = []
-    for app in app_list:
-        for model in app['models']:
-            result.append({
-                'model': model,
-                'app': app,
-            })
-    return result
+def partition_app_list(app_list, n):
+    """
+    :param app_list: A list of apps with models.
+    :param n: Number of buckets to divide into.
+    :return: Partition apps into n partitions, where the number of models in each list is roughly equal. We also factor
+    in the app heading.
+    """
+    num_rows = sum([1 + len(x['models']) for x in app_list]) # + 1 for app title
+    num_rows_per_partition = num_rows / n
 
+    result = [[] for i in range(n)] # start with n empty lists of lists
+    partition = 0
+    count = 0
 
-@register.filter
-def divide_list(l, n):
-    result = []
-    for i in xrange(0, len(l), n):
-        result.append(l[i:i+n])
+    for a in app_list:
+        # will the app fit in this column or overflow?
+        c = len(a['models']) + 1 # the +1 is for the app title
+        if (partition + 1 < n) and (count + (c/n) > num_rows_per_partition): # if we're not on the last column, and we overflowed
+            # overflow
+            partition += 1
+            count = 0
+        result[partition].append(a)
+        count += c
+
     return result

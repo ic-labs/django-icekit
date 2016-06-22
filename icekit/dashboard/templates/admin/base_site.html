@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% load static compress %}
 
-{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+{% block title %}{{ title }} | {{ SITE_VERBOSE_NAME|default:_('ICEkit admin') }}{% endblock %}
 
 {% block stylesheet %}{% endblock %}
 

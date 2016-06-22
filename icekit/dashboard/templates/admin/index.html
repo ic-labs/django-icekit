@@ -1,8 +1,6 @@
 {% extends "admin/base_site.html" %}
 {% load i18n admin_static dashboard_tags static %}
 
-{% block title %}ICEkit Admin{% endblock %}
-
 {% block content_title %}{% endblock %}
 
 {% block extrastyle %}
@@ -17,7 +15,7 @@
 
 {% block branding %}
 <a href="{% url 'admin:index' %}">
-	<img id="site-logo" src="{% block header-image %}{% static 'admin/img/header-brand.png' %}{% endblock header-image %}" title="San Francisco Museum of Modern Art">
+	<img id="site-logo" src="{% block header-image %}{% static 'admin/img/header-brand.png' %}{% endblock header-image %}" title="{{ SITE_VERBOSE_NAME }}">
 	<h1 id="site-name">Site Admin</h1>
 </a>
 {% endblock %}
@@ -29,13 +27,19 @@
 
 {% block content %}
 <div class="content-fullwidth">
-	<div class="widget-area">
-		{% for app in app_list|filter_featured_apps:request %}
-			{% include "admin/app_widget.html" with app=app %}
-		{% endfor %}
 
-		{# the usual app list goes here #}
-		<div class="widget widget-other is-full-width">
+	<div class="row">
+		{% for app in app_list|filter_featured_apps:request %}
+			<div class="col-md-4 col-sm-6">
+				{% include "admin/app_widget.html" with app=app %}
+			</div>
+		{% endfor %}
+	</div>
+
+	{# the usual app list goes here #}
+	{% if app_list %}
+	<div class="row">
+		<div class="widget widget-other">
 			<header>
 				<h2>{{ title }}</h2>
 				<!--<ul class="widget-controls">-->
@@ -43,62 +47,59 @@
 					<!--<li class="widget-control widget-control-drag">⣿</li>-->
 				<!--</ul>-->
 			</header>
-			{% if app_list %}
-				{% for column in app_list|get_model_list|divide_list:2 %}
-					<ul class="other-contents-list">
-						{% for app_model in column %}
+
+
+			{% for column in app_list|partition_app_list:3 %}
+				<ul class="other-contents-list col-md-4">
+					{% for app in column %}
+						<li class="mini caps quiet">
+							{% if app.app_url %}
+								<a href="{{ app.app_url }}">{{ app.name }}</a>
+							{% else %}
+								{{ app.name }}
+							{% endif %}
+						</li>
+						{% for model in app.models %}
 							<li>
 								<h3>
-									{% if app_model.model.admin_url %}
-										<a href="{{ app_model.model.admin_url }}">
-									{% endif %}
-									{{ app_model.model.name }}
-									<span class="mini caps quiet">
-										{{ app_model.app.name }}
-									</span>
-									{% if app_model.model.admin_url %}
-										</a>
+									{% if model.admin_url %}
+										<a href="{{ model.admin_url }}">{{ model.name }}</a>
+									{% else %}
+										{{ model.name }}
 									{% endif %}
 								</h3>
-								<p class="mini quiet">
-								</p>
-								<ul class="object-tools object-tools-compact">
-									{% if app_model.model.add_url %}
-									<li><a href="{{ app_model.model.add_url }}" title="Add [content-type-singular-name]">
-										<i class="fa fa-plus"></i>
-									</a></li>
-									{% endif %}
-									{% if app_model.model.admin_url %}
-									<li><a href="{{ app_model.model.admin_url }}" title="Manage [content-type-plural-name]">
-										<i class="fa fa-pencil"></i>
-									</a></li>
+								<ul class="model-tools model-tools-compact">
+									{% if model.add_url %}
+										<li><a href="{{ model.add_url }}" title="Add [content-type-singular-name]">
+											<i class="fa fa-plus"></i>
+										</a></li>
 									{% endif %}
 								</ul>
 							</li>
 						{% endfor %}
-					</ul>
-				{% endfor %}
-			{% endif %}
+					{% endfor %}
+				</ul>
+			{% endfor %}
 		</div>
 	</div>
+	{% endif %}
 </div>
 {% endblock %}
 
 {% block sidebar %}{% endblock %}
 
 {% block footer %}
-{{block.super}}
-<footer id="footer">
-	<section class="footer-section footer-left">
-		{% block footer-name %}{% endblock %}
-	</section>
-	<section class="footer-section footer-right">
-		<a href="#">{% block site-name %}{{ SITE_NAME }}{% endblock %}</a> is built with <a href="http://interaction.net.au">IceKit</a>.
-	</section>
-	<a href="#" id="ic-logo">
-		<div class="ic-logo-dot"></div>
-		<div class="ic-logo-dot"></div>
-		<div class="ic-logo-dot"></div>
-	</a>
-</footer>
+	<footer class="footer">
+		<section class="footer-section footer-left">
+			{% block footer-name %}{{ SITE_VERBOSE_NAME }}{% endblock %}
+		</section>
+		<section class="footer-section footer-right">
+			<a href="/">{% block site-name %}{% firstof SITE_NAME "This site" %}{% endblock %}</a> is built with <a href="http://interaction.net.au">IceKit</a>.
+		</section>
+		<a href="#" id="ic-logo">
+			<div class="ic-logo-dot"></div>
+			<div class="ic-logo-dot"></div>
+			<div class="ic-logo-dot"></div>
+		</a>
+	</footer>
 {% endblock %}

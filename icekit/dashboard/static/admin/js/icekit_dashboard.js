@@ -1,6 +1,6 @@
 (function($) {
 	$(function() {
-		var typeSelects = $('ul.object-tools select.type-select');
+		var typeSelects = $('ul.model-tools select.type-select');
 
 		typeSelects.each(function() {
 			var typeSelect = $(this);
