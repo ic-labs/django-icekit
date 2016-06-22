@@ -1,0 +1,22 @@
+{% extends base_change_form_template %}
+
+{% load i18n admin_urls polymorphic_admin_tags %}
+
+{% block breadcrumbs %}
+	{% breadcrumb_scope base_opts %}
+		<div class="breadcrumbs">
+		<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+		&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+		&rsaquo; {% if has_change_permission %}<a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
+		&rsaquo; {% if add %}{% trans 'Add' %} {{ opts.verbose_name }}{% else %}{{ original|truncatewords:"18" }}{% endif %}
+		</div>
+	{% endbreadcrumb_scope %}
+{% endblock %}
+
+{% block extrahead %}
+	{{ block.super }}
+	<script type="text/javascript">
+		fluent_layouts.ct_id = {{ content_type_id }};
+		fluent_layouts.layout_url = '{% url "admin:icekit_layout_changelist" %}';
+	</script>
+{% endblock %}
