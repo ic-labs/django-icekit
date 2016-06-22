@@ -15,8 +15,6 @@ Includes the following features:
       * `layout_page` - integrates with our layouts system.
       * `search_page` - integrates with [Haystack].
   * Modular content plugins:
-      * `blog_post` - TODO
-      * `brightcove` - TODO
       * `child_pages` - TODO
       * `faq` - TODO
       * `horizontal_rule` - TODO

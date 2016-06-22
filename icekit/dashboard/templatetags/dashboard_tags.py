@@ -65,8 +65,16 @@ def filter_featured_apps(admin_apps, request):
                 if app['app_label'] == app_label:
                     for model in app['models']:
                         if model['object_name'] == model_name:
-                            model['verbose_name'] = \
-                                featured_app['models'][app_and_model]['verbose_name']
+                            try:
+                                model['verbose_name'] = \
+                                    featured_app['models'][app_and_model]['verbose_name']
+                            except KeyError:
+                                pass
+                            try:
+                                model['verbose_name_plural'] = \
+                                    featured_app['models'][app_and_model]['verbose_name_plural']
+                            except KeyError:
+                                pass
                             # Get each of the polymorphic types to allow addition.
                             model_class = apps.get_model(app_and_model)
                             model_admin = admin.site._registry[model_class]
