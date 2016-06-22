@@ -29,7 +29,6 @@ from icekit.plugins.map.models import MapItem
 from icekit.plugins.map_with_text.models import MapWithTextItem
 from icekit.plugins.quote.models import QuoteItem
 from icekit.plugins.reusable_form.models import FormItem
-from icekit.plugins.reusable_quote.models import Quote, ReusableQuoteItem
 from icekit.plugins.slideshow.models import SlideShow, SlideShowItem
 from icekit.plugins.twitter_embed.forms import TwitterEmbedAdminForm
 from icekit.plugins.twitter_embed.models import TwitterEmbedItem
@@ -201,11 +200,6 @@ class Models(WebTest):
             self.page_1,
             quote='test quote',
         )
-        self.reusable_quote_item_1 = fluent_contents.create_content_instance(
-            ReusableQuoteItem,
-            self.page_1,
-            quote=self.quote_1,
-        )
         self.slide_show_1 = G(SlideShow)
         self.slide_show_item_1 = fluent_contents.create_content_instance(
             SlideShowItem,
@@ -258,7 +252,7 @@ class Models(WebTest):
     def test_page_creation(self):
         content_instances = self.page_1.placeholder_set.all()[0].get_content_items()
         anticipated_content_instances = [
-            self.image_item_1, self.faq_item_1, self.quote_item_1, self.reusable_quote_item_1,
+            self.image_item_1, self.faq_item_1, self.quote_item_1,
             self.slide_show_item_1, self.twitter_response_1, self.instagram_embed_1,
             self.reusable_form_1, self.map_1, self.map_with_text_1, self.horizontal_rule_1,
         ]
@@ -270,7 +264,6 @@ class Models(WebTest):
             self.assertIn(obj, content_instances)
 
     def test_str_functions(self):
-        self.assertEqual(str(self.reusable_quote_item_1), str(self.quote_1))
         self.assertEqual(str(self.image_item_1), str(self.image_1))
         self.assertEqual(str(self.quote_item_1), self.quote_item_1.quote)
         self.assertEqual(str(self.slide_show_item_1), str(self.slide_show_1))
@@ -433,7 +426,6 @@ class Views(WebTest):
         self.assertEqual(response.status_code, 200)
         admin_app_list = (
             ('image_image', self.image_1),
-            ('reusable_quote_quote', self.quote_1),
             ('fluent_pages_pagelayout', self.page_layout_1),
             ('icekit_layout', self.layout_1),
             ('icekit_mediacategory', self.media_category_1),
