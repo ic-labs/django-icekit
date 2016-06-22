@@ -15,7 +15,7 @@
 			{% if model.perms.change %}
 				<a href="{{ model.admin_url }}">
 			{% endif %}
-			<h3>{{ model.verbose_name }}</h3>
+			<h3>{% firstof model.verbose_name_plural model.verbose_name|pluralize model.name %}</h3>
 			{% if model.perms.change %}
 				</a>
 			{% endif %}
