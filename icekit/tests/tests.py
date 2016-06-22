@@ -172,7 +172,6 @@ class Models(WebTest):
             template_name='icekit/layouts/default.html',
         )
         self.layout_1.content_types.add(ContentType.objects.get_for_model(FluentPage))
-        self.quote_1 = G(Quote)
         self.page_1 = FluentPage.objects.create(
             author=self.user_1,
             title='Test title',
@@ -398,7 +397,6 @@ class Views(WebTest):
         )
         self.image_1 = G(Image)
         self.page_layout_1 = G(PageLayout)
-        self.quote_1 = G(Quote)
         self.media_category_1 = G(models.MediaCategory)
         self.layout_1 = G(models.Layout)
         self.response_page_1 = G(
