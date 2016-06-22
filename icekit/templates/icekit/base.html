@@ -14,6 +14,7 @@
 				<meta http-equiv="X-UA-Compatible" content="IE=edge">
 				<meta name="viewport" content="{% block meta_viewport %}width=device-width, initial-scale=1{% endblock %}">
 				<meta name="description" content="{% block meta_description %}{% endblock %}">
+				<link rel="author" href="/humans.txt" />
 
 				{% block open_graph %}
 					<meta property="og:title" content="{% block og_title %}{% if title %}{{ title }} - {% endif %}{{ SITE_NAME }}{% endblock %}">
