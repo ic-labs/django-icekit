@@ -6,8 +6,8 @@ Please follow these guidelines when making contributions to this app.
 
 Clone the repository and change directory:
 
-    $ git clone git@github.com:ixc/django-eventkit.git
-    $ cd django-eventkit
+    $ git clone git@github.com:ixc/glamkit-eventkit-plus.git
+    $ cd glamkit-eventkit-plus
 
 You don't need to install the project to run tests. You just need `tox`:
 

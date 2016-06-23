@@ -19,7 +19,7 @@ Update your settings module:
 
 Install Bower dependencies manually:
 
-    (venv)$ cd venv/src/django-eventkit/eventkit/static/eventkit
+    (venv)$ cd venv/src/glamkit-eventkit-plus/eventkit/static/eventkit
     (venv)$ bower install
 
 ## Usage

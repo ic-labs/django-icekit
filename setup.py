@@ -37,11 +37,11 @@ if {'bdist_wheel', 'develop', 'sdist'}.intersection(sys.argv):
     os.chdir(cwd)
 
 setuptools.setup(
-    name='django-eventkit',
+    name='glamkit-eventkit-plus',
     use_scm_version={'version_scheme': 'post-release'},
     author='Interaction Consortium',
     author_email='studio@interaction.net.au',
-    url='https://github.com/ixc/django-eventkit',
+    url='https://github.com/ixc/glamkit-eventkit-plus',
     description='',
     long_description=locals().get('long_description', ''),
     license='MIT',
