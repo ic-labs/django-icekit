@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% load placeholder_tags fluent_contents_tags %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block content %}
+	{% page_placeholder 'main' role='m' %}
+{% endblock %}
+
+{% block body_js %}
+	{{ block.super }}
+	{% render_content_items_media %}
+{% endblock %}

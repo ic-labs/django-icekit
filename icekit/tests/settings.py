@@ -15,6 +15,8 @@ SITE_ID = 1
 DEBUG = True
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+USE_TZ = True  # Default: False
+
 INSTALLED_APPS = (
     'bootstrap3',
     'django.contrib.admin',
@@ -27,12 +29,15 @@ INSTALLED_APPS = (
     'forms_builder.forms',
     'fluent_contents',
     'fluent_contents.plugins.oembeditem',
+    'fluent_contents.plugins.rawhtml',
     'fluent_pages',
     'fluent_pages.pagetypes.fluentpage',
     'haystack',
     'icekit',
+    'icekit.page_types.article',
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
+    'icekit.pages_api',
     'icekit.plugins.child_pages',
     'icekit.plugins.faq',
     'icekit.plugins.file',
@@ -50,6 +55,8 @@ INSTALLED_APPS = (
     'icekit.plugins.twitter_embed',
     'icekit.response_pages',
     'icekit.tests',
+    'polymorphic',
+    'polymorphic_tree',
 
     # Required for oembed
     'micawber',
@@ -68,7 +75,7 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 FLUENT_PAGES_TEMPLATE_DIR = os.path.join(
-    BASE_DIR, 'icekit', 'templates',
+    BASE_DIR, 'icekit', 'tests', 'templates',
 )
 
 BRIGHTCOVE_PLAYER = {}
@@ -82,6 +89,10 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
 ]
+
+TEMPLATE_DIRS = (
+    BASE_DIR,
+)
 
 HAYSTACK_CONNECTIONS = {
     'default': {

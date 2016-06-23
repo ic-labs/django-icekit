@@ -42,6 +42,9 @@ setuptools.setup(
         'unidecode',
     ],
     extras_require={
+        'api': [
+            'djangorestframework',
+        ],
         'brightcove': [
             'django-brightcove',
         ],
@@ -67,6 +70,7 @@ setuptools.setup(
             'coverage',
             'django-dynamic-fixture',
             'django-nose',
+            'djangorestframework',
             'django-webtest',
             'micawber',
             'mock',
