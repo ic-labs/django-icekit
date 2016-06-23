@@ -19,4 +19,5 @@ class ArticlePage(FluentContentsPage, LayoutFieldMixin):
         permissions = (
             ('change_page_layout', _("Can change Page layout")),
         )
-        db_table = 'pagetype_article_articlepage'  # Legacy DB table name
+        # Simplify & shorten "pagetype_icekit_page_types_article_articlepage"
+        db_table = 'pagetype_icekit_article_articlepage'
