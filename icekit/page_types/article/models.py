@@ -19,3 +19,4 @@ class ArticlePage(FluentContentsPage, LayoutFieldMixin):
         permissions = (
             ('change_page_layout', _("Can change Page layout")),
         )
+        db_table = 'pagetype_article_articlepage'  # Legacy DB table name
