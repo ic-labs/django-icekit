@@ -1,7 +1,7 @@
 {
   "name": "eventkit",
   "version": "0.0.0",
-  "homepage": "https://github.com/ixc/glamkit-eventkit-plus",
+  "homepage": "https://github.com/ixc/django-eventkit",
   "authors": [
     "Tai Lee <real.human@mrmachine.net>"
   ],
