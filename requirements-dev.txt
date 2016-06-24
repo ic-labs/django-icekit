@@ -1,0 +1,5 @@
+# Forked, pre-release, private, and vendored dependencies.
+
+-e git+ssh://git@github.com/ixc/django-icekit.git@develop#egg=django-icekit
+-e git+ssh://git@github.com/ixc/colorweave.git@develop#egg=colorweave
+-e git+ssh://git@github.com/ixc/imagetools.git@master#egg=imagetools
