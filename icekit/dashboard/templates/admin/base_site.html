@@ -9,6 +9,7 @@
 
 {% load static compress %}
 
+{% block title %}{{ title }} | {{ SITE_VERBOSE_NAME|default:_('ICEkit Admin') }}{% endblock %}
 
 {% block extrastyle %}
 	{% compress css %}
