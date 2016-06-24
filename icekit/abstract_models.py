@@ -223,3 +223,22 @@ class AbstractMediaCategory(AbstractBaseModel):
 
     def __str__(self):
         return self.name
+
+
+class BoostedTermsMixin(models.Model):
+    """
+    Mixin for providing a field for terms which will get boosted search
+    priority.
+    """
+    boosted_terms = models.TextField(
+        blank=True,
+        default='',  # This is for convenience when adding models in the shell.
+        help_text=_(
+            'Words (space separated) added here are boosted in relevance for search results '
+            'increasing the chance of this appearing higher in the search results.'
+        ),
+        verbose_name=_('Boosted Search Terms'),
+    )
+
+    class Meta:
+        abstract = True
