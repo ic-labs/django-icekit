@@ -11,13 +11,15 @@
 
 
 {% block extrastyle %}
-	<link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" />
 	{% compress css %}
+		<link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.css' %}" />
 		<link type="text/less" rel="stylesheet" href="{% static 'admin/css/icekit_dashboard.less' %}" />
 	{% endcompress %}
 {% endblock %}
 
 {% block extrahead %}
-	<script src="{% static 'jquery/dist/jquery.js' %}"></script>
-	<script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
+	{% compress js %}
+		<script src="{% static 'jquery/dist/jquery.js' %}"></script>
+		<script src="{% static 'bootstrap/dist/js/bootstrap.js' %}"></script>
+	{% endcompress %}
 {% endblock %}
