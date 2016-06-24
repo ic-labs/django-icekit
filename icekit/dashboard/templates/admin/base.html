@@ -1,5 +1,12 @@
-{% load i18n admin_static static compress %}
-<!DOCTYPE html>
+{% comment %}
+	Moves `footer` block outside of `content` container, to be a direct child
+	of the `<body>` tag.
+
+	TODO: Refactor this in a way that doesn't require duplication of the whole
+	template.
+{% endcomment %}
+
+{% load i18n admin_static %}<!DOCTYPE html>
 {% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 <head>
