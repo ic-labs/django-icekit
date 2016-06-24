@@ -1,7 +1,13 @@
 {% extends "admin/base.html" %}
-{% load static compress %}
 
-{% block title %}{{ title }} | {{ SITE_VERBOSE_NAME|default:_('ICEkit admin') }}{% endblock %}
+{% comment %}
+	* Set title.
+	* Load Bootstrap and ICEkit dashboard CSS and JS.
+	* Load jQuery into global namespace, because Django removes it and some
+	  code expects it.
+{% endcomment %}
+
+{% load static compress %}
 
 {% block stylesheet %}{% endblock %}
 
