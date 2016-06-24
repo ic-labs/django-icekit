@@ -13,13 +13,6 @@
 
 {% block bodyclass %}{{ block.super }} dashboard{% endblock %}
 
-{% block branding %}
-<a href="{% url 'admin:index' %}">
-	<img id="site-logo" src="{% block header-image %}{% static 'admin/img/header-brand.png' %}{% endblock header-image %}" title="{{ SITE_VERBOSE_NAME }}">
-	<h1 id="site-name">Site Admin</h1>
-</a>
-{% endblock %}
-
 {% block extrahead %}
     {{ block.super }}
     <script src="{% static 'admin/js/icekit_dashboard.js' %}"></script>
@@ -87,19 +80,3 @@
 {% endblock %}
 
 {% block sidebar %}{% endblock %}
-
-{% block footer %}
-	<footer class="footer">
-		<section class="footer-section footer-left">
-			{% block footer-name %}{{ SITE_VERBOSE_NAME }}{% endblock %}
-		</section>
-		<section class="footer-section footer-right">
-			<a href="/">{% block site-name %}{% firstof SITE_NAME "This site" %}{% endblock %}</a> is built with <a href="http://interaction.net.au">IceKit</a>.
-		</section>
-		<a href="#" id="ic-logo">
-			<div class="ic-logo-dot"></div>
-			<div class="ic-logo-dot"></div>
-			<div class="ic-logo-dot"></div>
-		</a>
-	</footer>
-{% endblock %}

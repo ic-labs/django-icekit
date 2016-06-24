@@ -5,6 +5,7 @@
 	* Load Bootstrap and ICEkit dashboard CSS and JS.
 	* Load jQuery into global namespace, because Django removes it and some
 	  code expects it.
+	* Add branding.
 {% endcomment %}
 
 {% load static compress %}
@@ -23,4 +24,27 @@
 		<script src="{% static 'jquery/dist/jquery.js' %}"></script>
 		<script src="{% static 'bootstrap/dist/js/bootstrap.js' %}"></script>
 	{% endcompress %}
+{% endblock %}
+
+{% block branding %}
+	<a href="{% url 'admin:index' %}">
+		<img id="site-logo" src="{% block header-image %}{% static 'admin/img/header-brand.png' %}{% endblock header-image %}" title="{{ SITE_VERBOSE_NAME }}">
+		<h1 id="site-name">Site Admin</h1>
+	</a>
+{% endblock %}
+
+{% block footer %}
+	<footer class="footer">
+		<section class="footer-section footer-left">
+			{% block footer-name %}{{ SITE_VERBOSE_NAME }}{% endblock %}
+		</section>
+		<section class="footer-section footer-right">
+			<a href="/">{% block site-name %}{% firstof SITE_NAME "This site" %}{% endblock %}</a> is built with <a href="http://interaction.net.au">ICEkit</a>
+		</section>
+		<a href="#" id="ic-logo">
+			<div class="ic-logo-dot"></div>
+			<div class="ic-logo-dot"></div>
+			<div class="ic-logo-dot"></div>
+		</a>
+	</footer>
 {% endblock %}
