@@ -9,12 +9,10 @@
 
 {% load static compress %}
 
-{% block stylesheet %}{% endblock %}
 
 {% block extrastyle %}
 	<link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" />
 	{% compress css %}
-		<link rel="stylesheet" href="{% static 'admin/css/base.css' %}" />
 		<link type="text/less" rel="stylesheet" href="{% static 'admin/css/icekit_dashboard.less' %}" />
 	{% endcompress %}
 {% endblock %}
