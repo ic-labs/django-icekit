@@ -14,7 +14,6 @@
 
 {% block extrastyle %}
 	{% compress css %}
-		<link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.css' %}" />
 		<link type="text/less" rel="stylesheet" href="{% static 'admin/css/icekit_dashboard.less' %}" />
 	{% endcompress %}
 {% endblock %}
@@ -22,7 +21,7 @@
 {% block extrahead %}
 	{% compress js %}
 		<script src="{% static 'jquery/dist/jquery.js' %}"></script>
-		<script src="{% static 'bootstrap/dist/js/bootstrap.js' %}"></script>
+	    <script src="{% static 'admin/js/icekit_dashboard.js' %}"></script>
 	{% endcompress %}
 {% endblock %}
 
@@ -39,13 +38,14 @@
 			{% block footer-name %}{{ SITE_VERBOSE_NAME }}{% endblock %}
 		</section>
 		<section class="footer-section footer-right">
-			<a href="/">{% block site-name %}{% firstof SITE_NAME "This site" %}{% endblock %}</a> is built with <a href="http://interaction.net.au">ICEkit</a>
+			<a href="/">{% block site-name %}{% firstof SITE_NAME "This site" %}{% endblock %}</a>
+			is built with <a href="http://interaction.net.au">ICEkit</a>
+			<a href="http://interaction.net.au" id="ic-logo">
+				<div class="ic-logo-dot"></div>
+				<div class="ic-logo-dot"></div>
+				<div class="ic-logo-dot"></div>
+			</a>
 		</section>
-		<a href="#" id="ic-logo">
-			<div class="ic-logo-dot"></div>
-			<div class="ic-logo-dot"></div>
-			<div class="ic-logo-dot"></div>
-		</a>
 	</footer>
 	<script>
 		$(function() {
