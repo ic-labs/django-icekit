@@ -12,7 +12,7 @@ html {
 }
 body {
   /* Margin bottom by footer height */
-  margin-bottom: @footer-height;
+  padding-bottom: @footer-height;
 }
 
 #container {
@@ -30,7 +30,7 @@ footer {
 
 .dashboard #content {
 	width: 100%;
-	padding: 20px 40px;
+	padding: 15px 25px;
 	box-sizing: border-box;
 }
 
@@ -44,10 +44,9 @@ footer {
 
 .widget {
     .cf;
-    box-sizing: border-box;
     background-color: #f8f8f8;
     padding: 10px 10px 5px 10px;
-    margin-bottom: 15px;
+    margin: 15px 0;
     min-height: 260px;
     overflow: hidden;
     border-radius: 3px 3px 0 0;
@@ -207,30 +206,37 @@ footer {
         }
     }
 
-    &.is-full-width { width: 95%; }
+    &.widget-other {
+        padding: 0;
+
+        > header {
+            margin: 0;
+            margin-bottom: 10px;
+        }
+    }
 
     .other-contents-list {
-        padding: 0 20px 0 0;
-        margin: 0 ;
-        box-sizing: border-box;
-        float: left;
-        &:last-child {
-            padding-right: 0;
-        }
+        padding: 0;
+        width: 100%;
 
         > li {
             .cf;
             list-style-type: none;
             position: relative;
-            padding: 0; margin: 0;
+            padding: 0 8px;
+            margin: 0;
 
             &.mini.caps {
                 border-bottom: 0px;
+                padding-top: 15px;
                 a {
                     color: #aaa;
                 }
                 &:hover {
                     background: transparent;
+                }
+                &:first-child {
+                    padding-top: 0;
                 }
             }
 
@@ -372,6 +378,10 @@ footer {
 	height: 35px !important;
 }
 
+.pull-left {
+    float: left !important;
+}
+
 // OVERRIDING DJANGO ADMIN CHANGE FORM APPEARANCE
 
 // Overrides bootstrap.min.css which hides the toggled fieldset in change form.
@@ -459,13 +469,14 @@ fieldset.collapse {
 
 footer {
 	.cf;
+    box-sizing: border-box;
     width: 100%;
 	color: #aaa;
 	background: #333;
 	font-size: 11px;
 	letter-spacing: 0.5px;
 	text-transform: uppercase;
-	padding: 15px 40px;
+	padding: 0 40px;
 
 	a {
 		color: #ffc !important;
@@ -476,7 +487,7 @@ footer {
 		}
 	}
 	.footer-section {
-		width: 50%;
+		line-height: @footer-height;
 		position: relative;
 		box-sizing: border-box;
 	}
@@ -487,7 +498,6 @@ footer {
 	.footer-right {
 		float: right;
 		text-align: right;
-		padding-right: 65px;
 	}
 }
 
@@ -500,15 +510,13 @@ footer {
 	color: #aaa !important;
 }
 
-
 #ic-logo {
-	display: block;
-	position: absolute;
-	top: 0;
-	right: 0;
-	margin-right: 45px;
-	width: 45px;
-	height: 45px;
+	display: inline-block;
+	position: relative;
+	float: right;
+	margin-left: 10px;
+	width: 50px;
+	height: 50px;
 	overflow: hidden;
 	border-bottom: 0 !important;
 	border-radius: 2px;
