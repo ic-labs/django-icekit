@@ -79,17 +79,17 @@ class AppConfig(AppConfig):
         # items but we want to get the correponding published copies.
         @monkey_patch_override_method(UrlNodeQuerySet)
         def published(self, for_user=None):
+            qs = self._single_site()
             if for_user is not None and for_user.is_staff:
-                return self._single_site()
-
-            qs = self._single_site() \
-                .filter(
-                    Q(publication_date__isnull=True) |
-                    Q(publication_date__lt=now())
-                ).filter(
-                    Q(publication_end_date__isnull=True) |
-                    Q(publication_end_date__gte=now())
-                )
+                pass  # Don't filter by publication date for Staff
+            else:
+                qs = qs.filter(
+                        Q(publication_date__isnull=True) |
+                        Q(publication_date__lt=now())
+                      ).filter(
+                          Q(publication_end_date__isnull=True) |
+                          Q(publication_end_date__gte=now())
+                      )
 
             # Include publishable items that are published themselves, or are
             # draft copies with a published copy.
