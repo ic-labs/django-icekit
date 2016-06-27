@@ -8,23 +8,16 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django_brightcove.fields import BrightcoveField
 from icekit.abstract_models import FluentFieldsMixin, BoostedTermsMixin
-from sfmoma.collection_import.etl.utils import grammatical_join
-
-ACCESSION_TYPE_PERMANENT = "permanent"
-ACCESSION_TYPE_STEWARDED = "stewarded"
-ACCESSION_TYPE_TEMPORARY = "temporary"
-ACCESSION_TYPE_UNKNOWN = ""
-
-VALID_EMA_CHOICES = (3000,8000,9999) #used in the public_images query
-PUBLIC_IMAGE_QS = Q(
-    is_public=True,
-    ema_status__in=VALID_EMA_CHOICES,
-) & ~Q(
-    downloaded_image=""
-)
+from collectionkit.utils import grammatical_join
 
 
 class WorkBase(FluentFieldsMixin, BoostedTermsMixin):
+
+    PUBLIC_IMAGE_QS = Q(
+        is_public=True,
+    ) & ~Q(
+        downloaded_image=""
+    )
 
     is_ok_for_web = models.BooleanField(default=False)
 

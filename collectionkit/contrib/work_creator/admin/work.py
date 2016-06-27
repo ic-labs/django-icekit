@@ -1,6 +1,6 @@
 from icekit.admin import FluentLayoutsMixin
 
-from collectionkit.contrib.work_creator.admin.image import WorkImageInline
+from .image import WorkImageInline
 from collectionkit.contrib.work_creator.admin_utils import WorkThumbnailMixin, admin_link
 
 class WorkAdmin(FluentLayoutsMixin, WorkThumbnailMixin):

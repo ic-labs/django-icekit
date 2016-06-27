@@ -122,24 +122,14 @@ class WorkImageBase(models.Model):
                 self.extract_colors(save=False)
             del kwargs['extract_colors']
 
-        super(ArtworkImageBase, self).save(*args, **kwargs)
+        super(WorkImageBase, self).save(*args, **kwargs)
 
     @property
     def views_display(self):
         return ",".join([v.name for v in self.views.all()])
 
     def max_size(self):
-        # return a tuple of the maximum size we can show the artwork, which depends on EMA status.
-        if self.ema_status == 3000:
-            return (300, 300)
-        elif self.ema_status == 8000:
-            return (850, 850)
-        elif self.ema_status == 9999:
-            # ema status 9999 is actually unlimited, but that doesn't mean free hi-res downloads.
-            # We want to show a zoom viewer in these cases.
-            return (1000, 1000)
-        # if not sure, use 850.
-        return (850, 850)
+        return (self.width, self.height)
 
     def is_hero_image(self):
         return self.artwork.hero_image == self

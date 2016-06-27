@@ -1,0 +1,13 @@
+The `contrib` folder is meant to be a primoridial soup of patterns and shapes for different collecting institutions.
+
+Some examples/ideas:
+
+work_creator - for modelling created works, such as art or design
+natural_history - for modelling natural organisms
+loc_classification - library of congress classification
+
+Try to make use of what is here already, and feel free to contribute your own!
+
+Over time, we will factor patterns out into more formal entities and standards that can then be tied together for each
+project in different ways.
+- e.g. Person > Creator > Author or Work > Artwork > Sculpture
