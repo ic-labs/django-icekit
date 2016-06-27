@@ -509,7 +509,10 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         })
 
         # Hook to permit subclasses to modify context in change form
-        self.update_context_for_render_change_form(context, obj)
+        try:
+            self.update_context_for_render_change_form(context, obj)
+        except AttributeError:
+            pass
 
         # Override this admin's change form template to point to the publishing
         # admin page template, but only for long enough to render the change
@@ -561,9 +564,6 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
                 self.non_publishing_change_form_template
 
         return response
-
-    def update_context_for_render_change_form(self, context, obj):
-        pass
 
     def publish(self, request, qs):
         # Convert polymorphic queryset instances to real ones if/when necessary
