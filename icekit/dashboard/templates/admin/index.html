@@ -38,13 +38,6 @@
 					{% include "admin/app_widget.html" with app=app %}
 				</div>
 			{% endfor %}
-			{% for app in app_list|filter_featured_apps:request %}
-				{% if forloop.first %}
-					<div class="col-md-4">
-						{% include "admin/app_widget.html" with app=app %}
-					</div>
-				{% endif %}
-			{% endfor %}
 
 			{# the usual app list goes here #}
 			{% if app_list %}
