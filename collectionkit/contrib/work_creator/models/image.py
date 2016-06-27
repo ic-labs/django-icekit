@@ -1,7 +1,6 @@
 import json
 from urlparse import urlparse
 from django.db import models
-from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.safestring import mark_safe

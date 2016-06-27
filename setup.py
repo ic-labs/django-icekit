@@ -27,7 +27,6 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=[
-        'imagetools==0.1.post8+ng6e73447.d20160404',
         'colorweave',
         'django-icekit',
         'django-object-actions<0.6',  # See: https://github.com/crccheck/django-object-actions/issues/45

@@ -1,12 +1,9 @@
-from datetime import date
-
 from django.db.models import Q
 from django.template import Template, Context
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
 from django.db import models
-from django_brightcove.fields import BrightcoveField
 from icekit.abstract_models import FluentFieldsMixin, BoostedTermsMixin
 from collectionkit.utils import grammatical_join
 
@@ -236,7 +233,7 @@ class WorkBase(FluentFieldsMixin, BoostedTermsMixin):
         if hasattr(self, 'prefetched_public_images'):
             return self.prefetched_public_images
 
-        queryset = self.images.filter(PUBLIC_IMAGE_QS).order_by_view()
+        queryset = self.images.filter(self.PUBLIC_IMAGE_QS).order_by_view()
         return queryset
 
     @property
