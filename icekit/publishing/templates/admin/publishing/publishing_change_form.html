@@ -17,9 +17,6 @@
 	{{ block.super }}
 	{% compress css %}
 		<link type="text/less" rel="stylesheet" href="{% static 'admin/css/edit_page.less' %}" />
-	{% comment %}
-		<link rel="stylesheet" href="{% static 'fluent_comments/css/ajaxcomments.css' %}">
-	{% endcomment %}
 	{% endcompress %}
 {% endblock %}
 
@@ -31,18 +28,12 @@
 		var csrf_token = '{{ csrf_token }}';
 	</script>
 	<script src="{% static 'admin/js/edit_page.js' %}"></script>
-	{% comment %}
-	<script src="{% static 'admin/js/ajaxcomments.js' %}"></script>
-	{% endcomment %}
 {% endblock %}
 
 {% block content %}
 	<ul class="nav nav-tabs" role="tablist">
 		<li role="presentation" class="active"><a href="#edit" aria-controls="edit" role="tab" data-toggle="tab">Edit</a></li>
 		<!--<li role="presentation"><a href="#promotion" aria-controls="promotion" role="tab" data-toggle="tab">Promotion</a></li>-->
-		{% comment %}
-		<li role="presentation"><a href="#versions" aria-controls="versions" role="tab" data-toggle="tab">Versions{% if versions %} ({{ versions.count }}){% endif %}</a></li>
-		{% endcomment %}
 		{% if has_absolute_url %}
 			<li role="presentation"><a href="{{ absolute_url }}" target="_blank">View on site <i class="fa fa-external-link"></i></a></li>
 		{% endif %}
@@ -55,76 +46,9 @@
 			<!--<div role="tabpanel" class="tab-pane" id="promotion">-->
 			<!--</div>-->
 			{% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
-			{% comment %}
-			<div role="tabpanel" class="tab-pane" id="versions"{% if versions %} data-ajax-url="{% add_preserved_filters history_url %}"{% endif %}>
-				<p>{% trans "This object doesn't have a change history. It probably wasn't added via this admin site." %}</p>
-			</div>
-			{% endcomment %}
 		</div>
 	</div>
 	<div class="content-right">
-		{% comment %}
-		<div class="panel-container">
-			<div class="panel-group nomargin" id="accordion" role="tablist" aria-multiselectable="true">
-				<div class="panel panel-default nomargin followers-panel">
-					<div class="panel-heading js-panel-heading">
-						<h4 class="panel-title">
-							<a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#followers" aria-expanded="true" aria-controls="followers">Followers</a>
-						</h4>
-					</div>
-					<div id="followers" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-						<div class="panel-body">
-							{% if original %}
-								<div class="checkbox text-right nomargin">
-									<label><input class="js-user-follower" id="js-user-follower-comments" type="checkbox"> Receive Comment Notifications</label>
-									<br>
-									<label><input class="js-user-follower" id="js-user-follower-publish" type="checkbox"> Receive Publishing Notifications</label>
-									<br>
-									<label><input id="js-current-user-is-following" type="checkbox" follower-id="{{ request.user.id }}"> Follow</label>
-								</div>
-								<ul class="list-group">
-									<li class="list-group-item active users">Users</li>
-									<li class="list-group-item">
-										<form action="{{ follow_btn }}" method="post">{% csrf_token %}
-											<input type="hidden" name="type" value="user">
-											<input type="text" placeholder="New user" id="id_add_user" name="type_id">
-											<a href="{% url 'admin:polymorphic_auth_user_changelist' %}?_to_field=id" class="btn btn-primary" id="lookup_id_add_user" onclick="return showRelatedObjectLookupPopup(this);">Add User</a>
-										</form>
-									</li>
-								</ul>
-								<ul class="list-group">
-									<li class="list-group-item active groups">Groups</li>
-									<li class="list-group-item">
-										<form action="{{ follow_btn }}" method="post">{% csrf_token %}
-											<input type="hidden" name="type" value="group">
-											<input type="text" placeholder="New group" id="id_add_group" name="type_id">
-											<a href="{% url 'admin:auth_group_changelist' %}?_to_field=id" class="btn btn-primary" id="lookup_id_add_group" onclick="return showRelatedObjectLookupPopup(this);">Add Group</a>
-										</form>
-									</li>
-								</ul>
-							{% endif %}
-						</div>
-					</div>
-				</div>
-				<div class="panel panel-default nomargin comments-panel">
-					<div class="panel-heading js-panel-heading">
-						<h4 class="panel-title">
-							<a role="button" data-toggle="collapse" data-parent="#accordion" href="#comments" aria-expanded="true" aria-controls="comments">Comments</a>
-						</h4>
-					</div>
-					<div id="comments" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-						<div class="panel-body">
-							{% if original %}
-								{% render_comment_form for original %}
-								<hr>
-								{% render_comment_list for original %}
-							{% endif %}
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		{% endcomment %}
 		<div class="panel panel-default nomargin save-panel">
 			<div class="panel-heading">
 				<h3 class="panel-title">Save / Publish</h3>
@@ -156,10 +80,6 @@
 									{% endif %}
 								</div>
 								{% if has_been_published and is_dirty %}<em><small>Published version is out-of-date</small></em>{% endif %}
-								{% comment %}
-								{# Latest version is always a draft #}
-								<em><small>Draft: v{{ versions.count }}{% if published %}, Published: v{{ published.version_number }}{% endif %}</small></em>
-								{% endcomment %}
 							</p>
 						</div>
 					</div>
