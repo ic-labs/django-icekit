@@ -8,10 +8,13 @@ from .pagination import ICEKitPagination
 class PageViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Read only viewset for published page objects.
-
-    It will exclude StoryPages if they exist as they live at a separate
-    API endpoint.
     """
     pagination_class = ICEKitPagination
-    queryset = Page.objects.published()
     serializer_class = serializers.PageSerializer
+    # NOTE: `get_queryset` method is used instead of this `queryset` class
+    # attribute to return results, but we still need this defined here so
+    # the API router can auto-generate the right page endpoint URL.
+    queryset = Page.objects
+
+    def get_queryset(self):
+        return Page.objects.published()

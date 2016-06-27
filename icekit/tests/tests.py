@@ -18,7 +18,7 @@ from django_dynamic_fixture import G
 from django_webtest import WebTest
 from fluent_contents.models import Placeholder
 from fluent_contents.plugins.rawhtml.models import RawHtmlItem
-from fluent_pages.models import PageLayout, UrlNode
+from fluent_pages.models import PageLayout
 from fluent_pages.pagetypes.fluentpage.models import FluentPage
 from forms_builder.forms.models import Form
 from icekit.abstract_models import LayoutFieldMixin
@@ -398,6 +398,8 @@ class Models(WebTest):
         )
         self.assertIn(article_page_1, ArticlePage.objects.all())
         self.assertEqual(ArticlePage.objects.count(), 1)
+        self.assertEqual(ArticlePage.objects.published().count(), 0)
+        self.assertEqual(ArticlePage.objects.draft().count(), 1)
 
 
 class Views(WebTest):
@@ -439,7 +441,6 @@ class Views(WebTest):
             author=self.super_user_1,
             title='Test Article',
             layout=self.layout_1,
-            status=UrlNode.PUBLISHED,
         )
         self.content_instance_1 = fluent_contents.create_content_instance(
             RawHtmlItem,
@@ -509,36 +510,43 @@ class Views(WebTest):
         self.response_page_2.save()
 
     def test_article_page_front_end(self):
+        # Article Page is unpublished
+        response = self.client.get(self.article_page_1.get_absolute_url())
+        self.assertEqual(response.status_code, 404)
+        # Article Page is published
+        self.article_page_1.publish()
         response = self.client.get(self.article_page_1.get_absolute_url())
         self.assertEqual(response.status_code, 200)
 
     def test_page_api(self):
+        self.article_page_1.publish()
         for j in range(20):
-            article = ArticlePage.objects.create(
+            published_article = ArticlePage.objects.create(
                 author=self.super_user_1,
                 title='Test Article %s' % j,
                 layout=self.layout_1,
-                status=UrlNode.PUBLISHED,
             )
-            setattr(self, 'auto_article_page_%s' % j, article)
-            article = ArticlePage.objects.create(
+            published_article.publish()
+
+            draft_article = ArticlePage.objects.create(
                 author=self.super_user_1,
                 title='Draft Article %s' % j,
                 layout=self.layout_1,
-                status=UrlNode.DRAFT,
             )
-            setattr(self, 'auto_draft_article_page_%s' % j, article)
 
         response = self.client.get(reverse('page-list'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 5)
         self.assertEqual(response.data['count'], 21)
         response = self.client.get(reverse('page-detail', args=(self.article_page_1.id, )))
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(reverse('page-detail', args=(self.article_page_1.get_published().id, )))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 6)
         for key in response.data.keys():
             if key is not 'content':
-                self.assertEqual(response.data[key], getattr(self.article_page_1, key))
+                self.assertEqual(response.data[key],
+                                 getattr(self.article_page_1.get_published(), key))
         self.assertEqual(len(response.data['content']), 3)
         for number, item in enumerate(response.data['content'], 1):
             self.assertEqual(item['content'], getattr(self, 'content_instance_%s' % number).html)
@@ -587,7 +595,6 @@ class TestIceKitTags(WebTest):
             parent_site=Site.objects.first(),
             layout=layout_1,
             author=staff_1,
-            status='p',  # Publish the page
         )
 
         hr = fluent_contents.create_content_instance(
@@ -595,9 +602,10 @@ class TestIceKitTags(WebTest):
             page_1,
             placeholder_name='test-main',
         )
+        # Publish the page
         page_1.publish()
 
-        response = self.app.get(page_1.publishing_linked.get_absolute_url())
+        response = self.app.get(page_1.get_published().get_absolute_url())
 
         response.mustcontain('<div class="filter">Horizontal Rule</div>')
         response.mustcontain('<div class="tag-as"></div>')
