@@ -29,6 +29,7 @@ INSTALLED_APPS = (
     'forms_builder.forms',
     'fluent_contents',
     'fluent_contents.plugins.oembeditem',
+    'fluent_contents.plugins.text',
     'fluent_contents.plugins.rawhtml',
     'fluent_pages',
     'fluent_pages.pagetypes.fluentpage',
@@ -38,6 +39,7 @@ INSTALLED_APPS = (
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
     'icekit.pages_api',
+    'icekit.publishing',
     'icekit.plugins.child_pages',
     'icekit.plugins.faq',
     'icekit.plugins.file',
@@ -55,21 +57,28 @@ INSTALLED_APPS = (
     'icekit.plugins.twitter_embed',
     'icekit.response_pages',
     'icekit.tests',
-    'polymorphic',
     'polymorphic_tree',
 
     # Required for oembed
     'micawber',
+
+    # Required for publishing
+    'polymorphic',
+    'model_settings',
+    'compressor',
 )
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
 )
 
 ROOT_URLCONF = 'icekit.tests.urls'
 SECRET_KEY = 'secret-key'
 STATIC_URL = '/static/'
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 

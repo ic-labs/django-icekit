@@ -1,9 +1,7 @@
-from django.utils.translation import ugettext_lazy as _
-from fluent_pages.integration.fluent_contents import FluentContentsPage
-from icekit.abstract_models import LayoutFieldMixin
+from . import abstract_models
 
 
-class ArticlePage(FluentContentsPage, LayoutFieldMixin):
+class ArticlePage(abstract_models.AbstractArticlePage):
     """
     An Article Page implementation similar to ``FluentPage``.
 
@@ -13,11 +11,4 @@ class ArticlePage(FluentContentsPage, LayoutFieldMixin):
     It is also anticipated that this class will be extended
     significantly in the future.
     """
-
-    class Meta:
-        verbose_name = 'Article'
-        permissions = (
-            ('change_page_layout', _("Can change Page layout")),
-        )
-        # Simplify & shorten "pagetype_icekit_page_types_article_articlepage"
-        db_table = 'pagetype_icekit_article_articlepage'
+    pass

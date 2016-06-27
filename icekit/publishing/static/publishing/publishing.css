@@ -1,0 +1,28 @@
+.col-published .viewpage {
+    text-indent: 200%;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background-image: url("images/icons.png");
+    background-position: -20px 0px;
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    margin-left: 4px;
+    margin-top: 3px;
+    vertical-align: middle;
+}
+
+.icon.publish {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background-image: url("images/icons.png");
+    background-position: -60px -82px;
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    margin: 0;
+}
