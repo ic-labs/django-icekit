@@ -80,6 +80,13 @@ class AppConfig(AppConfig):
         @monkey_patch_override_method(UrlNodeQuerySet)
         def published(self, for_user=None):
             qs = self._single_site()
+            # Avoid filtering to only published items when we are in a draft
+            # context and we know this method is triggered by Fluent (because
+            # the `for_user` is present) because we may actually want to find
+            # and return draft items to priveleged users in this situation.
+            if for_user and is_draft_request_context():
+                return qs
+
             if for_user is not None and for_user.is_staff:
                 pass  # Don't filter by publication date for Staff
             else:
