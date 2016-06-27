@@ -99,3 +99,16 @@ class Command(NoArgsCommand):
                     item.status = UrlNode.PUBLISHED
 
                 item.save()
+
+        # Finally, set `UrlNode.status` field to appropriate value for all
+        # nodes that implement ICEKit publishing, or at least have the DB field
+        for n in UrlNode.objects.all():
+            # Skip nodes that don't have ICEKit Publishing DB fields
+            if not hasattr(n, 'publishing_is_draft'):
+                continue
+            if n.publishing_is_draft and n.status != UrlNode.DRAFT:
+                UrlNode.objects.filter(pk=n.pk).update(
+                    status=UrlNode.DRAFT)
+            if not n.publishing_is_draft and n.status != UrlNode.PUBLISHED:
+                UrlNode.objects.filter(pk=n.pk).update(
+                    status=UrlNode.PUBLISHED)
