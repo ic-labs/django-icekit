@@ -45,6 +45,8 @@ class AppConfig(AppConfig):
 
     def ready(self):
         monkey_patches.APPLY_patch_urlnodeadminform_clean_for_publishable_items()
+        monkey_patches.APPLY_patch_django_17_collector_collect()
+        monkey_patches.APPLY_patch_django_18_get_candidate_relations_to_delete()
 
         # TODO: This is a copy/paste of one in .managers; make it DRY
         @monkey_patch_override_method(UrlNodeQuerySet)
