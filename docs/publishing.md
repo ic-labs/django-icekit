@@ -15,8 +15,14 @@ understand how to use the publishing system and major ideas that need to be know
 
 To use ICEKit Publishing in your project:
 
+* make sure you install ICEKit with the optional 'publishing' extra to get any
+  required libraries, e.g. in your *setup.py* include something like:
+  'django-icekit[forms,search,publishing]'
 * add 'icekit.publishing' to `INSTALLED_APPS`
 * add 'icekit.publishing.middleware.PublishingMiddleware' to `MIDDLEWARE_CLASSES`
+* if you are using Fluent Pages in your project add the setting
+  `FLUENT_PAGES_PARENT_ADMIN_MIXIN` with the value
+  'icekit.publishing.admin.ICEKitFluentPagesParentAdminMixin'
 
 Once set up in this way, the page and plugin models defined in ICEKit such as
 `ArticlePage` and `SlideShow` will gain publishing features in your project.
@@ -44,6 +50,23 @@ If you have in-project admins, consider providing the publishing-related admin
 filters provided in `icekit.publishing.admin` such as `PublishingStatusFilter`,
 and the publishing status column for listing pages by adding 'publishing_column'
 to your admin's `list_display` attribute.
+
+### Draft Request Context
+
+The `icekit.publishing.middleware.PublishingMiddleware` middleware class allows
+privileged users to view draft pages and page content before it has been published
+by adding the 'edit' GET parameter to page URLs, for example:
+http://site.com/welcome-page/?edit
+
+For the draft request context mechanism to work you must define a text model
+setting `DRAFT_SECRET_KEY` in the CMS admin at /admin/model_settings/setting/
+and provide secret value of some kind -- any long password-like text is fine.
+
+If you need to perform custom logic to show content to privileged users you
+can use the `is_draft_request_context()` global function defined with the
+middleware that will return true if, and only if, a privileged user has
+explicitly requested to view the draft version of a page by providing the
+'edit' GET parameter.
 
 ## Implementation details
 
