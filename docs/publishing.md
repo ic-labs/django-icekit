@@ -11,6 +11,40 @@ There are many considerations when using the publishing system with much history
 covered completely here. This is an attempt to document the major pieces to allow people to
 understand how to use the publishing system and major ideas that need to be known.
 
+## Use Publishing in your Project
+
+To use ICEKit Publishing in your project:
+
+* add 'icekit.publishing' to `INSTALLED_APPS`
+* add 'icekit.publishing.middleware.PublishingMiddleware' to `MIDDLEWARE_CLASSES`
+
+Once set up in this way, the page and plugin models defined in ICEKit such as
+`ArticlePage` and `SlideShow` will gain publishing features in your project.
+
+### Make Custom Publishable Models
+
+While ICEKit's models will general have publishing features built-in, you can add
+publishing to your own models by subclassing both the model and admin base classes
+provide in ICEKit.
+
+To make a standard Django model publishable:
+
+* subclass your model from `icekit.publishing.models.PublishingModel`
+* subclas your model's admin from `icekit.publishing.admin.PublishingAdmin`
+
+To make a `FluentContentsPage` model publishable:
+
+* subclass your model from `icekit.publishing.models.PublishableFluentContentsPage`
+* subclass your model's admin from `icekit.publishing.models.PublishableFluentContentsPage`
+
+Once you have modified your project's models in this way, make new DB migrations to
+apply the additional database fields required for publishing.
+
+If you have in-project admins, consider providing the publishing-related admin
+filters provided in `icekit.publishing.admin` such as `PublishingStatusFilter`,
+and the publishing status column for listing pages by adding 'publishing_column'
+to your admin's `list_display` attribute.
+
 ## Implementation details
 
 ### Usage
