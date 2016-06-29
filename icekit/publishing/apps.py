@@ -10,6 +10,7 @@ from fluent_pages.models.managers import UrlNodeQuerySet
 
 from mptt.models import MPTTModel
 
+from . import monkey_patches
 from .managers import PublishingUrlNodeManager, _exchange_for_published, \
     DraftItemBoobyTrap
 from .models import PublishingModel
@@ -43,6 +44,7 @@ class AppConfig(AppConfig):
         super(AppConfig, self).__init__(*args, **kwargs)
 
     def ready(self):
+        monkey_patches.APPLY_patch_urlnodeadminform_clean_for_publishable_items()
 
         # TODO: This is a copy/paste of one in .managers; make it DRY
         @monkey_patch_override_method(UrlNodeQuerySet)
