@@ -539,14 +539,22 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
                     extra_change_form_templates + self.change_form_template)
 
             # Directly overriding the `change_form_template` attr here is
-            # particularly messy since it's a property getter, not a normal
-            # attr, and any normal way of overriding or updating the value will
-            # not work.
-            self._change_form_template_getter = \
-                type(self).change_form_template.__get__
-            type(self).change_form_template = \
-                context['default_change_form_template']
-            has_change_form_attr_getter = True
+            # particularly messy since it can be a property getter, not
+            # a normal attr, and any normal way of overriding or updating the
+            # value will not work.
+            try:
+                self._change_form_template_getter = \
+                    type(self).change_form_template.__get__
+                type(self).change_form_template = \
+                    context['default_change_form_template']
+                has_change_form_attr_getter = True
+            except AttributeError:
+                # AttributeError presumably from `.__get__` hack above, in
+                # which case we don't need to worry about getters and can just
+                # do things the usual way
+                self.change_form_template = \
+                    context['default_change_form_template']
+                has_change_form_attr_getter = False
         else:
             self.change_form_template = \
                 "admin/publishing/publishing_change_form.html"
