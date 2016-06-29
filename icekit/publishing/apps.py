@@ -101,15 +101,6 @@ class AppConfig(AppConfig):
                           Q(publication_end_date__isnull=True) |
                           Q(publication_end_date__gte=now())
                       )
-
-            # Include publishable items that are published themselves, or are
-            # draft copies with a published copy.
-            items_to_include_pks = [
-                i.pk for i in qs
-                if i.is_published or getattr(i, 'has_been_published', False)
-            ]
-            qs = qs.filter(pk__in=items_to_include_pks)
-
             return _exchange_for_published(qs)
 
         # Monkey-patch `UrlNodeQuerySet.get_for_path` to add filtering by
