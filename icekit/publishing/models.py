@@ -132,7 +132,7 @@ class PublishingModel(models.Model):
         if self.is_published:
             return True
         elif self.is_draft:
-            return self.publishing_linked is not None
+            return self.publishing_linked_id is not None
         raise ValueError(  # pragma: no cover
             "Publishable object %r is neither draft nor published" % self)
 
