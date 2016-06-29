@@ -3,6 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 from fluent_pages.adminui import PageAdminForm
 from fluent_pages.integration.fluent_contents.admin import FluentContentsPageAdmin
 from icekit.admin import FluentLayoutsMixin
+from icekit.publishing.admin import PublishingAdmin
 
 from . import models
 
@@ -26,7 +27,8 @@ class ArticleAdminForm(PageAdminForm):
         exclude = []
 
 
-class ArticlePageAdmin(FluentLayoutsMixin, FluentContentsPageAdmin):
+class ArticlePageAdmin(FluentLayoutsMixin, FluentContentsPageAdmin,
+                       PublishingAdmin):
     """
     Article Page Admin integration.
     """
