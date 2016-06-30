@@ -32,8 +32,8 @@ setuptools.setup(
         'django-el-pagination',
         'django-fluent-contents',
         'django-fluent-pages',
-        'django-model-utils',
-        'django-polymorphic<0.8',  # For compatibility with django-fluent-contents
+        'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
+        'django-polymorphic<0.8',  # For compatibility with django-fluent-contents: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
         'django-wysiwyg',
         'django_extensions',
         'Pillow',
@@ -42,8 +42,15 @@ setuptools.setup(
         'unidecode',
     ],
     extras_require={
+        'api': [
+            'djangorestframework',
+        ],
         'brightcove': [
             'django-brightcove',
+        ],
+        'publishing': [
+            'django-model-settings',
+            'django-compressor<1.6',  # See: https://github.com/django-compressor/django-compressor/issues/706
         ],
         'dev': [
             'ipdb',
@@ -67,6 +74,7 @@ setuptools.setup(
             'coverage',
             'django-dynamic-fixture',
             'django-nose',
+            'djangorestframework',
             'django-webtest',
             'micawber',
             'mock',

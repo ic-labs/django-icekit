@@ -1,9 +1,11 @@
 """
 Tests for ``icekit`` app.
 """
+import os
 
 # WebTest API docs: http://webtest.readthedocs.org/en/latest/api.html
 from django.apps import apps
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.contenttypes.models import ContentType
@@ -15,11 +17,14 @@ from django.utils import six
 from django_dynamic_fixture import G
 from django_webtest import WebTest
 from fluent_contents.models import Placeholder
+from fluent_contents.plugins.rawhtml.models import RawHtmlItem
 from fluent_pages.models import PageLayout
 from fluent_pages.pagetypes.fluentpage.models import FluentPage
 from forms_builder.forms.models import Form
 from icekit.abstract_models import LayoutFieldMixin
 from icekit.page_types.layout_page.models import LayoutPage
+from icekit.page_types.article.models import ArticlePage
+from icekit.page_types import utils as page_types_utils
 from icekit.plugins import descriptors
 from icekit.plugins.faq.models import FAQItem
 from icekit.plugins.horizontal_rule.models import HorizontalRuleItem
@@ -386,6 +391,16 @@ class Models(WebTest):
         self.assertEqual(mixin.get_layout_template_name(), mixin_layout.template_name)
         mixin_layout.delete()
 
+    def test_article_page(self):
+        article_page_1 = ArticlePage.objects.create(
+            author=self.user_1,
+            title='Test Article'
+        )
+        self.assertIn(article_page_1, ArticlePage.objects.all())
+        self.assertEqual(ArticlePage.objects.count(), 1)
+        self.assertEqual(ArticlePage.objects.published().count(), 0)
+        self.assertEqual(ArticlePage.objects.draft().count(), 1)
+
 
 class Views(WebTest):
     def setUp(self):
@@ -398,7 +413,10 @@ class Views(WebTest):
         self.image_1 = G(Image)
         self.page_layout_1 = G(PageLayout)
         self.media_category_1 = G(models.MediaCategory)
-        self.layout_1 = G(models.Layout)
+        self.layout_1 = G(
+            models.Layout,
+            template_name='icekit/layouts/default.html',
+        )
         self.response_page_1 = G(
             ResponsePage,
             type='404',
@@ -419,6 +437,27 @@ class Views(WebTest):
             'response_page'
         )
 
+        self.article_page_1 = ArticlePage.objects.create(
+            author=self.super_user_1,
+            title='Test Article',
+            layout=self.layout_1,
+        )
+        self.content_instance_1 = fluent_contents.create_content_instance(
+            RawHtmlItem,
+            self.article_page_1,
+            html='<b>test 1</b>'
+        )
+        self.content_instance_2 = fluent_contents.create_content_instance(
+            RawHtmlItem,
+            self.article_page_1,
+            html='<b>test 2</b>'
+        )
+        self.content_instance_3 = fluent_contents.create_content_instance(
+            RawHtmlItem,
+            self.article_page_1,
+            html='<b>test 3</b>'
+        )
+
     def test_admin_pages(self):
         response = self.app.get(reverse('admin:index'), user=self.super_user_1)
         self.assertEqual(response.status_code, 200)
@@ -428,6 +467,7 @@ class Views(WebTest):
             ('icekit_layout', self.layout_1),
             ('icekit_mediacategory', self.media_category_1),
             ('response_pages_responsepage', self.response_page_1),
+            ('fluent_pages_page', self.article_page_1),
         )
         for admin_app, obj in admin_app_list:
             response = self.app.get(reverse('admin:%s_changelist' % admin_app))
@@ -468,6 +508,48 @@ class Views(WebTest):
         response.mustcontain('<h1>Server Error (500)</h1>')
         self.response_page_2.is_active = True
         self.response_page_2.save()
+
+    def test_article_page_front_end(self):
+        # Article Page is unpublished
+        response = self.client.get(self.article_page_1.get_absolute_url())
+        self.assertEqual(response.status_code, 404)
+        # Article Page is published
+        self.article_page_1.publish()
+        response = self.client.get(self.article_page_1.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+
+    def test_page_api(self):
+        self.article_page_1.publish()
+        for j in range(20):
+            published_article = ArticlePage.objects.create(
+                author=self.super_user_1,
+                title='Test Article %s' % j,
+                layout=self.layout_1,
+            )
+            published_article.publish()
+
+            draft_article = ArticlePage.objects.create(
+                author=self.super_user_1,
+                title='Draft Article %s' % j,
+                layout=self.layout_1,
+            )
+
+        response = self.client.get(reverse('page-list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 5)
+        self.assertEqual(response.data['count'], 21)
+        response = self.client.get(reverse('page-detail', args=(self.article_page_1.id, )))
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(reverse('page-detail', args=(self.article_page_1.get_published().id, )))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 6)
+        for key in response.data.keys():
+            if key is not 'content':
+                self.assertEqual(response.data[key],
+                                 getattr(self.article_page_1.get_published(), key))
+        self.assertEqual(len(response.data['content']), 3)
+        for number, item in enumerate(response.data['content'], 1):
+            self.assertEqual(item['content'], getattr(self, 'content_instance_%s' % number).html)
 
 
 class TestValidators(WebTest):
@@ -513,7 +595,6 @@ class TestIceKitTags(WebTest):
             parent_site=Site.objects.first(),
             layout=layout_1,
             author=staff_1,
-            status='p',  # Publish the page
         )
 
         hr = fluent_contents.create_content_instance(
@@ -521,8 +602,10 @@ class TestIceKitTags(WebTest):
             page_1,
             placeholder_name='test-main',
         )
+        # Publish the page
+        page_1.publish()
 
-        response = self.app.get(page_1.get_absolute_url())
+        response = self.app.get(page_1.get_published().get_absolute_url())
 
         response.mustcontain('<div class="filter">Horizontal Rule</div>')
         response.mustcontain('<div class="tag-as"></div>')
@@ -574,4 +657,36 @@ class TestDescribePageNumbers(TestCase):
                 'total_count': 500,
                 'per_page': 10,
             },
+        )
+
+
+class PageTypesUtils(WebTest):
+
+    def test_get_pages_template_dir(self):
+        self.assertEqual(
+            page_types_utils.get_pages_template_dir('', default_path=''),
+            settings.BASE_DIR
+        )
+
+        template_dirs = settings.TEMPLATE_DIRS
+        settings.TEMPLATE_DIRS = ''
+
+        # A lambda is used to call the function as assertRaises only accepts a callable.
+        self.assertRaises(
+            exceptions.ImproperlyConfigured,
+            lambda: page_types_utils.get_pages_template_dir('', default_path=''),
+        )
+
+        settings.TEMPLATE_DIRS = template_dirs
+
+        # A lambda is used to call the function as assertRaises only accepts a callable.
+        self.assertRaises(
+            exceptions.ImproperlyConfigured,
+            lambda: page_types_utils.get_pages_template_dir('', os.path.relpath(os.path.dirname(__file__))),
+        )
+
+        # A lambda is used to call the function as assertRaises only accepts a callable.
+        self.assertRaises(
+            exceptions.ImproperlyConfigured,
+            lambda: page_types_utils.get_pages_template_dir('', '/this-most-likely-wont-exist/'),
         )
