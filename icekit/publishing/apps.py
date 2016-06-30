@@ -1,8 +1,6 @@
 from django.apps import AppConfig, apps
 from django.core.exceptions import MultipleObjectsReturned
-from django.db.models.query_utils import Q
 from django.utils.translation import get_language
-from django.utils.timezone import now
 
 from fluent_pages import appsettings
 from fluent_pages.models import UrlNode
@@ -10,7 +8,7 @@ from fluent_pages.models.managers import UrlNodeQuerySet
 
 from mptt.models import MPTTModel
 
-from .managers import PublishingUrlNodeManager, _exchange_for_published, \
+from .managers import PublishingUrlNodeManager, UrlNodeQuerySetWithPublished, \
     DraftItemBoobyTrap
 from .models import PublishingModel
 from .middleware import is_draft_request_context, \
@@ -71,33 +69,6 @@ class AppConfig(AppConfig):
             else:
                 for item in super(UrlNodeQuerySet, self).iterator():
                     yield item
-
-        # Monkey-patch `UrlNodeQuerySet.published` to add filtering by
-        # publishing status and exchange of draft items to published ones.
-        # This is necessary to make publishable items available via
-        # relationship querysets where the relationship is generally to draft
-        # items but we want to get the correponding published copies.
-        @monkey_patch_override_method(UrlNodeQuerySet)
-        def published(self, for_user=None):
-            qs = self._single_site()
-            # Avoid filtering to only published items when we are in a draft
-            # context and we know this method is triggered by Fluent (because
-            # the `for_user` is present) because we may actually want to find
-            # and return draft items to priveleged users in this situation.
-            if for_user and is_draft_request_context():
-                return qs
-
-            if for_user is not None and for_user.is_staff:
-                pass  # Don't filter by publication date for Staff
-            else:
-                qs = qs.filter(
-                        Q(publication_date__isnull=True) |
-                        Q(publication_date__lt=now())
-                      ).filter(
-                          Q(publication_end_date__isnull=True) |
-                          Q(publication_end_date__gte=now())
-                      )
-            return _exchange_for_published(qs)
 
         # Monkey-patch `UrlNodeQuerySet.get_for_path` to add filtering by
         # publishing status.
@@ -196,6 +167,33 @@ class AppConfig(AppConfig):
         # avoid our custom versions from getting clobbered by versions higher
         # up the inheritance hierarchy.
         for model in apps.get_models():
+
+            # Monkey-patch queryset class used by any model attribute
+            # descriptors that represent relationships to `UrlNode`s, to allow
+            # us to exchange draft items for their corresponding published
+            # copies when `published()` is invoked on these relationships. This
+            # patching is only necessary when the target class is a descendent
+            # of `UrlNode` but not a subclass of `PublishingModel`.
+            for field in model._meta.get_fields():
+                try:
+                    descriptor = getattr(model, field.name)
+                except AttributeError:
+                    continue
+                if not hasattr(descriptor, 'related_manager_cls'):
+                    continue
+                manager_cls = descriptor.related_manager_cls
+                try:
+                    qs_class = manager_cls.queryset_class
+                    qs_class_attr = 'queryset_class'
+                except AttributeError:
+                    qs_class = manager_cls._queryset_class
+                    qs_class_attr = '_queryset_class'
+                if qs_class == UrlNodeQuerySet:
+                    #print("Overridden queryset class for %s.%s"
+                    #      % (model, field.name))
+                    setattr(manager_cls, qs_class_attr,
+                            UrlNodeQuerySetWithPublished)
+
             # Skip any models that don't have publishing features
             if not issubclass(model, PublishingModel):
                 continue

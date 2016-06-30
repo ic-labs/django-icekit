@@ -106,6 +106,7 @@ def _exchange_for_published(qs):
     # to pass a subquery instead of collecting PKs into a list to pass?
     published_version_pks = []
     for item in qs:
+        # TODO Adjust checks so they don't fail if fields are not present
         # If item is draft and has a linked published copy, use that...
         if item.publishing_is_draft and item.publishing_linked_id:
             published_version_pks.append(item.publishing_linked_id)
@@ -305,6 +306,37 @@ class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
         if with_exchange:
             queryset = queryset.exchange_for_published()
         return queryset
+
+
+class UrlNodeQuerySetWithPublished(UrlNodeQuerySet):
+    # TODO Update explanation here
+    # Monkey-patch `UrlNodeQuerySet.published` to add filtering by
+    # publishing status and exchange of draft items to published ones.
+    # This is necessary to make publishable items available via
+    # relationship querysets where the relationship is generally to draft
+    # items but we want to get the correponding published copies.
+    def published(self, for_user=None):
+        qs = self._single_site()
+        # Avoid filtering to only published items when we are in a draft
+        # context and we know this method is triggered by Fluent (because
+        # the `for_user` is present) because we may actually want to find
+        # and return draft items to priveleged users in this situation.
+        if for_user and is_draft_request_context():
+            return qs
+
+        if for_user is not None and for_user.is_staff:
+            pass  # Don't filter by publication date for Staff
+        else:
+            qs = qs.filter(
+                    Q(publication_date__isnull=True) |
+                    Q(publication_date__lt=now())
+                ).filter(
+                    Q(publication_end_date__isnull=True) |
+                    Q(publication_end_date__gte=now())
+                )
+        return _exchange_for_published(qs)
+
+    # TODO Add `visible()`?
 
 
 class PublishingManager(PassThroughManagerMixin, models.Manager):
