@@ -40,6 +40,7 @@ setuptools.setup(
         'requests',
         'nltk',
         'unidecode',
+        'django-app-namespace-template-loader',
     ],
     extras_require={
         'api': [
