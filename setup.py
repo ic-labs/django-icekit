@@ -79,6 +79,7 @@ setuptools.setup(
             'micawber',
             'mock',
             'nose-progressive',
+            'psycopg2',
             'WebTest',
         ],
     },
