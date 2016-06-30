@@ -14,7 +14,9 @@ User = get_user_model()
 
 class PlaceholderDescriptor(WebTest):
     def setUp(self):
-        self.site = G(Site)
+        self.site, __ = Site.objects.get_or_create(
+            pk=1,
+            defaults={'name': 'example.com', 'domain': 'example.com'})
         self.user_1 = G(User)
         descriptors.contribute_to_class(FluentPage)
         self.page_layout_1 = G(
