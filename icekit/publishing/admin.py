@@ -265,7 +265,7 @@ class _PublishingHelpersMixin(object):
             pass
         return t.render(c)
     publishing_column.allow_tags = True
-    publishing_column.short_description = _('Publishing')
+    publishing_column.short_description = _('Published')
 
 
 class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
@@ -615,7 +615,7 @@ class PublishingFluentPagesParentAdminMixin(_PublishingHelpersMixin):
     def status_column(self, obj):
         return self.publishing_column(obj)
     status_column.allow_tags = True
-    status_column.short_description = _('Publishing')
+    status_column.short_description = _('Published')
 
 
 class ICEKitFluentPagesParentAdminMixin(
