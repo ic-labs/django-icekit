@@ -144,6 +144,7 @@ class PublishingQuerySet(QuerySet):
     """
     Base publishing queryset features, without UrlNode customisations.
     """
+    exchange_on_published = False
 
     def visible(self):
         """
@@ -168,7 +169,7 @@ class PublishingQuerySet(QuerySet):
         queryset = self.all()
         return queryset.filter(publishing_is_draft=True)
 
-    def published(self, for_user=UNSET, with_exchange=True):
+    def published(self, for_user=UNSET, force_exchange=False):
         """
         Filter items to include only those that are actually published.
 
@@ -178,7 +179,7 @@ class PublishingQuerySet(QuerySet):
         pre-existing query optimisations ineffective.
 
         If you want the original draft objects as well as their published
-        copies, set ``with_exchange`` to ``False``. Please note that this will
+        copies, set ``force_exchange`` to ``False``. Please note that this will
         only return draft objects that have published copies.
 
         It should be noted that Fluent's notion of "published" items is
@@ -204,17 +205,18 @@ class PublishingQuerySet(QuerySet):
             return self.visible()
 
         queryset = self.all()
-        # Exclude any draft items without a published copy. We keep all
-        # published copy items, and draft items with a published copy. Result
-        # can therefore contain both draft and published items, with both the
-        # published and draft copies of published items.
-        queryset = queryset.exclude(
-            publishing_is_draft=True, publishing_linked=None)
-        # Return the published item copies by default, or the original draft
-        # copies if requested.
-        if with_exchange:
-            queryset = queryset.exchange_for_published()
-        return queryset
+        if force_exchange or self.exchange_on_published:
+            # Exclude any draft items without a published copy. We keep all
+            # published copy items, and draft items with a published copy. Result
+            # can therefore contain both draft and published items, with both the
+            # published and draft copies of published items.
+            queryset = queryset.exclude(
+                publishing_is_draft=True, publishing_linked=None)
+            # Return the published item copies by default, or the original draft
+            # copies if requested.
+            return queryset.exchange_for_published()
+        else:
+            return queryset.filter(publishing_is_draft=False)
 
     def exchange_for_published(self):
         return _exchange_for_published(self)
@@ -277,7 +279,7 @@ class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
     Publishing queryset features with UrlNode support and customisations.
     """
 
-    def published(self, for_user=UNSET, with_exchange=True):
+    def published(self, for_user=UNSET, force_exchange=False):
         """
         Apply additional filtering of published items over that done in
         `PublishingQuerySet.published` to filter based on additional publising
@@ -286,9 +288,9 @@ class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
         if for_user is not UNSET:
             return self.visible()
 
-        queryset = self.all()
-        queryset = queryset.exclude(
-            publishing_is_draft=True, publishing_linked=None)
+        queryset = super(PublishingUrlNodeQuerySet, self).published(
+            for_user=for_user, force_exchange=force_exchange)
+
         # Exclude by publication date on the published version of items, *not*
         # the draft vesion, or we could get the wrong result.
         # Exclude fields of published copy of draft items, not draft itself...
@@ -301,10 +303,7 @@ class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
             Q(publishing_is_draft=False) & Q(
                 Q(publication_date__gt=now())
                 | Q(publication_end_date__lte=now())))
-        # Return the published item copies by default, or the original draft
-        # copies if requested.
-        if with_exchange:
-            queryset = queryset.exchange_for_published()
+
         return queryset
 
 

@@ -8,8 +8,8 @@ from fluent_pages.models.managers import UrlNodeQuerySet
 
 from mptt.models import MPTTModel
 
-from .managers import PublishingUrlNodeManager, UrlNodeQuerySetWithPublished, \
-    DraftItemBoobyTrap
+from .managers import PublishingQuerySet, PublishingUrlNodeManager, \
+    UrlNodeQuerySetWithPublished, DraftItemBoobyTrap
 from .models import PublishingModel
 from .middleware import is_draft_request_context, \
     is_publishing_middleware_active
@@ -192,8 +192,12 @@ class AppConfig(AppConfig):
                 except AttributeError:
                     qs_class = manager_cls._queryset_class
                     qs_class_attr = '_queryset_class'
-                if qs_class == UrlNodeQuerySet:
-                    #print("Overridden queryset class for %s.%s"
+                if issubclass(qs_class, PublishingQuerySet):
+                    #print("Set `exchange_on_published` in queryset class %s.%s"
+                    #      % (model, field.name))
+                    qs_class.exchange_on_published = True
+                elif issubclass(qs_class, UrlNodeQuerySet):
+                    #print("Override of UrlNode queryset class for %s.%s"
                     #      % (model, field.name))
                     setattr(manager_cls, qs_class_attr,
                             UrlNodeQuerySetWithPublished)

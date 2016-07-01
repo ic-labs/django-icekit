@@ -238,7 +238,7 @@ class TestPublishingModelAndQueryset(TestCase):
         self.assertEqual(
             [], list(SlideShow.objects.published()))
         self.slide_show_1.publish()
-        # Exchange draft items for published by default
+        # Return only published items
         self.assertEqual(
             [self.slide_show_1.publishing_linked],  # Compare published copy
             list(SlideShow.objects.published()))
@@ -260,16 +260,21 @@ class TestPublishingModelAndQueryset(TestCase):
                 'success!', SlideShow.objects.published(for_user=None))
             self.assertEqual(
                 'success!', SlideShow.objects.published(for_user='whatever'))
-        # Without exchange of drafts for published
+        # Confirm draft-for-published exchange is disabled by default...
+        self.slide_show_1.unpublish()
         self.assertEqual(
-            set([self.slide_show_1.publishing_linked, self.slide_show_1]),
-            set(SlideShow.objects.published(with_exchange=False)))
+            set([]), set(SlideShow.objects.published()))
+        # ... but exchange can be forced
+        self.slide_show_1.publish()
+        self.assertEqual(
+            set([self.slide_show_1.publishing_linked]),
+            set(SlideShow.objects.published(force_exchange=True)))
 
     def test_queryset_published_on_urlnode_model(self):
         self.assertEqual(
             [], list(LayoutPage.objects.published()))
         self.page_1.publish()
-        # Exchange draft items for published by default
+        # Return only published items
         self.assertEqual(
             [self.page_1.publishing_linked],  # Compare published copy
             list(LayoutPage.objects.published()))
@@ -291,10 +296,15 @@ class TestPublishingModelAndQueryset(TestCase):
                 'success!', LayoutPage.objects.published(for_user=None))
             self.assertEqual(
                 'success!', LayoutPage.objects.published(for_user='whatever'))
-        # Without exchange of drafts for published
+        # Confirm draft-for-published exchange is disabled by default...
+        self.page_1.unpublish()
         self.assertEqual(
-            set([self.page_1.publishing_linked, self.page_1]),
-            set(LayoutPage.objects.published(with_exchange=False)))
+            set([]), set(LayoutPage.objects.published()))
+        # ... but exchange can be forced
+        self.page_1.publish()
+        self.assertEqual(
+            set([self.page_1.publishing_linked]),
+            set(LayoutPage.objects.published(force_exchange=True)))
 
     def test_queryset_visible(self):
         self.slide_show_1.publish()
