@@ -105,20 +105,53 @@ def _exchange_for_published(qs):
     # immediately before the queryset is evaluated. It might be possible
     # to pass a subquery instead of collecting PKs into a list to pass?
     published_version_pks = []
-    for item in qs:
-        # TODO Adjust checks so they don't fail if fields are not present
-        # If item is draft and has a linked published copy, use that...
-        if item.publishing_is_draft and item.publishing_linked_id:
-            published_version_pks.append(item.publishing_linked_id)
-        # ...otherwise if item is already the published copy, use it.
-        elif not item.publishing_is_draft:
-            published_version_pks.append(item.pk)
-    # TODO: Salvage more attributes from the original queryset, such as
-    # `annotate()`, `distinct()`, `select_related()`, `values()`, etc.
-    qs = qs.model.objects.filter(pk__in=published_version_pks)
-    # Restore ordering from original queryset.
-    qs = _order_by_pks(qs, published_version_pks)
-    return qs
+    draft_version_pks = []
+    is_exchange_required = False
+    # Use direct DB query if possible (be sure to prioritise the ordering of
+    # the draft items over the published items by checking the draft items
+    # first, since the draft item ordering may be explicitly set via admin)...
+    from .models import PublishingModel
+    if issubclass(qs.model, PublishingModel):
+        for pk, publishing_is_draft, publishing_linked_id in qs.values_list(
+                'pk', 'publishing_is_draft', 'publishing_linked_id'):
+            # If item is draft and if it has a linked published copy, exchange
+            # the draft to get the published copy instead...
+            if publishing_is_draft:
+                draft_version_pks.append(pk)
+                if publishing_linked_id:
+                    published_version_pks.append(publishing_linked_id)
+                    is_exchange_required = True
+            # ...otherwise if item is already the published copy, use it.
+            elif not publishing_is_draft:
+                published_version_pks.append(pk)
+    # ...otherwise we are forced to retrieve the real instances to check fields
+    # and we may be dealing with a UrlNode model without our own publishing
+    # fields so be defensive in our field lookups.
+    else:
+        for item in qs:
+            # If item is draft and if it has a linked published copy, exchange
+            # the draft to get the published copy instead...
+            if getattr(item, 'publishing_is_draft', None):
+                draft_version_pks.append(item.pk)
+                if getattr(item, 'publishing_linked_id', None):
+                    published_version_pks.append(item.publishing_linked_id)
+                    is_exchange_required = True
+            # ...otherwise if item is already the published copy, use it.
+            elif getattr(item, 'is_published', None):
+                published_version_pks.append(pk)
+    # Only perform exchange query and re-ordering if necessary
+    if not is_exchange_required:
+        # If no exchange is required, we must make sure any draft items we
+        # found are excluded from the queryset since we won't be filtering by
+        # published-item PKs
+        return qs.exclude(pk__in=draft_version_pks)
+    else:
+        # TODO: Salvage more attributes from the original queryset, such as
+        # `annotate()`, `distinct()`, `select_related()`, `values()`, etc.
+        qs = qs.model.objects.filter(pk__in=published_version_pks)
+        # Restore ordering from original queryset.
+        qs = _order_by_pks(qs, published_version_pks)
+        return qs
 
 
 def _order_by_pks(qs, pks):
