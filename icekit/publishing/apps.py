@@ -174,7 +174,11 @@ class AppConfig(AppConfig):
             # copies when `published()` is invoked on these relationships. This
             # patching is only necessary when the target class is a descendent
             # of `UrlNode` but not a subclass of `PublishingModel`.
-            for field in model._meta.get_fields():
+            try:
+                fields = model._meta.get_fields()
+            except AttributeError:
+                fields = model._meta.fields
+            for field in fields:
                 try:
                     descriptor = getattr(model, field.name)
                 except AttributeError:
