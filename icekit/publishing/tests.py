@@ -7,7 +7,7 @@ from django.contrib.auth.models import AnonymousUser, Group
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseNotFound, QueryDict
-from django.test import TestCase, RequestFactory
+from django.test import TestCase, TransactionTestCase, RequestFactory
 from django.test.utils import override_settings
 from django.utils import timezone
 
@@ -17,6 +17,7 @@ from django_dynamic_fixture import G
 
 from icekit.models import Layout
 from icekit.plugins.slideshow.models import SlideShow
+from icekit.page_types.article.models import ArticlePage
 from icekit.page_types.layout_page.models import LayoutPage
 
 from icekit.publishing.managers import DraftItemBoobyTrap
@@ -431,6 +432,63 @@ class TestPublishingModelAndQueryset(TestCase):
         self.assertEqual(
             self.slide_show_1.publishing_linked,
             self.slide_show_1.publishing_linked.get_published())
+
+
+class TestDjangoDeleteCollectorPatchForProxyModels(TransactionTestCase):
+    """
+    Make sure we can delete the whole object tree for Fluent pages, or other
+    similar models, that have non-abstract Proxy model instance ancestors
+    and where a relationship exists to the proxy ancestor.  Django does not
+    otherwise properly collect and delete the proxy model's DB record in this
+    case, at least prior to 1.10.
+
+    These tests will fail if the monkey-patches like
+    `APPLY_patch_django_18_get_candidate_relations_to_delete` are not applied
+    with error like:
+
+        IntegrityError: update or delete on table "fluent_pages_urlnode"
+        violates foreign key constraint
+        "fluent_pa_master_id_5300b55ee85000a1_fk_fluent_pages_urlnode_id" on
+        table "fluent_pages_htmlpage_translation" DETAIL:  Key (id)=(2) is
+        still referenced from table "fluent_pages_htmlpage_translation".
+    """
+
+    def setUp(self):
+        self.site, __ = Site.objects.get_or_create(
+            pk=1,
+            defaults={'name': 'example.com', 'domain': 'example.com'})
+        self.user_1 = G(User)
+        self.layout = G(Layout)
+
+        self.article_page = ArticlePage.objects.create(
+            author=self.user_1,
+            title='Test Article Page',
+            layout=self.layout,
+            #=================================================================
+            # Trigger creation of SEO Translations on page where these
+            # translations are related back to the proxy `HtmlPage` model.
+            # This is what creates problematic DB relations fixed by the patch.
+            #=================================================================
+            meta_description='',
+        )
+
+    def tearDown(self):
+        LayoutPage.objects.delete()
+
+    # Test to trigger DB integrity errors if Fluent Page deletion is not
+    # properly handled/patched
+    def test_republish_page(self):
+        # Publish first version
+        self.article_page.publish()
+        self.assertEqual(
+            'Test Article Page', self.article_page.get_published().title)
+        # Re-publish page, to trigger deletion and recreation of published copy
+        self.article_page.title += ' - Updated'
+        self.article_page.save()
+        self.article_page.publish()
+        self.assertEqual(
+            'Test Article Page - Updated',
+            self.article_page.get_published().title)
 
 
 class TestPublishingMiddleware(TestCase):

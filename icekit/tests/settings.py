@@ -23,6 +23,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 USE_TZ = True  # Default: False
 
+LANGUAGE_CODE = 'en'
+
 INSTALLED_APPS = (
     'bootstrap3',
     'django.contrib.admin',
