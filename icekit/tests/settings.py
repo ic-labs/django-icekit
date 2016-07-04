@@ -5,8 +5,14 @@ import os
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ':memory:',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'test_icekit',
+        'ATOMIC_REQUESTS': True,
+        'TEST': {
+            'NAME': 'test_icekit',
+            # See: https://docs.djangoproject.com/en/1.7/ref/settings/#serialize
+            'SERIALIZE': False,
+        },
     }
 }
 

@@ -38,7 +38,9 @@ class TestPublishingModelAndQueryset(TestCase):
     """
 
     def setUp(self):
-        self.site = G(Site)
+        self.site, __ = Site.objects.get_or_create(
+            pk=1,
+            defaults={'name': 'example.com', 'domain': 'example.com'})
         self.user_1 = G(User)
         self.page_layout_1 = G(Layout)
         self.page_1 = LayoutPage.objects.create(
