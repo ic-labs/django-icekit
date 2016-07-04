@@ -177,6 +177,9 @@ class PublishingQuerySet(QuerySet):
     """
     Base publishing queryset features, without UrlNode customisations.
     """
+    # Do not perform draft-to-published item exchange by default to avoid
+    # performance penalties. This class attribute exists to be enabled only
+    # where it is really necessary: on relationship querysets.
     exchange_on_published = False
 
     def visible(self):
@@ -206,14 +209,16 @@ class PublishingQuerySet(QuerySet):
         """
         Filter items to include only those that are actually published.
 
-        By default, this method will call ``exchange_for_published`` as the
-        last step and will therefore return only the published object copies
-        of published items. This is normally what you want, but it will make
-        pre-existing query optimisations ineffective.
+        By default, this method will apply a filter to find published items
+        where `publishing_is_draft==False`.
 
-        If you want the original draft objects as well as their published
-        copies, set ``force_exchange`` to ``False``. Please note that this will
-        only return draft objects that have published copies.
+        If it is necessary to exchange draft items for published copies, such
+        as for relationships defined in the admin that only capture draft
+        targets, the exchange mechanism is triggered either by forcing it
+        with `force_exchange==True` or by enabling exchange by default at
+        the class level with `exchange_on_published==True`. In either case,
+        this method will return only the published object copies of published
+        items.
 
         It should be noted that Fluent's notion of "published" items is
         different from ours and is user-sensitive such that privileged users
@@ -221,10 +226,6 @@ class PublishingQuerySet(QuerySet):
         published items align with ours this method also acts as a shim for our
         ``visible`` filter and will return visible items when invoked by
         Fluent's view resolution process that provides the ``for_user`` kwarg.
-
-        NOTE: Be aware that the queryset we are working with contains both
-        draft and published items, so the filtering logic can be convoluted as
-        it needs to handle both draft and published versions.
         """
         # Re-interpret call to `published` from within Fluent to our
         # `visible` implementation, if the `for_user` kwarg is provided by the
@@ -240,15 +241,15 @@ class PublishingQuerySet(QuerySet):
         queryset = self.all()
         if force_exchange or self.exchange_on_published:
             # Exclude any draft items without a published copy. We keep all
-            # published copy items, and draft items with a published copy. Result
-            # can therefore contain both draft and published items, with both the
-            # published and draft copies of published items.
+            # published copy items, and draft items with a published copy, so
+            # result may contain both draft and published items.
             queryset = queryset.exclude(
                 publishing_is_draft=True, publishing_linked=None)
-            # Return the published item copies by default, or the original draft
-            # copies if requested.
+            # Return only published items, exchanging draft items for their
+            # published copies where necessary.
             return queryset.exchange_for_published()
         else:
+            # No draft-to-published exchange requested, use simple constraint
             return queryset.filter(publishing_is_draft=False)
 
     def exchange_for_published(self):
@@ -307,6 +308,7 @@ class PublishingQuerySet(QuerySet):
             .only(*field_names, **kwargs)
 
 
+# TODO Can this class be replaced by `UrlNodeQuerySetWithPublished`?
 class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
     """
     Publishing queryset features with UrlNode support and customisations.
@@ -341,13 +343,12 @@ class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
 
 
 class UrlNodeQuerySetWithPublished(UrlNodeQuerySet):
-    # TODO Update explanation here
-    # Monkey-patch `UrlNodeQuerySet.published` to add filtering by
-    # publishing status and exchange of draft items to published ones.
-    # This is necessary to make publishable items available via
-    # relationship querysets where the relationship is generally to draft
-    # items but we want to get the correponding published copies.
+
     def published(self, for_user=None):
+        """
+        Customise `UrlNodeQuerySet.published()` to add filtering by publication
+        date constraints and exchange of draft items for published ones.
+        """
         qs = self._single_site()
         # Avoid filtering to only published items when we are in a draft
         # context and we know this method is triggered by Fluent (because

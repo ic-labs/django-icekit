@@ -168,12 +168,11 @@ class AppConfig(AppConfig):
         # up the inheritance hierarchy.
         for model in apps.get_models():
 
-            # Monkey-patch queryset class used by any model attribute
-            # descriptors that represent relationships to `UrlNode`s, to allow
-            # us to exchange draft items for their corresponding published
-            # copies when `published()` is invoked on these relationships. This
-            # patching is only necessary when the target class is a descendent
-            # of `UrlNode` but not a subclass of `PublishingModel`.
+            # Monkey-patch the queryset class used by any model descriptors
+            # that represent relationships to publishable items, including
+            # our own and `UrlNode`s notions of publishing, so that we can
+            # exchange draft items for their corresponding published copies
+            # when `published()` is invoked on these relationships.
             try:
                 fields = model._meta.get_fields()
             except AttributeError:
@@ -183,19 +182,32 @@ class AppConfig(AppConfig):
                     descriptor = getattr(model, field.name)
                 except AttributeError:
                     continue
+                # We are only interested in descriptors for related item
+                # relationships, which we recognise by the presence of
+                # `related_manager_cls`.
                 if not hasattr(descriptor, 'related_manager_cls'):
                     continue
                 manager_cls = descriptor.related_manager_cls
+                # Different item relationships keep the queryset class we need
+                # to patch in different places: grab the class and remember the
+                # attribute name wherever that class is.
                 try:
                     qs_class = manager_cls.queryset_class
                     qs_class_attr = 'queryset_class'
                 except AttributeError:
                     qs_class = manager_cls._queryset_class
                     qs_class_attr = '_queryset_class'
+
+                # If queryset is a descendent of our own `PublishingQuerySet`
+                # we only need to enable the exchange mechanism so it will
+                # happen by default
                 if issubclass(qs_class, PublishingQuerySet):
                     #print("Set `exchange_on_published` in queryset class %s.%s"
                     #      % (model, field.name))
                     qs_class.exchange_on_published = True
+                # If the queryset is no based on `PublishingQuerySet` but is
+                # a `UrlNodeQuerySet` we replace that QS class with our own
+                # customised version that overrides the `published()` method.
                 elif issubclass(qs_class, UrlNodeQuerySet):
                     #print("Override of UrlNode queryset class for %s.%s"
                     #      % (model, field.name))
