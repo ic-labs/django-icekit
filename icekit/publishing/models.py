@@ -321,7 +321,6 @@ class PublishingModel(models.Model):
             publishing_signals.publishing_post_unpublish.send(
                 sender=type(self), instance=self)
 
-    # TODO: Re-implement revert-to-public without reversion?
     @assert_draft
     def revert_to_public(self):
         """

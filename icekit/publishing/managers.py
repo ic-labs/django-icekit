@@ -2,7 +2,10 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils.timezone import now
+
 from fluent_pages.models.managers import UrlNodeQuerySet, UrlNodeManager
+from fluent_pages.models.db import UrlNode
+
 from model_utils.managers import PassThroughManagerMixin
 
 from .middleware import is_draft_request_context, \
@@ -105,19 +108,53 @@ def _exchange_for_published(qs):
     # immediately before the queryset is evaluated. It might be possible
     # to pass a subquery instead of collecting PKs into a list to pass?
     published_version_pks = []
-    for item in qs:
-        # If item is draft and has a linked published copy, use that...
-        if item.publishing_is_draft and item.publishing_linked_id:
-            published_version_pks.append(item.publishing_linked_id)
-        # ...otherwise if item is already the published copy, use it.
-        elif not item.publishing_is_draft:
-            published_version_pks.append(item.pk)
-    # TODO: Salvage more attributes from the original queryset, such as
-    # `annotate()`, `distinct()`, `select_related()`, `values()`, etc.
-    qs = qs.model.objects.filter(pk__in=published_version_pks)
-    # Restore ordering from original queryset.
-    qs = _order_by_pks(qs, published_version_pks)
-    return qs
+    draft_version_pks = []
+    is_exchange_required = False
+    # Use direct DB query if possible (be sure to prioritise the ordering of
+    # the draft items over the published items by checking the draft items
+    # first, since the draft item ordering may be explicitly set via admin)...
+    from .models import PublishingModel
+    if issubclass(qs.model, PublishingModel):
+        for pk, publishing_is_draft, publishing_linked_id in qs.values_list(
+                'pk', 'publishing_is_draft', 'publishing_linked_id'):
+            # If item is draft and if it has a linked published copy, exchange
+            # the draft to get the published copy instead...
+            if publishing_is_draft:
+                draft_version_pks.append(pk)
+                if publishing_linked_id:
+                    published_version_pks.append(publishing_linked_id)
+                    is_exchange_required = True
+            # ...otherwise if item is already the published copy, use it.
+            elif not publishing_is_draft:
+                published_version_pks.append(pk)
+    # ...otherwise we are forced to retrieve the real instances to check fields
+    # and we may be dealing with a UrlNode model without our own publishing
+    # fields so be defensive in our field lookups.
+    else:
+        for item in qs:
+            # If item is draft and if it has a linked published copy, exchange
+            # the draft to get the published copy instead...
+            if getattr(item, 'publishing_is_draft', None):
+                draft_version_pks.append(item.pk)
+                if getattr(item, 'publishing_linked_id', None):
+                    published_version_pks.append(item.publishing_linked_id)
+                    is_exchange_required = True
+            # ...otherwise if item is already the published copy, use it.
+            elif getattr(item, 'is_published', None):
+                published_version_pks.append(pk)
+    # Only perform exchange query and re-ordering if necessary
+    if not is_exchange_required:
+        # If no exchange is required, we must make sure any draft items we
+        # found are excluded from the queryset since we won't be filtering by
+        # published-item PKs
+        return qs.exclude(pk__in=draft_version_pks)
+    else:
+        # TODO: Salvage more attributes from the original queryset, such as
+        # `annotate()`, `distinct()`, `select_related()`, `values()`, etc.
+        qs = qs.model.objects.filter(pk__in=published_version_pks)
+        # Restore ordering from original queryset.
+        qs = _order_by_pks(qs, published_version_pks)
+        return qs
 
 
 def _order_by_pks(qs, pks):
@@ -139,22 +176,65 @@ def _order_by_pks(qs, pks):
         select={'pk_ordering': ordering}, order_by=('pk_ordering',))
 
 
+def _queryset_visible(qs):
+    """
+    Return the visible version of publishable items, which means:
+    - for privileged users: all draft items, whether published or not
+    - for everyone else: the published copy of items.
+    """
+    if is_draft_request_context():
+        # All draft objects, and only draft objects.
+        return qs.draft()
+    else:
+        return qs.published()
+
+
+def _queryset_iterator(qs):
+    """
+    Override default iterator to wrap returned items in a publishing
+    sanity-checker "booby trap" to lazily raise an exception if DRAFT
+    items are mistakenly returned and mis-used in a public context
+    where only PUBLISHED items should be used.
+
+    This booby trap is added when all of:
+
+    - the publishing middleware is active, and therefore able to report
+    accurately whether the request is in a drafts-permitted context
+    - the publishing middleware tells us we are not in
+    a drafts-permitted context, which means only published items
+    should be used.
+    """
+    # Avoid double-processing draft items in our custom iterator when we
+    # are in a `PublishingQuerySet` that is also a subclass of the
+    # monkey-patched `UrlNodeQuerySet`
+    if issubclass(type(qs), UrlNodeQuerySet):
+        super_without_boobytrap_iterator = super(UrlNodeQuerySet, qs)
+    else:
+        super_without_boobytrap_iterator = super(PublishingQuerySet, qs)
+
+    if is_publishing_middleware_active() \
+            and not is_draft_request_context():
+        for item in super_without_boobytrap_iterator.iterator():
+            if getattr(item, 'publishing_is_draft', False):
+                yield DraftItemBoobyTrap(item)
+            else:
+                yield item
+    else:
+        for item in super_without_boobytrap_iterator.iterator():
+            yield item
+
+
 class PublishingQuerySet(QuerySet):
     """
     Base publishing queryset features, without UrlNode customisations.
     """
+    # Do not perform draft-to-published item exchange by default to avoid
+    # performance penalties. This class attribute exists to be enabled only
+    # where it is really necessary: on relationship querysets.
+    exchange_on_published = False
 
     def visible(self):
-        """
-        Return the visible version of publishable items, which means:
-        - for privileged users: all draft items, whether published or not
-        - for everyone else: the published copy of items.
-        """
-        if is_draft_request_context():
-            # All draft objects, and only draft objects.
-            return self.draft()
-        else:
-            return self.published()
+        return _queryset_visible(self)
 
     def draft(self):
         """
@@ -167,18 +247,20 @@ class PublishingQuerySet(QuerySet):
         queryset = self.all()
         return queryset.filter(publishing_is_draft=True)
 
-    def published(self, for_user=UNSET, with_exchange=True):
+    def published(self, for_user=UNSET, force_exchange=False):
         """
         Filter items to include only those that are actually published.
 
-        By default, this method will call ``exchange_for_published`` as the
-        last step and will therefore return only the published object copies
-        of published items. This is normally what you want, but it will make
-        pre-existing query optimisations ineffective.
+        By default, this method will apply a filter to find published items
+        where `publishing_is_draft==False`.
 
-        If you want the original draft objects as well as their published
-        copies, set ``with_exchange`` to ``False``. Please note that this will
-        only return draft objects that have published copies.
+        If it is necessary to exchange draft items for published copies, such
+        as for relationships defined in the admin that only capture draft
+        targets, the exchange mechanism is triggered either by forcing it
+        with `force_exchange==True` or by enabling exchange by default at
+        the class level with `exchange_on_published==True`. In either case,
+        this method will return only the published object copies of published
+        items.
 
         It should be noted that Fluent's notion of "published" items is
         different from ours and is user-sensitive such that privileged users
@@ -186,10 +268,6 @@ class PublishingQuerySet(QuerySet):
         published items align with ours this method also acts as a shim for our
         ``visible`` filter and will return visible items when invoked by
         Fluent's view resolution process that provides the ``for_user`` kwarg.
-
-        NOTE: Be aware that the queryset we are working with contains both
-        draft and published items, so the filtering logic can be convoluted as
-        it needs to handle both draft and published versions.
         """
         # Re-interpret call to `published` from within Fluent to our
         # `visible` implementation, if the `for_user` kwarg is provided by the
@@ -203,55 +281,24 @@ class PublishingQuerySet(QuerySet):
             return self.visible()
 
         queryset = self.all()
-        # Exclude any draft items without a published copy. We keep all
-        # published copy items, and draft items with a published copy. Result
-        # can therefore contain both draft and published items, with both the
-        # published and draft copies of published items.
-        queryset = queryset.exclude(
-            publishing_is_draft=True, publishing_linked=None)
-        # Return the published item copies by default, or the original draft
-        # copies if requested.
-        if with_exchange:
-            queryset = queryset.exchange_for_published()
-        return queryset
+        if force_exchange or self.exchange_on_published:
+            # Exclude any draft items without a published copy. We keep all
+            # published copy items, and draft items with a published copy, so
+            # result may contain both draft and published items.
+            queryset = queryset.exclude(
+                publishing_is_draft=True, publishing_linked=None)
+            # Return only published items, exchanging draft items for their
+            # published copies where necessary.
+            return queryset.exchange_for_published()
+        else:
+            # No draft-to-published exchange requested, use simple constraint
+            return queryset.filter(publishing_is_draft=False)
 
     def exchange_for_published(self):
         return _exchange_for_published(self)
 
-    # TODO: This is a copy/paste of one in .apps; make it DRY
     def iterator(self):
-        """
-        Override default iterator to wrap returned items in a publishing
-        sanity-checker "booby trap" to lazily raise an exception if DRAFT
-        items are mistakenly returned and mis-used in a public context
-        where only PUBLISHED items should be used.
-
-        This booby trap is added when all of:
-
-        - the publishing middleware is active, and therefore able to report
-        accurately whether the request is in a drafts-permitted context
-        - the publishing middleware tells us we are not in
-        a drafts-permitted context, which means only published items
-        should be used.
-        """
-        # Avoid double-processing draft items in our custom iterator when we
-        # are in a `PublishingQuerySet` that is also a subclass of the
-        # monkey-patched `UrlNodeQuerySet`
-        if issubclass(type(self), UrlNodeQuerySet):
-            super_without_boobytrap_iterator = super(UrlNodeQuerySet, self)
-        else:
-            super_without_boobytrap_iterator = super(PublishingQuerySet, self)
-
-        if is_publishing_middleware_active() \
-                and not is_draft_request_context():
-            for item in super_without_boobytrap_iterator.iterator():
-                if getattr(item, 'publishing_is_draft', False):
-                    yield DraftItemBoobyTrap(item)
-                else:
-                    yield item
-        else:
-            for item in super_without_boobytrap_iterator.iterator():
-                yield item
+        return _queryset_iterator(self)
 
     def only(self, *args, **kwargs):
         """
@@ -273,10 +320,10 @@ class PublishingQuerySet(QuerySet):
 
 class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
     """
-    Publishing queryset features with UrlNode support and customisations.
+    Publishing queryset with customisations for UrlNode support.
     """
 
-    def published(self, for_user=UNSET, with_exchange=True):
+    def published(self, for_user=UNSET, force_exchange=False):
         """
         Apply additional filtering of published items over that done in
         `PublishingQuerySet.published` to filter based on additional publising
@@ -285,9 +332,9 @@ class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
         if for_user is not UNSET:
             return self.visible()
 
-        queryset = self.all()
-        queryset = queryset.exclude(
-            publishing_is_draft=True, publishing_linked=None)
+        queryset = super(PublishingUrlNodeQuerySet, self).published(
+            for_user=for_user, force_exchange=force_exchange)
+
         # Exclude by publication date on the published version of items, *not*
         # the draft vesion, or we could get the wrong result.
         # Exclude fields of published copy of draft items, not draft itself...
@@ -300,11 +347,52 @@ class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
             Q(publishing_is_draft=False) & Q(
                 Q(publication_date__gt=now())
                 | Q(publication_end_date__lte=now())))
-        # Return the published item copies by default, or the original draft
-        # copies if requested.
-        if with_exchange:
-            queryset = queryset.exchange_for_published()
+
         return queryset
+
+
+class UrlNodeQuerySetWithPublishingFeatures(UrlNodeQuerySet):
+    """
+    Customised `UrlNodeQuerySet` to impose our publishing API as much as
+    possible on `UrlNode` models that are not based on our `PublishingModel`,
+    which can be the situation for relationships to generic Fluent page types
+    like `HtmlPage` or `Page` where the related items may or may not be
+    instances of `PublishingModel`.
+    """
+
+    def published(self, for_user=None, force_exchange=True):
+        """
+        Customise `UrlNodeQuerySet.published()` to add filtering by publication
+        date constraints and exchange of draft items for published ones.
+        """
+        qs = self._single_site()
+        # Avoid filtering to only published items when we are in a draft
+        # context and we know this method is triggered by Fluent (because
+        # the `for_user` is present) because we may actually want to find
+        # and return draft items to priveleged users in this situation.
+        if for_user and is_draft_request_context():
+            return qs
+
+        if for_user is not None and for_user.is_staff:
+            pass  # Don't filter by publication date for Staff
+        else:
+            qs = qs.filter(
+                    Q(publication_date__isnull=True) |
+                    Q(publication_date__lt=now())
+                ).filter(
+                    Q(publication_end_date__isnull=True) |
+                    Q(publication_end_date__gte=now())
+                )
+        if force_exchange:
+            return _exchange_for_published(qs)
+        else:
+            return qs.filter(status=UrlNode.PUBLISHED)
+
+    def draft(self):
+        return self.filter(status=UrlNode.DRAFT)
+
+    def visible(self):
+        return _queryset_visible(self)
 
 
 class PublishingManager(PassThroughManagerMixin, models.Manager):

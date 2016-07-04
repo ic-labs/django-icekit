@@ -15,12 +15,15 @@ from mock import patch, Mock
 
 from django_dynamic_fixture import G
 
+from fluent_pages.models.db import UrlNode
+
 from icekit.models import Layout
 from icekit.plugins.slideshow.models import SlideShow
 from icekit.page_types.article.models import ArticlePage
 from icekit.page_types.layout_page.models import LayoutPage
 
-from icekit.publishing.managers import DraftItemBoobyTrap
+from icekit.publishing.managers import DraftItemBoobyTrap, \
+    UrlNodeQuerySetWithPublishingFeatures
 from icekit.publishing.middleware import PublishingMiddleware, \
     is_publishing_middleware_active, get_current_user, \
     is_draft_request_context, override_current_user, \
@@ -28,6 +31,7 @@ from icekit.publishing.middleware import PublishingMiddleware, \
 from icekit.publishing.utils import get_draft_hmac, verify_draft_url, \
     get_draft_url, PublishingException, NotDraftException
 from icekit.publishing.tests_base import BaseAdminTest
+from icekit.tests.models import ArticleWithRelatedPages
 
 User = get_user_model()
 
@@ -101,8 +105,8 @@ class TestPublishingModelAndQueryset(TestCase):
         self.assertFalse(draft_instance.is_published)
         # Publishing timestamps correct?
         self.assertTrue(
-            draft_instance.publishing_modified_at
-            < draft_instance.publishing_linked.publishing_modified_at)
+            draft_instance.publishing_modified_at <
+            draft_instance.publishing_linked.publishing_modified_at)
         # Draft instance is no longer dirty after publishing
         self.assertFalse(draft_instance.is_dirty)
 
@@ -111,8 +115,8 @@ class TestPublishingModelAndQueryset(TestCase):
         draft_instance.save()
         # Draft instance is now dirty after modification
         self.assertTrue(
-            draft_instance.publishing_modified_at
-            > draft_instance.publishing_linked.publishing_modified_at)
+            draft_instance.publishing_modified_at >
+            draft_instance.publishing_linked.publishing_modified_at)
         self.assertTrue(draft_instance.is_dirty)
 
         # Unpublish instance; check status flags again
@@ -189,10 +193,12 @@ class TestPublishingModelAndQueryset(TestCase):
         self.page_1.save()
         self.assertTrue(self.page_1.is_within_publication_dates())
         # Test publication end date
-        self.page_1.publication_end_date = timezone.now() + timedelta(seconds=1)
+        self.page_1.publication_end_date = \
+            timezone.now() + timedelta(seconds=1)
         self.page_1.save()
         self.assertTrue(self.page_1.is_within_publication_dates())
-        self.page_1.publication_end_date = timezone.now() - timedelta(seconds=1)
+        self.page_1.publication_end_date = \
+            timezone.now() - timedelta(seconds=1)
         self.page_1.save()
         self.assertFalse(self.page_1.is_within_publication_dates())
         # Reset
@@ -201,7 +207,8 @@ class TestPublishingModelAndQueryset(TestCase):
         self.assertTrue(self.page_1.is_within_publication_dates())
         # Test both publication start and end dates against arbitrary timestamp
         self.page_1.publication_date = timezone.now() - timedelta(seconds=1)
-        self.page_1.publication_end_date = timezone.now() + timedelta(seconds=1)
+        self.page_1.publication_end_date = \
+            timezone.now() + timedelta(seconds=1)
         self.assertTrue(self.page_1.is_within_publication_dates())
         self.assertTrue(
             self.page_1.is_within_publication_dates(timezone.now()))
@@ -221,7 +228,7 @@ class TestPublishingModelAndQueryset(TestCase):
         self.assertFalse(self.slide_show_1.is_published)
         self.assertTrue(self.slide_show_1.publishing_linked.is_published)
 
-    def test_queryset_draft(self):
+    def test_queryset_draft_with_publishing_model(self):
         self.assertEqual(
             [self.slide_show_1], list(SlideShow.objects.draft()))
         # Only draft items returned even when published
@@ -237,11 +244,11 @@ class TestPublishingModelAndQueryset(TestCase):
                 self.assertEqual(
                     [self.slide_show_1], list(SlideShow.objects.draft()))
 
-    def test_queryset_published_on_standard_model(self):
+    def test_queryset_published_with_publishing_model(self):
         self.assertEqual(
             [], list(SlideShow.objects.published()))
         self.slide_show_1.publish()
-        # Exchange draft items for published by default
+        # Return only published items
         self.assertEqual(
             [self.slide_show_1.publishing_linked],  # Compare published copy
             list(SlideShow.objects.published()))
@@ -263,16 +270,21 @@ class TestPublishingModelAndQueryset(TestCase):
                 'success!', SlideShow.objects.published(for_user=None))
             self.assertEqual(
                 'success!', SlideShow.objects.published(for_user='whatever'))
-        # Without exchange of drafts for published
+        # Confirm draft-for-published exchange is disabled by default...
+        self.slide_show_1.unpublish()
         self.assertEqual(
-            set([self.slide_show_1.publishing_linked, self.slide_show_1]),
-            set(SlideShow.objects.published(with_exchange=False)))
+            set([]), set(SlideShow.objects.published()))
+        # ... but exchange can be forced
+        self.slide_show_1.publish()
+        self.assertEqual(
+            set([self.slide_show_1.publishing_linked]),
+            set(SlideShow.objects.published(force_exchange=True)))
 
-    def test_queryset_published_on_urlnode_model(self):
+    def test_queryset_published_with_urlnode_based_publishing_model(self):
         self.assertEqual(
             [], list(LayoutPage.objects.published()))
         self.page_1.publish()
-        # Exchange draft items for published by default
+        # Return only published items
         self.assertEqual(
             [self.page_1.publishing_linked],  # Compare published copy
             list(LayoutPage.objects.published()))
@@ -294,10 +306,15 @@ class TestPublishingModelAndQueryset(TestCase):
                 'success!', LayoutPage.objects.published(for_user=None))
             self.assertEqual(
                 'success!', LayoutPage.objects.published(for_user='whatever'))
-        # Without exchange of drafts for published
+        # Confirm draft-for-published exchange is disabled by default...
+        self.page_1.unpublish()
         self.assertEqual(
-            set([self.page_1.publishing_linked, self.page_1]),
-            set(LayoutPage.objects.published(with_exchange=False)))
+            set([]), set(LayoutPage.objects.published()))
+        # ... but exchange can be forced
+        self.page_1.publish()
+        self.assertEqual(
+            set([self.page_1.publishing_linked]),
+            set(LayoutPage.objects.published(force_exchange=True)))
 
     def test_queryset_visible(self):
         self.slide_show_1.publish()
@@ -357,7 +374,8 @@ class TestPublishingModelAndQueryset(TestCase):
         self.assertEqual(
             self.slide_show_1.publishing_linked, wrapper.publishing_linked)
         self.assertEqual(
-            self.slide_show_1.publishing_linked_id, wrapper.publishing_linked_id)
+            self.slide_show_1.publishing_linked_id,
+            wrapper.publishing_linked_id)
         self.assertEqual(
             self.slide_show_1.publishing_is_draft, wrapper.publishing_is_draft)
         self.assertEqual(
@@ -404,6 +422,13 @@ class TestPublishingModelAndQueryset(TestCase):
                 self.assertTrue(all(
                     [i.__class__ != DraftItemBoobyTrap
                      for i in SlideShow.objects.all() if i.is_draft]))
+            # Confirm booby trap works for generic `UrlNode` QS iteration
+            self.assertTrue(all(
+                [i.__class__ == DraftItemBoobyTrap
+                 for i in UrlNode.objects.filter(status=UrlNode.DRAFT)]))
+            self.assertTrue(all(
+                [i.__class__ != DraftItemBoobyTrap
+                 for i in UrlNode.objects.filter(status=UrlNode.PUBLISHED)]))
 
     def test_queryset_only(self):
         # Check `publishing_is_draft` is always included in `only` filtering
@@ -432,6 +457,43 @@ class TestPublishingModelAndQueryset(TestCase):
         self.assertEqual(
             self.slide_show_1.publishing_linked,
             self.slide_show_1.publishing_linked.get_published())
+
+    def test_urlnodequerysetwithpublishingfeatures_for_publishing_model(self):
+        # Create page with related pages relationships to Fluent Page
+        test_page = ArticleWithRelatedPages.objects.create(
+            author=self.user_1,
+            title='Test Page',
+            layout=self.page_layout_1,
+        )
+        test_page.related_pages.add(self.page_1)
+        self.page_1.publish()
+        self.assertEqual(
+            set([self.page_1]),
+            set(test_page.related_pages.all()))
+        # Confirm relationship queryset is monkey-patched
+        self.assertEqual(
+            UrlNodeQuerySetWithPublishingFeatures,
+            type(test_page.related_pages.all()))
+        # Published -- exchange of draft-to-published items by default
+        self.assertEqual(
+            set([self.page_1.get_published()]),
+            set(test_page.related_pages.published()))
+        # Published -- exchange of draft-to-published items can be disabled
+        self.assertEqual(
+            set([]),
+            set(test_page.related_pages.published(force_exchange=False)))
+        # Draft
+        self.assertEqual(
+            set([self.page_1]),
+            set(test_page.related_pages.draft()))
+        # Visible - published items unless we are in privileged context
+        self.assertEqual(
+            set([self.page_1.get_published()]),
+            set(test_page.related_pages.visible()))
+        with override_draft_request_context(True):
+            self.assertEqual(
+                set([self.page_1]),
+                set(test_page.related_pages.visible()))
 
 
 class TestDjangoDeleteCollectorPatchForProxyModels(TransactionTestCase):
