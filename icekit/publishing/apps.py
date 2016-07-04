@@ -9,7 +9,8 @@ from fluent_pages.models.managers import UrlNodeQuerySet
 from mptt.models import MPTTModel
 
 from .managers import PublishingQuerySet, PublishingUrlNodeManager, \
-    UrlNodeQuerySetWithPublished, DraftItemBoobyTrap
+    UrlNodeQuerySetWithPublishingFeatures, DraftItemBoobyTrap, \
+    _queryset_iterator
 from .models import PublishingModel
 from .middleware import is_draft_request_context, \
     is_publishing_middleware_active
@@ -42,33 +43,9 @@ class AppConfig(AppConfig):
 
     def ready(self):
 
-        # TODO: This is a copy/paste of one in .managers; make it DRY
         @monkey_patch_override_method(UrlNodeQuerySet)
         def iterator(self):
-            """
-            Override default iterator to wrap returned items in a publishing
-            sanity-checker "booby trap" to lazily raise an exception if DRAFT
-            items are mistakenly returned and mis-used in a public context
-            where only PUBLISHED items should be used.
-
-            This booby trap is added when all of:
-
-            - the publishing middleware is active, and therefore able to report
-            accurately whether the request is in a drafts-permitted context
-            - the publishing middleware tells us we are not in
-            a drafts-permitted context, which means only published items
-            should be used.
-            """
-            if is_publishing_middleware_active() \
-                    and not is_draft_request_context():
-                for item in super(UrlNodeQuerySet, self).iterator():
-                    if getattr(item, 'publishing_is_draft', False):
-                        yield DraftItemBoobyTrap(item)
-                    else:
-                        yield item
-            else:
-                for item in super(UrlNodeQuerySet, self).iterator():
-                    yield item
+            return _queryset_iterator(self)
 
         # Monkey-patch `UrlNodeQuerySet.get_for_path` to add filtering by
         # publishing status.
@@ -212,7 +189,11 @@ class AppConfig(AppConfig):
                     #print("Override of UrlNode queryset class for %s.%s"
                     #      % (model, field.name))
                     setattr(manager_cls, qs_class_attr,
-                            UrlNodeQuerySetWithPublished)
+                            UrlNodeQuerySetWithPublishingFeatures)
+                    # Override published method on manager as well, so our
+                    # queryset's implementation of `published()` is used
+                    manager_cls.published = \
+                        lambda self, **kwargs: self.all().published(**kwargs)
 
             # Skip any models that don't have publishing features
             if not issubclass(model, PublishingModel):

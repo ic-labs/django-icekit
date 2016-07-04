@@ -2,7 +2,10 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils.timezone import now
+
 from fluent_pages.models.managers import UrlNodeQuerySet, UrlNodeManager
+from fluent_pages.models.db import UrlNode
+
 from model_utils.managers import PassThroughManagerMixin
 
 from .middleware import is_draft_request_context, \
@@ -173,6 +176,54 @@ def _order_by_pks(qs, pks):
         select={'pk_ordering': ordering}, order_by=('pk_ordering',))
 
 
+def _queryset_visible(qs):
+    """
+    Return the visible version of publishable items, which means:
+    - for privileged users: all draft items, whether published or not
+    - for everyone else: the published copy of items.
+    """
+    if is_draft_request_context():
+        # All draft objects, and only draft objects.
+        return qs.draft()
+    else:
+        return qs.published()
+
+
+def _queryset_iterator(qs):
+    """
+    Override default iterator to wrap returned items in a publishing
+    sanity-checker "booby trap" to lazily raise an exception if DRAFT
+    items are mistakenly returned and mis-used in a public context
+    where only PUBLISHED items should be used.
+
+    This booby trap is added when all of:
+
+    - the publishing middleware is active, and therefore able to report
+    accurately whether the request is in a drafts-permitted context
+    - the publishing middleware tells us we are not in
+    a drafts-permitted context, which means only published items
+    should be used.
+    """
+    # Avoid double-processing draft items in our custom iterator when we
+    # are in a `PublishingQuerySet` that is also a subclass of the
+    # monkey-patched `UrlNodeQuerySet`
+    if issubclass(type(qs), UrlNodeQuerySet):
+        super_without_boobytrap_iterator = super(UrlNodeQuerySet, qs)
+    else:
+        super_without_boobytrap_iterator = super(PublishingQuerySet, qs)
+
+    if is_publishing_middleware_active() \
+            and not is_draft_request_context():
+        for item in super_without_boobytrap_iterator.iterator():
+            if getattr(item, 'publishing_is_draft', False):
+                yield DraftItemBoobyTrap(item)
+            else:
+                yield item
+    else:
+        for item in super_without_boobytrap_iterator.iterator():
+            yield item
+
+
 class PublishingQuerySet(QuerySet):
     """
     Base publishing queryset features, without UrlNode customisations.
@@ -183,16 +234,7 @@ class PublishingQuerySet(QuerySet):
     exchange_on_published = False
 
     def visible(self):
-        """
-        Return the visible version of publishable items, which means:
-        - for privileged users: all draft items, whether published or not
-        - for everyone else: the published copy of items.
-        """
-        if is_draft_request_context():
-            # All draft objects, and only draft objects.
-            return self.draft()
-        else:
-            return self.published()
+        return _queryset_visible(self)
 
     def draft(self):
         """
@@ -255,40 +297,8 @@ class PublishingQuerySet(QuerySet):
     def exchange_for_published(self):
         return _exchange_for_published(self)
 
-    # TODO: This is a copy/paste of one in .apps; make it DRY
     def iterator(self):
-        """
-        Override default iterator to wrap returned items in a publishing
-        sanity-checker "booby trap" to lazily raise an exception if DRAFT
-        items are mistakenly returned and mis-used in a public context
-        where only PUBLISHED items should be used.
-
-        This booby trap is added when all of:
-
-        - the publishing middleware is active, and therefore able to report
-        accurately whether the request is in a drafts-permitted context
-        - the publishing middleware tells us we are not in
-        a drafts-permitted context, which means only published items
-        should be used.
-        """
-        # Avoid double-processing draft items in our custom iterator when we
-        # are in a `PublishingQuerySet` that is also a subclass of the
-        # monkey-patched `UrlNodeQuerySet`
-        if issubclass(type(self), UrlNodeQuerySet):
-            super_without_boobytrap_iterator = super(UrlNodeQuerySet, self)
-        else:
-            super_without_boobytrap_iterator = super(PublishingQuerySet, self)
-
-        if is_publishing_middleware_active() \
-                and not is_draft_request_context():
-            for item in super_without_boobytrap_iterator.iterator():
-                if getattr(item, 'publishing_is_draft', False):
-                    yield DraftItemBoobyTrap(item)
-                else:
-                    yield item
-        else:
-            for item in super_without_boobytrap_iterator.iterator():
-                yield item
+        return _queryset_iterator(self)
 
     def only(self, *args, **kwargs):
         """
@@ -308,10 +318,9 @@ class PublishingQuerySet(QuerySet):
             .only(*field_names, **kwargs)
 
 
-# TODO Can this class be replaced by `UrlNodeQuerySetWithPublished`?
 class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
     """
-    Publishing queryset features with UrlNode support and customisations.
+    Publishing queryset with customisations for UrlNode support.
     """
 
     def published(self, for_user=UNSET, force_exchange=False):
@@ -342,9 +351,16 @@ class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
         return queryset
 
 
-class UrlNodeQuerySetWithPublished(UrlNodeQuerySet):
+class UrlNodeQuerySetWithPublishingFeatures(UrlNodeQuerySet):
+    """
+    Customised `UrlNodeQuerySet` to impose our publishing API as much as
+    possible on `UrlNode` models that are not based on our `PublishingModel`,
+    which can be the situation for relationships to generic Fluent page types
+    like `HtmlPage` or `Page` where the related items may or may not be
+    instances of `PublishingModel`.
+    """
 
-    def published(self, for_user=None):
+    def published(self, for_user=None, force_exchange=True):
         """
         Customise `UrlNodeQuerySet.published()` to add filtering by publication
         date constraints and exchange of draft items for published ones.
@@ -367,9 +383,16 @@ class UrlNodeQuerySetWithPublished(UrlNodeQuerySet):
                     Q(publication_end_date__isnull=True) |
                     Q(publication_end_date__gte=now())
                 )
-        return _exchange_for_published(qs)
+        if force_exchange:
+            return _exchange_for_published(qs)
+        else:
+            return qs.filter(status=UrlNode.PUBLISHED)
 
-    # TODO Add `visible()`?
+    def draft(self):
+        return self.filter(status=UrlNode.DRAFT)
+
+    def visible(self):
+        return _queryset_visible(self)
 
 
 class PublishingManager(PassThroughManagerMixin, models.Manager):
