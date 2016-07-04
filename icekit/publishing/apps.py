@@ -151,12 +151,14 @@ class AppConfig(AppConfig):
             # exchange draft items for their corresponding published copies
             # when `published()` is invoked on these relationships.
             try:
-                fields = model._meta.get_fields()
+                # Django 1.8+
+                field_names = [f.name for f in model._meta.get_fields()]
             except AttributeError:
-                fields = model._meta.fields
-            for field in fields:
+                # Django < 1.8
+                field_names = model._meta.get_all_field_names()
+            for field_name in field_names:
                 try:
-                    descriptor = getattr(model, field.name)
+                    descriptor = getattr(model, field_name)
                 except AttributeError:
                     continue
                 # We are only interested in descriptors for related item
@@ -180,14 +182,14 @@ class AppConfig(AppConfig):
                 # happen by default
                 if issubclass(qs_class, PublishingQuerySet):
                     #print("Set `exchange_on_published` in queryset class %s.%s"
-                    #      % (model, field.name))
+                    #      % (model, field_name))
                     qs_class.exchange_on_published = True
                 # If the queryset is no based on `PublishingQuerySet` but is
                 # a `UrlNodeQuerySet` we replace that QS class with our own
                 # customised version that overrides the `published()` method.
                 elif issubclass(qs_class, UrlNodeQuerySet):
                     #print("Override of UrlNode queryset class for %s.%s"
-                    #      % (model, field.name))
+                    #      % (model, field_name))
                     setattr(manager_cls, qs_class_attr,
                             UrlNodeQuerySetWithPublishingFeatures)
                     # Override published method on manager as well, so our
