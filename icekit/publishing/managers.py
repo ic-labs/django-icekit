@@ -141,7 +141,7 @@ def _exchange_for_published(qs):
                     is_exchange_required = True
             # ...otherwise if item is already the published copy, use it.
             elif getattr(item, 'is_published', None):
-                published_version_pks.append(pk)
+                published_version_pks.append(item.pk)
     # Only perform exchange query and re-ordering if necessary
     if not is_exchange_required:
         # If no exchange is required, we must make sure any draft items we
