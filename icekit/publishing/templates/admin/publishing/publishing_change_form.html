@@ -21,9 +21,14 @@
 		var csrf_token = '{{ csrf_token }}';
 	</script>
 	<style>
+		/* style publish links to look like other buttons */
 		.submit-row a.button {
 			margin: 0 2px 0 5px;
 			padding: 10px 15px;
+		}
+		/* hide fluent's "status" field which is obsoleted (TODO: actually remove it from the form/model) */
+		fieldset .form-row.field-status {
+			display: none;
 		}
 	</style>
 {% endblock %}
