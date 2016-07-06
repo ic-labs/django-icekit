@@ -64,6 +64,7 @@ setuptools.setup(
         'python-dateutil',
         'pytz',
         'six',
+        'sqlparse',  # Required for SQL migrations, apparently
         'WebTest',
     ],
     extras_require={
