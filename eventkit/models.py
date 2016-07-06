@@ -143,6 +143,9 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     """
 
     # Changes to these fields will be propagated to repeat events.
+    # WARNING: If fields are altered in a subclass the `tracker` class
+    # attribute must be redeclared in that subclass like so:
+    #     tracker = FieldTracker(MONITOR_FIELDS)
     MONITOR_FIELDS = (
         'title',
         'all_day',
@@ -153,6 +156,7 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         'recurrence_rule',
         'end_repeat',
         'date_end_repeat',
+        'show_in_calendar',
     )
 
     PROPAGATE_FIELDS = [
@@ -201,18 +205,48 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         help_text=_('Show this event in the public calendar'),
     )
 
-
-
     class Meta:
         abstract = True
         ordering = ('date_starts', '-all_day', 'starts', 'title', 'pk')
+
+    def __init__(self, *args, **kwargs):
+        """
+        Sanity-check that the field tracker associated with this class tracks
+        exactly the same fields as the class's ``MONITOR_FIELDS`` listing.
+        This check is necessary because ``FieldTracker`` can only be declared
+        on concrete classes, and must be redeclared on any subclass where the
+        fields to track as defined in ``MONITOR_FIELDS`` are changed.
+        """
+        super(AbstractEvent, self).__init__(*args, **kwargs)
+        # Confirm field tracker is defined at all
+        if not hasattr(self.__class__, 'tracker'):
+            raise Exception(
+                "Event concrete subclass %r *must* include a field tracker"
+                " attribute definition like this:\n"
+                "   tracker = FieldTracker(MONITOR_FIELDS)\n"
+                % type(self)
+            )
+        # Confirm field tracker's tracked fields == MONITOR_FIELDS
+        if self.tracker.fields != set(self.MONITOR_FIELDS):
+            raise Exception(
+                "Fields tracked in event concrete subclass %r *must* match"
+                " the fields listed in ``MONITOR_FIELDS`` but they do not."
+                " Tracker fields missing: %s. Tracker extra fields: %s."
+                " You probably need to redefine the field tracker attribute"
+                " definition like this:\n"
+                "   tracker = FieldTracker(MONITOR_FIELDS)\n"
+                % (type(self),
+                   set(self.MONITOR_FIELDS).difference(self.tracker.fields),
+                   self.tracker.fields.difference(set(self.MONITOR_FIELDS)))
+            )
 
     def __str__(self):
         return self.title
 
     def _monitor_fields_changed(self, fields=None):
         """
-        Return ``True`` if the given field (or any field, if None) has changed.
+        Return ``True`` if the given set of fields (or ``self.MONITOR_FIELDS``
+        if None) has changed.
         """
         fields = fields or self.MONITOR_FIELDS
         if isinstance(fields, six.string_types):
@@ -682,9 +716,9 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             'className': self.calendar_classes(),
         }
 
+
 class Event(AbstractEvent):
     """
     A concrete polymorphic event model.
     """
-
     tracker = FieldTracker(AbstractEvent.MONITOR_FIELDS)
