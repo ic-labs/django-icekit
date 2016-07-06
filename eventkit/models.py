@@ -142,7 +142,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
     explicitly is most likely the easiest way to ensure this.
     """
 
-    # Changes to these fields will be propagated to repeat events.
+    # Changes to these fields will be propagated to repeat events if the
+    # user has checked "propagate changes".
     # WARNING: If fields are altered in a subclass the `tracker` class
     # attribute must be redeclared in that subclass like so:
     #     tracker = FieldTracker(MONITOR_FIELDS)
@@ -159,6 +160,8 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         'show_in_calendar',
     )
 
+    # If these fields are changed, they affect future events and so
+    # will trigger a propagation, and so user must check "progagate changes"
     PROPAGATE_FIELDS = [
         'starts',
         'ends',
