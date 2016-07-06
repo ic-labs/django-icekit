@@ -1,0 +1,22 @@
+{
+  "name": "icekit_events",
+  "version": "0.0.0",
+  "homepage": "https://github.com/ixc/icekit-events-plus",
+  "authors": [
+    "Tai Lee <real.human@mrmachine.net>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "fullcalendar": "~2.3.1",
+    "iframe-resizer": "~2.8.7",
+    "lodash": "~3.9.3",
+    "skveege-rrule": "~2.1.3"
+  }
+}

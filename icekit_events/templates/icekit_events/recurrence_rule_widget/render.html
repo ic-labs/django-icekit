@@ -1,0 +1,230 @@
+<div id="{{ id }}_recurrence-rule-widget" class="recurrence-rule-widget">
+	{{ rendered_widgets }}
+	<div class="preview">
+		<table class="dates"></table>
+	</div>
+	<div class="error"></div>
+</div>
+<script>
+	(function($) {
+		var options = {{ recurrence_rules|safe }};
+		var preset = $('#{{ id }}_0');
+		var natural = $('#{{ id }}_1');
+		var rfc = $('#{{ id }}_2');
+		var error = $('#{{ id }}_recurrence-rule-widget div.error');
+
+		// Bind click events to toggle links.
+		$('div.recurrence-rule-widget a[class^=toggle]').click(function(e) {
+			e.preventDefault();
+			var link = $(e.target);
+			link.closest('div.recurrence-rule-widget').find('div.' + link.data('target')).toggle();
+		});
+
+		function natural_to_rfc(val) {
+			var error_text = '';
+			var lines = [];
+			var valid = true;
+
+			if (val) {
+				$.each(val.match(/[^\r\n]+/g), function(i, line) {
+					try {
+						var rule = RRule.fromText(line.replace(/^exclude/, ''));
+					}
+					catch(err) {
+						error_text = err.message;
+						valid = false;
+						return false;
+					}
+
+					// The rule is invalid if we can't convert it back to text.
+					var rule_text = rule.toText();
+					if (rule_text.match('^RRule error:')) {
+						error_text = rule_text.replace(/^RRule error: /, '');
+						valid = false;
+						return false;
+					}
+
+					// Convert to RFC rule.
+					rule = rule.toString();
+
+					if (line.match('^exclude')) {
+						rule = 'EXRULE:' + rule;
+					}
+					else {
+						rule = 'RRULE:' + rule;
+					}
+					lines[i] = rule;
+				});
+
+			}
+
+			if (valid) {
+				rfc.val(lines.join('\n'));
+				rfc_to_preset(rfc.val());
+				error.hide();
+			}
+			else {
+				error.html('Natural Language Rule - ' + error_text);
+				error.show();
+			}
+		}
+
+		// Update the selected preset and RFC rule to match the natural
+		// language rule on key up.
+		natural.keyup(function(e) {
+			natural_to_rfc($.trim(natural.val()));
+		});
+
+		function rfc_to_natural(val) {
+			var error_text = '';
+			var lines = [];
+			var valid = true;
+
+			if (val) {
+				$.each(val.match(/[^\r\n]+/g), function(i, line) {
+					// The rule is invalid if we can't convert it to text.
+					try {
+						var rule = RRule
+							.fromString(line.replace(/^(EX|R)RULE:/, ''))
+							.toText()
+						;
+					}
+					catch(err) {
+						// Syntax error in the RFC rule.
+						error_text = err.message;
+						valid = false;
+						return false;
+					}
+					if (rule.match('^RRule error')) {
+						// Error in the `RRule.toText()` function.
+						error_text = rule;
+						valid = false;
+						return false;
+					}
+
+					if (line.match('^EXRULE')) {
+						rule = 'exclude ' + rule;
+					}
+					lines[i] = rule;
+				});
+			}
+
+			if (valid) {
+				natural.val(lines.join('\n'));
+				error.hide();
+			}
+			else {
+				error.html('RFC Rule Error - ' + error_text);
+				error.show();
+			}
+		}
+
+		function rfc_to_preset(val) {
+			var match = '';
+			// Compare the RFC rule to all presets, looking for a match.
+			$.each(options, function(i, recurrence_rule) {
+				// Normalise newlines in preset rules.
+				// TODO: Check that this is absolutely required, and doesn't
+				// break on other platforms.
+				if (val == recurrence_rule.replace(/[\r\n]+/g, '\n')) {
+					match = i;
+					return false;
+				}
+			});
+			// Update the selected preset rule.
+			preset.val(match);
+			// Update the saved RFC rule if it doesn't match any presets.
+			if (!match) {
+				rfc_custom = val;
+			}
+		}
+
+		// Update the selected preset and natural language rule to match the
+		// RFC rule on key up.
+		rfc.keyup(function(e) {
+			var val = $.trim(rfc.val());
+			rfc_to_preset(val);
+			rfc_to_natural(val);
+		}).keyup();
+
+		// Save the RFC rule if it doesn't match any presets.
+		var rfc_custom = preset.val() ? '' : rfc.val();
+
+		// Update the natural and RFC rules when the selected preset is
+		// changed.
+		preset.change(function(e) {
+			rfc.val(options[preset.val()] || rfc_custom).keyup();
+		});
+
+		// Generate a preview of occurrences.
+		function preview(e) {
+			var table = $('#{{ id }}_recurrence-rule-widget table.dates');
+			$.post(
+				'{% url "admin:icekit_events_recurrencerule_preview" %}',
+				{
+					recurrence_rule: rfc.val()
+				},
+				function(data, textStatus, jqXHR) {
+					// Success.
+					if (data.occurrences) {
+						var html = makeRows(
+							$.map(data.occurrences, function(value, i) {
+								return new Date(value);
+							})
+						);
+						table.html(html).show();
+					}
+					// Failure.
+					else if (rfc.val()) {
+						table.hide();
+					}
+					// Nothing to preview.
+					else {
+						table.hide();
+					}
+				}
+			);
+		}
+		var debounced_preview = _.debounce(preview, 500);
+		preset.change(debounced_preview);
+		natural.keyup(debounced_preview);
+		rfc.keyup(debounced_preview).keyup();
+
+		// See: https://github.com/jakubroztocil/rrule/blob/master/tests/demo/demo.js
+		makeRows = function(dates) {
+			var cells, cls, date, i, index, part, parts, prevParts, prevStates, rows, states;
+			prevParts = [];
+			prevStates = [];
+			index = 1;
+			rows = (function() {
+				var j, len, results;
+				results = [];
+				for (j = 0, len = dates.length; j < len; j++) {
+					date = dates[j];
+					states = [];
+					parts = date.toString().split(' ');
+					cells = (function() {
+						var l, len1, results1;
+						results1 = [];
+						for (i = l = 0, len1 = parts.length; l < len1; i = ++l) {
+							part = parts[i];
+							if (part !== prevParts[i]) {
+								states[i] = !prevStates[i];
+							} else {
+								states[i] = prevStates[i];
+							}
+							cls = states[i] ? 'a' : 'b';
+							results1.push("<td class='" + cls + "'>" + part + "</td>");
+						}
+						return results1;
+					})();
+					prevParts = parts;
+					prevStates = states;
+					results.push("<tr><td>" + (index++) + "</td>" + (cells.join('\n')) + "</tr>");
+				}
+				return results;
+			})();
+			return rows.join('\n\n');
+		};
+	})(window.jQuery || django.jQuery);
+</script>

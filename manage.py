@@ -11,7 +11,7 @@ if __name__ == "__main__":
         cov.start()
 
     os.environ.setdefault(
-        "DJANGO_SETTINGS_MODULE", "eventkit.tests.settings")
+        "DJANGO_SETTINGS_MODULE", "icekit_events.tests.settings")
 
     from django.core.management import execute_from_command_line
 

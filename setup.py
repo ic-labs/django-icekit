@@ -22,7 +22,7 @@ if {'bdist_wheel', 'sdist'}.intersection(sys.argv):
 # Clean and install bower components.
 if {'bdist_wheel', 'develop', 'sdist'}.intersection(sys.argv):
     cwd = os.getcwd()
-    os.chdir('eventkit/static/eventkit')
+    os.chdir('icekit_events/static/icekit_events')
     if os.path.exists('bower_comonents'):
         print('Cleaning bower components.')
         shutil.rmtree('bower_components')
@@ -37,11 +37,11 @@ if {'bdist_wheel', 'develop', 'sdist'}.intersection(sys.argv):
     os.chdir(cwd)
 
 setuptools.setup(
-    name='django-eventkit',
+    name='icekit-events-plus',
     use_scm_version={'version_scheme': 'post-release'},
     author='Interaction Consortium',
     author_email='studio@interaction.net.au',
-    url='https://github.com/ixc/django-eventkit',
+    url='https://github.com/ixc/icekit-events-plus',
     description='',
     long_description=locals().get('long_description', ''),
     license='MIT',
@@ -49,12 +49,13 @@ setuptools.setup(
     include_package_data=True,
     install_requires=[
         'coverage',
+        'Django<1.9',
         'django-dynamic-fixture',
         'django-icekit',
         'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
         'django-mptt<0.8',  # 0.8 requires Django 1.8. See: https://github.com/django-mptt/django-mptt/releases
         'django-nose',
-        'django-polymorphic<0.8',  # EventKit is not yet compatible with API changes in 0.8+
+        'django-polymorphic<0.8',  # ICEKit Events is not yet compatible with API changes in 0.8+
         'django-polymorphic-tree',
         'django-timezone',
         'django-webtest',
