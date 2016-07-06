@@ -30,6 +30,11 @@
 
 
 {% block submit_buttons_bottom %}
+	<div class="row">
+		<div class="col-md-12">
+			{{ block.super }}
+		</div>
+	</div>
 	{% if has_publish_permission or preview_draft_btn %}
 		<div class="row">
 			<div class="col-md-12">
@@ -50,9 +55,4 @@
 			</div>
 		</div>
 	{% endif %}
-	<div class="row">
-		<div class="col-md-12">
-			{{ block.super }}
-		</div>
-	</div>
 {% endblock %}
