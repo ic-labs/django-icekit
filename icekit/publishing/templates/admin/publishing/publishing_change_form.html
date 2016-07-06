@@ -44,6 +44,7 @@
 		<div class="row">
 			<div class="col-md-12">
 				<div class="submit-row">
+					{% if has_been_published and is_dirty %}<p style="clear: both;"><em><small>This version is newer than the published version</small></em></p>{% endif %}
 					{% if has_publish_permission %}
 						{% if publish_btn %}
 							<a href="{{ publish_btn }}" class="button default">Publish</a>
@@ -55,7 +56,6 @@
 					{% if preview_draft_btn %}
 						<a href="{{ original.get_absolute_url|get_draft_url }}" target="_blank" class="button default">Preview draft <i class="fa fa-external-link"></i></a>
 					{% endif %}
-					{% if has_been_published and is_dirty %}<p style="clear: both;"><em><small>Published version is out-of-date</small></em></p>{% endif %}
 				</div>
 			</div>
 		</div>
