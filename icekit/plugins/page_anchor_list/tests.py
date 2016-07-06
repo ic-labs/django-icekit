@@ -53,10 +53,18 @@ class PageAnchorItemTestCase(WebTest):
             self.page_1,
         )
         self.page_1.publish()
+        self.page_1_published = self.page_1.get_published()
 
     def test_renders_anchor_list(self):
-        response = self.app.get(self.page_1.get_published().get_absolute_url())
-        response.mustcontain('<a href="#jump-link-4">Jump Link</a>')
+        response = self.app.get(self.page_1_published.get_absolute_url())
+        published_anchor_1 = self.page_1_published.contentitem_set.get(
+            pageanchoritem__anchor_name='Jump Link')
+        response.mustcontain('<a href="#jump-link-%d">Jump Link</a>'
+                             % published_anchor_1.pk)
+        published_anchor_2 = self.page_1_published.contentitem_set.get(
+            pageanchoritem__anchor_name='Second Jump Link')
+        response.mustcontain('<a href="#second-jump-link-%d">Second Jump Link</a>'
+                             % published_anchor_2.pk)
 
     def test_str(self):
         self.assertEqual(str(self.anchor_list), 'Page Anchor List')

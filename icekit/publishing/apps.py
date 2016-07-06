@@ -1,8 +1,6 @@
 from django.apps import AppConfig, apps
 from django.core.exceptions import MultipleObjectsReturned
-from django.db.models.query_utils import Q
 from django.utils.translation import get_language
-from django.utils.timezone import now
 
 from fluent_pages import appsettings
 from fluent_pages.models import UrlNode
@@ -11,8 +9,9 @@ from fluent_pages.models.managers import UrlNodeQuerySet
 from mptt.models import MPTTModel
 
 from . import monkey_patches
-from .managers import PublishingUrlNodeManager, _exchange_for_published, \
-    DraftItemBoobyTrap
+from .managers import PublishingQuerySet, PublishingUrlNodeManager, \
+    UrlNodeQuerySetWithPublishingFeatures, DraftItemBoobyTrap, \
+    _queryset_iterator
 from .models import PublishingModel
 from .middleware import is_draft_request_context, \
     is_publishing_middleware_active
@@ -48,60 +47,9 @@ class AppConfig(AppConfig):
         monkey_patches.APPLY_patch_django_17_collector_collect()
         monkey_patches.APPLY_patch_django_18_get_candidate_relations_to_delete()
 
-        # TODO: This is a copy/paste of one in .managers; make it DRY
         @monkey_patch_override_method(UrlNodeQuerySet)
         def iterator(self):
-            """
-            Override default iterator to wrap returned items in a publishing
-            sanity-checker "booby trap" to lazily raise an exception if DRAFT
-            items are mistakenly returned and mis-used in a public context
-            where only PUBLISHED items should be used.
-
-            This booby trap is added when all of:
-
-            - the publishing middleware is active, and therefore able to report
-            accurately whether the request is in a drafts-permitted context
-            - the publishing middleware tells us we are not in
-            a drafts-permitted context, which means only published items
-            should be used.
-            """
-            if is_publishing_middleware_active() \
-                    and not is_draft_request_context():
-                for item in super(UrlNodeQuerySet, self).iterator():
-                    if getattr(item, 'publishing_is_draft', False):
-                        yield DraftItemBoobyTrap(item)
-                    else:
-                        yield item
-            else:
-                for item in super(UrlNodeQuerySet, self).iterator():
-                    yield item
-
-        # Monkey-patch `UrlNodeQuerySet.published` to add filtering by
-        # publishing status and exchange of draft items to published ones.
-        # This is necessary to make publishable items available via
-        # relationship querysets where the relationship is generally to draft
-        # items but we want to get the correponding published copies.
-        @monkey_patch_override_method(UrlNodeQuerySet)
-        def published(self, for_user=None):
-            qs = self._single_site()
-            # Avoid filtering to only published items when we are in a draft
-            # context and we know this method is triggered by Fluent (because
-            # the `for_user` is present) because we may actually want to find
-            # and return draft items to priveleged users in this situation.
-            if for_user and is_draft_request_context():
-                return qs
-
-            if for_user is not None and for_user.is_staff:
-                pass  # Don't filter by publication date for Staff
-            else:
-                qs = qs.filter(
-                        Q(publication_date__isnull=True) |
-                        Q(publication_date__lt=now())
-                      ).filter(
-                          Q(publication_end_date__isnull=True) |
-                          Q(publication_end_date__gte=now())
-                      )
-            return _exchange_for_published(qs)
+            return _queryset_iterator(self)
 
         # Monkey-patch `UrlNodeQuerySet.get_for_path` to add filtering by
         # publishing status.
@@ -200,6 +148,59 @@ class AppConfig(AppConfig):
         # avoid our custom versions from getting clobbered by versions higher
         # up the inheritance hierarchy.
         for model in apps.get_models():
+
+            # Monkey-patch the queryset class used by any model descriptors
+            # that represent relationships to publishable items, including
+            # our own and `UrlNode`s notions of publishing, so that we can
+            # exchange draft items for their corresponding published copies
+            # when `published()` is invoked on these relationships.
+            try:
+                # Django 1.8+
+                field_names = [f.name for f in model._meta.get_fields()]
+            except AttributeError:
+                # Django < 1.8
+                field_names = model._meta.get_all_field_names()
+            for field_name in field_names:
+                try:
+                    descriptor = getattr(model, field_name)
+                except AttributeError:
+                    continue
+                # We are only interested in descriptors for related item
+                # relationships, which we recognise by the presence of
+                # `related_manager_cls`.
+                if not hasattr(descriptor, 'related_manager_cls'):
+                    continue
+                manager_cls = descriptor.related_manager_cls
+                # Different item relationships keep the queryset class we need
+                # to patch in different places: grab the class and remember the
+                # attribute name wherever that class is.
+                try:
+                    qs_class = manager_cls.queryset_class
+                    qs_class_attr = 'queryset_class'
+                except AttributeError:
+                    qs_class = manager_cls._queryset_class
+                    qs_class_attr = '_queryset_class'
+
+                # If queryset is a descendent of our own `PublishingQuerySet`
+                # we only need to enable the exchange mechanism so it will
+                # happen by default
+                if issubclass(qs_class, PublishingQuerySet):
+                    #print("Set `exchange_on_published` in queryset class %s.%s"
+                    #      % (model, field_name))
+                    qs_class.exchange_on_published = True
+                # If the queryset is no based on `PublishingQuerySet` but is
+                # a `UrlNodeQuerySet` we replace that QS class with our own
+                # customised version that overrides the `published()` method.
+                elif issubclass(qs_class, UrlNodeQuerySet):
+                    #print("Override of UrlNode queryset class for %s.%s"
+                    #      % (model, field_name))
+                    setattr(manager_cls, qs_class_attr,
+                            UrlNodeQuerySetWithPublishingFeatures)
+                    # Override published method on manager as well, so our
+                    # queryset's implementation of `published()` is used
+                    manager_cls.published = \
+                        lambda self, **kwargs: self.all().published(**kwargs)
+
             # Skip any models that don't have publishing features
             if not issubclass(model, PublishingModel):
                 continue

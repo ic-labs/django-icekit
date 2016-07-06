@@ -18,11 +18,8 @@ To use ICEKit Publishing in your project:
 * make sure you install ICEKit with the optional 'publishing' extra to get any
   required libraries, e.g. in your *setup.py* include something like:
   'django-icekit[forms,search,publishing]'
-* add 'icekit.publishing' to `INSTALLED_APPS`
-* add 'icekit.publishing.middleware.PublishingMiddleware' to `MIDDLEWARE_CLASSES`
-* if you are using Fluent Pages in your project add the setting
-  `FLUENT_PAGES_PARENT_ADMIN_MIXIN` with the value
-  'icekit.publishing.admin.ICEKitFluentPagesParentAdminMixin'
+* add `'icekit.publishing'` to `INSTALLED_APPS`
+* add `'icekit.publishing.middleware.PublishingMiddleware'` to `MIDDLEWARE_CLASSES`
 
 Once set up in this way, the page and plugin models defined in ICEKit such as
 `ArticlePage` and `SlideShow` will gain publishing features in your project.
@@ -36,20 +33,39 @@ provide in ICEKit.
 To make a standard Django model publishable:
 
 * subclass your model from `icekit.publishing.models.PublishingModel`
-* subclas your model's admin from `icekit.publishing.admin.PublishingAdmin`
+* subclass your model's admin from `icekit.publishing.admin.PublishingAdmin`
 
 To make a `FluentContentsPage` model publishable:
 
 * subclass your model from `icekit.publishing.models.PublishableFluentContentsPage`
-* subclass your model's admin from `icekit.publishing.models.PublishableFluentContentsPage`
+* subclass your model's admin from `FluentContentsPageAdmin` and `icekit.publishing.admin.PublishingAdmin`
 
 Once you have modified your project's models in this way, make new DB migrations to
 apply the additional database fields required for publishing.
 
-If you have in-project admins, consider providing the publishing-related admin
+### Setting up Admin if you are using Fluent Pages
+
+To set up admin for your Fluent Pages:
+
+* add the setting `FLUENT_PAGES_PARENT_ADMIN_MIXIN` with the value
+  `'icekit.publishing.admin.ICEKitFluentPagesParentAdminMixin'` - this is used for the listing page admin, which, in
+  Polymorphic models, is separate to the admins for each Page type.
+* ensure your Admin for each page subclasses `FluentContentsPageAdmin` and `icekit.publishing.admin.PublishingAdmin`
+  as above.
+
+If your admin needs to render a custom `change_form_template`, this template should extend
+`admin/fluentpage/change_form.html`, *not* `admin/publishing/publishing_change_form.html`, which is injected, and
+inherits from your template using `{% extends non_publishing_change_form_template %}`.
+
+#### Filters
+
+Consider providing the publishing-related admin
 filters provided in `icekit.publishing.admin` such as `PublishingStatusFilter`,
 and the publishing status column for listing pages by adding 'publishing_column'
 to your admin's `list_display` attribute.
+
+
+
 
 ### Draft Request Context
 

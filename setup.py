@@ -40,6 +40,7 @@ setuptools.setup(
         'requests',
         'nltk',
         'unidecode',
+        'django-app-namespace-template-loader',
     ],
     extras_require={
         'api': [
@@ -79,6 +80,7 @@ setuptools.setup(
             'micawber',
             'mock',
             'nose-progressive',
+            'psycopg2',
             'WebTest',
         ],
     },

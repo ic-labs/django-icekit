@@ -13,13 +13,6 @@
 	{% endbreadcrumb_scope %}
 {% endblock %}
 
-{% block extrastyle %}
-	{{ block.super }}
-	{% compress css %}
-		<link type="text/less" rel="stylesheet" href="{% static 'admin/css/edit_page.less' %}" />
-	{% endcompress %}
-{% endblock %}
-
 {% block extrahead %}
 	{{ block.super }}
 	<script type="text/javascript">
@@ -27,71 +20,39 @@
 		fluent_layouts.layout_url = '{% url "admin:icekit_layout_changelist" %}';
 		var csrf_token = '{{ csrf_token }}';
 	</script>
-	<script src="{% static 'admin/js/edit_page.js' %}"></script>
+	<style>
+		.submit-row a.button {
+			margin: 0 2px 0 5px;
+			padding: 10px 15px;
+		}
+	</style>
 {% endblock %}
 
-{% block content %}
-	<ul class="nav nav-tabs" role="tablist">
-		<li role="presentation" class="active"><a href="#edit" aria-controls="edit" role="tab" data-toggle="tab">Edit</a></li>
-		<!--<li role="presentation"><a href="#promotion" aria-controls="promotion" role="tab" data-toggle="tab">Promotion</a></li>-->
-		{% if has_absolute_url %}
-			<li role="presentation"><a href="{{ absolute_url }}" target="_blank">View on site <i class="fa fa-external-link"></i></a></li>
-		{% endif %}
-	</ul>
-	<div class="content-left">
-		<div class="tab-content">
-			<div role="tabpanel" class="tab-pane active" id="edit">
-				{{ block.super }}
-			</div>
-			<!--<div role="tabpanel" class="tab-pane" id="promotion">-->
-			<!--</div>-->
-			{% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
-		</div>
-	</div>
-	<div class="content-right">
-		<div class="panel panel-default nomargin save-panel">
-			<div class="panel-heading">
-				<h3 class="panel-title">Save / Publish</h3>
-			</div>
-			<div class="panel-body">
-				{% if has_publish_permission or preview_draft_btn %}
-					<div class="row">
-						<form class="extra-data">
-							<div class="form-group">
-								<div class="col-md-6 publication_date"></div>
-								<div class="col-md-6 publication_end_date"></div>
-							</div>
-						</form>
-					</div>
-					<div class="row">
-						<div class="col-md-12">
-							<p>
-								<div class="btn-group">
-									{% if has_publish_permission %}
-										{% if publish_btn %}
-											<a href="{{ publish_btn }}" class="btn btn-primary">Publish</a>
-										{% endif %}
-										{% if unpublish_btn %}
-											<a href="{{ unpublish_btn }}" class="btn btn-primary">Unpublish</a>
-										{% endif %}
-									{% endif %}
-									{% if preview_draft_btn %}
-										<a href="{{ original.get_absolute_url|get_draft_url }}" target="_blank" class="btn btn-primary">Preview draft <i class="fa fa-external-link"></i></a>
-									{% endif %}
-								</div>
-								{% if has_been_published and is_dirty %}<em><small>Published version is out-of-date</small></em>{% endif %}
-							</p>
-						</div>
-					</div>
-				{% endif %}
-				<div class="row">
-					<div class="col-md-12">
-						{% submit_row %}
-					</div>
+
+{% block submit_buttons_bottom %}
+	{% if has_publish_permission or preview_draft_btn %}
+		<div class="row">
+			<div class="col-md-12">
+				<div class="submit-row">
+					{% if has_publish_permission %}
+						{% if publish_btn %}
+							<a href="{{ publish_btn }}" class="button default">Publish</a>
+						{% endif %}
+						{% if unpublish_btn %}
+							<a href="{{ unpublish_btn }}" class="button default">Unpublish</a>
+						{% endif %}
+					{% endif %}
+					{% if preview_draft_btn %}
+						<a href="{{ original.get_absolute_url|get_draft_url }}" target="_blank" class="button default">Preview draft <i class="fa fa-external-link"></i></a>
+					{% endif %}
+					{% if has_been_published and is_dirty %}<p style="clear: both;"><em><small>Published version is out-of-date</small></em></p>{% endif %}
 				</div>
 			</div>
 		</div>
+	{% endif %}
+	<div class="row">
+		<div class="col-md-12">
+			{{ block.super }}
+		</div>
 	</div>
 {% endblock %}
-
-{% block object-tools %}{% endblock %}

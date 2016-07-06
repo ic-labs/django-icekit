@@ -1,37 +1,16 @@
 {% load i18n static %}
-<div class="col-publishing">
-
-	<label class="publishing-icon">
-		{% if not object.has_been_published %}
-			<img src="{{ img_path }}icon-no.gif" width="10" height="10" alt="Unublished" title="Unublished" />
+<label class="publishing-links">
+	{% if object.has_been_published and published_url %}
+		{% if object.is_dirty %}
+			<a target="_blank" href="{{ draft_url }}" title="Preview draft version"><i class="fa fa-circle-o"></i></a>
 		{% else %}
-			{% if object.is_dirty %}
-				<img src="{{ img_path }}icon-unknown.gif" width="10" height="10" alt="Published (out-of-date)" title="Published (out-of-date)" />
-			{% else %}
-				<img src="{{ img_path }}icon-yes.gif" width="10" height="10" alt="Published" title="Published" />
-			{% endif %}
+			<i class="fa fa-circle-o" style="visibility: hidden;"></i>
 		{% endif %}
-	</label>
-
-	{% if has_publish_permission%}
-		<label class="publishing-links">
-
-			{% if object.has_been_published and published_url %}
-				<a target="_blank" href="{{ published_url }}">View Published</a>
-			{% endif %}
-
-			{% if object.is_dirty and draft_url %}
-				<a target="_blank" href="{{ draft_url }}">View Preview</a>
-			{% endif %}
-
-			{% if object.is_dirty %}
-				<a href="{{ publish_url }}">Publish</a>
-			{% endif %}
-
-			{% if object.has_been_published %}
-				<a href="{{ unpublish_url }}">Unpublish</a>
-			{% endif %}
-		</label>
+		<a target="_blank" href="{{ published_url }}" title="View published{% if not object.is_dirty %}/latest{% endif %} version"><i class="fa fa-circle"></i></a>
+	{% else %}
+		{% if draft_url %}
+			<a target="_blank" href="{{ draft_url }}" title="Preview draft version"><i class="fa fa-circle-o"></i></a>
+		{% endif %}
 	{% endif %}
 
-</div>
+</label>

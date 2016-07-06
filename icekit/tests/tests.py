@@ -165,7 +165,9 @@ class Layout(WebTest):
 
 class Models(WebTest):
     def setUp(self):
-        self.site = G(Site)
+        self.site, __ = Site.objects.get_or_create(
+            pk=1,
+            defaults={'name': 'example.com', 'domain': 'example.com'})
         self.user_1 = G(User)
         self.form_1 = G(Form)
         if apps.is_installed('icekit.plugins.brightcove'):
