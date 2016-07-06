@@ -8,7 +8,7 @@ from django import forms
 from django.contrib.admin.widgets import AdminTextareaWidget
 from django.template import Context, loader
 
-from icekit_events import models, validators
+from . import models, validators
 
 
 # WIDGETS #####################################################################

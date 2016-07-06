@@ -36,6 +36,8 @@ class Migration(migrations.Migration):
             ],
             options={
                 'abstract': False,
+                # Legacy table name
+                'db_table': 'eventkit_event',
             },
             bases=(models.Model,),
         ),
@@ -52,6 +54,8 @@ class Migration(migrations.Migration):
                 'ordering': ('-id',),
                 'abstract': False,
                 'get_latest_by': 'pk',
+                # Legacy table name
+                'db_table': 'eventkit_recurrencerule',
             },
             bases=(models.Model,),
         ),

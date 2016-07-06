@@ -27,7 +27,7 @@ from icekit.admin import (
 from polymorphic.admin import PolymorphicChildModelAdmin
 from timezone import timezone
 
-from icekit_events import admin_forms, appsettings, forms, models, plugins
+from . import admin_forms, appsettings, forms, models, plugins
 
 logger = logging.getLogger(__name__)
 

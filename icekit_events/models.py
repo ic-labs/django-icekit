@@ -59,7 +59,7 @@ class RecurrenceRuleField(
         'repeats.')
 
     def formfield(self, **kwargs):
-        from icekit_events import forms  # Avoid circular import.
+        from . import forms  # Avoid circular import.
         defaults = {
             'form_class': forms.RecurrenceRuleField,
         }

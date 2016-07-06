@@ -4,7 +4,7 @@ Admin forms for ``icekit_events`` app.
 
 from django import forms
 
-from icekit_events import models
+from . import models
 
 
 class BaseEventForm(forms.ModelForm):

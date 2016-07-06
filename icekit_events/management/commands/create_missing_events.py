@@ -1,7 +1,7 @@
 from django.core.management.base import NoArgsCommand
 from django.db.models import Q
 
-from icekit_events.models import Event
+from ...models import Event
 
 
 class Command(NoArgsCommand):
