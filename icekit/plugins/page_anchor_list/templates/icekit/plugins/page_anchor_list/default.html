@@ -1,3 +1,5 @@
-{% for anchor in instance.get_anchors %}
-	<a href="#{{ anchor.anchor_name|slugify }}-{{ anchor.id }}">{{ anchor }}</a>
-{% endfor %}
+<div class="page-anchor-list">
+	{% for anchor in instance.get_anchors %}
+		<a class="page-anchor-list-item" href="#{{ anchor.anchor_name|slugify }}-{{ anchor.id }}">{{ anchor }}</a>
+	{% endfor %}
+</div>

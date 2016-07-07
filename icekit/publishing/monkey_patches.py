@@ -89,7 +89,7 @@ def patch_django_18_get_candidate_relations_to_delete(opts):
     # PATCH: Find all relevant ancestor proxy models, working down from the
     # top- most parent concrete models, and include as candidates with
     # interesting relationships.
-    for parent in opts.parents:
+    for parent in opts.get_parent_list():
         for pc_opts in parent._meta.proxied_children:
             if issubclass(opts.model, pc_opts.model):
                 candidate_models.add(pc_opts)

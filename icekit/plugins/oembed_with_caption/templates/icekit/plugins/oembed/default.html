@@ -1,4 +1,6 @@
-<div class="oembed_wrap">
-	<div class="oembed">{{ instance.html|safe }}</div>
-	<div class="caption">{{ instance.caption }}</div>
+<div class="oembed">
+	<div class="oembed-html">{{ instance.html|safe }}</div>
+	{% if instance.caption %}
+		<div class="oembed-caption">{{ instance.caption }}</div>
+	{% endif %}
 </div>
