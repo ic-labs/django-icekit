@@ -1,5 +1,5 @@
-{% if instance.share_url %}
-	<div class="col-sm-12">
+<div class="map">
+	{% if instance.share_url %}
 		<div class="embed-responsive embed-responsive-16by9">
 			<iframe
 				class="embed-responsive-item"
@@ -10,10 +10,10 @@
 				{% endif %}
 				frameborder="0"
 				style="border:0"
-				allowfullscreen>
-			</iframe>
+				allowfullscreen
+			></iframe>
 		</div>
-	</div>
-{% else %}
-	Map cannot be displayed
-{% endif %}
+	{% else %}
+		Map cannot be displayed
+	{% endif %}
+</div>
