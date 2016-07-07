@@ -21,19 +21,30 @@
 		var csrf_token = '{{ csrf_token }}';
 	</script>
 	<style>
+		/* style publish links to look like other buttons */
 		.submit-row a.button {
 			margin: 0 2px 0 5px;
 			padding: 10px 15px;
+		}
+		/* hide fluent's "status" field which is obsoleted (TODO: actually remove it from the form/model) */
+		fieldset .form-row.field-status {
+			display: none;
 		}
 	</style>
 {% endblock %}
 
 
 {% block submit_buttons_bottom %}
+	<div class="row">
+		<div class="col-md-12">
+			{{ block.super }}
+		</div>
+	</div>
 	{% if has_publish_permission or preview_draft_btn %}
 		<div class="row">
 			<div class="col-md-12">
 				<div class="submit-row">
+					{% if has_been_published and is_dirty %}<p style="clear: both;"><em><small>This version is newer than the published version</small></em></p>{% endif %}
 					{% if has_publish_permission %}
 						{% if publish_btn %}
 							<a href="{{ publish_btn }}" class="button default">Publish</a>
@@ -45,14 +56,8 @@
 					{% if preview_draft_btn %}
 						<a href="{{ original.get_absolute_url|get_draft_url }}" target="_blank" class="button default">Preview draft <i class="fa fa-external-link"></i></a>
 					{% endif %}
-					{% if has_been_published and is_dirty %}<p style="clear: both;"><em><small>Published version is out-of-date</small></em></p>{% endif %}
 				</div>
 			</div>
 		</div>
 	{% endif %}
-	<div class="row">
-		<div class="col-md-12">
-			{{ block.super }}
-		</div>
-	</div>
 {% endblock %}
