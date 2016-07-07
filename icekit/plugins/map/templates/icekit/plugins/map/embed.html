@@ -1,14 +1,17 @@
 {% if instance.share_url %}
 	<div class="col-sm-12">
 		<div class="embed-responsive embed-responsive-16by9">
-			{% if instance.loc %}
-			<iframe class="embed-responsive-item" src="http://maps.google.com/maps?q={{ instance.place_name }}&loc:{{ instance.loc }}&z=15&output=embed"
-				frameborder="0" style="border:0" allowfullscreen>
+			<iframe
+				class="embed-responsive-item"
+				{% if instance.loc %}
+					src="http://maps.google.com/maps?q={{ instance.place_name }}&loc:{{ instance.loc }}&z=15&output=embed"
+				{% else %}
+					src="{{ instance.share_url }}"
+				{% endif %}
+				frameborder="0"
+				style="border:0"
+				allowfullscreen>
 			</iframe>
-			{% else %}
-			<iframe class="embed-responsive-item" src="{{ instance.share_url }}" frameborder="0" style="border:0" allowfullscreen>
-			</iframe>
-			{% endif %}
 		</div>
 	</div>
 {% else %}
