@@ -40,7 +40,12 @@ class WorkImageInline(admin.TabularInline, WorkThumbnailMixin):
 
     def thumbnail_link(self, obj):
         link = admin_url(obj)
-        return "<a href='%s'>%s</a>" % (link, self.thumbnail(obj) or "None")
+        try:
+            thumb = self.thumbnail(obj)
+        except:
+            thumb = "None"
+
+        return "<a href='%s'>%s</a>" % (link,  thumb)
     thumbnail_link.allow_tags = True
 
 
