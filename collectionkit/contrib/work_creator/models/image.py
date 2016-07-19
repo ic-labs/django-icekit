@@ -64,7 +64,7 @@ class ArtworkImageQuerySet(QuerySet):
 
 class WorkImageBase(models.Model):
 
-    artwork = models.ForeignKey('collection.Artwork', related_name='images')
+    artwork = models.ForeignKey('collection.Artwork', related_name='images', on_delete=models.PROTECT)
 
     order = models.PositiveIntegerField(null=True, blank=True)
 
