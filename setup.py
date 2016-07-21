@@ -63,6 +63,7 @@ setuptools.setup(
             'django-mptt<0.8',  # See: https://github.com/django-mptt/django-mptt/releases
             'django-polymorphic<0.8',  # For compatibility with Django < 1.8, see: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
             'Django>=1.7,<1.8',
+            'djangorestframework<3.4',  # For compatibility with Django < 1.8
         ],
         'forms': [
             'django-forms-builder',
