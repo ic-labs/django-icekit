@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
 from django.db import models
 from icekit.abstract_models import FluentFieldsMixin, BoostedTermsMixin
-from collectionkit.utils import grammatical_join
+from glamkit_collections.utils import grammatical_join
 
 
 class WorkBase(FluentFieldsMixin, BoostedTermsMixin):
