@@ -47,6 +47,18 @@ class AppConfig(AppConfig):
         monkey_patches.APPLY_patch_django_17_collector_collect()
         monkey_patches.APPLY_patch_django_18_get_candidate_relations_to_delete()
 
+        # Monkey-patch `UrlNodeQuerySet.published` to avoid filtering out draft
+        # items when we are in a draft request context when the special-case
+        # `for_user` parameter is supplied. The original only avoids this
+        # filtering for logged-in staff users, but we need to avoid it for
+        # other cases like when a specially "signed" draft URL is shared.
+        @monkey_patch_override_method(UrlNodeQuerySet)
+        def published(self, for_user=None):
+            if for_user is not None and is_draft_request_context():
+                return self._single_site()
+            else:
+                return self._original_published(for_user=for_user)
+
         @monkey_patch_override_method(UrlNodeQuerySet)
         def iterator(self):
             return _queryset_iterator(self)
@@ -188,7 +200,7 @@ class AppConfig(AppConfig):
                     #print("Set `exchange_on_published` in queryset class %s.%s"
                     #      % (model, field_name))
                     qs_class.exchange_on_published = True
-                # If the queryset is no based on `PublishingQuerySet` but is
+                # If the queryset is not based on `PublishingQuerySet` but is
                 # a `UrlNodeQuerySet` we replace that QS class with our own
                 # customised version that overrides the `published()` method.
                 elif issubclass(qs_class, UrlNodeQuerySet):
