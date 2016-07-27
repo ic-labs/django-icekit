@@ -7,6 +7,8 @@ from fluent_pages.extensions import page_type_pool
 
 from icekit import abstract_models
 from icekit.page_types.article.abstract_models import AbstractArticlePage
+from icekit.page_types.layout_page.abstract_models import \
+    AbstractUnpublishableLayoutPage
 from icekit.plugins import ICEkitFluentContentsPagePlugin
 
 
@@ -47,3 +49,13 @@ class ArticleWithRelatedPagesPlugin(ICEkitFluentContentsPagePlugin):
     """
     model = ArticleWithRelatedPages
     render_template = 'icekit/page_types/article/default.html'
+
+
+class UnpublishableLayoutPage(AbstractUnpublishableLayoutPage):
+    pass
+
+
+@page_type_pool.register
+class UnpublishableLayoutPagePlugin(ICEkitFluentContentsPagePlugin):
+    model = UnpublishableLayoutPage
+    render_template = 'icekit/layouts/default.html'

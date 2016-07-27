@@ -8,12 +8,16 @@ from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseNotFound, QueryDict
 from django.test import TestCase, TransactionTestCase, RequestFactory
-from django.test.utils import override_settings
+from django.test.utils import override_settings, modify_settings
 from django.utils import timezone
+
+from django_webtest import WebTest
 
 from mock import patch, Mock
 
 from django_dynamic_fixture import G
+
+from fluent_contents.plugins.rawhtml.models import RawHtmlItem
 
 from fluent_pages.models.db import UrlNode
 
@@ -21,6 +25,7 @@ from icekit.models import Layout
 from icekit.plugins.slideshow.models import SlideShow
 from icekit.page_types.article.models import ArticlePage
 from icekit.page_types.layout_page.models import LayoutPage
+from icekit.utils import fluent_contents
 
 from icekit.publishing.managers import DraftItemBoobyTrap, \
     UrlNodeQuerySetWithPublishingFeatures
@@ -31,7 +36,8 @@ from icekit.publishing.middleware import PublishingMiddleware, \
 from icekit.publishing.utils import get_draft_hmac, verify_draft_url, \
     get_draft_url, PublishingException, NotDraftException
 from icekit.publishing.tests_base import BaseAdminTest
-from icekit.tests.models import ArticleWithRelatedPages
+from icekit.tests.models import ArticleWithRelatedPages, \
+    UnpublishableLayoutPage
 
 User = get_user_model()
 
@@ -907,6 +913,118 @@ class TestPublishingAdmin(BaseAdminTest):
         self.assertFalse(
             reverse('admin:slideshow_slideshow_unpublish',
                     args=(self.slide_show_1.pk, )) in response.text)
+
+
+@modify_settings(MIDDLEWARE_CLASSES={
+    'append': 'icekit.publishing.middleware.PublishingMiddleware',
+})
+class TestPublishingForPageViews(WebTest):
+
+    def setUp(self):
+        self.normal_user = G(User)
+        self.super_user = G(
+            User,
+            is_staff=True,
+            is_active=True,
+            is_superuser=True,
+        )
+        self.layout = G(
+            Layout,
+            template_name='icekit/layouts/default.html',
+        )
+        # LayoutPage is a PublishingModel
+        self.layoutpage = LayoutPage.objects.create(
+            author=self.super_user,
+            title='Test LayoutPage',
+            layout=self.layout,
+        )
+        self.content_instance = fluent_contents.create_content_instance(
+            RawHtmlItem,
+            self.layoutpage,
+            html='<b>test content instance</b>'
+        )
+        # UnpublishableLayoutPage is not a PublishingModel
+        self.unpublishablelayoutpage = UnpublishableLayoutPage.objects.create(
+            author=self.super_user,
+            title='Test Unpublishable LayoutPage',
+            layout=self.layout,
+            status=UrlNode.DRAFT,
+        )
+        self.content_instance = fluent_contents.create_content_instance(
+            RawHtmlItem,
+            self.unpublishablelayoutpage,
+            html='<b>test content instance</b>'
+        )
+
+    def test_verified_draft_url_for_publishingmodel(self):
+        # Unpublished page is not visible to anonymous users
+        response = self.app.get(
+            self.layoutpage.get_absolute_url(),
+            user=self.normal_user,
+            expect_errors=True)
+        self.assertEqual(response.status_code, 404)
+        # Unpublished page is visible to staff user with '?edit' param redirect
+        response = self.app.get(
+            self.layoutpage.get_absolute_url(),
+            user=self.super_user)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue('?edit=' in response['Location'])
+        response = response.follow()
+        self.assertEqual(response.status_code, 200)
+        # Unpublished page is visible to any user with signed '?edit' param
+        salt = '123'
+        url_hmac = get_draft_hmac(salt, self.layoutpage.get_absolute_url())
+        response = self.app.get(
+            self.layoutpage.get_absolute_url() + '?edit=%s:%s' % (
+                salt, url_hmac),
+            user=self.normal_user)
+        self.assertEqual(response.status_code, 200)
+
+        # Publish page
+        self.layoutpage.publish()
+
+        # Published page is visible to anonymous users
+        response = self.app.get(
+            self.layoutpage.get_absolute_url(),
+            user=self.normal_user)
+        self.assertEqual(response.status_code, 200)
+
+    # This is a duplicate of `test_verified_draft_url_for_publishingmodel` but
+    # for a non-publishable model instead, to ensure verified draft URLs work
+    # in all cases.
+    def test_verified_draft_url_for_non_publishingmodel(self):
+        # Unpublished page is not visible to anonymous users
+        response = self.app.get(
+            self.unpublishablelayoutpage.get_absolute_url(),
+            user=self.normal_user,
+            expect_errors=True)
+        self.assertEqual(response.status_code, 404)
+        # Unpublished page is visible to staff user with '?edit' param redirect
+        response = self.app.get(
+            self.unpublishablelayoutpage.get_absolute_url(),
+            user=self.super_user)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue('?edit=' in response['Location'])
+        response = response.follow()
+        self.assertEqual(response.status_code, 200)
+        # Unpublished page is visible to any user with signed '?edit' param
+        salt = '123'
+        url_hmac = get_draft_hmac(salt, self.unpublishablelayoutpage.get_absolute_url())
+        response = self.app.get(
+            self.unpublishablelayoutpage.get_absolute_url() + '?edit=%s:%s' % (
+                salt, url_hmac),
+            user=self.normal_user)
+        self.assertEqual(response.status_code, 200)
+
+        # Publish page by changing status (no `published()` method)
+        self.unpublishablelayoutpage.status = UrlNode.PUBLISHED
+        self.unpublishablelayoutpage.save()
+
+        # Published page is visible to anonymous users
+        response = self.app.get(
+            self.unpublishablelayoutpage.get_absolute_url(),
+            user=self.normal_user)
+        self.assertEqual(response.status_code, 200)
 
 
 class TestPublishingOfM2MRelationships(TestCase):
