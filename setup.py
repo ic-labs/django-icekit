@@ -33,6 +33,7 @@ setuptools.setup(
         'django-fluent-contents',
         'django-fluent-pages',
         'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
+        'django-mptt<0.8.5',  # See: https://github.com/django-mptt/django-mptt/releases
         'django-polymorphic<0.8',  # For compatibility with django-fluent-contents: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
         'django-wysiwyg',
         'django_extensions',
