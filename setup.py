@@ -37,11 +37,11 @@ if {'bdist_wheel', 'develop', 'sdist'}.intersection(sys.argv):
     os.chdir(cwd)
 
 setuptools.setup(
-    name='icekit-events-plus',
+    name='icekit-events',
     use_scm_version={'version_scheme': 'post-release'},
     author='Interaction Consortium',
     author_email='studio@interaction.net.au',
-    url='https://github.com/ixc/icekit-events-plus',
+    url='https://github.com/ixc/icekit-events',
     description='',
     long_description=locals().get('long_description', ''),
     license='MIT',

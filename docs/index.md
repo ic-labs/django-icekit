@@ -19,7 +19,7 @@ Update your settings module:
 
 Install Bower dependencies manually:
 
-    (venv)$ cd venv/src/icekit-events-plus/icekit_events/static/icekit_events
+    (venv)$ cd venv/src/icekit-events/icekit_events/static/icekit_events
     (venv)$ bower install
 
 ## Usage

@@ -3,8 +3,8 @@ Refactor of ICEKit Events' Repeating Events - Functional Spec
 
 Document history:
 
-* 2016-03-08 - jmurty : Revised draft following feedback from Greg in https://github.com/ixc/icekit-events-plus/pull/9/files#r54678289
-* 2016-03-01 - jmurty : Revised draft following discussions with Greg and Tai and comments in https://github.com/ixc/icekit-events-plus/pull/9/files
+* 2016-03-08 - jmurty : Revised draft following feedback from Greg in https://github.com/ixc/icekit-events/pull/9/files#r54678289
+* 2016-03-01 - jmurty : Revised draft following discussions with Greg and Tai and comments in https://github.com/ixc/icekit-events/pull/9/files
 * 2016-02-18 – jmurty : Initial draft, up to technical decision point described in Occurrence Implementation Options
 
 ## Goals
