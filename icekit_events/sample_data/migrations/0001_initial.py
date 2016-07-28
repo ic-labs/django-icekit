@@ -93,7 +93,7 @@ def backwards(apps, schema_editor):
         'Yearly Event',
     ]
     samples = Event.objects.filter(title__in=titles)
-    Event.objects.filter(tree_id__in=samples.values('tree_id')).delete()
+    samples.delete()
 
 
 class Migration(migrations.Migration):

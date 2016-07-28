@@ -19,8 +19,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
     get_current_timezone
 from model_utils import FieldTracker
-from polymorphic_tree.models import \
-    PolymorphicMPTTModel, PolymorphicTreeForeignKey
+from polymorphic_tree.models import PolymorphicModel, PolymorphicTreeForeignKey
 from timezone import timezone
 
 from . import appsettings, validators, utils
@@ -179,7 +178,7 @@ class RecurrenceRule(AbstractBaseModel):
 
 
 @encoding.python_2_unicode_compatible
-class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
+class AbstractEvent(PolymorphicModel, AbstractBaseModel):
     """
     An abstract polymorphic event model, with the bare minimum fields.
 
@@ -659,24 +658,6 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         if self.parent and with_parent:
             self.parent.regenerate_occurrences()
 
-    def refresh_mptt_fields(self):
-        """
-        Refresh the MPTT fields on this instance from the database. Call this
-        on an instance that is in an inconsistent state after rebuilding the
-        MPTT tree.
-        """
-        event = type(self).objects.get(pk=self.pk)
-        fields = (
-            'left_attr',
-            'right_attr',
-            'tree_id_attr',
-            'level_attr',
-            'parent_attr',
-        )
-        for field in fields:
-            attr = getattr(self._mptt_meta, field)
-            setattr(self, attr, getattr(event, attr))
-
     def calendar_classes(self):
         """
         Return css classes to be used in admin calendar JSON
@@ -700,7 +681,6 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
         if not self.show_in_calendar:
             classes.append('do-not-show-in-calendar')
 
-        classes.append(self.tree_id)
         # Prefix class names with "fcc-" (full calendar class).
         classes = ['fcc-%s' % class_ for class_ in classes]
 
@@ -722,7 +702,6 @@ class AbstractEvent(PolymorphicMPTTModel, AbstractBaseModel):
             start = timezone.localize(self.starts)
             end = timezone.localize(self.ends)
         return {
-            'id': self.tree_id,
             'title': self.title,
             'allDay': self.all_day,
             'start': start,

@@ -53,7 +53,6 @@ setuptools.setup(
         'django-dynamic-fixture',
         'django-icekit',
         'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
-        'django-mptt<0.8',  # 0.8 requires Django 1.8. See: https://github.com/django-mptt/django-mptt/releases
         'django-nose',
         'django-polymorphic<0.8',  # ICEKit Events is not yet compatible with API changes in 0.8+
         'django-polymorphic-tree',

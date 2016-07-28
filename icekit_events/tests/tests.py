@@ -185,7 +185,6 @@ class Models(WebTest):
 
     def test_Event_parent(self):
         now = timezone.now()
-        date_now = now.date()
 
         # Original is originating event for itself.
         event = G(
@@ -194,8 +193,6 @@ class Models(WebTest):
             ends=now,
             recurrence_rule='FREQ=DAILY')
         self.assertIsNone(event.parent)
-        # Original has no childrent
-        self.assertEqual(0, len(event.get_children()))
         # Variation is originating event for itself.
         variation = event.make_variation(
             event.get_future_occurrences()[5])
