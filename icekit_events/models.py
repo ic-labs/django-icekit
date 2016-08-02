@@ -18,7 +18,6 @@ from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
     get_current_timezone
-from model_utils import FieldTracker
 from polymorphic_tree.models import PolymorphicModel, PolymorphicTreeForeignKey
 from timezone import timezone
 
@@ -200,34 +199,6 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
     explicitly is most likely the easiest way to ensure this.
     """
 
-    # Changes to these fields will be propagated to repeat events if the
-    # user has checked "propagate changes".
-    # WARNING: If fields are altered in a subclass the `tracker` class
-    # attribute must be redeclared in that subclass like so:
-    #     tracker = FieldTracker(MONITOR_FIELDS)
-    MONITOR_FIELDS = (
-        'title',
-        'all_day',
-        'starts',
-        'ends',
-        'date_starts',
-        'date_ends',
-        'recurrence_rule',
-        'end_repeat',
-        'date_end_repeat',
-        'show_in_calendar',
-    )
-
-    # If these fields are changed, they affect future events and so
-    # will trigger a propagation, and so user must check "progagate changes"
-    PROPAGATE_FIELDS = [
-        'starts',
-        'ends',
-        'date_starts',
-        'date_ends',
-        'recurrence_rule',
-    ]
-
     parent = PolymorphicTreeForeignKey(
         'self',
         blank=True,
@@ -271,49 +242,8 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         abstract = True
         ordering = ('date_starts', '-all_day', 'starts', 'title', 'pk')
 
-    def __init__(self, *args, **kwargs):
-        """
-        Sanity-check that the field tracker associated with this class tracks
-        exactly the same fields as the class's ``MONITOR_FIELDS`` listing.
-        This check is necessary because ``FieldTracker`` can only be declared
-        on concrete classes, and must be redeclared on any subclass where the
-        fields to track as defined in ``MONITOR_FIELDS`` are changed.
-        """
-        super(AbstractEvent, self).__init__(*args, **kwargs)
-        # Confirm field tracker is defined at all
-        if not hasattr(self.__class__, 'tracker'):
-            raise Exception(
-                "Event concrete subclass %r *must* include a field tracker"
-                " attribute definition like this:\n"
-                "   tracker = FieldTracker(MONITOR_FIELDS)\n"
-                % type(self)
-            )
-        # Confirm field tracker's tracked fields == MONITOR_FIELDS
-        if self.tracker.fields != set(self.MONITOR_FIELDS):
-            raise Exception(
-                "Fields tracked in event concrete subclass %r *must* match"
-                " the fields listed in ``MONITOR_FIELDS`` but they do not."
-                " Tracker fields missing: %s. Tracker extra fields: %s."
-                " You probably need to redefine the field tracker attribute"
-                " definition like this:\n"
-                "   tracker = FieldTracker(MONITOR_FIELDS)\n"
-                % (type(self),
-                   set(self.MONITOR_FIELDS).difference(self.tracker.fields),
-                   self.tracker.fields.difference(set(self.MONITOR_FIELDS)))
-            )
-
     def __str__(self):
         return self.title
-
-    def _monitor_fields_changed(self, fields=None):
-        """
-        Return ``True`` if the given set of fields (or ``self.MONITOR_FIELDS``
-        if None) has changed.
-        """
-        fields = fields or self.MONITOR_FIELDS
-        if isinstance(fields, six.string_types):
-            fields = [fields]
-        return bool(set(self.tracker.changed().keys()).intersection(fields))
 
     def clean(self):
         """
@@ -416,14 +346,6 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         else:
             qs = self.occurrences.filter(starts__gt=self.starts)
         return qs.order_by('starts')  # Ensure chronological ordering
-
-    def get_variation_fields(self):
-        """
-        Return a list of fields to be copied when creating repeat events.
-        """
-        fields = set(self.MONITOR_FIELDS).difference([
-            'starts', 'ends', 'date_starts', 'date_ends'])
-        return fields
 
     def get_rruleset(self):
         """
@@ -601,19 +523,9 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         """
         When ``regenerate_occurrences=True``, refresh occurrences.
         """
-        # Is this a new event?
-        adding = self._state.adding
-        # Have monitored fields have changed since the last save?
-        changed = set(self.tracker.changed())
         super(AbstractEvent, self).save(*args, **kwargs)
-        if changed and changed.intersection([
-                'starts', 'ends', 'recurrence_rule', 'end_repeat']):
-            if regenerate_occurrences:
-                self.regenerate_occurrences()
-            else:
-                assert adding, (
-                    'Cannot save changes to event occurrence fields on an'
-                    ' existing event without regenerating occurrences')
+        if regenerate_occurrences:
+            self.regenerate_occurrences()
 
     @transaction.atomic
     def extend_occurrences(self, until=None):
@@ -716,7 +628,7 @@ class Event(AbstractEvent):
     """
     A concrete polymorphic event model.
     """
-    tracker = FieldTracker(AbstractEvent.MONITOR_FIELDS)
+    pass
 
 
 # TODO Custom Occurrence manager to show useful collections of occurrences,
