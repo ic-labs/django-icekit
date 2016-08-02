@@ -10,7 +10,7 @@ from django.utils.module_loading import autodiscover_modules
 
 
 class AppConfig(AppConfig):
-    name = 'icekit_events'
+    name = '_'.join(__name__.split('.')[:-1])
     label = 'icekit_events'
 
     def ready(self):

@@ -21,6 +21,9 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             "UPDATE django_content_type SET app_label='icekit_events' WHERE app_label='eventkit'",
-            "",  # No-op
+            # No-op: I haven't yet found a way to make this reversible in the
+            # way you would expect without unique constraint DB errors, whereas
+            # it works (according to unit tests at least) with a no-op.
+            "",
         ),
     ]
