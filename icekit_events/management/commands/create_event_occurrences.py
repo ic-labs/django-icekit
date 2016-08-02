@@ -1,5 +1,4 @@
 from django.core.management.base import NoArgsCommand
-from django.db.models import Q
 
 from ...models import Event
 
@@ -9,9 +8,8 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, *args, **options):
         verbosity = int(options.get('verbosity'))
-        # Get all root and variation events with recurrence rules.
-        events = Event.objects.filter(
-            ~Q(recurrence_rule='') | ~Q(recurrence_rule=None))
+        # Get all events with generators
+        events = Event.objects.exclude(repeat_generators=None)
         count = 0
         for event in events:
             created = event.extend_occurrences()

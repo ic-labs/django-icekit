@@ -53,56 +53,12 @@ class EventTypeFilter(ChildModelFilter):
     child_model_plugin_class = plugins.EventChildModelPlugin
 
 
-class OriginalFilter(admin.SimpleListFilter):
-    title = _('is original')
-    parameter_name = 'is_original'
-
-    YES = '1'
-    NO = '0'
-
-    def lookups(self, request, model_admin):
-        lookups = (
-            (self.YES, _('Yes')),
-            (self.NO, _('No')),
-        )
-        return lookups
-
-    def queryset(self, request, queryset):
-        if self.value() == self.YES:
-            return queryset.filter(parent=None)
-        elif self.value() == self.NO:
-            return queryset.exclude(parent=None)
-
-
-class VariationFilter(admin.SimpleListFilter):
-    title = _('is variation')
-    parameter_name = 'is_variation'
-
-    YES = '1'
-    NO = '0'
-
-    def lookups(self, request, model_admin):
-        lookups = (
-            (self.YES, _('Yes')),
-            (self.NO, _('No')),
-        )
-        return lookups
-
-    def queryset(self, request, queryset):
-        if self.value() == self.YES:
-            return queryset.exclude(parent=None).exclude(is_repeat=True)
-        elif self.value() == self.NO:
-            return queryset.filter(Q(parent=None) | Q(is_repeat=True))
-
-
 class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
     base_model = models.Event
     list_filter = (
-        'all_day', 'date_starts', 'date_ends', EventTypeFilter, OriginalFilter,
-        VariationFilter, 'is_repeat', 'modified')
+        EventTypeFilter, 'modified')
     list_display = (
-        '__str__', 'get_type', 'all_day', 'get_starts', 'get_ends', 'is_original',
-        'is_variation', 'is_repeat', 'modified')
+        '__str__', 'get_type', 'modified')
     search_fields = ('title', )
 
     child_model_plugin_class = plugins.EventChildModelPlugin
@@ -123,7 +79,6 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
             ),
         )
         return my_urls + urls
-
 
     def calendar(self, request):
         """
@@ -180,13 +135,67 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
 
         data = []
         for event in events.get_real_instances():
-            data.append(event.calendar_json())
+            data.append(self.calendar_json(event))
         data = json.dumps(data, cls=DjangoJSONEncoder)
         return HttpResponse(content=data, content_type='applicaton/json')
 
     def get_type(self, obj):
         return obj.get_real_concrete_instance_class()._meta.verbose_name.title()
     get_type.short_description = "type"
+
+    def calendar_json(self, event):
+        """
+        Return JSON for a single event
+        """
+        # Slugify the plugin's verbose name for use as a class name.
+        if event.all_day:
+            start = event.date_starts
+            # `end` is exclusive according to the doc in
+            # http://fullcalendar.io/docs/event_data/Event_Object/, so
+            # we need to add 1 day to ``date_ends`` to have the end date
+            # included in the calendar.
+            end = (event.date_ends or event.date_starts) + timedelta(days=1)
+        else:
+            start = timezone.localize(event.starts)
+            end = timezone.localize(event.ends)
+        return {
+            'title': event.title,
+            'allDay': event.all_day,
+            'start': start,
+            'end': end,
+            'url': reverse(
+                'admin:icekit_events_event_change', args=[event.pk]),
+            'className': self.calendar_classes(event),
+        }
+
+    def calendar_classes(self, event):
+        """
+        Return css classes to be used in admin calendar JSON
+        """
+        classes = [slugify(event.polymorphic_ctype.name)]
+
+        # quick-and-dirty way to get a color for the type.
+        # There are 12 colors defined in the css file
+        classes.append("color-%s" % (event.polymorphic_ctype_id % 12))
+
+        # Add a class name for the type of event.
+        if event.is_repeat:
+            classes.append('is-repeat')
+        elif not event.parent:
+            classes.append('is-original')
+        else:
+            classes.append('is-variation')
+
+        # if an event isn't published or does not have show_in_calendar ticked,
+        # indicate that it is hidden
+        if not event.show_in_calendar:
+            classes.append('do-not-show-in-calendar')
+
+        # Prefix class names with "fcc-" (full calendar class).
+        classes = ['fcc-%s' % class_ for class_ in classes]
+
+        return classes
+
 
 admin.site.register(models.Event, EventAdmin)
 
