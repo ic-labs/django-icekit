@@ -32,21 +32,44 @@ from . import admin_forms, appsettings, forms, models, plugins
 logger = logging.getLogger(__name__)
 
 
+class EventRepeatGeneratorsInline(admin.TabularInline):
+    model = models.EventRepeatsGenerator
+    form = admin_forms.BaseEventRepeatsGeneratorForm
+    exclude = ('event',)
+    extra = 0
+    max_num = 3
+    formfield_overrides = {
+        models.RecurrenceRuleField: {'widget': forms.RecurrenceRuleWidget},
+    }
+
+
+class OccurrencesInline(admin.TabularInline):
+    model = models.Occurrence
+    exclude = ('generator', 'is_generated',)
+    extra = 0
+
+
 class EventChildAdmin(PolymorphicChildModelAdmin):
     """
     Abstract admin class for polymorphic child event models.
     """
     base_form = admin_forms.BaseEventForm
     base_model = models.Event
-    formfield_overrides = {
-        models.RecurrenceRuleField: {'widget': forms.RecurrenceRuleWidget},
-    }
+    inlines = [
+        EventRepeatGeneratorsInline,
+        OccurrencesInline,
+    ]
+    exclude = (
+        # Legacy fields, will be removed soon
+        'all_day', 'starts', 'ends', 'date_starts', 'date_ends',
+        'recurrence_rule', 'end_repeat', 'date_end_repeat', 'is_repeat',
+    )
 
     def save_model(self, request, obj, form, change):
         """
         Propagate changes if requested.
         """
-        obj.save(propagate=form.cleaned_data['propagate'])
+        obj.save()
 
 
 class EventTypeFilter(ChildModelFilter):
@@ -92,50 +115,50 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
             return TemplateResponse(
                 request, 'admin/icekit_events/event/calendar.html', context)
         tz = timezone.get(request.GET.get('timezone'))
-        starts = timezone.localize(
+        start = timezone.localize(
             datetime.datetime.strptime(request.GET['start'], '%Y-%m-%d'), tz)
-        ends = timezone.localize(
+        end = timezone.localize(
             datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d'), tz)
 
-        all_events = self.get_queryset(request) \
+        all_occurrences = models.Occurrence.objects \
             .filter(
-                Q(all_day=False, starts__gte=starts) |
-                Q(all_day=True, date_starts__gte=starts.date())
+                Q(is_all_day=False, start__gte=start) |
+                Q(is_all_day=True, start__gte=start.date())
             ) \
             .filter(
                 # Exclusive for datetime, inclusive for date.
-                Q(all_day=False, starts__lt=ends) |
-                Q(all_day=True, date_starts__lte=ends.date())
+                Q(is_all_day=False, start__lt=end) |
+                Q(is_all_day=True, start__lte=end.date())
             )
 
-        # Get a dict mapping the primary keys for content types to plugins, so
-        # we can get the verbose name of the plugin and a consistent colour for
-        # each event.
-        plugins_for_ctype = {
-            plugin.content_type.pk: plugin
-            for plugin in plugins.EventChildModelPlugin.get_plugins()
-        }
-        # TODO: This excludes events for which there is no corresponding plugin
-        # (e.g. plugin was enabled, events created, then plugin disabled). This
-        # might not be wise, but I'm not sure how else to handle existing
-        # events of an unknown type. If ignored here, we probably need a more
-        # generic way to ignore them everywhere.
-        events = all_events.filter(
-            polymorphic_ctype__in=plugins_for_ctype.keys())
-        if events.count() != all_events.count():
-            ignored_events = all_events.exclude(
-                polymorphic_ctype__in=plugins_for_ctype.keys())
-            ignored_ctypes = ContentType.objects \
-                .filter(pk__in=ignored_events.values('polymorphic_ctype')) \
-                .values_list('app_label', 'name')
-            logger.warn('%s events of unknown type (%s) are being ignored.' % (
-                ignored_events.count(),
-                ';'.join(['%s.%s' % ctype for ctype in ignored_ctypes]),
-            ))
+#        # Get a dict mapping the primary keys for content types to plugins, so
+#        # we can get the verbose name of the plugin and a consistent colour for
+#        # each event.
+#        plugins_for_ctype = {
+#            plugin.content_type.pk: plugin
+#            for plugin in plugins.EventChildModelPlugin.get_plugins()
+#        }
+#        # TODO: This excludes events for which there is no corresponding plugin
+#        # (e.g. plugin was enabled, events created, then plugin disabled). This
+#        # might not be wise, but I'm not sure how else to handle existing
+#        # events of an unknown type. If ignored here, we probably need a more
+#        # generic way to ignore them everywhere.
+#        events = all_events.filter(
+#            polymorphic_ctype__in=plugins_for_ctype.keys())
+#        if events.count() != all_events.count():
+#            ignored_events = all_events.exclude(
+#                polymorphic_ctype__in=plugins_for_ctype.keys())
+#            ignored_ctypes = ContentType.objects \
+#                .filter(pk__in=ignored_events.values('polymorphic_ctype')) \
+#                .values_list('app_label', 'name')
+#            logger.warn('%s events of unknown type (%s) are being ignored.' % (
+#                ignored_events.count(),
+#                ';'.join(['%s.%s' % ctype for ctype in ignored_ctypes]),
+#            ))
 
         data = []
-        for event in events.get_real_instances():
-            data.append(self.calendar_json(event))
+        for occurrence in all_occurrences.all():
+            data.append(self._calendar_json_for_occurrence(occurrence))
         data = json.dumps(data, cls=DjangoJSONEncoder)
         return HttpResponse(content=data, content_type='applicaton/json')
 
@@ -143,61 +166,60 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
         return obj.get_real_concrete_instance_class()._meta.verbose_name.title()
     get_type.short_description = "type"
 
-    def calendar_json(self, event):
+    def _calendar_json_for_occurrence(self, occurrence):
         """
-        Return JSON for a single event
+        Return JSON for a single Occurrence
         """
         # Slugify the plugin's verbose name for use as a class name.
-        if event.all_day:
-            start = event.date_starts
+        if occurrence.is_all_day:
+            start = occurrence.start
             # `end` is exclusive according to the doc in
             # http://fullcalendar.io/docs/event_data/Event_Object/, so
-            # we need to add 1 day to ``date_ends`` to have the end date
+            # we need to add 1 day to ``end`` to have the end date
             # included in the calendar.
-            end = (event.date_ends or event.date_starts) + timedelta(days=1)
+            end = occurrence.start + timedelta(days=1)
         else:
-            start = timezone.localize(event.starts)
-            end = timezone.localize(event.ends)
+            start = timezone.localize(occurrence.start)
+            end = timezone.localize(occurrence.end)
+        if occurrence.is_cancelled and occurrence.cancel_reason:
+            title = occurrence.event.title + u" [%s]" % occurrence.cancel_reason
+        else:
+            title = occurrence.event.title
         return {
-            'title': event.title,
-            'allDay': event.all_day,
+            'title': title,
+            'allDay': occurrence.is_all_day,
             'start': start,
             'end': end,
             'url': reverse(
-                'admin:icekit_events_event_change', args=[event.pk]),
-            'className': self.calendar_classes(event),
+                'admin:icekit_events_event_change', args=[occurrence.event.pk]),
+            'className': self._calendar_classes_for_occurrence(occurrence),
         }
 
-    def calendar_classes(self, event):
+    def _calendar_classes_for_occurrence(self, occurrence):
         """
         Return css classes to be used in admin calendar JSON
         """
-        classes = [slugify(event.polymorphic_ctype.name)]
+        classes = [slugify(occurrence.event.polymorphic_ctype.name)]
 
-        # quick-and-dirty way to get a color for the type.
+        # quick-and-dirty way to get a color for the Event type.
         # There are 12 colors defined in the css file
-        classes.append("color-%s" % (event.polymorphic_ctype_id % 12))
+        classes.append("color-%s" % (occurrence.event.polymorphic_ctype_id % 12))
 
         # Add a class name for the type of event.
-        if event.is_repeat:
-            classes.append('is-repeat')
-        elif not event.parent:
-            classes.append('is-original')
-        else:
-            classes.append('is-variation')
+        if occurrence.is_user_modified:
+            classes.append('is-user-modified')
+        if occurrence.is_cancelled:
+            classes.append('is-cancelled')
 
         # if an event isn't published or does not have show_in_calendar ticked,
         # indicate that it is hidden
-        if not event.show_in_calendar:
+        if not occurrence.event.show_in_calendar:
             classes.append('do-not-show-in-calendar')
 
         # Prefix class names with "fcc-" (full calendar class).
         classes = ['fcc-%s' % class_ for class_ in classes]
 
         return classes
-
-
-admin.site.register(models.Event, EventAdmin)
 
 
 class RecurrenceRuleAdmin(admin.ModelAdmin):
@@ -242,4 +264,6 @@ class RecurrenceRuleAdmin(admin.ModelAdmin):
             }
         return JsonResponse(data)
 
+
+admin.site.register(models.Event, EventAdmin)
 admin.site.register(models.RecurrenceRule, RecurrenceRuleAdmin)

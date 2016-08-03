@@ -20,6 +20,7 @@ from polymorphic_tree.models import PolymorphicModel, PolymorphicTreeForeignKey
 from timezone import timezone
 
 from . import appsettings, validators, utils
+from .utils import time as utils_time
 
 
 # Constant object used as a flag for unset kwarg parameters
@@ -27,7 +28,7 @@ UNSET = object()
 
 
 def default_starts():
-    when = utils.time.round_datetime(
+    when = utils_time.round_datetime(
         when=timezone.now(),
         precision=appsettings.DEFAULT_STARTS_PRECISION,
         rounding=utils.time.ROUND_UP,
@@ -199,11 +200,13 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
         null=True,
     )
     is_repeat = models.BooleanField(default=False, editable=False)
+    ########################################################################
+
+    # TODO This should be rendered obsolete once publishing is integrated
     show_in_calendar = models.BooleanField(
         default=True,
         help_text=_('Show this event in the public calendar'),
     )
-    ########################################################################
 
     class Meta:
         abstract = True
@@ -226,7 +229,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
             event=self,
             start=start,
             end=end,
-            is_generated=False,
+            generator=None,
             is_user_modified=True,
         )
 
@@ -328,7 +331,6 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel):
             Occurrence.objects.create(
                 event=self,
                 generator=generator,
-                is_generated=True,
                 start=start_dt,
                 end=end_dt,
                 is_all_day=generator.is_all_day,
@@ -557,8 +559,6 @@ class Occurrence(AbstractBaseModel):
     is_all_day = models.BooleanField(
         default=False, db_index=True)
 
-    is_generated = models.BooleanField(
-        default=False, db_index=True)
     is_user_modified = models.BooleanField(
         default=False, db_index=True)
 
@@ -567,7 +567,8 @@ class Occurrence(AbstractBaseModel):
     is_hidden = models.BooleanField(
         default=False)
     cancel_reason = models.CharField(
-        max_length=255)
+        max_length=255,
+        blank=True, null=True)
 
     # TODO `original_starts` and `original_ends` fields
 
@@ -577,6 +578,10 @@ class Occurrence(AbstractBaseModel):
     def __str__(self):
         return """Occurrence of "{0}" {1} - {2}""".format(
             self.event.title, self.start, self.end)
+
+    @property
+    def is_generated(self):
+        return self.generator is not None
 
     @property
     def duration(self):
