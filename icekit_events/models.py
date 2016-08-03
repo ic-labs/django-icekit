@@ -8,7 +8,6 @@ from datetime import datetime, timedelta, time as datetime_time
 from dateutil import rrule
 import six
 import pytz
-from copy import deepcopy
 
 from django.conf import settings
 from django.db import models, transaction

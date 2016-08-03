@@ -164,81 +164,65 @@ class TestEventRepeatsGeneratorModel(TestCase):
 
     def test_save_checks(self):
         # End cannot come before start
-        try:
-            models.EventRepeatsGenerator(
-                start=self.start,
-                end=self.start - timedelta(seconds=1),
-            ).save()
-            self.fail("Expected GeneratorException")
-        except models.GeneratorException, ex:
-            self.assertTrue(
-                'End date/time must be after or equal to start date/time:'
-                in ex.message)
+        self.assertRaisesRegexp(
+            models.GeneratorException,
+            r'End date/time must be after or equal to start date/time.*',
+            models.EventRepeatsGenerator.objects.create,
+            start=self.start,
+            end=self.start - timedelta(seconds=1),
+        )
         # End can equal start
-        generator = models.EventRepeatsGenerator(
+        generator = models.EventRepeatsGenerator.objects.create(
             start=self.start,
             end=self.start,
             event=G(models.Event),
         )
-        generator.save()  # Check it passes ``save()`` tests
         self.assertEqual(timedelta(), generator.duration)
         # Repeat end cannot be set without a recurrence rule
-        try:
-            models.EventRepeatsGenerator(
-                start=self.start,
-                end=self.start + timedelta(seconds=1),
-                repeat_end=self.start + timedelta(seconds=1)
-            ).save()
-            self.fail("Expected GeneratorException")
-        except models.GeneratorException, ex:
-            self.assertTrue(
-                'Recurrence rule must be set if a repeat end date/time is set'
-                in ex.message)
+        self.assertRaisesRegexp(
+            models.GeneratorException,
+            'Recurrence rule must be set if a repeat end date/time is set.*',
+            models.EventRepeatsGenerator.objects.create,
+            start=self.start,
+            end=self.start + timedelta(seconds=1),
+            repeat_end=self.start + timedelta(seconds=1),
+        )
         # Repeat end cannot come before start
-        try:
-            models.EventRepeatsGenerator(
-                start=self.start,
-                end=self.start + timedelta(seconds=1),
-                recurrence_rule='FREQ=DAILY',
-                repeat_end=self.start - timedelta(seconds=1)
-            ).save()
-            self.fail("Expected GeneratorException")
-        except models.GeneratorException, ex:
-            self.assertTrue(
-                'Repeat end date/time must be after or equal to start date/time'
-                in ex.message)
+        self.assertRaisesRegexp(
+            models.GeneratorException,
+            'Repeat end date/time must be after or equal to start date/time.*',
+            models.EventRepeatsGenerator.objects.create,
+            start=self.start,
+            end=self.start + timedelta(seconds=1),
+            recurrence_rule='FREQ=DAILY',
+            repeat_end=self.start - timedelta(seconds=1),
+        )
         # All-day generator must have a start datetime with 00:00:00 time
-        try:
-            models.EventRepeatsGenerator(
+        self.assertRaisesRegexp(
+            models.GeneratorException,
+            'Start date/time must be at 00:00:00 hours/minutes/seconds for'
+            ' all-day generators.*',
+            models.EventRepeatsGenerator.objects.create,
             is_all_day=True,
-                start=self.start.replace(hour=0, minute=0, second=1),
-                end=self.start.replace(hour=0, minute=0, second=1),
-            ).save()
-            self.fail("Expected GeneratorException")
-        except models.GeneratorException, ex:
-            self.assertTrue(
-                'Start date/time must be at 00:00:00 hours/minutes/seconds'
-                ' for all-day generators'
-                in ex.message)
-        # All-day generator must have a duration that's a multiple of whole days
-        models.EventRepeatsGenerator(
+            start=self.start.replace(hour=0, minute=0, second=1),
+            end=self.start.replace(hour=0, minute=0, second=1),
+        )
+        # All-day generator duration must be a multiple of whole days
+        models.EventRepeatsGenerator.objects.create(
             is_all_day=True,
             start=self.start,
             end=self.start + timedelta(hours=24),
             event=G(models.Event),
-        ).save()
-        try:
-            models.EventRepeatsGenerator(
-                is_all_day=True,
-                start=self.start,
-                end=self.start + timedelta(hours=24, seconds=1),
-            ).save()
-            self.fail("Expected GeneratorException")
-        except models.GeneratorException, ex:
-            self.assertTrue(
-                'Duration between start and end times must be multiples of'
-                ' a day for all-day generators'
-                in ex.message)
+        )
+        self.assertRaisesRegexp(
+            models.GeneratorException,
+            'Duration between start and end times must be multiples of a day'
+            ' for all-day generators',
+            models.EventRepeatsGenerator.objects.create,
+            is_all_day=True,
+            start=self.start,
+            end=self.start + timedelta(hours=24, seconds=1),
+        )
 
     def test_duration(self):
         self.assertEquals(
@@ -372,24 +356,24 @@ class TestEventRepeatsGeneratorModel(TestCase):
         start_and_end_times = generator.generate()
         self.assertEqual(
             (self.start, self.end),
-            start_and_end_times.next())
+            next(start_and_end_times))
         self.assertEqual(
             (self.start + timedelta(days=1), self.end + timedelta(days=1)),
-            start_and_end_times.next())
+            next(start_and_end_times))
         self.assertEqual(
             (self.start + timedelta(days=2), self.end + timedelta(days=2)),
-            start_and_end_times.next())
+            next(start_and_end_times))
         for i in range(16):
-            start_and_end_times.next()
+            next(start_and_end_times)
         self.assertEqual(
             (self.start + timedelta(days=19), self.end + timedelta(days=19)),
-            start_and_end_times.next())
+            next(start_and_end_times))
         # Default ``appsettings.REPEAT_LIMIT`` is 13 weeks
         for i in range(13 * 7 - 20):
-            start_and_end_times.next()
+            next(start_and_end_times)
         self.assertEqual(
             (self.start + timedelta(days=91), self.end + timedelta(days=91)),
-            start_and_end_times.next())
+            next(start_and_end_times))
 
 
 class TestEventOccurrences(TestCase):
