@@ -14,7 +14,8 @@
     "tests"
   ],
   "dependencies": {
-    "fullcalendar": "~2.3.1",
+    "jquery": "~2.1.4",
+    "fullcalendar": "~2.6.0",
     "iframe-resizer": "~2.8.7",
     "lodash": "~3.9.3",
     "skveege-rrule": "~2.1.3"
