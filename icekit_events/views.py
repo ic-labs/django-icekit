@@ -5,6 +5,7 @@ Views for ``icekit_events`` app.
 # Do not use generic class based views unless there is a really good reason to.
 # Functional views are much easier to comprehend and maintain.
 from django.core.exceptions import PermissionDenied
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 
@@ -26,7 +27,7 @@ def index(request, is_preview=False):
     if is_preview and not permissions.allowed_to_preview(request.user):
         raise PermissionDenied
 
-    events = models.Event.objects.all()
+    events = models.Event.objects.visible()
     context = {
         'is_preview': is_preview,
         'events': events,
@@ -48,7 +49,10 @@ def detail(request, event_id, is_preview=False):
     if is_preview and not permissions.allowed_to_preview(request.user):
         raise PermissionDenied
 
-    event = get_object_or_404(models.Event, id=event_id)
+    event = get_object_or_404(models.Event, pk=event_id).get_visible()
+    if not event:
+        raise Http404
+
     context = {
         'is_preview': is_preview,
         'event': event,

@@ -51,7 +51,7 @@ setuptools.setup(
         'coverage',
         'Django<1.9',
         'django-dynamic-fixture',
-        'django-icekit',
+        'django-icekit[publishing]',
         'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
         'django-nose',
         'django-polymorphic<0.8',  # ICEKit Events is not yet compatible with API changes in 0.8+

@@ -25,6 +25,12 @@ INSTALLED_APPS = (
     'icekit',
     'icekit_events',
     'icekit_events.tests',
+
+    # Apps required for publishing features
+    'icekit.publishing',
+    'model_settings',
+    'polymorphic',
+    'compressor',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -38,6 +44,7 @@ STATIC_URL = '/static/'
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'  # Default: django.test.runner.DiscoverRunner
 TIME_ZONE = 'Australia/Sydney'  # Default: America/Chicago
 USE_TZ = True  # Default: False
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DDF_FILL_NULLABLE_FIELDS = False
 FLUENT_PAGES_TEMPLATE_DIR = os.path.join(BASE_DIR, '..', 'templates')

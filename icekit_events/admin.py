@@ -25,6 +25,8 @@ from icekit.admin import (
 from polymorphic.admin import PolymorphicChildModelAdmin
 from timezone import timezone
 
+from icekit.publishing import admin as publishing_admin
+
 from . import admin_forms, forms, models, plugins
 
 logger = logging.getLogger(__name__)
@@ -49,7 +51,8 @@ class OccurrencesInline(admin.TabularInline):
     readonly_fields = ('is_user_modified', 'is_cancelled',)
 
 
-class EventChildAdmin(PolymorphicChildModelAdmin):
+class EventChildAdmin(PolymorphicChildModelAdmin,
+                      publishing_admin.PublishingAdmin):
     """
     Abstract admin class for polymorphic child event models.
     """
@@ -71,16 +74,25 @@ class EventTypeFilter(ChildModelFilter):
     child_model_plugin_class = plugins.EventChildModelPlugin
 
 
-class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
+class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
+                 publishing_admin.PublishingAdmin):
     base_model = models.Event
     list_filter = (
-        EventTypeFilter, 'modified')
+        EventTypeFilter, 'modified',
+        publishing_admin.PublishingStatusFilter,
+        publishing_admin.PublishingPublishedFilter,
+    )
     list_display = (
-        '__str__', 'get_type', 'modified')
+        '__str__', 'get_type', 'modified', 'publishing_column')
     search_fields = ('title', )
 
     child_model_plugin_class = plugins.EventChildModelPlugin
     child_model_admin = EventChildAdmin
+
+    class Media:
+        css = {
+            'all': ('icekit_events/bower_components/font-awesome/css/font-awesome.css',),
+        }
 
     def get_urls(self):
         """
@@ -116,6 +128,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
             datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d'), tz)
 
         all_occurrences = models.Occurrence.objects \
+            .filter(event__publishing_is_draft=True) \
             .filter(
                 Q(is_all_day=False, start__gte=start) |
                 Q(is_all_day=True, start__gte=start.date())
