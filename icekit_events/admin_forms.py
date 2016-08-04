@@ -20,6 +20,32 @@ class BaseEventRepeatsGeneratorForm(forms.ModelForm):
         return media
 
 
+class BaseOccurrenceForm(forms.ModelForm):
+
+    class Meta:
+        fields = '__all__'
+        model = models.Occurrence
+
+    @property
+    def media(self):
+        media = super(BaseOccurrenceForm, self).media
+        media.add_js(['admin/js/event_all_day_field.js'])
+        return media
+
+    def save(self, *args, **kwargs):
+        occurrence = self.instance
+        # We assume any change to a model made via the admin (as opposed to
+        # an `EventRepeatsGenerator`) implies a user modification.
+        occurrence.is_user_modified = True
+        # If and only if a Cancel reason is given, flag the Occurrence as
+        # cancelled
+        if occurrence.cancel_reason:
+            occurrence.is_cancelled = True
+        else:
+            occurrence.is_cancelled = False
+        super(BaseOccurrenceForm, self).save(*args, **kwargs)
+
+
 class BaseEventForm(forms.ModelForm):
 
     class Meta:

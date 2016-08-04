@@ -13,21 +13,19 @@ import logging
 import six
 
 from django.contrib import admin
-from django.contrib.contenttypes.models import ContentType
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
-from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from icekit.admin import (
     ChildModelFilter, ChildModelPluginPolymorphicParentModelAdmin)
 from polymorphic.admin import PolymorphicChildModelAdmin
 from timezone import timezone
 
-from . import admin_forms, appsettings, forms, models, plugins
+from . import admin_forms, forms, models, plugins
 
 logger = logging.getLogger(__name__)
 
@@ -45,8 +43,10 @@ class EventRepeatGeneratorsInline(admin.TabularInline):
 
 class OccurrencesInline(admin.TabularInline):
     model = models.Occurrence
+    form = admin_forms.BaseOccurrenceForm
     exclude = ('generator', 'is_generated',)
     extra = 0
+    readonly_fields = ('is_user_modified', 'is_cancelled',)
 
 
 class EventChildAdmin(PolymorphicChildModelAdmin):
@@ -64,12 +64,7 @@ class EventChildAdmin(PolymorphicChildModelAdmin):
         'all_day', 'starts', 'ends', 'date_starts', 'date_ends',
         'recurrence_rule', 'end_repeat', 'date_end_repeat', 'is_repeat',
     )
-
-    def save_model(self, request, obj, form, change):
-        """
-        Propagate changes if requested.
-        """
-        obj.save()
+    save_on_top = True
 
 
 class EventTypeFilter(ChildModelFilter):
@@ -206,6 +201,8 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin):
         classes.append("color-%s" % (occurrence.event.polymorphic_ctype_id % 12))
 
         # Add a class name for the type of event.
+        if occurrence.is_all_day:
+            classes.append('is-all-day')
         if occurrence.is_user_modified:
             classes.append('is-user-modified')
         if occurrence.is_cancelled:

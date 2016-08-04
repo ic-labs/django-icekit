@@ -1,32 +1,32 @@
 (function($) {
 	function toggleDateTimeFields(checkbox) {
-		var starts = $('.field-starts');
-		var ends = $('.field-ends');
-		var endRepeat = $('.field-end_repeat');
-		var dateStarts = $('.field-date_starts');
-		var dateEnds = $('.field-date_ends');
-		var dateEndRepeat = $('.field-date_end_repeat');
+		var formParent = checkbox.parents('.form-row');
+		var timeInputs = formParent.find('input.vTimeField');
 		if (checkbox.prop('checked')) {
-			starts.hide();
-			ends.hide();
-			endRepeat.hide();
-			dateStarts.show();
-			dateEnds.show();
-			dateEndRepeat.show();
+			timeInputs.val("00:00:00").attr('readonly', 'readonly');
+			timeInputs.each(function() {
+				$(this).hide().next(".datetimeshortcuts").hide();
+			});
 		} else {
-			starts.show();
-			ends.show();
-			endRepeat.show();
-			dateStarts.hide();
-			dateEnds.hide();
-			dateEndRepeat.hide();
+			timeInputs.removeAttr('readonly');
+			timeInputs.each(function() {
+				$(this).show().next(".datetimeshortcuts").show();
+			});
 		}
 	}
-	$(document).ready(function() {
-		var checkbox = $('#id_all_day');
-		toggleDateTimeFields(checkbox);
-		checkbox.change(function() {
-			toggleDateTimeFields(checkbox);
+	// NOTE: We use `window.load` event handler here because that's the same
+	// one used by DateTimeShortcuts.js and we need our code to run *after*
+	// the UI shorcuts are generated, not before which happens with
+	// `document.ready`.
+	$(window).load(function() {
+		var allDayCheckboxes = $('.field-is_all_day input');
+		// Handle fields on initial page load
+		allDayCheckboxes.each(function() {
+			toggleDateTimeFields($(this));
+		});
+		// Respond to changes as the all-day-field checkbox is changed
+		allDayCheckboxes.change(function() {
+			toggleDateTimeFields($(this));
 		});
 	});
 })(django.jQuery);
