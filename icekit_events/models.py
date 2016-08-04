@@ -9,6 +9,7 @@ from dateutil import rrule
 import six
 import pytz
 
+from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.db import models, transaction
 from django.db.models.signals import post_save, post_delete
@@ -353,7 +354,9 @@ class Event(AbstractEvent):
     """
     A concrete polymorphic event model.
     """
-    pass
+
+    def get_absolute_url(self):
+        return reverse('icekit_events_detail', args=(self.pk,))
 
 
 class GeneratorException(Exception):

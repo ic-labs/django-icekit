@@ -53,4 +53,7 @@ def detail(request, event_id, is_preview=False):
         'is_preview': is_preview,
         'event': event,
     }
-    return TemplateResponse(request, event.template, context)
+    # TODO Not sure where the `Event.template` notion comes from, keeping it
+    # here for now for backwards compatibility
+    template = getattr(event, 'template',  'icekit_events/detail.html')
+    return TemplateResponse(request, template, context)

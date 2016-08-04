@@ -4,7 +4,7 @@
 	{% if events %}
 		{% for event in events %}
 			<ul>
-				<li>{{ event.title }}</li>
+				<li><a href="{% url 'icekit_events_detail' event.pk %}">{{ event.title }}</a></li>
 			</ul>
 		{% endfor %}
 	{% else %}
