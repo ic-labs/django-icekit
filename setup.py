@@ -42,6 +42,7 @@ setuptools.setup(
         'nltk',
         'unidecode',
         'django-app-namespace-template-loader',
+        'html5lib==0.999',
     ],
     extras_require={
         'api': [
