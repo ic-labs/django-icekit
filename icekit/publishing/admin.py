@@ -297,8 +297,11 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
             self.admin_site.name,
             self.get_url_name_prefix(model), )
 
-        self.non_publishing_change_form_template = \
-            self.find_first_available_template(self.change_form_template)
+        # Some admins are missing a `change_form_template` such as
+        # PolymorphicParentModelAdmin
+        if self.change_form_template:
+            self.non_publishing_change_form_template = \
+                self.find_first_available_template(self.change_form_template)
 
     def find_first_available_template(self, template_name_list):
         """
@@ -518,13 +521,13 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         # Override this admin's change form template to point to the publishing
         # admin page template, but only for long enough to render the change
         # form.
-        if isinstance(self, DefaultPageChildAdmin) \
+        if hasattr(type(self).change_form_template, '__get__') \
                 and isinstance(self.change_form_template, (list, tuple)):
-            # Special handling for `DefaultPageChildAdmin` subclases with
-            # multiple templates, a feature of FluentPages that is as confusing
-            # as it is helpful. In this case, find the best available template
-            # preferring publishing-specific templates and apply it via
-            # a context variable that should be respected by Fluent's base
+            # Special handling for class that provide multiple templates via,
+            # a `change_form_template` get-only property instead of the usual
+            # plain class attribute.  In this case, find the best available
+            # template preferring publishing-specific templates and apply it
+            # via a context variable that should be respected by Fluent's base
             # templates, which we are most likely using at this point.
             opts = self.model._meta
             app_label = opts.app_label

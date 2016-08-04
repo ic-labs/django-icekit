@@ -6,12 +6,14 @@ from fluent_pages import appsettings
 from fluent_pages.models import UrlNode
 from fluent_pages.models.managers import UrlNodeQuerySet
 
+from polymorphic.polymorphic_model import PolymorphicModel
+
 from mptt.models import MPTTModel
 
 from . import monkey_patches
-from .managers import PublishingQuerySet, PublishingUrlNodeManager, \
-    UrlNodeQuerySetWithPublishingFeatures, DraftItemBoobyTrap, \
-    _queryset_iterator
+from .managers import PublishingQuerySet, PublishingPolymorphicManager, \
+    PublishingUrlNodeManager, UrlNodeQuerySetWithPublishingFeatures, \
+    DraftItemBoobyTrap, _queryset_iterator
 from .models import PublishingModel
 from .middleware import is_draft_request_context, \
     is_publishing_middleware_active
@@ -216,6 +218,13 @@ class AppConfig(AppConfig):
             # Skip any models that don't have publishing features
             if not issubclass(model, PublishingModel):
                 continue
+
+            if issubclass(model, PolymorphicModel):
+
+                PublishingPolymorphicManager().contribute_to_class(
+                    model, 'objects')
+                PublishingPolymorphicManager().contribute_to_class(
+                    model, '_default_manager')
 
             if issubclass(model, UrlNode):
 
