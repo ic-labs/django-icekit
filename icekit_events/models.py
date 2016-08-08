@@ -447,8 +447,7 @@ class EventRepeatsGenerator(AbstractBaseModel):
     )
 
     class Meta:
-        ordering = (
-            'start', '-is_all_day', 'event__title', 'pk')
+        ordering = ['pk']  # Order by PK, essentially in creation order
 
     def __str__(self):
         return "EventRepeatsGenerator of '{0}'".format(self.event.title)
@@ -550,6 +549,12 @@ class EventRepeatsGenerator(AbstractBaseModel):
                     'Duration between start and end times must be multiples of'
                     ' a day for all-day generators: {0}'.format(self.duration)
                 )
+
+        # Convert datetime field values to date-compatible versions in the
+        # UTC timezone when we save an all-day occurrence
+        if self.is_all_day:
+            self.start = zero_datetime(self.start)
+            self.end = zero_datetime(self.end)
 
         super(EventRepeatsGenerator, self).save(*args, **kwargs)
 

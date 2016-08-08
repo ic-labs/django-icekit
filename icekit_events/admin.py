@@ -38,10 +38,14 @@ class EventRepeatGeneratorsInline(admin.TabularInline):
     model = models.EventRepeatsGenerator
     form = admin_forms.BaseEventRepeatsGeneratorForm
     exclude = ('event',)
-    extra = 0
+    extra = 1
     max_num = 3
     formfield_overrides = {
-        models.RecurrenceRuleField: {'widget': forms.RecurrenceRuleWidget},
+        models.RecurrenceRuleField: {
+            'widget': forms.RecurrenceRuleWidget(attrs={
+                'rows': 1,
+            }),
+        },
     }
 
 

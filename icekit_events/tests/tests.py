@@ -1,3 +1,4 @@
+# -*- encoding: utf8 -*-
 """
 Tests for ``icekit_events`` app.
 """
@@ -25,19 +26,135 @@ from icekit_events.tests import models as test_models
 from icekit_events.utils import time
 
 
-class Admin(WebTest):
+class TestAdmin(WebTest):
 
     def setUp(self):
         self.User = get_user_model()
-        self.superuser = G(self.User)
+        self.superuser = G(
+            self.User,
+            is_staff=True,
+            is_superuser=True,
+        )
         self.superuser.set_password('abc123')
-        self.client.login(**{
-            self.User.USERNAME_FIELD: self.superuser.get_username(),
-            'password': 'abc123',
-        })
+        self.start = time.round_datetime(
+            when=timezone.now(),
+            precision=timedelta(minutes=1),
+            rounding=time.ROUND_DOWN)
+        self.end = self.start + timedelta(minutes=45)
 
     def test_urls(self):
-        self.app.get(reverse('admin:icekit_events_recurrencerule_changelist'))
+        response = self.app.get(
+            reverse('admin:icekit_events_recurrencerule_changelist'),
+            user=self.superuser,
+        )
+        self.assertEqual(200, response.status_code)
+
+    def test_create_event(self):
+        response = self.app.get(
+            reverse('admin:icekit_events_event_add'),
+            user=self.superuser,
+        ).follow()  # Need to follow to get "?ct_id=" GET parameter
+        form = response.forms[0]
+        form['title'].value = u"Test Event"
+        response = form.submit()
+        self.assertEqual(302, response.status_code)
+        response = response.follow()
+        event = models.Event.objects.get(title=u"Test Event")
+        self.assertEqual(0, event.repeat_generators.count())
+        self.assertEqual(0, event.occurrences.count())
+
+    def test_event_with_eventrepeatgenerators(self):
+        event = G(
+            models.Event,
+            title='Test Event',
+        )
+        response = self.app.get(
+            reverse('admin:icekit_events_event_change', args=(event.pk,)),
+            user=self.superuser,
+        )
+        #######################################################################
+        # Add "Daily" repeat generator, spans 1 week
+        #######################################################################
+        repeat_end = self.start + timedelta(days=7)
+        form = response.forms[0]
+        form['repeat_generators-0-recurrence_rule_0'].select('1')
+        form['repeat_generators-0-recurrence_rule_1'].value = 'every day'
+        form['repeat_generators-0-recurrence_rule_2'].value = "RRULE:FREQ=DAILY"
+        form['repeat_generators-0-start_0'].value = \
+            self.start.strftime('%Y-%m-%d')
+        form['repeat_generators-0-start_1'].value = \
+            self.start.strftime('%H:%M:%S')
+        form['repeat_generators-0-end_0'].value = \
+            self.end.strftime('%Y-%m-%d')
+        form['repeat_generators-0-end_1'].value = \
+            self.end.strftime('%H:%M:%S')
+        form['repeat_generators-0-repeat_end_0'].value = \
+            repeat_end.strftime('%Y-%m-%d')
+        form['repeat_generators-0-repeat_end_1'].value = \
+            repeat_end.strftime('%H:%M:%S')
+        response = form.submit(name='_continue')
+        # Check occurrences created
+        event = models.Event.objects.get(pk=event.pk)
+        self.assertEqual(1, event.repeat_generators.count())
+        self.assertEqual(7, event.occurrences.count())
+        self.assertEqual(
+            self.start, event.occurrences.all()[0].start)
+        self.assertEqual(
+            self.end, event.occurrences.all()[0].end)
+        self.assertEqual(
+            self.start + timedelta(days=6), event.occurrences.all()[6].start)
+        self.assertEqual(
+            self.end + timedelta(days=6), event.occurrences.all()[6].end)
+        #######################################################################
+        # Add "Daily on weekends" all-day repeat generator, no repeat end
+        #######################################################################
+        form = response.follow().forms[0]
+        form['repeat_generators-1-recurrence_rule_0'].select('3')
+        form['repeat_generators-1-recurrence_rule_1'].value = \
+            'every day on Saturday, Sunday'
+        form['repeat_generators-1-recurrence_rule_2'].value = \
+            "RRULE:FREQ=DAILY;BYDAY=SA,SU"
+        form['repeat_generators-1-is_all_day'].value = True
+        form['repeat_generators-1-start_0'].value = \
+            self.start.strftime('%Y-%m-%d')
+        form['repeat_generators-1-start_1'].value = '00:00:00'
+        form['repeat_generators-1-end_0'].value = \
+            self.start.strftime('%Y-%m-%d')  # NOTE: end date == start date
+        form['repeat_generators-1-end_1'].value = '00:00:00'
+        response = form.submit('_continue')
+        # Check occurrences created
+        event = models.Event.objects.get(pk=event.pk)
+        daily_generator = event.repeat_generators.all()[0]
+        daily_wend_generator = event.repeat_generators.all()[1]
+        daily_occurrences = event.occurrences.filter(generator=daily_generator)
+        daily_wend_occurrences = event.occurrences.filter(
+            generator=daily_wend_generator)
+        self.assertEqual(2, event.repeat_generators.count())
+        self.assertEqual(7, daily_occurrences.count())
+        self.assertEqual(
+            13 * 2, daily_wend_occurrences.count())
+        self.assertEqual(
+            5,  # Saturday
+            daily_wend_occurrences[0].start.weekday())
+        self.assertEqual(
+            6,  # Sunday
+            daily_wend_occurrences[1].start.weekday())
+        # Start and end dates of all-day occurrences are zeroed
+        self.assertEqual(
+            models.zero_datetime(daily_wend_occurrences[0].start),
+            daily_wend_occurrences[0].start)
+        self.assertEqual(
+            models.zero_datetime(daily_wend_occurrences[0].end),
+            daily_wend_occurrences[0].end)
+        #######################################################################
+        # Delete "Daily" repeat generator
+        #######################################################################
+        form = response.follow().forms[0]
+        form['repeat_generators-0-DELETE'].value = True
+        response = form.submit('_continue')
+        event = models.Event.objects.get(pk=event.pk)
+        self.assertEqual(1, event.repeat_generators.count())
+        self.assertEqual(13 * 2, event.occurrences.count())
 
 
 class Forms(TestCase):

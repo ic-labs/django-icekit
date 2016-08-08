@@ -36,6 +36,8 @@ INSTALLED_APPS = (
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'icekit.publishing.middleware.PublishingMiddleware',
 )
 
 ROOT_URLCONF = 'icekit_events.tests.urls'
