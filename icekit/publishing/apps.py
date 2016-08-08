@@ -45,6 +45,12 @@ class AppConfig(AppConfig):
         super(AppConfig, self).__init__(*args, **kwargs)
 
     def ready(self):
+        # Ensure everything below is only ever run once
+        # TODO This check is necessary for Django 1.7 events tests, why?
+        if getattr(AppConfig, 'has_run_ready', False):
+            return
+        AppConfig.has_run_ready = True
+
         monkey_patches.APPLY_patch_urlnodeadminform_clean_for_publishable_items()
         monkey_patches.APPLY_patch_django_17_collector_collect()
         monkey_patches.APPLY_patch_django_18_get_candidate_relations_to_delete()
