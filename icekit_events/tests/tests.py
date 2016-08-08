@@ -16,11 +16,11 @@ from django.core.urlresolvers import reverse
 from django.forms.models import fields_for_model
 from django.test import TestCase
 from django.test.utils import override_settings
-from django_dynamic_fixture import G, N
+from django_dynamic_fixture import G
 from django_webtest import WebTest
 
 from icekit_events import appsettings, forms, models
-from icekit_events.models import get_occurrences_start_datetimes_for_event
+from icekit_events.models import get_occurrence_times_for_event
 from icekit_events.tests import models as test_models
 from icekit_events.utils import time
 
@@ -402,12 +402,15 @@ class TestEventOccurrences(TestCase):
         )
         self.assertEqual(event.occurrences.count(), 20)
         # An occurrence exists for each expected start time
-        occurrence_starts = get_occurrences_start_datetimes_for_event(event)
-        first_occurrence_start = event.occurrences.all()[0].start
+        occurrence_starts, occurrence_ends = get_occurrence_times_for_event(event)
+        first_occurrence = event.occurrences.all()[0]
         for days_hence in range(20):
-            start = first_occurrence_start + timedelta(days=days_hence)
+            start = first_occurrence.start + timedelta(days=days_hence)
             self.assertTrue(start in occurrence_starts,
                             "Missing start time %d days hence" % days_hence)
+            end = first_occurrence.end + timedelta(days=days_hence)
+            self.assertTrue(end in occurrence_ends,
+                            "Missing end time %d days hence" % days_hence)
 
     def test_limited_daily_repeating_occurrences(self):
         event = G(models.Event)
@@ -544,7 +547,7 @@ class TestEventOccurrences(TestCase):
         # Find valid occurrences to cancel
         occurrence_to_cancel_1 = event.occurrences.all()[3]
         occurrence_to_cancel_2 = event.occurrences.all()[5]
-        occurrence_starts = get_occurrences_start_datetimes_for_event(event)
+        occurrence_starts, __ = get_occurrence_times_for_event(event)
         self.assertTrue(occurrence_to_cancel_1.start in occurrence_starts)
         self.assertTrue(occurrence_to_cancel_2.start in occurrence_starts)
         # Cancel occurrences

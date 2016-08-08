@@ -294,27 +294,26 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
         self.save()
         return variation_event
 
-    @transaction.atomic
-    def save(self, regenerate_occurrences=True, *args, **kwargs):
-        """
-        When ``regenerate_occurrences=True``, refresh occurrences.
-        """
-        super(AbstractEvent, self).save(*args, **kwargs)
-        if regenerate_occurrences:
-            self.regenerate_occurrences()
-
     def missing_occurrence_data(self, until=None):
         """
         Return a generator of (start, end, generator) tuples that are the
         datetimes and generator responsible for occurrences based on any
         ``EventRepeatsGenerator``s associated with this event.
+
+        This method performs basic detection of existing occurrences with
+        matching start/end times so it can avoid recreating those occurrences,
+        which will generally be user-modified items.
         """
-        existing_datetimes = get_occurrences_start_datetimes_for_event(self)
+        existing_starts, existing_ends = get_occurrence_times_for_event(self)
         for generator in self.repeat_generators.all():
             for start, end in generator.generate(until=until):
-                # TODO Detect duration changes, not just start time changes
-                if start not in existing_datetimes:
-                    yield(start, end, generator)
+                # Skip occurrence times when we already have an existing
+                # occurrence with that start time or end time, since that is
+                # probably a user-modified event
+                if start in existing_starts \
+                        or end in existing_ends:
+                    continue
+                yield(start, end, generator)
 
     @transaction.atomic
     def extend_occurrences(self, until=None):
@@ -336,6 +335,8 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
                 generator=generator,
                 start=start_dt,
                 end=end_dt,
+                original_start=start_dt,
+                original_end=end_dt,
                 is_all_day=generator.is_all_day,
             )
             count += 1
@@ -590,7 +591,11 @@ class Occurrence(AbstractBaseModel):
         max_length=255,
         blank=True, null=True)
 
-    # TODO `original_starts` and `original_ends` fields
+    # Start/end times as originally set by a generator, before user modifiction
+    original_start = models.DateTimeField(
+        blank=True, null=True, editable=False)
+    original_end = models.DateTimeField(
+        blank=True, null=True, editable=False)
 
     class Meta:
         ordering = ['start']
@@ -610,11 +615,34 @@ class Occurrence(AbstractBaseModel):
         """
         return self.end - self.start
 
+    @transaction.atomic
+    def save(self, *args, **kwargs):
+        if getattr(self, '_flag_user_modification', False):
+            self.is_user_modified = True
+            # If and only if a Cancel reason is given, flag the Occurrence as
+            # cancelled
+            if self.cancel_reason:
+                self.is_cancelled = True
+            else:
+                self.is_cancelled = False
+        super(Occurrence, self).save(*args, **kwargs)
 
-def get_occurrences_start_datetimes_for_event(event):
-    """ Return a set of `start` field values for an Event's Occurrences """
+
+def get_occurrence_times_for_event(event):
+    """
+    Return a tuple with two sets containing the (start, end) datetimes of an
+    Event's Occurrences, or the original start datetime if an Occurrence's
+    start was modified by a user.
+    """
     # TODO Account for `original_starts` field once we have one
-    return set(event.occurrences.all().values_list('start', flat=True))
+    occurrences_starts = set()
+    occurrences_ends = set()
+    for start, original_start, end, original_end in \
+            event.occurrences.all().values_list('start', 'original_start',
+                                                'end', 'original_end'):
+        occurrences_starts.add(original_start or start)
+        occurrences_ends.add(original_end or end)
+    return occurrences_starts, occurrences_ends
 
 
 def regenerate_event_occurrences(sender, instance, **kwargs):
