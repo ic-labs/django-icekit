@@ -113,21 +113,29 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
                 self.admin_site.admin_view(self.calendar),
                 name='icekit_events_event_calendar'
             ),
+            url(
+                r'^calendar_data/$',
+                self.admin_site.admin_view(self.calendar_data),
+                name='icekit_events_event_calendar_data'
+            ),
         )
         return my_urls + urls
 
     def calendar(self, request):
         """
+        Return a calendar page to be loaded in an iframe.
+        """
+        context = {
+            'is_popup': bool(int(request.GET.get('_popup', 0))),
+        }
+        return TemplateResponse(
+            request, 'admin/icekit_events/event/calendar.html', context)
+
+    def calendar_data(self, request):
+        """
         Return event data in JSON format for AJAX requests, or a calendar page
         to be loaded in an iframe.
         """
-        if not request.is_ajax():
-            context = {
-                'is_popup': bool(int(request.GET.get('_popup', 0))),
-            }
-            return TemplateResponse(
-                request, 'admin/icekit_events/event/calendar.html', context)
-
         if 'timezone' in request.GET:
             tz = timezone.get(request.GET.get('timezone'))
         else:
@@ -138,31 +146,6 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d'), tz)
 
         all_occurrences = models.Occurrence.objects.draft().within(start, end)
-
-#        # Get a dict mapping the primary keys for content types to plugins, so
-#        # we can get the verbose name of the plugin and a consistent colour for
-#        # each event.
-#        plugins_for_ctype = {
-#            plugin.content_type.pk: plugin
-#            for plugin in plugins.EventChildModelPlugin.get_plugins()
-#        }
-#        # TODO: This excludes events for which there is no corresponding plugin
-#        # (e.g. plugin was enabled, events created, then plugin disabled). This
-#        # might not be wise, but I'm not sure how else to handle existing
-#        # events of an unknown type. If ignored here, we probably need a more
-#        # generic way to ignore them everywhere.
-#        events = all_events.filter(
-#            polymorphic_ctype__in=plugins_for_ctype.keys())
-#        if events.count() != all_events.count():
-#            ignored_events = all_events.exclude(
-#                polymorphic_ctype__in=plugins_for_ctype.keys())
-#            ignored_ctypes = ContentType.objects \
-#                .filter(pk__in=ignored_events.values('polymorphic_ctype')) \
-#                .values_list('app_label', 'name')
-#            logger.warn('%s events of unknown type (%s) are being ignored.' % (
-#                ignored_events.count(),
-#                ';'.join(['%s.%s' % ctype for ctype in ignored_ctypes]),
-#            ))
 
         data = []
         for occurrence in all_occurrences.all():
