@@ -15,6 +15,6 @@ env:
 
 matrix:
   allow_failures:
-    - TOXENV=django17-py34
-    - TOXENV=django18-py34
+    - env: TOXENV=django17-py34
+    - env: TOXENV=django18-py34
   fast_finish: true
