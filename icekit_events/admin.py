@@ -11,6 +11,7 @@ import datetime
 import json
 import logging
 import six
+import pytz
 
 from django.contrib import admin
 from django.core.serializers.json import DjangoJSONEncoder
@@ -19,6 +20,7 @@ from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
+from django.utils.timezone import get_current_timezone
 from django.views.decorators.csrf import csrf_exempt
 from icekit.admin import (
     ChildModelFilter, ChildModelPluginPolymorphicParentModelAdmin)
@@ -121,23 +123,17 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             }
             return TemplateResponse(
                 request, 'admin/icekit_events/event/calendar.html', context)
-        tz = timezone.get(request.GET.get('timezone'))
+
+        if 'timezone' in request.GET:
+            tz = timezone.get(request.GET.get('timezone'))
+        else:
+            tz = get_current_timezone()
         start = timezone.localize(
             datetime.datetime.strptime(request.GET['start'], '%Y-%m-%d'), tz)
         end = timezone.localize(
             datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d'), tz)
 
-        all_occurrences = models.Occurrence.objects \
-            .filter(event__publishing_is_draft=True) \
-            .filter(
-                Q(is_all_day=False, start__gte=start) |
-                Q(is_all_day=True, start__gte=start.date())
-            ) \
-            .filter(
-                # Exclusive for datetime, inclusive for date.
-                Q(is_all_day=False, start__lt=end) |
-                Q(is_all_day=True, start__lte=end.date())
-            )
+        all_occurrences = models.Occurrence.objects.draft().within(start, end)
 
 #        # Get a dict mapping the primary keys for content types to plugins, so
 #        # we can get the verbose name of the plugin and a consistent colour for
