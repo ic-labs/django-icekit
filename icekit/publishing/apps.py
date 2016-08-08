@@ -225,7 +225,8 @@ class AppConfig(AppConfig):
             if not issubclass(model, PublishingModel):
                 continue
 
-            if issubclass(model, PolymorphicModel):
+            if issubclass(model, PolymorphicModel) \
+                    and not issubclass(model, UrlNode):
 
                 PublishingPolymorphicManager().contribute_to_class(
                     model, 'objects')
