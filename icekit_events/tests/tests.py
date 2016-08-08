@@ -63,7 +63,7 @@ class TestAdmin(WebTest):
         self.assertEqual(0, event.repeat_generators.count())
         self.assertEqual(0, event.occurrences.count())
 
-    def test_event_with_eventrepeatgenerators(self):
+    def test_event_with_eventrepeatsgenerators(self):
         event = G(
             models.Event,
             title='Test Event',
@@ -155,6 +155,218 @@ class TestAdmin(WebTest):
         event = models.Event.objects.get(pk=event.pk)
         self.assertEqual(1, event.repeat_generators.count())
         self.assertEqual(13 * 2, event.occurrences.count())
+
+    def test_event_with_user_modified_occurrences(self):
+        event = G(
+            models.Event,
+            title='Test Event',
+        )
+        response = self.app.get(
+            reverse('admin:icekit_events_event_change', args=(event.pk,)),
+            user=self.superuser,
+        )
+        self.assertEqual(0, event.occurrences.count())
+        #######################################################################
+        # Add timed occurrence manually
+        #######################################################################
+        form = response.forms[0]
+        form['occurrences-0-start_0'].value = \
+            self.start.strftime('%Y-%m-%d')
+        form['occurrences-0-start_1'].value = \
+            self.start.strftime('%H:%M:%S')
+        form['occurrences-0-end_0'].value = \
+            self.end.strftime('%Y-%m-%d')
+        form['occurrences-0-end_1'].value = \
+            self.end.strftime('%H:%M:%S')
+        response = form.submit('_continue')
+        self.assertEqual(1, event.occurrences.count())
+        timed_occurrence = event.occurrences.all()[0]
+        self.assertTrue(timed_occurrence.is_user_modified)
+        self.assertEqual(
+            self.start, timed_occurrence.start)
+        self.assertEqual(
+            self.end, timed_occurrence.end)
+        #######################################################################
+        # Add all-day occurrence manually
+        #######################################################################
+        form = response.follow().forms[0]
+        all_day_start = self.start + timedelta(days=3)
+        form['occurrences-1-start_0'].value = \
+            all_day_start.strftime('%Y-%m-%d')
+        form['occurrences-1-start_1'].value = '00:00:00'
+        form['occurrences-1-end_0'].value = \
+            all_day_start.strftime('%Y-%m-%d')
+        form['occurrences-1-end_1'].value = '00:00:00'
+        form['occurrences-1-is_all_day'].value = True
+        response = form.submit('_continue')
+        event = models.Event.objects.get(pk=event.pk)
+        self.assertEqual(2, event.occurrences.count())
+        all_day_occurrence = event.occurrences.all()[1]
+        self.assertTrue(timed_occurrence.is_user_modified)
+        self.assertEqual(
+            models.zero_datetime(all_day_start), all_day_occurrence.start)
+        self.assertEqual(
+            models.zero_datetime(all_day_start), all_day_occurrence.end)
+        # Start and end dates of all-day occurrences are zeroed
+        self.assertEqual(
+            models.zero_datetime(all_day_occurrence.start),
+            all_day_occurrence.start)
+        self.assertEqual(
+            models.zero_datetime(all_day_occurrence.end),
+            all_day_occurrence.end)
+        #######################################################################
+        # Cancel first (timed) event
+        #######################################################################
+        form = response.follow().forms[0]
+        form['occurrences-0-cancel_reason'].value = 'Sold out'
+        response = form.submit('_continue')
+        self.assertEqual(2, event.occurrences.count())
+        timed_occurrence = event.occurrences.all()[0]
+        self.assertEqual('Sold out', timed_occurrence.cancel_reason)
+        self.assertTrue(timed_occurrence.is_cancelled)
+        #######################################################################
+        # Delete second (all-day) event
+        #######################################################################
+        form = response.follow().forms[0]
+        form['occurrences-1-DELETE'].value = True
+        response = form.submit('_continue')
+        self.assertEqual(1, event.occurrences.count())
+
+    def test_event_with_repeatsgenerators_and_user_modified_occurrences(self):
+        event = G(
+            models.Event,
+            title='Test Event',
+        )
+        G(
+            models.EventRepeatsGenerator,
+            event=event,
+            start=self.start,
+            end=self.end,
+            recurrence_rule='FREQ=WEEKLY',
+            repeat_end=self.start + timedelta(weeks=10),
+        )
+        self.assertEqual(10, event.occurrences.count())
+        self.assertEqual(10, event.occurrences.generated().count())
+        response = self.app.get(
+            reverse('admin:icekit_events_event_change', args=(event.pk,)),
+            user=self.superuser,
+        )
+        first_occurrence = event.occurrences.all()[0]
+        #######################################################################
+        # Add occurrence manually
+        #######################################################################
+        form = response.forms[0]
+        extra_occurrence_start = (first_occurrence.start - timedelta(days=3)) \
+            .astimezone(timezone.get_current_timezone())
+        extra_occurrence_end = (first_occurrence.end - timedelta(days=3)) \
+            .astimezone(timezone.get_current_timezone())
+        form['occurrences-10-start_0'].value = \
+            extra_occurrence_start.strftime('%Y-%m-%d')
+        form['occurrences-10-start_1'].value = \
+            extra_occurrence_start.strftime('%H:%M:%S')
+        form['occurrences-10-end_0'].value = \
+            extra_occurrence_end.strftime('%Y-%m-%d')
+        form['occurrences-10-end_1'].value = \
+            extra_occurrence_end.strftime('%H:%M:%S')
+        response = form.submit('_continue')
+        self.assertEqual(10 + 1, event.occurrences.count())
+        extra_occurrence = event.occurrences.all()[0]
+        self.assertTrue(extra_occurrence.is_user_modified)
+        self.assertFalse(extra_occurrence.is_generated)
+        self.assertEqual(
+            extra_occurrence_start, extra_occurrence.start)
+        self.assertEqual(
+            extra_occurrence_end, extra_occurrence.end)
+        #######################################################################
+        # Adjust start time of a generated occurrence
+        #######################################################################
+        form = response.follow().forms[0]
+        shifted_occurrence = event.occurrences.all()[6]
+        self.assertFalse(shifted_occurrence.is_user_modified)
+        shifted_occurrence_start = \
+            (shifted_occurrence.start + timedelta(minutes=30)) \
+            .astimezone(timezone.get_current_timezone())
+        form['occurrences-6-start_0'].value = \
+            shifted_occurrence_start.strftime('%Y-%m-%d')
+        form['occurrences-6-start_1'].value =\
+            shifted_occurrence_start.strftime('%H:%M:%S')
+        response = form.submit('_continue')
+        event = models.Event.objects.get(pk=event.pk)
+        self.assertEqual(10 + 1, event.occurrences.count())
+        shifted_occurrence = models.Occurrence.objects.get(
+            pk=shifted_occurrence.pk)
+        self.assertTrue(shifted_occurrence.is_user_modified)
+        self.assertTrue(shifted_occurrence.is_generated)
+        self.assertEqual(
+            shifted_occurrence_start, shifted_occurrence.start)
+        self.assertEqual(
+            shifted_occurrence_start + timedelta(minutes=15),
+            shifted_occurrence.end)
+        #######################################################################
+        # Convert a timed generated occurrence to all-day
+        #######################################################################
+        form = response.follow().forms[0]
+        converted_occurrence = event.occurrences.all()[2]
+        self.assertFalse(converted_occurrence.is_user_modified)
+        form['occurrences-2-is_all_day'].value = True
+        response = form.submit('_continue')
+        event = models.Event.objects.get(pk=event.pk)
+        self.assertEqual(10 + 1, event.occurrences.count())
+        converted_occurrence = models.Occurrence.objects.get(
+            pk=converted_occurrence.pk)
+        self.assertTrue(converted_occurrence.is_user_modified)
+        self.assertTrue(converted_occurrence.is_generated)
+        self.assertTrue(converted_occurrence.is_all_day)
+        #######################################################################
+        # Cancel a generated occurrence
+        #######################################################################
+        form = response.follow().forms[0]
+        cancelled_occurrence = event.occurrences.all()[3]
+        self.assertFalse(cancelled_occurrence.is_user_modified)
+        form['occurrences-3-cancel_reason'].value = 'Sold out'
+        response = form.submit('_continue')
+        event = models.Event.objects.get(pk=event.pk)
+        self.assertEqual(10 + 1, event.occurrences.count())
+        cancelled_occurrence = models.Occurrence.objects.get(
+            pk=cancelled_occurrence.pk)
+        self.assertTrue(cancelled_occurrence.is_user_modified)
+        self.assertTrue(cancelled_occurrence.is_generated)
+        self.assertTrue(cancelled_occurrence.is_cancelled)
+        self.assertEqual('Sold out', cancelled_occurrence.cancel_reason)
+        #######################################################################
+        # Delete a generated occurrence (should be regenerated)
+        #######################################################################
+        self.assertEqual(11, event.occurrences.count())
+        form = response.follow().forms[0]
+        form['occurrences-8-DELETE'].value = True
+        response = form.submit('_continue')
+        self.assertEqual(10, event.occurrences.count())
+        #######################################################################
+        # Regenerate event occurrences and confirm user modifications intact
+        #######################################################################
+        self.assertEqual(1, event.occurrences.added_by_user().count())
+        self.assertEqual(
+            9,  # Down one, since we deleted a generated occurrence above
+            event.occurrences.generated().count())
+        self.assertEqual(4, event.occurrences.modified_by_user().count())
+        self.assertEqual(6, event.occurrences.unmodified_by_user().count())
+        self.assertEqual(6, event.occurrences.regeneratable().count())
+        # Regenerate!
+        event.regenerate_occurrences()
+        self.assertEqual(11, event.occurrences.count())
+        self.assertEqual(1, event.occurrences.added_by_user().count())
+        self.assertEqual(
+            10,  # Deleted generated occurrence is recreated
+            event.occurrences.generated().count())
+        self.assertEqual(4, event.occurrences.modified_by_user().count())
+        self.assertEqual(7, event.occurrences.unmodified_by_user().count())
+        self.assertEqual(7, event.occurrences.regeneratable().count())
+
+    # TODO Test Event publishing
+
+    # TODO Test Event cloning
+
+    # TODO Test admin calendar
 
 
 class Forms(TestCase):

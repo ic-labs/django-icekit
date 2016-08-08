@@ -581,11 +581,17 @@ class OccurrenceQueryset(QuerySet):
     def draft(self):
         return self.filter(event__publishing_is_draft=True)
 
+    def added_by_user(self):
+        return self.filter(generator__isnull=True, is_user_modified=True)
+
     def modified_by_user(self):
         return self.filter(is_user_modified=True)
 
     def unmodified_by_user(self):
         return self.filter(is_user_modified=False)
+
+    def generated(self):
+        return self.filter(generator__isnull=False)
 
     def regeneratable(self):
         return self.unmodified_by_user()
@@ -611,6 +617,7 @@ class OccurrenceQueryset(QuerySet):
 
 class OccurrenceManager(PassThroughManagerMixin, models.Manager):
     _queryset_class = OccurrenceQueryset
+    use_for_related_fields = True
 
 
 @encoding.python_2_unicode_compatible
@@ -688,8 +695,11 @@ class Occurrence(AbstractBaseModel):
         if self.is_all_day:
             self.start = zero_datetime(self.start)
             self.end = zero_datetime(self.end)
-            self.original_start = zero_datetime(self.original_start)
-            self.original_end = zero_datetime(self.original_end)
+        # Set original start/end times, if necessary
+        if not self.original_start:
+            self.original_start = self.start
+        if not self.original_end:
+            self.original_end = self.end
         super(Occurrence, self).save(*args, **kwargs)
 
 

@@ -11,12 +11,10 @@ import datetime
 import json
 import logging
 import six
-import pytz
 
 from django.contrib import admin
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
-from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
@@ -53,7 +51,7 @@ class OccurrencesInline(admin.TabularInline):
     model = models.Occurrence
     form = admin_forms.BaseOccurrenceForm
     exclude = ('generator', 'is_generated',)
-    extra = 0
+    extra = 1
     readonly_fields = ('is_user_modified', 'is_cancelled',)
 
 
@@ -97,7 +95,8 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
 
     class Media:
         css = {
-            'all': ('icekit_events/bower_components/font-awesome/css/font-awesome.css',),
+            'all': ('icekit_events/bower_components/'
+                    'font-awesome/css/font-awesome.css',),
         }
 
     def get_urls(self):
@@ -154,7 +153,8 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         return HttpResponse(content=data, content_type='applicaton/json')
 
     def get_type(self, obj):
-        return obj.get_real_concrete_instance_class()._meta.verbose_name.title()
+        return obj.get_real_concrete_instance_class() \
+            ._meta.verbose_name.title()
     get_type.short_description = "type"
 
     def _calendar_json_for_occurrence(self, occurrence):
@@ -173,7 +173,8 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             start = timezone.localize(occurrence.start)
             end = timezone.localize(occurrence.end)
         if occurrence.is_cancelled and occurrence.cancel_reason:
-            title = occurrence.event.title + u" [%s]" % occurrence.cancel_reason
+            title = u"{0} [{1}]".format(
+                occurrence.event.title, occurrence.cancel_reason)
         else:
             title = occurrence.event.title
         return {
@@ -181,8 +182,8 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             'allDay': occurrence.is_all_day,
             'start': start,
             'end': end,
-            'url': reverse(
-                'admin:icekit_events_event_change', args=[occurrence.event.pk]),
+            'url': reverse('admin:icekit_events_event_change',
+                           args=[occurrence.event.pk]),
             'className': self._calendar_classes_for_occurrence(occurrence),
         }
 
@@ -194,7 +195,8 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
 
         # quick-and-dirty way to get a color for the Event type.
         # There are 12 colors defined in the css file
-        classes.append("color-%s" % (occurrence.event.polymorphic_ctype_id % 12))
+        classes.append("color-%s" % (
+            occurrence.event.polymorphic_ctype_id % 12))
 
         # Add a class name for the type of event.
         if occurrence.is_all_day:
