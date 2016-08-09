@@ -452,7 +452,7 @@ class EventRepeatsGenerator(AbstractBaseModel):
         ordering = ['pk']  # Order by PK, essentially in creation order
 
     def __str__(self):
-        return "EventRepeatsGenerator of '{0}'".format(self.event.title)
+        return u"EventRepeatsGenerator of '{0}'".format(self.event.title)
 
     def generate(self, until=None):
         """
@@ -668,7 +668,7 @@ class Occurrence(AbstractBaseModel):
         ordering = ['start', '-is_all_day', 'event', 'pk']
 
     def __str__(self):
-        return """Occurrence of "{0}" {1} - {2}""".format(
+        return u"""Occurrence of "{0}" {1} - {2}""".format(
             self.event.title, self.start, self.end)
 
     @property
