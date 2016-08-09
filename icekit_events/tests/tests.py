@@ -8,6 +8,7 @@ Tests for ``icekit_events`` app.
 from timezone import timezone
 from datetime import datetime, timedelta
 import six
+import json
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -17,6 +18,7 @@ from django.core.urlresolvers import reverse
 from django.forms.models import fields_for_model
 from django.test import TestCase
 from django.test.utils import override_settings
+
 from django_dynamic_fixture import G
 from django_webtest import WebTest
 
@@ -538,9 +540,72 @@ class TestAdmin(WebTest):
             reverse('icekit_events_detail', args=(published_event.pk,)),
             expect_errors=404)
 
-    # TODO Test Event cloning
+    def test_admin_calendar(self):
+        event = G(
+            models.Event,
+            title='Test Event',
+        )
+        repeat_end = self.end + timedelta(days=7)
+        G(
+            models.EventRepeatsGenerator,
+            event=event,
+            start=self.start,
+            end=self.end,
+            recurrence_rule="FREQ=DAILY;BYDAY=SA,SU",
+            repeat_end=repeat_end,
+        )
+        self.assertEqual(2, event.occurrences.count())
+        #######################################################################
+        # Fetch calendar HTML page
+        #######################################################################
+        response = self.app.get(
+            reverse('admin:icekit_events_event_calendar'),
+            user=self.superuser,
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('text/html; charset=utf-8', response['content-type'])
+        self.assertTrue("<div id='calendar'></div>" in response.content)
+        self.assertTrue(
+            reverse('admin:icekit_events_event_calendar_data')
+            in response.content)
+        #######################################################################
+        # Fetch calendar JSON data
+        #######################################################################
+        response = self.app.get(
+            reverse('admin:icekit_events_event_calendar_data'),
+            {
+                'start': self.start.date(),
+                'end': repeat_end.date() + timedelta(days=1),
+            },
+            user=self.superuser,
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('application/json', response['content-type'])
+        data = json.loads(response.content)
+        self.assertEqual(2, len(data))
+        def format_dt_like_fullcalendar(dt):
+            formatted = dt.astimezone(timezone.get_current_timezone()) \
+                .strftime('%Y-%m-%dT%H:%M:%S%z')
+            # FullCalendar includes ':' between hour & minute portions of the
+            # timzone offset. There's no way to do this directly with Python's
+            # `strftime` formatting...
+            formatted = formatted[:-2] + ':' + formatted[-2:]
+            return formatted
+        for entry, occurrence in zip(data, event.occurrences.all()):
+            self.assertEqual(
+                occurrence.event.title,
+                entry['title'])
+            self.assertEqual(
+                format_dt_like_fullcalendar(occurrence.start),
+                entry['start'])
+            self.assertEqual(
+                format_dt_like_fullcalendar(occurrence.end),
+                entry['end'])
+            self.assertEqual(
+                occurrence.is_all_day,
+                entry['allDay'])
 
-    # TODO Test admin calendar
+    # TODO Test Event cloning
 
 
 class Forms(TestCase):

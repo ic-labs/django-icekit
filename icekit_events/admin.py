@@ -150,7 +150,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         for occurrence in all_occurrences.all():
             data.append(self._calendar_json_for_occurrence(occurrence))
         data = json.dumps(data, cls=DjangoJSONEncoder)
-        return HttpResponse(content=data, content_type='applicaton/json')
+        return HttpResponse(content=data, content_type='application/json')
 
     def get_type(self, obj):
         return obj.get_real_concrete_instance_class() \
