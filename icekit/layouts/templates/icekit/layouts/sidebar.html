@@ -1,0 +1,12 @@
+{% extends "icekit/layouts/default.html" %}
+
+{% load placeholder_tags %}
+
+{% block content %}
+	<div class="main">
+		{% page_placeholder "main" role="m" %}
+	</div>
+	<div class="sidebar">
+		{% page_placeholder "sidebar" role="s" %}
+	</div>
+{% endblock %}

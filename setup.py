@@ -1,7 +1,18 @@
 from __future__ import print_function
 
+import datetime
+import os
 import setuptools
 import sys
+
+# Allow installation without git repository, e.g. inside Docker.
+if os.path.exists('.git'):
+    kwargs = dict(
+        use_scm_version={'version_scheme': 'post-release'},
+        setup_requires=['setuptools_scm'],
+    )
+else:
+    kwargs = dict(version='0+d' + datetime.date.today().strftime('%Y%m%d'))
 
 # Convert README.md to reStructuredText.
 if {'bdist_wheel', 'sdist'}.intersection(sys.argv):
@@ -14,16 +25,14 @@ if {'bdist_wheel', 'sdist'}.intersection(sys.argv):
     else:
         print('Converting `README.md` to reStructuredText to use as long '
               'description.')
-        long_description = pypandoc.convert('README.md', 'rst')
+        kwargs['long_description'] = pypandoc.convert('README.md', 'rst')
 
 setuptools.setup(
     name='django-icekit',
-    use_scm_version={'version_scheme': 'post-release'},
     author='Interaction Consortium',
     author_email='studio@interaction.net.au',
     url='https://github.com/ic-labs/django-icekit',
     description='A modular content CMS by Interaction Consortium.',
-    long_description=locals().get('long_description', ''),
     license='MIT',
     packages=setuptools.find_packages(),
     include_package_data=True,
@@ -34,6 +43,7 @@ setuptools.setup(
         'django-fluent-pages',
         'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
         'django-mptt<0.8',  # <0.8.5 for django-polymophic<0.8; <0.8 for Django 1.7
+        'django-multiurl',
         'django-polymorphic<0.8',  # For compatibility with django-fluent-contents: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
         'django-wysiwyg',
         'django_extensions',
@@ -85,10 +95,13 @@ setuptools.setup(
             'WebTest',
         ],
     },
-    setup_requires=['setuptools_scm'],
     entry_points={
         'console_scripts': [
             'icekit = icekit.bin.icekit:main',
         ],
     },
+    scripts=[
+        'manage.py',
+    ],
+    **kwargs
 )

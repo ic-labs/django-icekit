@@ -10,7 +10,7 @@
 
 {% load static compress %}
 
-{% block title %}{{ title }} | {{ SITE_VERBOSE_NAME|default:_('ICEkit Admin') }}{% endblock %}
+{% block title %}{{ title }} | {{ SITE_NAME }}{% endblock %}
 
 {% block extrastyle %}
 	{% compress css %}
@@ -28,7 +28,7 @@
 
 {% block branding %}
 	<a href="{% url 'admin:index' %}">
-		<img id="site-logo" src="{% block header-image %}{% static 'admin/img/header-brand.png' %}{% endblock header-image %}" title="{{ SITE_VERBOSE_NAME }}">
+		<img id="site-logo" src="{% block header-image %}{% static 'admin/img/header-brand.png' %}{% endblock header-image %}" title="{{ SITE_NAME }}">
 		<h1 id="site-name">Site Admin</h1>
 	</a>
 {% endblock %}
@@ -36,10 +36,10 @@
 {% block footer %}
 	<footer class="footer">
 		<section class="footer-section footer-left">
-			{% block footer-name %}{{ SITE_VERBOSE_NAME }}{% endblock %}
+			{% block footer-name %}{{ SITE_NAME }}{% endblock %}
 		</section>
 		<section class="footer-section footer-right">
-			<a href="/">{% block site-name %}{% firstof SITE_NAME "This site" %}{% endblock %}</a>
+			<a href="/">{% block site-name %}{% if SITE_NAME == "ICEkit" %}This site{% else %}{{ SITE_NAME }}{% endif %}{% endblock %}</a>
 			is built with <a href="http://interaction.net.au">ICEkit</a>
 			<a href="http://interaction.net.au" id="ic-logo">
 				<div class="ic-logo-dot"></div>
