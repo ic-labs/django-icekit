@@ -64,9 +64,10 @@ class Migration(migrations.Migration):
             model_name='event',
             name='lft',
         ),
-        migrations.RemoveField(
+        migrations.RenameField(
             model_name='event',
-            name='parent',
+            old_name='parent',
+            new_name='derived_from',
         ),
         migrations.RemoveField(
             model_name='event',
@@ -75,11 +76,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='event',
             name='tree_id',
-        ),
-        migrations.AddField(
-            model_name='event',
-            name='derived_from',
-            field=polymorphic_tree.models.PolymorphicTreeForeignKey(related_name='derivitives', blank=True, editable=False, to='icekit_events.Event', null=True),
         ),
         migrations.AddField(
             model_name='event',
