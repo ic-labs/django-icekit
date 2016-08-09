@@ -362,7 +362,181 @@ class TestAdmin(WebTest):
         self.assertEqual(7, event.occurrences.unmodified_by_user().count())
         self.assertEqual(7, event.occurrences.regeneratable().count())
 
-    # TODO Test Event publishing
+    def test_event_publishing(self):
+        #######################################################################
+        # Create unpublished (draft) event
+        #######################################################################
+        event = G(
+            models.Event,
+            title='Test Event',
+        )
+        self.assertTrue(event.is_draft)
+        self.assertEqual([event], list(models.Event.objects.draft()))
+        self.assertIsNone(event.get_published())
+        self.assertEqual([], list(models.Event.objects.published()))
+        self.assertEqual(0, event.repeat_generators.count())
+        self.assertEqual(0, event.occurrences.count())
+        view_response = self.app.get(
+            reverse('icekit_events_detail', args=(event.pk,)),
+            expect_errors=404)
+        #######################################################################
+        # Publish event, nothing much to clone yet
+        #######################################################################
+        response = self.app.get(
+            reverse('admin:icekit_events_event_publish', args=(event.pk,)),
+            user=self.superuser,
+        )
+        self.assertEqual(302, response.status_code)
+        event = models.Event.objects.get(pk=event.pk)
+        self.assertTrue(event.is_draft)
+        self.assertEqual([event], list(models.Event.objects.draft()))
+        self.assertIsNotNone(event.get_published())
+        published_event = event.get_published()
+        self.assertEqual(
+            [published_event], list(models.Event.objects.published()))
+        self.assertEqual(event.title, published_event.title)
+        self.assertEqual(0, published_event.repeat_generators.count())
+        self.assertEqual(0, published_event.repeat_generators.count())
+        view_response = self.app.get(
+            reverse('icekit_events_detail', args=(published_event.pk,)))
+        self.assertEqual(200, view_response.status_code)
+        self.assertTrue('Test Event' in view_response.content)
+        #######################################################################
+        # Update draft event with repeat generators and manual occurrences
+        #######################################################################
+        response = self.app.get(
+            reverse('admin:icekit_events_event_change', args=(event.pk,)),
+            user=self.superuser,
+        )
+        form = response.forms[0]
+        # Update event title
+        form['title'].value += ' - Update 1'
+        # Add weekly repeat for 4 weeks
+        repeat_end = self.start + timedelta(days=28)
+        form['repeat_generators-0-recurrence_rule_0'].select('4')
+        form['repeat_generators-0-recurrence_rule_1'].value = 'weekly'
+        form['repeat_generators-0-recurrence_rule_2'].value = "FREQ=WEEKLY"
+        form['repeat_generators-0-start_0'].value = \
+            self.start.strftime('%Y-%m-%d')
+        form['repeat_generators-0-start_1'].value = \
+            self.start.strftime('%H:%M:%S')
+        form['repeat_generators-0-end_0'].value = \
+            self.end.strftime('%Y-%m-%d')
+        form['repeat_generators-0-end_1'].value = \
+            self.end.strftime('%H:%M:%S')
+        form['repeat_generators-0-repeat_end_0'].value = \
+            repeat_end.strftime('%Y-%m-%d')
+        form['repeat_generators-0-repeat_end_1'].value = \
+            repeat_end.strftime('%H:%M:%S')
+        # Add ad-hoc occurrence
+        extra_occurrence_start = (self.start - timedelta(days=30)) \
+            .astimezone(timezone.get_current_timezone())
+        extra_occurrence_end = extra_occurrence_start + timedelta(hours=3)
+        form['occurrences-0-start_0'].value = \
+            extra_occurrence_start.strftime('%Y-%m-%d')
+        form['occurrences-0-start_1'].value = \
+            extra_occurrence_start.strftime('%H:%M:%S')
+        form['occurrences-0-end_0'].value = \
+            extra_occurrence_end.strftime('%Y-%m-%d')
+        form['occurrences-0-end_1'].value = \
+            extra_occurrence_end.strftime('%H:%M:%S')
+        # Submit form
+        response = form.submit(name='_continue')
+        self.assertEqual(302, response.status_code)
+        event = models.Event.objects.get(pk=event.pk)
+        # Convert a generated occurrence to all-day
+        form = response.follow().forms[0]
+        converted_occurrence = event.occurrences.all()[3]
+        self.assertFalse(converted_occurrence.is_user_modified)
+        form['occurrences-3-is_all_day'].value = True
+        response = form.submit('_continue')
+        self.assertEqual(302, response.status_code)
+        #######################################################################
+        # Republish event, ensure everything is cloned
+        #######################################################################
+        # First check that published copy remains unchanged so far
+        published_event = models.Event.objects.get(pk=published_event.pk)
+        self.assertEqual('Test Event', published_event.title)
+        self.assertEqual(0, published_event.repeat_generators.count())
+        self.assertEqual(0, published_event.occurrences.count())
+        view_response = self.app.get(
+            reverse('icekit_events_detail', args=(published_event.pk,)))
+        self.assertEqual(200, view_response.status_code)
+        self.assertFalse('Test Event - Update 1' in view_response.content)
+        # Republish event
+        response = self.app.get(
+            reverse('admin:icekit_events_event_publish', args=(event.pk,)),
+            user=self.superuser,
+        )
+        self.assertEqual(302, response.status_code)
+        event = models.Event.objects.get(pk=event.pk)
+        # Original published event record has been deleted
+        self.assertEqual(
+            0, models.Event.objects.filter(pk=published_event.pk).count())
+        # Confirm cloning of published event's repeat rules and occurrences
+        published_event = event.get_published()
+        self.assertEqual('Test Event - Update 1', published_event.title)
+        self.assertEqual(
+            event.repeat_generators.count(),
+            published_event.repeat_generators.count())
+        for draft_generator, published_generator in zip(
+                event.repeat_generators.all(),
+                published_event.repeat_generators.all()
+        ):
+            self.assertNotEqual(draft_generator.pk, published_generator.pk)
+            self.assertEqual(event, draft_generator.event)
+            self.assertEqual(published_event, published_generator.event)
+            self.assertEqual(
+                draft_generator.recurrence_rule,
+                published_generator.recurrence_rule)
+        for draft_occurrence, published_occurrence in zip(
+                event.occurrences.all(), published_event.occurrences.all()):
+            self.assertNotEqual(draft_occurrence.pk, published_occurrence.pk)
+            self.assertEqual(event, draft_occurrence.event)
+            self.assertEqual(published_event, published_occurrence.event)
+            self.assertEqual(
+                draft_occurrence.start, published_occurrence.start)
+            self.assertEqual(
+                draft_occurrence.end, published_occurrence.end)
+            self.assertEqual(
+                draft_occurrence.is_all_day, published_occurrence.is_all_day)
+            self.assertEqual(
+                draft_occurrence.is_user_modified,
+                published_occurrence.is_user_modified)
+            self.assertEqual(
+                draft_occurrence.is_cancelled,
+                published_occurrence.is_cancelled)
+            self.assertEqual(
+                draft_occurrence.is_hidden,
+                published_occurrence.is_hidden)
+            self.assertEqual(
+                draft_occurrence.cancel_reason,
+                published_occurrence.cancel_reason)
+            self.assertEqual(
+                draft_occurrence.original_start,
+                published_occurrence.original_start)
+            self.assertEqual(
+                draft_occurrence.original_end,
+                published_occurrence.original_end)
+        view_response = self.app.get(
+            reverse('icekit_events_detail', args=(published_event.pk,)))
+        self.assertEqual(200, view_response.status_code)
+        self.assertTrue('Test Event - Update 1' in view_response.content)
+        #######################################################################
+        # Unpublish event
+        #######################################################################
+        # Unpublish event
+        response = self.app.get(
+            reverse('admin:icekit_events_event_unpublish', args=(event.pk,)),
+            user=self.superuser,
+        )
+        self.assertEqual(302, response.status_code)
+        event = models.Event.objects.get(pk=event.pk)
+        self.assertTrue(event.is_draft)
+        self.assertIsNone(event.get_published())
+        view_response = self.app.get(
+            reverse('icekit_events_detail', args=(published_event.pk,)),
+            expect_errors=404)
 
     # TODO Test Event cloning
 
