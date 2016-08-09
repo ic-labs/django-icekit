@@ -19,6 +19,17 @@ class BaseEventRepeatsGeneratorForm(forms.ModelForm):
         media.add_js(['admin/js/event_all_day_field.js'])
         return media
 
+    def clean(self):
+        cleaned_data = super(BaseEventRepeatsGeneratorForm, self).clean()
+        # Handle situation where hidden time fields in admin UI submit the
+        # value "00:00:00" for `repeat_end` without a corresponding date.
+        if 'repeat_end' in self.errors:
+            if self.data.get(self.prefix + '-repeat_end_1') == '00:00:00' \
+                    and not self.data.get(self.prefix + '-repeat_end_0'):
+                cleaned_data['repeat_end'] = None
+                del(self.errors['repeat_end'])
+        return cleaned_data
+
 
 class BaseOccurrenceForm(forms.ModelForm):
 
