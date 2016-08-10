@@ -231,16 +231,12 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
 
     class Meta:
         abstract = True
-        # TODO Do we still want/need to sort Events by date?
-        ordering = (
-            # 'date_starts', '-all_day', 'starts',
-            'title', 'pk')
+        ordering = ('title', 'pk')
 
     def __str__(self):
         return self.title
 
-    # TODO Necessary? Should be replaced by future clone mechanism
-    def get_variation_fields(self):
+    def get_cloneable_fieldnames(self):
         return ['title']
 
     def add_occurrence(self, start, end=None):
@@ -264,15 +260,12 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
         them to be re-generated the next time occurrence generation is done.
         """
         if occurrence not in self.occurrences.all():
-            # TODO Should we raise an error here?
-            return
+            return  # No-op
         occurrence.is_user_modified = True
         occurrence.is_cancelled = True
         occurrence.is_hidden = hide_cancelled_occurrence
         occurrence.cancel_reason = reason
         occurrence.save()
-
-    # TODO Do we need `undelete_occurrence`?
 
     @transaction.atomic
     def make_variation(self, occurrence):
@@ -284,10 +277,9 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
         are saved and occurrences are refreshed.
         """
         # Clone fields from source event
-        # TODO Add special handling to clone extra data from original event?
         defaults = {
             field: getattr(self, field)
-            for field in self.get_variation_fields()
+            for field in self.get_cloneable_fieldnames()
         }
         # Create new variation event based on source event
         variation_event = type(self)(
@@ -295,15 +287,9 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
             **defaults
         )
         variation_event.save()
-        # TODO Clone `EventRepeatsGenerator`s to variation?
-        #for src_repeat_generator in self.repeat_generators.all():
-        #    new_repeat_generator = deepcopy(src_repeat_generator)
-        #    new_repeat_generator.event = variation_event
-        #    new_repeat_generator.pk = None
-        #    new_repeat_generator.save()
+        self.clone_relations(variation_event)
 
         # Adjust this event so its occurrences stop at point variation splits
-        # TODO Is this really what we want at all?
         self.end_repeat = occurrence.start
         qs_overlapping_occurrences = self.occurrences \
             .filter(start__gte=occurrence.start)
@@ -420,7 +406,6 @@ class EventRepeatsGenerator(AbstractBaseModel):
     ensure the data meets these standards. Calling the `clean` method
     explicitly is most likely the easiest way to ensure this.
     """
-    # TODO Make FK to AbstractEvent if possible
     event = PolymorphicTreeForeignKey(
         Event,
         db_index=True,
@@ -501,8 +486,8 @@ class EventRepeatsGenerator(AbstractBaseModel):
         if until is None:
             until = self.repeat_end \
                 or timezone.now() + appsettings.REPEAT_LIMIT
-        # TODO Safe to assume `recurrence_rule` is always a RRULE repeat spec
-        # of the form "FREQ=DAILY", "FREQ=WEEKLY", etc?
+        # We assume `recurrence_rule` is always a RRULE repeat spec of the form
+        # "FREQ=DAILY", "FREQ=WEEKLY", etc?
         rrule_spec = "DTSTART:%s" % format_ical_dt(start_dt)
         if not self.recurrence_rule:
             rrule_spec += "\nRDATE:%s" % format_ical_dt(start_dt)
@@ -630,7 +615,6 @@ class Occurrence(AbstractBaseModel):
     """
     objects = OccurrenceManager()
 
-    # TODO Make FK to AbstractEvent if possible
     event = PolymorphicTreeForeignKey(
         Event,
         db_index=True,
@@ -711,7 +695,6 @@ def get_occurrence_times_for_event(event):
     Event's Occurrences, or the original start datetime if an Occurrence's
     start was modified by a user.
     """
-    # TODO Account for `original_starts` field once we have one
     occurrences_starts = set()
     occurrences_ends = set()
     for start, original_start, end, original_end in \

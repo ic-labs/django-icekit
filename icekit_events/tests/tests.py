@@ -1182,12 +1182,6 @@ class TestEventOccurrences(TestCase):
         self.assertEqual(event.occurrences.count(), 20)
         self.assertEqual(models.Event.objects.count(), 1)
 
-    # TODO test_add_eventrepeatsrule
-
-    # TODO test_remove_eventrepeatsrule
-
-    # TODO test_change_eventrepeatsrule
-
 
 class Views(WebTest):
 
