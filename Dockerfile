@@ -29,7 +29,7 @@ RUN npm install && rm -rf /root/.npm
 RUN md5sum package.json > package.json.md5
 ENV PATH=/opt/django-icekit/icekit/node_modules/.bin:$PATH
 
-COPY bower.json /opt/django-icekit/icekit/
+COPY icekit/bower.json /opt/django-icekit/icekit/
 RUN bower install --allow-root && rm -rf /root/.cache/bower
 RUN md5sum bower.json > bower.json.md5
 
