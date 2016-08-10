@@ -14,9 +14,6 @@ mkdir -p "$DIR"
 cd "$DIR"
 
 if [[ ! -s package.json ]]; then
-fi
-
-if [[ ! -s package.json ]]; then
     echo '{}' > package.json
 fi
 
