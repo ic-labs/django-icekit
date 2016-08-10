@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% load placeholder_tags fluent_contents_tags %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block content %}
+	<h1>{{ page.title }}</h1>
+
+	{% page_placeholder "main" role="m" %}
+
+	<ul>
+		{% for press_release in press_releases %}
+			<a href="{{ press_release.get_absolute_url }}">
+				{{ press_release.title|safe }}
+				<br>
+				{{ press_release.released|date:"F j, Y" }}
+			</a>
+		{% endfor %}
+	</ul>
+
+{% endblock %}
+
+{% block base_js %}
+	{{ block.super }}
+	{% render_content_items_media %}
+{% endblock %}

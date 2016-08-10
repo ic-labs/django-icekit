@@ -1,0 +1,14 @@
+# Only include files that are actually generated or required by the app.
+
+# For anything that is local to your environment, e.g. dotfiles created by your
+# IDE, use your own `~/.gitignore_global` file.
+
+*.egg-info/
+*.py[co]
+/.coverage
+/.eggs/
+/.tox/
+/db.sqlite3
+/dist/
+/htmlcov/
+/venv/

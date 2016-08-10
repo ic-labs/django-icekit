@@ -1,0 +1,12 @@
+[run]
+branch = True
+omit = */migrations/__init__.py, press_releases/tests/*
+source = press_releases
+
+[report]
+exclude_lines =
+    def __repr__
+    pragma: no cover
+    raise AssertionError
+    raise NotImplementedError
+show_missing = True

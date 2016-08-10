@@ -1,0 +1,20 @@
+{% with contact=instance.contact %}
+	<h6 class="contact-name-title">
+		{{ contact.name }}
+		{% if contact.title %}
+			<span>
+				{{ contact.title }}
+			</span>
+		{% endif %}
+	</h6>
+	{% if contact.phone %}
+		<a href="tel:+1{{ contact.phone }}" class="clearfix">
+			{{ contact.phone }}
+		</a>
+	{% endif %}
+	{% if contact.email %}
+		<a href="mailto:{{ contact.email }}" class="clearfix">
+			{{ contact.email }}
+		</a>
+	{% endif %}
+{% endwith %}

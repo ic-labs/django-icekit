@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% load placeholder_tags fluent_contents_tags %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block content %}
+	{% if page.category %}{{ page.category }}{% endif %}
+
+	<h1>{{ page.title }}</h1>
+
+	{% if page.released %}
+		Released: {{ page.released|date:"F d, Y" }}
+	{% endif %}
+	{% if page.released and page.modified %}&middot;{% endif %}
+	{% if page.modified %}
+		Last updated: {{ page.modified|date:"F d, Y" }}
+	{% endif %}
+
+	{% if page.print_version %}
+		&middot;
+		<a href="{{ page.print_version.url }}">
+			Download
+			({{ page.print_version.size|filesizeformat }}
+			{{ page.download_extension|upper }})
+		</a>
+	{% endif %}
+
+
+	{% page_placeholder "pressrelease_main" title='Main' role="m" %}
+
+	{% page_placeholder "pressrelease_contacts" title='Contacts' role="related" %}
+
+{% endblock %}
+
+{% block base_js %}
+	{{ block.super }}
+	{% render_content_items_media %}
+{% endblock %}
