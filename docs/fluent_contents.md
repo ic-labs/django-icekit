@@ -1,5 +1,24 @@
 # Features Specific for Fluent Contents
 
+Most ICEkit content uses the Fluent-contents system for adding an ordered list of arbitrary
+content items to a given Django model (aka "Rich Content"). A content item is a (usually) small
+django model for representing an item of content on a page and can have any fields that a normal
+model has.
+
+ContentItems and Fluent Contents models (which contain them) are related with Generic Foreign Keys.
+
+ICEkit comes with a fairly complex `AbstractLayoutPage` model, which implements a Publishable
+FluentPage - ie it's a Polymorphic model that sits in a tree (you can have many kinds of rich
+content pages being parents of each other in a tree), and each such page has a draft copy and a
+published copy. This is useful for a permanent page hierarchy, particularly things that are
+included in a site's information architecture. See `icekit.pagetypes` for included examples of usage.
+
+ICEkit also has a simpler `AbstractArticle` model, which implements a Publishable Fluent Contents
+model - ie it's a straightforward Django model that happens to have rich content and be publishable.
+This is useful for more normal Django collections-of-things, like Press Releases, People, Articles.
+It's common to have a collecton of items with a paired `AbstractLayoutPage` Page to list/navigate
+the collection. See `icekit-press-releases` for a worked example of this.
+
 ## Which content plugins are being used in the project and how do I remove / add one?
 
 All content plugins need to be registered with `INSTALLED_APPS` as they are self contained Django
@@ -139,5 +158,5 @@ Everything else is just extensions and normal stuff.
 
 ### When something breaks in the new system, what's the order of people that I should ask for help?
 
-Backend: Tai Lee, Addy Yeow, James Murty, Mark Finger, Richard Antecki
-Frontend: Alice Athens
+Backend: Tai Lee, James Murty, Greg Turner, Mark Finger
+Frontend: Mark Finger, Greg Turner

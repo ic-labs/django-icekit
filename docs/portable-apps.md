@@ -25,15 +25,20 @@ customisation is required, without complicated database migrations.
         # apps.py
         from django.apps import AppConfig
         class AppConfig(AppConfig):
-            name = '.'.join(__name__.split('.')[:-1])  # Name of package where `apps` module is located
+            name = '.'.join(__name__.split('.')[:-1])
 
     These values won't break when the app package is copied to a new location.
 
-  * Manually derive the `AppConfig.label` attribute from `AppConfig.name`,
-    e.g. by replacing `.` with `_`.
+  * Hardcode the `AppConfig.label` attribute, ideally deriving from `AppConfig
+    .name`, e.g. by replacing `.` with `_`. e.g.
 
-    By default, Django only uses the last component of the app name, which
-    might result in labels that are likely to conflict with other apps.
+        # apps.py
+        class AppConfig(AppConfig):
+            name = ... # as above
+            label = 'icekit_page_types_layout_page'
+
+    (By default, Django only uses the last component of the app name, which
+    might result in labels that are likely to conflict with other apps).
 
   * Always use relative imports within the app package, not only model imports.
 

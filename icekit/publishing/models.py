@@ -532,6 +532,9 @@ class PublishingModel(models.Model):
 
 class PublishableFluentContentsPage(FluentContentsPage,
                                     PublishingModel):
+    """
+    Basic Page subtype (ie that lives in the Page tree)
+    """
     # TODO Default managers don't apply properly in all cases, not sure why...
     objects = PublishingUrlNodeManager()
     _default_manager = PublishingUrlNodeManager()
