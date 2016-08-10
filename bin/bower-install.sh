@@ -16,7 +16,7 @@ cd "$DIR"
 if [[ ! -s bower.json ]]; then
     cat <<EOF > bower.json
 {
-  "name": "",
+  "name": "icekit",
   "dependencies": {
   },
   "private": true
