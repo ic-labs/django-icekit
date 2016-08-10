@@ -196,34 +196,6 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
     )
     title = models.CharField(max_length=255)
 
-    ########################################################################
-    # TODO Remove these fields once we have a data migration tool for SFMOMA
-    all_day = models.BooleanField(default=False, db_index=True)
-    starts = models.DateTimeField(blank=True, null=True, db_index=True)
-    ends = models.DateTimeField(blank=True, null=True)
-    date_starts = models.DateField(blank=True, null=True, db_index=True)
-    date_ends = models.DateField(blank=True, null=True)
-    recurrence_rule = RecurrenceRuleField(
-        blank=True,
-        help_text=_(
-            'An iCalendar (RFC2445) recurrence rule that defines when this '
-            'event repeats.'),
-        null=True,
-    )
-    end_repeat = models.DateTimeField(
-        blank=True,
-        help_text=_('If empty, this event will repeat indefinitely.'),
-        null=True,
-    )
-    date_end_repeat = models.DateField(
-        blank=True,
-        help_text=_('If empty, this event will repeat indefinitely.'),
-        null=True,
-    )
-    is_repeat = models.BooleanField(default=False, editable=False)
-    ########################################################################
-
-    # TODO This should be rendered obsolete once publishing is integrated
     show_in_calendar = models.BooleanField(
         default=True,
         help_text=_('Show this event in the public calendar'),
