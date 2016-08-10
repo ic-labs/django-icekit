@@ -9,14 +9,18 @@ BASE_SETTINGS_MODULE = os.environ.setdefault('BASE_SETTINGS_MODULE', 'base')
 print '# Importing BASE_SETTINGS_MODULE: %s' % BASE_SETTINGS_MODULE
 
 # Emulate `from ... import *` with base settings module from environment.
-locals().update(
-    importlib.import_module('icekit.settings._%s' % BASE_SETTINGS_MODULE)
-    .__dict__)
+try:
+    locals().update(importlib.import_module(
+        'icekit.project.settings._%s' % BASE_SETTINGS_MODULE).__dict__)
+except ImportError:
+    locals().update(importlib.import_module(BASE_SETTINGS_MODULE).__dict__)
 
 # Create missing runtime directories.
 runtime_dirs = STATICFILES_DIRS + (
+    os.path.join(PROJECT_DIR, 'templates'),
     os.path.join(VAR_DIR, 'logs'),
     os.path.join(VAR_DIR, 'run'),
+    # TODO: Add layout diretories.
 )
 for dirname in runtime_dirs:
     try:
@@ -124,6 +128,5 @@ if ENABLE_S3_MEDIA:
 # SUPERVISOR ##################################################################
 
 SUPERVISOR.update({
-    'celerybeat': SUPERVISOR['celerybeat'].format(**locals()),
     'django': SUPERVISOR['django'].format(**locals()),
 })

@@ -1,10 +1,11 @@
+**/*.md5
 **/*.orig
 **/*.pyc
 **/*.pyo
 **/*.swp
 **/.DS_Store
+**/npm-debug.log
 *.egg-info/
-*.md5
 .coverage
 .eggs/
 .git/
@@ -12,10 +13,9 @@
 .tox/
 dist/
 htmlcov/
-icekit/settings/local.py
+icekit/bower_components/
+icekit/node_modules/
 initial_data.sql
-node_modules/
-npm-debug.log
 project/
 requirements-local.txt
 venv/

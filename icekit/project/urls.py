@@ -2,10 +2,8 @@ from django.conf import settings
 from django.conf.urls import include, patterns, url
 from django.contrib import admin
 from django.core.urlresolvers import reverse_lazy
-from django.http import Http404
 from django.views.generic import RedirectView, TemplateView
 from fluent_pages.sitemaps import PageSitemap
-from multiurl import ContinueResolving, multiurl
 
 from icekit.admin_forms import PasswordResetForm
 
@@ -48,6 +46,8 @@ urlpatterns = patterns(
     url(getattr(settings, 'ICEKIT_ADMIN_URL_PREFIX', r'^admin/'), include(patterns(
         '',
         url(r'^doc/', include('django.contrib.admindocs.urls')),
+
+        # Password reset.
         url(r'^password/reset/$',
             'django.contrib.auth.views.password_reset',
             {
@@ -77,11 +77,16 @@ urlpatterns = patterns(
             },
             name='admin_password_reset_complete'
         ),
+
+        # Admin.
+        url(r'^', include(admin.site.urls)),
     ))),
 
     # Get front-end authentication URLs prefix from settings.
     url(getattr(settings, 'ICEKIT_LOGIN_URL_PREFIX', r''), include(patterns(
         '',
+
+        # Authentication.
         url(r'^login/$',
             'django.contrib.auth.views.login',
             {
@@ -96,6 +101,8 @@ urlpatterns = patterns(
             },
             name='logout'
         ),
+
+        # Password change.
         url(r'^password/change/$',
             'django.contrib.auth.views.password_change',
             {
@@ -110,6 +117,8 @@ urlpatterns = patterns(
             },
             name='password_change_done'
         ),
+
+        # Password reset.
         url(r'^password/reset/$',
             'django.contrib.auth.views.password_reset',
             {
@@ -142,13 +151,6 @@ urlpatterns = patterns(
         ),
     ))),
 
-    multiurl(
-        # Catch all, fluent page dispatcher.
-        url(r'^', include('fluent_pages.urls')),
-
-        # Default home page.
-        url(r'^$', 'icekit.views.index', name='icekit_index'),
-
-        catch=(Http404, ContinueResolving)
-    )
+    # Catch all, fluent page dispatcher.
+    url(r'^', include('fluent_pages.urls')),
 )

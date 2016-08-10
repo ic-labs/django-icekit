@@ -4,13 +4,13 @@ services:
     command: entrypoint.sh celery -A icekit worker -l info
     extends: django
   celerybeat:
-    command: entrypoint.sh celery -A icekit beat -l info -s /opt/icekit/project/var/celerybeat-schedule --pidfile=/opt/icekit/project/var/run/celerybeat.pid
+    command: entrypoint.sh celery -A icekit beat -l info --pidfile
     extends: django
   celeryflower:
     command: entrypoint.sh celery -A icekit flower
     extends: django
   django:
-    command: entrypoint.sh newrelic-admin run-program python manage.py runserver 0.0.0.0:8000
+    command: entrypoint.sh manage.py runserver 0.0.0.0:8000
     environment:
       BASE_SETTINGS_MODULE: docker
     image: interaction/icekit:latest

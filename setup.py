@@ -37,22 +37,27 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=[
+        'django-app-namespace-template-loader',
         'django-bootstrap3',
+        'django-compressor',
         'django-el-pagination<3',  # 3+ drops support for Django < 1.8
         'django-fluent-contents',
         'django-fluent-pages',
+        'django-model-settings',
         'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
-        'django-mptt<0.8',  # <0.8.5 for django-polymophic<0.8; <0.8 for Django 1.7
+        'django-mptt',
         'django-multiurl',
         'django-polymorphic<0.8',  # For compatibility with django-fluent-contents: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
         'django-wysiwyg',
         'django_extensions',
+        'html5lib',
+        'nltk',
         'Pillow',
         'requests',
-        'nltk',
         'unidecode',
-        'django-app-namespace-template-loader',
-        'html5lib==0.999',
+
+        # Override incompatible versions for nested dependencies.
+        'django-polymorphic-tree<1.2',  # See: https://github.com/django-polymorphic/django-polymorphic-tree/commit/389b4800aadf05a02bc66e0589e6fa511aabc3a2
     ],
     extras_require={
         'api': [
@@ -62,32 +67,76 @@ setuptools.setup(
             'django-brightcove',
         ],
         'dev': [
+            'django-debug-toolbar',
+            # 'glamkit-fallbackserve',
             'ipdb',
             'ipython',
             'mkdocs',
+            'Werkzeug',
         ],
         'django17': [
-            'django-fluent-contents<1.1',  # See: https://github.com/edoburu/django-fluent-contents/issues/67
-            'django-polymorphic<0.8',  # For compatibility with Django < 1.8, see: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
+            'django-fluent-contents',
+            'django-polymorphic<0.8',  # For compatibility with django-fluent-contents: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
             'Django>=1.7,<1.8',
+        ],
+        'django18': [
+            'Django>=1.8,<1.9',
         ],
         'forms': [
             'django-forms-builder',
         ],
-        'publishing': [
-            'django-model-settings',
-            'django-compressor<1.6',  # See: https://github.com/django-compressor/django-compressor/issues/706
+        'project': [
+            'celery[redis]',
+            'ConcurrentLogHandler',
+            'django-celery',
+            'django-celery-email',
+            'django-extensions',
+            'django-flat-theme<1.1.3',  # See: https://github.com/elky/django-flat-theme/issues/30'
+            'django-fluent-contents[markupoembeditemtext]',
+            'django-fluent-pages[redirectnodereversion]',
+            'django-generic',
+            'django-master-password',
+            'django-polymorphic-auth',
+            'django-post-office',
+            'django-redis',
+            'django-reversion>=1.9.3,<1.10',  # 1.9.3+ use DB transactions 1.10 has breaking changes for Django 1.9'
+            'django-storages<1.2',  # See: https://github.com/jschneier/django-storages/blob/cf3cb76ca060f0dd82766daa43ee92fccca3dec7/storages/backends/s3boto.py#L28-L30'
+            'django-supervisor',
+            'django-test-without-migrations',
+            'django-timezone',
+            'Django>=1.8,<1.9',  # LTS
+            'docutils',
+            'flower',
+            'gunicorn',
+            'icekit-notifications',
+            'ixc-django-compressor',
+            'ixc-redactor',
+            'ixc-whitenoise',
+            'Jinja2',
+            # 'newrelic',
+            'psycopg2',
+            'python-redis-lock[django]',
+            'pytz',
+            'raven',
+
+            # Override incompatible versions for nested dependencies.
+            'boto<=2.27',  # See: https://github.com/danilop/yas3fs/issues/26
         ],
         'search': [
             'django-fluent-pages[flatpage,fluentpage]',
             'django-haystack',
+            'elasticsearch',
+            'elasticstack',
+        ],
+        'slideshow': [
+            'easy_thumbnails',
         ],
         'test': [
             'coverage',
             'django-dynamic-fixture',
             'django-nose',
-            'djangorestframework',
             'django-webtest',
+            'djangorestframework',
             'micawber',
             'mock',
             'nose-progressive',
@@ -98,10 +147,18 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'icekit = icekit.bin.icekit:main',
+            'manage.py = icekit.manage:main',
         ],
     },
     scripts=[
-        'manage.py',
+        'bin/bower-install.sh',
+        'bin/migrate.sh',
+        'bin/npm-install.sh',
+        'bin/pip-install.sh',
+        'bin/setup-postgres-database.sh',
+        'bin/setup-postgres-env.sh',
+        'bin/startproject.sh',
+        'bin/waitlock.sh',
     ],
     **kwargs
 )

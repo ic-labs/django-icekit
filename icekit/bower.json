@@ -1,0 +1,10 @@
+{
+  "name": "ICEkit",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "font-awesome": "^4.6.3",
+    "jquery": "^3.1.0",
+    "lodash": "^4.14.2"
+  },
+  "private": true
+}

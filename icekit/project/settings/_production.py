@@ -5,6 +5,7 @@ SITE_PUBLIC_PORT = None  # Default: SITE_PORT
 # DJANGO ######################################################################
 
 CACHES['default'].update({
+    # 'BACKEND': 'django_redis.cache.RedisCache',
     'BACKEND': 'redis_lock.django_cache.RedisCache',
     'LOCATION': 'redis://redis:6379/1',
 })
@@ -30,6 +31,10 @@ TEMPLATES_DJANGO['OPTIONS']['loaders'] = [
 # CELERY EMAIL ################################################################
 
 CELERY_EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# NEW RELIC ###################################################################
+
+# SUPERVISOR['django'] = 'newrelic-admin run-program %s' % SUPERVISOR['django']
 
 # STORAGES ####################################################################
 

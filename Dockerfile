@@ -22,26 +22,27 @@ RUN wget -nv -O - "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION
 RUN ln -s "/opt/node-v${NODE_VERSION}-linux-x64/bin/node" /usr/local/bin/
 RUN ln -s "/opt/node-v${NODE_VERSION}-linux-x64/bin/npm" /usr/local/bin/
 
-WORKDIR /opt/icekit/
+WORKDIR /opt/django-icekit/icekit/
 
-COPY package.json /opt/icekit/
+COPY icekit/package.json /opt/django-icekit/icekit/
 RUN npm install && rm -rf /root/.npm
 RUN md5sum package.json > package.json.md5
-ENV PATH=/opt/icekit/node_modules/.bin:$PATH
+ENV PATH=/opt/django-icekit/icekit/node_modules/.bin:$PATH
 
-# COPY bower.json /opt/icekit/
-# RUN bower install --allow-root && rm -rf /root/.cache/bower
-# RUN md5sum bower.json > bower.json.md5
+COPY bower.json /opt/django-icekit/icekit/
+RUN bower install --allow-root && rm -rf /root/.cache/bower
+RUN md5sum bower.json > bower.json.md5
+
+WORKDIR /opt/django-icekit/
 
 RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python
-
 ARG PIP_INDEX_URL=https://devpi.ixcsandbox.com/ic/dev/+simple
 
 COPY requirements.txt /opt/icekit/
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY setup.py /opt/icekit/
-RUN pip install --no-cache-dir -e .[api,brightcove,publishing,dev,django17,forms,search,test]
+COPY bin/ setup.py /opt/django-icekit/
+RUN pip install --no-cache-dir -e .[api,brightcove,dev,django18,forms,project,search,slideshow,test]
 
 RUN touch requirements-local.txt
 RUN md5sum requirements.txt requirements-local.txt > requirements.md5
@@ -52,10 +53,6 @@ RUN chmod +x /usr/local/bin/cronlock
 
 ENV DOCKERIZE_VERSION=0.2.0
 RUN wget -nv -O - "https://github.com/jwilder/dockerize/releases/download/v${DOCKERIZE_VERSION}/dockerize-linux-amd64-v${DOCKERIZE_VERSION}.tar.gz" | tar -xz -C /usr/local/bin/ -f -
-
-ENV GOSS_VERSION=0.2.2
-RUN wget -nv -O /usr/local/bin/goss "https://github.com/aelsabbahy/goss/releases/download/v${GOSS_VERSION}/goss-linux-amd64"
-RUN chmod +x /usr/local/bin/goss
 
 ENV TINI_VERSION=0.9.0
 RUN wget -nv -O /usr/local/bin/tini "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini-static"
@@ -77,22 +74,20 @@ RUN cd /usr/local/bin \
 # RUN echo "int chown() { return 0; }" > preload.c && gcc -shared -o /libpreload.so preload.c && rm preload.c
 # ENV LD_PRELOAD=/libpreload.so
 
-ENV CRONLOCK_GRACE=0
 ENV CRONLOCK_HOST=redis
-ENV CRONLOCK_RELEASE=3600
 ENV PATH=/opt/icekit/bin:/opt/icekit/venv/bin:$PATH
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_INDEX_URL=$PIP_INDEX_URL
-ENV PIP_SRC=/opt/icekit/venv/src
-ENV PROJECT_DIR=/opt/icekit
+ENV PIP_SRC=/opt/django-icekit/venv/src
+ENV PROJECT_DIR=/opt/django-icekit
 ENV PROJECT_NAME=icekit
 ENV PYTHONHASHSEED=random
-ENV PYTHONPATH=/opt/icekit:$PYTHONPATH
-ENV PYTHONUSERBASE=/opt/icekit/venv
+ENV PYTHONPATH=/opt/django-icekit:$PYTHONPATH
+ENV PYTHONUSERBASE=/opt/django-icekit/venv
 ENV PYTHONWARNINGS=ignore
 
 VOLUME /root
 
 ENTRYPOINT ["tini", "--"]
 
-COPY . /opt/icekit/
+COPY . /opt/django-icekit/

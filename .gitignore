@@ -1,9 +1,10 @@
-**/*.egg-info/
+**/*.md5
 **/*.orig
 **/*.py[co]
 **/*.swp
 **/.DS_Store
-/*.md5
+**/npm-debug.log
+/*.egg-info/
 /.coverage
 /.eggs/
 /.git/
@@ -11,10 +12,9 @@
 /.tox/
 /dist/
 /htmlcov/
-/icekit/settings/local.py
+/icekit/bower_components/
+/icekit/node_modules/
 /initial_data.sql
-/node_modules/
-/npm-debug.log
 /project/
 /requirements-local.txt
 /venv/

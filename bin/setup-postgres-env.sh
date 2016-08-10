@@ -1,14 +1,10 @@
 #!/bin/bash
 
-cat <<EOF
-#
-###############################################################################
-#
-# `whoami`@`hostname`:$PWD$ setup-postgres-env.sh
-#
 # Set 'PG*' variables. Default 'PGDATABASE' is derived from 'PROJECT_NAME' and
 # git branch or 'BASE_SETTINGS_MODULE'.
-#
+
+cat <<EOF
+echo # `whoami`@`hostname`:$PWD$ setup-postgres-env.sh
 EOF
 
 set -e

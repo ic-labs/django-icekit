@@ -30,13 +30,9 @@ SITE_PORT = 8000
 
 # FILE SYSTEM PATHS ###########################################################
 
-# Working copy root. Contains `manage.py`.
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-
-# Project specific files. Static, templates, etc.
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+ICEKIT_DIR = os.path.join(BASE_DIR, 'icekit')
 PROJECT_DIR = os.path.join(BASE_DIR, 'project')
-
-# Runtime variable files. Logs, media, etc.
 VAR_DIR = os.path.join(PROJECT_DIR, 'var')
 
 # DJANGO CHECKLIST ############################################################
@@ -237,8 +233,8 @@ SILENCED_SYSTEM_CHECKS = (
 
 STATICFILES_DIRS = (
     os.path.join(PROJECT_DIR, 'static'),
-    os.path.join(PROJECT_DIR, 'node_modules'),
-    os.path.join(BASE_DIR, 'node_modules'),
+    os.path.join(PROJECT_DIR, 'bower_components'),
+    os.path.join(ICEKIT_DIR 'bower_components'),
 )
 
 STATICFILES_FINDERS = (
@@ -335,7 +331,12 @@ CELERY_QUEUES = (
     ),
 )
 
-INSTALLED_APPS += ('kombu.transport.django', )
+CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+
+INSTALLED_APPS += (
+    'djcelery',
+    'kombu.transport.django',
+)
 
 # CELERY EMAIL ################################################################
 
@@ -356,13 +357,13 @@ COMPRESS_PRECOMPILERS = (
     (
         'text/less',
         '%s {infile} {outfile} --autoprefix' % (
-            os.path.join(BASE_DIR, 'node_modules', '.bin', 'lessc'),
+            os.path.join(ICEKIT_DIR, 'node_modules', '.bin', 'lessc'),
         ),
     ),
     (
         'text/x-scss',
         '%s {infile} {outfile} --autoprefix --include-path %s' % (
-            os.path.join(BASE_DIR, 'node_modules', '.bin', 'node-sass'),
+            os.path.join(ICEKIT_DIR, 'node_modules', '.bin', 'node-sass'),
             STATIC_ROOT,
         ),
     ),
@@ -596,8 +597,8 @@ TEMPLATES_DJANGO['OPTIONS']['context_processors'].append(
 
 # NEW RELIC ###################################################################
 
-os.environ.setdefault('NEW_RELIC_CONFIG_FILE', 'newrelic.ini')
-os.environ.setdefault('NEW_RELIC_ENVIRONMENT', BASE_SETTINGS_MODULE)
+# os.environ.setdefault('NEW_RELIC_CONFIG_FILE', 'newrelic.ini')
+# os.environ.setdefault('NEW_RELIC_ENVIRONMENT', BASE_SETTINGS_MODULE)
 
 # NOSE ########################################################################
 
@@ -677,10 +678,10 @@ INSTALLED_APPS += ('djsupervisor', )
 
 SUPERVISOR = {
     'celery': 'celery -A icekit worker -l info',
-    'celerybeat': 'celery -A icekit beat -l info -s {VAR_DIR}/celerybeat-schedule --pidfile={VAR_DIR}/run/celerybeat.pid',
+    'celerybeat': 'celery -A icekit beat -l info --pidfile',
     'celeryflower': 'celery -A icekit flower',
     'django': (
-        'newrelic-admin run-program gunicorn '
+        'gunicorn '
         '-b {WSGI_ADDRESS}:{SITE_PORT} '
         '-w {WSGI_WORKERS} '
         '-t {WSGI_TIMEOUT} '

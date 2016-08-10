@@ -1,28 +1,26 @@
 #!/bin/bash
 
-cat <<EOF
-#
-###############################################################################
-#
-# `whoami`@`hostname`:$PWD$ migrate.sh $@
-#
 # Apply Django migrations, if they are out of date.
-#
+
+cat <<EOF
+# `whoami`@`hostname`:$PWD$ migrate.sh $@
 EOF
 
 set -e
 
-DIR=${1:-.}
-DIR=${DIR%/}  # Strip trailing slash
+DIR="${1:-$PWD}"
 
-mkdir -p $DIR
+mkdir -p "$DIR"
+cd "$DIR"
 
-touch "$DIR/migrate.txt.md5"
-python manage.py migrate --list > "$DIR/migrate.txt"
+touch migrate.txt.md5
+manage.py migrate --list > migrate.txt
 
-if ! md5sum -c --status "$DIR/migrate.txt.md5" > /dev/null 2>&1; then
+if ! md5sum -c --status migrate.txt.md5 > /dev/null 2>&1; then
     echo 'Migrations are out of date.'
-    python manage.py migrate --noinput
-    python manage.py migrate --list > "$DIR/migrate.txt"
-    md5sum "$DIR/migrate.txt" > "$DIR/migrate.txt.md5"
+    manage.py migrate --noinput
+    manage.py migrate --list > migrate.txt
+    md5sum migrate.txt > migrate.txt.md5
+else
+    echo 'Migrations are already up to date.'
 fi
