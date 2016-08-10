@@ -2,8 +2,8 @@
 
 ## 0.1 (in development)
   * Add template tags to obtain slot contents via a descriptor.
-  * Added `PlaceholderDescriptor` to allow slot contents to be accessed directly. Useful for 
-  templates.
+  * Added `PlaceholderDescriptor` to allow slot contents to be accessed
+   directly. Useful for templates.
   * Initial development
 
 Features:
