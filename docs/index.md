@@ -11,15 +11,15 @@ TODO
 
 Install the app into your virtualenv:
 
-    (venv)$ pip install -e git+ssh://git@github.com/ixc/<app_name>.git#egg=<app_name>
+    (venv)$ pip install -e git+ssh://git@github.com/ic-labs/<app_name>.git#egg=<app_name>
 
 Update your settings module:
 
-    INSTALLED_APPS += ('eventkit', )
+    INSTALLED_APPS += ('icekit_events', )
 
 Install Bower dependencies manually:
 
-    (venv)$ cd venv/src/django-eventkit/eventkit/static/eventkit
+    (venv)$ cd venv/src/icekit-events/icekit_events/static/icekit_events
     (venv)$ bower install
 
 ## Usage

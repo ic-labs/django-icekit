@@ -1,7 +1,7 @@
 [run]
 branch = True
 omit = */migrations/__init__.py
-source = eventkit
+source = icekit_events
 
 [report]
 exclude_lines =

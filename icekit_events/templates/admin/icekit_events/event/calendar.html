@@ -1,0 +1,123 @@
+{% load static %}
+
+<!doctype html>
+
+
+
+<link rel='stylesheet' href='{% static "icekit_events/bower_components/fullcalendar/dist/fullcalendar.css" %}' />
+<style>
+	body {
+		font-family: "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
+		font-size: 12px;
+		margin: 1em;
+	}
+
+	.fcc-color-0 { background-color: #1f78b4; }
+	.fcc-color-1 { background-color: #33a02c; }
+	.fcc-color-2 { background-color: #e31a1c; }
+	.fcc-color-3 { background-color: #ff7f00; }
+	.fcc-color-4 { background-color: #6a3d9a; }
+	.fcc-color-5 { background-color: #b15928; }
+	.fcc-color-6 { background-color: #a6cee3; }
+	.fcc-color-7 { background-color: #b2df8a; }
+	.fcc-color-8 { background-color: #fb9a99; }
+	.fcc-color-9 { background-color: #fdbf6f; }
+	.fcc-color-10 { background-color: #cab2d6; }
+	.fcc-color-11 { background-color: #ffff99; }
+
+	.fcc-do-not-show-in-calendar {
+		background-image: url({% static 'icekit_events/img/stripe.png' %});
+		background-repeat: repeat;
+	}
+
+	.fcc-is-all-day .fc-title {
+		text-decoration: underline;
+	}
+
+	.fcc-is-cancelled {
+		background-image: url({% static 'icekit_events/img/fade.png' %});
+		background-repeat: repeat;
+	}
+	.fcc-is-cancelled .fc-title {
+		color: red;
+	}
+
+	.fcc-is-user-modified {
+		background-image: url({% static 'icekit_events/img/fade.png' %});
+		background-repeat: repeat;
+	}
+
+	.fcc-draft {
+		opacity: 0.4;
+	}
+</style>
+<script src='{% static "icekit_events/bower_components/jquery/dist/jquery.js" %}'></script>
+<script src='{% static "icekit_events/bower_components/moment/moment.js" %}'></script>
+<script src='{% static "icekit_events/bower_components/fullcalendar/dist/fullcalendar.js" %}'></script>
+<script src='{% static "icekit_events/bower_components/iframe-resizer/src/iframeResizer.contentWindow.js" %}'></script>
+<script>
+	var icekit_events = icekit_events || {};
+	icekit_events.jQuery = jQuery.noConflict(true);
+	(function($) {
+		$(document).ready(function() {
+			var eid;
+			$('#calendar').fullCalendar({
+				{% if is_popup %}
+					eventClick: function(calEvent, jsEvent, view) {
+						parent.opener.dismissRelatedLookupPopup(parent, calEvent.id);
+						return false;
+					},
+				{% endif %}
+				events: '{% url "admin:icekit_events_event_calendar_data" %}',
+				header: {
+					left: 'prevYear,prev,next,nextYear today',
+					center: 'title',
+					right: 'month,basicWeek,agendaWeek,agendaDay'
+				},
+				height: 'auto',
+				viewRender: function(view, element) {
+					$('.fc-agendaWeek-button').text('week (by time)');
+					$('.fc-agendaDay-button').text('day (by time)');
+				},
+				eventMouseover: function(event, jsEvent, view) {
+					eid = event.id;
+					over();
+				},
+				eventMouseout: function(event, jsEvent, view) {
+				    clearTimeout(timeout);
+					$('.fc-event').css('opacity', '');
+				}
+			}).on('click', 'a.fc-event', function(e) {
+				// Open links in the top frame.
+				if (self != top) {
+					e.preventDefault();
+					top.location.href = $(e.currentTarget).attr('href');
+				}
+			});
+
+			var over = debounce(function() {
+				// make the rolledover event more visible
+				$('.fcc-'+eid).css('opacity', '1.0');
+				$('.fc-event:not(.fcc-'+eid+')').css('opacity', '0.30');
+			}, 250);
+
+			function debounce(func, wait, immediate) {
+
+				timeout = null;
+				return function() {
+					var context = this, args = arguments;
+					var later = function() {
+						timeout = null;
+						if (!immediate) func.apply(context, args);
+					};
+					var callNow = immediate && !timeout;
+					clearTimeout(timeout);
+					timeout = setTimeout(later, wait);
+					if (callNow) func.apply(context, args);
+				};
+			};
+
+		});
+	})(icekit_events.jQuery);
+</script>
+<div id='calendar'></div>

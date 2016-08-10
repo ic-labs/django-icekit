@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block body %}
+	<p>
+		<a href="{% url 'icekit_events_index' %}">&lt; All Events</a>
+	</p>
+
+	<h1>{{ event.title }}</h1>
+	<h2>Occurences</h2>
+	<ul>
+	{% for occurrence in event.occurrences.all %}
+		<li>{{ occurrence.start }} to {{ occurrence.end }}</li>
+	{% endfor %}
+	</ul>
+{% endblock %}
+
