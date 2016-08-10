@@ -38,7 +38,7 @@ WORKDIR /opt/django-icekit/
 RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python
 ARG PIP_INDEX_URL=https://devpi.ixcsandbox.com/ic/dev/+simple
 
-COPY requirements.txt /opt/icekit/
+COPY requirements.txt /opt/django-icekit/
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY bin/ /opt/django-icekit/bin/
@@ -76,7 +76,7 @@ RUN cd /usr/local/bin \
 # ENV LD_PRELOAD=/libpreload.so
 
 ENV CRONLOCK_HOST=redis
-ENV PATH=/opt/icekit/bin:/opt/icekit/venv/bin:$PATH
+ENV PATH=/opt/django-icekit/bin:/opt/django-icekit/venv/bin:$PATH
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_INDEX_URL=$PIP_INDEX_URL
 ENV PIP_SRC=/opt/django-icekit/venv/src
