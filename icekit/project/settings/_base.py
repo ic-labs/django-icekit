@@ -214,7 +214,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.admindocs.middleware.XViewMiddleware',
 )
 
-ROOT_URLCONF = 'icekit.urls'
+ROOT_URLCONF = 'icekit.project.urls'
 
 # Fix HTTPS redirect behind proxy.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -268,7 +268,7 @@ TEMPLATES_DJANGO = {
             'django.core.context_processors.tz',
 
             # Project.
-            'icekit.context_processors.environment',
+            'icekit.project.context_processors.environment',
         ],
         'loaders': [
             # Must come first. See: https://github.com/Fantomas42/django-app-namespace-template-loader/issues/16
@@ -289,7 +289,7 @@ TEMPLATES_JINJA2 = {
     ],
     'APP_DIRS': True,
     'OPTIONS': {
-        'environment': 'icekit.jinja2.environment',
+        'environment': 'icekit.project.jinja2.environment',
     }
 }
 
@@ -300,7 +300,7 @@ USE_ETAGS = True  # Default: False
 USE_L10N = True  # Default: False
 USE_TZ = True  # Default: False
 
-WSGI_APPLICATION = 'icekit.wsgi.application'
+WSGI_APPLICATION = 'icekit.project.wsgi.application'
 
 # DJANGO REDIRECTS ############################################################
 
