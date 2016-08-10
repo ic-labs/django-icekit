@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block body %}
+	{% if events %}
+		{% for event in events %}
+			<ul>
+				<li><a href="{% url 'icekit_events_detail' event.pk %}">{{ event.title }}</a></li>
+			</ul>
+		{% endfor %}
+	{% else %}
+		<div>There are no events.</div>
+	{% endif %}
+{% endblock %}
+

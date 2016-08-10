@@ -1,1 +1,1 @@
-recursive-include eventkit *
+recursive-include icekit_events *
