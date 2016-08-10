@@ -41,7 +41,8 @@ ARG PIP_INDEX_URL=https://devpi.ixcsandbox.com/ic/dev/+simple
 COPY requirements.txt /opt/icekit/
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY bin/ setup.py /opt/django-icekit/
+COPY bin/ /opt/django-icekit/bin/
+COPY setup.py /opt/django-icekit/
 RUN pip install --no-cache-dir -e .[api,brightcove,dev,django18,forms,project,search,slideshow,test]
 
 RUN touch requirements-local.txt
