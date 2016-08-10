@@ -234,7 +234,7 @@ SILENCED_SYSTEM_CHECKS = (
 STATICFILES_DIRS = (
     os.path.join(PROJECT_DIR, 'static'),
     os.path.join(PROJECT_DIR, 'bower_components'),
-    os.path.join(ICEKIT_DIR 'bower_components'),
+    os.path.join(ICEKIT_DIR, 'bower_components'),
 )
 
 STATICFILES_FINDERS = (
