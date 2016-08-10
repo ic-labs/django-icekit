@@ -6,7 +6,7 @@ Please follow these guidelines when making contributions to this app.
 
 Clone the repository and change directory:
 
-    $ git clone git@github.com:ixc/icekit-events.git
+    $ git clone git@github.com:ic-labs/icekit-events.git
     $ cd icekit-events
 
 You don't need to install the project to run tests. You just need `tox`:

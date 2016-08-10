@@ -41,35 +41,31 @@ setuptools.setup(
     use_scm_version={'version_scheme': 'post-release'},
     author='Interaction Consortium',
     author_email='studio@interaction.net.au',
-    url='https://github.com/ixc/icekit-events',
+    url='https://github.com/ic-labs/icekit-events',
     description='',
     long_description=locals().get('long_description', ''),
     license='MIT',
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=[
-        'coverage',
         'Django<1.9',
         'django-dynamic-fixture',
         'django-icekit[publishing]',
         'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
-        'django-nose',
         'django-polymorphic<0.8',  # ICEKit Events is not yet compatible with API changes in 0.8+
         'django-polymorphic-tree',
         'django-timezone',
-        'django-webtest',
         'mkdocs',
-        'nose-progressive',
         'python-dateutil',
         'pytz',
         'six',
         'sqlparse',  # Required for SQL migrations, apparently
-        'WebTest',
     ],
     extras_require={
         'dev': ['ipdb', 'ipython'],
         'fluentevent': ['django-fluent-contents'],
         'postgres': ['psycopg2'],
+        'test': ['coverage', 'django-nose', 'nose-progressive', 'django-webtest', 'WebTest']
     },
     setup_requires=['setuptools_scm'],
 )

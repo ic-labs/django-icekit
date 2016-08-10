@@ -11,7 +11,7 @@ TODO
 
 Install the app into your virtualenv:
 
-    (venv)$ pip install -e git+ssh://git@github.com/ixc/<app_name>.git#egg=<app_name>
+    (venv)$ pip install -e git+ssh://git@github.com/ic-labs/<app_name>.git#egg=<app_name>
 
 Update your settings module:
 
