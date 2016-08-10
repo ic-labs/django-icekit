@@ -446,6 +446,8 @@ class PublishingModel(models.Model):
 
     @assert_draft
     def patch_placeholders(self):
+        if not isinstance(self, FluentContentsPage):
+            return
         published_obj = self.publishing_linked
 
         for draft_placeholder, published_placeholder in zip(
@@ -492,6 +494,8 @@ class PublishingModel(models.Model):
         are to be related.
         :return: None
         """
+        if not isinstance(self, FluentContentsPage):
+            return
         for src_placeholder in Placeholder.objects.parent(self):
             dst_placeholder = Placeholder.objects.create_for_object(
                 dst_obj,

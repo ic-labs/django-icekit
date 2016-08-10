@@ -1,17 +1,13 @@
-<figure>
-	<img src="{{ instance.image.image.url }}"
-         alt="{{ instance.image.image.alt_text }}"
-         {% if instance.image.title %} title="{{ instance.image.title }}" {% endif %}
-    />
-
-	{% if instance.image.title or instance.image.caption %}
-		<figcaption>
-			{% if instance.image.title %}
-				<h3>{{ instance.image.title }}</h3>
-			{% endif %}
-			{% if instance.caption %}
-				{{ instance.caption }}
-			{% endif %}
+<figure class="image">
+	<div class="image-container">
+		<img
+			src="{{ instance.image.image.url }}"
+			alt="{{ instance.image.image.alt_text }}"
+		/>
+	</div>
+	{% if instance.image.caption %}
+		<figcaption class="image-caption">
+			{{ instance.caption }}
 		</figcaption>
 	{% endif %}
 </figure>
