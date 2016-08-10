@@ -13,9 +13,20 @@ DIR="${1:-$PWD}"
 mkdir -p "$DIR"
 cd "$DIR"
 
-touch bower.json bower.json.md5
+if [[ ! -s bower.json ]]; then
+    cat <<EOF > bower.json
+{
+  "name": "",
+  "dependencies": {
+  },
+  "private": true
+}
+EOF
+fi
 
-if [[ -s bower.json ]] && ! md5sum -c --status bower.json.md5 > /dev/null 2>&1; then
+touch bower.json.md5
+
+if ! md5sum -c --status bower.json.md5 > /dev/null 2>&1; then
     echo "Bower components in $DIR are out of date."
     bower install --allow-root
     md5sum bower.json > bower.json.md5
