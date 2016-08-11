@@ -144,7 +144,7 @@ def main():
     )
     startproject.set_defaults(
         command='startproject',
-        template='https://github.com/ixc/ixc-project-template/archive/django-icekit.zip',
+        template='https://github.com/ixc/ixc-project-template/archive/master.zip',
     )
 
     # Common arguments for all subcommands.

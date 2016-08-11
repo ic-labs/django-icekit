@@ -21,7 +21,7 @@ setuptools.setup(
     use_scm_version={'version_scheme': 'post-release'},
     author='Interaction Consortium',
     author_email='studio@interaction.net.au',
-    url='https://github.com/ixc/django-icekit',
+    url='https://github.com/ic-labs/django-icekit',
     description='A modular content CMS by Interaction Consortium.',
     long_description=locals().get('long_description', ''),
     license='MIT',
@@ -46,14 +46,10 @@ setuptools.setup(
     ],
     extras_require={
         'api': [
-            'djangorestframework',
+            'djangorestframework<3.4',  # For compatibility with Django < 1.8
         ],
         'brightcove': [
             'django-brightcove',
-        ],
-        'publishing': [
-            'django-model-settings',
-            'django-compressor<1.6',  # See: https://github.com/django-compressor/django-compressor/issues/706
         ],
         'dev': [
             'ipdb',
@@ -64,10 +60,13 @@ setuptools.setup(
             'django-fluent-contents<1.1',  # See: https://github.com/edoburu/django-fluent-contents/issues/67
             'django-polymorphic<0.8',  # For compatibility with Django < 1.8, see: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
             'Django>=1.7,<1.8',
-            'djangorestframework<3.4',  # For compatibility with Django < 1.8
         ],
         'forms': [
             'django-forms-builder',
+        ],
+        'publishing': [
+            'django-model-settings',
+            'django-compressor<1.6',  # See: https://github.com/django-compressor/django-compressor/issues/706
         ],
         'search': [
             'django-fluent-pages[flatpage,fluentpage]',
