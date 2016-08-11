@@ -29,7 +29,7 @@ setuptools.setup(
     include_package_data=True,
     install_requires=[
         'django-bootstrap3',
-        'django-el-pagination',
+        'django-el-pagination<3',  # 3+ drops support for Django < 1.8
         'django-fluent-contents',
         'django-fluent-pages',
         'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
