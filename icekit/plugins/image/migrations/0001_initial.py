@@ -24,12 +24,15 @@ class Migration(migrations.Migration):
                 ('admin_notes', models.TextField(help_text='Internal notes for administrators only.', blank=True)),
                 ('categories', models.ManyToManyField(related_name='image_image_related', to='icekit.MediaCategory', blank=True)),
             ],
+            options={
+                'db_table': 'image_image',
+            },
         ),
         migrations.CreateModel(
             name='ImageItem',
             fields=[
                 ('contentitem_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='fluent_contents.ContentItem')),
-                ('image', models.ForeignKey(help_text='An image from the image library.', to='image.Image')),
+                ('image', models.ForeignKey(help_text='An image from the image library.', to='icekit_plugins_image.Image')),
             ],
             options={
                 'db_table': 'contentitem_image_imageitem',
