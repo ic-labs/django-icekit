@@ -1,11 +1,9 @@
-{% load static %}
-
 {% if instance.file.is_active %}
-	<div>
-		<a href="{{ instance.file.file.url }}">{{ instance.file }}</a>
-		(
-			<span class="extension">{{ instance.file.extension }}</span>
-			<span class="file-size">{{ instance.file.file_size }}</span>
-		)
+	<div class="file">
+		<a class="file-link" href="{{ instance.file.file.url }}">
+			{{ instance.file }}
+		</a>
+		(<span class="file-extension">{{ instance.file.extension }}</span>
+		<span class="file-size">{{ instance.file.file_size }}</span>)
 	</div>
 {% endif %}

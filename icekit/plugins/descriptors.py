@@ -20,11 +20,7 @@ class PlaceholderDescriptor(object):
         if instance is None:
             return self
 
-        if self.place_holder_access:
-            return self.place_holder_access
-
-        self.place_holder_access = self.create_placeholder_access_object(instance)
-        return self.place_holder_access
+        return self.create_placeholder_access_object(instance)
 
     def contribute_to_class(self, cls, name):
         """
@@ -43,25 +39,65 @@ class PlaceholderDescriptor(object):
         """
         related_model = self.related_model
 
+        def get_related_model_objects(name):
+            """
+            Obtains the related model objects based upon the slot name.
+
+            :param name: The slot name in string form.
+            :returns; Related model contents if they exist or it will
+            raise a `DoesNotExist` exception.
+            """
+            # Parent type, parent id and slot are set to be unique on the default
+            # related model and therefore treated as such here.
+            return related_model.objects.get(
+                parent_type=ContentType.objects.get_for_model(type(instance)),
+                parent_id=instance.id,
+                slot=name,
+            ).get_content_items()
+
         class PlaceholderAccess(object):
             def __getattribute__(self, name):
+                """
+                Allow placeholder contents to be accessed via slot
+                name on the descriptor object.
+
+                For example if the slot was named `main` and you had
+                a descriptor named `slots` on an object named `page`
+                you would call it by `page.slots.main`.
+
+                If a slot name is used that does not exist an
+                `AttributeError` will be raised.
+                """
                 try:
-                    # Parent type, parent id and slot are set to be unique on the default
-                    # related model and therefore treated as such here.
-                    return related_model.objects.get(
-                        parent_type=ContentType.objects.get_for_model(type(instance)),
-                        parent_id=instance.id,
-                        slot=name,
-                    ).get_content_items()
+                    return get_related_model_objects(name)
                 except related_model.DoesNotExist:
                     return super(PlaceholderAccess, self).__getattribute__(name)
+
+            def __getitem__(self, item):
+                """
+                Allow placeholder contents to be accessed via slot
+                name one the descriptor object via a dictionary
+                lookup.
+
+                For example if the slot was named `main` and you had
+                a descriptor named `slots` on an object named `page`
+                you would call it by `page.slots['main']`.
+
+                If a slot name is used that does not exist a
+                `KeyError` will be raised.
+                """
+                try:
+                    return get_related_model_objects(item)
+                except related_model.DoesNotExist:
+                    raise KeyError
 
         return PlaceholderAccess()
 
 
-def monkey_patch(model_class, name='slots', descriptor=None):
+def contribute_to_class(model_class, name='slots', descriptor=None):
     """
-    Monkey patching function that adds a description to a model Class.
+    Function that adds a description to a model Class.
+
     :param model_class: The model class the descriptor is to be added
     to.
     :param name: The attribute name the descriptor will be assigned to.

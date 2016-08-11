@@ -14,9 +14,11 @@ User = get_user_model()
 
 class PlaceholderDescriptor(WebTest):
     def setUp(self):
-        self.site = G(Site)
+        self.site, __ = Site.objects.get_or_create(
+            pk=1,
+            defaults={'name': 'example.com', 'domain': 'example.com'})
         self.user_1 = G(User)
-        descriptors.monkey_patch(FluentPage)
+        descriptors.contribute_to_class(FluentPage)
         self.page_layout_1 = G(
             PageLayout,
             template_path='icekit/layouts/default.html',
@@ -40,8 +42,9 @@ class PlaceholderDescriptor(WebTest):
         horizontal_rule_1.delete()
         self.assertEqual(self.page_1.slots.main.count(), 0)
 
-        # Test that the same object is returned
-        self.assertEqual(self.page_1.slots, self.page_1.slots)
+        # Test that the same object is not returned. For context, we have had previous issues with
+        # slots which were bound to class objects and cached across instances.
+        self.assertNotEqual(self.page_1.slots, self.page_1.slots)
 
     def tearDown(self):
         self.page_1.delete()

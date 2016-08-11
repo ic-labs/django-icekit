@@ -1,17 +1,20 @@
-{% load compress %}
+{% load compress static %}
 
 {% block doctype %}<!DOCTYPE html>{% endblock %}
 <html lang="{% block html_lang %}en{% endblock %}" {% block html_attributes %}{% endblock %}>
 	<head {% block head_attributes %}prefix="og: http://ogp.me/ns#"{% endblock %}>
 		{% block head %}
+			{% block credits %}
 			<!-- Hello. We're the Interaction Consortium (http://interaction.net.au) -->
 			<!-- We made this. -->
+			{% endblock %}
 
 			{% block meta %}
 				<meta charset="utf-8">
 				<meta http-equiv="X-UA-Compatible" content="IE=edge">
 				<meta name="viewport" content="{% block meta_viewport %}width=device-width, initial-scale=1{% endblock %}">
 				<meta name="description" content="{% block meta_description %}{% endblock %}">
+				<link rel="author" href="/humans.txt" />
 
 				{% block open_graph %}
 					<meta property="og:title" content="{% block og_title %}{% if title %}{{ title }} - {% endif %}{{ SITE_NAME }}{% endblock %}">
@@ -21,12 +24,12 @@
 					<meta property="og:description" content="{% block og_description %}{% endblock %}">
 				{% endblock %}
 
-				{% if DEBUG %}
+				{% if debug %}
 					<meta name="robots" content="noindex">
 				{% endif %}
 			{% endblock %}
 
-			<title>{% block title %}{% if title %}{{ title }} - {% endif %}{{ SITE_NAME }}{% endblock %}</title>
+			<title>{% block title %}{% if title %}{{ title|safe }} - {% endif %}{{ SITE_NAME|safe }}{% endblock %}</title>
 
 			{% block head_css %}
 				{# CSS files hosted externally #}
@@ -63,6 +66,13 @@
 			{# Base JS files #}
 			{% compress js file %}
 				{% block base_js %}{% endblock %}
+				{% if ICEKIT_SHARE_USERNAME and ICEKIT_SHARE_KEY %}
+					<script language="javascript">
+						window.ICEKIT_SHARE_USERNAME = '{{ ICEKIT_SHARE_USERNAME }}';
+						window.ICEKIT_SHARE_KEY = '{{ ICEKIT_SHARE_KEY }}';
+					</script>
+					<script src="{% static "icekit/js/link_share.js" %}"></script>
+				{% endif %}
 			{% endcompress %}
 			{# Extra JS files - section/page specific, etc #}
 			{% compress js file %}

@@ -1,0 +1,16 @@
+{% load i18n static %}
+<label class="publishing-links">
+	{% if object.has_been_published and published_url %}
+		{% if object.is_dirty %}
+			<a target="_blank" href="{{ draft_url }}" title="Preview draft version"><i class="fa fa-circle-o"></i></a>
+		{% else %}
+			<i class="fa fa-circle-o" style="visibility: hidden;"></i>
+		{% endif %}
+		<a target="_blank" href="{{ published_url }}" title="View published{% if not object.is_dirty %}/latest{% endif %} version"><i class="fa fa-circle"></i></a>
+	{% else %}
+		{% if draft_url %}
+			<a target="_blank" href="{{ draft_url }}" title="Preview draft version"><i class="fa fa-circle-o"></i></a>
+		{% endif %}
+	{% endif %}
+
+</label>

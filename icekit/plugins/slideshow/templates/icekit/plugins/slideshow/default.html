@@ -1,42 +1,45 @@
 {% load fluent_contents_tags thumbnail %}
 
-{% if instance.slide_show.show_title %}
-	<h3>{{ instance.slide_show.title }}</h3>
-{% endif %}
-
-<div id="carousel-{{ instance.id }}" class="carousel slide" data-ride="carousel">
-	<!-- Indicators -->
-	<ol class="carousel-indicators">
-		{% for item in instance.slide_show.content.get_content_items %}
-			<li
-				data-target="#carousel-{{ instance.id }}"
-				data-slide-to="{{ forloop.counter0 }}"
-				{% if forloop.first %} class="active"{% endif %}
-			></li>
-		{% endfor %}
-	</ol>
-
-	<!-- Wrapper for slides -->
-	<div class="carousel-inner" role="listbox">
-		{% for item in instance.slide_show.content.get_content_items %}
-			<div class="item{% if forloop.first %} active{% endif %}">
-				<img src="{% thumbnail item.image.image 1200x0 upscale %}" alt="{{ item.image.alt_text }}">
-				{% if item.image.caption %}
-					<div class="carousel-caption">
-						{{ item.image.caption }}
-					</div>
-				{% endif %}
+{% with slideshow=instance.slide_show.get_visible %}
+	{% if slideshow %}
+		<div class="carousel-container">
+			{% if slideshow.show_title %}
+				<h3 class="carousel-title">{{ slideshow.title }}</h3>
+			{% endif %}
+			<div id="carousel-{{ instance.id }}" class="carousel slide" data-ride="carousel">
+				<!-- Indicators -->
+				<ol class="carousel-indicators">
+					{% for item in slideshow.content.get_content_items %}
+						<li
+							data-target="#carousel-{{ instance.id }}"
+							data-slide-to="{{ forloop.counter0 }}"
+							{% if forloop.first %} class="active"{% endif %}
+						></li>
+					{% endfor %}
+				</ol>
+				<!-- Wrapper for slides -->
+				<div class="carousel-inner" role="listbox">
+					{% for item in slideshow.content.get_content_items %}
+						<div class="item {% if forloop.first %}active{% endif %}">
+							<img src="{% thumbnail item.image.image 1200x0 upscale %}" alt="{{ item.image.alt_text }}">
+							{% if item.image.caption %}
+								<div class="carousel-caption">
+									{{ item.image.caption }}
+								</div>
+							{% endif %}
+						</div>
+					{% endfor %}
+				</div>
+				<!-- Controls -->
+				<a class="left carousel-control" href="#carousel-{{ instance.id }}" role="button" data-slide="prev">
+					<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+					<span class="sr-only">Previous</span>
+				</a>
+				<a class="right carousel-control" href="#carousel-{{ instance.id }}" role="button" data-slide="next">
+					<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+					<span class="sr-only">Next</span>
+				</a>
 			</div>
-		{% endfor %}
-	</div>
-
-	<!-- Controls -->
-	<a class="left carousel-control" href="#carousel-{{ instance.id }}" role="button" data-slide="prev">
-	<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-	<span class="sr-only">Previous</span>
-	</a>
-	<a class="right carousel-control" href="#carousel-{{ instance.id }}" role="button" data-slide="next">
-	<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-	<span class="sr-only">Next</span>
-	</a>
-</div>
+		</div>
+	{% endif %}
+{% endwith %}

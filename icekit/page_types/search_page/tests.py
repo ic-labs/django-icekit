@@ -21,7 +21,8 @@ class SearchPage(WebTest):
             author=self.super_user_1,
             status='p'
         )
+        self.page_1.publish()
 
     def test_extra_context(self):
-        response = self.app.get(self.page_1.get_absolute_url())
+        response = self.app.get(self.page_1.publishing_linked.get_absolute_url())
         response.mustcontain("<!-- placeholder 'main' does not yet exist -->")

@@ -1,0 +1,552 @@
+@footer-height: 50px;
+
+/* clearfix */
+.cf() {
+	&::before, &::after { content: " "; display: table; }
+	&::after { clear: both; }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  padding-bottom: @footer-height;
+}
+
+#container {
+    min-width: auto;
+}
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: @footer-height;
+  background-color: #f5f5f5;
+}
+
+
+.dashboard #content {
+	width: 100%;
+	padding: 15px 25px;
+	box-sizing: border-box;
+}
+
+#content-main {
+	// width: 600px;
+}
+
+#content-related {
+	margin-right: 0;
+}
+
+.widget {
+    .cf;
+    background-color: #f8f8f8;
+    padding: 10px 10px 5px 10px;
+    margin: 15px 0;
+    min-height: 260px;
+    overflow: hidden;
+    border-radius: 3px 3px 0 0;
+
+    img  {
+        max-width: 100%;
+        height: auto;
+    }
+
+    > header {
+        margin: -10px;
+        margin-bottom: 10px;
+        padding: 8px;
+        transition: all 0.2s;
+        background: #79aec8;
+        position: relative;
+        border-radius: 3px 3px 0 0;
+        > h2 {
+            margin: 0;
+            font-weight: 400;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            text-align: left;
+            color: #fff;
+            text-transform: uppercase;
+        }
+        // visual affordance for drag-and-drop widgets;
+        // TODO: uncomment :hover state when widgets can be dragged-and-dropped
+        // &:hover {
+            // padding-left: 16px;
+            // .widget-control { opacity: 0.5; }
+        // }
+    }
+
+    // controls for drag-and-drop widgets;
+    // TODO: uncomment the corresponding `ul.widget-controls` in `app_widget.html`
+    // when widgets can be dragged-and-dropped
+    .widget-controls {
+        margin: 0;
+        padding: 0;
+        .widget-control {
+            transition: all 0.2s;
+            color: #fff;
+            opacity: 0;
+            position: absolute;
+            display: block;
+            box-sizing: border-box;
+            padding: 5px;
+            font-size: 20px;
+            line-height: 1;
+            &:hover { opacity: 1; }
+        }
+        .widget-control-close {
+            top: 0;
+            right: 0;
+            cursor: pointer;
+        }
+        .widget-control-drag {
+            top: 0;
+            left: 0;
+            padding-left: 2px;
+            cursor: grab;
+        }
+    }
+
+    .content-type-icon {
+        text-align: center;
+        font-size: 80px;
+        color: #ccc;
+        margin: 0 auto;
+        float: none;
+        display: block;
+        margin-bottom: 10px;
+        text-shadow: 1px 1px 0 #fff, -1px -1px 0 #eee;
+    }
+
+    h3 {
+        font-size: 18px;
+        line-height: 28px;
+        font-weight: normal;
+        margin: 0 0 10px 0;
+        text-align: center;
+        > mark {
+            color: black;
+            font-weight: bold;
+            background: transparent;
+        }
+    }
+
+    p.mini {
+        text-align: center;
+        font-size: 12px;
+    }
+
+    ul.model-tools {
+        .cf;
+        float: right;
+        padding: 0;
+        margin: 0;
+
+        li {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            margin-bottom: 5px;
+            background: #999;
+            font-weight: 400;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            a {
+                color: #fff;
+                > i { padding-left: 3px; }
+            }
+            &.has-select {
+                > a {
+                    padding: 0 3px 0 0;
+                    cursor: pointer;
+                    &:hover {
+                        text-decoration: none;
+                    }
+                }
+                > select {
+                    line-height: 1;
+                    padding: 0;
+                    height: 20px;
+                    max-width: 120px;
+                    color: #333;
+                    border: none;
+                    background: #ccc;
+                    margin-bottom: 0;
+                }
+                &:hover > select { background: #fff; }
+            }
+
+        }
+        &.model-tools-compact { // shown in the list of all apps
+            position: absolute;
+            top: 4px;
+            right: 5px;
+            opacity: 0;
+            transition: all 0.2s;
+            > li {
+                padding: 2px;
+                > a {
+                    padding: 3px 0;
+                    width: 26px;
+                    text-align: center;
+                    > i { padding: 0; }
+                }
+            }
+        }
+        .add-event,
+        .add-page-type {
+            float: right;
+            padding: 0 0 0 5px;
+        }
+    }
+
+    &.widget-other {
+        padding: 0;
+
+        > header {
+            margin: 0;
+            margin-bottom: 10px;
+        }
+    }
+
+    .other-contents-list {
+        padding: 0;
+        width: 100%;
+
+        > li {
+            .cf;
+            list-style-type: none;
+            position: relative;
+            padding: 0 8px;
+            margin: 0;
+
+            &.mini.caps {
+                border-bottom: 0px;
+                padding-top: 15px;
+                a {
+                    color: #aaa;
+                }
+                &:hover {
+                    background: transparent;
+                }
+                &:first-child {
+                    padding-top: 0;
+                }
+            }
+
+            a {
+                display: block;
+                //padding: 9px 70px 0 3px;
+            }
+            &:hover {
+                .model-tools { opacity: 1; }
+                .content-type-icon { color: #999; }
+                background: #eaeaea;
+            }
+        }
+
+        .content-type-icon {
+            font-size: 30px;
+            float: left;
+            margin: 3px 10px 5px 0;
+        }
+
+        h3 {
+            //font-size: 18px;
+            text-align: left;
+            font-size: 14px;
+            line-height: 1.0;
+            margin: 0;
+            padding: 11px 70px 11px 0;
+            font-weight: normal;
+            > mark {
+                color: black;
+                font-weight: bold;
+                background: transparent;
+            }
+            > a {
+            }
+        }
+
+        p { float: left; text-align: left; }
+
+    }
+
+    &.widget-content {
+        padding: 0;
+        header { margin: 0; }
+    }
+
+    .multi-content-group {
+        .cf;
+        position: relative;
+        border-bottom: 1px solid #eaeaea;
+        margin-bottom: 6px;
+        h3 {
+            text-align: left;
+            margin: 0 15px 5px 0;
+        }
+        > a {
+            display: inline-block;
+            float: left;
+        }
+    }
+
+    .content-scroll-wrapper {
+        overflow: auto;
+        margin: 0 auto;
+        max-height: 228px;
+        background:
+            // Shadow covers
+            linear-gradient(#f8f8f8 30%, rgba(248,248,248,0)),
+            linear-gradient(rgba(248,248,248,0), #f8f8f8 70%) 0 100%,
+
+            // Shadows
+            radial-gradient(50% 0, farthest-side, rgba(50,50,50,.3), rgba(50,50,50,0)),
+            radial-gradient(50% 100%,farthest-side, rgba(50,50,50,.3), rgba(50,50,50,0)) 0 100%;
+        background:
+            // Shadow covers
+            linear-gradient(#f8f8f8 30%, rgba(248,248,248,0)),
+            linear-gradient(rgba(248,248,248,0), #f8f8f8 70%) 0 100%,
+
+            // Shadows
+            radial-gradient(farthest-side at 50% 0, rgba(50,50,50,.3), rgba(50,50,50,0)),
+            radial-gradient(farthest-side at 50% 100%, rgba(50,50,50,.3), rgba(50,50,50,0)) 0 100%;
+        background-repeat: no-repeat;
+        background-color: #f8f8f8;
+        background-size: 100% 40px, 100% 40px, 100% 14px, 100% 14px;
+
+        /* Opera doesn't support this in the shorthand */
+        background-attachment: local, local, scroll, scroll;
+
+    }
+
+    .content-scroll-list {
+        padding: 0;
+        margin: 0;
+        > li {
+            border-bottom: 1px solid #eaeaea;
+            list-style-type: none;
+            position: relative;
+            padding: 0;
+            .content-type-icon {
+                font-size: 20px;
+                float: left;
+                margin: 5px 5px 0 0;
+                color: #aaa;
+            }
+            h3 {
+                text-align: left;
+                font-size: 14px;
+            }
+            h3, h4 {
+                margin: 0;
+                padding: 0 0 0 27px;
+            }
+            h4 { line-height: 1; }
+            > a {
+                padding: 5px 10px;
+                display: block;
+                &:hover {
+                    background: #eaeaea;
+                    h3 { color: #333; }
+                    .content-type-icon { color: #666; }
+                }
+            }
+            &:hover {
+                .model-tools {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+}
+
+#cp-tabnav li {
+	height: 31px;
+}
+
+.submit-row a.deletelink,
+.delete-confirmation form .cancel-link {
+	color: #fff;
+	height: 35px;
+}
+
+.pull-left {
+    float: left !important;
+}
+
+// OVERRIDING DJANGO ADMIN CHANGE FORM APPEARANCE
+
+// Overrides bootstrap.min.css which hides the toggled fieldset in change form.
+fieldset.collapse {
+	display: block !important;
+}
+
+// Publication status is shown in the side panel.
+.tab-pane fieldset .form-row.field-status {
+	display: none;
+}
+
+// OVERRIDING DJANGO ADMIN CHANGE LIST APPEARANCE
+
+// Overrides pagetree.css columns styling.
+.jqtree-django .col-status_column {
+	width: 80px;
+}
+.jqtree-django .col-modification_date,
+.jqtree-django .col-creation_date {
+	width: 220px;
+}
+.jqtree-django .col-actions_column,
+.jqtree-django .col-author {
+	width: 120px;
+}
+.jqtree-django .col-language_column,
+.jqtree-django .col-sub_page_count {
+	width: 100px;
+}
+.jqtree-django ul.tree div {
+	cursor: default;
+}
+.jqtree-django .toggler {
+	cursor: pointer;
+}
+.jqtree-django .drag-handle {
+	cursor: move;
+}
+
+// OVERRIDING DJANGO ADMIN COLORS
+
+#header {
+    height: auto;
+	background: #333;
+	color: #aaa;
+}
+
+#user-tools a:hover {
+	color: #fccc02;
+	border-bottom-color: #fccc02;
+}
+
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+	color: #fff;
+}
+
+#branding {
+	#site-logo {
+		float: left;
+		max-height: 40px;
+		margin-right: 12px;
+	}
+	#site-name {
+		float: left;
+		font-size: 16px;
+		line-height: 13px;
+		margin-top: 14px;
+	}
+}
+
+.widget > header {
+	background: #666;
+}
+
+.model-tools a:hover,
+.model-tools li:hover a,
+.widget .model-tools > li:hover,
+.object-tools a:hover,
+.object-tools li:hover a
+{
+	background-color: #fccc02;
+	color: #333 !important;
+}
+
+footer {
+	.cf;
+    box-sizing: border-box;
+    width: 100%;
+	color: #aaa;
+	background: #333;
+	font-size: 11px;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+	padding: 0 40px;
+
+	a {
+		color: #ffc !important;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+		&:hover {
+			color: #fccc02;
+			border-bottom-color: #fccc02;
+		}
+	}
+	.footer-section {
+		line-height: @footer-height;
+		position: relative;
+		box-sizing: border-box;
+	}
+	.footer-left {
+		float: left;
+		text-align: left;
+	}
+	.footer-right {
+		float: right;
+		text-align: right;
+	}
+}
+
+.caps {
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.quiet {
+	color: #aaa !important;
+}
+
+#ic-logo {
+	display: inline-block;
+	position: relative;
+	float: right;
+	margin-left: 10px;
+	width: 50px;
+	height: 50px;
+	overflow: hidden;
+	border-bottom: 0 !important;
+	border-radius: 2px;
+	.ic-logo-dot {
+		content: ' ';
+		width: 75%;
+		height: 75%;
+		position: absolute;
+		top: 12.5%;
+		border-radius: 100%;
+		z-index: 2;
+		background: #fde149;
+		transition: none 0s;
+		&:nth-child(1) { left: -142.5%; }
+		&:nth-child(2) { left: -57.5%; }
+		&:nth-child(3) { left:  32.5%; }
+	}
+	&:hover {
+		.ic-logo-dot {
+			transition: all 0.5s;
+			&:nth-child(1) { left: -57.5%; }
+			&:nth-child(2) { left: 32.5%; }
+			&:nth-child(3) { left:  117.5%; }
+		}
+
+	}
+
+}
+
+input#id_tags {
+	width: 60em;
+	max-width: 100%;
+}

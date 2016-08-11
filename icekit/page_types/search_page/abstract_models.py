@@ -1,7 +1,15 @@
 from fluent_pages.integration.fluent_contents import FluentContentsPage
 
+from icekit.publishing.models import PublishableFluentContentsPage
 
-class AbstractSearchPage(FluentContentsPage):
+
+class AbstractUnpublishableSearchPage(FluentContentsPage):
+    class Meta:
+        abstract = True
+        verbose_name = 'Search Page'
+
+
+class AbstractSearchPage(PublishableFluentContentsPage):
     class Meta:
         abstract = True
         verbose_name = 'Search Page'
