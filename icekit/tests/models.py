@@ -6,9 +6,9 @@ from django.db import models
 from fluent_pages.extensions import page_type_pool
 
 from icekit import abstract_models
-from icekit.page_types.article.abstract_models import AbstractArticlePage
+from icekit.articles.abstract_models import PublishableArticle
 from icekit.page_types.layout_page.abstract_models import \
-    AbstractUnpublishableLayoutPage
+    AbstractLayoutPage, AbstractUnpublishableLayoutPage
 from icekit.plugins import ICEkitFluentContentsPagePlugin
 
 
@@ -35,19 +35,25 @@ class ImageTest(models.Model):
     image = models.ImageField(upload_to='testing/')
 
 
-class ArticleWithRelatedPages(AbstractArticlePage):
+class Article(PublishableArticle):
+
+    class Meta:
+        db_table = 'test_article'
+
+
+class LayoutPageWithRelatedPages(AbstractLayoutPage):
     related_pages = models.ManyToManyField('fluent_pages.Page')
 
     class Meta:
-        db_table = 'test_article_with_related'
+        db_table = 'test_layoutpage_with_related'
 
 
 @page_type_pool.register
-class ArticleWithRelatedPagesPlugin(ICEkitFluentContentsPagePlugin):
+class LayoutPageWithRelatedPagesPlugin(ICEkitFluentContentsPagePlugin):
     """
-    ArticlePage implementation as a plugin for use with pages.
+    LayoutPage implementation as a plugin for use with pages.
     """
-    model = ArticleWithRelatedPages
+    model = LayoutPageWithRelatedPages
     render_template = 'icekit/page_types/article/default.html'
 
 
