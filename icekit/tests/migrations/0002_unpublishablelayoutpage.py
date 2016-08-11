@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('fluent_pages', '0001_initial'),
         ('icekit', '0006_auto_20150911_0744'),
-        ('tests', '0002_articlewithrelatedpages'),
+        ('tests', '0001_initial'),
     ]
 
     operations = [
@@ -22,7 +22,6 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
                 'db_table': 'pagetype_tests_unpublishablelayoutpage',
-                'verbose_name': 'Layout Page',
             },
             bases=('fluent_pages.htmlpage', models.Model),
         ),

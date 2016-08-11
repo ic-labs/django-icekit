@@ -35,7 +35,7 @@ from icekit.publishing.middleware import PublishingMiddleware, \
 from icekit.publishing.utils import get_draft_hmac, verify_draft_url, \
     get_draft_url, PublishingException, NotDraftException
 from icekit.publishing.tests_base import BaseAdminTest
-from icekit.tests.models import ArticleWithRelatedPages, \
+from icekit.tests.models import LayoutPageWithRelatedPages, \
     UnpublishableLayoutPage, Article
 
 User = get_user_model()
@@ -465,7 +465,7 @@ class TestPublishingModelAndQueryset(TestCase):
 
     def test_urlnodequerysetwithpublishingfeatures_for_publishing_model(self):
         # Create page with related pages relationships to Fluent Page
-        test_page = ArticleWithRelatedPages.objects.create(
+        test_page = LayoutPageWithRelatedPages.objects.create(
             author=self.user_1,
             title='Test Page',
             layout=self.page_layout_1,
@@ -527,9 +527,9 @@ class TestDjangoDeleteCollectorPatchForProxyModels(TransactionTestCase):
         self.user_1 = G(User)
         self.layout = G(Layout)
 
-        self.article = Article.objects.create(
+        self.layoutpage = LayoutPage.objects.create(
             author=self.user_1,
-            title='Test Article',
+            title='Test LayoutPage',
             layout=self.layout,
             #=================================================================
             # Trigger creation of SEO Translations on page where these
@@ -546,17 +546,17 @@ class TestDjangoDeleteCollectorPatchForProxyModels(TransactionTestCase):
     # properly handled/patched
     def test_republish_page(self):
         # Publish first version
-        self.article.publish()
+        self.layoutpage.publish()
         self.assertEqual(
-            'Test Article', self.article.get_published().title)
-        # Re-publish article, to trigger deletion and recreation of published
+            'Test LayoutPage', self.layoutpage.get_published().title)
+        # Re-publish page, to trigger deletion and recreation of published
         # copy
-        self.article.title += ' - Updated'
-        self.article.save()
-        self.article.publish()
+        self.layoutpage.title += ' - Updated'
+        self.layoutpage.save()
+        self.layoutpage.publish()
         self.assertEqual(
-            'Test Article - Updated',
-            self.article.get_published().title)
+            'Test LayoutPage - Updated',
+            self.layoutpage.get_published().title)
 
 
 class TestPublishingMiddleware(TestCase):

@@ -8,7 +8,7 @@ from fluent_pages.extensions import page_type_pool
 from icekit import abstract_models
 from icekit.articles.abstract_models import PublishableArticle
 from icekit.page_types.layout_page.abstract_models import \
-    AbstractUnpublishableLayoutPage
+    AbstractLayoutPage, AbstractUnpublishableLayoutPage
 from icekit.plugins import ICEkitFluentContentsPagePlugin
 
 
@@ -41,11 +41,20 @@ class Article(PublishableArticle):
         db_table = 'test_article'
 
 
-class ArticleWithRelatedPages(PublishableArticle):
+class LayoutPageWithRelatedPages(AbstractLayoutPage):
     related_pages = models.ManyToManyField('fluent_pages.Page')
 
     class Meta:
-        db_table = 'test_article_with_related'
+        db_table = 'test_layoutpage_with_related'
+
+
+@page_type_pool.register
+class LayoutPageWithRelatedPagesPlugin(ICEkitFluentContentsPagePlugin):
+    """
+    LayoutPage implementation as a plugin for use with pages.
+    """
+    model = LayoutPageWithRelatedPages
+    render_template = 'icekit/page_types/article/default.html'
 
 
 class UnpublishableLayoutPage(AbstractUnpublishableLayoutPage):
