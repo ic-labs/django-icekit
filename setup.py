@@ -51,10 +51,6 @@ setuptools.setup(
         'brightcove': [
             'django-brightcove',
         ],
-        'publishing': [
-            'django-model-settings',
-            'django-compressor<1.6',  # See: https://github.com/django-compressor/django-compressor/issues/706
-        ],
         'dev': [
             'ipdb',
             'ipython',
@@ -68,6 +64,10 @@ setuptools.setup(
         ],
         'forms': [
             'django-forms-builder',
+        ],
+        'publishing': [
+            'django-model-settings',
+            'django-compressor<1.6',  # See: https://github.com/django-compressor/django-compressor/issues/706
         ],
         'search': [
             'django-fluent-pages[flatpage,fluentpage]',
