@@ -21,7 +21,7 @@ setuptools.setup(
     use_scm_version={'version_scheme': 'post-release'},
     author='Interaction Consortium',
     author_email='studio@interaction.net.au',
-    url='https://github.com/ixc/django-icekit',
+    url='https://github.com/ic-labs/django-icekit',
     description='A modular content CMS by Interaction Consortium.',
     long_description=locals().get('long_description', ''),
     license='MIT',
