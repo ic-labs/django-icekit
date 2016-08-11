@@ -1,6 +1,8 @@
 from icekit.admin import FluentLayoutsMixin
 from .image import WorkImageInline
-from collectionkit.contrib.work_creator.admin_utils import WorkThumbnailMixin, admin_link
+from glamkit_collections.contrib.work_creator.admin_utils import \
+    WorkThumbnailMixin, admin_link
+
 
 class WorkAdmin(FluentLayoutsMixin, WorkThumbnailMixin):
 
@@ -44,9 +46,9 @@ class WorkAdmin(FluentLayoutsMixin, WorkThumbnailMixin):
             if obj.admin_hero_image == obj.hero_image:
                 message = ""
             else:
-                message ="<br><span style='font-weight: normal'>(not public)</span>"
+                message = \
+                    "<br><span style='font-weight: normal'>(not public)</span>"
             return "%s%s" % (t, message)
         return ""
     admin_thumbnail.allow_tags = True
     admin_thumbnail.short_description = "thumbnail"
-

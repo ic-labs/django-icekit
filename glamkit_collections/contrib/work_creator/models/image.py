@@ -4,8 +4,8 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.safestring import mark_safe
-from collectionkit.contrib.work_creator.fields import QuietImageField
-from collectionkit.contrib.work_creator import settings
+from glamkit_collections.contrib.work_creator.fields import QuietImageField
+from glamkit_collections.contrib.work_creator import settings
 import colorweave
 import webcolors
 

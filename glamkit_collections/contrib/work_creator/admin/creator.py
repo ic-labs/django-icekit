@@ -1,8 +1,9 @@
 from django.contrib import admin
 from icekit.admin import FluentLayoutsMixin
 
-from collectionkit.contrib.work_creator.admin_utils import WorkThumbnailMixin, admin_link, \
-    admin_url
+from glamkit_collections.contrib.work_creator.admin_utils import \
+    WorkThumbnailMixin, admin_link, admin_url
+
 
 class WorkInline(admin.TabularInline, WorkThumbnailMixin):
     """
@@ -22,7 +23,6 @@ class WorkInline(admin.TabularInline, WorkThumbnailMixin):
     )
     extra = 0
 
-
     def artwork_link(self, obj):
         return admin_link(obj.artwork)
     artwork_link.allow_tags = True
@@ -36,7 +36,8 @@ class WorkInline(admin.TabularInline, WorkThumbnailMixin):
     def thumbnail_link(self, obj):
         link = admin_url(obj.artwork)
         style = ""
-        return "<a href='%s' style='%s'>%s</a>" % (link, style, self.thumbnail(obj) or "No thumbnail")
+        return "<a href='%s' style='%s'>%s</a>" % (
+            link, style, self.thumbnail(obj) or "No thumbnail")
     thumbnail_link.allow_tags = True
 
 
@@ -56,5 +57,3 @@ class CreatorAdmin(FluentLayoutsMixin):
     )
 
     raw_id_fields = ['portrait', ]
-
-

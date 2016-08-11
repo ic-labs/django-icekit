@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.template.defaultfilters import filesizeformat
 from django_object_actions import DjangoObjectActions
-from collectionkit.contrib.work_creator.admin_utils import WorkThumbnailMixin, admin_url, \
-    admin_link
+from glamkit_collections.contrib.work_creator.admin_utils import \
+    WorkThumbnailMixin, admin_url, admin_link
 
 
 class WorkImageInline(admin.TabularInline, WorkThumbnailMixin):
@@ -11,7 +11,7 @@ class WorkImageInline(admin.TabularInline, WorkThumbnailMixin):
     model = ArtworkImage
     """
 
-    thumbnail_options = {'size': (160,120)}
+    thumbnail_options = {'size': (160, 120)}
     thumbnail_field = 'downloaded_image'
 
     fields = (
@@ -49,8 +49,8 @@ class WorkImageInline(admin.TabularInline, WorkThumbnailMixin):
     thumbnail_link.allow_tags = True
 
 
-class WorkImageAdmin(DjangoObjectActions, admin.ModelAdmin, WorkThumbnailMixin):
-
+class WorkImageAdmin(DjangoObjectActions, admin.ModelAdmin,
+                     WorkThumbnailMixin):
 
     list_display = (
         'thumbnail',
@@ -63,7 +63,7 @@ class WorkImageAdmin(DjangoObjectActions, admin.ModelAdmin, WorkThumbnailMixin):
     )
 
     thumbnail_field = 'downloaded_image'
-    thumbnail_options = {'size': (250,250)}
+    thumbnail_options = {'size': (250, 250)}
 
     search_fields = (
         'netx_id',
@@ -72,7 +72,8 @@ class WorkImageAdmin(DjangoObjectActions, admin.ModelAdmin, WorkThumbnailMixin):
     )
 
     def image_link(self, obj):
-        return "<a href='%s'>%s</a>" % (obj.downloaded_image.url, self.thumbnail(obj))
+        return "<a href='%s'>%s</a>" % (
+            obj.downloaded_image.url, self.thumbnail(obj))
     image_link.allow_tags = True
     image_link.short_descrpition = "image"
 

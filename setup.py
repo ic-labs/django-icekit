@@ -17,11 +17,11 @@ if {'bdist_wheel', 'sdist'}.intersection(sys.argv):
         long_description = pypandoc.convert('README.md', 'rst')
 
 setuptools.setup(
-    name='glamkit-collectionkit',
+    name='glamkit-collections',
     use_scm_version={'version_scheme': 'post-release'},
     author='Interaction Consortium',
     author_email='studio@interaction.net.au',
-    url='https://github.com/ic-labs/glamkit-collectionkit',
+    url='https://github.com/ixc/glamkit-collections',
     description='Boilerplate for modelling collections of collecting institutions.',
     long_description=locals().get('long_description', ''),
     packages=setuptools.find_packages(),
