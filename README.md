@@ -1,3 +1,5 @@
+# OBSOLETE! - Go to https://github.com/ic-labs/django-icekit
+
 # Getting started
 
 The easiest way to run an ICEkit project is with Docker. It works on OS X,
