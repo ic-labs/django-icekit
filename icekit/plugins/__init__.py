@@ -60,16 +60,17 @@ class AppModelDefaultLayoutsPlugin(TemplateNameFieldChoicesPlugin):
             )
             choices.append((template_name, label))
             # Polymorphic child model defaults.
-            for ro in meta.get_all_related_objects():
-                if issubclass(ro.model, meta.model):
+            for relation in meta.get_all_related_objects():
+                model = getattr(relation, 'related_model', relation.model)
+                if issubclass(model, meta.model):
                     template_name = '%s/%s/layouts/%s.html' % (
                         meta.app_label,
                         meta.model_name,
-                        ro.opts.model_name,
+                        model._meta.model_name,
                     )
                     label = '%s: %s' % (
                         meta.app_config.verbose_name,
-                        ro.opts.verbose_name.capitalize(),
+                        model._meta.verbose_name.capitalize(),
                     )
                     choices.append((template_name, label))
         return choices
