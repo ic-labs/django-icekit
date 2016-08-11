@@ -46,7 +46,7 @@ setuptools.setup(
     ],
     extras_require={
         'api': [
-            'djangorestframework',
+            'djangorestframework<3.4',  # For compatibility with Django < 1.8
         ],
         'brightcove': [
             'django-brightcove',
@@ -60,7 +60,6 @@ setuptools.setup(
             'django-fluent-contents<1.1',  # See: https://github.com/edoburu/django-fluent-contents/issues/67
             'django-polymorphic<0.8',  # For compatibility with Django < 1.8, see: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
             'Django>=1.7,<1.8',
-            'djangorestframework<3.4',  # For compatibility with Django < 1.8
         ],
         'forms': [
             'django-forms-builder',
