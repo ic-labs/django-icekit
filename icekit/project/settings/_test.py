@@ -15,6 +15,8 @@ DATABASES['default'].update({
 
 INSTALLED_APPS += ('icekit.tests', )
 
+ROOT_URLCONF = 'icekit.tests.urls'
+
 TEMPLATES_DJANGO['DIRS'].insert(
     0, os.path.join(BASE_DIR, 'icekit', 'tests', 'templates')),
 
