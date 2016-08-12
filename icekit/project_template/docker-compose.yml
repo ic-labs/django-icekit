@@ -13,7 +13,7 @@ services:
     command: entrypoint.sh manage.py runserver 0.0.0.0:8000
     environment:
       BASE_SETTINGS_MODULE: docker
-    image: ICEKIT_PROJECT/icekit:latest
+    image: icekit-project/icekit:latest
     tmpfs:
       - /tmp
     volumes:
