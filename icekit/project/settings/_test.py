@@ -4,16 +4,14 @@ from ._base import *
 
 DATABASE_NAME = 'test_%s' % DATABASES['default']['NAME']
 
-DATABASES = {
-    'default': {
+DATABASES['default'].update({
+    'NAME': DATABASE_NAME,
+    'TEST': {
         'NAME': DATABASE_NAME,
-        'TEST': {
-            'NAME': DATABASE_NAME,
-            # See: https://docs.djangoproject.com/en/1.7/ref/settings/#serialize
-            'SERIALIZE': False,
-        },
-    }
-}
+        # See: https://docs.djangoproject.com/en/1.7/ref/settings/#serialize
+        'SERIALIZE': False,
+    },
+})
 
 INSTALLED_APPS += ('icekit.tests', )
 
