@@ -29,16 +29,16 @@ fi
 mkdir -p "$DEST_DIR"
 cd "$DEST_DIR"
 
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/bower.json
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/docker-compose.override.yml
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/docker-compose.yml
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/docker-stack.sample.yml
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/Dockerfile
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/go.sh
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/package.json
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/README.md
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/requirements.txt
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/settings.py
+wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/bower.json
+wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/docker-compose.override.yml
+wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/docker-compose.yml
+wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/docker-stack.sample.yml
+wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/Dockerfile
+wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/go.sh
+wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/package.json
+wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/README.md
+wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/requirements.txt
+wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/settings.py
 
 if [[ -n $(which git) ]]; then
     echo

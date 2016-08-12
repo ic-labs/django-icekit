@@ -6,7 +6,7 @@
 
 Create a new ICEkit project in the given directory (default: `icekit-project`):
 
-    $ bash <(curl -L https://raw.githubusercontent.com/ic-labs/django-icekit/master/bin/startproject.sh) [destination_dir]
+    $ bash <(curl -L https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/bin/startproject.sh) [destination_dir]
 
 NOTE: Windows users should run this command in Git Bash, which comes with
 [Git for Windows].
