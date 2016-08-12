@@ -160,10 +160,10 @@ AUTHENTICATION_BACKENDS = (
 
 CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
 
-# Enable cross-subdomain cookies, only if `SITE_DOMAIN` is not a TLD.
-if '.' in SITE_DOMAIN:
-    CSRF_COOKIE_DOMAIN = LANGUAGE_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = \
-        '.%s' % SITE_DOMAIN
+# # Enable cross-subdomain cookies, only if `SITE_DOMAIN` is not a TLD.
+# if '.' in SITE_DOMAIN:
+#     CSRF_COOKIE_DOMAIN = LANGUAGE_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = \
+#         '.%s' % SITE_DOMAIN
 
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'noreply@%s' % SITE_DOMAIN
 
