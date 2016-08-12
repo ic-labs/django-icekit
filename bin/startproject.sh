@@ -2,7 +2,7 @@
 
 set -e
 
-DEST_DIR="${1:-$PWD}"
+DEST_DIR="${1:-$PWD/icekit-project}"
 
 cat <<EOF
 
