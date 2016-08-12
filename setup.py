@@ -146,7 +146,6 @@ setuptools.setup(
     },
     entry_points={
         'console_scripts': [
-            'icekit = icekit.bin.icekit:main',
             'abspath = icekit.manage:abspath',
             'icekit_dir = icekit.manage:icekit_dir',
             'manage.py = icekit.manage:main',
