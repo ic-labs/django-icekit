@@ -94,6 +94,7 @@ setuptools.setup(
             'django-test-without-migrations',
             'django-timezone',
             'docutils',
+            'easy_thumbnails',
             'flower',
             'gunicorn',
             'icekit-notifications',
@@ -115,9 +116,6 @@ setuptools.setup(
             'django-haystack',
             'elasticsearch',
             'elasticstack',
-        ],
-        'slideshow': [
-            'easy_thumbnails',
         ],
         'test': [
             'coverage',
