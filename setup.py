@@ -74,11 +74,6 @@ setuptools.setup(
             'mkdocs',
             'Werkzeug',
         ],
-        'django17': [
-            'django-fluent-contents',
-            'django-polymorphic<0.8',  # For compatibility with django-fluent-contents: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
-            'Django>=1.7,<1.8',
-        ],
         'django18': [
             'Django>=1.8,<1.9',
         ],
