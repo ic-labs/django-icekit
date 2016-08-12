@@ -144,14 +144,6 @@ setuptools.setup(
             'WebTest',
         ],
     },
-    entry_points={
-        'console_scripts': [
-            'abspath = icekit.manage:abspath',
-            'icekit_dir = icekit.manage:icekit_dir',
-            'manage.py = icekit.manage:main',
-            'project_dir = icekit.manage:project_dir',
-        ],
-    },
     scripts=[
         'bin/bower-install.sh',
         'bin/migrate.sh',
