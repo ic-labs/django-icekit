@@ -1,0 +1,34 @@
+version: "2"
+services:
+  celery:
+    links:
+      - elasticsearch
+      - postgres
+      - redis
+  celerybeat:
+    links:
+      - redis
+  celeryflower:
+    environment:
+      VIRTUALHOST: flower.lvh.me
+    expose:
+      - 5555
+    links:
+      - redis
+  django:
+    build: .
+    environment:
+      MASTER_PASSWORD: # Get from environment
+      VIRTUALHOST: lvh.me
+    expose:
+      - 8000
+    links:
+      - elasticsearch
+      - celery
+      - redis
+  haproxy:
+    links:
+      - celeryflower
+      - django
+    ports:
+      - "80:80"

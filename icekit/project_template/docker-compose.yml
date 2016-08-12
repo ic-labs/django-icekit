@@ -1,0 +1,31 @@
+version: "2"
+services:
+  celery:
+    command: entrypoint.sh celery -A icekit.project worker -l info
+    extends: django
+  celerybeat:
+    command: entrypoint.sh celery -A icekit.project beat -l info --pidfile=
+    extends: django
+  celeryflower:
+    command: entrypoint.sh celery -A icekit.project flower
+    extends: django
+  django:
+    command: entrypoint.sh manage.py runserver 0.0.0.0:8000
+    environment:
+      BASE_SETTINGS_MODULE: docker
+    image: YOU/icekit:latest
+    tmpfs:
+      - /tmp
+    volumes:
+      - ./:/opt/icekit
+  elasticsearch:
+    image: interaction/elasticsearch-icu:1
+  haproxy:
+    image: dockercloud/haproxy:1.5.1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  postgres:
+    image: onjin/alpine-postgres:9.4
+  redis:
+    command: redis-server --appendonly yes
+    image: redis:3-alpine
