@@ -8,9 +8,6 @@ cat <<EOF
 
 This script will create a new ICEkit project in directory '${DEST_DIR}'.
 
-You will be able to run it immediately with Docker, or you can manually install
-its dependencies and run it directly.
-
 EOF
 
 read -p 'Press CTRL-C to abort or any other key to continue...'
