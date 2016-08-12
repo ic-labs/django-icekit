@@ -6,7 +6,10 @@ from fluent_pages import appsettings
 from fluent_pages.models import UrlNode
 from fluent_pages.models.managers import UrlNodeQuerySet
 
-from polymorphic.polymorphic_model import PolymorphicModel
+try:
+    from polymorphic.models import PolymorphicModel
+except ImportError:
+    from polymorphic.polymorphic_model import PolymorphicModel
 
 from mptt.models import MPTTModel
 
