@@ -678,7 +678,11 @@ INSTALLED_APPS += ('djsupervisor', )
 
 SUPERVISOR = {
     'celery': 'celery -A icekit.project worker -l info',
-    'celerybeat': 'celery -A icekit.project beat -l info --pidfile=',
+    'celerybeat':
+        'celery -A icekit.project beat '
+        '-l info '
+        '-S djcelery.schedulers.DatabaseScheduler '
+        '--pidfile=',
     'celeryflower': 'celery -A icekit.project flower',
     'django': (
         'gunicorn '

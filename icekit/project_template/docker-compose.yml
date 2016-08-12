@@ -4,7 +4,7 @@ services:
     command: entrypoint.sh celery -A icekit.project worker -l info
     extends: django
   celerybeat:
-    command: entrypoint.sh celery -A icekit.project beat -l info --pidfile=
+    command: entrypoint.sh celery -A icekit.project beat -l info -S djcelery.schedulers.DatabaseScheduler --pidfile=
     extends: django
   celeryflower:
     command: entrypoint.sh celery -A icekit.project flower
