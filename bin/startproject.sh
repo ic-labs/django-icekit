@@ -59,6 +59,6 @@ Open the site in a browser:
 
     http://lvh.me
 
-Or to run directly, go to https://github.com/ic-labs/django-icekit/#run-directly
+Or to run directly, see: https://github.com/ic-labs/django-icekit/#run-directly
 
 EOF
