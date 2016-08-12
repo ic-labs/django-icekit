@@ -34,6 +34,8 @@ wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project
 wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/requirements.txt
 wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/settings.py
 
+chmod +x manage.py
+
 # Use basename of destination directory as Docker Hub repository name.
 sed -i -e "s/icekit-project/$(basename $DEST_DIR)/" docker-compose.yml
 
