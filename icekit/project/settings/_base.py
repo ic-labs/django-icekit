@@ -23,7 +23,7 @@ BASE_SETTINGS_MODULE = os.environ.get('BASE_SETTINGS_MODULE', '')
 SETTINGS_MODULE_HASH = hashlib.md5(__file__ + BASE_SETTINGS_MODULE).hexdigest()
 
 SITE_NAME = os.environ.get('SITE_NAME', 'ICEkit')
-SITE_SLUG = slugify(SITE_NAME)
+SITE_SLUG = slugify(unicode(SITE_NAME))
 
 SITE_DOMAIN = os.environ.get('SITE_DOMAIN', '%s.lvh.me' % SITE_SLUG)
 SITE_PORT = 8000
