@@ -49,9 +49,10 @@ cat <<EOF
 
 All done!
 
-If you have Docker installed, you can run your new ICEkit project immediately:
+Build an image and start the project with Docker:
 
     $ cd ${DEST_DIR}
+    $ docker-compose build
     $ docker-compose up
 
 Open the site in a browser:
