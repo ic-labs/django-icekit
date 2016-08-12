@@ -14,7 +14,14 @@ mkdir -p "$DIR"
 cd "$DIR"
 
 if [[ ! -s package.json ]]; then
-    echo '{}' > package.json
+    cat <<EOF > package.json
+{
+  "name": "icekit-project",
+  "dependencies": {
+  },
+  "private": true
+}
+EOF
 fi
 
 touch package.json.md5
