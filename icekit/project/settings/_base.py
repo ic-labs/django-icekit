@@ -32,7 +32,8 @@ SITE_PORT = 8000
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
 ICEKIT_DIR = os.path.join(BASE_DIR, 'icekit')
-PROJECT_DIR = os.environ.get('PROJECT_DIR', os.path.join(BASE_DIR, 'project'))
+PROJECT_DIR = os.path.abspath(os.environ.get(
+    'ICKIT_PROJECT_DIR', os.path.join(BASE_DIR, 'icekit-project')))
 VAR_DIR = os.path.join(PROJECT_DIR, 'var')
 
 # DJANGO CHECKLIST ############################################################
