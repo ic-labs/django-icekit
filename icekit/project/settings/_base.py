@@ -678,9 +678,9 @@ INSTALLED_APPS += ('storages', )
 INSTALLED_APPS += ('djsupervisor', )
 
 SUPERVISOR = {
-    'celery': 'celery -A icekit worker -l info',
-    'celerybeat': 'celery -A icekit beat -l info --pidfile',
-    'celeryflower': 'celery -A icekit flower',
+    'celery': 'celery -A icekit.project worker -l info',
+    'celerybeat': 'celery -A icekit.project beat -l info --pidfile=',
+    'celeryflower': 'celery -A icekit.project flower',
     'django': (
         'gunicorn '
         '-b {WSGI_ADDRESS}:{SITE_PORT} '
