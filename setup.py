@@ -40,14 +40,14 @@ setuptools.setup(
         'django-app-namespace-template-loader',
         'django-bootstrap3',
         'django-compressor',
-        'django-el-pagination<3',  # 3+ drops support for Django < 1.8
+        'django-el-pagination',
         'django-fluent-contents',
         'django-fluent-pages',
         'django-model-settings',
         'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
         'django-mptt',
         'django-multiurl',
-        'django-polymorphic<0.8',  # For compatibility with django-fluent-contents: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
+        'django-polymorphic',
         'django-wysiwyg',
         'django_extensions',
         'html5lib',
@@ -55,13 +55,10 @@ setuptools.setup(
         'Pillow',
         'requests',
         'unidecode',
-
-        # Override incompatible versions for nested dependencies.
-        'django-polymorphic-tree<1.2',  # See: https://github.com/django-polymorphic/django-polymorphic-tree/commit/389b4800aadf05a02bc66e0589e6fa511aabc3a2
     ],
     extras_require={
         'api': [
-            'djangorestframework<3.4',  # For compatibility with Django < 1.8
+            'djangorestframework',
         ],
         'brightcove': [
             'django-brightcove',
@@ -73,9 +70,6 @@ setuptools.setup(
             'ipython',
             'mkdocs',
             'Werkzeug',
-        ],
-        'django18': [
-            'Django>=1.8,<1.9',
         ],
         'forms': [
             'django-forms-builder',
@@ -99,7 +93,6 @@ setuptools.setup(
             'django-supervisor',
             'django-test-without-migrations',
             'django-timezone',
-            'Django>=1.8,<1.9',  # LTS
             'docutils',
             'flower',
             'gunicorn',
