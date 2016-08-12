@@ -21,6 +21,8 @@ fi
 mkdir -p "$DEST_DIR"
 cd "$DEST_DIR"
 
+wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/.dockerignore
+wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/.gitignore
 wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/bower.json
 wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/docker-compose.override.yml
 wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/docker-compose.yml
