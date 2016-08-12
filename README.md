@@ -4,34 +4,64 @@
 
 # Getting started
 
+Create a new ICEkit project in the given directory (default: `icekit-project`):
+
+    $ bash <(curl -L https://raw.githubusercontent.com/ic-labs/django-icekit/master/bin/startproject.sh) [destination_dir]
+
+NOTE: Windows users should run this command in Git Bash, which comes with
+[Git for Windows].
+
+# Run with Docker
+
 The easiest way to run an ICEkit project is with Docker. It works on OS X,
-Linux, and Windows.
+Linux, and Windows, and takes care of all the project dependencies like the
+database and search engine.
 
-If you are not yet familiar with Docker, check out our [Docker Quick Start][0]
-guide and then come back here.
+Install Docker:
 
-If you are still not yet ready for Docker, check out our [Manual Setup][1]
-guide, which covers all the things that Docker would otherwise take care of.
+  * OS X: https://download.docker.com/mac/stable/Docker.dmg
+  * Linux: https://docs.docker.com/engine/installation/linux/
+  * Windows: https://download.docker.com/win/stable/InstallDocker.msi
 
-[0]: https://github.com/ic-labs/django-icekit/docs/docker-quick-start.md
-[1]: https://github.com/ic-labs/django-icekit/docs/manual-setup-guide.md
+Start the project from the project directory:
 
-# Creating a new ICEkit project
-
-    $ bash <(curl -L https://raw.githubusercontent.com/ixc/ixc-project-template/master/startproject.sh) <project_name> [destination_dir]
-
-This script will create a new ICEkit project in a directory named
-`<project_name>` in the current working directory (or `[destination_dir]`),
-ready to hack on.
-
-It might need to install `pip` and `virtualenv` into your global environment,
-and will prompt for confirmation if it does.
-
-# Running an ICEkit project with Docker
-
-    $ cd <project_name>
     $ docker-compose up
 
-Some local setup will be performed on first run, which might take a while, so
-make yourself a cup of tea. Subsequent runs will skip the local setup unless
-the project dependencies have been updated.
+Now you can open the site:
+
+    http://lvh.me
+
+For an overview on how to use Docker with an ICEkit project, check out our
+[Docker Quick Start] guide.
+
+# Run directly
+
+If you are not yet ready for Docker, you can run an ICEkit project directly.
+You'll just need to install and configure all of its dependencies manually.
+
+Install required system packages:
+
+  * Elasticsearch
+  * PostgreSQL
+  * Python 2.7
+  * Redis
+
+Install required Python packages:
+
+    $ pip install -r requirements.txt
+
+Create a database and apply migrations:
+
+    $ createdb icekit
+    $ ./go.sh manage.py migrate
+
+Start the project:
+
+    $ ./go.sh manage.py supervisor
+
+Now you can open the site:
+
+    http://lvh.me:8000
+
+[Docker Quick Start]: https://github.com/ic-labs/django-icekit/blob/master/docs/docker-quick-start.md
+[Git for Windows]: https://git-for-windows.github.io/
