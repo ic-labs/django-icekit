@@ -36,6 +36,9 @@ wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project
 wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/requirements.txt
 wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/settings.py
 
+# Use basename of destination directory as Docker Hub repository name.
+sed -i -e "s/ICEKIT_PROJECT/$(basename $DEST_DIR)/" docker-compose.yml
+
 if [[ -n $(which git) ]]; then
     echo
     read -p 'Would you like to initialize a Git repository for your new project and create an initial commit? (Y/n) ' -n 1 -r
