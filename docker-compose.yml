@@ -1,13 +1,13 @@
 version: "2"
 services:
   celery:
-    command: entrypoint.sh celery -A icekit worker -l info
+    command: entrypoint.sh celery -A icekit.project worker -l info
     extends: django
   celerybeat:
-    command: entrypoint.sh celery -A icekit beat -l info --pidfile
+    command: entrypoint.sh celery -A icekit.project beat -l info --pidfile=
     extends: django
   celeryflower:
-    command: entrypoint.sh celery -A icekit flower
+    command: entrypoint.sh celery -A icekit.project flower
     extends: django
   django:
     command: entrypoint.sh manage.py runserver 0.0.0.0:8000
