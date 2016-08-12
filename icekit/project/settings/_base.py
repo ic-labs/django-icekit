@@ -414,7 +414,7 @@ INSTALLED_APPS += ('flat', )
 # FLUENT ######################################################################
 
 DJANGO_WYSIWYG_FLAVOR = 'redactor'
-DJANGO_WYSIWYG_MEDIA_URL = '/'  # See redirects in `icekit.urls`
+DJANGO_WYSIWYG_MEDIA_URL = '/'  # See redirects in `icekit.project.urls`
 
 FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     # 'home': {
@@ -686,7 +686,7 @@ SUPERVISOR = {
         '-b {WSGI_ADDRESS}:{SITE_PORT} '
         '-w {WSGI_WORKERS} '
         '-t {WSGI_TIMEOUT} '
-        'icekit.wsgi:application'
+        'icekit.project.wsgi:application'
     ),
 }
 
