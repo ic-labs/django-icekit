@@ -52,18 +52,43 @@ fi
 
 cat <<EOF
 
-All done!
-
-Build an image and start the project with Docker:
+All done! What now? First, change to the project directory:
 
     $ cd ${DEST_DIR}
+
+# Run with Docker
+
+The easiest way to run an ICEkit project is with Docker. It works on OS X,
+Linux, and Windows, takes care of all the project dependencies like the
+database and search engine, and makes deployment easy.
+
+If you haven't already, go install Docker:
+
+  * [OS X](https://download.docker.com/mac/stable/Docker.dmg)
+  * [Linux](https://docs.docker.com/engine/installation/linux/)
+  * [Windows](https://download.docker.com/win/stable/InstallDocker.msi)
+
+Build an image and start the project:
+
     $ docker-compose build
     $ docker-compose up
 
-Open the site in a browser:
+Start the project:
+
+    $ docker-compose up
+
+Now you can open the site:
 
     http://lvh.me
 
-Or to run directly, see: https://github.com/ic-labs/django-icekit/#run-directly
+Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/master/docs/docker-quick-start.md)
+guide for more info on using Docker with an ICEkit project.
+
+# Run directly
+
+If you are not yet ready for Docker, you can run an ICEkit project directly.
+You will just need to install and configure all of its dependencies manually.
+
+See: https://github.com/ic-labs/django-icekit/#run-directly
 
 EOF

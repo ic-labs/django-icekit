@@ -8,22 +8,29 @@ Create a new ICEkit project in the given directory (default: `icekit-project`):
 
     $ bash <(curl -L https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/bin/startproject.sh) [destination_dir]
 
+All other commands in this document should be run from the project directory.
+
 NOTE: Windows users should run this command in Git Bash, which comes with
-[Git for Windows].
+[Git for Windows](https://git-for-windows.github.io/).
 
 # Run with Docker
 
 The easiest way to run an ICEkit project is with Docker. It works on OS X,
-Linux, and Windows, and takes care of all the project dependencies like the
-database and search engine.
+Linux, and Windows, takes care of all the project dependencies like the
+database and search engine, and makes deployment easy.
 
-Install Docker:
+If you haven't already, go install Docker:
 
-  * OS X: https://download.docker.com/mac/stable/Docker.dmg
-  * Linux: https://docs.docker.com/engine/installation/linux/
-  * Windows: https://download.docker.com/win/stable/InstallDocker.msi
+  * [OS X](https://download.docker.com/mac/stable/Docker.dmg)
+  * [Linux](https://docs.docker.com/engine/installation/linux/)
+  * [Windows](https://download.docker.com/win/stable/InstallDocker.msi)
 
-Start the project from the project directory:
+Build an image and start the project:
+
+    $ docker-compose build
+    $ docker-compose up
+
+Start the project:
 
     $ docker-compose up
 
@@ -31,13 +38,13 @@ Now you can open the site:
 
     http://lvh.me
 
-For an overview on how to use Docker with an ICEkit project, check out our
-[Docker Quick Start] guide.
+Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/master/docs/docker-quick-start.md)
+guide for more info on using Docker with an ICEkit project.
 
 # Run directly
 
 If you are not yet ready for Docker, you can run an ICEkit project directly.
-You'll just need to install and configure all of its dependencies manually.
+You will just need to install and configure all of its dependencies manually.
 
 Install required system packages:
 
@@ -46,22 +53,31 @@ Install required system packages:
   * Python 2.7
   * Redis
 
-Install required Python packages:
+On OS X, you can use [Homebrew](http://brew.sh/):
 
-    $ pip install -r requirements.txt
+    $ brew install elasticsearch python redis
+
+You don't need to configure these services to start automatically, they will
+be started by the project.
+
+We recommend [Postgres.app](http://postgresapp.com/) for the database. It is
+easier to start, stop, and upgrade than Homebrew.
+
+Make a virtualenv and install required Python packages:
+
+    $ pip install virtualenv
+    $ virtualenv venv
+    (venv)$ pip install -r requirements.txt
 
 Create a database and apply migrations:
 
-    $ createdb icekit
-    $ ./go.sh manage.py migrate
+    (venv)$ createdb icekit
+    (venv)$ ./manage.py migrate
 
 Start the project:
 
-    $ ./go.sh manage.py supervisor
+    (venv)$ ./manage.py supervisor
 
 Now you can open the site:
 
     http://lvh.me:8000
-
-[Docker Quick Start]: https://github.com/ic-labs/django-icekit/blob/master/docs/docker-quick-start.md
-[Git for Windows]: https://git-for-windows.github.io/
