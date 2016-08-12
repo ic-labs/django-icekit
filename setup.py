@@ -50,7 +50,7 @@ setuptools.setup(
         'django-polymorphic',
         'django-wysiwyg',
         'django_extensions',
-        'html5lib',
+        'html5lib==0.999',
         'nltk',
         'Pillow',
         'requests',
