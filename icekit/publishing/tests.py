@@ -490,15 +490,15 @@ class TestPublishingModelAndQueryset(TestCase):
         # Draft
         self.assertEqual(
             set([self.page_1]),
-            set(test_page.related_pages.draft()))
+            set(test_page.related_pages.all().draft()))
         # Visible - published items unless we are in privileged context
         self.assertEqual(
             set([self.page_1.get_published()]),
-            set(test_page.related_pages.visible()))
+            set(test_page.related_pages.all().visible()))
         with override_draft_request_context(True):
             self.assertEqual(
                 set([self.page_1]),
-                set(test_page.related_pages.visible()))
+                set(test_page.related_pages.all().visible()))
 
 
 class TestDjangoDeleteCollectorPatchForProxyModels(TransactionTestCase):
