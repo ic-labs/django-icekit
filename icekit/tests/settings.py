@@ -82,7 +82,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'icekit.project.urls'
+ROOT_URLCONF = 'icekit.tests.urls'
 SECRET_KEY = 'secret-key'
 STATIC_URL = '/static/'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
