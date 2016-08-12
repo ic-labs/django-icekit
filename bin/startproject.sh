@@ -13,13 +13,8 @@ EOF
 read -p 'Press CTRL-C to abort or any other key to continue...'
 echo
 
-if [[ -z $(which curl) && -z $(which wget) ]]; then
-    cat <<EOF
-
-Neither 'curl' nor 'wget' is available. Please install one or the other and try
-again.
-
-EOF
+if [[ -z $(which wget) ]]; then
+    echo "'wget' is not available. Please install it try again."
     exit 1
 fi
 
