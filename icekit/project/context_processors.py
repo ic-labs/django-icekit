@@ -7,5 +7,6 @@ def environment(request):
     """
     context = {
         'COMPRESS_ENABLED': settings.COMPRESS_ENABLED,
+        'SITE_NAME': settings.SITE_NAME,
     }
     return context

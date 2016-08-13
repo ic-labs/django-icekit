@@ -478,15 +478,6 @@ INSTALLED_APPS += (
     'micawber',
 )
 
-# GENERIC #####################################################################
-
-INSTALLED_APPS += ('generic', )
-
-TEMPLATES_DJANGO['OPTIONS']['context_processors'].append(
-    'generic.context_processors.generic')
-
-TEMPLATE_CONSTANTS = {'SITE_NAME': SITE_NAME, }
-
 # GUARDIAN ####################################################################
 
 # INSTALLED_APPS += ('guardian', )
