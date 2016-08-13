@@ -550,6 +550,7 @@ INSTALLED_APPS += (
     'icekit.dashboard',  # Must come before `django.contrib.admin` and `flat`
     'icekit.integration.reversion',
     'icekit.layouts',
+    'icekit.publishing',
     'icekit.response_pages',
     'notifications',
 
