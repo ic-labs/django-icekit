@@ -98,7 +98,7 @@ setuptools.setup(
             'gunicorn',
             'icekit-notifications',
             'ixc-django-compressor',
-            'ixc-redactor',
+            # 'ixc-redactor',
             'ixc-whitenoise',
             'Jinja2',
             # 'newrelic',

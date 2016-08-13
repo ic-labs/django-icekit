@@ -177,7 +177,7 @@ INSTALLED_APPS = (
     'bootstrap3',
     'django_extensions',
     'forms_builder.forms',
-    'ixc_redactor',
+    # 'ixc_redactor',
     'reversion',
 
     # Default.
@@ -412,8 +412,11 @@ INSTALLED_APPS += ('flat', )
 
 # FLUENT ######################################################################
 
-DJANGO_WYSIWYG_FLAVOR = 'redactor'
-DJANGO_WYSIWYG_MEDIA_URL = '/'  # See redirects in `icekit.project.urls`
+# DJANGO_WYSIWYG_FLAVOR = 'redactor'
+# DJANGO_WYSIWYG_MEDIA_URL = '/'  # See redirects in `icekit.project.urls`
+
+DJANGO_WYSIWYG_FLAVOR = 'alloyeditor'
+DJANGO_WYSIWYG_MEDIA_URL = STATIC_URL + 'alloyeditor/dist/alloy-editor/'
 
 FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     # 'home': {
