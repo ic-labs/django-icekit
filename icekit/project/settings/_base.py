@@ -147,7 +147,7 @@ LOGGING = {
 }
 
 ADMINS = (
-    ('Interaction Consortium', 'admins@interaction.net.au'),
+    ('Admin', 'admin@%s' % SITE_DOMAIN),
 )
 MANAGERS = ADMINS
 
