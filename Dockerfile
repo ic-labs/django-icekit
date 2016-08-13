@@ -61,13 +61,6 @@ RUN chmod +x /usr/local/bin/tini
 
 ENV DOCKER_COMMIT=0a214841ace30f8ff67cd1c3a9c2214b62eb4619
 RUN cd /usr/local/bin \
-    && wget -N -nv "https://raw.githubusercontent.com/ixc/docker/${DOCKER_COMMIT}/bin/bower-install.sh" \
-    # && wget -N -nv "https://raw.githubusercontent.com/ixc/docker/${DOCKER_COMMIT}/bin/gulp.sh" \
-    && wget -N -nv "https://raw.githubusercontent.com/ixc/docker/${DOCKER_COMMIT}/bin/migrate.sh" \
-    && wget -N -nv "https://raw.githubusercontent.com/ixc/docker/${DOCKER_COMMIT}/bin/npm-install.sh" \
-    && wget -N -nv "https://raw.githubusercontent.com/ixc/docker/${DOCKER_COMMIT}/bin/pip-install.sh" \
-    # && wget -N -nv "https://raw.githubusercontent.com/ixc/docker/${DOCKER_COMMIT}/bin/setup-postgres.sh" \
-    # && wget -N -nv "https://raw.githubusercontent.com/ixc/docker/${DOCKER_COMMIT}/bin/supervisor.sh" \
     && wget -N -nv "https://raw.githubusercontent.com/ixc/docker/${DOCKER_COMMIT}/bin/transfer.sh" \
     && chmod +x *.sh
 
