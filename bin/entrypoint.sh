@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Install Node modules, install Python requirements, setup database, do cluster
-# init (e.g. migrations), and execute command.
+# Install Node modules, Bower components and Python requirements, setup
+# database, apply migrations, and execute command.
 
 cat <<EOF
 # `whoami`@`hostname`:$PWD$ entrypoint.sh $@
