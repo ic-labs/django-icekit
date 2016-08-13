@@ -1,0 +1,2 @@
+-e .[api,brightcove,dev,forms,project,search,slideshow,test]
+-e git+https://github.com/ixc/django-dynamic-fixture.git#egg=django-dynamic-fixture
