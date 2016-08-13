@@ -28,7 +28,7 @@ If you haven't already, go install Docker:
 Build an image and start the project:
 
     $ docker-compose build
-    $ docker-compose up
+    $ docker-compose up  # Watch for the admin account credentials that get created on first run
 
 Now you can open the site in a browser:
 
@@ -68,7 +68,7 @@ Make a virtualenv and install required Python packages:
 Create a database and apply migrations:
 
     (venv)$ createdb icekit
-    (venv)$ ./manage.py migrate
+    (venv)$ ./manage.py migrate  # Watch for the admin account credentials that get created on first run
 
 Start the project:
 
