@@ -481,10 +481,6 @@ class Views(WebTest):
             response = self.app.get(reverse('admin:%s_change' % admin_app, args=(obj.id, )))
             self.assertEqual(response.status_code, 200)
 
-    def test_index(self):
-        response = self.app.get(reverse('icekit_index'))
-        response.mustcontain('Hello World')
-
     def test_response_pages(self):
         response = self.app.get(reverse('404'), expect_errors=404)
         self.assertEqual(response.status_code, 404)
