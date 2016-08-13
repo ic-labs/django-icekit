@@ -19,8 +19,8 @@ mkdir -p "$PYTHONUSERBASE/lib/python2.7/site-packages"
 
 touch requirements.txt requirements-local.txt requirements.md5
 
-if ! md5sum -c --status requirements.md5 > /dev/null 2>&1; then
-    echo "Python requirements in $DIR are out of date."
+if ! md5sum --status -c requirements.md5 > /dev/null 2>&1; then
+    echo "Python requirements in '$DIR' directory are out of date."
     if [[ -s requirements.txt ]]; then
         pip install --user -r requirements.txt
     fi
@@ -29,5 +29,5 @@ if ! md5sum -c --status requirements.md5 > /dev/null 2>&1; then
     fi
     md5sum requirements.txt requirements-local.txt > requirements.md5
 else
-    echo "Python requirements in $DIR are already up to date."
+    echo "Python requirements in '$DIR' directory are already up to date."
 fi

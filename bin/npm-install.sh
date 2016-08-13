@@ -26,10 +26,10 @@ fi
 
 touch package.json.md5
 
-if ! md5sum -c --status package.json.md5 > /dev/null 2>&1; then
-    echo "Node modules in $DIR are out of date."
+if ! md5sum --status -c package.json.md5 > /dev/null 2>&1; then
+    echo "Node modules in '$DIR' directory are out of date."
     npm install
     md5sum package.json > package.json.md5
 else
-    echo "Node modules in $DIR are already up to date."
+    echo "Node modules in '$DIR' directory are already up to date."
 fi
