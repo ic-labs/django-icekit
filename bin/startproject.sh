@@ -21,16 +21,16 @@ fi
 mkdir -p "$DEST_DIR"
 cd "$DEST_DIR"
 
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/.dockerignore
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/.gitignore
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/bower.json
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/docker-compose.override.yml
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/docker-compose.yml
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/Dockerfile
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/go.sh
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/icekit_settings.py
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/package.json
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/requirements.txt
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/.dockerignore
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/.gitignore
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/bower.json
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/docker-compose.override.yml
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/docker-compose.yml
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/Dockerfile
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/go.sh
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/icekit_settings.py
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/package.json
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/requirements.txt
 
 chmod +x go.sh
 
