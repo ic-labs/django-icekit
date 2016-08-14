@@ -63,8 +63,10 @@ ENV CRONLOCK_HOST=redis
 ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/icekit-project
 ENV PATH=/opt/django-icekit/bin:/opt/django-icekit/venv/bin:$PATH
 ENV PIP_SRC=/opt/django-icekit/venv/src
+ENV PYTHONHASHSEED=random
 ENV PYTHONPATH=/opt/django-icekit:$PYTHONPATH
 ENV PYTHONUSERBASE=/opt/django-icekit/venv
+ENV PYTHONWARNINGS=ignore
 
 VOLUME /root
 
