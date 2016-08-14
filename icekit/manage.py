@@ -7,7 +7,7 @@ import sys
 
 
 def main():
-    if os.environ.get('ICEKIT_PROJECT_DIR'):
+    if not os.environ.get('ICEKIT_PROJECT_DIR'):
         print("'ICEKIT_PROJECT_DIR' is not defined.", file=sys.stderr)
         exit(1)
 
