@@ -38,13 +38,9 @@ WORKDIR /opt/django-icekit/
 RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python
 ARG PIP_INDEX_URL=https://devpi.ixcsandbox.com/ic/dev/+simple
 
-COPY requirements.txt /opt/django-icekit/
-RUN pip install --no-cache-dir -r requirements.txt
-
 COPY bin/ /opt/django-icekit/bin/
-COPY setup.py /opt/django-icekit/
-RUN pip install --no-cache-dir -e .[api,brightcove,dev,django18,forms,project,search,slideshow,test]
-
+COPY requirements.txt setup.py /opt/django-icekit/
+RUN pip install --no-cache-dir -r requirements.txt
 RUN touch requirements-local.txt
 RUN md5sum requirements.txt requirements-local.txt > requirements.md5
 
