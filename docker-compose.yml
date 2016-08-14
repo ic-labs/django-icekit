@@ -13,6 +13,8 @@ services:
     command: entrypoint.sh manage.py runserver 0.0.0.0:8000
     environment:
       BASE_SETTINGS_MODULE: docker
+      PGHOST: postgres
+      PGUSER: postgres
     image: interaction/icekit:latest
     tmpfs:
       - /tmp

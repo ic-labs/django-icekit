@@ -24,6 +24,6 @@ if [[ -z "$PGDATABASE" ]]; then
     fi
 fi
 
-export PGHOST="${PGHOST:-postgres}"
+export PGHOST="${PGHOST:-localhost}"
 export PGPORT="${PGPORT:-5432}"
-export PGUSER="${PGUSER:-postgres}"
+export PGUSER="${PGUSER:-$(whoami)}"
