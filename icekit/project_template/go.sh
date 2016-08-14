@@ -8,6 +8,6 @@ EOF
 
 set -e
 
-ICEKIT_PROJECT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd -P)
+export ICEKIT_PROJECT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd -P)
 
 exec entrypoint.sh "$@"
