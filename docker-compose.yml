@@ -19,7 +19,7 @@ services:
     tmpfs:
       - /tmp
     volumes:
-      - ./:/opt/icekit
+      - ./:/opt/django-icekit
   elasticsearch:
     image: interaction/elasticsearch-icu:1
   haproxy:
