@@ -45,7 +45,7 @@ setuptools.setup(
         'django-fluent-pages',
         'django-model-settings',
         'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
-        'django-mptt',
+        'django-mptt!=0.8.5',  # See: https://github.com/django-fluent/django-fluent-pages/commit/98a35e43fbedf78c190e2dee38dd12f88a496bf3
         'django-multiurl',
         'django-polymorphic',
         'django-wysiwyg',
