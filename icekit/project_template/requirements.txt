@@ -1,1 +1,1 @@
-django-icekit[api,brightcove,dev,django18,forms,project,search,slideshow,test]
+django-icekit[api,brightcove,dev,django18,forms,project,search,test]
