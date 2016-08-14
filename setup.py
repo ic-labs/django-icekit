@@ -92,6 +92,7 @@ setuptools.setup(
             'django-supervisor',
             'django-test-without-migrations',
             'django-timezone',
+            'Django>=1.8,<1.9'
             'docutils',
             'easy_thumbnails',
             'flower',
