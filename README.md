@@ -2,6 +2,8 @@
 [![Coverage Status](https://img.shields.io/coveralls/ic-labs/django-icekit.svg)](https://coveralls.io/github/ic-labs/django-icekit)
 [![Version](https://img.shields.io/pypi/v/django-icekit.svg)](https://pypi.python.org/pypi/django-icekit)
 
+[![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/)
+
 # Getting started
 
 Create a new ICEkit project in the given directory (default: `icekit-project`):
@@ -80,8 +82,8 @@ Now you can open the site in a browser:
 
 # Deploy to Docker Cloud
 
-Use the [![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/)
-button to create a new ICEkit stack on [Docker Cloud](https://cloud.docker.com/).
+Use the Deploy to Docker Cloud button above to create a new ICEkit stack on
+[Docker Cloud](https://cloud.docker.com/).
 
 You won't be able to [customise your project](#customise-your-project) when
 deploying the official ICEkit Docker image directly this way.
