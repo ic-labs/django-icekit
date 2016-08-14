@@ -86,6 +86,9 @@ setuptools.setup(
             'mkdocs',
             'Werkzeug',
         ],
+        'django18': [
+            'Django>=1.8,<1.9',
+        ],
         'forms': [
             'django-forms-builder',
         ],
@@ -107,7 +110,6 @@ setuptools.setup(
             'django-supervisor',
             'django-test-without-migrations',
             'django-timezone',
-            'Django>=1.8,<1.9'
             'docutils',
             'easy_thumbnails',
             'flower',
