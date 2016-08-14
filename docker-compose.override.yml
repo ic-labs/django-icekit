@@ -19,7 +19,7 @@ services:
     build: .
     environment:
       MASTER_PASSWORD: # Get from environment
-      VIRTUALHOST: lvh.me
+      VIRTUALHOST: icekit.lvh.me
     expose:
       - 8000
     links:
