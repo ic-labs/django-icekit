@@ -131,6 +131,8 @@ setuptools.setup(
     },
     scripts=[
         'bin/bower-install.sh',
+        'bin/cronlock.sh',
+        'bin/entrypoint.sh',
         'bin/migrate.sh',
         'bin/npm-install.sh',
         'bin/pip-install.sh',

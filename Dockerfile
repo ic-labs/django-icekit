@@ -48,10 +48,6 @@ RUN pip install --no-cache-dir -e .[api,brightcove,dev,django18,forms,project,se
 RUN touch requirements-local.txt
 RUN md5sum requirements.txt requirements-local.txt > requirements.md5
 
-ENV CRONLOCK_COMMIT=a85c5851d303a411ddd28bedef86751b2e5453ea
-RUN wget -nv -O /usr/local/bin/cronlock "https://raw.githubusercontent.com/kvz/cronlock/${CRONLOCK_COMMIT}/cronlock"
-RUN chmod +x /usr/local/bin/cronlock
-
 ENV DOCKERIZE_VERSION=0.2.0
 RUN wget -nv -O - "https://github.com/jwilder/dockerize/releases/download/v${DOCKERIZE_VERSION}/dockerize-linux-amd64-v${DOCKERIZE_VERSION}.tar.gz" | tar -xz -C /usr/local/bin/ -f -
 

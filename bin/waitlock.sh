@@ -15,7 +15,7 @@ CRONLOCK_RELEASE="${CRONLOCK_RELEASE:-3600}"
 
 COUNT=0
 while true; do
-    cronlock "$@" && STATUS="$?" || STATUS="$?"
+    cronlock.sh "$@" && STATUS="$?" || STATUS="$?"
     if [[ "$STATUS" == 200 ]]; then
         if [[ "$COUNT" == 0 ]]; then
             echo "Waiting to acquire lock for command: $@"

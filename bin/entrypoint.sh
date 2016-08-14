@@ -9,6 +9,8 @@ EOF
 
 set -e
 
+ICEKIT_DIR=$(python -c 'import icekit, os; print os.path.dirname(icekit.__file__);')
+
 # Install Node modules.
 waitlock.sh npm-install.sh "$ICEKIT_DIR"
 waitlock.sh npm-install.sh "$ICEKIT_PROJECT_DIR"
@@ -18,9 +20,7 @@ waitlock.sh bower-install.sh "$ICEKIT_DIR"
 waitlock.sh bower-install.sh "$ICEKIT_PROJECT_DIR"
 
 # Install Python requirements.
-if [[ "$PWD" != "$ICEKIT_ROJECT_DIR" ]]; then
-    waitlock.sh pip-install.sh
-fi
+waitlock.sh pip-install.sh "$ICEKIT_DIR"
 waitlock.sh pip-install.sh "$ICEKIT_PROJECT_DIR"
 
 # Setup database.
@@ -28,6 +28,6 @@ source setup-postgres-env.sh
 waitlock.sh setup-postgres-database.sh
 
 # Apply migrations.
-waitlock.sh migrate.sh "$ICEKIT_PROJECT_DIR"
+waitlock.sh migrate.sh "$ICEKIT_PROJECT_DIR/var"
 
 exec "${@:-bash}"
