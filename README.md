@@ -65,7 +65,7 @@ Make a virtualenv and install required Python packages:
 
     $ pip install virtualenv
     $ virtualenv venv
-    (venv)$ pip install -r requirements.txt
+    (venv)$ pip install -r requirements-icekit.txt
 
 Create a database and apply migrations:
 

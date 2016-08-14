@@ -30,6 +30,7 @@ curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/projec
 curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/go.sh
 curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/icekit_settings.py
 curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/package.json
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/requirements-icekit.txt
 curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/requirements.txt
 
 chmod +x go.sh

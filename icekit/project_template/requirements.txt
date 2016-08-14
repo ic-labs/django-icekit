@@ -1,3 +1,0 @@
--e git+https://github.com/ixc/django-dynamic-fixture.git#egg=django-dynamic-fixture
--e git+https://github.com/pydanny-archive/django-wysiwyg.git#egg=django-wysiwyg
-django-icekit[api,brightcove,dev,django18,forms,project,search,test]
