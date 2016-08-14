@@ -74,7 +74,7 @@ Build an image and start the project:
 
 Now you can open the site:
 
-    http://lvh.me
+    http://icekit.lvh.me  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
 
 Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/master/docs/docker-quick-start.md)
 guide for more info on using Docker with an ICEkit project.
