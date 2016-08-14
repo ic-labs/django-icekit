@@ -36,7 +36,6 @@ RUN md5sum bower.json > bower.json.md5
 WORKDIR /opt/django-icekit/
 
 RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python
-ARG PIP_INDEX_URL=https://devpi.ixcsandbox.com/ic/dev/+simple
 
 COPY bin/ /opt/django-icekit/bin/
 COPY requirements.txt setup.py /opt/django-icekit/
@@ -63,7 +62,6 @@ RUN cd /usr/local/bin \
 ENV CRONLOCK_HOST=redis
 ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/icekit-project
 ENV PATH=/opt/django-icekit/bin:/opt/django-icekit/venv/bin:$PATH
-ENV PIP_INDEX_URL=$PIP_INDEX_URL
 ENV PIP_SRC=/opt/django-icekit/venv/src
 ENV PYTHONPATH=/opt/django-icekit:$PYTHONPATH
 ENV PYTHONUSERBASE=/opt/django-icekit/venv
