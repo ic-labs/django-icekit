@@ -15,7 +15,9 @@ cd "$DIR"
 
 # For some reason pip allows us to install sdist packages, but not editable
 # packages, when this directory doesn't exist. So make sure it does exist.
-mkdir -p "$PYTHONUSERBASE/lib/python2.7/site-packages"
+if [[ -n "$PYTHONUSERBASE" ]]; then
+    mkdir -p "$PYTHONUSERBASE/lib/python2.7/site-packages"
+fi
 
 touch requirements.txt requirements-local.txt requirements.md5
 
