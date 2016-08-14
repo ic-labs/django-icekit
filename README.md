@@ -67,14 +67,9 @@ Make a virtualenv and install required Python packages:
     $ virtualenv venv
     (venv)$ pip install -r requirements-icekit.txt
 
-Create a database and apply migrations:
-
-    (venv)$ createdb icekit
-    (venv)$ ./manage.py migrate  # Watch for the admin account credentials that get created on first run
-
 Start the project:
 
-    (venv)$ ./manage.py supervisor
+    (venv)$ ./go.sh manage.py supervisor  # Watch for the admin account credentials that get created on first run
 
 Now you can open the site in a browser:
 
