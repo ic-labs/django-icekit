@@ -130,6 +130,11 @@ setuptools.setup(
             'WebTest',
         ],
     },
+    entry_points={
+        'console_scripts': [
+            'manage.py = icekit.manage:main',
+        ],
+    },
     scripts=[
         'bin/bower-install.sh',
         'bin/cronlock.sh',
