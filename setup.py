@@ -5,6 +5,21 @@ import os
 import setuptools
 import sys
 
+
+# Make `pip install -e .` much faster.
+# See: https://bitbucket.org/pypa/setuptools/pull-requests/140/big-performance-fix-for-find_packages-by/diff#comment-18174057
+def find_packages(*paths):
+    for path in paths or ['.']:
+        path = os.path.abspath(path)
+        cwd = os.getcwd()
+        os.chdir(os.path.dirname(path))
+        for dirpath, dirnames, filenames in os.walk(os.path.basename(path)):
+            if '__init__.py' in filenames:
+                yield '.'.join(dirpath.split(os.path.sep))
+            else:
+                dirnames[:] = []
+        os.chdir(cwd)
+
 # Allow installation without git repository, e.g. inside Docker.
 if os.path.exists('.git'):
     kwargs = dict(
@@ -34,7 +49,7 @@ setuptools.setup(
     url='https://github.com/ic-labs/django-icekit',
     description='A modular content CMS by Interaction Consortium.',
     license='MIT',
-    packages=setuptools.find_packages(),
+    packages=find_packages('icekit'),
     include_package_data=True,
     install_requires=[
         'django-app-namespace-template-loader',
