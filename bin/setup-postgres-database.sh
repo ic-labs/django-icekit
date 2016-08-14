@@ -14,7 +14,7 @@ set -e
 COUNT=0
 until psql -l > /dev/null 2>&1; do
     if [[ "$COUNT" == 0 ]]; then
-        echo 'Waiting for PostgreSQL...'
+        echo "Waiting for PostgreSQL ($PGUSER@$PGHOST:$PGPORT)..."
     fi
     (( COUNT += 1 ))
     sleep 1
@@ -48,7 +48,7 @@ elif [[ -n "$SRC_PGDATABASE" ]]; then
     COUNT=0
     until PGPASSWORD="$SRC_PGPASSWORD" psql -l -h "$SRC_PGHOST" -p "$SRC_PGPORT" -U "$SRC_PGUSER" > /dev/null 2>&1; do
         if [[ "$COUNT" == 0 ]]; then
-            echo 'Waiting for PostgreSQL...'
+            echo "Waiting for PostgreSQL ($SRC_PGUSER@$SRC_PGHOST:$SRC_PGPORT)..."
         fi
         (( COUNT += 1 ))
         sleep 1
