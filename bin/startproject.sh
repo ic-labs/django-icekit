@@ -71,10 +71,6 @@ Build an image and start the project:
     $ docker-compose build
     $ docker-compose up
 
-Start the project:
-
-    $ docker-compose up
-
 Now you can open the site:
 
     http://lvh.me
