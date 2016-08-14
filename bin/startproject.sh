@@ -31,9 +31,9 @@ curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/projec
 curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/icekit_settings.py
 curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/package.json
 curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/requirements-icekit.txt
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/requirements.txt
 
 chmod +x go.sh
+touch requirements.txt
 
 # Use basename of destination directory as Docker Hub repository name.
 sed -i -e "s/icekit-project/$(basename $DEST_DIR)/" docker-compose.yml
