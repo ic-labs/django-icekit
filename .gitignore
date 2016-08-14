@@ -4,6 +4,7 @@
 **/*.swp
 **/.DS_Store
 **/npm-debug.log
+**/requirements-local.txt
 /*.egg-info/
 /.coverage
 /.eggs/
@@ -16,5 +17,4 @@
 /icekit/node_modules/
 /icekit-project/
 /initial_data.sql
-/requirements-local.txt
 /venv/

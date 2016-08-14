@@ -5,6 +5,7 @@
 **/*.swp
 **/.DS_Store
 **/npm-debug.log
+**/requirements-local.txt
 *.egg-info/
 .coverage
 .eggs/
@@ -17,5 +18,4 @@ icekit/bower_components/
 icekit/node_modules/
 initial_data.sql
 project/
-requirements-local.txt
 venv/
