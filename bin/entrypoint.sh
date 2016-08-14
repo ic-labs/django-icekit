@@ -11,10 +11,8 @@ set -e
 
 export ICEKIT_DIR=$(python -c 'import icekit, os; print os.path.dirname(icekit.__file__);')
 export PIP_DISABLE_PIP_VERSION_CHECK=on
-export PIP_SRC="$ICEKIT_PROJECT_DIR/venv/src"
 export PROJECT_NAME=$(basename "$ICEKIT_PROJECT_DIR")
 export PYTHONHASHSEED=random
-export PYTHONUSERBASE="$ICEKIT_PROJECT_DIR/venv"
 export PYTHONWARNINGS=ignore
 
 # Install Node modules.
