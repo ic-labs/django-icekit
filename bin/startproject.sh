@@ -30,7 +30,6 @@ wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project
 wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/go.sh
 wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/icekit_settings.py
 wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/package.json
-wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/README.md
 wget -nv https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/project_template/requirements.txt
 
 chmod +x go.sh
