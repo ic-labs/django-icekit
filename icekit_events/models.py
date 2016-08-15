@@ -21,8 +21,6 @@ from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
 from polymorphic_tree.models import PolymorphicModel, PolymorphicTreeForeignKey
 from timezone import timezone
 
-from model_utils.managers import PassThroughManagerMixin
-
 from icekit.publishing.models import PublishingModel
 
 from . import appsettings, validators, utils
@@ -574,9 +572,8 @@ class OccurrenceQueryset(QuerySet):
             )
 
 
-class OccurrenceManager(PassThroughManagerMixin, models.Manager):
-    _queryset_class = OccurrenceQueryset
-    use_for_related_fields = True
+OccurrenceManager = models.Manager.from_queryset(OccurrenceQueryset)
+OccurrenceManager.use_for_related_fields = True
 
 
 @encoding.python_2_unicode_compatible
