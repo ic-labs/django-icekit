@@ -36,7 +36,7 @@ chmod +x go.sh
 touch requirements.txt
 
 # Use basename of destination directory as Docker Hub repository name.
-sed -i -e "s/icekit-project/$(basename $DEST_DIR)/" docker-compose.yml
+sed -e "s/icekit-project/$(basename $DEST_DIR)/" -i '' docker-compose.yml
 
 if [[ -n $(which git) ]]; then
     echo
