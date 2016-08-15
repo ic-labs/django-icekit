@@ -7,8 +7,10 @@ from fluent_pages.models import UrlNode
 from fluent_pages.models.managers import UrlNodeQuerySet
 
 try:
+    # Polymorphic >= 0.8
     from polymorphic.models import PolymorphicModel
 except ImportError:
+    # Polymorphic < 0.8
     from polymorphic.polymorphic_model import PolymorphicModel
 
 from mptt.models import MPTTModel
@@ -16,10 +18,9 @@ from mptt.models import MPTTModel
 from . import monkey_patches
 from .managers import PublishingQuerySet, PublishingPolymorphicManager, \
     PublishingUrlNodeManager, UrlNodeQuerySetWithPublishingFeatures, \
-    DraftItemBoobyTrap, _queryset_iterator
+    _queryset_iterator
 from .models import PublishingModel
-from .middleware import is_draft_request_context, \
-    is_publishing_middleware_active
+from .middleware import is_draft_request_context
 
 
 def monkey_patch_override_method(klass):
@@ -199,29 +200,23 @@ class AppConfig(AppConfig):
                 # attribute name wherever that class is.
                 try:
                     qs_class = manager_cls.queryset_class
-                    qs_class_attr = 'queryset_class'
                 except AttributeError:
                     qs_class = manager_cls._queryset_class
-                    qs_class_attr = '_queryset_class'
 
                 # If queryset is a descendent of our own `PublishingQuerySet`
                 # we only need to enable the exchange mechanism so it will
                 # happen by default
                 if issubclass(qs_class, PublishingQuerySet):
-                    #print("Set `exchange_on_published` in queryset class %s.%s"
-                    #      % (model, field_name))
                     qs_class.exchange_on_published = True
                 # If the queryset is not based on `PublishingQuerySet` but is
                 # a `UrlNodeQuerySet` we replace that QS class with our own
                 # customised version that overrides the `published()` method.
                 elif issubclass(qs_class, UrlNodeQuerySet):
-                    #print("Override of UrlNode queryset class for %s.%s"
-                    #      % (model, field_name))
-                    setattr(manager_cls, qs_class_attr,
-                            UrlNodeQuerySetWithPublishingFeatures)
+                    descriptor.related_manager_cls = manager_cls.from_queryset(
+                        UrlNodeQuerySetWithPublishingFeatures)
                     # Override published method on manager as well, so our
                     # queryset's implementation of `published()` is used
-                    manager_cls.published = \
+                    descriptor.related_manager_cls.published = \
                         lambda self, **kwargs: self.all().published(**kwargs)
 
             # Skip any models that don't have publishing features
