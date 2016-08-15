@@ -490,15 +490,15 @@ class TestPublishingModelAndQueryset(TestCase):
         # Draft
         self.assertEqual(
             set([self.page_1]),
-            set(test_page.related_pages.all().draft()))
+            set(test_page.related_pages.draft()))
         # Visible - published items unless we are in privileged context
         self.assertEqual(
             set([self.page_1.get_published()]),
-            set(test_page.related_pages.all().visible()))
+            set(test_page.related_pages.visible()))
         with override_draft_request_context(True):
             self.assertEqual(
                 set([self.page_1]),
-                set(test_page.related_pages.all().visible()))
+                set(test_page.related_pages.visible()))
 
 
 class TestDjangoDeleteCollectorPatchForProxyModels(TransactionTestCase):
@@ -540,7 +540,7 @@ class TestDjangoDeleteCollectorPatchForProxyModels(TransactionTestCase):
         )
 
     def tearDown(self):
-        LayoutPage.objects.delete()
+        LayoutPage.objects.all().delete()
 
     # Test to trigger DB integrity errors if Fluent Page deletion is not
     # properly handled/patched
