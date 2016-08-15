@@ -10,7 +10,7 @@ services:
       - redis
   celeryflower:
     environment:
-      VIRTUALHOST: flower.lvh.me
+      VIRTUAL_HOST: flower.lvh.me
     expose:
       - 5555
     links:
@@ -19,7 +19,7 @@ services:
     build: .
     environment:
       MASTER_PASSWORD: # Get from environment
-      VIRTUALHOST: icekit.lvh.me
+      VIRTUAL_HOST: icekit.lvh.me
     expose:
       - 8000
     links:
