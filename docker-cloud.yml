@@ -45,8 +45,6 @@ celeryflower:
     - django
 django:
   command: entrypoint.sh manage.py runserver 0.0.0.0:8000
-  environment:
-    VIRTUAL_HOST: www.*
   extends: common
   expose:
     - 8000
