@@ -36,6 +36,7 @@ celeryflower:
   command: entrypoint.sh celery -A icekit.project flower
   environment:
     VIRTUAL_HOST: flower.*
+    VIRTUAL_HOST_WEIGHT: 1
   extends: common
   expose:
     - 5555
@@ -45,6 +46,8 @@ celeryflower:
     - django
 django:
   command: entrypoint.sh manage.py runserver 0.0.0.0:8000
+  environment:
+    VIRTUAL_HOST: "*"
   extends: common
   expose:
     - 8000

@@ -11,6 +11,7 @@ services:
   celeryflower:
     environment:
       VIRTUAL_HOST: flower.*
+      VIRTUAL_HOST_WEIGHT: 1
     expose:
       - 5555
     links:
@@ -19,6 +20,7 @@ services:
     build: .
     environment:
       MASTER_PASSWORD: # Get from environment
+      VIRTUAL_HOST: "*"
     expose:
       - 8000
     links:
