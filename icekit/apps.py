@@ -17,3 +17,15 @@ class AppConfig(AppConfig):
         Import plugins from installed apps.
         """
         autodiscover_modules('plugins')
+
+        # Monkey-patch `RedirectNodeAdmin` to replace `fieldsets` attribute
+        # with `base_fieldsets` to avoid infinitie recursion bug when using
+        # django-polymorphic>=0.8, see:
+        # https://github.com/django-fluent/django-fluent-pages/issues/110
+        from django.conf import settings
+        if 'fluent_pages.pagetypes.redirectnode' in settings.INSTALLED_APPS:
+            from fluent_pages.pagetypes.redirectnode.admin \
+                import RedirectNodeAdmin
+            if getattr(RedirectNodeAdmin, 'fieldsets', None):
+                RedirectNodeAdmin.base_fieldsets = RedirectNodeAdmin.fieldsets
+                RedirectNodeAdmin.fieldsets = None
