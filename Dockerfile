@@ -37,7 +37,6 @@ WORKDIR /opt/django-icekit/
 
 RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python
 
-COPY bin/ /opt/django-icekit/bin/
 COPY requirements.txt setup.py /opt/django-icekit/
 RUN pip install --no-cache-dir -r requirements.txt
 RUN touch requirements-local.txt
@@ -60,8 +59,9 @@ RUN cd /usr/local/bin \
 # ENV LD_PRELOAD=/libpreload.so
 
 ENV CRONLOCK_HOST=redis
+ENV ICEKIT_DIR=/opt/django-icekit/icekit
 ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/icekit-project
-ENV PATH=/opt/django-icekit/bin:/opt/django-icekit/venv/bin:$PATH
+ENV PATH=/opt/django-icekit/icekit/bin:/opt/django-icekit/venv/bin:$PATH
 ENV PIP_SRC=/opt/django-icekit/venv/src
 ENV PYTHONHASHSEED=random
 ENV PYTHONPATH=/opt/django-icekit:$PYTHONPATH

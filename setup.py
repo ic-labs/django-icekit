@@ -149,22 +149,5 @@ setuptools.setup(
             'WebTest',
         ],
     },
-    entry_points={
-        'console_scripts': [
-            'manage.py = icekit.manage:main',
-        ],
-    },
-    scripts=[
-        'bin/bower-install.sh',
-        'bin/cronlock.sh',
-        'bin/entrypoint.sh',
-        'bin/migrate.sh',
-        'bin/npm-install.sh',
-        'bin/pip-install.sh',
-        'bin/setup-postgres-database.sh',
-        'bin/setup-postgres-env.sh',
-        'bin/startproject.sh',
-        'bin/waitlock.sh',
-    ],
     **kwargs
 )
