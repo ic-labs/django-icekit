@@ -624,4 +624,4 @@ class ICEKitFluentPagesParentAdminMixin(
         PublishingFluentPagesParentAdminMixin, UrlNodeParentAdmin,
 ):
     """ Add publishing features for FluentPage parent admin (listing) pages """
-    pass
+    list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
