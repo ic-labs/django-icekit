@@ -2,4 +2,5 @@ from . import abstract_models
 
 
 class LayoutPage(abstract_models.AbstractLayoutPage):
-    pass
+    class Meta:
+        verbose_name = "Layout page"

@@ -1,13 +1,15 @@
 # Changelog
 
-## 0.1 (in development)
-  * Add template tags to obtain slot contents via a descriptor.
-  * Added `PlaceholderDescriptor` to allow slot contents to be accessed directly. Useful for 
-  templates.
-  * Initial development
+## (in development)
 
-Features:
+Backwards incompatible changes:
 
-  * Created app from [ixc-app-template]
+  * Make the `icekit.plugins.image` app "portable". You will need to run a raw
+    SQL statement manually to fix Django's migration history when upgrading
+    an existing project. See [portable apps](portable-apps.md).
 
-[ixc-app-template]: https://github.com/ixc/ixc-app-template/
+        UPDATE django_migrations SET app='icekit_plugins_image' WHERE app='image';
+
+## 0.9 (11 August 2016)
+
+  * Initial release.

@@ -29,8 +29,13 @@ customisation is required, without complicated database migrations.
 
     These values won't break when the app package is copied to a new location.
 
-  * Manually derive the `AppConfig.label` attribute from `AppConfig.name`,
-    e.g. by replacing `.` with `_`.
+  * Hardcode the `AppConfig.label` attribute, deriving from the canonical
+    `AppConfig.name`. For example, by replacing `.` with `_`:
+
+        # apps.py
+        class AppConfig(AppConfig):
+            name = ...
+            label = 'icekit_page_types_layout_page'
 
     By default, Django only uses the last component of the app name, which
     might result in labels that are likely to conflict with other apps.

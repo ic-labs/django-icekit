@@ -53,7 +53,7 @@ class AbstractImageItem(ContentItem):
     An image from the Image model.
     """
     image = models.ForeignKey(
-        'image.Image',
+        'icekit_plugins_image.Image',
         help_text=_('An image from the image library.')
     )
 

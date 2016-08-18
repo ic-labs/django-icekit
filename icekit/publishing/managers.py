@@ -3,6 +3,9 @@ from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
 from django.utils.timezone import now
 
+from polymorphic.manager import PolymorphicManager
+from polymorphic.query import PolymorphicQuerySet
+
 from fluent_pages.models.managers import UrlNodeQuerySet, UrlNodeManager
 from fluent_pages.models.db import UrlNode
 
@@ -318,6 +321,10 @@ class PublishingQuerySet(QuerySet):
             .only(*field_names, **kwargs)
 
 
+class PublishingPolymorphicQuerySet(PublishingQuerySet, PolymorphicQuerySet):
+    pass
+
+
 class PublishingUrlNodeQuerySet(PublishingQuerySet, UrlNodeQuerySet):
     """
     Publishing queryset with customisations for UrlNode support.
@@ -405,6 +412,15 @@ class PublishingManager(PassThroughManagerMixin, models.Manager):
 
     def get_queryset(self):
         return PublishingQuerySet(self.model, using=self._db).all()
+
+
+class PublishingPolymorphicManager(PolymorphicManager, PublishingManager):
+    """
+    Publishing manager with polymorphic support and customisations.
+    """
+    queryset_class = PublishingPolymorphicQuerySet
+    # Tell Django that related fields also need to use this manager:
+    use_for_related_fields = True
 
 
 class PublishingUrlNodeManager(UrlNodeManager, PublishingManager):

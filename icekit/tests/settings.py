@@ -43,7 +43,7 @@ INSTALLED_APPS = (
     'fluent_pages.pagetypes.fluentpage',
     'haystack',
     'icekit',
-    'icekit.page_types.article',
+    'icekit.articles',
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
     'icekit.pages_api',

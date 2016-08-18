@@ -6,10 +6,10 @@ from icekit.publishing.models import PublishableFluentContentsPage
 class AbstractUnpublishableSearchPage(FluentContentsPage):
     class Meta:
         abstract = True
-        verbose_name = 'Search Page'
+        verbose_name = 'Search page'
 
 
 class AbstractSearchPage(PublishableFluentContentsPage):
     class Meta:
         abstract = True
-        verbose_name = 'Search Page'
+        verbose_name = 'Search page'

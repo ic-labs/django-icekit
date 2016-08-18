@@ -1,3 +1,5 @@
+# OBSOLETE! - Go to https://github.com/ic-labs/django-icekit
+
 # Getting started
 
 The easiest way to run an ICEkit project is with Docker. It works on OS X,
@@ -9,12 +11,12 @@ guide and then come back here.
 If you are still not yet ready for Docker, check out our [Manual Setup][1]
 guide, which covers all the things that Docker would otherwise take care of.
 
-[0]: https://github.com/ixc/django-icekit/docs/docker-quick-start.md
-[1]: https://github.com/ixc/django-icekit/docs/manual-setup-guide.md
+[0]: https://github.com/ic-labs/django-icekit/docs/docker-quick-start.md
+[1]: https://github.com/ic-labs/django-icekit/docs/manual-setup-guide.md
 
 # Creating a new ICEkit project
 
-    $ bash <(curl -L http://bit.ly/ixc-project-template) <project_name> [destination_dir]
+    $ bash <(curl -L https://raw.githubusercontent.com/ixc/ixc-project-template/master/startproject.sh) <project_name> [destination_dir]
 
 This script will create a new ICEkit project in a directory named
 `<project_name>` in the current working directory (or `[destination_dir]`),
