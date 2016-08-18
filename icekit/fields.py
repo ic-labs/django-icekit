@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
+from icekit.validators import RelativeURLValidator
 
 from . import validators
 
@@ -32,3 +33,8 @@ class TemplateNameField(six.with_metaclass(models.SubfieldBase, models.CharField
         if self.plugin_class:
             self._choices = self.plugin_class.get_all_choices(field=self)
         return super(TemplateNameField, self).formfield(**kwargs)
+
+
+class ICEkitURLField(models.URLField):
+    default_validators = [RelativeURLValidator()]
+    pass
