@@ -1,3 +1,3 @@
 # -e git+https://github.com/ixc/ixc-redactor.git#egg=ixc-redactor
 -e .[api,brightcove,dev,django18,forms,project,search,test]
-https://github.com/ixc/django-dynamic-fixture/archive/ixc/master.zip
+git+https://github.com/ixc/django-dynamic-fixture.git#egg=django-dynamic-fixture
