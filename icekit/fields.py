@@ -1,3 +1,4 @@
+from django import forms
 from django.db import models
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
@@ -36,5 +37,9 @@ class TemplateNameField(six.with_metaclass(models.SubfieldBase, models.CharField
 
 
 class ICEkitURLField(models.URLField):
-    default_validators = [RelativeURLValidator()]
-    pass
+    default_validators = [RelativeURLValidator(verify_exists=True)]
+    description = _("URL")
+
+    def formfield(self, **kwargs):
+        # skip the URLfield's formfield() as it repeats the validation.
+        return models.CharField.formfield(self, **kwargs)
