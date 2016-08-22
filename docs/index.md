@@ -41,7 +41,7 @@ Includes the following features:
 
 Create a new ICEkit project from our project template:
 
-    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/feature/project/icekit/bin/startproject.sh) [destination_dir]
+    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/bin/startproject.sh) [destination_dir]
 
 ## Flexible Layouts
 
