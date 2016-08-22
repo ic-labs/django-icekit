@@ -1,3 +1,0 @@
-# Forked, pre-release and private dependencies.
-
--e git+https://github.com/django-nose/django-nose.git#egg=django-nose

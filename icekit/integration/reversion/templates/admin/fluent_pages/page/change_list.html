@@ -1,0 +1,14 @@
+{% extends "fluent_pages:admin/fluent_pages/page/change_list.html" %}
+
+{% comment %}
+    Add blocks from `reversion/change_list.html`.
+{% endcomment %}
+
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+    {% if not is_popup and has_add_permission and has_change_permission %}
+        <li><a href="{% url opts|admin_urlname:'recoverlist' %}" class="recoverlink">{% blocktrans with cl.opts.verbose_name_plural|escape as name %}Recover deleted {{name}}{% endblocktrans %}</a></li>
+    {% endif %}
+    {{block.super}}
+{% endblock %}

@@ -1,0 +1,48 @@
+<div class="widget widget-multi-content">
+	<header>
+		<h2>{{ app.verbose_name }}</h2>
+		{# drag and drop handles, one day #}
+		{% comment %}
+		<ul class="widget-controls">
+			<li class="widget-control widget-control-close">×</li>
+			<li class="widget-control widget-control-drag">⣿</li>
+		</ul>
+		{% endcomment %}
+	</header>
+	{{ app.icon_html|safe }}
+	{% for model in app.models %}
+		<div class="multi-content-group">
+			{% if model.perms.change %}
+				<a href="{{ model.admin_url }}">
+			{% endif %}
+			<h3>{% firstof model.verbose_name_plural model.verbose_name|pluralize model.name %}</h3>
+			{% if model.perms.change %}
+				</a>
+			{% endif %}
+			<ul class="model-tools">
+				{% if model.perms.add %}
+					{% if model.polymorphic_classes|length > 1 %}
+						<li class="has-select">
+							{# The anchor's href is set during the init of `icekit_dashboard.js` #}
+							<a class="js-add">Add</a>
+							<select name="type-select" class="type-select">
+								{% for ctype_id, name in model.polymorphic_classes %}
+									<option value="{{ model.add_url }}?ct_id={{ ctype_id }}" data-manage="{{ model.admin_url }}?ct_id={{ ctype_id }}"{% if forloop.first and not app.default_poly_child or app.default_poly_child == ctype_id %} selected{% endif %}>
+										{{ name }}
+									</option>
+								{% endfor %}
+							</select>
+						</li>
+					{% else %}
+						<li>
+							<a class="js-add" href="{{ model.add_url }}">Add <i class="fa fa-plus"></i></a>
+						</li>
+					{% endif %}
+				{% endif %}
+				{% if model.perms.change %}
+					<li><a href="{{ model.admin_url }}">Manage <i class="fa fa-pencil"></i></a></li>
+				{% endif %}
+			</ul>
+		</div>
+	{% endfor %}
+</div>

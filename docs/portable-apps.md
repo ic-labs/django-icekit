@@ -84,7 +84,6 @@ following changes:
 
   * Update foreign key and many to many fields in all apps.
 
-  * Execute the following SQL diretly on the database for your Create a new migration in your project, depending on the latest migration
-    from the portable app, and with the following `RunSQL` operation:
+  * Execute the following SQL diretly on the database for your renamed apps:
 
-        migrations.RunSQL("UPDATE django_migrations SET app='{new app label}' WHERE app='{old app label}';"),
+        UPDATE django_migrations SET app='{new app label}' WHERE app='{old app label}';

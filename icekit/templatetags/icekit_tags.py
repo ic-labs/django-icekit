@@ -34,3 +34,13 @@ def get_slot_contents_tag(descriptor, slot_name):
     `{% get_slot_contents <slot descriptor> <slot name> as <variable_name> %}`
     """
     return get_item(descriptor, slot_name)
+
+
+@register.inclusion_tag('icekit/templatetags/link_share.html',
+                        takes_context=True)
+def link_share(context, text):
+    return {
+        'text': text,
+        'ICEKIT_SHARE_USERNAME': context.get('ICEKIT_SHARE_USERNAME', ''),
+        'ICEKIT_SHARE_KEY': context.get('ICEKIT_SHARE_KEY', ''),
+    }

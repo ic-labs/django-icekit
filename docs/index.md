@@ -12,11 +12,10 @@ Includes the following features:
       * TODO: Add layouts and modular content to 3rd party models without
         migrations.
   * Page type plugins:
+      * `article_page` - integrates with Fluent Pages
       * `layout_page` - integrates with our layouts system.
       * `search_page` - integrates with [Haystack].
   * Modular content plugins:
-      * `blog_post` - TODO
-      * `brightcove` - TODO
       * `child_pages` - TODO
       * `faq` - TODO
       * `horizontal_rule` - TODO
@@ -146,12 +145,6 @@ Would result in these choices::
     ('myproject/layouts/foo.html', 'My Project: foo.html')
     ('myproject/layouts/bar/baz.html', 'My Project: bar/baz.html')
 
-#### ICEkitLayoutPlugin
-
-Adds a default template, to be sure there is always at least one available:
-
-    ('icekit/layouts/default.html', 'ICEkit: Default'),
-
 #### Creating a Custom TemplateNameFieldChoicesPlugin
 
 Subclass `TemplateNameFieldChoicesPlugin` and define a `get_choices()` method
@@ -180,6 +173,15 @@ The template for a layout should define placeholders for modular content:
 
 Models that have modular content will have a `layout` field in the admin change
 form, that will only show layouts for the model being edited.
+
+## Article Page Type
+
+The article page type is designed to be used with ``fluent_pages`` to enable
+add it to `INSTALLED_APPS` setting:
+
+    INSTALLED_APPS += (
+        'icekit.page_types.article',
+    )
 
 ## Layout Page Type
 

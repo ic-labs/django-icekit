@@ -46,11 +46,21 @@ class PageAnchorItemTestCase(WebTest):
             self.page_1,
             anchor_name='Second Jump Link'
         )
+        self.page_1.publish()
+        self.page_1_published = self.page_1.get_published()
 
     def test_renders_anchor(self):
-        response = self.app.get(self.page_1.get_absolute_url())
-        response.mustcontain('<a name="jump-link-1"></a>')
+        response = self.app.get(self.page_1_published.get_absolute_url())
+        published_anchor_1 = self.page_1_published.contentitem_set.get(
+            pageanchoritem__anchor_name='Jump Link')
+        response.mustcontain(
+            '<a class="page-anchor" name="jump-link-%d"></a>'
+            % published_anchor_1.pk)
 
     def test_increments_anchor_id(self):
-        response = self.app.get(self.page_1.get_absolute_url())
-        response.mustcontain('<a name="second-jump-link-2"></a>')
+        response = self.app.get(self.page_1_published.get_absolute_url())
+        published_anchor_1 = self.page_1_published.contentitem_set.get(
+            pageanchoritem__anchor_name='Jump Link')
+        response.mustcontain(
+            '<a class="page-anchor" name="second-jump-link-%d"></a>'
+            % (published_anchor_1.pk + 1))

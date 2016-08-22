@@ -111,3 +111,33 @@ This will then let us work on the contents later in the template e.g.
     {% endfor %}
 
 If a placeholder does not exist `None` will be returned.
+
+
+## Frequently Asked Questions
+
+### How do I target a specific page layout with a plugin?
+
+[Defining a 'placeholder slot'](https://django-fluent-contents.readthedocs.org/en/latest/templatetags.html#cms-page-placeholders)
+
+[Configuring the available plugins](https://django-fluent-contents.readthedocs.org/en/latest/configuration.html#configuration)
+
+### How do I make changes to the fields on a plugin that lives in the venv? How do I add/remove fields in the admin?
+
+Inherit from the plugin, make changes as a subclass, use `fieldsets` (property on the content plugin) to hide fields.
+
+Refer to [fluent-contents](https://django-fluent-contents.readthedocs.org/en/latest/index.html) - specifically [Customizing the admin interface](https://django-fluent-contents.readthedocs.org/en/latest/newplugins/admin.html)
+
+### How do I know what plugins are available in IC repos so that I don't roll my own?
+
+Look through IC repos (check Icekit/Glamkit, specifically the plugins directory). Also ask people.
+
+### How much of icekit is django-fluent and how much of it has been rolled bespoke - what's our maintenance debt?
+
+Currently fluent pages is running a branch that adds support for reversions. Sometime soon, this should all get merged into the fluent-pages repo.
+
+Everything else is just extensions and normal stuff.
+
+### When something breaks in the new system, what's the order of people that I should ask for help?
+
+Backend: Tai Lee, Addy Yeow, James Murty, Mark Finger, Richard Antecki
+Frontend: Alice Athens

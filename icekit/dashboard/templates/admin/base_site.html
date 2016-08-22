@@ -1,0 +1,56 @@
+{% extends "admin/base.html" %}
+
+{% comment %}
+	* Set verbose site name as title.
+	* Load Bootstrap and ICEkit dashboard CSS and JS.
+	* Load jQuery into global namespace, because Django removes it and some
+	  code expects it.
+	* Add branding.
+{% endcomment %}
+
+{% load static compress %}
+
+{% block title %}{{ title }} | {{ SITE_VERBOSE_NAME|default:_('ICEkit Admin') }}{% endblock %}
+
+{% block extrastyle %}
+	{% compress css %}
+		<link type="text/less" rel="stylesheet" href="{% static 'admin/css/icekit_dashboard.less' %}" />
+	{% endcompress %}
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+{% endblock %}
+
+{% block extrahead %}
+	{% compress js %}
+		<script src="{% static 'jquery/dist/jquery.js' %}"></script>
+	    <script src="{% static 'admin/js/icekit_dashboard.js' %}"></script>
+	{% endcompress %}
+{% endblock %}
+
+{% block branding %}
+	<a href="{% url 'admin:index' %}">
+		<img id="site-logo" src="{% block header-image %}{% static 'admin/img/header-brand.png' %}{% endblock header-image %}" title="{{ SITE_VERBOSE_NAME }}">
+		<h1 id="site-name">Site Admin</h1>
+	</a>
+{% endblock %}
+
+{% block footer %}
+	<footer class="footer">
+		<section class="footer-section footer-left">
+			{% block footer-name %}{{ SITE_VERBOSE_NAME }}{% endblock %}
+		</section>
+		<section class="footer-section footer-right">
+			<a href="/">{% block site-name %}{% firstof SITE_NAME "This site" %}{% endblock %}</a>
+			is built with <a href="http://interaction.net.au">ICEkit</a>
+			<a href="http://interaction.net.au" id="ic-logo">
+				<div class="ic-logo-dot"></div>
+				<div class="ic-logo-dot"></div>
+				<div class="ic-logo-dot"></div>
+			</a>
+		</section>
+	</footer>
+	<script>
+		$(function() {
+			$('footer.footer').appendTo('body');
+		});
+	</script>
+{% endblock %}

@@ -58,13 +58,15 @@ class MapItemTestCase(WebTest):
             share_url=self.share_url,
         )
 
+        self.page_1.publish()
+
     def test_regex_finds_values(self):
-        response = self.app.get(self.page_1.get_absolute_url())
+        response = self.app.get(self.page_1.get_published().get_absolute_url())
         response.mustcontain('Chippen+St,+Chippendale')
         response.mustcontain('-33.8877043,151.2005881,17z')
 
     def test_map_renders(self):
-        response = self.app.get(self.page_1.get_absolute_url())
+        response = self.app.get(self.page_1.get_published().get_absolute_url())
         response.mustcontain('<iframe')
 
     def test_clean(self):

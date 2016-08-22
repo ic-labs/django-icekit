@@ -1,0 +1,12 @@
+{# NOTE: Ensure jQuery and link_share.js are loaded on page #}
+{% if ICEKIT_SHARE_USERNAME and ICEKIT_SHARE_KEY %}
+  <div class="share-button js-share">
+    <span class="share-button__share">
+      <span class='share-button__text'>{{ text }}</span>
+      <input type="text" readonly="true" class='share-button__input js-short-url'>
+      <a href="#" style="display:none;" class='share-button__input'></a>{# Used as iOS fallback #}
+      <i class="sficon large sficon-share share-button__icon"></i>
+    </span>
+    <span class="share-button__copied">Link Copied</span>
+  </div>
+{% endif %}

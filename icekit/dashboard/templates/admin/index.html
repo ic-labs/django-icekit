@@ -1,0 +1,95 @@
+{% extends "admin:admin/index.html" %}
+
+{% comment %}
+	* Load FontAwesome CSS.
+	* Style app list with featured apps.
+	* Remove sidebar.
+{% endcomment %}
+
+{% load i18n admin_static dashboard_tags compress %}
+
+{% block content_title %}{% endblock %}
+
+{% block stylesheet %}{% endblock %}
+
+{% block extrastyle %}
+	{% compress css %}
+		{# Bootstrap, then default admin styles, then our styles. #}
+		{# This avoids overriding the admin with Bootstrap, and allows us to override anything. #}
+		<link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.css' %}" />
+		<link rel="stylesheet" href="{% static 'admin/css/base.css' %}" />
+	{% endcompress %}
+	{{ block.super }}
+{% endblock %}
+
+{% block extrahead %}
+	{{ block.super }}
+	{% compress js %}
+		<script src="{% static 'bootstrap/dist/js/bootstrap.js' %}"></script>
+	{% endcompress %}
+{% endblock %}
+
+{% block content %}
+	<div class="container-fluid">
+		<div class="row">
+			{% for app in app_list|filter_featured_apps:request %}
+				<div class="col-md-4">
+					{% include "admin/app_widget.html" with app=app %}
+				</div>
+			{% endfor %}
+
+			{# the usual app list goes here #}
+			{% if app_list %}
+				<div class="col-md-12">
+					<div class="widget widget-other">
+						<header>
+							<h2>{{ title }}</h2>
+							<!--<ul class="widget-controls">-->
+								<!--<li class="widget-control widget-control-close">×</li>-->
+								<!--<li class="widget-control widget-control-drag">⣿</li>-->
+							<!--</ul>-->
+						</header>
+
+						<div class="row">
+							{% for column in app_list|partition_app_list:3 %}
+								<div class="col-md-4">
+									<ul class="other-contents-list">
+										{% for app in column %}
+											<li class="mini caps quiet">
+												{% if app.app_url %}
+													<a href="{{ app.app_url }}">{{ app.name }}</a>
+												{% else %}
+													{{ app.name }}
+												{% endif %}
+											</li>
+											{% for model in app.models %}
+												<li>
+													<h3>
+														{% if model.admin_url %}
+															<a href="{{ model.admin_url }}">{{ model.name }}</a>
+														{% else %}
+															{{ model.name }}
+														{% endif %}
+													</h3>
+													<ul class="model-tools model-tools-compact">
+														{% if model.add_url %}
+															<li><a href="{{ model.add_url }}" title="Add [content-type-singular-name]">
+																<i class="fa fa-plus"></i>
+															</a></li>
+														{% endif %}
+													</ul>
+												</li>
+											{% endfor %}
+										{% endfor %}
+									</ul>
+								</div>
+							{% endfor %}
+						</div>
+					</div>
+				</div>
+			{% endif %}
+		</div>
+	</div>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

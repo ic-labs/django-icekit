@@ -1,0 +1,63 @@
+{% extends non_publishing_change_form_template %}
+
+{% load i18n admin_modify admin_static admin_urls polymorphic_admin_tags compress publishing_tags %}
+
+{% block breadcrumbs %}
+	{% breadcrumb_scope base_opts %}
+		<div class="breadcrumbs">
+			<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+			&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+			&rsaquo; {% if has_change_permission %}<a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
+			&rsaquo; {% if add %}{% trans 'Add' %} {{ opts.verbose_name }}{% else %}{{ original|truncatewords:"18" }}{% endif %}
+		</div>
+	{% endbreadcrumb_scope %}
+{% endblock %}
+
+{% block extrahead %}
+	{{ block.super }}
+	<script type="text/javascript">
+		fluent_layouts.ct_id = {{ content_type_id }};
+		fluent_layouts.layout_url = '{% url "admin:icekit_layout_changelist" %}';
+		var csrf_token = '{{ csrf_token }}';
+	</script>
+	<style>
+		/* style publish links to look like other buttons */
+		.submit-row a.button {
+			margin: 0 2px 0 5px;
+			padding: 10px 15px;
+		}
+		/* hide fluent's "status" field which is obsoleted (TODO: actually remove it from the form/model) */
+		fieldset .form-row.field-status {
+			display: none;
+		}
+	</style>
+{% endblock %}
+
+
+{% block submit_buttons_bottom %}
+	<div class="row">
+		<div class="col-md-12">
+			{{ block.super }}
+		</div>
+	</div>
+	{% if has_publish_permission or preview_draft_btn %}
+		<div class="row">
+			<div class="col-md-12">
+				<div class="submit-row">
+					{% if has_been_published and is_dirty %}<p style="clear: both;"><em><small>This version is newer than the published version</small></em></p>{% endif %}
+					{% if has_publish_permission %}
+						{% if publish_btn %}
+							<a href="{{ publish_btn }}" class="button default">Publish</a>
+						{% endif %}
+						{% if unpublish_btn %}
+							<a href="{{ unpublish_btn }}" class="button default">Unpublish</a>
+						{% endif %}
+					{% endif %}
+					{% if preview_draft_btn %}
+						<a href="{{ original.get_absolute_url|get_draft_url }}" target="_blank" class="button default">Preview draft <i class="fa fa-external-link"></i></a>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	{% endif %}
+{% endblock %}

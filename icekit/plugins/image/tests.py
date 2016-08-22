@@ -52,9 +52,11 @@ class ImageItem(WebTest):
         self.assertEqual(self.image_item_1.caption, test_text)
 
     def test_render(self):
-        response = self.app.get(self.page_1.get_absolute_url())
+        self.page_1.publish()
+        response = self.app.get(self.page_1.publishing_linked.get_absolute_url())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            'icekit/plugins/image/default.html',
-            response.templates[2].name
+            [u'layout_page/layoutpage/layouts/default.html',
+             'icekit/plugins/image/default.html'],
+            [t.name for t in response.templates]
         )
