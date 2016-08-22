@@ -23,7 +23,6 @@ from fluent_pages.pagetypes.fluentpage.models import FluentPage
 from forms_builder.forms.models import Form
 from icekit.abstract_models import LayoutFieldMixin
 from icekit.page_types.layout_page.models import LayoutPage
-from icekit.page_types import utils as page_types_utils
 from icekit.plugins import descriptors
 from icekit.plugins.faq.models import FAQItem
 from icekit.plugins.horizontal_rule.models import HorizontalRuleItem
@@ -482,10 +481,6 @@ class Views(WebTest):
             response = self.app.get(reverse('admin:%s_change' % admin_app, args=(obj.id, )))
             self.assertEqual(response.status_code, 200)
 
-    def test_index(self):
-        response = self.app.get(reverse('icekit_index'))
-        response.mustcontain('Hello World')
-
     def test_response_pages(self):
         response = self.app.get(reverse('404'), expect_errors=404)
         self.assertEqual(response.status_code, 404)
@@ -658,36 +653,4 @@ class TestDescribePageNumbers(TestCase):
                 'total_count': 500,
                 'per_page': 10,
             },
-        )
-
-
-class PageTypesUtils(WebTest):
-
-    def test_get_pages_template_dir(self):
-        self.assertEqual(
-            page_types_utils.get_pages_template_dir('', default_path=''),
-            settings.BASE_DIR
-        )
-
-        template_dirs = settings.TEMPLATE_DIRS
-        settings.TEMPLATE_DIRS = ''
-
-        # A lambda is used to call the function as assertRaises only accepts a callable.
-        self.assertRaises(
-            exceptions.ImproperlyConfigured,
-            lambda: page_types_utils.get_pages_template_dir('', default_path=''),
-        )
-
-        settings.TEMPLATE_DIRS = template_dirs
-
-        # A lambda is used to call the function as assertRaises only accepts a callable.
-        self.assertRaises(
-            exceptions.ImproperlyConfigured,
-            lambda: page_types_utils.get_pages_template_dir('', os.path.relpath(os.path.dirname(__file__))),
-        )
-
-        # A lambda is used to call the function as assertRaises only accepts a callable.
-        self.assertRaises(
-            exceptions.ImproperlyConfigured,
-            lambda: page_types_utils.get_pages_template_dir('', '/this-most-likely-wont-exist/'),
         )

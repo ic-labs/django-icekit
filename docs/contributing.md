@@ -16,6 +16,11 @@ Run the tests:
     $ tox -r                              # Rebuild environments
     $ tox -e django17-py27,django18-py27  # Just the named environments
 
+Build an image and start the project template:
+
+    $ docker-compose build
+    $ docker-compose up
+
 ## Git
 
 We are using the [Gitflow] branching model. Basically:
