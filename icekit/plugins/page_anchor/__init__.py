@@ -1,1 +1,1 @@
-default_app_config = 'icekit.plugins.page_anchor.apps.PageAnchorPluginConfig'
+default_app_config = '%s.apps.AppConfig' % __name__

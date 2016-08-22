@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('slideshow', '0001_initial'),
+        ('icekit_plugins_slideshow', '0001_initial'),
     ]
 
     operations = [

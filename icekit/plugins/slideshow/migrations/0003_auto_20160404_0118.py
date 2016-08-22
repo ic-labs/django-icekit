@@ -9,7 +9,7 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('slideshow', '0002_auto_20150623_0115'),
+        ('icekit_plugins_slideshow', '0002_auto_20150623_0115'),
     ]
 
     operations = [
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='slideshow',
             name='publishing_linked',
-            field=models.OneToOneField(related_name='publishing_draft', null=True, on_delete=django.db.models.deletion.SET_NULL, editable=False, to='slideshow.SlideShow'),
+            field=models.OneToOneField(related_name='publishing_draft', null=True, on_delete=django.db.models.deletion.SET_NULL, editable=False, to='icekit_plugins_slideshow.SlideShow'),
             preserve_default=True,
         ),
         migrations.AddField(

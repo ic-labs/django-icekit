@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('fluent_contents', '0001_initial'),
-        ('map_with_text', '0002_auto_20150906_2301'),
+        ('icekit_plugins_map_with_text', '0002_auto_20150906_2301'),
     ]
 
     operations = [
