@@ -23,7 +23,6 @@ from fluent_pages.models.db import UrlNode
 
 from icekit.models import Layout
 from icekit.plugins.slideshow.models import SlideShow
-from icekit.page_types.article.models import ArticlePage
 from icekit.page_types.layout_page.models import LayoutPage
 from icekit.utils import fluent_contents
 
@@ -36,8 +35,8 @@ from icekit.publishing.middleware import PublishingMiddleware, \
 from icekit.publishing.utils import get_draft_hmac, verify_draft_url, \
     get_draft_url, PublishingException, NotDraftException
 from icekit.publishing.tests_base import BaseAdminTest
-from icekit.tests.models import ArticleWithRelatedPages, \
-    UnpublishableLayoutPage
+from icekit.tests.models import LayoutPageWithRelatedPages, \
+    UnpublishableLayoutPage, Article
 
 User = get_user_model()
 
@@ -466,7 +465,7 @@ class TestPublishingModelAndQueryset(TestCase):
 
     def test_urlnodequerysetwithpublishingfeatures_for_publishing_model(self):
         # Create page with related pages relationships to Fluent Page
-        test_page = ArticleWithRelatedPages.objects.create(
+        test_page = LayoutPageWithRelatedPages.objects.create(
             author=self.user_1,
             title='Test Page',
             layout=self.page_layout_1,
@@ -528,9 +527,9 @@ class TestDjangoDeleteCollectorPatchForProxyModels(TransactionTestCase):
         self.user_1 = G(User)
         self.layout = G(Layout)
 
-        self.article_page = ArticlePage.objects.create(
+        self.layoutpage = LayoutPage.objects.create(
             author=self.user_1,
-            title='Test Article Page',
+            title='Test LayoutPage',
             layout=self.layout,
             #=================================================================
             # Trigger creation of SEO Translations on page where these
@@ -541,22 +540,23 @@ class TestDjangoDeleteCollectorPatchForProxyModels(TransactionTestCase):
         )
 
     def tearDown(self):
-        LayoutPage.objects.delete()
+        LayoutPage.objects.all().delete()
 
     # Test to trigger DB integrity errors if Fluent Page deletion is not
     # properly handled/patched
     def test_republish_page(self):
         # Publish first version
-        self.article_page.publish()
+        self.layoutpage.publish()
         self.assertEqual(
-            'Test Article Page', self.article_page.get_published().title)
-        # Re-publish page, to trigger deletion and recreation of published copy
-        self.article_page.title += ' - Updated'
-        self.article_page.save()
-        self.article_page.publish()
+            'Test LayoutPage', self.layoutpage.get_published().title)
+        # Re-publish page, to trigger deletion and recreation of published
+        # copy
+        self.layoutpage.title += ' - Updated'
+        self.layoutpage.save()
+        self.layoutpage.publish()
         self.assertEqual(
-            'Test Article Page - Updated',
-            self.article_page.get_published().title)
+            'Test LayoutPage - Updated',
+            self.layoutpage.get_published().title)
 
 
 class TestPublishingMiddleware(TestCase):

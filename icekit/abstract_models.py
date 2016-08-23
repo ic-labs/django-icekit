@@ -85,6 +85,7 @@ class FluentFieldsMixin(LayoutFieldMixin):
         return result
 
 
+# TODO: should be a sub-app.
 class ReadabilityMixin(models.Model):
     readability_score = models.DecimalField(max_digits=4, decimal_places=2, null=True)
 

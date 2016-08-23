@@ -19,7 +19,6 @@ from fluent_pages.models.db import UrlNode
 from fluent_pages.adminui.pageadmin import DefaultPageChildAdmin, \
     _select_template_name
 from fluent_pages.adminui.urlnodeparentadmin import UrlNodeParentAdmin
-
 from .models import PublishingModel
 
 
@@ -624,5 +623,5 @@ class PublishingFluentPagesParentAdminMixin(_PublishingHelpersMixin):
 class ICEKitFluentPagesParentAdminMixin(
         PublishingFluentPagesParentAdminMixin, UrlNodeParentAdmin,
 ):
-    """ Add publishing features for Fluent parent admin (listing) pages """
-    pass
+    """ Add publishing features for FluentPage parent admin (listing) pages """
+    list_filter = (PublishingStatusFilter, PublishingPublishedFilter)

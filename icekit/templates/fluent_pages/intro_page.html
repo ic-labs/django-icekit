@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="robots" content="NONE,NOARCHIVE">
+    <title>Welcome to ICEkit</title>
+    <style type="text/css">
+      html, body { padding:0; margin:0; }
+      #summary, #instructions, #explanation { padding:10px 20px; }
+      body { font:small sans-serif; background: #fff; }
+      body>div { border-bottom:1px solid #ddd; }
+      h1 { font-weight:normal; margin: 0; }
+      h2 { margin-bottom:.8em; color:#666; }
+      h2 span { font-size:80%; font-weight:normal; }
+      p { margin: 0 0 1em 0; }
+      #summary { background: #333; color: #fff; }
+      #explanation { border-bottom: 0; }
+      #explanation p { margin: 0; }
+      #instructions { background:#f6f6f6; }
+      a, a:link, a:visited { color: #447e9b; text-decoration: none; }
+      a:hover { color: #447e9b; text-decoration: underline; }
+    </style>
+  </head>
+
+  <body>
+    <div id="summary">
+      <h1>Welcome to ICEkit!</h1>
+    </div>
+
+    <div id="instructions">
+      <h2>The website on <span>{{ site.domain|default:request.get_host }}</span> is empty.</h2>
+      <p>You can start by <a href="{% url 'admin:fluent_pages_page_add' %}">adding your first page</a> in the <a href="{% url 'admin:index' %}">admin interface</a>.</p>
+    </div>
+
+    <div id="explanation">
+      <p>
+        You're seeing this message because you have <code>DEBUG = True</code> in your
+        Django settings file and you haven't published any pages yet. Get to work!
+      </p>
+    </div>
+  </body>
+</html>

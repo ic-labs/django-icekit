@@ -62,6 +62,10 @@ class AbstractInstagramEmbedItem(ContentItem):
 
         :return: Dict of data if successful or String if error.
         """
+        # Don't fetch content from Instgram API if we have an empty URL, which
+        # can happen if a user enters an invalid URL in the admin form.
+        if not self.url:
+            return ''
         r = requests.get('http://api.instagram.com/publicapi/oembed/?url=%s' % self.url)
         if r.status_code is 200:
             return json.loads(r.content.decode())

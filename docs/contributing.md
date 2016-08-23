@@ -4,34 +4,31 @@ Please follow these guidelines when making contributions to this app.
 
 ## Getting Started
 
-Get the code and setup a virtualenv:
+Get the code:
 
-    $ git clone git@github.com:ixc/<app_name>.git
-    $ cd <app_name>
-    $ virtualenv venv
-    $ source venv/bin/activate
-    (venv)$ pip install -r requirements.txt
+    $ git clone https://github.com/ic-labs/django-icekit.git
+    $ cd django-icekit
 
 Run the tests:
 
-    # All environments, just the given environments, or just the virtualenv.
-    (venv)$ tox
-    (venv)$ tox -e django17-py27,django18-py27
-    (venv)$ ./manage.py test
+    $ pip install tox
+    $ tox                                 # All environments
+    $ tox -r                              # Rebuild environments
+    $ tox -e django17-py27,django18-py27  # Just the named environments
 
-Run the test project interactively:
+Build an image and start the project template:
 
-    (venv)$ ./manage.py migrate
-    (venv)$ ./manage.py runserver
+    $ docker-compose build
+    $ docker-compose up
 
 ## Git
 
-We are using the [Gitflow branching model]. Basically:
+We are using the [Gitflow] branching model. Basically:
 
-  * The `master` branch always contains production ready code, and each commit
-    represents a release to production.
-  * The `develop` branch serves as an integration branch for new features, and
-    is merged into `master` when we are ready to tag a new release.
+  * The `master` branch contains stable code, and each commit represents a
+    tagged release.
+  * The `develop` branch is an integration branch for new features, and is
+    merged into `master` when we are ready to tag a new release.
   * New features are developed in `feature/*` branches. Create a pull request
     when you are ready to merge a feature branch back into `develop`.
 
@@ -40,8 +37,8 @@ there is also a collection of [git-extensions] for command line users.
 
 ## Code Style
 
-It's important that we all adopt a consistent code style to minimise code churn
-and make collaboration easier.
+It's important that we adopt a consistent code style to minimise code churn and
+make collaboration easier.
 
   * Follow [PEP8] for Python code, unless there is a good reason not to.
   * Install the [EditorConfig] plugin for your preferred code editor.
@@ -55,8 +52,17 @@ Docs are probably more important than tests!
   * Include rationale when there are competing solutions, so people know why
     they should use our solution.
   * Keep the [changelog] up to date. Use plain language to describe changes,
-    as it may be read by people who are not as familiar with the project or a
-    particular feature as you.
+    as it may be read by people who are not familiar with the project or a
+    particular feature.
+
+### HTML Docs
+
+You can use [MkDocs] to preview your documentation as you are writing it:
+
+    $ mkdocs serve
+
+It will even auto-reload whenever you save any changes, so all you need to do
+to see your latest edits is refresh your browser.
 
 ## Tests
 
@@ -67,13 +73,14 @@ We don't need 100% test coverage, but we should at least have:
 
 ## Releases
 
-  * When the changelog for a release gets sufficiently long (half a page to a
-    page) or major features or fixes are implemented, tag a release.
+  * When the changelog for a release gets sufficiently long or major features
+    or fixes are implemented, tag a release.
 
 [changelog]: changelog.md
 [EditorConfig]: http://editorconfig.org/
 [git-extensions]: https://github.com/nvie/gitflow/
-[Gitflow branching model]: http://atlassian.com/git/workflows#!workflow-gitflow
+[Gitflow]: http://nvie.com/posts/a-successful-git-branching-model/
 [Markdown]: http://daringfireball.net/projects/markdown/
+[MkDocs]: http://mkdocs.org
 [PEP8]: http://legacy.python.org/dev/peps/pep-0008/
 [SourceTree]: http://sourcetreeapp.com/
