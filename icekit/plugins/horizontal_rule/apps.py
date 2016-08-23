@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class HorizontalRulePluginConfig(AppConfig):
-    name = 'icekit.plugins.horizontal_rule'
-    verbose_name = 'Horizontal Rule'
+class AppConfig(AppConfig):
+    name = '.'.join(__name__.split('.')[:-1])
+    label = "icekit_plugins_horizontal_rule"

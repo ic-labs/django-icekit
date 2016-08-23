@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('twitter_embed', '0001_initial'),
+        ('icekit_plugins_twitter_embed', '0001_initial'),
     ]
 
     operations = [

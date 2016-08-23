@@ -19,6 +19,7 @@ class Migration(migrations.Migration):
                 ('show_title', models.BooleanField(default=False, help_text='Should the title of the slide show be displayed?')),
             ],
             options={
+                'db_table': 'icekit_plugins_slideshow_slideshow'
             },
             bases=(models.Model,),
         ),
@@ -26,7 +27,7 @@ class Migration(migrations.Migration):
             name='SlideShowItem',
             fields=[
                 ('contentitem_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='fluent_contents.ContentItem')),
-                ('slide_show', models.ForeignKey(help_text='A slide show from the slide show library.', to='slideshow.SlideShow')),
+                ('slide_show', models.ForeignKey(help_text='A slide show from the slide show library.', to='icekit_plugins_slideshow.SlideShow')),
             ],
             options={
                 'db_table': 'contentitem_slideshow_slideshowitem',

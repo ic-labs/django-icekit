@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class PageAnchorListPluginConfig(AppConfig):
-    name = 'icekit.plugins.page_anchor_list'
-    verbose_name = 'Page Anchor List'
+class AppConfig(AppConfig):
+    name = '.'.join(__name__.split('.')[:-1])
+    label = "icekit_plugins_page_anchor_list"

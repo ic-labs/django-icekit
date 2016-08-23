@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class MapPluginConfig(AppConfig):
-    name = 'icekit.plugins.map'
-    verbose_name = 'Google Map'
+class AppConfig(AppConfig):
+    name = '.'.join(__name__.split('.')[:-1])
+    label = "icekit_plugins_map"

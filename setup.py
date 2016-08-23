@@ -1,7 +1,35 @@
 from __future__ import print_function
 
+import datetime
+import os
 import setuptools
 import sys
+
+
+# Make `pip install -e .` much faster.
+# See: https://bitbucket.org/pypa/setuptools/pull-requests/140/big-performance-fix-for-find_packages-by/diff#comment-18174057
+def find_packages(*paths):
+    packages = []
+    for path in paths or ['.']:
+        path = os.path.abspath(path)
+        cwd = os.getcwd()
+        os.chdir(os.path.dirname(path))
+        for dirpath, dirnames, filenames in os.walk(os.path.basename(path)):
+            if '__init__.py' in filenames:
+                packages.append('.'.join(dirpath.split(os.path.sep)))
+            else:
+                dirnames[:] = []
+        os.chdir(cwd)
+    return packages
+
+# Allow installation without git repository, e.g. inside Docker.
+if os.path.exists('.git'):
+    kwargs = dict(
+        use_scm_version={'version_scheme': 'post-release'},
+        setup_requires=['setuptools_scm'],
+    )
+else:
+    kwargs = dict(version='0+d' + datetime.date.today().strftime('%Y%m%d'))
 
 # Convert README.md to reStructuredText.
 if {'bdist_wheel', 'sdist'}.intersection(sys.argv):
@@ -14,70 +42,106 @@ if {'bdist_wheel', 'sdist'}.intersection(sys.argv):
     else:
         print('Converting `README.md` to reStructuredText to use as long '
               'description.')
-        long_description = pypandoc.convert('README.md', 'rst')
+        kwargs['long_description'] = pypandoc.convert('README.md', 'rst')
 
 setuptools.setup(
     name='django-icekit',
-    use_scm_version={'version_scheme': 'post-release'},
     author='Interaction Consortium',
     author_email='studio@interaction.net.au',
     url='https://github.com/ic-labs/django-icekit',
     description='A modular content CMS by Interaction Consortium.',
-    long_description=locals().get('long_description', ''),
     license='MIT',
-    packages=setuptools.find_packages(),
+    packages=find_packages('icekit'),
     include_package_data=True,
     install_requires=[
+        'django-app-namespace-template-loader',
         'django-bootstrap3',
-        'django-el-pagination<3',  # 3+ drops support for Django < 1.8
+        'django-compressor',
+        'django-el-pagination',
         'django-fluent-contents',
         'django-fluent-pages',
-        'django-model-utils<2.4',  # See: https://github.com/jp74/django-model-publisher/pull/26
-        'django-mptt<0.8',  # <0.8.5 for django-polymophic<0.8; <0.8 for Django 1.7
-        'django-polymorphic<0.8',  # For compatibility with django-fluent-contents: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
+        'django-model-settings',
+        'django-mptt!=0.8.5',  # See: https://github.com/django-fluent/django-fluent-pages/commit/98a35e43fbedf78c190e2dee38dd12f88a496bf3
+        'django-multiurl',
+        'django-polymorphic',
         'django-wysiwyg',
         'django_extensions',
+        'html5lib==0.999',
+        'nltk',
         'Pillow',
         'requests',
-        'nltk',
         'unidecode',
-        'django-app-namespace-template-loader',
-        'html5lib==0.999',
     ],
     extras_require={
         'api': [
-            'djangorestframework<3.4',  # For compatibility with Django < 1.8
+            'djangorestframework',
         ],
         'brightcove': [
             'django-brightcove',
         ],
         'dev': [
+            'django-debug-toolbar',
+            # 'glamkit-fallbackserve',
             'ipdb',
             'ipython',
             'mkdocs',
+            'Werkzeug',
         ],
-        'django17': [
-            'django-fluent-contents<1.1',  # See: https://github.com/edoburu/django-fluent-contents/issues/67
-            'django-polymorphic<0.8',  # For compatibility with Django < 1.8, see: https://django-polymorphic.readthedocs.org/en/latest/changelog.html#version-0-8-2015-12-28
-            'Django>=1.7,<1.8',
+        'django18': [
+            'Django>=1.8,<1.9',
         ],
         'forms': [
             'django-forms-builder',
         ],
-        'publishing': [
-            'django-model-settings',
-            'django-compressor<1.6',  # See: https://github.com/django-compressor/django-compressor/issues/706
+        'project': [
+            'celery[redis]',
+            'ConcurrentLogHandler',
+            'django-celery',
+            'django-celery-email',
+            'django-extensions',
+            'django-flat-theme<1.1.3',  # See: https://github.com/elky/django-flat-theme/issues/30'
+            'django-fluent-contents[markupoembeditemtext]',
+            'django-fluent-pages[redirectnodereversion]',
+            'django-master-password',
+            'django-polymorphic-auth',
+            'django-post-office',
+            'django-redis',
+            'django-reversion>=1.9.3,<1.10',  # 1.9.3+ use DB transactions 1.10 has breaking changes for Django 1.9'
+            'django-storages<1.2',  # See: https://github.com/jschneier/django-storages/blob/cf3cb76ca060f0dd82766daa43ee92fccca3dec7/storages/backends/s3boto.py#L28-L30'
+            'django-supervisor',
+            'django-test-without-migrations',
+            'django-timezone',
+            'docutils',
+            'easy_thumbnails',
+            'flower',
+            'gunicorn',
+            'icekit-notifications',
+            'ixc-django-compressor',
+            # 'ixc-redactor',
+            'ixc-whitenoise',
+            'Jinja2',
+            # 'newrelic',
+            'psycopg2',
+            'python-redis-lock[django]',
+            'pytz',
+            'raven',
+
+            # Override incompatible versions for nested dependencies.
+            'boto<=2.27',  # See: https://github.com/danilop/yas3fs/issues/26
         ],
         'search': [
             'django-fluent-pages[flatpage,fluentpage]',
             'django-haystack',
+            'elasticsearch',
+            'elasticstack',
         ],
         'test': [
+            'celery[redis]',
             'coverage',
             'django-dynamic-fixture',
             'django-nose',
-            'djangorestframework',
             'django-webtest',
+            'djangorestframework',
             'micawber',
             'mock',
             'nose-progressive',
@@ -85,10 +149,5 @@ setuptools.setup(
             'WebTest',
         ],
     },
-    setup_requires=['setuptools_scm'],
-    entry_points={
-        'console_scripts': [
-            'icekit = icekit.bin.icekit:main',
-        ],
-    },
+    **kwargs
 )

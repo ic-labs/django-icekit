@@ -24,6 +24,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'abstract': False,
+                'db_table': 'file_file',
             },
             bases=(models.Model,),
         ),
@@ -31,7 +32,7 @@ class Migration(migrations.Migration):
             name='FileItem',
             fields=[
                 ('contentitem_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='fluent_contents.ContentItem')),
-                ('file', models.ForeignKey(help_text='A file from the file library.', to='file.File')),
+                ('file', models.ForeignKey(help_text='A file from the file library.', to='icekit_plugins_file.File')),
             ],
             options={
                 'abstract': False,

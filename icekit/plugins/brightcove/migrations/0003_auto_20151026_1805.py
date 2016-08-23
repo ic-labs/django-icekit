@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('brightcove', '0002_auto_20150527_0022'),
+        ('icekit_plugins_brightcove', '0002_auto_20150527_0022'),
     ]
 
     operations = [

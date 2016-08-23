@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('image', '0002_auto_20150527_0022'),
+        ('icekit_plugins_image', '0002_auto_20150527_0022'),
     ]
 
     operations = [

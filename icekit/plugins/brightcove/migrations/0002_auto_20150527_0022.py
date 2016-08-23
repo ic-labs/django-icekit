@@ -9,7 +9,7 @@ import django_brightcove.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('brightcove', '0001_initial'),
+        ('icekit_plugins_brightcove', '0001_initial'),
     ]
 
     operations = [

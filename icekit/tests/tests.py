@@ -23,11 +23,9 @@ from fluent_pages.pagetypes.fluentpage.models import FluentPage
 from forms_builder.forms.models import Form
 from icekit.abstract_models import LayoutFieldMixin
 from icekit.page_types.layout_page.models import LayoutPage
-from icekit.page_types import utils as page_types_utils
 from icekit.plugins import descriptors
 from icekit.plugins.faq.models import FAQItem
 from icekit.plugins.horizontal_rule.models import HorizontalRuleItem
-from icekit.plugins.image.models import ImageItem, Image
 from icekit.plugins.instagram_embed.models import InstagramEmbedItem
 from icekit.plugins.map.models import MapItem
 from icekit.plugins.map_with_text.models import MapWithTextItem
@@ -51,6 +49,8 @@ if apps.is_installed('icekit.plugins.brightcove'):
     from django_brightcove.models import BrightcoveItems
     from icekit.plugins.brightcove.models import BrightcoveItem
 
+Image = apps.get_model('icekit_plugins_image.Image')
+ImageItem = apps.get_model('icekit_plugins_image.ImageItem')
 
 User = get_user_model()
 
@@ -462,7 +462,7 @@ class Views(WebTest):
         response = self.app.get(reverse('admin:index'), user=self.super_user_1)
         self.assertEqual(response.status_code, 200)
         admin_app_list = (
-            ('image_image', self.image_1),
+            ('icekit_plugins_image_image', self.image_1),
             ('fluent_pages_pagelayout', self.page_layout_1),
             ('icekit_layout', self.layout_1),
             ('icekit_mediacategory', self.media_category_1),
@@ -480,10 +480,6 @@ class Views(WebTest):
             self.assertEqual(response.status_code, 200)
             response = self.app.get(reverse('admin:%s_change' % admin_app, args=(obj.id, )))
             self.assertEqual(response.status_code, 200)
-
-    def test_index(self):
-        response = self.app.get(reverse('icekit_index'))
-        response.mustcontain('Hello World')
 
     def test_response_pages(self):
         response = self.app.get(reverse('404'), expect_errors=404)
@@ -657,36 +653,4 @@ class TestDescribePageNumbers(TestCase):
                 'total_count': 500,
                 'per_page': 10,
             },
-        )
-
-
-class PageTypesUtils(WebTest):
-
-    def test_get_pages_template_dir(self):
-        self.assertEqual(
-            page_types_utils.get_pages_template_dir('', default_path=''),
-            settings.BASE_DIR
-        )
-
-        template_dirs = settings.TEMPLATE_DIRS
-        settings.TEMPLATE_DIRS = ''
-
-        # A lambda is used to call the function as assertRaises only accepts a callable.
-        self.assertRaises(
-            exceptions.ImproperlyConfigured,
-            lambda: page_types_utils.get_pages_template_dir('', default_path=''),
-        )
-
-        settings.TEMPLATE_DIRS = template_dirs
-
-        # A lambda is used to call the function as assertRaises only accepts a callable.
-        self.assertRaises(
-            exceptions.ImproperlyConfigured,
-            lambda: page_types_utils.get_pages_template_dir('', os.path.relpath(os.path.dirname(__file__))),
-        )
-
-        # A lambda is used to call the function as assertRaises only accepts a callable.
-        self.assertRaises(
-            exceptions.ImproperlyConfigured,
-            lambda: page_types_utils.get_pages_template_dir('', '/this-most-likely-wont-exist/'),
         )

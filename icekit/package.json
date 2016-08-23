@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "dependencies": {
+    "bower": "^1.7.9",
+    "gulp": "^3.9.1",
+    "less": "^2.7.1",
+    "less-plugin-autoprefix": "^1.5.1",
+    "node-sass": "^3.8.0"
+  }
+}
