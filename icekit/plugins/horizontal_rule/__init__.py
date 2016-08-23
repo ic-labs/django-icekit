@@ -1,1 +1,1 @@
-default_app_config = 'icekit.plugins.horizontal_rule.apps.HorizontalRulePluginConfig'
+default_app_config = '%s.apps.AppConfig' % __name__

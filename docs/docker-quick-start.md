@@ -17,29 +17,13 @@ Docker has many advantages over a simple Python virtualenv environment:
   * Much less (if any) downtime during deployments, because Node modules,
     Bower components and Python packages are already installed in the image.
 
-# Installation (OS X)
+# Installation
 
-Install [Docker Toolbox][docker-toolbox], but do not choose either "Quick Start
-Terminal" or "Kitematic" during install.
+If you haven't already, go install Docker:
 
-Install [Dinghy][dinghy] for improved file sharing performance and a `*.docker`
-wildcard DNS mapped to your Docker VM.
-
-    $ brew tap codekitchen/dinghy
-    $ brew install dinghy
-
-    # Create a new Docker VM
-    $ dinghy create --provider virtualbox  # Or `vmware`, if you have it installed
-
-    # Configure Docker to use the Docker VM
-    $ eval "$(dinghy shellinit)"
-    $ echo 'eval "$(dinghy shellinit)"' >> ~/.profile  # or `~/.bashrc`, etc.
-
-# Installation (Linux)
-
-On Linux, install [Docker Engine][docker-engine] and
-[Docker Compose][docker-compose]. Docker runs natively on Linux, so there is no
-need for VirtualBox or DNS mapping.
+  * [OS X](https://download.docker.com/mac/stable/Docker.dmg)
+  * [Linux](https://docs.docker.com/engine/installation/linux/)
+  * [Windows](https://download.docker.com/win/stable/InstallDocker.msi)
 
 # Cheat Sheet
 
@@ -55,7 +39,7 @@ The typical Docker workflow is:
 
 Here are some of the most commonly used Docker commands when getting started:
 
-    # Rebuild service images defined in your compose file
+    # Rebuild images for all services in your compose file
     $ docker-compose build --pull
 
     # Start all services in your compose file
@@ -65,10 +49,11 @@ Here are some of the most commonly used Docker commands when getting started:
     $ docker-compose stop
 
     # List all containers for services in your compose file
-    $ docker-compose ps -a
+    $ docker-compose ps
 
-    # Open a new shell inside an already running container for the `django` service
-    $ docker-compose exec django entrypoint.sh bash
+    # Open a new shell (`entrypoint.sh`) inside an already running container
+    # for the `django` service
+    $ docker-compose exec django entrypoint.sh
 
     # Remove all stopped containers and their data volumes
     docker rm -v $(docker ps -a -q -f status=exited)
@@ -78,8 +63,3 @@ Here are some of the most commonly used Docker commands when getting started:
 
     # Remove ALL images (start from scratch)
     docker rmi $(docker images -q)
-
-[dinghy]: https://github.com/codekitchen/dinghy
-[docker-compose]: https://docs.docker.com/compose/install/
-[docker-engine]: https://docs.docker.com/engine/installation/
-[docker-toolbox]: https://www.docker.com/products/docker-toolbox

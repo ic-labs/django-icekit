@@ -1,15 +1,20 @@
-# Only include files that are actually generated or required by the app.
-
-# For anything that is local to your environment, e.g. dotfiles created by your
-# IDE, use your own `~/.gitignore_global` file.
-
-*.egg-info/
-*.py[co]
+**/*.md5
+**/*.orig
+**/*.py[co]
+**/*.swp
+**/.DS_Store
+**/npm-debug.log
+**/requirements-local.txt
+/*.egg-info/
 /.coverage
 /.eggs/
+/.git/
+/.idea/
 /.tox/
-/db.sqlite3
 /dist/
 /htmlcov/
+/icekit/bower_components/
+/icekit/node_modules/
+/icekit-project/
+/initial_data.sql
 /venv/
-.idea

@@ -9,8 +9,6 @@ from polymorphic.query import PolymorphicQuerySet
 from fluent_pages.models.managers import UrlNodeQuerySet, UrlNodeManager
 from fluent_pages.models.db import UrlNode
 
-from model_utils.managers import PassThroughManagerMixin
-
 from .middleware import is_draft_request_context, \
     is_publishing_middleware_active
 from .utils import PublishingException
@@ -402,38 +400,20 @@ class UrlNodeQuerySetWithPublishingFeatures(UrlNodeQuerySet):
         return _queryset_visible(self)
 
 
-class PublishingManager(PassThroughManagerMixin, models.Manager):
-    """
-    Base publishing manager, without UrlNode customisations.
-    """
-    queryset_class = PublishingQuerySet
-    # Tell Django that related fields also need to use this manager:
-    use_for_related_fields = True
-
-    def get_queryset(self):
-        return PublishingQuerySet(self.model, using=self._db).all()
+PublishingManager = \
+    models.Manager.from_queryset(PublishingQuerySet)
+# Tell Django that related fields also need to use this manager
+PublishingManager.use_for_related_fields = True
 
 
-class PublishingPolymorphicManager(PolymorphicManager, PublishingManager):
-    """
-    Publishing manager with polymorphic support and customisations.
-    """
-    queryset_class = PublishingPolymorphicQuerySet
-    # Tell Django that related fields also need to use this manager:
-    use_for_related_fields = True
+PublishingPolymorphicManager = \
+    PolymorphicManager.from_queryset(PublishingPolymorphicQuerySet)
 
 
-class PublishingUrlNodeManager(UrlNodeManager, PublishingManager):
-    """
-    Publishing manager with UrlNode support and customisations.
-    """
-    queryset_class = PublishingUrlNodeQuerySet
-    # Tell Django that related fields also need to use this manager:
-    use_for_related_fields = True
-
-    # We must override UrlNodeManager's `published` method here to ensure the
-    # version in our queryset takes precedence, otherwise invocations directly
-    # on `Model.objects` can end up using `UrlNodeManager`s `published`
-    # method instead of ours.
-    def published(self, **kwargs):
-        return self.all().published(**kwargs)
+PublishingUrlNodeManager = \
+    UrlNodeManager.from_queryset(PublishingUrlNodeQuerySet)
+# We must override `UrlNodeManager`s `published` method here to ensure the
+# version in our queryset takes precedence, otherwise invocations directly on
+# `Model.objects` won't use our customised version.
+PublishingUrlNodeManager.published = \
+    lambda self, **kwargs: self.all().published(**kwargs)

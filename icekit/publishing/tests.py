@@ -540,7 +540,7 @@ class TestDjangoDeleteCollectorPatchForProxyModels(TransactionTestCase):
         )
 
     def tearDown(self):
-        LayoutPage.objects.delete()
+        LayoutPage.objects.all().delete()
 
     # Test to trigger DB integrity errors if Fluent Page deletion is not
     # properly handled/patched

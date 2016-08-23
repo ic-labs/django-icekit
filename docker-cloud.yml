@@ -1,0 +1,76 @@
+common:
+  environment:
+    BASE_SETTINGS_MODULE: production
+    # EMAIL_HOST:
+    # EMAIL_HOST_PASSWORD:
+    # EMAIL_HOST_USER:
+    # MEDIA_AWS_ACCESS_KEY_ID:
+    # MEDIA_AWS_SECRET_ACCESS_KEY:
+    # MEDIA_AWS_STORAGE_BUCKET_NAME:
+    # PGDATABASE:
+    # PGHOST:
+    # PGPASSWORD:
+    # PGPORT:
+    # PGUSER:
+    # SENTRY_DSN:
+    # SITE_DOMAIN:
+    # SITE_NAME:
+  image: interaction/icekit:latest
+celery:
+  command: entrypoint.sh celery -A icekit.project worker -l info
+  extends: common
+  links:
+    - elasticsearch
+    - postgres
+    - redis
+  volumes_from:
+    - django
+celerybeat:
+  command: entrypoint.sh celery -A icekit.project beat -l info -S djcelery.schedulers.DatabaseScheduler --pidfile=
+  extends: common
+  links:
+    - redis
+  volumes_from:
+    - django
+celeryflower:
+  command: entrypoint.sh celery -A icekit.project flower
+  environment:
+    VIRTUAL_HOST: flower.*
+    VIRTUAL_HOST_WEIGHT: 1
+  extends: common
+  expose:
+    - 5555
+  links:
+    - redis
+  volumes_from:
+    - django
+django:
+  command: entrypoint.sh manage.py runserver 0.0.0.0:8000
+  environment:
+    VIRTUAL_HOST: "*"
+  extends: common
+  expose:
+    - 8000
+  links:
+    - elasticsearch
+    - celery
+    - redis
+  volumes:
+    - /opt/icekit-project
+elasticsearch:
+  image: interaction/elasticsearch-icu:1
+haproxy:
+  image: dockercloud/haproxy:1.5.1
+  links:
+    - celeryflower
+    - django
+  ports:
+    - "80:80"
+    - "443:443"
+  roles:
+    - global
+postgres:
+  image: onjin/alpine-postgres:9.4
+redis:
+  command: redis-server --appendonly yes
+  image: redis:3-alpine

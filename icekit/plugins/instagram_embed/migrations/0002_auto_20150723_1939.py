@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('instagram_embed', '0001_initial'),
+        ('icekit_plugins_instagram_embed', '0001_initial'),
     ]
 
     operations = [
