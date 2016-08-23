@@ -8,7 +8,7 @@ import fluent_contents.extensions
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('faq', '0001_initial'),
+        ('icekit_plugins_faq', '0001_initial'),
     ]
 
     operations = [

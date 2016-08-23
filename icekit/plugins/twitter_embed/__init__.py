@@ -1,1 +1,1 @@
-__author__ = 'sjdines'
+default_app_config = '%s.apps.AppConfig' % __name__

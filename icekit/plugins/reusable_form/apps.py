@@ -3,4 +3,4 @@ from django.apps import AppConfig
 
 class AppConfig(AppConfig):
     name = '.'.join(__name__.split('.')[:-1])
-    label = "icekit_plugins_horizontal_rule"
+    label = "icekit_plugins_reusable_form"

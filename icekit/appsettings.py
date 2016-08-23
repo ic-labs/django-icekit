@@ -6,4 +6,4 @@ ICEKIT = getattr(settings, 'ICEKIT', {})
 LAYOUT_TEMPLATES = ICEKIT.get('LAYOUT_TEMPLATES', [])
 
 # File class referenced by `icekit.plugins.file.abstract_models.AbstractFileItem`.
-FILE_CLASS = ICEKIT.get('FILE_CLASS', 'file.File')
+FILE_CLASS = ICEKIT.get('FILE_CLASS', 'icekit_plugins_file.File')
