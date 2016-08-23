@@ -1,15 +1,12 @@
 from icekit.admin import FluentLayoutsMixin
 from icekit.publishing.admin import PublishingAdmin
 
-
-class PublishableArticleAdmin(PublishingAdmin, FluentLayoutsMixin):
+class PublishableFluentModelAdmin(PublishingAdmin, FluentLayoutsMixin):
     """
     Add publishing features for non-Page rich content models
     """
+    pass
+
+
+class PublishableArticleAdmin(PublishableFluentModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
-
-    class Media:
-        css = {
-            'all': ('admin/production/redactor_field_styles.css',)
-        }
-
