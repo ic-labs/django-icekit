@@ -2,6 +2,17 @@
 
 ## (in development)
 
+New:
+
+  * [#3](https://github.com/ic-labs/django-icekit/pull/3)
+    Include a Django project with ICEkit, making it easier to run in
+    development, need less boilerplate code, be less likely to diverge over
+    time, and easier to keep up-to-date.
+
+  * [#4](https://github.com/ic-labs/django-icekit/pull/4)
+    Make content plugins "portable", making it easier to fork and customise
+    them for a project.
+
 Backwards incompatible changes:
 
   * Make content plugins [portable](portable-apps.md). You will need to run an
