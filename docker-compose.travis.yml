@@ -1,0 +1,21 @@
+django:
+  command: runtests.sh
+  environment:
+    BASE_SETTINGS_MODULE: docker
+    PGHOST: postgres
+    PGUSER: postgres
+    TRAVIS:
+  image: interaction/icekit:latest
+  links:
+    - elasticsearch
+    - postgres
+    - redis
+  volumes:
+    - ./:/opt/django-icekit
+elasticsearch:
+  image: interaction/elasticsearch-icu:1
+postgres:
+  image: onjin/alpine-postgres:9.4
+redis:
+  command: redis-server --appendonly yes
+  image: redis:3-alpine

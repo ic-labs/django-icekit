@@ -45,6 +45,7 @@ INSTALLED_APPS = dedupe_and_sort(INSTALLED_APPS, [
     'icekit',
     'icekit.dashboard',
     'icekit.integration.reversion',
+    'polymorphic_auth',
 
     # Then 3rd party apps.
     'fluent_suit',
