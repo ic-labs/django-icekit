@@ -73,3 +73,6 @@ VOLUME /root
 ENTRYPOINT ["tini", "--"]
 
 COPY . /opt/django-icekit/
+
+RUN manage.py collectstatic --noinput --verbosity=0
+RUN manage.py compress --verbosity=0

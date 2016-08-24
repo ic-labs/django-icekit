@@ -14,4 +14,4 @@ export REUSE_DB=1
 export FORCE_SETUP_POSTGRES_DATABASE=1
 export SRC_PGDATABASE=test_icekit.sql
 
-exec entrypoint.sh bash -c "manage.py collectstatic --noinput --verbosity=0 && manage.py compress --verbosity=0 && manage.py test --noinput --verbosity=2 $@"
+exec entrypoint.sh icekit/bin/manage.py test --noinput --verbosity=2 "$@"
