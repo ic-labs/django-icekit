@@ -23,8 +23,10 @@ before_install:
   - docker pull "interaction/icekit:${TAG}" || true
   - docker build -t "interaction/icekit:${TAG}" .
   - docker-compose -f docker-compose.travis.yml config
-  - pip install coveralls tox
   - touch .coverage
+
+install:
+  - pip install coveralls tox
 
 script:
   - docker-compose -f docker-compose.travis.yml run --rm django
