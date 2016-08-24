@@ -5,7 +5,7 @@ django:
     PGHOST: postgres
     PGUSER: postgres
     TRAVIS:
-  image: interaction/icekit:latest
+  image: interaction/icekit:${TAG}
   links:
     - elasticsearch
     - postgres
