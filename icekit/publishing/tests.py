@@ -58,8 +58,8 @@ class TestPublishingModelAndQueryset(TestCase):
             title='Test title',
             layout=self.page_layout_1,
         )
-        self.staff_1 = User.objects.create(
-            username='staff_1',
+        self.staff_1 = G(
+            User,
             is_staff=True,
             is_active=True,
             is_superuser=True,
@@ -566,22 +566,22 @@ class TestPublishingMiddleware(TestCase):
 
         self.response = Mock()
 
-        self.staff_1 = User.objects.create(
-            username='staff_1',
+        self.staff_1 = G(
+            User,
             is_staff=True,
             is_active=True,
             is_superuser=True,
         )
 
-        self.public_user = User.objects.create(
-            username='public_user',
+        self.public_user = G(
+            User,
             is_active=True,
             is_staff=False,
             is_superuser=False,
         )
 
-        self.reviewer_user = User.objects.create(
-            username='reviewer',
+        self.reviewer_user = G(
+            User,
             is_active=True,
             is_staff=False,
             is_superuser=False,
@@ -838,8 +838,8 @@ class TestPublishingAdmin(BaseAdminTest):
     """
 
     def setUp(self):
-        self.staff_1 = User.objects.create(
-            username='staff_1',
+        self.staff_1 = G(
+            User,
             is_staff=True,
             is_active=True,
             is_superuser=True,
@@ -856,15 +856,15 @@ class TestPublishingAdmin(BaseAdminTest):
 
         # Check admin change page includes publish links, not unpublish ones
         response = self.app.get(
-            reverse('admin:slideshow_slideshow_change',
+            reverse('admin:icekit_plugins_slideshow_slideshow_change',
                     args=(self.slide_show_1.pk, )),
             user=self.staff_1)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
-            reverse('admin:slideshow_slideshow_publish',
+            reverse('admin:icekit_plugins_slideshow_slideshow_publish',
                     args=(self.slide_show_1.pk, )) in response.text)
         self.assertFalse(
-            reverse('admin:slideshow_slideshow_unpublish',
+            reverse('admin:icekit_plugins_slideshow_slideshow_unpublish',
                     args=(self.slide_show_1.pk, )) in response.text)
 
         # Publish via admin
@@ -876,15 +876,15 @@ class TestPublishingAdmin(BaseAdminTest):
 
         # Check admin change page includes unpublish link (published item)
         response = self.app.get(
-            reverse('admin:slideshow_slideshow_change',
+            reverse('admin:icekit_plugins_slideshow_slideshow_change',
                     args=(self.slide_show_1.pk, )),
             user=self.staff_1)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(
-            reverse('admin:slideshow_slideshow_publish',
+            reverse('admin:icekit_plugins_slideshow_slideshow_publish',
                     args=(self.slide_show_1.pk, )) in response.text)
         self.assertTrue(
-            reverse('admin:slideshow_slideshow_unpublish',
+            reverse('admin:icekit_plugins_slideshow_slideshow_unpublish',
                     args=(self.slide_show_1.pk, )) in response.text)
 
         # Publish again
@@ -903,15 +903,15 @@ class TestPublishingAdmin(BaseAdminTest):
 
         # Check admin change page includes publish links, not unpublish ones
         response = self.app.get(
-            reverse('admin:slideshow_slideshow_change',
+            reverse('admin:icekit_plugins_slideshow_slideshow_change',
                     args=(self.slide_show_1.pk, )),
             user=self.staff_1)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
-            reverse('admin:slideshow_slideshow_publish',
+            reverse('admin:icekit_plugins_slideshow_slideshow_publish',
                     args=(self.slide_show_1.pk, )) in response.text)
         self.assertFalse(
-            reverse('admin:slideshow_slideshow_unpublish',
+            reverse('admin:icekit_plugins_slideshow_slideshow_unpublish',
                     args=(self.slide_show_1.pk, )) in response.text)
 
 
