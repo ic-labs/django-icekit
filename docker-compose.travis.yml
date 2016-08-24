@@ -1,7 +1,6 @@
 django:
   command: runtests.sh
   environment:
-    BASE_SETTINGS_MODULE: docker
     PGHOST: postgres
     PGUSER: postgres
     TRAVIS:
