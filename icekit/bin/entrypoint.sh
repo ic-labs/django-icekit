@@ -9,13 +9,22 @@ EOF
 
 set -e
 
+# Add bin directory to PATH if not already there.
+# See: http://superuser.com/a/39995
+if [[ ":$PATH:" != *":$ICEKIT_PROJECT_DIR/bin:"* ]]; then
+    export PATH="$ICEKIT_PROJECT_DIR/bin${PATH:+:$PATH}"
+fi
+
+# Configure Python.
 export PIP_DISABLE_PIP_VERSION_CHECK=on
-export PROJECT_NAME=$(basename "$ICEKIT_PROJECT_DIR")
 export PYTHONHASHSEED=random
 export PYTHONWARNINGS=ignore
 
 # Get number of CPU cores, so we know how many processes to run.
 export CPU_CORES=$(python -c 'import multiprocessing; print multiprocessing.cpu_count();')
+
+# Get project name from the project directory.
+export ICEKIT_PROJECT_NAME=$(basename "$ICEKIT_PROJECT_DIR")
 
 # Install Node modules.
 waitlock.sh npm-install.sh "$ICEKIT_DIR"
