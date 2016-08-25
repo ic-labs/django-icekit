@@ -21,16 +21,16 @@ fi
 mkdir -p "$DEST_DIR"
 cd "$DEST_DIR"
 
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/.dockerignore
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/.gitignore
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/bower.json
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/docker-compose.override.yml
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/docker-compose.yml
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/Dockerfile
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/go.sh
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/icekit_settings.py
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/package.json
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/requirements-icekit.txt
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/.dockerignore
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/.gitignore
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/bower.json
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/docker-compose.override.yml
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/docker-compose.yml
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/Dockerfile
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/go.sh
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/icekit_settings.py
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/package.json
+curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/requirements-icekit.txt
 
 chmod +x go.sh
 touch requirements.txt
