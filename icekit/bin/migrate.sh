@@ -20,6 +20,4 @@ if [[ ! -s "$DIR/migrate.txt.md5" ]] || ! md5sum --status -c "$DIR/migrate.txt.m
     manage.py migrate --noinput
     manage.py migrate --list > "$DIR/migrate.txt"
     md5sum "$DIR/migrate.txt" > "$DIR/migrate.txt.md5"
-else
-    echo 'Migrations are already up to date.'
 fi

@@ -1,17 +1,16 @@
 django:
   command: runtests.sh
   environment:
-    BASE_SETTINGS_MODULE: docker
     PGHOST: postgres
     PGUSER: postgres
     TRAVIS:
-  image: interaction/icekit:latest
+  image: interaction/icekit:${TAG}
   links:
     - elasticsearch
     - postgres
     - redis
   volumes:
-    - ./:/opt/django-icekit
+    - ./.coverage:/opt/django-icekit/.coverage
 elasticsearch:
   image: interaction/elasticsearch-icu:1
 postgres:
