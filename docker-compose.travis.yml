@@ -9,8 +9,6 @@ django:
     - elasticsearch
     - postgres
     - redis
-  volumes:
-    - ./.coverage:/opt/django-icekit/.coverage
 elasticsearch:
   image: interaction/elasticsearch-icu:1
 postgres:
