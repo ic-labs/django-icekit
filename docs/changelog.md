@@ -1,6 +1,16 @@
 # Changelog
 
-## (in development)
+## 0.10.2 (25 August 2016)
+
+  * Run tests in a Docker image on Travis CI and push to Docker Hub on success.
+  * Fix broken tests.
+
+## 0.10.1 (24 August 2016)
+
+  * Speed up tests by restoring a database with migrations already applied.
+  * Fix broken tests.
+
+## 0.10 (23 August 2016)
 
 New:
 
