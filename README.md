@@ -29,7 +29,7 @@ If you haven't already, go install Docker:
 
 Build an image and start the project:
 
-    $ docker-compose build
+    $ docker-compose build --pull
     $ docker-compose up  # Watch for the admin account credentials that get created on first run
 
 Now you can open the site in a browser:

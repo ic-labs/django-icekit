@@ -69,7 +69,7 @@ If you haven't already, go install Docker:
 
 Build an image and start the project:
 
-    $ docker-compose build
+    $ docker-compose build --pull
     $ docker-compose up
 
 Now you can open the site:

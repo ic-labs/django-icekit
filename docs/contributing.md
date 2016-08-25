@@ -18,7 +18,7 @@ Run the tests:
 
 Build an image and start the project template:
 
-    $ docker-compose build
+    $ docker-compose build --pull
     $ docker-compose up
 
 ## Git
