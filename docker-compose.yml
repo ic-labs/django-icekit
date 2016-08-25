@@ -10,7 +10,7 @@ services:
     command: entrypoint.sh celery -A icekit.project flower
     extends: django
   django:
-    command: entrypoint.sh manage.py runserver 0.0.0.0:8000
+    command: entrypoint.sh supervisord.sh
     environment:
       BASE_SETTINGS_MODULE: docker
       PGHOST: postgres

@@ -14,6 +14,9 @@ export PROJECT_NAME=$(basename "$ICEKIT_PROJECT_DIR")
 export PYTHONHASHSEED=random
 export PYTHONWARNINGS=ignore
 
+# Get number of CPU cores, so we know how many processes to run.
+export CPU_CORES=$(python -c 'import multiprocessing; print multiprocessing.cpu_count();')
+
 # Install Node modules.
 waitlock.sh npm-install.sh "$ICEKIT_DIR"
 waitlock.sh npm-install.sh "$ICEKIT_PROJECT_DIR"

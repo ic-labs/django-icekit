@@ -45,7 +45,7 @@ celeryflower:
   volumes_from:
     - django
 django:
-  command: entrypoint.sh manage.py runserver 0.0.0.0:8000
+  command: entrypoint.sh supervisord.sh
   environment:
     VIRTUAL_HOST: "*"
   extends: common

@@ -11,6 +11,7 @@ RUN apt-get update \
         gettext \
         jq \
         nano \
+        nginx \
         postgresql-client \
         python \
         python-dev \
