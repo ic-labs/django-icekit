@@ -17,7 +17,7 @@ common:
     # SITE_NAME:
   image: interaction/icekit:master
 celery:
-  command: entrypoint.sh celery -A icekit.project worker -l info
+  command: entrypoint.sh celery.sh
   extends: common
   links:
     - elasticsearch
@@ -26,14 +26,14 @@ celery:
   volumes_from:
     - django
 celerybeat:
-  command: entrypoint.sh celery -A icekit.project beat -l info -S djcelery.schedulers.DatabaseScheduler --pidfile=
+  command: entrypoint.sh celerybeat.sh
   extends: common
   links:
     - redis
   volumes_from:
     - django
 celeryflower:
-  command: entrypoint.sh celery -A icekit.project flower
+  command: entrypoint.sh celeryflower.sh
   environment:
     VIRTUAL_HOST: flower.*
     VIRTUAL_HOST_WEIGHT: 1
