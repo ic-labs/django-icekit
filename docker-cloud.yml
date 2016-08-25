@@ -1,4 +1,5 @@
 common:
+  deployment_strategy: high_availability
   environment:
     BASE_SETTINGS_MODULE: production
     # EMAIL_HOST:
