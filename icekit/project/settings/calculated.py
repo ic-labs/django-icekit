@@ -17,6 +17,7 @@ except ImportError:
 
 # Create missing runtime directories.
 runtime_dirs = STATICFILES_DIRS + (
+    MEDIA_ROOT,
     os.path.join(PROJECT_DIR, 'templates'),
     os.path.join(VAR_DIR, 'logs'),
     os.path.join(VAR_DIR, 'run'),
@@ -45,6 +46,7 @@ INSTALLED_APPS = dedupe_and_sort(INSTALLED_APPS, [
     'icekit',
     'icekit.dashboard',
     'icekit.integration.reversion',
+    'polymorphic_auth',
 
     # Then 3rd party apps.
     'fluent_suit',

@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('icekit_plugins_map_with_text', '0003_mapwithtextitem'),
+        ('icekit_plugins_map_with_text', '0001_squashed_0003_mapwithtextitem'),
     ]
 
     operations = [

@@ -4,7 +4,7 @@
 # git branch or 'BASE_SETTINGS_MODULE'.
 
 cat <<EOF
-echo # `whoami`@`hostname`:$PWD$ setup-postgres-env.sh
+# `whoami`@`hostname`:$PWD$ setup-postgres-env.sh
 EOF
 
 set -e

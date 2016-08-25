@@ -1,36 +1,41 @@
+sudo: required
+
 language: python
+
+services:
+  - docker
+
+before_install:
+  # Upgrade Docker Engine. See: https://docs.docker.com/engine/installation/linux/ubuntulinux/
+  - sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+  - echo 'deb https://apt.dockerproject.org/repo ubuntu-trusty main' | sudo tee /etc/apt/sources.list.d/docker.list
+  - sudo apt-get update
+
+  # Install 1.9.x for build cache support. See: https://github.com/docker/docker/issues/20380#issuecomment-212388961
+  - sudo apt-get -o Dpkg::Options::="--force-confnew" -q -y --force-yes install docker-engine=1.9.1-0~trusty
+
+  # Upgrade Docker Compose. See: https://github.com/docker/compose/releases
+  - curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-`uname -s`-`uname -m` | sudo tee /usr/local/bin/docker-compose > /dev/null
+  - sudo chmod +x /usr/local/bin/docker-compose
+
+  # Login and build images.
+  - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker pull "interaction/icekit:${TAG}" || true
+  - docker build -t "interaction/icekit:${TAG}" .
+  - docker-compose -f docker-compose.travis.yml config
+  - touch .coverage
 
 install:
   - pip install coveralls tox
 
 script:
-  - tox
+  - docker-compose -f docker-compose.travis.yml run --rm django
 
 after_success:
   - coveralls
+  - docker push "interaction/icekit:${TAG}"
+  - docker history "interaction/icekit:${TAG}"
 
 env:
-  - TOXENV=django18-py27
-  # - TOXENV=django18-py33
-  # - TOXENV=django18-py34
-  # - TOXENV=django18-py35
-  - TOXENV=django19-py27
-  # - TOXENV=django19-py34
-  # - TOXENV=django19-py35
-  - TOXENV=django110-py27
-  # - TOXENV=django110-py34
-  # - TOXENV=django110-py35
-
-matrix:
-  allow_failures:
-    # - env: TOXENV=django18-py27
-    - env: TOXENV=django18-py33
-    - env: TOXENV=django18-py34
-    - env: TOXENV=django18-py35
-    - env: TOXENV=django19-py27
-    - env: TOXENV=django19-py34
-    - env: TOXENV=django19-py35
-    - env: TOXENV=django110-py27
-    - env: TOXENV=django110-py34
-    - env: TOXENV=django110-py35
-  fast_finish: true
+  global:
+    - TAG=$(echo ${TRAVIS_BRANCH} | sed 's/[^0-9A-Za-z]/_/g')

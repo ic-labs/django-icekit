@@ -1,4 +1,4 @@
-FROM interaction/icekit:latest
+FROM interaction/icekit:master
 
 WORKDIR /opt/icekit-project/
 

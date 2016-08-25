@@ -1,19 +1,19 @@
-from ._base import *
+from ._docker import *
 
 # DJANGO ######################################################################
 
-DATABASE_NAME = 'test_%s' % DATABASES['default']['NAME']
-
 DATABASES['default'].update({
-    'NAME': DATABASE_NAME,
     'TEST': {
-        'NAME': DATABASE_NAME,
+        'NAME': DATABASES['default']['NAME'],
         # See: https://docs.djangoproject.com/en/1.7/ref/settings/#serialize
         'SERIALIZE': False,
     },
 })
 
-INSTALLED_APPS += ('icekit.tests', )
+INSTALLED_APPS += (
+    'fluent_pages.pagetypes.fluentpage',
+    'icekit.tests',
+)
 
 ROOT_URLCONF = 'icekit.tests.urls'
 

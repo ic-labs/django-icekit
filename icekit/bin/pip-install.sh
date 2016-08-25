@@ -30,6 +30,4 @@ if [[ ! -s requirements.md5 ]] || ! md5sum --status -c requirements.md5 > /dev/n
         pip install --user -r requirements-local.txt
     fi
     md5sum requirements.txt requirements-local.txt > requirements.md5
-else
-    echo "Python requirements in '$DIR' directory are already up to date."
 fi

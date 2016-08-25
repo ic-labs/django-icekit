@@ -470,15 +470,25 @@ class Views(WebTest):
             ('fluent_pages_page', self.layoutpage_1),
         )
         for admin_app, obj in admin_app_list:
-            response = self.app.get(reverse('admin:%s_changelist' % admin_app))
+            response = self.app.get(
+                reverse('admin:%s_changelist' % admin_app),
+                user=self.super_user_1)
             self.assertEqual(response.status_code, 200)
-            response = self.app.get(reverse('admin:%s_add' % admin_app))
+            response = self.app.get(
+                reverse('admin:%s_add' % admin_app),
+                user=self.super_user_1)
             self.assertEqual(response.status_code, 200)
-            response = self.app.get(reverse('admin:%s_history' % admin_app, args=(obj.id, )))
+            response = self.app.get(
+                reverse('admin:%s_history' % admin_app, args=(obj.id, )),
+                user=self.super_user_1)
             self.assertEqual(response.status_code, 200)
-            response = self.app.get(reverse('admin:%s_delete' % admin_app, args=(obj.id, )))
+            response = self.app.get(
+                reverse('admin:%s_delete' % admin_app, args=(obj.id, )),
+                user=self.super_user_1)
             self.assertEqual(response.status_code, 200)
-            response = self.app.get(reverse('admin:%s_change' % admin_app, args=(obj.id, )))
+            response = self.app.get(
+                reverse('admin:%s_change' % admin_app, args=(obj.id, )),
+                user=self.super_user_1)
             self.assertEqual(response.status_code, 200)
 
     def test_response_pages(self):

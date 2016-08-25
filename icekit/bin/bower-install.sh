@@ -30,6 +30,4 @@ if [[ ! -s bower.json.md5 ]] || ! md5sum --status -c bower.json.md5 > /dev/null 
     echo "Bower components in '$DIR' directory are out of date."
     bower install --allow-root
     md5sum bower.json > bower.json.md5
-else
-    echo "Bower components in '$DIR' directory are already up to date."
 fi

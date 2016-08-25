@@ -15,7 +15,7 @@ common:
     # SENTRY_DSN:
     # SITE_DOMAIN:
     # SITE_NAME:
-  image: interaction/icekit:latest
+  image: interaction/icekit:master
 celery:
   command: entrypoint.sh celery -A icekit.project worker -l info
   extends: common
