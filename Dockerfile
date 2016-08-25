@@ -72,6 +72,7 @@ ENV PYTHONWARNINGS=ignore
 VOLUME /root
 
 ENTRYPOINT ["tini", "--"]
+CMD ["entrypoint.sh"]
 
 COPY . /opt/django-icekit/
 
