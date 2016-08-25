@@ -3,6 +3,7 @@
 ## 0.10.2 (25 August 2016)
 
   * Run tests in a Docker image on Travis CI and push to Docker Hub on success.
+  * Test the same settings module in Docker and Tox.
   * Fix broken tests.
 
 ## 0.10.1 (24 August 2016)
