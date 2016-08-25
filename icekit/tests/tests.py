@@ -464,8 +464,8 @@ class Views(WebTest):
         admin_app_list = (
             ('icekit_plugins_image_image', self.image_1),
             ('fluent_pages_pagelayout', self.page_layout_1),
-            # ('icekit_layout', self.layout_1),
-            # ('icekit_mediacategory', self.media_category_1),
+            ('icekit_layout', self.layout_1),
+            ('icekit_mediacategory', self.media_category_1),
             ('response_pages_responsepage', self.response_page_1),
             ('fluent_pages_page', self.layoutpage_1),
         )

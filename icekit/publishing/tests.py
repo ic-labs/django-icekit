@@ -2,6 +2,7 @@
 from datetime import timedelta
 import urlparse
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Group
 from django.contrib.sites.models import Site
@@ -519,6 +520,12 @@ class TestDjangoDeleteCollectorPatchForProxyModels(TransactionTestCase):
         table "fluent_pages_htmlpage_translation" DETAIL:  Key (id)=(2) is
         still referenced from table "fluent_pages_htmlpage_translation".
     """
+    # Set `available_apps` here merely to trigger special behaviour in
+    # `TransactionTestCase._fixture_teardown` to avoid emitting the
+    # `post_migrate` signal when flushing the DB during teardown, since doing
+    # so can cause integrity errors related to publishing-related permissions
+    # created by icekit.publishing.models.create_can_publish_permission
+    available_apps = settings.INSTALLED_APPS
 
     def setUp(self):
         self.site, __ = Site.objects.get_or_create(
