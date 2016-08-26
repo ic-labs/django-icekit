@@ -3,6 +3,7 @@
 set -e
 
 DEST_DIR="${1:-$PWD/icekit-project}"
+BRANCH="${2:-master}"
 
 cat <<EOF
 
@@ -21,16 +22,16 @@ fi
 mkdir -p "$DEST_DIR"
 cd "$DEST_DIR"
 
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/.dockerignore
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/.gitignore
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/bower.json
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/docker-compose.override.yml
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/docker-compose.yml
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/Dockerfile
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/go.sh
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/icekit_settings.py
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/package.json
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/project_template/requirements-icekit.txt
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/.dockerignore"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/.gitignore"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/bower.json"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/docker-compose.override.yml"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/docker-compose.yml"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/Dockerfile"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/go.sh"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/icekit_settings.py"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/package.json"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/requirements-icekit.txt"
 
 chmod +x go.sh
 touch requirements.txt
@@ -76,7 +77,7 @@ Now you can open the site:
 
     http://icekit.lvh.me  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
 
-Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/master/docs/docker-quick-start.md)
+Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/${BRANCH}/docs/docker-quick-start.md)
 guide for more info on using Docker with an ICEkit project.
 
 # Run directly
