@@ -15,12 +15,6 @@ not install any dependencies for the project. You will need:
   * PostgreSQL
   * Redis
 
-You will need to create a local settings module to reconfigure some settings,
-depending on how your services have been installed:
-
-    $ cp djangosite/settings/local.sample.py djangosite/settings/local.py
-    $ vi djangosite/settings/local.py
-
 Create a database and Python virtualenv:
 
     $ createdb FOO
