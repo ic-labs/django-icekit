@@ -73,6 +73,14 @@ Build an image and start the project:
     $ docker-compose build --pull
     $ docker-compose up
 
+The first time you start a project will probably take a few minutes to download
+additional images, install dependencies, and setup the database. Go make a cup
+of tea, and when you see the following message you'll know it's ready:
+
+    #
+    # READY.
+    #
+
 Now you can open the site:
 
     http://icekit.lvh.me  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
