@@ -2,4 +2,4 @@
 
 set -e
 
-exec supervisord --configuration "$ICEKIT_PROJECT_DIR/etc/supervisord.conf" "$@"
+exec supervisord --configuration "$ICEKIT_DIR/etc/supervisord.conf" "$@"
