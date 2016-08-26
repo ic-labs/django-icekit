@@ -29,9 +29,18 @@ services:
     ports:
       - 8000
       - 8080
+  # elasticsearch:
+  #   ports:
+  #     - 9200
   haproxy:
     links:
       - celeryflower
       - django
     ports:
       - "80:80"
+  postgres:
+    ports:
+      - 5432
+  redis:
+    ports:
+      - 6379
