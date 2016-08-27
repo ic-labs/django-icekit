@@ -9,6 +9,10 @@ EOF
 
 set -e
 
+# Make sure this is set, even if to an empty string, to stop Supervisor from
+# complaining.
+export EXTRA_SUPERVISORD_CONFIG="$EXTRA_SUPERVISORD_CONFIG"
+
 # Add bin directory to PATH if not already there.
 # See: http://superuser.com/a/39995
 if [[ ":$PATH:" != *":$ICEKIT_DIR/bin:"* ]]; then
