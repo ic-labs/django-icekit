@@ -84,13 +84,11 @@ Now you can open the site:
     http://icekit.lvh.me  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
 
 Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/${BRANCH}/docs/docker-quick-start.md)
-guide for more info on using Docker with an ICEkit project.
+guide for more info on running an ICEkit project with Docker.
 
-# Run directly
+# Run without Docker
 
-If you are not yet ready for Docker, you can run an ICEkit project directly.
-You will just need to install and configure all of its dependencies manually.
-
-See: https://github.com/ic-labs/django-icekit/#run-directly
+Read our [Manual Setup](https://github.com/ic-labs/django-icekit/blob/develop/docs/manual-setup.md)
+guide for more info on running an ICEkit project without Docker.
 
 EOF

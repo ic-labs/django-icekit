@@ -1,32 +1,41 @@
-# Manual Setup
+# Run without Docker
 
-If you are not using Docker, you will need to install the required services and
-library dependencies manually.
+If you are not yet ready for Docker, you can run an ICEkit project directly.
+You will need to install and configure all of its dependencies manually.
 
-First, create your project the same way as if you were using Docker:
-
-    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) FOO
-    $ cd FOO
-
-This only creates the source code for a new project from our template. It does
-not install any dependencies for the project. You will need:
+Install required system packages:
 
   * Elasticsearch
   * PostgreSQL
+  * Python 2.7
   * Redis
 
-Create a database and Python virtualenv:
+On OS X, you can use [Homebrew](http://brew.sh/):
 
-    $ createdb FOO
-    $ pip install virtualenvwrapper
-    $ mkvirtualenv -a $PWD FOO
-    (FOO)$ pip install -e .
+    $ brew install elasticsearch postgresql python redis
 
-Now you can apply database migrations and run the project:
+We recommend [Postgres.app](http://postgresapp.com/) for the database. It is
+easier to start, stop, and upgrade than Homebrew.
 
-    (FOO)$ ./manage.py migrate
-    (FOO)$ ./manage.py supervisor  # Starts all services
+You need to configure these services to start automatically, or start them
+manually before you start the project.
 
-Open the site in your browser:
+Make a virtualenv and install required Python packages:
 
-    http://localhost:8000
+    $ pip install virtualenv
+    $ virtualenv venv
+    (venv)$ pip install -r requirements-icekit.txt
+
+Start the project:
+
+    (venv)$ ./go.sh supervisord.sh  # Watch for the admin account credentials that get created on first run
+
+When you see the following message, you will know it is ready:
+
+    #
+    # READY.
+    #
+
+Now you can open the site in a browser:
+
+    http://icekit.lvh.me:8000  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
