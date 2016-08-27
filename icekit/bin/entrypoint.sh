@@ -45,4 +45,6 @@ waitlock.sh setup-postgres-database.sh
 # Apply migrations.
 waitlock.sh migrate.sh "$ICEKIT_PROJECT_DIR/var"
 
+# Open a new shell by default, so we can interactively execute commands with
+# the correct environment.
 exec "${@:-bash}"
