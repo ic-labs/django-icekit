@@ -73,9 +73,7 @@ Build an image and start the project:
     $ docker-compose build --pull
     $ docker-compose up
 
-The first time you start a project will probably take a few minutes to download
-additional images, install dependencies, and setup the database. Go make a cup
-of tea, and when you see the following message you'll know it's ready:
+When you see the following message, you will know it is ready:
 
     #
     # READY.

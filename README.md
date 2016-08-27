@@ -32,6 +32,12 @@ Build an image and start the project:
     $ docker-compose build --pull
     $ docker-compose up  # Watch for the admin account credentials that get created on first run
 
+When you see the following message, you will know it is ready:
+
+    #
+    # READY.
+    #
+
 Now you can open the site in a browser:
 
     http://icekit.lvh.me  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
@@ -70,6 +76,12 @@ Make a virtualenv and install required Python packages:
 Start the project:
 
     (venv)$ ./go.sh manage.py supervisor  # Watch for the admin account credentials that get created on first run
+
+When you see the following message, you will know it is ready:
+
+    #
+    # READY.
+    #
 
 Now you can open the site in a browser:
 
