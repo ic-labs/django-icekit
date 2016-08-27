@@ -13,10 +13,13 @@ set -e
 # complaining.
 export EXTRA_SUPERVISORD_CONFIG="$EXTRA_SUPERVISORD_CONFIG"
 
-# Add bin directory to PATH if not already there.
+# Add bin directories to PATH if not already there.
 # See: http://superuser.com/a/39995
 if [[ ":$PATH:" != *":$ICEKIT_DIR/bin:"* ]]; then
     export PATH="$ICEKIT_DIR/bin${PATH:+:$PATH}"
+fi
+if [[ ":$PATH:" != *":$ICEKIT_PROJECT_DIR/venv/bin:"* ]]; then
+    export PATH="$ICEKIT_PROJECT_DIR/venv/bin${PATH:+:$PATH}"
 fi
 
 # Configure Python.
