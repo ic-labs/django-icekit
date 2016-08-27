@@ -11,8 +11,8 @@ set -e
 
 # Add bin directory to PATH if not already there.
 # See: http://superuser.com/a/39995
-if [[ ":$PATH:" != *":$ICEKIT_PROJECT_DIR/bin:"* ]]; then
-    export PATH="$ICEKIT_PROJECT_DIR/bin${PATH:+:$PATH}"
+if [[ ":$PATH:" != *":$ICEKIT_DIR/bin:"* ]]; then
+    export PATH="$ICEKIT_DIR/bin${PATH:+:$PATH}"
 fi
 
 # Configure Python.
