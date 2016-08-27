@@ -75,7 +75,7 @@ Make a virtualenv and install required Python packages:
 
 Start the project:
 
-    (venv)$ ./go.sh manage.py supervisor  # Watch for the admin account credentials that get created on first run
+    (venv)$ ./go.sh supervisord.sh  # Watch for the admin account credentials that get created on first run
 
 When you see the following message, you will know it is ready:
 
