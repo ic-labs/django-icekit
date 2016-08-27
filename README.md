@@ -32,7 +32,8 @@ Build an image and start the project:
     $ docker-compose build --pull
     $ docker-compose up  # Watch for the admin account credentials that get created on first run
 
-When you see the following message, you will know it is ready:
+This will take a few minutes the first time. When you see the following
+message, you will know it is ready:
 
     #
     # READY.

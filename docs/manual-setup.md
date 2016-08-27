@@ -30,7 +30,8 @@ Start the project:
 
     (venv)$ ./go.sh supervisord.sh  # Watch for the admin account credentials that get created on first run
 
-When you see the following message, you will know it is ready:
+This will take a few minutes the first time. When you see the following
+message, you will know it is ready:
 
     #
     # READY.
