@@ -25,7 +25,7 @@ If you haven't already, go install Docker:
   * [Linux](https://docs.docker.com/engine/installation/linux/)
   * [Windows](https://download.docker.com/win/stable/InstallDocker.msi)
 
-# Cheat Sheet
+# Getting Started
 
 The typical Docker workflow is:
 
