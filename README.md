@@ -61,11 +61,11 @@ On OS X, you can use [Homebrew](http://brew.sh/):
 
     $ brew install elasticsearch python redis
 
-You don't need to configure these services to start automatically, they will
-be started by the project.
-
 We recommend [Postgres.app](http://postgresapp.com/) for the database. It is
 easier to start, stop, and upgrade than Homebrew.
+
+You need to configure these services to start automatically, or start them
+manually before you start the project.
 
 Make a virtualenv and install required Python packages:
 
