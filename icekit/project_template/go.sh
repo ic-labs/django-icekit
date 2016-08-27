@@ -9,6 +9,9 @@ EOF
 
 set -e
 
+# We need to run additional services with Supervisord when not using Docker.
+export EXTRA_SUPERVISORD_CONFIG=supervisord-no-docker.conf
+
 # Get absolute directory for the `icekit` package.
 export ICEKIT_DIR=$(python -c 'import icekit, os; print os.path.dirname(icekit.__file__);')
 
