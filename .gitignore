@@ -15,6 +15,7 @@
 /htmlcov/
 /icekit/bower_components/
 /icekit/node_modules/
-/icekit-project/
+/icekit/project_template/static_root/
+/icekit/project_template/venv/
 /initial_data.sql
 /venv/
