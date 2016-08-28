@@ -718,5 +718,5 @@ WHITENOISE_ROOT = os.path.join(PROJECT_DIR, 'whitenoise_root')
 
 WSGI_ADDRESS = '127.0.0.1'
 WSGI_PORT = 8080
+WSGI_TIMEOUT = 60
 WSGI_WORKERS = multiprocessing.cpu_count() * 2 + 1
-WSGI_TIMEOUT = 30
