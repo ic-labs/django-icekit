@@ -10,32 +10,23 @@ Install required system packages:
   * Python 2.7
   * Redis
 
-On OS X, you can use [Homebrew](http://brew.sh/):
+On OS X, we recommend [Postgres.app](http://postgresapp.com/). It is easy to
+install, start, stop, and upgrade.
 
-    $ brew install elasticsearch postgresql python redis
+The rest can be installed with [Homebrew](http://brew.sh/):
 
-We recommend [Postgres.app](http://postgresapp.com/) for the database. It is
-easier to start, stop, and upgrade than Homebrew.
+    $ brew install elasticsearch python redis
 
 You need to configure these services to start automatically, or start them
 manually before you start the project.
 
-Make a virtualenv and install required Python packages:
+Open a subshell with a reconfigured environment for your project:
 
-    $ pip install virtualenv
-    $ virtualenv venv
-    (venv)$ pip install -r requirements-icekit.txt
+    $ ./go.sh  # Watch for the admin account credentials that get created on first run
 
 Start the project:
 
-    (venv)$ ./go.sh supervisord.sh  # Watch for the admin account credentials that get created on first run
-
-This will take a few minutes the first time. When you see the following
-message, you will know it is ready:
-
-    #
-    # READY.
-    #
+    $ supervisord.sh
 
 Now you can open the site in a browser:
 
