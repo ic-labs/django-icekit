@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Wrapper for 'entrypoint.sh' that defines 'ICEKIT_DIR' and
-# 'ICEKIT_PROJECT_DIR', environment variables.
+# Wrapper for 'entrypoint.sh' that configures the environment similarly to the
+# way it would be with Docker.
 
 cat <<EOF
 # `whoami`@`hostname`:$PWD$ go.sh $@
