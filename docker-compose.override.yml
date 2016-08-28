@@ -37,7 +37,7 @@ services:
       - celeryflower
       - django
     ports:
-      - 8000:8000
+      - 8000:80
   postgres:
     ports:
       - 5432
