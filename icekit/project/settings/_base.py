@@ -685,7 +685,7 @@ SUPERVISOR = {
     'celeryflower': 'celery -A icekit.project flower',
     'django': (
         'gunicorn '
-        '-b {WSGI_ADDRESS}:{SITE_PORT} '
+        '-b {WSGI_ADDRESS}:{WSGI_PORT} '
         '-w {WSGI_WORKERS} '
         '-t {WSGI_TIMEOUT} '
         'icekit.project.wsgi:application'
@@ -717,5 +717,6 @@ WHITENOISE_ROOT = os.path.join(PROJECT_DIR, 'whitenoise_root')
 # WSGI ########################################################################
 
 WSGI_ADDRESS = '127.0.0.1'
+WSGI_PORT = 8080
 WSGI_WORKERS = multiprocessing.cpu_count() * 2 + 1
 WSGI_TIMEOUT = 30

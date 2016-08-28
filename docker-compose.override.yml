@@ -19,7 +19,7 @@ services:
   django:
     build: .
     environment:
-      EXCLUDE_PORTS: 8000
+      EXCLUDE_PORTS: 8080
       MASTER_PASSWORD: # Get from environment
       VIRTUAL_HOST: "*"
     links:
@@ -37,7 +37,7 @@ services:
       - celeryflower
       - django
     ports:
-      - "80:80"
+      - 8000:8000
   postgres:
     ports:
       - 5432

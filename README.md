@@ -41,7 +41,7 @@ message, you will know it is ready:
 
 Now you can open the site in a browser:
 
-    http://icekit.lvh.me  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
+    http://icekit.lvh.me:8000  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
 
 Read our [Docker Quick Start](docs/docker-quick-start.md) guide for more info
 on running an ICEkit project with Docker.
