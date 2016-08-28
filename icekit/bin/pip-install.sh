@@ -24,10 +24,10 @@ touch requirements.txt requirements-local.txt requirements.md5
 if [[ ! -s requirements.md5 ]] || ! md5sum --status -c requirements.md5 > /dev/null 2>&1; then
     echo "Python requirements in '$DIR' directory are out of date."
     if [[ -s requirements.txt ]]; then
-        pip install --user -r requirements.txt
+        pip install --upgrade --user -r requirements.txt
     fi
     if [[ -s requirements-local.txt ]]; then
-        pip install --user -r requirements-local.txt
+        pip install --upgrade --user -r requirements-local.txt
     fi
     md5sum requirements.txt requirements-local.txt > requirements.md5
 fi
