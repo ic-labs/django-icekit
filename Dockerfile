@@ -61,7 +61,7 @@ RUN cd /usr/local/bin \
 
 ENV CRONLOCK_HOST=redis
 ENV ICEKIT_DIR=/opt/django-icekit/icekit
-ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/icekit-project
+ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/icekit/project_template
 ENV PATH=/opt/django-icekit/icekit/bin:/opt/django-icekit/venv/bin:$PATH
 ENV PIP_SRC=/opt/django-icekit/venv/src
 ENV PYTHONHASHSEED=random
