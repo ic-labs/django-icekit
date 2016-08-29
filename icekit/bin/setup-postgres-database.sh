@@ -39,7 +39,7 @@ echo "Create database '$PGDATABASE'."
 createdb "$PGDATABASE"
 
 # Restore from file or source database.
-INITIAL_DATA="${SRC_PGDATABASE:-initial_data.sql}"
+INITIAL_DATA="${SRC_PGDATABASE:-$ICEKIT_DIR/initial_data.sql}"
 if [[ -f "$INITIAL_DATA" ]]; then
     echo "Restore to database '$PGDATABASE' from file '$INITIAL_DATA'."
     pv "$INITIAL_DATA" | psql -d "$PGDATABASE" > /dev/null
