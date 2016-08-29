@@ -12,24 +12,35 @@ services:
     environment:
       VIRTUAL_HOST: flower.*
       VIRTUAL_HOST_WEIGHT: 1
-    expose:
-      - 5555
     links:
       - redis
+    ports:
+      - 5555
   django:
     build: .
     environment:
+      EXCLUDE_PORTS: 8080
       MASTER_PASSWORD: # Get from environment
       VIRTUAL_HOST: "*"
-    expose:
-      - 8000
     links:
       - elasticsearch
       - celery
       - redis
+    ports:
+      - 8000
+      - 8080
+  # elasticsearch:
+  #   ports:
+  #     - 9200
   haproxy:
     links:
       - celeryflower
       - django
     ports:
-      - "80:80"
+      - 8000:80
+  postgres:
+    ports:
+      - 5432
+  redis:
+    ports:
+      - 6379

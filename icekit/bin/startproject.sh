@@ -3,6 +3,7 @@
 set -e
 
 DEST_DIR="${1:-$PWD/icekit-project}"
+BRANCH="${2:-master}"
 
 cat <<EOF
 
@@ -21,22 +22,22 @@ fi
 mkdir -p "$DEST_DIR"
 cd "$DEST_DIR"
 
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/.dockerignore
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/.gitignore
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/bower.json
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/docker-compose.override.yml
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/docker-compose.yml
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/Dockerfile
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/go.sh
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/icekit_settings.py
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/package.json
-curl -#LO https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/project_template/requirements-icekit.txt
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/.dockerignore"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/.gitignore"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/bower.json"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/docker-compose.override.yml"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/docker-compose.yml"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/Dockerfile"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/go.sh"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/icekit_settings.py"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/package.json"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/icekit/project_template/requirements-icekit.txt"
 
 chmod +x go.sh
 touch requirements.txt
 
 # Use basename of destination directory as Docker Hub repository name.
-sed -e "s/icekit-project/$(basename $DEST_DIR)/" -i '' docker-compose.yml
+sed -e "s/project_template/$(basename $DEST_DIR)/" -i '' docker-compose.yml
 
 if [[ -n $(which git) ]]; then
     echo
@@ -69,21 +70,26 @@ If you haven't already, go install Docker:
 
 Build an image and start the project:
 
-    $ docker-compose build
-    $ docker-compose up
+    $ docker-compose build --pull
+    $ docker-compose up  # Watch for the admin account credentials that get created on first run
+
+This will take a few minutes the first time. When you see the following
+message, you will know it is ready:
+
+    #
+    # READY.
+    #
 
 Now you can open the site:
 
-    http://icekit.lvh.me  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
+    http://icekit.lvh.me:8000  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
 
-Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/master/docs/docker-quick-start.md)
-guide for more info on using Docker with an ICEkit project.
+Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/${BRANCH}/docs/docker-quick-start.md)
+guide for more info on running an ICEkit project with Docker.
 
-# Run directly
+# Run without Docker
 
-If you are not yet ready for Docker, you can run an ICEkit project directly.
-You will just need to install and configure all of its dependencies manually.
-
-See: https://github.com/ic-labs/django-icekit/#run-directly
+Read our [Manual Setup](https://github.com/ic-labs/django-icekit/blob/develop/docs/manual-setup.md)
+guide for more info on running an ICEkit project without Docker.
 
 EOF

@@ -1,38 +1,35 @@
-# Manual Setup
+# Run without Docker
 
-If you are not using Docker, you will need to install the required services and
-library dependencies manually.
+If you are not yet ready for Docker, you can run an ICEkit project directly.
+You will need to install and configure all of its dependencies manually.
 
-First, create your project the same way as if you were using Docker:
-
-    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/bin/startproject.sh) FOO
-    $ cd FOO
-
-This only creates the source code for a new project from our template. It does
-not install any dependencies for the project. You will need:
+Install required system packages:
 
   * Elasticsearch
+  * Nginx
+  * NPM
   * PostgreSQL
+  * Python 2.7
   * Redis
 
-You will need to create a local settings module to reconfigure some settings,
-depending on how your services have been installed:
+On OS X, we recommend [Postgres.app](http://postgresapp.com/). It is easy to
+install, start, stop, and upgrade.
 
-    $ cp djangosite/settings/local.sample.py djangosite/settings/local.py
-    $ vi djangosite/settings/local.py
+The rest can be installed with [Homebrew](http://brew.sh/):
 
-Create a database and Python virtualenv:
+    $ brew install elasticsearch nginx npm python redis
 
-    $ createdb FOO
-    $ pip install virtualenvwrapper
-    $ mkvirtualenv -a $PWD FOO
-    (FOO)$ pip install -e .
+You need to configure these services to start automatically, or start them
+manually before you start the project.
 
-Now you can apply database migrations and run the project:
+Open a subshell with a reconfigured environment for your project:
 
-    (FOO)$ ./manage.py migrate
-    (FOO)$ ./manage.py supervisor  # Starts all services
+    $ ./go.sh  # Watch for the admin account credentials that get created on first run
 
-Open the site in your browser:
+Start the project:
 
-    http://localhost:8000
+    $ supervisord.sh
+
+Now you can open the site in a browser:
+
+    http://icekit.lvh.me:8000  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1

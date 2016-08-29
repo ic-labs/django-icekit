@@ -10,6 +10,10 @@ EOF
 
 set -e
 
+export PGHOST="${PGHOST:-localhost}"
+export PGPORT="${PGPORT:-5432}"
+export PGUSER="${PGUSER:-$(whoami)}"
+
 # Wait for PostgreSQL to become available.
 COUNT=0
 until psql -l > /dev/null 2>&1; do
@@ -39,7 +43,7 @@ echo "Create database '$PGDATABASE'."
 createdb "$PGDATABASE"
 
 # Restore from file or source database.
-INITIAL_DATA="${SRC_PGDATABASE:-initial_data.sql}"
+INITIAL_DATA="${SRC_PGDATABASE:-$ICEKIT_DIR/initial_data.sql}"
 if [[ -f "$INITIAL_DATA" ]]; then
     echo "Restore to database '$PGDATABASE' from file '$INITIAL_DATA'."
     pv "$INITIAL_DATA" | psql -d "$PGDATABASE" > /dev/null

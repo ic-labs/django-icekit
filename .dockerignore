@@ -16,6 +16,6 @@ dist/
 htmlcov/
 icekit/bower_components/
 icekit/node_modules/
-initial_data.sql
-project/
+icekit/project_template/static_root/
+icekit/project_template/venv/
 venv/

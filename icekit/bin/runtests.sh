@@ -9,9 +9,9 @@ EOF
 set -e
 
 export BASE_SETTINGS_MODULE=test
-export PGDATABASE="${PGDATABASE:-test_icekit}"
-export REUSE_DB=1
 export FORCE_SETUP_POSTGRES_DATABASE=1
-export SRC_PGDATABASE=test_icekit.sql
+export PGDATABASE=test_icekit
+export REUSE_DB=1
+export SRC_PGDATABASE="$ICEKIT_DIR/initial_data.sql"
 
-exec entrypoint.sh icekit/bin/manage.py test --noinput --verbosity=2 "$@"
+exec entrypoint.sh python "$ICEKIT_DIR/bin/manage.py" test --noinput --verbosity=2 "$@"

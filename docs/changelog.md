@@ -1,5 +1,35 @@
 # Changelog
 
+## (in development)
+
+  * Serve Django with Nginx/Gunicorn under Supervisord, to buffer requests,
+    facilitate large file uploads (500MB), and take full advantage of multiple
+    CPU cores.
+
+  * The `SITE_PORT` setting now represents the public port that the site is
+    listening on (Nginx), not the WSGI process (Gunicorn).
+
+  * Use `initial_data.sql` dump to bypass old migrations on first run, not only
+    when running tests.
+
+  * Use wrapper scripts for program commands, so we can run programs
+    consistently in Docker containers of via Supervisord when not using Docker.
+
+  * Expose private ports (e.g. Gunicorn, PostgreSQL, Redis) to the host on a
+    dynamic port during development.
+
+  * Update the `Site` object matching the `SITE_ID` setting in a post-migrate
+    signal handler with the `SITE_DOMAIN`, `SITE_PORT` and `SITE_NAME`
+    settings.
+
+  * Run celery programs via Supervisord when not using Docker.
+
+  * Configure Docker and non-Docker environments to be more similar so we can
+    use more of the same scripts to run.
+
+  * Don't use Redis lock to avoid parallel setup when not using Docker, on a
+    single server.
+
 ## 0.10.2 (25 August 2016)
 
   * Run tests in a Docker image on Travis CI and push to Docker Hub on success.
