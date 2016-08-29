@@ -16,6 +16,10 @@ export EXTRA_SUPERVISORD_CONFIG=supervisord-no-docker.conf
 # See: http://stackoverflow.com/a/4774063
 export ICEKIT_PROJECT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}"); pwd -P)
 
+# Don't use Redis locks to serialize setup, since we are running locally on a
+# single server.
+export NO_WAITLOCK=1
+
 # Use alternate installation (user scheme) for Python packages.
 export PIP_SRC="$ICEKIT_PROJECT_DIR/venv/src"
 export PYTHONUSERBASE="$ICEKIT_PROJECT_DIR/venv"
