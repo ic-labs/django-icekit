@@ -10,6 +10,10 @@ EOF
 
 set -e
 
+export PGHOST="${PGHOST:-localhost}"
+export PGPORT="${PGPORT:-5432}"
+export PGUSER="${PGUSER:-$(whoami)}"
+
 # Wait for PostgreSQL to become available.
 COUNT=0
 until psql -l > /dev/null 2>&1; do
