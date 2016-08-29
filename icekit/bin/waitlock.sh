@@ -9,7 +9,8 @@ EOF
 
 set -e
 
-if [[ -n "$NO_WAITLOCK" ]]; then
+# Don't use Redis locks to serialize access to shared resources, e.g. database.
+if [[ -z "$WAITLOCK_ENABLE" ]]; then
     exec "$@"
 fi
 

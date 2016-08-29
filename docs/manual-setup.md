@@ -19,8 +19,8 @@ The rest can be installed with [Homebrew](http://brew.sh/):
 
     $ brew install elasticsearch nginx npm python redis
 
-You need to configure these services to start automatically, or start them
-manually before you start the project.
+You need to configure Elasticsearch, PostgreSQL and Redis to start
+automatically, or start them manually before you start the project.
 
 Open a subshell with a reconfigured environment for your project:
 

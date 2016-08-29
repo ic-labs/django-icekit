@@ -4,11 +4,13 @@ django:
     PGHOST: postgres
     PGUSER: postgres
     TRAVIS:
-  image: interaction/icekit:${TAG}
+  image: interaction/icekit:latest
   links:
     - elasticsearch
     - postgres
     - redis
+  volumes:
+    - ./icekit-project/var:/opt/django-icekit/icekit-project/var
 elasticsearch:
   image: interaction/elasticsearch-icu:1
 postgres:

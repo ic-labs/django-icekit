@@ -1,5 +1,6 @@
 [run]
 branch = True
+data_file = icekit-project/var/.coverage
 omit = */migrations/__init__.py, icekit/tests/*
 source = icekit
 

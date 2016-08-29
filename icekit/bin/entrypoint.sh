@@ -9,29 +9,40 @@ EOF
 
 set -e
 
-# Make sure this is set, even if to an empty string, to stop Supervisor from
-# complaining.
-export EXTRA_SUPERVISORD_CONFIG="$EXTRA_SUPERVISORD_CONFIG"
-
-# Add bin directories to PATH if not already there.
-# See: http://superuser.com/a/39995
-if [[ ":$PATH:" != *":$ICEKIT_DIR/bin:"* ]]; then
-    export PATH="$ICEKIT_DIR/bin${PATH:+:$PATH}"
-fi
-if [[ ":$PATH:" != *":$ICEKIT_PROJECT_DIR/venv/bin:"* ]]; then
-    export PATH="$ICEKIT_PROJECT_DIR/venv/bin${PATH:+:$PATH}"
-fi
-
-# Configure Python.
-export PIP_DISABLE_PIP_VERSION_CHECK=on
-export PYTHONHASHSEED=random
-export PYTHONWARNINGS=ignore
+# Make `pip install --user` the default.
+pip() {
+    if [[ "$1" == install ]]; then
+        shift
+        set -- install --user "$@"
+    fi
+    command pip "$@"
+}
+export -f pip
 
 # Get number of CPU cores, so we know how many processes to run.
 export CPU_CORES=$(python -c 'import multiprocessing; print multiprocessing.cpu_count();')
 
 # Get project name from the project directory.
 export ICEKIT_PROJECT_NAME=$(basename "$ICEKIT_PROJECT_DIR")
+
+# Add bin directories to PATH.
+export PATH="$ICEKIT_PROJECT_DIR/var/venv/bin:$ICEKIT_DIR/bin:$PATH"
+
+# Use alternate installation (user scheme) for Python packages.
+export PIP_SRC="$ICEKIT_PROJECT_DIR/var/venv/src"
+export PYTHONUSERBASE="$ICEKIT_PROJECT_DIR/var/venv"
+
+# Configure Python.
+export PIP_DISABLE_PIP_VERSION_CHECK=on
+export PYTHONHASHSEED=random
+export PYTHONWARNINGS=ignore
+
+# Get Redis host and port.
+export REDIS_ADDRESS="${REDIS_ADDRESS:-localhost:6379}"
+
+# The default is `django` and `no-docker`. This is overridden in Dockerfile to
+# be just `django`.
+export SUPERVISORD_CONFIG_INCLUDE="${SUPERVISORD_CONFIG_INCLUDE:-supervisord-django.conf supervisord-no-docker.conf}"
 
 # Install Node modules.
 waitlock.sh npm-install.sh "$ICEKIT_DIR"
@@ -42,7 +53,6 @@ waitlock.sh bower-install.sh "$ICEKIT_DIR"
 waitlock.sh bower-install.sh "$ICEKIT_PROJECT_DIR"
 
 # Install Python requirements.
-waitlock.sh pip-install.sh "$ICEKIT_DIR"
 waitlock.sh pip-install.sh "$ICEKIT_PROJECT_DIR"
 
 # Setup database.
@@ -52,6 +62,5 @@ waitlock.sh setup-postgres-database.sh
 # Apply migrations.
 waitlock.sh migrate.sh "$ICEKIT_PROJECT_DIR/var"
 
-# Open a new shell by default, so we can interactively execute commands with
-# the correct environment.
+# Open a new shell by default.
 exec "${@:-bash}"

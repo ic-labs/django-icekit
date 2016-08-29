@@ -18,6 +18,9 @@ from kombu import Exchange, Queue
 
 BASE_SETTINGS_MODULE = os.environ.get('BASE_SETTINGS_MODULE', '')
 
+# Get Redis host and port.
+REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
+
 # Uniquely identify the base settings module, so we can avoid conflicts with
 # other projects running on the same system.
 SETTINGS_MODULE_HASH = hashlib.md5(__file__ + BASE_SETTINGS_MODULE).hexdigest()
@@ -321,7 +324,7 @@ SITE_ID = 1
 
 # CELERY ######################################################################
 
-BROKER_URL = CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+BROKER_URL = CELERY_RESULT_BACKEND = 'redis://%s/0' % REDIS_ADDRESS
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']  # 'pickle'
 CELERY_DEFAULT_QUEUE = SITE_SLUG
 
