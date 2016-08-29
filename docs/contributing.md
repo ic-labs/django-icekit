@@ -1,6 +1,6 @@
 # Contributing
 
-Please follow these guidelines when making contributions to this app.
+Please follow these guidelines when making contributions to this project.
 
 ## Getting Started
 
@@ -11,15 +11,20 @@ Get the code:
 
 Run the tests:
 
-    $ pip install tox
-    $ tox                                 # All environments
-    $ tox -r                              # Rebuild environments
-    $ tox -e django17-py27,django18-py27  # Just the named environments
+    $ TAG=latest docker-compose -f docker-compose.travis.yml run --rm django
 
-Build an image and start the project template:
+Build an image and start the project:
 
     $ docker-compose build --pull
     $ docker-compose up
+
+Open a shell in the running `django` service container:
+
+    $ docker-compose exec django entrypoint.sh
+
+Execute management commands in a running container:
+
+    # manage.py shell_plus
 
 ## Git
 
