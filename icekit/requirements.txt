@@ -1,1 +1,0 @@
-git+https://github.com/ixc/django-dynamic-fixture.git#egg=django-dynamic-fixture
