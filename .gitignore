@@ -1,6 +1,7 @@
 **/*.md5
 **/*.orig
-**/*.py[co]
+**/*.pyc
+**/*.pyo
 **/*.swp
 **/.DS_Store
 **/npm-debug.log
@@ -17,5 +18,4 @@
 /icekit/node_modules/
 /icekit/project_template/static_root/
 /icekit/project_template/venv/
-/initial_data.sql
 /venv/
