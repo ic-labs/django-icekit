@@ -1,4 +1,5 @@
 common:
+  deployment_strategy: high_availability
   environment:
     BASE_SETTINGS_MODULE: production
     # EMAIL_HOST:
@@ -17,7 +18,7 @@ common:
     # SITE_NAME:
   image: interaction/icekit:master
 celery:
-  command: entrypoint.sh celery -A icekit.project worker -l info
+  command: entrypoint.sh celery.sh
   extends: common
   links:
     - elasticsearch
@@ -26,14 +27,14 @@ celery:
   volumes_from:
     - django
 celerybeat:
-  command: entrypoint.sh celery -A icekit.project beat -l info -S djcelery.schedulers.DatabaseScheduler --pidfile=
+  command: entrypoint.sh celerybeat.sh
   extends: common
   links:
     - redis
   volumes_from:
     - django
 celeryflower:
-  command: entrypoint.sh celery -A icekit.project flower
+  command: entrypoint.sh celeryflower.sh
   environment:
     VIRTUAL_HOST: flower.*
     VIRTUAL_HOST_WEIGHT: 1
@@ -45,7 +46,7 @@ celeryflower:
   volumes_from:
     - django
 django:
-  command: entrypoint.sh manage.py runserver 0.0.0.0:8000
+  command: entrypoint.sh supervisord.sh
   environment:
     VIRTUAL_HOST: "*"
   extends: common

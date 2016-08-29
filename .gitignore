@@ -1,6 +1,7 @@
 **/*.md5
 **/*.orig
-**/*.py[co]
+**/*.pyc
+**/*.pyo
 **/*.swp
 **/.DS_Store
 **/npm-debug.log
@@ -15,6 +16,6 @@
 /htmlcov/
 /icekit/bower_components/
 /icekit/node_modules/
-/icekit-project/
-/initial_data.sql
+/icekit/project_template/static_root/
+/icekit/project_template/venv/
 /venv/

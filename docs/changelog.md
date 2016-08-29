@@ -1,5 +1,11 @@
 # Changelog
 
+## (in development)
+
+  * Serve Django with Nginx/Gunicorn under Supervisord, to buffer requests,
+    facilitate large file uploads (500MB), and take full advantage of multiple
+    CPU cores.
+
 ## 0.10.2 (25 August 2016)
 
   * Run tests in a Docker image on Travis CI and push to Docker Hub on success.

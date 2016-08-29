@@ -9,6 +9,10 @@ EOF
 
 set -e
 
+if [[ -n "$NO_WAITLOCK" ]]; then
+    exec "$@"
+fi
+
 export CRONLOCK_GRACE="${CRONLOCK_GRACE:-0}"
 export CRONLOCK_HOST="${CRONLOCK_HOST:-localhost}"
 export CRONLOCK_RELEASE="${CRONLOCK_RELEASE:-3600}"

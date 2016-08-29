@@ -1,16 +1,16 @@
 version: "2"
 services:
   celery:
-    command: entrypoint.sh celery -A icekit.project worker -l info
+    command: entrypoint.sh celery.sh
     extends: django
   celerybeat:
-    command: entrypoint.sh celery -A icekit.project beat -l info -S djcelery.schedulers.DatabaseScheduler --pidfile=
+    command: entrypoint.sh celerybeat.sh
     extends: django
   celeryflower:
-    command: entrypoint.sh celery -A icekit.project flower
+    command: entrypoint.sh celeryflower.sh
     extends: django
   django:
-    command: entrypoint.sh manage.py runserver 0.0.0.0:8000
+    command: entrypoint.sh supervisord.sh
     environment:
       BASE_SETTINGS_MODULE: docker
       PGHOST: postgres
