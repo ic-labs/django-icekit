@@ -1,8 +1,10 @@
 # Changelog
 
-## Develop
+## (in development)
 
+  * Make project run more consistently without Docker (via `go.sh`).
   * Refactor docs to provide better onboarding.
+  * Fix intermittent cache related test failures.
 
 ## 0.11 (29 August 2016)
 
@@ -61,8 +63,8 @@ New:
 Backwards incompatible changes:
 
   * Make content plugins [portable](topics/portable-apps.md). You will need to
-  run an SQL statement for each plugin manually to fix Django's migration
-  history when upgrading an existing project.
+    run an SQL statement for each plugin manually to fix Django's migration
+    history when upgrading an existing project.
 
         UPDATE django_migrations SET app='icekit_plugins_brightcove' WHERE app='brightcove';
         UPDATE django_migrations SET app='icekit_plugins_child_pages' WHERE app='child_pages';

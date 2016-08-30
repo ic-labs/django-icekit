@@ -60,6 +60,6 @@ implements a Publishable FluentPage - ie it's a Polymorphic model that sits
 in a tree, and each such page has a draft copy and a published
 copy.
 
-[Haystack]: http://haystacksearch.org/
-[FluentContentsPage]: http://django-fluent-pages.readthedocs.org/en/latest/api/integration/fluent_contents.html?highlight=fluentcontentspage#the-fluentcontentspage-class
 [django-polymorphic]: https://django-polymorphic.readthedocs.io/
+[FluentContentsPage]: http://django-fluent-pages.readthedocs.org/en/latest/api/integration/fluent_contents.html?highlight=fluentcontentspage#the-fluentcontentspage-class
+[Haystack]: http://haystacksearch.org/

@@ -1,35 +1,53 @@
 # Contributing
 
-Please follow these guidelines when making contributions to this project.
+Please follow these guidelines when making contributions.
 
-## Getting Started
+# Getting started
+
+You can run the ICEkit project template as-is, without first creating a project
+from the template.
 
 Get the code:
 
     $ git clone https://github.com/ic-labs/django-icekit.git
     $ cd django-icekit
 
+Build a Docker image:
+
+    $ docker-compose build --pull
+
+Start all services:
+
+    $ docker-compose up
+
+This will take a few minutes. You will know it is ready when you see:
+
+    #
+    # READY.
+    #
+
+Now you can open the site in a browser:
+
+    http://localhost:8000
+
+Create a superuser account:
+
+    $ docker-compose exec django entrypoint.sh manage.py createsuperuser
+
+Stop all services:
+
+    $ docker-compose stop
+
 Run the tests:
 
     $ docker-compose -f docker-compose.travis.yml run --rm django
 
-Build an ICEkit image and start the project:
+# Run without Docker
 
-    $ docker-compose build --pull
-    $ docker-compose up
+Read [Manual Setup](../intro/manual-setup.md) for more info on running an
+ICEkit project without Docker.
 
-Run the tests without Docker:
-
-    $ cd project_template
-    $ ./go.sh entrypoint.sh collectstatic
-    $ ./go.sh runtests.sh
-
-Start the project template without Docker:
-
-    $ ./go.sh
-    $ supervisord.sh
-
-## Git
+# Git
 
 We are using the [Gitflow] branching model. Basically:
 
@@ -43,7 +61,7 @@ We are using the [Gitflow] branching model. Basically:
 The [SourceTree] app (OS X and Windows) has built-in support for Gitflow, and
 there is also a collection of [git-extensions] for command line users.
 
-## Code Style
+# Code style
 
 It's important that we adopt a consistent code style to minimise code churn and
 make collaboration easier.
@@ -51,41 +69,28 @@ make collaboration easier.
   * Follow [PEP8] for Python code, unless there is a good reason not to.
   * Install the [EditorConfig] plugin for your preferred code editor.
 
-## Documentation
+# Tests
 
-Docs are probably more important than tests!
-
-  * Write [Markdown] docs for all notable changes and additions.
-  * Include examples so new contributors can get started quickly.
-  * Include rationale when there are competing solutions, so people know why
-    they should use our solution.
-  * Keep the [changelog] up to date. Use plain language to describe changes,
-    as it may be read by people who are not familiar with the project or a
-    particular feature.
-  * Document all functions that don't begin with an underscore.
-
-### HTML Docs
-
-You can use [MkDocs] to preview your documentation as you are writing it:
-
-    $ mkdocs serve
-
-It will even auto-reload whenever you save any changes, so all you need to do
-to see your latest edits is refresh your browser.
-
-## Tests
-
-We don't need 100% test coverage, but we should at least have:
+We don't strictly need 100% test coverage, but we aim to have:
 
   * Unit tests for all regression bugs.
   * Unit or integration tests for complex, fragile, or important functionality.
 
-## Releases
+# Documentation
 
-  * When the changelog for a release gets sufficiently long or major features
-    or fixes are implemented, tag a release.
+Docs are just as important as tests.
 
-[changelog]: ../changelog.md
+  * Write [Markdown] docs for all notable changes and additions.
+  * Include examples so new contributors can get started quickly.
+  * Keep the [changelog] up to date. Describe features, not implementation
+    details, except for backwards incompatible changes.
+
+# Releases
+
+When the [changelog] for a release gets sufficiently long or major features or
+fixes are implemented, tag and upload a release to PyPI.
+
+[changelog]: changelog.md
 [EditorConfig]: http://editorconfig.org/
 [git-extensions]: https://github.com/nvie/gitflow/
 [Gitflow]: http://nvie.com/posts/a-successful-git-branching-model/
