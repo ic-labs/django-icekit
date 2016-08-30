@@ -24,14 +24,10 @@ before_install:
   - docker build -t "interaction/icekit:${TAG}" -t "interaction/icekit:latest" .
   - docker-compose -f docker-compose.travis.yml config
 
-install:
-  - pip install coveralls
-
 script:
   - docker-compose -f docker-compose.travis.yml run --rm django
 
 after_success:
-  - coveralls
   - docker history "interaction/icekit:${TAG}"
   - docker push "interaction/icekit:${TAG}"
 
