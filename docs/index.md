@@ -5,20 +5,12 @@ Are you new to ICEkit? Start here.
 
 * [ICEkit features]
 * [Quick install guide]
-* [ICEkit architectural overview]
-
-<!-- # Editors guide -->
-
 
 # Building ICEkit sites
 
 Add custom functionality to your site.
 
-<!--
-- Architectural overview
-- Modular content
--->
-
+* [Architectural overview]
 * [Start building your site]
 * [Creating page types]
 * [Creating content plugins]
@@ -27,17 +19,11 @@ Add custom functionality to your site.
 
 
 # Topic guides
-<!-- * Debugging/troubleshooting -->
 * [Layouts]
 * [Placeholders]
 * [Publishing]
 * [Page trees and mptt]
 * [Writing portable apps]
-
-<!-- - Testing -->
-
-
-<!-- # Reference -->
 
 
 # Apps for ICEkit
@@ -65,18 +51,9 @@ Add custom functionality to your site.
       * `text`
       * `twitter_embed`
 
-<!-- ## GLAMkit apps, pagetypes and plugins -->
-
 ## 3rd-party
 * [icekit-events] - rich, repeating, publishable calendared events
 * [icekit-press-releases] - general-purpose press releases
-
-<!--
-authors
-sponsors
-author
-assets
--->
 
 # Contributing to ICEkit
 
@@ -99,7 +76,7 @@ team at [the Interaction Consortium]: [labs@interaction.net.au](mailto:labs@inte
 
 <!--internal links -->
 [ICEkit features]: intro/features.md
-[ICEkit architectural overview]: intro/architecture.md
+[Architectural overview]: intro/architecture.md
 [Quick install guide]: intro/install.md
 [Start building your site]: howto/start.md
 [Configuring your site]: howto/settings.md
