@@ -21,7 +21,8 @@ before_install:
   # Login and build images.
   - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
   - docker pull "interaction/icekit:${TAG}" || true
-  - docker build -t "interaction/icekit:${TAG}" -t "interaction/icekit:latest" .
+  - docker build -t "interaction/icekit:${TAG}" .
+  - docker tag "interaction/icekit:${TAG}" interaction/icekit:latest
   - docker-compose -f docker-compose.travis.yml config
 
 install:
