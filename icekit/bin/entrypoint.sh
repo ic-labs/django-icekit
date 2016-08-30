@@ -67,65 +67,29 @@ COMMAND="${@:-bash}"
 if [[ "$COMMAND" == bash ]]; then
     cat <<EOF
 
-You are running an interactive shell. Here's a list of commands you might want
-to run:
+You are running an interactive shell. Here is a list of frequently used
+commands you might want to run:
 
     bower-install.sh <DIR>
-        Change to <DIR> and execute 'bower install', *if* 'bower.json' has been
-        updated since the last time it was run.
-
     celery.sh
-        Start Celery. This is normally managed by Docker or Supervisord, and is
-        not normally used interactively.
-
     celerybeat.sh
-        Start Celery Beat. This is normally managed by Docker or Supervisord,
-        and is not normally used interactively.
-
     celeryflower.sh
-        Start Celery Flower. This is normally managed by Docker or Supervisord,
-        and is not normally used interactively.
-
     gunicorn.sh
-        Start Gunicorn. This is normally managed by Docker or Supervisord, and
-        is not normally used interactively.
-
-    manage.py [SUBCOMMAND [ARGUMENTS]]
-        Run a Django management command.
-
+    manage.py [COMMAND [ARGS]]
     migrate.sh
-        Apply Django migrations, *if* the migrations on disk have been updated
-        since the last time it was run.
-
     nginx.sh
-        Start Nginx. This is normally managed by Docker or Supervisord, and is
-        not normally used interactively.
-
     npm-install.sh <DIR>
-        Change to <DIR> and execute 'npm install', *if* 'package.json' has been
-        updated since the last time it was run.
-
     pip-install.sh <DIR>
-        Change to <DIR> and execute 'pip install', *if* 'requirements.txt' or
-        'requirements-local.txt' have been updated since the last time it was
-        run.
+    runserver.sh [ARGS]
+    runtests.sh [ARGS]
+    setup-django.sh [COMMAND]
+    setup-postgres.sh
+    supervisorctl.sh [OPTIONS] [ACTION [ARGS]]
+    supervisord.sh [ARGS]
 
-    runserver.sh
-        Start the Django development server.
+For more info on each command, run:
 
-    setup-postgres-database.sh
-        Create a PostgreSQL database with a name derived from the current Git
-        branch and project directory. Seed the new database it with data from
-        the 'SRC_PG*' environment variables, if defined.
-
-    supervisorctl.sh [OPTIONS] [ACTION [ARGUMENTS]]
-        Run 'supervisorctl'. When using Docker, use this to manage Gunicorn and
-        Nginx. When not using Docker, it also manages Celery, Celery Beat and
-        Celery Flower.
-
-    supervisord.sh
-        Start Supervisord. This is normally managed by Docker, and is usually
-        only used interactively when not using Docker.
+    help.sh
 
 EOF
 fi
