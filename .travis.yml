@@ -31,6 +31,8 @@ script:
   - docker-compose -f docker-compose.travis.yml run --rm django
 
 after_success:
+  - cat .coveragerc
+  - ls -la icekit-project/var/
   - coveralls
   - docker history "interaction/icekit:${TAG}"
   - docker push "interaction/icekit:${TAG}"
