@@ -74,6 +74,8 @@ In the app whose label is being updated, make the following changes:
 
         migrations.RunSQL("UPDATE django_content_type SET app_label='{new app label}' WHERE app_label='{old app label}';"),
 
+## Applying the app rename in an existing project
+
 In a project that uses a portable app with an updated app label, make the
 following changes:
 
@@ -89,6 +91,6 @@ following changes:
 
   * Update foreign key and many to many fields in all apps.
 
-  * Execute the following SQL diretly on the database for your renamed apps:
+  * Execute the following SQL directly on the database for your renamed apps:
 
         UPDATE django_migrations SET app='{new app label}' WHERE app='{old app label}';

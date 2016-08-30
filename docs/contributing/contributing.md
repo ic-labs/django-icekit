@@ -62,6 +62,7 @@ Docs are probably more important than tests!
   * Keep the [changelog] up to date. Use plain language to describe changes,
     as it may be read by people who are not familiar with the project or a
     particular feature.
+  * Document all functions that don't begin with an underscore.
 
 ### HTML Docs
 
@@ -84,7 +85,7 @@ We don't need 100% test coverage, but we should at least have:
   * When the changelog for a release gets sufficiently long or major features
     or fixes are implemented, tag a release.
 
-[changelog]: changelog.md
+[changelog]: ../changelog.md
 [EditorConfig]: http://editorconfig.org/
 [git-extensions]: https://github.com/nvie/gitflow/
 [Gitflow]: http://nvie.com/posts/a-successful-git-branching-model/

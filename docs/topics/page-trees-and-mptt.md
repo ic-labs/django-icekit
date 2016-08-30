@@ -11,7 +11,7 @@ tree structure to define a page and URL hierarchy for a site.
 The tree structure is authoritatively described by `UrlNode.parent`
 relationships, and by corresponding reverse `children` relationship.
 
-Like many Django CMS systems, Fluent uses the [django-mptt] (MPTT) utilities
+Like many Django CMS systems, Fluent uses the [MPTT](django-mptt) utilities
 to improve the performance of tree hierarchy lookups and gain tree traversal
 and management tools. MPTT derives and stores extra data from the
 authoritative `parent`/`children` relationships so it can reconstruct tree
@@ -71,10 +71,10 @@ structure showing in the admin, rather than public-facing failures.
 
 ## MPTT and Publishing
 
-Our [publishing implementation](publishing.md) is based on having up to two
-copies of every publishable item: a draft copy which has the latest data and
-is visible in the CMS admin, and a published copy which was cloned from a
-current or prior draft copy and shares all its data but is handled
+Our [publishing implementation](../topics/publishing.md) is based on having
+up to two copies of every publishable item: a draft copy which has the latest
+data and is visible in the CMS admin, and a published copy which was cloned
+from a current or prior draft copy and shares all its data but is handled
 differently by the system. In particular, the `parent` relationship for both
 draft and published copies always points to a **draft** copy in the system,
 so that child/descendant items can be published before their ancestors (as
@@ -85,10 +85,10 @@ often have two copies of an item – a draft copy and a published copy – yet
 these two copies logically are in the exact same location in the overall
 tree hierarchy, and also often have identical URL paths to be cached. MPTT,
 on the other hand, doesn't know about the draft/published distinction and
-wants to manage both copies as separate items. This clash led to [issue #945]
-and [issue #963] where MPTT got confused, and corrupted, and then when we
-naively performed an MPTT tree rebuild while MPTT was unaware of our
-publishing system things only got worse.
+wants to manage both copies as separate items. This clash led to issues where
+MPTT got confused, and corrupted, and then when we naively performed an MPTT
+tree rebuild while MPTT was unaware of our publishing system things only got
+worse.
 
 To solve problems with MPTT's interactions with publishing we have
 customised MPTT in two key ways.
@@ -160,7 +160,7 @@ versions of pages to roll back to earlier data. This feature also clashes
 badly with standard MPTT because historical cached MPTT data is likely to
 get out-of-date with the correct cached tree data very quickly, and if the
 outdated data is then restored MPTT's tree can get corrupted in particularly
-nasty ways. This bit us in [issue #963] where restoring historical data led
+nasty ways. This bit us in an issue where restoring historical data led
 two completely different trees (according to the authoritative `parent`
 relationship) having the same MPTT `tree_id`, which caused every MPTT tree
 traversal or update operation on either tree to fail.
@@ -198,7 +198,7 @@ post-processing of the revision form view.
 
 ## MPTT Tree Fixes and Monitoring
 
-To fix corrupted MPTT tree data as described in [issue #963] and to monitor
+To fix corrupted MPTT tree data and to monitor
 tree data over time to identify and fix tree-related problems, we have tools
 to manage and log the page tree:
 
@@ -314,5 +314,3 @@ NOTE: We do not yet have a way to run the `rebuild_page_tree` management
 command in a transaction context that can be rolled back.
 
 [django-mptt]: https://github.com/django-mptt/django-mptt
-[issue #945]: https://www.assembla.com/spaces/sfmoma/tickets/963
-[issue #963]: https://www.assembla.com/spaces/sfmoma/tickets/963

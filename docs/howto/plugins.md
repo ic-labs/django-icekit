@@ -1,0 +1,118 @@
+# Content Plugins
+
+Most ICEkit content uses the Fluent-contents system for adding an ordered
+list of arbitrary content items to a given Django model (aka "Rich Content").
+A content item is a (usually) small django model for representing an item of
+content on a page and can have any fields that a normal model has.
+
+ContentItems and Fluent Contents models (which contain them) are related with
+Generic Foreign Keys.
+
+
+## Which content plugins are being used in the project and how do I remove / add one?
+
+All content plugins need to be registered with `INSTALLED_APPS` as they are self
+contained Django apps. Each of these apps to be available for registration
+must extend `ContentItem` for the model declaration and `ContentPlugin` for
+the registration for use.
+
+To be able to find which plugins are installed into the project looking in
+`INSTALLED_APPS` can start you on the process of discovery as well as
+searching the project and environment for `ContentItem` or `ContentPlugin`.
+
+If the app is installed it does not necessarily mean that it is available for
+use every where in the project. There is a setting named
+`FLUENT_CONTENTS_PLACEHOLDER_CONFIG` which allows each region to have
+specified content plugins enabled for it. If the region is not defined in
+this setting it is assume that all content plugins are appropriate for use
+with it.
+
+To add a content plugin to a project add it in `INSTALLED_APPS` and if
+applicable define its use in `FLUENT_CONTENTS_PLACEHOLDER_CONFIG`.
+
+To remove a content plugin first ensure all the content instances have been
+removed from your database and then remove the content plugin from
+`INSTALLED_APPS` and `FLUENT_CONTENTS_PLACEHOLDER_CONFIG`.
+
+ICEkit also has a simpler `PublishableArticle` model, which implements a
+Publishable Fluent Contents model - ie it's a straightforward Django model
+that happens to have rich content and be publishable. This is useful for more
+ normal Django collections-of-things, like Press Releases, People, Articles.
+It's common to have a collecton of items with a paired `AbstractLayoutPage`
+Page to list/navigate the collection. See the `icekit-press-releases`
+project for a worked example of this.
+
+
+## Adding rich content to a model.
+
+You can add modular content to any model, not only hierarchical `Page` models,
+with two mixin classes:
+
+    # models.py
+
+    from icekit.abstract_models import FluentFieldsMixin
+
+    class MyModel(FluentFieldsMixin, MyModelBase):
+        ...
+
+    # admin.py
+
+    from icekit.admin import FluentLayoutsMixin
+
+    class MyModelAdmin(FluentLayoutsMixin, MyModelAdminBase):
+        ...
+
+`FluentFieldsMixin` will add a `layout` field to your model, so you'll need a
+migration for this change:
+
+    $ ./manage.py makemigrations myapp
+    $ ./manage.py migrate
+
+
+## Creating New Plugins
+
+We should endeavor to use the reference plugins as-is to keep things DRY.
+
+When they don't entirely fit the requirements, we should try to enhance them in
+a backwards compatible way to support the new requirements without breaking any
+existing projects that might be using them.
+
+If the requirements are drastically divergent and can't support both the
+current and new requirements, we can make a new plugin.
+
+If the new requirements are widely reusable, we should make a
+new reference plugin in `icekit`, or perhaps in another repository.
+
+If the new requirements are a different flavour of the same thing that will
+almost certainly only apply to one client or project, then we can make a new
+plugin in the project.
+
+Before we make a new plugin in the project, we should consider that:
+
+ 1. A fully customised solution is warranted by the requirements and budget;
+
+ 2. Future projects won't be able to benefit from custom plugins developed for
+    one project. It is rarely the case that we refactor project plugins into
+    `icekit` after a project has ended.
+
+ 3. The project won't get "free" plugin enhancements when upgrading to a new
+    version of ICEkit.
+
+ 4. We may end up re-implementing very similar plugins again and again in
+    different projects.
+
+## Frequently Asked Questions
+
+### How do I target a specific page layout with a plugin?
+
+[Defining a 'placeholder slot'](https://django-fluent-contents.readthedocs.org/en/latest/templatetags.html#cms-page-placeholders)
+
+[Configuring the available plugins](https://django-fluent-contents.readthedocs.org/en/latest/configuration.html#configuration)
+
+### How do I make changes to the fields on a plugin that lives in the venv? How do I add/remove fields in the admin?
+
+Inherit from the plugin, make changes as a subclass, use `fieldsets`
+(property on the content plugin) to hide fields.
+
+Refer to [fluent-contents](https://django-fluent-contents.readthedocs.org/en/latest/index.html)
+ - specifically [Customizing the admin interface](https://django-fluent-contents.readthedocs.org/en/latest/newplugins/admin.html)
