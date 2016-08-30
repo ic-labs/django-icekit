@@ -1,24 +1,55 @@
-# Useful commands
+# Useful shell commands
 
-This document contains some commands for achieving common tasks. These
-commands assume you are running ICEkit in a Docker container.
+This document describes a few useful shell commands. For Docker commands, see
+our [Docker intro](../intro/docker.md).
 
-For common Docker commands, see the [Docker docs](../intro/docker.md).
+## Opening a shell
 
-## Shell commands
-
-To get to a django shell (we prefer the enhanced shell which imports all the
-models and has tab completion):
+Open a shell on an already running container (e.g. via `docker-compose up`):
 
     $ docker-compose exec django entrypoint.sh
-    # manage.py shell_plus
 
-To run tests:
+Or open a shell on a new container, and remove it on exit:
 
-    $ docker-compose exec django entrypoint.sh
-    # manage.py test
+    $ docker-compose run --rm django entrypoint.sh
 
-<!-- or without migrations: -->
+Or open a shell without Docker from the ICEkit project template (or an ICEkit
+project) directory:
+
+    $ cd project_template
+    $ ./go.sh
+
+## Once in a shell
+
+Run Django management commands:
+
+    $ manage.py migrate --list
+    $ manage.py shell_plus
+
+Open a PostgreSQL shell:
+
+    $ psql
+
+Dump the database:
+
+    $ pg_dump -O -x -f dump.sql
+
+Run the tests:
+
+    $ runtests.sh
+
+Run a single test:
+
+    $ runtests.sh path.to:TestCase.test_method
+
+Manage Supervisord programs (Gunicorn, Nginx, etc.):
+
+    $ supervisorctl.sh status
+    $ supervisorctl.sh restart gunicorn
+
+Display a list of other frequently used shell commands:
+
+    $ help.sh
 
 ## Suggestions?
 
