@@ -9,6 +9,7 @@ ICEkit is a next-generation CMS by [the Interaction Consortium], built on top of
 [django-fluent-pages] and [django-fluent-contents]. See [ICEkit features at a
 glance](docs/intro/features.md)
 
+ICEkit underpins [GLAMkit](http://glamkit.org) and many individual sites.
 
 # Quickstart
 <!-- keep identical with docs/intro/install.md, except for link relativity. -->
