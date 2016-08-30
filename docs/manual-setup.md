@@ -6,6 +6,7 @@ You will need to install and configure all of its dependencies manually.
 Install required system packages:
 
   * Elasticsearch
+  * md5sum
   * Nginx
   * NPM
   * PostgreSQL
@@ -17,7 +18,7 @@ install, start, stop, and upgrade.
 
 The rest can be installed with [Homebrew](http://brew.sh/):
 
-    $ brew install elasticsearch nginx npm python redis
+    $ brew install elasticsearch md5sha1sum nginx npm python redis
 
 You need to configure Elasticsearch, PostgreSQL and Redis to start
 automatically, or start them manually before you start the project.
