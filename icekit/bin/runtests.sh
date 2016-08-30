@@ -16,4 +16,4 @@ export SRC_PGDATABASE="$ICEKIT_DIR/initial_data.sql"
 
 unset WAITLOCK_ENABLED
 
-exec entrypoint.sh python "$ICEKIT_DIR/bin/manage.py" test --noinput --verbosity=2 "${@:-icekit}"
+exec entrypoint.sh coverage run "$ICEKIT_DIR/bin/manage.py" test --noinput --verbosity=2 "${@:-icekit}"
