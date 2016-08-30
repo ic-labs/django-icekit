@@ -1,0 +1,14 @@
+**/*.md5
+**/*.orig
+**/*.pyc
+**/*.pyo
+**/*.swp
+**/.DS_Store
+**/npm-debug.log
+**/requirements-local.txt
+.git/
+.idea/
+bower_components/
+node_modules/
+static_root/
+var/

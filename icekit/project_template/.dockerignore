@@ -1,9 +1,0 @@
-**/*.md5
-**/*.py[co]
-*.egg-info/
-.eggs/
-.git/
-bower_components/
-node_modules/
-requirements-local.txt
-var/

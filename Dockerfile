@@ -61,13 +61,13 @@ RUN cd /usr/local/bin \
 
 ENV CRONLOCK_HOST=redis
 ENV ICEKIT_DIR=/opt/django-icekit/icekit
-ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/icekit/project_template
-ENV PATH=/opt/django-icekit/icekit/bin:/opt/django-icekit/venv/bin:$PATH
-ENV PIP_SRC=/opt/django-icekit/venv/src
-ENV PYTHONHASHSEED=random
-ENV PYTHONPATH=/opt/django-icekit:$PYTHONPATH
-ENV PYTHONUSERBASE=/opt/django-icekit/venv
-ENV PYTHONWARNINGS=ignore
+ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/icekit-project
+ENV PATH=/opt/django-icekit/icekit-project/var/venv/bin:/opt/django-icekit/icekit/bin:$PATH
+ENV PIP_SRC=/opt/django-icekit/icekit-project/var/venv/src
+ENV PYTHONUSERBASE=/opt/django-icekit/icekit-project/var/venv
+ENV REDIS_ADDRESS=redis:6379
+ENV SUPERVISORD_CONFIG_INCLUDE=supervisord-django.conf
+ENV WAITLOCK_ENABLE=1
 
 VOLUME /root
 

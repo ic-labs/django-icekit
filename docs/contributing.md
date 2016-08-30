@@ -11,20 +11,23 @@ Get the code:
 
 Run the tests:
 
-    $ TAG=latest docker-compose -f docker-compose.travis.yml run --rm django
+    $ docker-compose -f docker-compose.travis.yml run --rm django
 
-Build an image and start the project:
+Build an ICEkit image and start the project:
 
     $ docker-compose build --pull
     $ docker-compose up
 
-Open a shell in the running `django` service container:
+Run the tests without Docker:
 
-    $ docker-compose exec django entrypoint.sh
+    $ cd project_template
+    $ ./go.sh entrypoint.sh collectstatic
+    $ ./go.sh runtests.sh
 
-Execute management commands in a running container:
+Start the project template without Docker:
 
-    # manage.py shell_plus
+    $ ./go.sh
+    $ supervisord.sh
 
 ## Git
 

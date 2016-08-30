@@ -55,8 +55,11 @@ class ImageItem(WebTest):
         self.page_1.publish()
         response = self.app.get(self.page_1.publishing_linked.get_absolute_url())
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            [u'layout_page/layoutpage/layouts/default.html',
-             'icekit/plugins/image/default.html'],
-            [t.name for t in response.templates]
-        )
+        # Confirm our icekit/plugins/image/default.html template is used to
+        # help render the page. We cannot lookup `response.templates` because
+        # this will only be fully populated if the `ImagePlugin` has not yet
+        # been rendered and cached. That is, enabling caching for unit test
+        # runs will cause `response.templates` comparisons to be unreliable.
+        self.assertTrue('<div class="image-container">' in response.content)
+        self.assertTrue('src="%s"' % self.image_1.image.url
+                        in response.content)

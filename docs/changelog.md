@@ -1,6 +1,6 @@
 # Changelog
 
-## (in development)
+## 0.11 (29 August 2016)
 
   * Serve Django with Nginx/Gunicorn under Supervisord, to buffer requests,
     facilitate large file uploads (500MB), and take full advantage of multiple
