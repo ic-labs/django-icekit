@@ -12,7 +12,7 @@ django:
     - postgres
     - redis
   volumes:
-    - ./icekit-project/var:/opt/django-icekit/icekit-project/var
+    - .:/opt/django-icekit
 elasticsearch:
   image: interaction/elasticsearch-icu:1
 postgres:
