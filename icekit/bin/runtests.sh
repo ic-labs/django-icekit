@@ -16,4 +16,7 @@ export SRC_PGDATABASE="$ICEKIT_DIR/initial_data.sql"
 
 unset WAITLOCK_ENABLED
 
-exec entrypoint.sh coverage run "$ICEKIT_DIR/bin/manage.py" test --noinput --verbosity=2 "${@:-icekit}"
+exec entrypoint.sh \
+    coverage run "$ICEKIT_DIR/bin/manage.py" test --noinput --verbosity=2 "${@:-icekit}" && \
+    coverage report && \
+    [[ -n "$TRAVIS" ]] && coveralls
