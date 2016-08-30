@@ -1,5 +1,5 @@
 django:
-  command: runtests.sh
+  command: entrypoint.sh runtests.sh
   environment:
     PGHOST: postgres
     PGUSER: postgres

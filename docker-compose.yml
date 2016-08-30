@@ -10,7 +10,7 @@ services:
     command: entrypoint.sh celeryflower.sh
     extends: django
   django:
-    command: entrypoint.sh supervisord.sh
+    command: entrypoint.sh setup-django.sh supervisord.sh
     environment:
       BASE_SETTINGS_MODULE: develop
       PGHOST: postgres
