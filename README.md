@@ -64,9 +64,9 @@ Open your new site in a browser:
 
 # Next steps
 
-* Read the [overview of ICEkit architecture](docs/intro/architecture.md)
-* [Start building your site](docs/howto/start.md)
-* Read the [Documentation](http://icekit.readthedocs.io) on Read the Docs
+  * [Start building your site](docs/howto/start.md)
+  * [Architectural overview](docs/intro/architecture.md)
+  * [Read the Documentation](http://icekit.readthedocs.io)
 
 <!-- editors guide -->
 

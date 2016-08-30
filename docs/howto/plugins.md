@@ -1,24 +1,23 @@
 # Content Plugins
 
-Most ICEkit content uses the Fluent-contents system for adding an ordered
+Most ICEkit content uses the Fluent Contents system for adding an ordered
 list of arbitrary content items to a given Django model (aka "Rich Content").
-A content item is a (usually) small django model for representing an item of
-content on a page and can have any fields that a normal model has.
+A Content Item is (usually) a small model for representing an item of content
+on a page and can have any fields that a normal model has.
 
-ContentItems and Fluent Contents models (which contain them) are related with
+Content Items and Fluent Contents models (which contain them) are related with
 Generic Foreign Keys.
 
+## Which content plugins are used in the project and how do I remove / add one?
 
-## Which content plugins are being used in the project and how do I remove / add one?
-
-All content plugins need to be registered with `INSTALLED_APPS` as they are self
-contained Django apps. Each of these apps to be available for registration
-must extend `ContentItem` for the model declaration and `ContentPlugin` for
-the registration for use.
+All content plugins need to be listed in `INSTALLED_APPS` as they are self
+contained Django apps. Each of these apps to be available for registration must
+extend `ContentItem` for the model declaration and `ContentPlugin` for the
+registration for use.
 
 To be able to find which plugins are installed into the project looking in
-`INSTALLED_APPS` can start you on the process of discovery as well as
-searching the project and environment for `ContentItem` or `ContentPlugin`.
+`INSTALLED_APPS` can start you on the process of discovery as well as searching
+the project and environment for `ContentItem` or `ContentPlugin`.
 
 If the app is installed it does not necessarily mean that it is available for
 use every where in the project. There is a setting named
@@ -42,7 +41,6 @@ It's common to have a collecton of items with a paired `AbstractLayoutPage`
 Page to list/navigate the collection. See the `icekit-press-releases`
 project for a worked example of this.
 
-
 ## Adding rich content to a model.
 
 You can add modular content to any model, not only hierarchical `Page` models,
@@ -65,9 +63,8 @@ with two mixin classes:
 `FluentFieldsMixin` will add a `layout` field to your model, so you'll need a
 migration for this change:
 
-    $ ./manage.py makemigrations myapp
-    $ ./manage.py migrate
-
+    $ manage.py makemigrations myapp
+    $ manage.py migrate
 
 ## Creating New Plugins
 

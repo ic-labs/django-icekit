@@ -1,20 +1,27 @@
 # Installing ICEkit
 <!-- keep identical with README -->
 
-For detailed instructions, see [Manual Setup](manual-setup.md).
+If you haven't already, install Docker:
 
-## 1. Start a new project
+  * [OS X](https://download.docker.com/mac/stable/Docker.dmg)
+  * [Linux](https://docs.docker.com/engine/installation/linux/)
+  * [Windows](https://download.docker.com/win/stable/InstallDocker.msi)
 
-With [Docker installed and running](docker.md),
-create a new project template with:
+[Docker](docker.md) works on OS X, Linux, and Windows, takes care of all the
+project dependencies (e.g. database, search engine, web server, etc.), and
+makes [deployment](../howto/deployment.md) easy.
+
+If you're not ready for Docker, see [Manual Setup](manual-setup.md).
+
+## 1. Create a new project
 
     $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) <project_name>
 
-This script will create a new project in a directory named <project_name> in
-the current working directory, ready to hack on. NOTE: Windows users should
-run this command in Git Bash, which comes with
-[Git for Windows](https://git-for-windows.github.io/).
+This will create a new project from the ICEkit project template, in a directory
+named <project_name> in the current working directory.
 
+NOTE: Windows users should run this command in Git Bash, which comes with
+[Git for Windows](https://git-for-windows.github.io/).
 
 ## 2. Run the project
 
@@ -22,25 +29,28 @@ run this command in Git Bash, which comes with
     $ docker-compose build --pull
     $ docker-compose up
 
-This will ensure all dependencies are installed and up to date, and will run
-a development server. <strong>Watch for the admin account credentials that get created on first run</strong>.</p>
+This will build a Docker image, download and install all dependencies, and
+start all required services.
 
-It will take a few minutes the first time. When you see the following message, you will know it is ready:
+It will take a few minutes the first time. When you see the following message,
+you will know it is ready:
 
     #
     # READY.
     #
 
+Create a superuser account:
+
+    $ docker-compose exec django entrypoint.sh manage.py createsuperuser
+
 ## 3. That's it!
 
-Open your new GLAMkit site in a browser:
+Open your new site in a browser:
 
-    http://<project_name>.lvh.me:8000
-
-(`*.lvh.me` is a wildcard DNS that maps to 127.0.0.1)
+    http://localhost:8000
 
 # Next steps
 
-* [Start building your site](../howto/start.md)
-* [Features at a glance](features.md)
-* [Architectural overview](architecture.md)
+  * [Start building your site](../howto/start.md)
+  * [Features at a glance](features.md)
+  * [Architectural overview](architecture.md)

@@ -2,7 +2,7 @@
 
 Please follow these guidelines when making contributions.
 
-# Getting started
+# Run from source, with Docker
 
 You can run the ICEkit project template as-is, without first creating a project
 from the template.
@@ -47,7 +47,7 @@ Run the tests:
 Read [Manual Setup](../intro/manual-setup.md) for more info on running an
 ICEkit project without Docker.
 
-# Git
+# Git branching
 
 We are using the [Gitflow] branching model. Basically:
 
@@ -59,7 +59,8 @@ We are using the [Gitflow] branching model. Basically:
     when you are ready to merge a feature branch back into `develop`.
 
 The [SourceTree] app (OS X and Windows) has built-in support for Gitflow, and
-there is also a collection of [git-extensions] for command line users.
+there is also a collection of [git-extensions](https://github.com/nvie/gitflow/)
+for command line users.
 
 # Code style
 
@@ -67,7 +68,8 @@ It's important that we adopt a consistent code style to minimise code churn and
 make collaboration easier.
 
   * Follow [PEP8] for Python code, unless there is a good reason not to.
-  * Install the [EditorConfig] plugin for your preferred code editor.
+  * Install the [EditorConfig](http://editorconfig.org/) plugin for your
+    preferred code editor.
 
 # Tests
 
@@ -90,11 +92,8 @@ Docs are just as important as tests.
 When the [changelog] for a release gets sufficiently long or major features or
 fixes are implemented, tag and upload a release to PyPI.
 
-[changelog]: changelog.md
-[EditorConfig]: http://editorconfig.org/
-[git-extensions]: https://github.com/nvie/gitflow/
+[changelog]: ../changelog.md
 [Gitflow]: http://nvie.com/posts/a-successful-git-branching-model/
 [Markdown]: http://daringfireball.net/projects/markdown/
-[MkDocs]: http://mkdocs.org
 [PEP8]: http://legacy.python.org/dev/peps/pep-0008/
 [SourceTree]: http://sourcetreeapp.com/

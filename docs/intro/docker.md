@@ -17,7 +17,7 @@ Docker has many advantages over a simple Python virtualenv environment:
   * Much less (if any) downtime during deployments, because Node modules,
     Bower components and Python packages are already installed in the image.
 
-# Getting Started
+# Getting started
 
 If you haven't already, install Docker:
 
@@ -35,7 +35,7 @@ The typical Docker workflow is:
   * During local development, mount your source directory into containers for
     rapid iteration without having to rebuild images.
 
-## Useful commands
+# Useful commands
 
 Here are some of the most commonly used Docker commands when getting started:
 

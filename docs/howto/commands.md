@@ -3,7 +3,7 @@
 This document describes a few useful shell commands. For Docker commands, see
 our [Docker intro](../intro/docker.md).
 
-## Opening a shell
+# Opening a shell
 
 Open a shell on an already running container (e.g. via `docker-compose up`):
 
@@ -19,12 +19,17 @@ project) directory:
     $ cd project_template
     $ ./go.sh
 
-## Once in a shell
+# Once in a shell
 
 Run Django management commands:
 
     $ manage.py migrate --list
     $ manage.py shell_plus
+
+Install a Python package:
+
+    $ pip install -U django-icekit
+    $ pip install -e git+https://github.com/ic-labs/django-icekit.git
 
 Open a PostgreSQL shell:
 
@@ -51,7 +56,7 @@ Display a list of other frequently used shell commands:
 
     $ help.sh
 
-## Suggestions?
+# Suggestions?
 
 If you'd like to add a useful command, please
 [create a ticket](https://github.com/ic-labs/django-icekit/issues/new) and/or

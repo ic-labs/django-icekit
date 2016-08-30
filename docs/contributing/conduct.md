@@ -73,6 +73,6 @@ the [Speak Up! project].
 [Django Code of Conduct]: https://www.djangoproject.com/conduct/
 [Speak Up! project]: http://speakup.io/coc.html
 
-## Questions?
+# Questions?
 
-If you have questions, please feel free to [contact us](mailto:labs@interaction.net.au).
+If you have any questions, please [contact us](mailto:labs@interaction.net.au).
