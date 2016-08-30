@@ -10,8 +10,9 @@ the following features:
     * [Publish and unpublish](../topics/publishing.md) rich content models
     * Each content page in a list or tree can be a different shape (e.g.
     a list of articles can mix Text articles, Image articles, Redirects, etc).
-    * Each page can have several [content placeholders](../topics/placeholders.md)
-    (e.g. Main region,More info, Authors)
+    * Each page can have several
+    [content placeholders](../topics/placeholders.md) (e.g. Main region,More
+    info, Authors)
     * Each content placeholder can contain as many of any kind of content
     items as required.
 * [Built-in rich content models](../howto/page-types.md):
@@ -43,8 +44,10 @@ structure, ready for clean export
 * Made in Python, a language that is fun to use and fast to innovate on
 * Designed for easy installation and deployment using Docker
 
-For more detail on how ICEkit works, see the [architectural overview](../intro/architecture.md)
-For recent updates, see the [release notes](../changelog.md)
+For more detail on how ICEkit works, see the
+[architectural overview](../intro/architecture.md).
+
+For recent updates, see the [release notes](../changelog.md).
 
 [the Interaction Consortium]: https://interaction.net.au
 

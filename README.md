@@ -11,13 +11,13 @@ glance](docs/intro/features.md)
 
 
 # Quickstart
-<!-- keep identical with docs/intro/install.md -->
+<!-- keep identical with docs/intro/install.md, except for link relativity. -->
 
-For detailed instructions, see [Manual Setup](manual-setup.md).
+For detailed instructions, see [Manual Setup](docs/intro/manual-setup.md).
 
 ## 1. Start a new project
 
-With [Docker installed and running](docker.md),
+With [Docker installed and running](docs/intro/docker.md),
 create a new project template with:
 
     $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) <project_name>
@@ -55,7 +55,7 @@ Open your new GLAMkit site in a browser:
 
 * Read the [overview of ICEkit architecture](docs/intro/architecture.md)
 * [Start building your site](docs/howto/start.md)
-* Read the [Documentation](http://icekit.readthedocs.io)
+* Read the [Documentation](http://icekit.readthedocs.io) on Read the Docs
 
 <!-- editors guide -->
 

@@ -2,7 +2,7 @@
 
 The easiest way to run an ICEkit project is with Docker. It works on OS X,
 Linux, and Windows, takes care of all the project dependencies like the
-database and search engine, and makes deployment easy.
+database and search engine, and makes [deployment easy](../howto/deploying.md).
 
 If you haven't already, go install Docker:
 

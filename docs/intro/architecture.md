@@ -26,7 +26,7 @@ has. Each Content Item has at least one associated **Content Plugin** which
 specifies how it is to be rendered in a given context and how it is edited in
 the admin.
 
-[more on Content Items and Plugins](../howto/plugins.md)
+[More on Content Items and Plugins](../howto/plugins.md)
 
 ### Database representation
 `ContentItems` and the rich content models which contain them are related with
