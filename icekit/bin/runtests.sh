@@ -16,7 +16,10 @@ export SRC_PGDATABASE="$ICEKIT_DIR/initial_data.sql"
 
 unset WAITLOCK_ENABLED
 
+setup-postgres.sh
+
 manage.py collectstatic --noinput --verbosity=0
+manage.py compress --verbosity=0
 
 coverage run "$ICEKIT_DIR/bin/manage.py" test --noinput --verbosity=2 "${@:-icekit}"
 coverage report

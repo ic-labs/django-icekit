@@ -40,7 +40,7 @@ Stop all services:
 
 Run the tests:
 
-    $ docker-compose -f docker-compose.travis.yml run --rm django
+    $ docker-compose run --rm django entrypoint.sh runtests.sh
 
 # Run without Docker
 
