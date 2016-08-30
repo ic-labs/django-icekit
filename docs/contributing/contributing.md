@@ -62,6 +62,7 @@ Docs are probably more important than tests!
   * Keep the [changelog] up to date. Use plain language to describe changes,
     as it may be read by people who are not familiar with the project or a
     particular feature.
+  * Document all functions that don't begin with an underscore.
 
 ### HTML Docs
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## Develop
+
+  * Refactor docs to provide better onboarding.
+
 ## 0.11 (29 August 2016)
 
   * Serve Django with Nginx/Gunicorn under Supervisord, to buffer requests,

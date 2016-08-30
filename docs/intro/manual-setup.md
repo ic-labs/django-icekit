@@ -1,4 +1,4 @@
-# Run without Docker
+# Install and run ICEkit without Docker
 
 If you are not yet ready for Docker, you can run an ICEkit project directly.
 You will need to install and configure all of its dependencies manually.
