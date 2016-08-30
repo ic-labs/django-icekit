@@ -1,13 +1,13 @@
 version: "2"
 services:
   celery:
-    command: entrypoint.sh celery.sh
+    command: entrypoint.sh setup-django.sh celery.sh
     extends: django
   celerybeat:
-    command: entrypoint.sh celerybeat.sh
+    command: entrypoint.sh setup-django.sh celerybeat.sh
     extends: django
   celeryflower:
-    command: entrypoint.sh celeryflower.sh
+    command: entrypoint.sh setup-django.sh celeryflower.sh
     extends: django
   django:
     command: entrypoint.sh setup-django.sh supervisord.sh
