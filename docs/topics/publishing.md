@@ -192,8 +192,6 @@ Because the publishing approach creates draft and published copies of models,
 any fields marked as `unique=True` will raise IntegrityErrors unless the
 field is made non-unique.
 
-** TODO** Describe approach for slugs (unique_together?)
-
 ## Related fields (`ForeignKey`, `ManyToMany`, etc)
 
 When referring to publishable `ForeignKey` or `ManyToMany` data items -- such
