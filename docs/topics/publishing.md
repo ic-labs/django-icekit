@@ -1,4 +1,4 @@
-# Publishing Notes
+# Publishing in ICEkit
 
 The publishing system used in ICEKit is a re-implementation of concepts and
 code from [`django-model-publisher`](https://github.com/jp74/django-model-publisher),
@@ -66,8 +66,6 @@ Consider providing the publishing-related admin
 filters provided in `icekit.publishing.admin` such as `PublishingStatusFilter`,
 and the publishing status column for listing pages by adding 'publishing_column'
 to your admin's `list_display` attribute.
-
-
 
 
 ### Draft Request Context
@@ -193,8 +191,6 @@ Each publishable model is assigned four main extra columns:
 Because the publishing approach creates draft and published copies of models,
 any fields marked as `unique=True` will raise IntegrityErrors unless the
 field is made non-unique.
-
-** TODO** Describe approach for slugs (unique_together?)
 
 ## Related fields (`ForeignKey`, `ManyToMany`, etc)
 

@@ -138,6 +138,7 @@ setuptools.setup(
         'test': [
             'celery[redis]',
             'coverage',
+            'coveralls',
             'django-dynamic-fixture',
             'django-nose',
             'django-webtest',

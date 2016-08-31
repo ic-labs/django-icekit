@@ -1,16 +1,35 @@
-# Overview
+<!-- Comments are items which are to come -->
+# First steps
 
-A modular content CMS by [Interaction Consortium], built on top of
-[django-fluent-pages] and [django-fluent-contents].
+Are you new to ICEkit? Start here.
 
-Includes the following features:
+* [ICEkit features]
+* [Quick install guide]
 
-  * Flexible layouts system.
-      * Define modular content placeholders in layout templates.
-      * Enable different layouts for different models.
-      * Switch layouts at the instance level.
+# Building ICEkit sites
+
+Add custom functionality to your site.
+
+* [Architectural overview]
+* [Start building your site]
+* [Creating page types]
+* [Creating content plugins]
+* [Useful commands]
+* [Deploying ICEkit]
+
+
+# Topic guides
+* [Layouts]
+* [Placeholders]
+* [Publishing]
+* [Page trees and mptt]
+* [Writing portable apps]
+
+
+# Apps for ICEkit
+## Included apps, pagetypes and plugins
+
   * Page type plugins:
-      * `article_page` - integrates with Fluent Pages.
       * `layout_page` - integrates with our flexible layouts system.
       * `search_page` - integrates with [Haystack].
   * Modular content plugins:
@@ -32,152 +51,51 @@ Includes the following features:
       * `text`
       * `twitter_embed`
 
-## Table of Contents
+## 3rd-party
+* [icekit-events] - rich, repeating, publishable calendared events
+* [icekit-press-releases] - general-purpose press releases
 
-  * [Changelog]
-  * [Contributing]
+# Contributing to ICEkit
 
-## Installation
+* [Release notes]
+* [Standards and collaboration]
+* [Code of Conduct]
+* [Roadmap]
 
-Create a new ICEkit project from our project template:
+# Support
 
-    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) [destination_dir]
+## Issues
 
-## Flexible Layouts
+For feature suggestions and bug reports, check the currently open [issues].
 
-The `Layout` model links a template to all the models that can use it.
+## Contact the Interaction Consortium
 
-The template for a layout should define placeholders for modular content:
+ICEkit is open and free to use. However if you have a query or business need
+that doesn't belong in the public community, please get in touch with the ICEkit
+team at [the Interaction Consortium]: [labs@interaction.net.au](mailto:labs@interaction.net.au).
 
-    {# layouts/default.html #}
-
-    {% load fluent_contents_tags %}
-
-    <div id="main">
-        {% page_placeholder obj "main" %}
-    </div>
-    <div id="sidebar">
-        {% page_placeholder obj "sidebar" %}
-    </div>
-
-Models that have modular content will have a `layout` field in the admin change
-form, allowing the selection of a layout that is compatible with that model.
-
-### TemplateNameField
-
-`TemplateNameField` behaves like a choice field and populates its list of
-available template names by plugins, if the `plugin_class` kwarg is given.
-
-The `Layout.template_name` field uses the `TemplateNameFieldChoicesPlugin`
-mount point, and ICEkit ships with several plugins.
-
-#### AppModelDefaultLayoutsPlugin
-
-Adds default app and model templates for related models.
-
-For example, if a `foo.Bar` model had a `ForeignKey('icekit.Layout')` field,
-this plugin would return the following choices:
-
-    ('foo/layouts/default.html', 'Foo: Default'),
-    ('foo/bar/layouts/default.html', 'Foo: Bar'),
-    ('foo/bar/layouts/baz.html', 'Foo: Baz'),  # Polymorphic child model
-
-#### FileSystemLayoutsPlugin
-
-Adds templates from one or more directories on the file system.
-
-Directories can be specified in the `ICEKIT['LAYOUT_TEMPLATES']` setting,
-which should be a list of 3-tuples, each containing a label prefix, a
-templates directory that will be searched by the installed template
-loaders, and a template name prefix.
-
-The templates directory and template name prefix are combined to get the
-source directory. All files in this directory will be included.
-
-The template name prefix and the source file path, relative to the source
-directory, are combined to get the template name.
-
-The label prefix and source file path are combined to get the label.
-
-Given the following directory structure:
-
-    /myproject/templates/myproject/layouts/foo.html
-    /myproject/templates/myproject/layouts/bar/baz.html
-
-These settings:
-
-    ICEKIT = {
-        'LAYOUT_TEMPLATES': (
-            ('My Project', '/myproject/templates, 'myproject/layouts'),
-        ),
-    }
-
-Would result in these choices::
-
-    ('myproject/layouts/foo.html', 'My Project: foo.html')
-    ('myproject/layouts/bar/baz.html', 'My Project: bar/baz.html')
-
-#### Creating a Custom TemplateNameFieldChoicesPlugin
-
-Subclass `TemplateNameFieldChoicesPlugin` and define a `get_choices()` method
-that returns a list of 2-tuples, each containing a template name and a label.
-
-The `field` attribute will be the `TemplateNameField` to which the plugin mount
-point is attached.
-
-## Article Page Type
-
-The article page type is designed to be used with `fluent_pages`.
-
-Add to the `INSTALLED_APPS` setting:
-
-    INSTALLED_APPS += ('icekit.page_types.article', )
-
-## Layout Page Type
-
-Integrates [FluentContentsPage] and our flexible layouts system.
-
-Add to the `INSTALLED_APPS` setting:
-
-    INSTALLED_APPS += ('icekit.page_types.layout_page', )
-
-## Search Page Type
-
-Integrates [Haystack] search into the hierarchical page tree.
-
-Add to the `INSTALLED_APPS` setting:
-
-    INSTALLED_APPS += ('icekit.page_types.search_page', )
-
-## Adding Modular Content to Models
-
-You can add modular content to any model, not only hierarchical `Page` models,
-with two mixin classes:
-
-    # models.py
-
-    from icekit.abstract_models import FluentFieldsMixin
-
-    class MyModel(FluentFieldsMixin, MyModelBase):
-        ...
-
-    # admin.py
-
-    from icekit.admin import FluentLayoutsMixin
-
-    class MyModelAdmin(FluentLayoutsMixin, MyModelAdminBase):
-        ...
-
-`FluentFieldsMixin` will add a `layout` field to your model, so you'll need a
-migration for this change:
-
-    $ ./manage.py makemigrations myapp
-    $ ./manage.py migrate
-
-[Changelog]: changelog.md
-[Contributing]: contributing.md
-[django-fluent-contents]: https://github.com/edoburu/django-fluent-contents
-[django-fluent-pages]: https://github.com/edoburu/django-fluent-pages
-[FluentContentsPage]: http://django-fluent-pages.readthedocs.org/en/latest/api/integration/fluent_contents.html?highlight=fluentcontentspage#the-fluentcontentspage-class
-[Haystack]: http://haystacksearch.org/
-[Interaction Consortium]: http://interaction.net.au
+<!--internal links -->
+[ICEkit features]: intro/features.md
+[Architectural overview]: intro/architecture.md
+[Quick install guide]: intro/install.md
+[Start building your site]: howto/start.md
+[Configuring your site]: howto/settings.md
+[Where to put your files]: howto/files.md
+[Useful shell commands]: howto/commands.md
+[Creating page types]: howto/page-types.md
+[Creating content plugins]: howto/plugins.md
+[Deploying ICEkit]: howto/deployment.md
+[Layouts]: topics/layouts.md
+[Placeholders]: topics/placeholders.md
+[Publishing]: topics/publishing.md
+[Page trees and mptt]: topics/page-trees-and-mptt.md
+[Writing portable apps]: topics/portable-apps.md
+[Release notes]: changelog.md
+[Standards and collaboration]: contributing/contributing.md
+[Code of Conduct]: contributing/conduct.md
+[Roadmap]: contributing/roadmap.md
+<!-- external links -->
+[icekit-events]: https://github.com/ic-labs/icekit-events
+[icekit-press-releases]: https://github.com/ic-labs/icekit-press-releases
+[issues]: https://github.com/ic-labs/django-icekit/issues
+[the Interaction Consortium]: http://interaction.net.au

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# Install Node modules, Bower components and Python requirements, setup
-# database, apply migrations, and execute command.
+# Configure the environment and execute a command.
 
 cat <<EOF
 # `whoami`@`hostname`:$PWD$ entrypoint.sh $@
@@ -37,6 +36,25 @@ export PIP_DISABLE_PIP_VERSION_CHECK=on
 export PYTHONHASHSEED=random
 export PYTHONWARNINGS=ignore
 
+# Derive 'PGDATABASE' from 'ICEKIT_PROJECT_NAME' and git branch or
+# 'BASE_SETTINGS_MODULE', if not already defined.
+if [[ -z "$PGDATABASE" ]]; then
+    if [[ -d .git ]]; then
+        export PGDATABASE="${ICEKIT_PROJECT_NAME}_$(git rev-parse --abbrev-ref HEAD | sed 's/[^0-9A-Za-z]/_/g')"
+        echo "Derived database name '$PGDATABASE' from 'ICEKIT_PROJECT_NAME' environment variable and git branch."
+    elif [[ -n "$BASE_SETTINGS_MODULE" ]]; then
+        export PGDATABASE="${ICEKIT_PROJECT_NAME}_$BASE_SETTINGS_MODULE"
+        echo "Derived database name '$PGDATABASE' from 'ICEKIT_PROJECT_NAME' and 'BASE_SETTINGS_MODULE' environment variables."
+    else
+        export PGDATABASE="$ICEKIT_PROJECT_NAME"
+        echo "Derived database name '$PGDATABASE' from 'ICEKIT_PROJECT_NAME' environment variable."
+    fi
+fi
+
+export PGHOST="${PGHOST:-localhost}"
+export PGPORT="${PGPORT:-5432}"
+export PGUSER="${PGUSER:-$(whoami)}"
+
 # Get Redis host and port.
 export REDIS_ADDRESS="${REDIS_ADDRESS:-localhost:6379}"
 
@@ -44,23 +62,36 @@ export REDIS_ADDRESS="${REDIS_ADDRESS:-localhost:6379}"
 # be just `django`.
 export SUPERVISORD_CONFIG_INCLUDE="${SUPERVISORD_CONFIG_INCLUDE:-supervisord-django.conf supervisord-no-docker.conf}"
 
-# Install Node modules.
-waitlock.sh npm-install.sh "$ICEKIT_DIR"
-waitlock.sh npm-install.sh "$ICEKIT_PROJECT_DIR"
+COMMAND="${@:-bash}"
 
-# Install Bower components.
-waitlock.sh bower-install.sh "$ICEKIT_DIR"
-waitlock.sh bower-install.sh "$ICEKIT_PROJECT_DIR"
+if [[ "$COMMAND" == bash ]]; then
+    cat <<EOF
 
-# Install Python requirements.
-waitlock.sh pip-install.sh "$ICEKIT_PROJECT_DIR"
+You are running an interactive shell. Here is a list of frequently used
+commands you might want to run:
 
-# Setup database.
-source setup-postgres-env.sh
-waitlock.sh setup-postgres-database.sh
+    bower-install.sh <DIR>
+    celery.sh
+    celerybeat.sh
+    celeryflower.sh
+    gunicorn.sh
+    manage.py [COMMAND [ARGS]]
+    migrate.sh
+    nginx.sh
+    npm-install.sh <DIR>
+    pip-install.sh <DIR>
+    runserver.sh [ARGS]
+    runtests.sh [ARGS]
+    setup-django.sh [COMMAND]
+    setup-postgres.sh
+    supervisorctl.sh [OPTIONS] [ACTION [ARGS]]
+    supervisord.sh [ARGS]
 
-# Apply migrations.
-waitlock.sh migrate.sh "$ICEKIT_PROJECT_DIR/var"
+For more info on each command, run:
 
-# Open a new shell by default.
-exec "${@:-bash}"
+    help.sh
+
+EOF
+fi
+
+exec $COMMAND

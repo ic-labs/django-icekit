@@ -10,10 +10,6 @@ EOF
 
 set -e
 
-export PGHOST="${PGHOST:-localhost}"
-export PGPORT="${PGPORT:-5432}"
-export PGUSER="${PGUSER:-$(whoami)}"
-
 # Wait for PostgreSQL to become available.
 COUNT=0
 until psql -l > /dev/null 2>&1; do
@@ -29,11 +25,11 @@ fi
 
 # Database does not exist.
 if psql -l | grep -q "\b$PGDATABASE\b"; then
-    if [[ -z "$FORCE_SETUP_POSTGRES_DATABASE" ]]; then
+    if [[ -z "$SETUP_POSTGRES_FORCE" ]]; then
         echo "Database '$PGDATABASE' already exists."
         exit 0
     else
-        echo "Database '$PGDATABASE' already exists and FORCE_SETUP_POSTGRES_DATABASE is set. Drop existing database."
+        echo "Database '$PGDATABASE' already exists and SETUP_POSTGRES_FORCE is set. Drop existing database."
         dropdb "$PGDATABASE"
     fi
 fi
