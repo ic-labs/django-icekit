@@ -2,6 +2,9 @@ sudo: required
 
 language: python
 
+services:
+  - docker
+
 before_install:
   # Update apt sources. See: https://docs.docker.com/engine/installation/linux/ubuntulinux/
   - sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
