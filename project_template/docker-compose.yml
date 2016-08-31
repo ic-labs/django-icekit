@@ -17,7 +17,7 @@ services:
     tmpfs:
       - /tmp
     volumes:
-      - ./:/opt/icekit-project
+      - ./:/opt/project_template
   elasticsearch:
     image: interaction/elasticsearch-icu:1
   haproxy:

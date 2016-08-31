@@ -60,14 +60,14 @@ RUN cd /usr/local/bin \
 # ENV LD_PRELOAD=/libpreload.so
 
 ENV CRONLOCK_HOST=redis
+ENV DOCKER=1
 ENV ICEKIT_DIR=/opt/django-icekit/icekit
-ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/icekit-project
-ENV PATH=/opt/django-icekit/icekit-project/var/venv/bin:/opt/django-icekit/icekit/bin:$PATH
+ENV ICEKIT_PROJECT_DIR=/opt/icekit-project
+ENV PATH=/opt/django-icekit/icekit/bin:$PATH
 ENV PGHOST=postgres
 ENV PGUSER=postgres
-ENV PIP_SRC=/opt/django-icekit/icekit-project/var/venv/src
-ENV PYTHONUSERBASE=/opt/django-icekit/icekit-project/var/venv
 ENV REDIS_ADDRESS=redis:6379
+ENV RUNTESTS_PACKAGE=icekit
 ENV SUPERVISORD_CONFIG_INCLUDE=supervisord-django.conf
 ENV WAITLOCK_ENABLE=1
 

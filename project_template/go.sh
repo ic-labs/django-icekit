@@ -12,13 +12,13 @@ set -e
 # See: http://stackoverflow.com/a/4774063
 export ICEKIT_PROJECT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}"); pwd -P)
 
-# Use alternate installation (user scheme) for Python packages.
-export PIP_SRC="$ICEKIT_PROJECT_DIR/var/venv/src"
-export PYTHONUSERBASE="$ICEKIT_PROJECT_DIR/var/venv"
+if [[ ! -d "$ICEKIT_PROJECT_DIR/var/venv" ]]; then
+    virtualenv "$ICEKIT_PROJECT_DIR/var/venv"
+fi
 
 # Install ICEkit, if necessary.
 if [[ -z $(pip freeze | grep django-icekit) ]]; then
-    pip install --user -r requirements.txt
+    pip install -r requirements.txt
 fi
 
 # Get absolute directory for the `icekit` package.
