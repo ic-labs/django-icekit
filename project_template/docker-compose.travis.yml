@@ -1,0 +1,21 @@
+django:
+  command: entrypoint.sh runtests.sh
+  environment:
+    TRAVIS:
+    TRAVIS_BRANCH:
+    TRAVIS_JOB_ID:
+  image: interaction/icekit:${TAG}
+  links:
+    - elasticsearch
+    - postgres
+    - redis
+  volumes:
+    - ./.git:/opt/icekit-project/.git
+    - ./var:/opt/icekit-project/var
+elasticsearch:
+  image: interaction/elasticsearch-icu:1
+postgres:
+  image: onjin/alpine-postgres:9.4
+redis:
+  command: redis-server --appendonly yes
+  image: redis:3-alpine
