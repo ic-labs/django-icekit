@@ -5,6 +5,8 @@ set -e
 DEST_DIR="${1:-$PWD/icekit-project}"
 BRANCH="${2:-master}"
 
+DEST_DIR_BASENAME="$(basename $DEST_DIR)"
+
 cat <<EOF
 
 This script will create a new ICEkit project in directory '${DEST_DIR}'.
@@ -36,8 +38,8 @@ curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/pro
 chmod +x go.sh
 touch requirements.txt
 
-# Use basename of destination directory as Docker Hub repository name.
-sed -e "s/project_template/$(basename $DEST_DIR)/" -i '' docker-compose.yml
+# Find and replace 'project_template' with destination directory basename.
+find . -type f -exec sed -e "s/project_template/$DEST_DIR_BASENAME/g" -i '' {} \;
 
 # Replace editable with package requirement.
 sed -e "s/-e ../django-icekit/" -i '' requirements.txt
