@@ -1,8 +1,6 @@
 django:
   command: entrypoint.sh runtests.sh
   environment:
-    PGHOST: postgres
-    PGUSER: postgres
     TRAVIS:
     TRAVIS_BRANCH:
     TRAVIS_JOB_ID:
