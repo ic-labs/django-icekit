@@ -11,10 +11,10 @@ install:
   - echo 'deb https://apt.dockerproject.org/repo ubuntu-trusty main' | sudo tee /etc/apt/sources.list.d/docker.list
   - sudo apt-get update
 
-  # Install Docker Engine 1.9.x for build cache support. See: https://github.com/docker/docker/issues/20380#issuecomment-212388961
+  # Docker Engine 1.9.x for build cache support. See: https://github.com/docker/docker/issues/20380#issuecomment-212388961
   - sudo apt-get -o Dpkg::Options::="--force-confnew" -q -y --force-yes install docker-engine=1.9.1-0~trusty
 
-  # Install Docker Compose. See: https://github.com/docker/compose/releases
+  # Docker Compose. See: https://github.com/docker/compose/releases
   - curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-`uname -s`-`uname -m` | sudo tee /usr/local/bin/docker-compose > /dev/null
   - sudo chmod +x /usr/local/bin/docker-compose
 
