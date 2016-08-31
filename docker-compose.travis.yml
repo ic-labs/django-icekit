@@ -6,7 +6,7 @@ django:
     TRAVIS:
     TRAVIS_BRANCH:
     TRAVIS_JOB_ID:
-  image: interaction/icekit:latest
+  image: interaction/icekit:${TAG}
   links:
     - elasticsearch
     - postgres
