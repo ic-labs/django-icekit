@@ -13,7 +13,7 @@ services:
     command: entrypoint.sh setup-django.sh supervisord.sh
     environment:
       BASE_SETTINGS_MODULE: develop
-    image: project_template/icekit-project:latest
+    image: interaction/project_template:latest
     tmpfs:
       - /tmp
     volumes:
