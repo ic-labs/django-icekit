@@ -149,6 +149,11 @@ setuptools.setup(
             'psycopg2',
             'WebTest',
         ],
+        'glamkit': [
+            # 'glamkit-events', #SOON...
+            # 'glamkit-sponsors',
+            # 'icekit-press-releases',
+        ]
     },
     **kwargs
 )
