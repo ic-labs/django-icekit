@@ -14,15 +14,15 @@ ICEkit underpins [GLAMkit](http://glamkit.org) and many individual sites.
 # Quickstart, with Docker
 <!-- keep identical with docs/intro/install.md, except for link relativity. -->
 
-If you haven't already, install Docker:
+If you haven't already, install [Docker](docs/intro/docker.md):
 
   * [OS X](https://download.docker.com/mac/stable/Docker.dmg)
   * [Linux](https://docs.docker.com/engine/installation/linux/)
   * [Windows](https://download.docker.com/win/stable/InstallDocker.msi)
 
-[Docker](docs/intro/docker.md) works on OS X, Linux, and Windows, takes care of
-all the project dependencies (e.g. database, search engine, web server, etc.),
-and makes [deployment](docs/howto/deployment.md) easy.
+Docker works on OS X, Linux, and Windows, takes care of all the project
+dependencies (e.g. database, search engine, web server, etc.), and makes
+[deployment](docs/howto/deployment.md) easy.
 
 If you're not ready for Docker, see [Manual Setup](docs/intro/manual-setup.md).
 

@@ -1,15 +1,15 @@
 # Installing ICEkit
 <!-- keep identical with README -->
 
-If you haven't already, install Docker:
+If you haven't already, install [Docker](docker.md):
 
   * [OS X](https://download.docker.com/mac/stable/Docker.dmg)
   * [Linux](https://docs.docker.com/engine/installation/linux/)
   * [Windows](https://download.docker.com/win/stable/InstallDocker.msi)
 
-[Docker](docker.md) works on OS X, Linux, and Windows, takes care of all the
-project dependencies (e.g. database, search engine, web server, etc.), and
-makes [deployment](../howto/deployment.md) easy.
+Docker works on OS X, Linux, and Windows, takes care of all the project
+dependencies (e.g. database, search engine, web server, etc.), and makes
+[deployment](../howto/deployment.md) easy.
 
 If you're not ready for Docker, see [Manual Setup](manual-setup.md).
 
