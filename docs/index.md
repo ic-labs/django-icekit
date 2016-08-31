@@ -81,10 +81,10 @@ team at [the Interaction Consortium]: [labs@interaction.net.au](mailto:labs@inte
 [Start building your site]: howto/start.md
 [Configuring your site]: howto/settings.md
 [Where to put your files]: howto/files.md
-[Useful commands]: howto/commands.md
+[Useful shell commands]: howto/commands.md
 [Creating page types]: howto/page-types.md
 [Creating content plugins]: howto/plugins.md
-[Deploying ICEkit]: howto/deploying.md
+[Deploying ICEkit]: howto/deployment.md
 [Layouts]: topics/layouts.md
 [Placeholders]: topics/placeholders.md
 [Publishing]: topics/publishing.md

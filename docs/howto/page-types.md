@@ -29,11 +29,13 @@ example, you can freely mix general-purpose pages with special-purpose pages
 like search or redirects. (This is implemented using [django-polymorphic]).
 
 A Page Type always inherits:
-* Fluent's `URLNode`, giving it a title, slug and some other features.
+
+  * Fluent's `URLNode`, giving it a title, slug and some other features.
 
 Page Types normally, but don't have to, inherit from:
-* ICEkit's publishing, enabling the page to be published and unpublished.
-* Fluent-contents, enabling the page to have rich modular content.
+
+  * ICEkit's publishing, enabling the page to be published and unpublished.
+  * Fluent-contents, enabling the page to have rich modular content.
 
 ## Included Page Types
 
@@ -60,6 +62,6 @@ implements a Publishable FluentPage - ie it's a Polymorphic model that sits
 in a tree, and each such page has a draft copy and a published
 copy.
 
-[Haystack]: http://haystacksearch.org/
-[FluentContentsPage]: http://django-fluent-pages.readthedocs.org/en/latest/api/integration/fluent_contents.html?highlight=fluentcontentspage#the-fluentcontentspage-class
 [django-polymorphic]: https://django-polymorphic.readthedocs.io/
+[FluentContentsPage]: http://django-fluent-pages.readthedocs.org/en/latest/api/integration/fluent_contents.html?highlight=fluentcontentspage#the-fluentcontentspage-class
+[Haystack]: http://haystacksearch.org/

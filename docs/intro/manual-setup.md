@@ -1,7 +1,10 @@
 # Install and run ICEkit without Docker
 
-If you are not yet ready for Docker, you can run an ICEkit project directly.
-You will need to install and configure all of its dependencies manually.
+If you are not yet ready for Docker, you can run the ICEkit project template
+(or an ICEkit project) directly. You will need to install and configure all of
+its dependencies manually.
+
+## Install system packages
 
 Install required system packages:
 
@@ -23,14 +26,37 @@ The rest can be installed with [Homebrew](http://brew.sh/):
 You need to configure Elasticsearch, PostgreSQL and Redis to start
 automatically, or start them manually before you start the project.
 
-Open a subshell with a reconfigured environment for your project:
+## Run without Docker
 
-    $ ./go.sh  # Watch for the admin account credentials that get created on first run
+Change to the ICEkit project template (or an ICEkit project) directory:
 
-Start the project:
+    $ cd project_template
+
+Open a shell with the environment appropriately configured:
+
+    $ ./go.sh
+
+Install Node modules, Bower components and Python requirements, create a
+database, and apply Django migrations:
+
+    $ setup-django.sh
+
+Create a superuser account:
+
+    $ manage.py createsuperuser
+
+Start all services:
 
     $ supervisord.sh
 
 Now you can open the site in a browser:
 
-    http://icekit.lvh.me:8000  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
+    http://localhost:8000
+
+Stop all services:
+
+    $ supervisorctl.sh stop all
+
+Run the tests:
+
+    $ runtests.sh

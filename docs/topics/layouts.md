@@ -1,4 +1,4 @@
-## Flexible Layouts
+# Flexible Layouts
 
 The `Layout` model links a template to all the models that can use it.
 
@@ -18,7 +18,7 @@ The template for a layout should define placeholders for modular content:
 Models that have modular content will have a `layout` field in the admin change
 form, allowing the selection of a layout that is compatible with that model.
 
-### TemplateNameField
+## TemplateNameField
 
 `TemplateNameField` behaves like a choice field and populates its list of
 available template names by plugins, if the `plugin_class` kwarg is given.
@@ -26,7 +26,7 @@ available template names by plugins, if the `plugin_class` kwarg is given.
 The `Layout.template_name` field uses the `TemplateNameFieldChoicesPlugin`
 mount point, and ICEkit ships with several plugins.
 
-#### AppModelDefaultLayoutsPlugin
+### AppModelDefaultLayoutsPlugin
 
 Adds default app and model templates for related models.
 
@@ -37,7 +37,7 @@ this plugin would return the following choices:
     ('foo/bar/layouts/default.html', 'Foo: Bar'),
     ('foo/bar/layouts/baz.html', 'Foo: Baz'),  # Polymorphic child model
 
-#### FileSystemLayoutsPlugin
+### FileSystemLayoutsPlugin
 
 Adds templates from one or more directories on the file system.
 
@@ -72,7 +72,7 @@ Would result in these choices::
     ('myproject/layouts/foo.html', 'My Project: foo.html')
     ('myproject/layouts/bar/baz.html', 'My Project: bar/baz.html')
 
-#### Creating a Custom TemplateNameFieldChoicesPlugin
+### Creating a Custom TemplateNameFieldChoicesPlugin
 
 Subclass `TemplateNameFieldChoicesPlugin` and define a `get_choices()` method
 that returns a list of 2-tuples, each containing a template name and a label.

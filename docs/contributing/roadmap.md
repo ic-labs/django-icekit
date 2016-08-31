@@ -1,3 +1,3 @@
 # Roadmap
 
-To follow. For enquiries, write to labs@interaction.net.au.
+To follow. For enquiries, please [contact us](mailto:labs@interaction.net.au).

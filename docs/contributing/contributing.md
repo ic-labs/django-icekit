@@ -1,35 +1,53 @@
 # Contributing
 
-Please follow these guidelines when making contributions to this project.
+Please follow these guidelines when making contributions.
 
-## Getting Started
+# Run from source, with Docker
+
+You can run the ICEkit project template as-is, without first creating a project
+from the template.
 
 Get the code:
 
     $ git clone https://github.com/ic-labs/django-icekit.git
     $ cd django-icekit
 
-Run the tests:
-
-    $ docker-compose -f docker-compose.travis.yml run --rm django
-
-Build an ICEkit image and start the project:
+Build a Docker image:
 
     $ docker-compose build --pull
+
+Start all services:
+
     $ docker-compose up
 
-Run the tests without Docker:
+This will take a few minutes. You will know it is ready when you see:
 
-    $ cd project_template
-    $ ./go.sh entrypoint.sh collectstatic
-    $ ./go.sh runtests.sh
+    #
+    # READY.
+    #
 
-Start the project template without Docker:
+Now you can open the site in a browser:
 
-    $ ./go.sh
-    $ supervisord.sh
+    http://localhost:8000
 
-## Git
+Create a superuser account:
+
+    $ docker-compose exec django entrypoint.sh manage.py createsuperuser
+
+Stop all services:
+
+    $ docker-compose stop
+
+Run the tests:
+
+    $ docker-compose run --rm django entrypoint.sh runtests.sh
+
+# Run without Docker
+
+Read [Manual Setup](../intro/manual-setup.md) for more info on running an
+ICEkit project without Docker.
+
+# Git branching
 
 We are using the [Gitflow] branching model. Basically:
 
@@ -41,55 +59,41 @@ We are using the [Gitflow] branching model. Basically:
     when you are ready to merge a feature branch back into `develop`.
 
 The [SourceTree] app (OS X and Windows) has built-in support for Gitflow, and
-there is also a collection of [git-extensions] for command line users.
+there is also a collection of [git-extensions](https://github.com/nvie/gitflow/)
+for command line users.
 
-## Code Style
+# Code style
 
 It's important that we adopt a consistent code style to minimise code churn and
 make collaboration easier.
 
   * Follow [PEP8] for Python code, unless there is a good reason not to.
-  * Install the [EditorConfig] plugin for your preferred code editor.
+  * Install the [EditorConfig](http://editorconfig.org/) plugin for your
+    preferred code editor.
 
-## Documentation
+# Tests
 
-Docs are probably more important than tests!
-
-  * Write [Markdown] docs for all notable changes and additions.
-  * Include examples so new contributors can get started quickly.
-  * Include rationale when there are competing solutions, so people know why
-    they should use our solution.
-  * Keep the [changelog] up to date. Use plain language to describe changes,
-    as it may be read by people who are not familiar with the project or a
-    particular feature.
-  * Document all functions that don't begin with an underscore.
-
-### HTML Docs
-
-You can use [MkDocs] to preview your documentation as you are writing it:
-
-    $ mkdocs serve
-
-It will even auto-reload whenever you save any changes, so all you need to do
-to see your latest edits is refresh your browser.
-
-## Tests
-
-We don't need 100% test coverage, but we should at least have:
+We don't strictly need 100% test coverage, but we aim to have:
 
   * Unit tests for all regression bugs.
   * Unit or integration tests for complex, fragile, or important functionality.
 
-## Releases
+# Documentation
 
-  * When the changelog for a release gets sufficiently long or major features
-    or fixes are implemented, tag a release.
+Docs are just as important as tests.
+
+  * Write [Markdown] docs for all notable changes and additions.
+  * Include examples so new contributors can get started quickly.
+  * Keep the [changelog] up to date. Describe features, not implementation
+    details, except for backwards incompatible changes.
+
+# Releases
+
+When the [changelog] for a release gets sufficiently long or major features or
+fixes are implemented, tag and upload a release to PyPI.
 
 [changelog]: ../changelog.md
-[EditorConfig]: http://editorconfig.org/
-[git-extensions]: https://github.com/nvie/gitflow/
 [Gitflow]: http://nvie.com/posts/a-successful-git-branching-model/
 [Markdown]: http://daringfireball.net/projects/markdown/
-[MkDocs]: http://mkdocs.org
 [PEP8]: http://legacy.python.org/dev/peps/pep-0008/
 [SourceTree]: http://sourcetreeapp.com/

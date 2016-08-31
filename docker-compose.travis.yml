@@ -1,15 +1,18 @@
 django:
-  command: runtests.sh
+  command: entrypoint.sh runtests.sh
   environment:
     PGHOST: postgres
     PGUSER: postgres
     TRAVIS:
-  image: interaction/icekit:latest
+    TRAVIS_BRANCH:
+    TRAVIS_JOB_ID:
+  image: interaction/icekit:${TAG}
   links:
     - elasticsearch
     - postgres
     - redis
   volumes:
+    - ./.git:/opt/django-icekit/.git
     - ./icekit-project/var:/opt/django-icekit/icekit-project/var
 elasticsearch:
   image: interaction/elasticsearch-icu:1

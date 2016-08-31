@@ -56,18 +56,27 @@ The `icekit_settings.py` file is a Django settings module. You can override any
 default Django/ICEkit settings or configure apps installed via `requirements
 .txt`.
 
-
 ## Where's my virtualenv? How do I modify a source package?
 
-If you're running in Docker, the requirements are installed inside the Docker
-image and aren't on your local machine.
+If you're running in Docker, the requirements are installed in the Docker image
+and aren't on your local machine.
 
-When Docker is running, you can see what those requirements are with:
+From the [shell](commands.md#opening-a-shell), you can see what those
+requirements are with:
 
-    $ docker-compose exec django entrypoint.sh
-    # pip freeze
+    $ pip freeze
 
-To install requirements on your machine, create a file called
-`requirements-local.txt` (which is ignored by git). Next time you run
-`docker-compose up` it should be installed into `./var/venv/src`.
+Or install packages (into `./var/venv/lib/python2.7/site-packages`):
 
+    $ pip install django-debug-toolbar
+
+Or install editable packages (into `./var/venv/src`):
+
+    $ pip install -e 'git+https://github.com/ic-labs/django-icekit.git#egg=django-icekit'
+
+Or list just the additional packages that you have already installed:
+
+    $ pip freeze --user
+
+You can also create a `requirements-local.txt` file (ignored by Git) that will
+be installed automatically when the project is started.
