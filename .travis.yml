@@ -1,0 +1,20 @@
+before_script:
+  - echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+
+language: python
+
+install:
+  - pip install tox
+
+script:
+  - tox
+
+env:
+  - TOXENV=django17-py27
+  - TOXENV=django17-py32
+  - TOXENV=django17-py33
+  - TOXENV=django17-py34
+  - TOXENV=django18-py27
+  - TOXENV=django18-py32
+  - TOXENV=django18-py33
+  - TOXENV=django18-py34
