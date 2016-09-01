@@ -12,9 +12,13 @@ set -e
 # See: http://stackoverflow.com/a/4774063
 export ICEKIT_PROJECT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}"); pwd -P)
 
+# Create virtualenv.
 if [[ ! -d "$ICEKIT_PROJECT_DIR/var/venv" ]]; then
     virtualenv "$ICEKIT_PROJECT_DIR/var/venv"
 fi
+
+# Add virtualenv bin directory to PATH.
+export PATH="$ICEKIT_PROJECT_DIR/var/venv/bin:$PATH"
 
 # Install ICEkit, if necessary.
 if [[ -z $(pip freeze | grep django-icekit) ]]; then
@@ -24,8 +28,8 @@ fi
 # Get absolute directory for the `icekit` package.
 export ICEKIT_DIR=$(python -c 'import icekit, os; print os.path.dirname(icekit.__file__);')
 
-# Add bin directories to PATH.
-export PATH="$ICEKIT_PROJECT_DIR/var/venv/bin:$ICEKIT_DIR/bin:$PATH"
+# Add ICEkit bin directory to PATH.
+export PATH="$ICEKIT_DIR/bin:$PATH"
 
 # Execute the entrypoint script by default.
 exec "${@:-entrypoint.sh}"
