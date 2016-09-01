@@ -2,13 +2,12 @@
 Administration configuration for Sponser models.
 """
 from django.contrib import admin
-from help_me.admin_mixins import HelpMyFormMixin
 from icekit.utils.admin.mixins import ThumbnailAdminMixin
 
 from . import models
 
 
-class SponsorAdmin(HelpMyFormMixin, ThumbnailAdminMixin):
+class SponsorAdmin(admin.ModelAdmin, ThumbnailAdminMixin):
     """
     Administration configuration for the `Sponsor` model.
     """
