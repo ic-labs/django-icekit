@@ -398,14 +398,19 @@ INSTALLED_APPS += ('easy_thumbnails', )
 # Scoped aliases allows us to pre-generate all the necessary thumbnails for a
 # given model/field, without generating additional unecessary thumbnails. This
 # is essential when using a remote storage backend.
-# THUMBNAIL_ALIASES = {
+THUMBNAIL_ALIASES = {
 #     'app[.model][.field]': {
 #         'name-WxH': {
 #             'size': (W, H),
 #             ...,
 #         },
 #     },
-# }
+    '': {
+        'admin': {
+            'size': (150, 150),
+        }
+    }
+}
 
 THUMBNAIL_BASEDIR = 'thumbs'
 THUMBNAIL_HIGH_RESOLUTION = True
