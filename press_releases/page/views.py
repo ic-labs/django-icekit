@@ -1,16 +1,14 @@
 from django.http import Http404
 from django.template.response import TemplateResponse
-from fluent_pages.models import UrlNode
-from press_releases.models import PressRelease
+from ..models import PressRelease
 
 def detail(request, slug):
     """
-    A press release detail page view.
+    Detail page view.
     """
     try:
-        # Add '$' slug suffix to match published press release copies
         press_release = PressRelease.objects.visible().get(
-            slug__in=[slug, slug + '$'])
+            slug=slug)
     except PressRelease.DoesNotExist:
         raise Http404
 

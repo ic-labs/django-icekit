@@ -67,13 +67,11 @@ class PressRelease(PublishableArticle):
         :return: String.
         """
         try:
-            # Strip '$' slug suffix from published copies
-            slug = self.slug.rstrip('$')
             # `app_reverse` is used here for compatibility with mounted
             # `fluent_pages` URL structures.
             return app_reverse(
                 'press-release-detail',
-                kwargs={'slug': slug},
+                kwargs={'slug': -self.slug},
                 ignore_multiple=True
             )
         except (PageTypeNotMounted, NoReverseMatch):
