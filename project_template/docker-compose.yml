@@ -13,13 +13,11 @@ services:
     command: entrypoint.sh setup-django.sh supervisord.sh
     environment:
       BASE_SETTINGS_MODULE: develop
-      PGHOST: postgres
-      PGUSER: postgres
-    image: project_template/icekit-project:latest
+    image: interaction/project_template:latest
     tmpfs:
       - /tmp
     volumes:
-      - ./:/opt/icekit-project
+      - ./:/opt/project_template
   elasticsearch:
     image: interaction/elasticsearch-icu:1
   haproxy:

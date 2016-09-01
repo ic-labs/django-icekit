@@ -4,14 +4,14 @@ django:
     TRAVIS:
     TRAVIS_BRANCH:
     TRAVIS_JOB_ID:
-  image: interaction/icekit:${TAG}
+  image: interaction/project_template:${TAG}
   links:
     - elasticsearch
     - postgres
     - redis
   volumes:
-    - ./.git:/opt/django-icekit/.git
-    - ./project_template/var:/opt/django-icekit/project_template/var
+    - ./.git:/opt/project_template/.git
+    - ./var:/opt/project_template/var
 elasticsearch:
   image: interaction/elasticsearch-icu:1
 postgres:
