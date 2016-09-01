@@ -14,7 +14,7 @@ Add custom functionality to your site.
 * [Start building your site]
 * [Creating page types]
 * [Creating content plugins]
-* [Useful commands]
+* [Useful shell commands]
 * [Deploying ICEkit]
 
 
