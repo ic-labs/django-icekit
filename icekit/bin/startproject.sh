@@ -10,6 +10,11 @@ if [[ -z "$DEST_DIR" ]];
     exit 1
 fi
 
+if [[ -d "$DEST_DIR" ]];
+    >&2 echo "Destination directory '$DEST_DIR' already exists."
+    exit 1
+fi
+
 DEST_DIR_BASENAME="$(basename $DEST_DIR)"
 
 cat <<EOF
