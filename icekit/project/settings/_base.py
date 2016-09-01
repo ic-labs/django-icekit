@@ -398,14 +398,17 @@ INSTALLED_APPS += ('easy_thumbnails', )
 # Scoped aliases allows us to pre-generate all the necessary thumbnails for a
 # given model/field, without generating additional unecessary thumbnails. This
 # is essential when using a remote storage backend.
-# THUMBNAIL_ALIASES = {
+THUMBNAIL_ALIASES = {
 #     'app[.model][.field]': {
 #         'name-WxH': {
 #             'size': (W, H),
 #             ...,
 #         },
 #     },
-# }
+    '': {
+        'author_portrait': { 'size': (360, 640), }
+    }
+}
 
 THUMBNAIL_BASEDIR = 'thumbs'
 THUMBNAIL_HIGH_RESOLUTION = True
@@ -560,6 +563,9 @@ INSTALLED_APPS += (
     'icekit.publishing',
     'icekit.response_pages',
     'notifications',
+
+    'icekit.authors',
+    'icekit.authors.page',
 
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',

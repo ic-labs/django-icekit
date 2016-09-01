@@ -28,7 +28,7 @@
 							<select name="type-select" class="type-select">
 								{% for ctype_id, name in model.polymorphic_classes %}
 									<option value="{{ model.add_url }}?ct_id={{ ctype_id }}" data-manage="{{ model.admin_url }}?ct_id={{ ctype_id }}"{% if forloop.first and not app.default_poly_child or app.default_poly_child == ctype_id %} selected{% endif %}>
-										{{ name }}
+										{{ name|capfirst }}
 									</option>
 								{% endfor %}
 							</select>

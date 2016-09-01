@@ -73,6 +73,7 @@ class AppModelDefaultLayoutsPlugin(TemplateNameFieldChoicesPlugin):
                         model._meta.verbose_name.capitalize(),
                     )
                     choices.append((template_name, label))
+        print choices
         return choices
 
 

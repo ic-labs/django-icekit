@@ -29,9 +29,13 @@ Add custom functionality to your site.
 # Apps for ICEkit
 ## Included apps, pagetypes and plugins
 
+  * Apps:
+      * `authors` - descriptions of site contributors
+
   * Page type plugins:
       * `layout_page` - integrates with our flexible layouts system.
       * `search_page` - integrates with [Haystack].
+      * `authors.page.AuthorListing` - a list of Authors
   * Modular content plugins:
       * `brightcove`
       * `child_pages`

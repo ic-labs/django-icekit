@@ -16,8 +16,10 @@
 {% block extrahead %}
 	{{ block.super }}
 	<script type="text/javascript">
-		fluent_layouts.ct_id = {{ content_type_id }};
-		fluent_layouts.layout_url = '{% url "admin:icekit_layout_changelist" %}';
+        if (typeof fluent_layoutsI != 'undefined') {
+            fluent_layouts.ct_id = {{ content_type_id }};
+            fluent_layouts.layout_url = '{% url "admin:icekit_layout_changelist" %}';
+        }
 		var csrf_token = '{{ csrf_token }}';
 	</script>
 	<style>
