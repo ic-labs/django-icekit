@@ -1,9 +1,3 @@
-# * `docker run --rm interaction/icekit -v ~/myproject:/install`
-# * Populates ~/myproject with base and sample docker compose and stack files,
-#   and directories for media, static files, templates, logs, plugins, etc.
-# * `docker-compose up`
-# * Access site on `http://icekit.lvh.me`
-
 FROM buildpack-deps:jessie
 
 RUN apt-get update \
