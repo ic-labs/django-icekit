@@ -71,4 +71,7 @@ Here is a list of frequently used commands you might want to run:
         Start Supervisord. This is normally managed by Docker, and is usually
         only used interactively when not using Docker.
 
+    transfer.sh
+        Encrypt and upload a file to https://transfer.sh
+
 EOF

@@ -106,6 +106,7 @@ commands you might want to run:
     setup-postgres.sh
     supervisorctl.sh [OPTIONS] [ACTION [ARGS]]
     supervisord.sh [ARGS]
+    transfer.sh <FILE>
 
 For more info on each command, run:
 
