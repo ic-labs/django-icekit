@@ -43,7 +43,7 @@ fi
 export CPU_CORES=$(python -c 'import multiprocessing; print multiprocessing.cpu_count();')
 
 # Get project name from the project directory.
-export ICEKIT_PROJECT_NAME=${ICEKIT_PROJECT_NAME:-$(basename "$ICEKIT_PROJECT_DIR")}
+export ICEKIT_PROJECT_NAME="$(basename '$ICEKIT_PROJECT_DIR')"
 
 # Add bin directories to PATH.
 export PATH="$ICEKIT_PROJECT_DIR/bin:$ICEKIT_PROJECT_DIR/var/venv/bin:$PATH"
