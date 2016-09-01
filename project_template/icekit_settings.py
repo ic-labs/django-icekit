@@ -36,3 +36,9 @@ from icekit.project.settings.calculated import *
 
 # These settings are absolute overrides. When overriding a calculated setting,
 # be sure to override all of its derivative settings as well.
+
+INSTALLED_APPS += (
+    'sponsors',
+    'press_releases',
+    'press_releases.page',
+)

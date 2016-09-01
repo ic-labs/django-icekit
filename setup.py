@@ -151,8 +151,8 @@ setuptools.setup(
         ],
         'glamkit': [
             # 'glamkit-events', #SOON...
-            # 'glamkit-sponsors',
-            # 'icekit-press-releases',
+            'glamkit-sponsors',
+            'icekit-press-releases',
         ]
     },
     **kwargs
