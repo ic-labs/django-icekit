@@ -62,7 +62,7 @@ RUN cd /usr/local/bin \
 ENV CRONLOCK_HOST=redis
 ENV DOCKER=1
 ENV ICEKIT_DIR=/opt/django-icekit/icekit
-ENV ICEKIT_PROJECT_DIR=/opt/icekit-project
+ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/project_template
 ENV PATH=/opt/django-icekit/icekit/bin:$PATH
 ENV PGHOST=postgres
 ENV PGUSER=postgres
