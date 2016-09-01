@@ -6,7 +6,7 @@ COPY package.json /opt/project_template/
 RUN npm-install.sh && rm -rf /root/.npm
 ENV PATH=/opt/project_template/node_modules/.bin:$PATH
 
-COPY bower.json /opt/django-icekit/icekit/
+COPY bower.json /opt/project_template/
 RUN bower-install.sh && rm -rf /root/.cache/bower
 
 COPY requirements.txt /opt/project_template/
