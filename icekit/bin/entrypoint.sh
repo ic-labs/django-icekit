@@ -37,6 +37,9 @@ if [[ -n "$DOCKER" ]]; then
     # For some reason pip allows us to install sdist packages, but not editable
     # packages, when this directory doesn't exist. So make sure it does exist.
     mkdir -p "$PYTHONUSERBASE/lib/python2.7/site-packages"
+else
+    # Add ICEkit bin directory to PATH.
+    export PATH="$ICEKIT_DIR/bin:$PATH"
 fi
 
 # Get number of CPU cores, so we know how many processes to run.
@@ -45,7 +48,7 @@ export CPU_CORES=$(python -c 'import multiprocessing; print multiprocessing.cpu_
 # Get project name from the project directory.
 export ICEKIT_PROJECT_NAME=$(basename "$ICEKIT_PROJECT_DIR")
 
-# Add bin directories to PATH.
+# Add project and virtualenv bin directories to PATH.
 export PATH="$ICEKIT_PROJECT_DIR/bin:$ICEKIT_PROJECT_DIR/var/venv/bin:$PATH"
 
 # Configure Python.
