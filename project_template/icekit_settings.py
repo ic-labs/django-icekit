@@ -37,8 +37,14 @@ from icekit.project.settings.calculated import *
 # These settings are absolute overrides. When overriding a calculated setting,
 # be sure to override all of its derivative settings as well.
 
+# Add apps for your project here.
 INSTALLED_APPS += (
+    # 'debug_toolbar',
     'sponsors',
     'press_releases',
     'press_releases.page',
+)
+
+MIDDLEWARE_CLASSES += (
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
