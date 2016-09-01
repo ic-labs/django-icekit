@@ -28,8 +28,6 @@ os.environ.setdefault('SITE_NAME', 'ICEkit')
 # os.environ.setdefault('PGPASSWORD', '')
 # os.environ.setdefault('SENTRY_DSN', '')
 
-
-
 # ICEKIT ######################################################################
 
 from icekit.project.settings.calculated import *
@@ -39,6 +37,7 @@ from icekit.project.settings.calculated import *
 # These settings are absolute overrides. When overriding a calculated setting,
 # be sure to override all of its derivative settings as well.
 
+# Add apps for your project here.
 INSTALLED_APPS += (
     # 'debug_toolbar',
 )

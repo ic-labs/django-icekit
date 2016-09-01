@@ -16,7 +16,7 @@
 {% block extrahead %}
 	{{ block.super }}
 	<script type="text/javascript">
-        if (typeof fluent_layoutsI != 'undefined') {
+        if (typeof fluent_layouts != 'undefined') {
             fluent_layouts.ct_id = {{ content_type_id }};
             fluent_layouts.layout_url = '{% url "admin:icekit_layout_changelist" %}';
         }
