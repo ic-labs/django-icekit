@@ -2,8 +2,13 @@
 
 set -e
 
-DEST_DIR="${1:-$PWD/icekit-project}"
+DEST_DIR="$1"
 BRANCH="${2:-master}"
+
+if [[ -z "$DEST_DIR" ]];
+    >&2 echo 'You must specify a destination directory.'
+    exit 1
+fi
 
 DEST_DIR_BASENAME="$(basename $DEST_DIR)"
 
