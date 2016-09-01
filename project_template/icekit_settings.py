@@ -6,7 +6,7 @@ import os
 # derive other settings, which is why we don't list them as overrides, after
 # the base settings module has been imported.
 
-os.environ.setdefault('BASE_SETTINGS_MODULE', 'develop')  # production
+# os.environ.setdefault('BASE_SETTINGS_MODULE', 'base')  # develop, production, test
 os.environ.setdefault('SITE_DOMAIN', 'project_template.lvh.me')  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
 os.environ.setdefault('SITE_NAME', 'project_template')
 # os.environ.setdefault('EMAIL_HOST', '')
