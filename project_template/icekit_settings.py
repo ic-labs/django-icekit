@@ -7,8 +7,8 @@ import os
 # the base settings module has been imported.
 
 os.environ.setdefault('BASE_SETTINGS_MODULE', 'develop')  # production
-os.environ.setdefault('SITE_DOMAIN', 'icekit.lvh.me')  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
-os.environ.setdefault('SITE_NAME', 'ICEkit')
+os.environ.setdefault('SITE_DOMAIN', 'project_template.lvh.me')  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
+os.environ.setdefault('SITE_NAME', 'project_template')
 # os.environ.setdefault('EMAIL_HOST', '')
 # os.environ.setdefault('EMAIL_HOST_USER', '')
 # os.environ.setdefault('MEDIA_AWS_ACCESS_KEY_ID', '')
