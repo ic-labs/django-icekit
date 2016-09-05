@@ -133,6 +133,11 @@ setuptools.setup(
             'elasticsearch',
             'elasticstack',
         ],
+        'glamkit': [
+            # 'icekit-events' # SOON ...
+            'glamkit-sponsors',
+            'icekit-press-releases',
+        ],
         'test': [
             'celery[redis]',
             'coverage',
