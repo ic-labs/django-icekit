@@ -40,9 +40,14 @@ from icekit.project.settings.calculated import *
 # Add apps for your project here.
 INSTALLED_APPS += (
     # 'debug_toolbar',
+
+    # INSTALLED BY SETUP.PY
     'sponsors',
     'press_releases',
     'press_releases.page',
+
+    # INCLUDED IN PROJECT TEMPLATE
+    'articles',
 )
 
 MIDDLEWARE_CLASSES += (
