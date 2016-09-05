@@ -17,6 +17,7 @@ export SRC_PGDATABASE="$ICEKIT_DIR/initial_data.sql"
 unset WAITLOCK_ENABLED
 
 setup-postgres.sh
+migrate.sh
 
 manage.py collectstatic --noinput --verbosity=0
 manage.py compress --verbosity=0
