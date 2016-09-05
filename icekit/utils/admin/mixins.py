@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.contrib.admin.views.main import TO_FIELD_VAR
 from django.contrib.admin.widgets import (ForeignKeyRawIdWidget,
     ManyToManyRawIdWidget,)
@@ -31,9 +32,9 @@ class ThumbnailAdminMixin(object):
     """
 
     thumbnail_field = None
-    thumbnail_options = {
-        'size': (100, 100),
-    }
+    thumbnail_options = settings.THUMBNAIL_ALIASES[''].get(
+        'admin', {'size': (100, 100),}
+    )
     thumbnail_show_exceptions = False
 
     def get_thumbnail_source(self, obj):
@@ -117,16 +118,16 @@ class PolymorphicAdminRawIdFix(object):
     Use this mixin in any ModelAdmin that has a foreign key to a polymorphic
     model that you would like to be a raw id field.
     """
-    
+
     def _get_child_admin_site(self, rel):
         """
         Returns the separate AdminSite instance that django-polymorphic
         maintains for child models.
-        
+
         This admin site needs to be passed to the widget so that it passes the
         check of whether the field is pointing to a model that's registered
         in the admin.
-        
+
         The hackiness of this implementation reflects the hackiness of the way
         django-polymorphic does things.
         """
@@ -139,7 +140,7 @@ class PolymorphicAdminRawIdFix(object):
                 and hasattr(self.admin_site._registry[parent], '_child_admin_site'):
                     return self.admin_site._registry[parent]._child_admin_site
         return self.admin_site
-    
+
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         """
         Replicates the logic in ModelAdmin.forfield_for_foreignkey, replacing
@@ -189,12 +190,12 @@ class PolymorphicFluentAdminRawIdFix(PolymorphicAdminRawIdFix):
     Use this mixin in any ModelAdmin for a Fluent content page to make sure
     that any Fluent inlines in the admin for the page inherit from the mixin
     above.
-    
+
     Using this as the FLUENT_PAGES_[PARENT/CHILD]_ADMIN_MIXIN setting does not
     appear to work (possibly because of explicit model_admin declarations in
     PagePlugins defining page types).
     """
-    
+
     def get_extra_inlines(self):
         # Replicates the equivalent method on PlaceholderEditorAdmin, except
         # adds the `base` kwarg to the inline generator, so that all inlines

@@ -4,5 +4,12 @@
 	</head>
 	<body>
 		{% block content %}{% endblock content %}
+        {% block body_js %}
+            {% block external_js %}{% endblock %}
+            {% block base_js %}{% endblock %}
+            {% block js %}{% endblock %}
+        {% endblock %}
 	</body>
 </html>
+
+
