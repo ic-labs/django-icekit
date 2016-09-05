@@ -15,13 +15,14 @@ Install required system packages:
   * PostgreSQL
   * Python 2.7
   * Redis
+  * Pipe Viewer
 
 On OS X, we recommend [Postgres.app](http://postgresapp.com/). It is easy to
 install, start, stop, and upgrade.
 
 The rest can be installed with [Homebrew](http://brew.sh/):
 
-    $ brew install elasticsearch md5sha1sum nginx npm python redis
+    $ brew install elasticsearch md5sha1sum nginx npm python redis pv
 
 You need to configure Elasticsearch, PostgreSQL and Redis to start
 automatically, or start them manually before you start the project.
