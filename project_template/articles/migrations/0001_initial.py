@@ -16,14 +16,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Article',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
-                ('publishing_is_draft', models.BooleanField(editable=False, default=True, db_index=True)),
-                ('publishing_modified_at', models.DateTimeField(editable=False, default=django.utils.timezone.now)),
-                ('publishing_published_at', models.DateTimeField(editable=False, null=True)),
+                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
+                ('publishing_is_draft', models.BooleanField(db_index=True, default=True, editable=False)),
+                ('publishing_modified_at', models.DateTimeField(default=django.utils.timezone.now, editable=False)),
+                ('publishing_published_at', models.DateTimeField(null=True, editable=False)),
                 ('title', models.CharField(max_length=255)),
                 ('slug', models.SlugField(max_length=255)),
-                ('layout', models.ForeignKey(blank=True, to='icekit.Layout', null=True, related_name='articles_article_related')),
-                ('publishing_linked', models.OneToOneField(editable=False, on_delete=django.db.models.deletion.SET_NULL, to='articles.Article', null=True, related_name='publishing_draft')),
+                ('layout', models.ForeignKey(related_name='glamkit_articles_article_related', blank=True, to='icekit.Layout', null=True)),
+                ('publishing_linked', models.OneToOneField(related_name='publishing_draft', to='glamkit_articles.Article', on_delete=django.db.models.deletion.SET_NULL, null=True, editable=False)),
             ],
             options={
                 'abstract': False,

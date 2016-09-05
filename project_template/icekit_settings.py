@@ -53,3 +53,8 @@ INSTALLED_APPS += (
 MIDDLEWARE_CLASSES += (
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
+
+# Add "Articles" to the dashboard.
+FEATURED_APPS[0]['models']['glamkit_articles.Article'] = {
+    'verbose_name_plural': 'Articles',
+}
