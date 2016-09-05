@@ -1,10 +1,12 @@
 import os
 from django.core.urlresolvers import NoReverseMatch
+from fluent_contents.models import ContentItem
 from fluent_pages.urlresolvers import app_reverse, PageTypeNotMounted
 from icekit.articles.abstract_models import PublishableArticle
 from timezone import timezone
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.translation import ugettext_lazy as _
 
 
 @python_2_unicode_compatible
@@ -76,3 +78,20 @@ class PressRelease(PublishableArticle):
             )
         except (PageTypeNotMounted, NoReverseMatch):
             return ''
+
+
+@python_2_unicode_compatible
+class ContactItem(ContentItem):
+    """
+    Promotional item for a Contact.
+    """
+    contact = models.ForeignKey(PressContact)
+
+    help_me_out_here = \
+        'A content plugin that allows you to add contact information.'
+
+    class Meta:
+        verbose_name = _('Contact Item')
+
+    def __str__(self):
+        return str(self.contact)
