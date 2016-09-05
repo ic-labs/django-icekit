@@ -288,11 +288,22 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
             self.admin_site.name,
             self.get_url_name_prefix(model), )
 
-        # Some admins are missing a `change_form_template` such as
-        # PolymorphicParentModelAdmin
+        # Find base template for publishing modifications.
+        # Use overridden change form template if present...
         if self.change_form_template:
             self.non_publishing_change_form_template = \
                 self.find_first_available_template(self.change_form_template)
+        # ...otherwise use similar logic to `ModelAdmin.render_change_form`
+        # to find the best matching default
+        else:
+            opts = self.model._meta
+            app_label = opts.app_label
+            self.non_publishing_change_form_template = \
+                self.find_first_available_template([
+                    "admin/%s/%s/change_form.html" % (app_label, opts.model_name),
+                    "admin/%s/change_form.html" % app_label,
+                    "admin/change_form.html"
+                ])
 
     def find_first_available_template(self, template_name_list):
         """

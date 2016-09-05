@@ -55,9 +55,11 @@
 							<a href="{{ unpublish_btn }}" class="button default">Unpublish</a>
 						{% endif %}
 					{% endif %}
-					{% if preview_draft_btn %}
-						<a href="{{ original.get_absolute_url|get_draft_url }}" target="_blank" class="button default">Preview draft <i class="fa fa-external-link"></i></a>
-					{% endif %}
+                    {% with original.get_absolute_url as preview_url %}
+                        {% if preview_draft_btn and preview_url %}
+                            <a href="{{ preview_url|get_draft_url }}" target="_blank" class="button default">Preview draft <i class="fa fa-external-link"></i></a>
+                        {% endif %}
+					{% endwith %}
 				</div>
 			</div>
 		</div>

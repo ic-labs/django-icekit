@@ -55,11 +55,16 @@ Here are some of the most commonly used Docker commands when getting started:
     # for the `django` service
     $ docker-compose exec django entrypoint.sh
 
-    # Remove all stopped containers and their data volumes
-    docker rm -v $(docker ps -a -q -f status=exited)
+    # Remove all exited containers and their volumes
+    docker rm -v $(docker ps -a -f status=exited -q)
 
-    # Remove all "dangling" images (untagged and not referenced by a container)
-    docker rmi $(docker images -f "dangling=true" -q)
+    # Remove all dangling images (not tagged or used by any container)
+    docker rmi $(docker images -f dangling=true -q)
 
-    # Remove ALL images (start from scratch)
+    # Remove all dangling volumes (not used by any container)
+    docker volume rm $(docker volume list -f dangling=true -q)
+
+    # Remove ALL containers, images and volumes, to start from scratch
+    docker rm -f $(docker ps -a -q)
     docker rmi $(docker images -q)
+    docker volume rm $(docker volume ls -q)

@@ -13,11 +13,6 @@ services:
     command: entrypoint.sh setup-django.sh supervisord.sh
     environment:
       BASE_SETTINGS_MODULE: develop
-      PGHOST: postgres
-      PGUSER: postgres
-      TRAVIS:
-      TRAVIS_BRANCH:
-      TRAVIS_JOB_ID:
     image: interaction/icekit:latest
     tmpfs:
       - /tmp

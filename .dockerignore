@@ -15,6 +15,5 @@
 dist/
 icekit/bower_components/
 icekit/node_modules/
-icekit-project/
 project_template/static_root/
 project_template/var/

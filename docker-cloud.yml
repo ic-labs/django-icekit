@@ -5,6 +5,7 @@ common:
     # EMAIL_HOST:
     # EMAIL_HOST_PASSWORD:
     # EMAIL_HOST_USER:
+    ICEKIT_PROJECT_DIR: /opt/icekit-project
     # MEDIA_AWS_ACCESS_KEY_ID:
     # MEDIA_AWS_SECRET_ACCESS_KEY:
     # MEDIA_AWS_STORAGE_BUCKET_NAME:
@@ -17,6 +18,8 @@ common:
     # SITE_DOMAIN:
     # SITE_NAME:
   image: interaction/icekit:master
+  volumes:
+    - /opt/icekit-project
 celery:
   command: entrypoint.sh celery.sh
   extends: common
@@ -56,8 +59,6 @@ django:
     - elasticsearch
     - celery
     - redis
-  volumes:
-    - /opt/icekit-project
 elasticsearch:
   image: interaction/elasticsearch-icu:1
 haproxy:

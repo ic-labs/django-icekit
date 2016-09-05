@@ -16,7 +16,7 @@ cd "$DIR"
 if [[ ! -s package.json ]]; then
     cat <<EOF > package.json
 {
-  "name": "icekit-project",
+  "name": "$ICEKIT_PROJECT_NAME",
   "dependencies": {
   },
   "private": true

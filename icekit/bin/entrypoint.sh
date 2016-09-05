@@ -8,15 +8,39 @@ EOF
 
 set -e
 
-# Make `pip install --user` the default.
-pip() {
-    if [[ "$1" == install ]]; then
-        shift
-        set -- install --user "$@"
-    fi
-    command pip "$@"
-}
-export -f pip
+if [[ -n "$DOCKER" ]]; then
+    # In our Docker image, the only system site packages are the ones that we
+    # have installed, so we do not need a virtualenv for isolation. Using an
+    # isolated virtualenv would mean we have to reinstall everything during
+    # development, even when no versions have changed. Using a virtualenv
+    # created with `--system-site-packages` would mean we can avoid
+    # reinstalling everything, but Pip would try to uninstall existing packages
+    # when we try to install a new version, which can fail with permissions
+    # errors (e.g. when running as an unprivileged user, or when the image is
+    # read-only). The alternate installation user scheme avoids these problems
+    # by ignoring existing system site packages when installing a new version,
+    # instead of trying to uninstall them.
+    # See: https://pip.pypa.io/en/stable/user_guide/#user-installs
+    pip() {
+        if [[ "$1" == install ]]; then
+            shift
+            set -- install --user "$@"
+        fi
+        command pip "$@"
+    }
+    export -f pip
+
+    # Use alternate installation (user scheme) for Python packages.
+    export PIP_SRC="$ICEKIT_PROJECT_DIR/var/venv/src"
+    export PYTHONUSERBASE="$ICEKIT_PROJECT_DIR/var/venv"
+
+    # For some reason pip allows us to install sdist packages, but not editable
+    # packages, when this directory doesn't exist. So make sure it does exist.
+    mkdir -p "$PYTHONUSERBASE/lib/python2.7/site-packages"
+else
+    # Add ICEkit bin directory to PATH.
+    export PATH="$ICEKIT_DIR/bin:$PATH"
+fi
 
 # Get number of CPU cores, so we know how many processes to run.
 export CPU_CORES=$(python -c 'import multiprocessing; print multiprocessing.cpu_count();')
@@ -24,12 +48,8 @@ export CPU_CORES=$(python -c 'import multiprocessing; print multiprocessing.cpu_
 # Get project name from the project directory.
 export ICEKIT_PROJECT_NAME=$(basename "$ICEKIT_PROJECT_DIR")
 
-# Add bin directories to PATH.
-export PATH="$ICEKIT_PROJECT_DIR/var/venv/bin:$ICEKIT_DIR/bin:$PATH"
-
-# Use alternate installation (user scheme) for Python packages.
-export PIP_SRC="$ICEKIT_PROJECT_DIR/var/venv/src"
-export PYTHONUSERBASE="$ICEKIT_PROJECT_DIR/var/venv"
+# Add project and virtualenv bin directories to PATH.
+export PATH="$ICEKIT_PROJECT_DIR/bin:$ICEKIT_PROJECT_DIR/var/venv/bin:$PATH"
 
 # Configure Python.
 export PIP_DISABLE_PIP_VERSION_CHECK=on
@@ -86,6 +106,7 @@ commands you might want to run:
     setup-postgres.sh
     supervisorctl.sh [OPTIONS] [ACTION [ARGS]]
     supervisord.sh [ARGS]
+    transfer.sh <FILE>
 
 For more info on each command, run:
 
