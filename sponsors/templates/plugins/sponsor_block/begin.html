@@ -1,0 +1,4 @@
+<div class="patrons">{# avoid 'sponsors' in HTML due to adblockers #}
+  {%  if instance.text %}<p class="patron-text">{{ instance.text|safe }}</p>{% endif %}
+  <div class="patron-list">
+    {# closes in end.html #}
