@@ -10,6 +10,6 @@ from . import models
 @plugin_pool.register
 class FilePlugin(ContentPlugin):
     model = models.FileItem
-    category = _('File')
+    category = _('Assets')
     render_template = 'icekit/plugins/file/default.html'
     raw_id_fields = ['file', ]

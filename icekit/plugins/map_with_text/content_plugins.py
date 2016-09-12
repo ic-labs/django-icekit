@@ -10,5 +10,5 @@ from . import models
 @plugin_pool.register
 class MapWithTextPlugin(ContentPlugin):
     model = models.MapWithTextItem
-    category = _('Media')
+    category = _('Assets')
     render_template = 'sfmoma/plugins/map_with_text/default.html'

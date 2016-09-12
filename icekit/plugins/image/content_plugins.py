@@ -11,7 +11,7 @@ from . import models
 @plugin_pool.register
 class ImagePlugin(ContentPlugin):
     model = models.ImageItem
-    category = _('Image')
+    category = _('Assets')
     raw_id_fields = ['image', ]
 
     def get_render_template(self, request, instance, **kwargs):

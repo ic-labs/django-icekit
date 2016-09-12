@@ -10,7 +10,7 @@ from . import forms, models
 @plugin_pool.register
 class InstagramEmbedPlugin(ContentPlugin):
     model = models.InstagramEmbedItem
-    category = _('Media')
+    category = _('Assets')
     render_template = 'icekit/plugins/instagram_embed/default.html'
     form = forms.InstagramEmbedAdminForm
 

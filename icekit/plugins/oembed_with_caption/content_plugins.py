@@ -14,7 +14,7 @@ re_safe = re.compile(r'[^\w_-]')
 @plugin_pool.register
 class OEmbedWithCaptionPlugin(ContentPlugin):
     model = OEmbedWithCaptionItem
-    category = _('Media')
+    category = _('Assets')
     render_template = "icekit/plugins/oembed/default.html"
 
     #: Custom render template
