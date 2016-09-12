@@ -1,7 +1,6 @@
-<div class="quote">
-	<span class="quote-left-quotation-mark">&ldquo;</span>{{ instance.quote|safe }}<span class="quote-right-quotation-mark">&rdquo;</span>
+<blockquote>
+	<p>{{ instance.quote|safe }}</p>
 	{% if instance.attribution %}
-		<span class="quote-attribution-mark">&mdash;</span>
-		<span class="quote-attribution">{{ instance.attribution|safe }}</span>
+		<footer>{{ instance.attribution}}{% if instance.organisation %}, <cite>{{ instance.organisation }}</cite>{% endif %}</footer>
 	{% endif %}
-</div>
+</blockquote>
