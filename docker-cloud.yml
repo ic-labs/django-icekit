@@ -1,9 +1,11 @@
 common:
+  deployment_strategy: high_availability
   environment:
     BASE_SETTINGS_MODULE: production
     # EMAIL_HOST:
     # EMAIL_HOST_PASSWORD:
     # EMAIL_HOST_USER:
+    ICEKIT_PROJECT_DIR: /opt/icekit-project
     # MEDIA_AWS_ACCESS_KEY_ID:
     # MEDIA_AWS_SECRET_ACCESS_KEY:
     # MEDIA_AWS_STORAGE_BUCKET_NAME:
@@ -15,9 +17,11 @@ common:
     # SENTRY_DSN:
     # SITE_DOMAIN:
     # SITE_NAME:
-  image: interaction/icekit:latest
+  image: interaction/icekit:master
+  volumes:
+    - /opt/icekit-project
 celery:
-  command: entrypoint.sh celery -A icekit.project worker -l info
+  command: entrypoint.sh celery.sh
   extends: common
   links:
     - elasticsearch
@@ -26,14 +30,14 @@ celery:
   volumes_from:
     - django
 celerybeat:
-  command: entrypoint.sh celery -A icekit.project beat -l info -S djcelery.schedulers.DatabaseScheduler --pidfile=
+  command: entrypoint.sh celerybeat.sh
   extends: common
   links:
     - redis
   volumes_from:
     - django
 celeryflower:
-  command: entrypoint.sh celery -A icekit.project flower
+  command: entrypoint.sh celeryflower.sh
   environment:
     VIRTUAL_HOST: flower.*
     VIRTUAL_HOST_WEIGHT: 1
@@ -45,7 +49,7 @@ celeryflower:
   volumes_from:
     - django
 django:
-  command: entrypoint.sh manage.py runserver 0.0.0.0:8000
+  command: entrypoint.sh supervisord.sh
   environment:
     VIRTUAL_HOST: "*"
   extends: common
@@ -55,8 +59,6 @@ django:
     - elasticsearch
     - celery
     - redis
-  volumes:
-    - /opt/icekit-project
 elasticsearch:
   image: interaction/elasticsearch-icu:1
 haproxy:

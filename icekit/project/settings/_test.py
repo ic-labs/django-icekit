@@ -2,18 +2,28 @@ from ._base import *
 
 # DJANGO ######################################################################
 
-DATABASE_NAME = 'test_%s' % DATABASES['default']['NAME']
+ALLOWED_HOSTS = ('*', )
+
+CACHES['default'].update({
+    'BACKEND': 'redis_lock.django_cache.RedisCache',
+    'LOCATION': 'redis://%s/1' % REDIS_ADDRESS,
+})
+
+CSRF_COOKIE_SECURE = False  # Don't require HTTPS for CSRF cookie
+SESSION_COOKIE_SECURE = False  # Don't require HTTPS for session cookie
 
 DATABASES['default'].update({
-    'NAME': DATABASE_NAME,
     'TEST': {
-        'NAME': DATABASE_NAME,
+        'NAME': DATABASES['default']['NAME'],
         # See: https://docs.djangoproject.com/en/1.7/ref/settings/#serialize
         'SERIALIZE': False,
     },
 })
 
-INSTALLED_APPS += ('icekit.tests', )
+INSTALLED_APPS += (
+    'fluent_pages.pagetypes.fluentpage',
+    'icekit.tests',
+)
 
 ROOT_URLCONF = 'icekit.tests.urls'
 

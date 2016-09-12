@@ -11,12 +11,16 @@ variable, and override settings in `local.py`.
 import hashlib
 import multiprocessing
 import os
+import re
 
 from django.core.urlresolvers import reverse_lazy
 from django.utils.text import slugify
 from kombu import Exchange, Queue
 
 BASE_SETTINGS_MODULE = os.environ.get('BASE_SETTINGS_MODULE', '')
+
+# Get Redis host and port.
+REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
 
 # Uniquely identify the base settings module, so we can avoid conflicts with
 # other projects running on the same system.
@@ -25,7 +29,10 @@ SETTINGS_MODULE_HASH = hashlib.md5(__file__ + BASE_SETTINGS_MODULE).hexdigest()
 SITE_NAME = os.environ.get('SITE_NAME', 'ICEkit')
 SITE_SLUG = slugify(unicode(SITE_NAME))
 
-SITE_DOMAIN = os.environ.get('SITE_DOMAIN', '%s.lvh.me' % SITE_SLUG)
+SITE_DOMAIN = re.sub(
+    r'[^-.0-9A-Za-z]',
+    '-',
+    os.environ.get('SITE_DOMAIN', '%s.lvh.me' % SITE_SLUG))
 SITE_PORT = 8000
 
 # FILE SYSTEM PATHS ###########################################################
@@ -321,7 +328,7 @@ SITE_ID = 1
 
 # CELERY ######################################################################
 
-BROKER_URL = CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+BROKER_URL = CELERY_RESULT_BACKEND = 'redis://%s/0' % REDIS_ADDRESS
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']  # 'pickle'
 CELERY_DEFAULT_QUEUE = SITE_SLUG
 
@@ -395,14 +402,19 @@ INSTALLED_APPS += ('easy_thumbnails', )
 # Scoped aliases allows us to pre-generate all the necessary thumbnails for a
 # given model/field, without generating additional unecessary thumbnails. This
 # is essential when using a remote storage backend.
-# THUMBNAIL_ALIASES = {
+THUMBNAIL_ALIASES = {
 #     'app[.model][.field]': {
 #         'name-WxH': {
 #             'size': (W, H),
 #             ...,
 #         },
 #     },
-# }
+    '': {
+        'admin': {
+            'size': (150, 150),
+        }
+    }
+}
 
 THUMBNAIL_BASEDIR = 'thumbs'
 THUMBNAIL_HIGH_RESOLUTION = True
@@ -685,7 +697,7 @@ SUPERVISOR = {
     'celeryflower': 'celery -A icekit.project flower',
     'django': (
         'gunicorn '
-        '-b {WSGI_ADDRESS}:{SITE_PORT} '
+        '-b {WSGI_ADDRESS}:{WSGI_PORT} '
         '-w {WSGI_WORKERS} '
         '-t {WSGI_TIMEOUT} '
         'icekit.project.wsgi:application'
@@ -717,5 +729,6 @@ WHITENOISE_ROOT = os.path.join(PROJECT_DIR, 'whitenoise_root')
 # WSGI ########################################################################
 
 WSGI_ADDRESS = '127.0.0.1'
+WSGI_PORT = 8080
+WSGI_TIMEOUT = 60
 WSGI_WORKERS = multiprocessing.cpu_count() * 2 + 1
-WSGI_TIMEOUT = 30

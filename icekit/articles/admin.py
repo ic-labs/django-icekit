@@ -1,3 +1,5 @@
+from django.contrib import admin
+
 from icekit.admin import FluentLayoutsMixin
 from icekit.publishing.admin import PublishingAdmin
 
@@ -8,5 +10,9 @@ class PublishableFluentModelAdmin(PublishingAdmin, FluentLayoutsMixin):
     pass
 
 
-class PublishableArticleAdmin(PublishableFluentModelAdmin):
+class TitleSlugAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
+
+
+class PublishableArticleAdmin(PublishableFluentModelAdmin, TitleSlugAdmin):
+    pass

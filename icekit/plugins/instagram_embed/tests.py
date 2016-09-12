@@ -222,7 +222,7 @@ class InstagramEmbedItemTestCase(WebTest):
         self.assertEqual(form.errors['url'][0], 'Please provide a valid instagram link.')
         form.instance.fetch_instagram_data = initial_fetch_instagram_data
 
-        # Test valid and invalid Instagram URLs
+        # Test form regexp cleaning of valid and invalid Instagram URLs
         for valid_url in [
             'http://instagram.com/p/5O26siFtv8/',
             'https://instagram.com/p/5O26siFtv8/',
@@ -237,11 +237,15 @@ class InstagramEmbedItemTestCase(WebTest):
                 {
                     'parent_id': self.page_1.id,
                     'sort_order': 4,
-                    'parent_type': ContentType.objects.get_for_model(type(self.page_1)).id,
+                    'parent_type': ContentType.objects.get_for_model(
+                        type(self.page_1)).id,
                     'url': valid_url,
                 }
             )
-            self.assertTrue(form.is_valid())
+            form.instance.fetch_instagram_data = Mock(return_value={})
+            self.assertTrue(
+                form.is_valid(),
+                "Expected a valid form for URL " + valid_url)
 
         for invalid_url in [
             'http://test.com/p/5O26siFtv8/',
@@ -254,9 +258,15 @@ class InstagramEmbedItemTestCase(WebTest):
                 {
                     'parent_id': self.page_1.id,
                     'sort_order': 4,
-                    'parent_type': ContentType.objects.get_for_model(type(self.page_1)).id,
+                    'parent_type': ContentType.objects.get_for_model(
+                        type(self.page_1)).id,
                     'url': invalid_url,
                 }
             )
-            self.assertFalse(form.is_valid())
-            self.assertEqual(form.errors['url'][0], 'Please provide a valid instagram link.')
+            form.instance.fetch_instagram_data = Mock(return_value={})
+            self.assertFalse(
+                form.is_valid(),
+                "Expected an invalid form for URL " + invalid_url)
+            self.assertEqual(
+                form.errors['url'][0],
+                'Please provide a valid instagram link.')

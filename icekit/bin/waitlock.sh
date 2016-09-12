@@ -3,6 +3,11 @@
 # Execute cronlock in a loop to queue but avoid overlaps, instead of exiting
 # when a lock is already acquired.
 
+# Don't use Redis locks to serialize access to shared resources, e.g. database.
+if [[ -z "$WAITLOCK_ENABLE" ]]; then
+    exec "$@"
+fi
+
 cat <<EOF
 # `whoami`@`hostname`:$PWD$ waitlock.sh $@
 EOF

@@ -1,9 +1,3 @@
-# * `docker run --rm interaction/icekit -v ~/myproject:/install`
-# * Populates ~/myproject with base and sample docker compose and stack files,
-#   and directories for media, static files, templates, logs, plugins, etc.
-# * `docker-compose up`
-# * Access site on `http://icekit.lvh.me`
-
 FROM buildpack-deps:jessie
 
 RUN apt-get update \
@@ -11,6 +5,7 @@ RUN apt-get update \
         gettext \
         jq \
         nano \
+        nginx \
         postgresql-client \
         python \
         python-dev \
@@ -59,17 +54,23 @@ RUN cd /usr/local/bin \
 # ENV LD_PRELOAD=/libpreload.so
 
 ENV CRONLOCK_HOST=redis
+ENV DOCKER=1
 ENV ICEKIT_DIR=/opt/django-icekit/icekit
-ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/icekit-project
-ENV PATH=/opt/django-icekit/icekit/bin:/opt/django-icekit/venv/bin:$PATH
-ENV PIP_SRC=/opt/django-icekit/venv/src
-ENV PYTHONHASHSEED=random
-ENV PYTHONPATH=/opt/django-icekit:$PYTHONPATH
-ENV PYTHONUSERBASE=/opt/django-icekit/venv
-ENV PYTHONWARNINGS=ignore
+ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/project_template
+ENV PATH=/opt/django-icekit/icekit/bin:$PATH
+ENV PGHOST=postgres
+ENV PGUSER=postgres
+ENV REDIS_ADDRESS=redis:6379
+ENV RUNTESTS_PACKAGE=icekit
+ENV SUPERVISORD_CONFIG_INCLUDE=supervisord-django.conf
+ENV WAITLOCK_ENABLE=1
 
 VOLUME /root
 
 ENTRYPOINT ["tini", "--"]
+CMD ["entrypoint.sh"]
 
 COPY . /opt/django-icekit/
+
+RUN manage.py collectstatic --noinput --verbosity=0
+RUN manage.py compress --verbosity=0

@@ -1,0 +1,31 @@
+version: "2"
+services:
+  celery:
+    command: entrypoint.sh setup-django.sh celery.sh
+    extends: django
+  celerybeat:
+    command: entrypoint.sh setup-django.sh celerybeat.sh
+    extends: django
+  celeryflower:
+    command: entrypoint.sh setup-django.sh celeryflower.sh
+    extends: django
+  django:
+    command: entrypoint.sh setup-django.sh supervisord.sh
+    environment:
+      BASE_SETTINGS_MODULE: develop
+    image: interaction/project_template:latest
+    tmpfs:
+      - /tmp
+    volumes:
+      - ./:/opt/project_template
+  elasticsearch:
+    image: interaction/elasticsearch-icu:1
+  haproxy:
+    image: dockercloud/haproxy:1.5.1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  postgres:
+    image: onjin/alpine-postgres:9.4
+  redis:
+    command: redis-server --appendonly yes
+    image: redis:3-alpine
