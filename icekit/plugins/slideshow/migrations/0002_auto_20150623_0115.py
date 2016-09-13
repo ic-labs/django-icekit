@@ -15,11 +15,4 @@ class Migration(migrations.Migration):
             name='slideshowitem',
             options={'verbose_name': 'Slide show', 'verbose_name_plural': 'Slide shows'},
         ),
-        migrations.AlterModelTable(
-            name='slideshow',
-            table=None,
-        ),
-        migrations.RunSQL(
-            "UPDATE django_content_type SET app_label='icekit_plugins_slideshow' WHERE app_label='slideshow';"
-        ),
     ]
