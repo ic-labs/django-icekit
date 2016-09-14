@@ -38,7 +38,9 @@ SITE_PORT = 8000
 # FILE SYSTEM PATHS ###########################################################
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
-ICEKIT_DIR = os.path.join(BASE_DIR, 'icekit')
+# Prefer ICEKIT_DIR env var if available, otherwise assume path from base dir
+ICEKIT_DIR = os.path.abspath(
+    os.environ.get('ICEKIT_DIR', os.path.join(BASE_DIR, 'icekit')))
 PROJECT_DIR = os.path.abspath(os.environ['ICEKIT_PROJECT_DIR'])
 VAR_DIR = os.path.join(PROJECT_DIR, 'var')
 
