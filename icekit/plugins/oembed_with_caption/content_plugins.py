@@ -23,7 +23,7 @@ class OEmbedWithCaptionPlugin(ContentPlugin):
     fieldsets = (
         (None, {
             'fields': (
-                'embed_url',
+                ('embed_url', 'is_16by9'),
                 'caption',
             ),
         }),
