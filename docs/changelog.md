@@ -4,10 +4,10 @@
 
   * An authors app
 
-## 0.13 (14 September 2016)
+## 0.13.1 (14 September 2016)
 
   * Refactored templates so as to only use bootstrap markup when layout is
-    intrinsic. Improved markup for some, particularly quote.
+    intrinsic. Improved markup for some, particularly quote and OEmbed.
 
   * Added instructions covering uninstalling a docker project.
 
