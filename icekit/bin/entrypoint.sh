@@ -92,9 +92,13 @@ export REDIS_ADDRESS="${REDIS_ADDRESS:-localhost:6379}"
 # be just `django`.
 export SUPERVISORD_CONFIG_INCLUDE="${SUPERVISORD_CONFIG_INCLUDE:-supervisord-django.conf supervisord-no-docker.conf}"
 
-COMMAND="${@:-bash}"
+# Run bash by default without any user customisations from rc or profile files
+# to reduce the chance of user customisations clashing with our paths etc.
+DEFAULT_SHELL_COMMAND="bash --norc --noprofile"
 
-if [[ "$COMMAND" == bash ]]; then
+COMMAND="${@:-$DEFAULT_SHELL_COMMAND}"
+
+if [[ "$COMMAND" == "$DEFAULT_SHELL_COMMAND" ]]; then
     cat <<EOF
 
 You are running an interactive shell. Here is a list of frequently used
