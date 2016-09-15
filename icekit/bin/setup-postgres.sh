@@ -10,12 +10,8 @@ EOF
 
 set -e
 
-# Is the `pv` utility available
-if [[ `pv --help > /dev/null 2>&1` ]]; then
-    PV_CMD=pv
-else
-    PV_CMD=cat
-fi
+# If the `pv` utility isn't available fall back to `cat`
+pv --help > /dev/null 2>&1 && PV_CMD=pv || PV_CMD=cat
 
 # Wait for PostgreSQL to become available.
 COUNT=0
