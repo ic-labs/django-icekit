@@ -8,6 +8,12 @@ EOF
 
 set -e
 
+# Detect if this script is run within an existing virtualenv and abort
+if [[ $VIRTUAL_ENV ]]; then
+    echo "ERROR: $0 will not work properly if run inside a venv; deactivate '`basename $VIRTUAL_ENV`'"
+    exit 1
+fi
+
 # Get absolute project directory from the location of this script.
 # See: http://stackoverflow.com/a/4774063
 export ICEKIT_PROJECT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}"); pwd -P)
