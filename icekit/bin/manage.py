@@ -7,9 +7,14 @@ import sys
 
 
 if __name__ == "__main__":
-    if not os.environ.get('ICEKIT_PROJECT_DIR'):
+    ICEKIT_PROJECT_DIR = os.environ.get('ICEKIT_PROJECT_DIR')
+    if not ICEKIT_PROJECT_DIR:
         print("'ICEKIT_PROJECT_DIR' is not defined.", file=sys.stderr)
         exit(1)
+
+    # Add project dir to Python path
+    if ICEKIT_PROJECT_DIR not in sys.path:
+        sys.path.insert(0, ICEKIT_PROJECT_DIR)
 
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "icekit.project.settings")
 
