@@ -1,9 +1,26 @@
 # Changelog
 
-## (in development)
+## In Development
+
+  * An authors app
+
+## 0.13.1 (14 September 2016)
+
+  * Refactored templates so as to only use bootstrap markup when layout is
+    intrinsic. Improved markup for some, particularly quote and OEmbed.
+
+  * Added instructions covering uninstalling a docker project.
+
+  * Installation improvements
+
+  * Thumbnail configuration should now be specified in settings, not templates.
+
+## 0.12 (30 August 2016)
 
   * Make project run more consistently without Docker (via `go.sh`).
+
   * Refactor docs to provide better onboarding.
+
   * Fix intermittent cache related test failures.
 
 ## 0.11 (29 August 2016)

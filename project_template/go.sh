@@ -12,9 +12,13 @@ set -e
 # See: http://stackoverflow.com/a/4774063
 export ICEKIT_PROJECT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}"); pwd -P)
 
-# Create virtualenv and install requirements.
-if [[ ! -d "$ICEKIT_PROJECT_DIR/var/venv" ]]; then
+# Create virtualenv.
+if [[ ! -d "$ICEKIT_PROJECT_DIR/var/venv/bin/pip" ]]; then
     virtualenv "$ICEKIT_PROJECT_DIR/var/venv"
+fi
+
+# Install ICEkit.
+if [[ -z $("$ICEKIT_PROJECT_DIR/var/venv/bin/pip" freeze | grep django-icekit) ]]; then
     "$ICEKIT_PROJECT_DIR/var/venv/bin/pip" install -r requirements.txt
 fi
 

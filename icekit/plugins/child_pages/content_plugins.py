@@ -10,5 +10,5 @@ from . import models
 @plugin_pool.register
 class ChildPagesPlugin(ContentPlugin):
     model = models.ChildPageItem
-    category = _('Pages')
+    category = _('Navigation')
     render_template = 'icekit/plugins/child_pages/default.html'

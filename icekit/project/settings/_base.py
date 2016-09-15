@@ -11,6 +11,7 @@ variable, and override settings in `local.py`.
 import hashlib
 import multiprocessing
 import os
+import re
 
 from django.core.urlresolvers import reverse_lazy
 from django.utils.text import slugify
@@ -28,7 +29,10 @@ SETTINGS_MODULE_HASH = hashlib.md5(__file__ + BASE_SETTINGS_MODULE).hexdigest()
 SITE_NAME = os.environ.get('SITE_NAME', 'ICEkit')
 SITE_SLUG = slugify(unicode(SITE_NAME))
 
-SITE_DOMAIN = os.environ.get('SITE_DOMAIN', '%s.lvh.me' % SITE_SLUG)
+SITE_DOMAIN = re.sub(
+    r'[^-.0-9A-Za-z]',
+    '-',
+    os.environ.get('SITE_DOMAIN', '%s.lvh.me' % SITE_SLUG))
 SITE_PORT = 8000
 
 # FILE SYSTEM PATHS ###########################################################
