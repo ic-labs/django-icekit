@@ -31,8 +31,11 @@ if [[ -n "$DOCKER" ]]; then
     export -f pip
 
     # Use alternate installation (user scheme) for Python packages.
-    export PIP_SRC="$ICEKIT_PROJECT_DIR/var/venv/src"
-    export PYTHONUSERBASE="$ICEKIT_PROJECT_DIR/var/venv"
+    export PYTHONUSERBASE="$ICEKIT_PROJECT_DIR/var/docker-pyuserbase"
+    export PIP_SRC="$PYTHONUSERBASE/src"
+
+    # Add user scheme bin directory to PATH.
+    export PATH="$PYTHONUSERBASE/bin:$PATH"
 
     # For some reason pip allows us to install sdist packages, but not editable
     # packages, when this directory doesn't exist. So make sure it does exist.
@@ -40,6 +43,11 @@ if [[ -n "$DOCKER" ]]; then
 else
     # Add ICEkit bin directory to PATH.
     export PATH="$ICEKIT_DIR/bin:$PATH"
+
+    # Prefer ICEKit virtualenv binaries to run things inside the venv
+    if [[ -n "$ICEKIT_VENV" ]]; then
+        export PATH="$ICEKIT_VENV/bin:$PATH"
+    fi
 fi
 
 # Set default base settings module.
@@ -51,8 +59,7 @@ export CPU_CORES=$(python -c 'import multiprocessing; print multiprocessing.cpu_
 # Get project name from the project directory.
 export ICEKIT_PROJECT_NAME=$(basename "$ICEKIT_PROJECT_DIR")
 
-# Add project and virtualenv bin directories to PATH.
-export PATH="$ICEKIT_PROJECT_DIR/bin:$ICEKIT_PROJECT_DIR/var/venv/bin:$PATH"
+export PATH="$ICEKIT_PROJECT_DIR/bin:$PATH"
 
 # Configure Python.
 export PIP_DISABLE_PIP_VERSION_CHECK=on
