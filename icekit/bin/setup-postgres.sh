@@ -10,6 +10,13 @@ EOF
 
 set -e
 
+# Is the `pv` utility available
+if [[ `pv --help > /dev/null 2>&1` ]]; then
+    PV_CMD=pv
+else
+    PV_CMD=cat
+fi
+
 # Wait for PostgreSQL to become available.
 COUNT=0
 until psql -l > /dev/null 2>&1; do
@@ -42,7 +49,7 @@ createdb "$PGDATABASE"
 INITIAL_DATA="${SRC_PGDATABASE:-$ICEKIT_DIR/initial_data.sql}"
 if [[ -f "$INITIAL_DATA" ]]; then
     echo "Restore to database '$PGDATABASE' from file '$INITIAL_DATA'."
-    pv "$INITIAL_DATA" | psql -d "$PGDATABASE" > /dev/null
+    $PV_CMD "$INITIAL_DATA" | psql -d "$PGDATABASE" > /dev/null
 elif [[ -n "$SRC_PGDATABASE" ]]; then
     # Get source database credentials.
     SRC_PGHOST="${SRC_PGHOST:-${PGHOST}}"
@@ -62,5 +69,5 @@ elif [[ -n "$SRC_PGDATABASE" ]]; then
         echo "Waited $COUNT seconds for PostgreSQL."
     fi
     echo "Restore database '$PGDATABASE' from source database '$SRC_PGDATABASE' on tcp://$SRC_PGHOST:$SRC_PGPORT."
-    PGPASSWORD="$SRC_PGPASSWORD" pg_dump -d "$SRC_PGDATABASE" -h "$SRC_PGHOST" -p "$SRC_PGPORT" -U "$SRC_PGUSER" -O -x | pv | psql -d "$PGDATABASE" > /dev/null
+    PGPASSWORD="$SRC_PGPASSWORD" pg_dump -d "$SRC_PGDATABASE" -h "$SRC_PGHOST" -p "$SRC_PGPORT" -U "$SRC_PGUSER" -O -x | $PV_CMD | psql -d "$PGDATABASE" > /dev/null
 fi
