@@ -1,6 +1,6 @@
-<div class="oembed">
-	<div class="oembed-html">{{ instance.html|safe }}</div>
+<figure class="oembed">
+	<div class="oembed-html embed-responsive embed-responsive-{% if instance.is_16by9 %}16by9{% else %}4by3{% endif %}">{{ instance.html|safe }}</div>
 	{% if instance.caption %}
-		<div class="oembed-caption">{{ instance.caption }}</div>
+		<figcaption class="oembed-caption">{{ instance.caption|safe }}</figcaption>
 	{% endif %}
-</div>
+</figure>

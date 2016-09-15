@@ -10,7 +10,7 @@ from . import models
 @plugin_pool.register
 class BrightcovePlugin(ContentPlugin):
     model = models.BrightcoveItem
-    category = _('Media')
+    category = _('Assets')
     render_template = 'icekit/plugins/brightcove/default.html'
 
     class FrontendMedia:

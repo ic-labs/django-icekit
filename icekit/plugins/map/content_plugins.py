@@ -8,7 +8,7 @@ from . import models
 class MapPlugin(ContentPlugin):
     model = models.MapItem
     render_template = 'icekit/plugins/map/embed.html'
-    category = _('Media')
+    category = _('Assets')
 
     def render(self, request, instance, **kwargs):
         instance.parse_share_url()

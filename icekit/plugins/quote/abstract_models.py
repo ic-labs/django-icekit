@@ -11,11 +11,11 @@ class AbstractQuoteItem(ContentItem):
     """
     quote = models.TextField()
     attribution = models.CharField(max_length=255, blank=True)
+    organisation = models.CharField(max_length=255, blank=True, help_text="only shown if attribution is given")
 
     class Meta:
         abstract = True
-        verbose_name = _('Quote')
-        verbose_name_plural = _('Quotes')
+        verbose_name = _('Pull quote')
 
     def __str__(self):
         return self.quote
