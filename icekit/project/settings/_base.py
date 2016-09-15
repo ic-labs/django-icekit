@@ -42,6 +42,14 @@ ICEKIT_DIR = os.path.join(BASE_DIR, 'icekit')
 PROJECT_DIR = os.path.abspath(os.environ['ICEKIT_PROJECT_DIR'])
 VAR_DIR = os.path.join(PROJECT_DIR, 'var')
 
+# Sanity-check the ICEKIT_DIR in our settings matches the $ICEKIT_DIR
+# environment variable, to ensure we are in sync with the external environment.
+if ICEKIT_DIR != os.path.abspath(os.environ['ICEKIT_DIR']):
+    raise Exception(
+        "Mismatching paths for project setting ICEKIT_DIR and env var"
+        " $ICEKIT_DIR: %s != %s" % (ICEKIT_DIR, os.path.abspath(os.environ['ICEKIT_DIR']))
+    )
+
 # DJANGO CHECKLIST ############################################################
 
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
