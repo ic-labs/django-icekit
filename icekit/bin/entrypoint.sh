@@ -14,13 +14,15 @@ if [[ -n "${DOCKER+1}" ]]; then
     # isolated virtualenv would mean we have to reinstall everything during
     # development, even when no versions have changed. Using a virtualenv
     # created with `--system-site-packages` would mean we can avoid
-    # reinstalling everything, but Pip would try to uninstall existing packages
+    # reinstalling everything, but pip would try to uninstall existing packages
     # when we try to install a new version, which can fail with permissions
-    # errors (e.g. when running as an unprivileged user, or when the image is
+    # errors (e.g. when running as an unprivileged user or when the image is
     # read-only). The alternate installation user scheme avoids these problems
     # by ignoring existing system site packages when installing a new version,
     # instead of trying to uninstall them.
     # See: https://pip.pypa.io/en/stable/user_guide/#user-installs
+
+    # Make `pip install --user` the default.
     pip() {
         if [[ "$1" == install ]]; then
             shift
@@ -40,7 +42,7 @@ if [[ -n "${DOCKER+1}" ]]; then
     export PIP_SRC="$PYTHONUSERBASE/src"
 
     # For some reason pip allows us to install sdist packages, but not editable
-    # packages, when this directory doesn't exist. So make sure it does exist.
+    # packages, when this directory doesn't exist. So make sure it does.
     mkdir -p "$PYTHONUSERBASE/lib/python2.7/site-packages"
 else
     # Fail loudly when required environment variables are missing.
