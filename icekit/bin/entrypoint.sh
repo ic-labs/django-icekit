@@ -84,6 +84,7 @@ export PATH="$ICEKIT_PROJECT_DIR/bin:$PATH"
 # Configure Python.
 export PIP_DISABLE_PIP_VERSION_CHECK=on
 export PYTHONHASHSEED=random
+export PYTHONPATH="$ICEKIT_PROJECT_DIR:$PYTHONPATH"
 export PYTHONWARNINGS=ignore
 
 # Derive 'PGDATABASE' from 'ICEKIT_PROJECT_NAME' and git branch or
