@@ -97,6 +97,7 @@ if [[ -z "$PGDATABASE" ]]; then
     fi
 fi
 
+# Default PostgreSQL credentials.
 export PGHOST="${PGHOST:-localhost}"
 export PGPORT="${PGPORT:-5432}"
 export PGUSER="${PGUSER:-$(whoami)}"
