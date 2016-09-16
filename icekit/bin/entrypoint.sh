@@ -45,6 +45,10 @@ if [[ -n "${DOCKER+1}" ]]; then
     # packages, when this directory doesn't exist. So make sure it does.
     mkdir -p "$PYTHONUSERBASE/lib/python2.7/site-packages"
 else
+    # When run via 'go.sh' (no Docker), we need to use a virtualenv for greater
+    # isolation from system site packages, and we also verify that dependencies
+    # are installed.
+
     # Fail loudly when required environment variables are missing.
     for var in ICEKIT_DIR ICEKIT_PROJECT_DIR ICEKIT_VENV; do
         eval [[ -z \${$var+1} ]] && {
