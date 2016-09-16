@@ -46,7 +46,7 @@ if [[ -n "${DOCKER+1}" ]]; then
     mkdir -p "$PYTHONUSERBASE/lib/python2.7/site-packages"
 else
     # Fail loudly when required environment variables are missing.
-    for var in ICEKIT_VENV; do
+    for var in ICEKIT_DIR ICEKIT_PROJECT_DIR ICEKIT_VENV; do
         eval [[ -z \${$var+1} ]] && {
             >&2 echo "ERROR: Missing environment variable: $var"
             exit 1
