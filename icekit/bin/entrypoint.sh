@@ -74,6 +74,7 @@ export CPU_CORES=$(python -c 'import multiprocessing; print multiprocessing.cpu_
 # Get project name from the project directory.
 export ICEKIT_PROJECT_NAME=$(basename "$ICEKIT_PROJECT_DIR")
 
+# Add project bin directory to PATH.
 export PATH="$ICEKIT_PROJECT_DIR/bin:$PATH"
 
 # Configure Python.
