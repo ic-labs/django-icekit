@@ -22,7 +22,7 @@ fi
 
 # Install ICEKit project.
 if [[ -z $("$ICEKIT_VENV/bin/pip" freeze | grep django-icekit) ]]; then
-    "$ICEKIT_VENV/bin/pip" install -r requirements.txt
+    "$ICEKIT_VENV/bin/pip" install -r requirements-icekit.txt
 fi
 
 # Get absolute directory for the `icekit` package.

@@ -54,7 +54,7 @@ touch requirements.txt
 find . -type f -exec sed -e "s/project_template/$DEST_DIR_BASENAME/g" -i '' {} \;
 
 # Replace editable with package requirement.
-sed -e "s/-e ../django-icekit/" -i '' requirements.txt
+sed -e "s/-e ../django-icekit/" -i '' requirements-icekit.txt
 
 if [[ -n $(which git) ]]; then
     echo
