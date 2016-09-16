@@ -30,12 +30,14 @@ if [[ -n "${DOCKER+1}" ]]; then
     }
     export -f pip
 
-    # Use alternate installation (user scheme) for Python packages.
-    export PYTHONUSERBASE="$ICEKIT_PROJECT_DIR/var/docker-pyuserbase"
-    export PIP_SRC="$PYTHONUSERBASE/src"
+    # Set location of userbase directory.
+    export PYTHONUSERBASE="$ICEKIT_PROJECT_DIR/var/docker-pythonuserbase"
 
-    # Add user scheme bin directory to PATH.
+    # Add userbase bin directory to PATH.
     export PATH="$PYTHONUSERBASE/bin:$PATH"
+
+    # Install editable packages into userbase src directory.
+    export PIP_SRC="$PYTHONUSERBASE/src"
 
     # For some reason pip allows us to install sdist packages, but not editable
     # packages, when this directory doesn't exist. So make sure it does exist.

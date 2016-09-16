@@ -12,7 +12,8 @@ set -e
 # See: http://stackoverflow.com/a/4774063
 export ICEKIT_PROJECT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}"); pwd -P)
 
-export ICEKIT_VENV="$ICEKIT_PROJECT_DIR/var/venv-icekit-dev"
+# Set location of virtualenv.
+export ICEKIT_VENV="$ICEKIT_PROJECT_DIR/var/go.sh-venv"
 
 # Create local (non-Docker) virtualenv.
 if [[ ! -d "$ICEKIT_VENV" ]]; then
