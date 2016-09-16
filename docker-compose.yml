@@ -13,6 +13,7 @@ services:
     command: entrypoint.sh setup-django.sh supervisord.sh
     environment:
       BASE_SETTINGS_MODULE: develop
+      TERM: # Get from environment
     image: interaction/icekit:latest
     tmpfs:
       - /tmp
