@@ -15,6 +15,7 @@ RUN touch requirements-local.txt
 RUN md5sum requirements.txt requirements-local.txt > requirements.md5
 
 ENV ICEKIT_PROJECT_DIR=/opt/project_template
+ENV RUNTESTS_ARGS=/opt/project_template
 
 COPY . /opt/project_template/
 
