@@ -9,14 +9,13 @@ EOF
 set -e
 
 export BASE_SETTINGS_MODULE=test
-export PGDATABASE=test_icekit
 export REUSE_DB=1
 export SETUP_POSTGRES_FORCE=1
-export SRC_PGDATABASE="$ICEKIT_DIR/initial_data.sql"
+export SRC_PGDATABASE="$ICEKIT_PROJECT_DIR/test_initial_data.sql"
 
 unset WAITLOCK_ENABLED
 
-setup-postgres.sh
+PGDATABASE="test_$PGDATABASE" setup-postgres.sh
 migrate.sh
 
 manage.py collectstatic --noinput --verbosity=0

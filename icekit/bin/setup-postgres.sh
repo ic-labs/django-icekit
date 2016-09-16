@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# Create a database for 'PG*'. If 'SRC_PGDATABASE' is a file, restore it.
-# Otherwise, it is assumed to be the name of a database to dump and restore
-# from 'SRC_PG*', which match 'PG*' by default.
+# Create a database for 'PG*'. If 'SRC_PGDATABASE' ('initial_data.sql' in
+# 'ICEKIT_PROJECT_DIR' by default) is an '*.sql' file, try to restore it.
+# Otherwise, 'SRC_PGDATABASE' should be the name of a database to dump and
+# restore from 'SRC_PG*' (which match 'PG*' by default).
 
 cat <<EOF
 # `whoami`@`hostname`:$PWD$ setup-postgres-database.sh
@@ -39,10 +40,12 @@ echo "Create database '$PGDATABASE'."
 createdb "$PGDATABASE"
 
 # Restore from file or source database.
-INITIAL_DATA="${SRC_PGDATABASE:-$ICEKIT_DIR/initial_data.sql}"
-if [[ -f "$INITIAL_DATA" ]]; then
-    echo "Restore to database '$PGDATABASE' from file '$INITIAL_DATA'."
-    pv "$INITIAL_DATA" | psql -d "$PGDATABASE" > /dev/null
+SRC_PGDATABASE="${SRC_PGDATABASE:-$ICEKIT_PROJECT_DIR/initial_data.sql}"
+if [[ "$SRC_PGDATABASE" == *.sql ]]; then
+    if [[ -f "$SRC_PGDATABASE" ]]; then
+        echo "Restore to database '$PGDATABASE' from file '$SRC_PGDATABASE'."
+        pv "$SRC_PGDATABASE" | psql -d "$PGDATABASE" > /dev/null
+    fi
 elif [[ -n "$SRC_PGDATABASE" ]]; then
     # Get source database credentials.
     SRC_PGHOST="${SRC_PGHOST:-${PGHOST}}"
