@@ -41,13 +41,24 @@ if [[ -n "${DOCKER+1}" ]]; then
     # packages, when this directory doesn't exist. So make sure it does exist.
     mkdir -p "$PYTHONUSERBASE/lib/python2.7/site-packages"
 else
-    # Add ICEkit bin directory to PATH.
-    export PATH="$ICEKIT_DIR/bin:$PATH"
+    # Fail loudly when required environment variables are missing.
+    for var in ICEKIT_VENV; do
+        eval [[ -z \${$var+1} ]] && {
+            >&2 echo "ERROR: Missing environment variable: $var"
+            exit 1
+        }
+    done
 
-    # Prefer ICEKit virtualenv binaries to run things inside the venv
-    if [[ -n "$ICEKIT_VENV" ]]; then
-        export PATH="$ICEKIT_VENV/bin:$PATH"
-    fi
+    # Fail loudly when required programs are missing.
+    for cmd in elasticsearch md5sum nginx npm psql python pv redis-server; do
+        hash $cmd 2>/dev/null || {
+            >&2 echo "ERROR: Missing program: $cmd"
+            exit 1
+        }
+    done
+
+    # Add ICEkit and virtualenv bin directories to PATH.
+    export PATH="$ICEKIT_DIR/bin:$ICEKIT_VENV/bin:$PATH"
 fi
 
 # Set default base settings module.
