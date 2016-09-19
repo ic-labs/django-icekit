@@ -25,5 +25,5 @@ coverage run "$ICEKIT_DIR/bin/manage.py" test --noinput --verbosity=2 "${@:-.}"
 coverage report
 
 if [[ -n "$TRAVIS" ]]; then
-    coveralls
+    coveralls || true
 fi
