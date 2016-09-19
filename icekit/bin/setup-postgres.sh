@@ -6,7 +6,7 @@
 # restore from 'SRC_PG*' (which match 'PG*' by default).
 
 cat <<EOF
-# `whoami`@`hostname`:$PWD$ setup-postgres-database.sh
+# `whoami`@`hostname`:$PWD$ setup-postgres.sh
 EOF
 
 set -e
