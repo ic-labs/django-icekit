@@ -21,7 +21,7 @@ migrate.sh
 manage.py collectstatic --noinput --verbosity=0
 manage.py compress --verbosity=0
 
-coverage run "$ICEKIT_DIR/bin/manage.py" test --noinput --verbosity=2 "${@:-$RUNTESTS_ARGS}"
+coverage run "$ICEKIT_DIR/bin/manage.py" test --noinput --verbosity=2 "${@:-.}"
 coverage report
 
 if [[ -n "$TRAVIS" ]]; then
