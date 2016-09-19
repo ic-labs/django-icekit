@@ -55,6 +55,18 @@ Add to the `INSTALLED_APPS` setting:
 
     INSTALLED_APPS += ('icekit.page_types.search_page', )
 
+### Creating a custom rich content model
+
+To create a model that has rich content, look in the table below to see which
+mixins you should inherit your model and admin from.
+
+If your new model has URLs that content editors will want to link to, don't
+forget to register the model with ICEkitURLField in `models.py`:
+
+    from any_urlfield.forms import SimpleRawIdWidget
+    from icekit.fields import ICEkitURLField
+    ICEkitURLField.register_model(MyModel, widget=SimpleRawIdWidget(MyModel), title="My model")
+
 ### Abstract Page Type mixins
 
 ICEkit comes with a number of mixins to create different types of content.
@@ -74,6 +86,7 @@ Here's a rough guide:
 | Dynamic              | No                      | Yes         | `(FluentFieldsMixin, PublishingModel)`                    | `(FluentLayoutsMixin, PublishingAdmin)`        |
 | Dynamic              | Yes                     | No          | `AbstractUnpublishableLayoutPage`                         | `UnpublishableLayoutPageAdmin`                 |
 | Dynamic              | Yes                     | Yes         | `AbstractLayoutPage`                                      | `LayoutPageAdmin`                              |
+
 
 [django-polymorphic]: https://django-polymorphic.readthedocs.io/
 [FluentContentsPage]: http://django-fluent-pages.readthedocs.org/en/latest/api/integration/fluent_contents.html?highlight=fluentcontentspage#the-fluentcontentspage-class

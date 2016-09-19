@@ -1,7 +1,12 @@
+from any_urlfield.forms import SimpleRawIdWidget
+from any_urlfield.models import AnyUrlField
+from any_urlfield.registry import UrlTypeRegistry
 from django import forms
+from django.conf import settings
 from django.db import models
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
+from fluent_pages.models import Page
 from icekit.validators import RelativeURLValidator
 
 from . import validators
@@ -36,10 +41,15 @@ class TemplateNameField(six.with_metaclass(models.SubfieldBase, models.CharField
         return super(TemplateNameField, self).formfield(**kwargs)
 
 
-class ICEkitURLField(models.URLField):
-    default_validators = [RelativeURLValidator(verify_exists=True)]
-    description = _("URL")
+class ICEkitURLField(AnyUrlField):
+    # start with an empty UrlTypeRegistry to undo Fluent_Page's
+    # inappropriate-for-us restriction to only-published Pages.
+    _static_registry = UrlTypeRegistry()
 
-    def formfield(self, **kwargs):
-        # skip the URLfield's formfield() as it repeats the validation.
-        return models.CharField.formfield(self, **kwargs)
+
+
+
+# (Re-)Register Fluent's Page model in our fresh subclass,
+# only this time using the default (unpublished) queryset.
+if 'fluent_pages' in settings.INSTALLED_APPS:
+    ICEkitURLField.register_model(Page, widget=SimpleRawIdWidget(Page))
