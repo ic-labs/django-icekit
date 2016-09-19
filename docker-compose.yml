@@ -13,6 +13,7 @@ services:
     command: setup-django.sh runserver.sh
     environment:
       BASE_SETTINGS_MODULE: develop
+      MASTER_PASSWORD: # Get from environment
       TERM: # Get from environment
     image: interaction/icekit:latest
     tmpfs:

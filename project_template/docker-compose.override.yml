@@ -15,8 +15,6 @@ services:
       - 5555:5555
   django:
     build: .
-    environment:
-      MASTER_PASSWORD: # Get from environment
     links:
       - elasticsearch
       - celery
