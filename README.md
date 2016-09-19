@@ -38,23 +38,18 @@ NOTE: Windows users should run this command in Git Bash, which comes with
 
 ## 2. Run the project
 
+Build a Docker image:
+
     $ cd <project_name>
     $ docker-compose build --pull
-    $ docker-compose run --rm --service-ports django
-
-This will build a Docker image, download and install all dependencies, and
-start all required services.
-
-It will take a few minutes the first time. When you see the following message,
-you will know it is ready:
-
-    #
-    # READY.
-    #
 
 Create a superuser account:
 
     $ docker-compose run --rm django manage.py createsuperuser
+
+Run the project:
+
+    $ docker-compose run --rm --service-ports django
 
 ## 3. That's it!
 

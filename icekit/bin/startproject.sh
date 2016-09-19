@@ -86,25 +86,21 @@ If you haven't already, go install Docker:
   * [Linux](https://docs.docker.com/engine/installation/linux/)
   * [Windows](https://download.docker.com/win/stable/InstallDocker.msi)
 
-Build an image and start the project:
+Build a Docker image:
 
     $ docker-compose build --pull
-    $ docker-compose run --rm --service-ports django
-
-This will take a few minutes the first time. When you see the following
-message, you will know it is ready:
-
-    #
-    # READY.
-    #
-
-Now you can open the site:
-
-    http://localhost:8000
 
 Create a superuser account:
 
     $ docker-compose run --rm django manage.py createsuperuser
+
+Run the project:
+
+    $ docker-compose run --rm --service-ports django
+
+Now you can open the site in a browser:
+
+    http://localhost:8000
 
 Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/${BRANCH}/docs/docker-quick-start.md)
 guide for more info on running an ICEkit project with Docker.

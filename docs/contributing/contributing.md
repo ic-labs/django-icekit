@@ -16,23 +16,17 @@ Build a Docker image:
 
     $ docker-compose build --pull
 
+Create a superuser account:
+
+    $ docker-compose run --rm django manage.py createsuperuser
+
 Run the project:
 
     $ docker-compose run --rm --service-ports django
 
-This will take a few minutes. You will know it is ready when you see:
-
-    #
-    # READY.
-    #
-
 Now you can open the site in a browser:
 
     http://localhost:8000
-
-Create a superuser account:
-
-    $ docker-compose run --rm django manage.py createsuperuser
 
 Stop all services:
 
