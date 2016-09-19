@@ -13,7 +13,7 @@
 .idea/
 .tox/
 dist/
-icekit/bower_components/
-icekit/node_modules/
+project_template/bower_components/
+project_template/node_modules/
 project_template/static_root/
 project_template/var/
