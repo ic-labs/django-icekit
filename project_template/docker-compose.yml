@@ -10,7 +10,7 @@ services:
     command: setup-django.sh celeryflower.sh
     extends: django
   django:
-    command: setup-django.sh runserver.sh
+    command: setup-django.sh bash.sh
     environment:
       BASE_SETTINGS_MODULE: develop
       MASTER_PASSWORD: # Get from environment

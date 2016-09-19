@@ -90,17 +90,26 @@ Build a Docker image:
 
     $ docker-compose build --pull
 
-Create a superuser account:
-
-    $ docker-compose run --rm django manage.py createsuperuser
-
-Run the project:
+Run a 'django' container and all of its dependancies:
 
     $ docker-compose run --rm --service-ports django
 
-Now you can open the site in a browser:
+Create a superuser account:
+
+    # manage.py createsuperuser
+
+Run the Django dev server:
+
+    # runserver.sh
+
+Open the site in a browser:
 
     http://localhost:8000
+
+When you're done, exit the container and stop all of its dependencies:
+
+    # exit
+    $ docker-compose stop
 
 Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/${BRANCH}/docs/docker-quick-start.md)
 guide for more info on running an ICEkit project with Docker.

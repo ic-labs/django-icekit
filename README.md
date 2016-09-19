@@ -43,19 +43,28 @@ Build a Docker image:
     $ cd <project_name>
     $ docker-compose build --pull
 
-Create a superuser account:
-
-    $ docker-compose run --rm django manage.py createsuperuser
-
-Run the project:
+Run a `django` container and all of its dependancies:
 
     $ docker-compose run --rm --service-ports django
 
+Create a superuser account:
+
+    # manage.py createsuperuser
+
+Run the Django dev server:
+
+    # runserver.sh
+
 ## 3. That's it!
 
-Open your new site in a browser:
+Open the site in a browser:
 
     http://localhost:8000
+
+When you're done, exit the container and stop all of its dependencies:
+
+    # exit
+    $ docker-compose stop
 
 # Next steps
 
