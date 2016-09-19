@@ -104,7 +104,7 @@ Now you can open the site:
 
 Create a superuser account:
 
-    $ docker-compose run --rm django entrypoint.sh manage.py createsuperuser
+    $ docker-compose run --rm django manage.py createsuperuser
 
 Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/${BRANCH}/docs/docker-quick-start.md)
 guide for more info on running an ICEkit project with Docker.

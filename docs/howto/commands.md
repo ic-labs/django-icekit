@@ -11,7 +11,7 @@ Open a shell on an already running container (e.g. via `docker-compose up`):
 
 Or open a shell on a new container, and remove it on exit:
 
-    $ docker-compose run --rm django entrypoint.sh
+    $ docker-compose run --rm django
 
 Or open a shell without Docker from the ICEkit project template (or an ICEkit
 project) directory:

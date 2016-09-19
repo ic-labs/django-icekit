@@ -41,7 +41,7 @@ you will know it is ready:
 
 Create a superuser account:
 
-    $ docker-compose run --rm django entrypoint.sh manage.py createsuperuser
+    $ docker-compose run --rm django manage.py createsuperuser
 
 ## 3. That's it!
 

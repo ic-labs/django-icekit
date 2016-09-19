@@ -1,16 +1,16 @@
 version: "2"
 services:
   celery:
-    command: entrypoint.sh setup-django.sh celery.sh
+    command: setup-django.sh celery.sh
     extends: django
   celerybeat:
-    command: entrypoint.sh setup-django.sh celerybeat.sh
+    command: setup-django.sh celerybeat.sh
     extends: django
   celeryflower:
-    command: entrypoint.sh setup-django.sh celeryflower.sh
+    command: setup-django.sh celeryflower.sh
     extends: django
   django:
-    command: entrypoint.sh setup-django.sh runserver.sh
+    command: setup-django.sh runserver.sh
     environment:
       BASE_SETTINGS_MODULE: develop
       TERM: # Get from environment

@@ -32,7 +32,7 @@ Now you can open the site in a browser:
 
 Create a superuser account:
 
-    $ docker-compose run --rm django entrypoint.sh manage.py createsuperuser
+    $ docker-compose run --rm django manage.py createsuperuser
 
 Stop all services:
 
@@ -40,7 +40,7 @@ Stop all services:
 
 Run the tests:
 
-    $ docker-compose run --rm django entrypoint.sh runtests.sh
+    $ docker-compose run --rm django runtests.sh
 
 # Run without Docker
 
