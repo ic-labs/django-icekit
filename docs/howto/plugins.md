@@ -41,6 +41,32 @@ It's common to have a collecton of items with a paired `AbstractLayoutPage`
 Page to list/navigate the collection. See the `icekit-press-releases`
 project for a worked example of this.
 
+### Adding help text to a Placeholder
+
+You can also add help text to a placeholder, by specifying a `'help_text'`
+entry for the placeholder in `settings.FLUENT_CONTENTS_PLACEHOLDER_CONFIG`:
+
+    FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
+        ...
+        'about_the_show': {
+            'plugins':  (
+                'RawHTMLPlugin',
+                'TextPlugin',
+            ),
+            'help_text': "About the show can <em>only</em> have text and HTML."
+        },
+        ...
+    }
+
+The placeholder help text displays when its tab is selected.
+
+Note: Placeholder help text is currently only implemented for Models that
+inherit ICEkit's `LayoutFieldMixin`, and with an Admin that inherits from
+`FluentLayoutsMixin`. This is because `icekit.admin.LayoutAdmin` defines a
+URL/view that includes the help text, and the
+`icekit/static/icekit/admin/js/fluent_layouts.js` file injects the help text
+into the DOM.
+
 ## Adding rich content to a model.
 
 You can add modular content to any model, not only hierarchical `Page` models,
