@@ -690,27 +690,6 @@ INSTALLED_APPS += ('storages', )
 #     'suit',
 # )
 
-# SUPERVISOR ##################################################################
-
-INSTALLED_APPS += ('djsupervisor', )
-
-SUPERVISOR = {
-    'celery': 'celery -A icekit.project worker -l info',
-    'celerybeat':
-        'celery -A icekit.project beat '
-        '-l info '
-        '-S djcelery.schedulers.DatabaseScheduler '
-        '--pidfile=',
-    'celeryflower': 'celery -A icekit.project flower',
-    'django': (
-        'gunicorn '
-        '-b {WSGI_ADDRESS}:{WSGI_PORT} '
-        '-w {WSGI_WORKERS} '
-        '-t {WSGI_TIMEOUT} '
-        'icekit.project.wsgi:application'
-    ),
-}
-
 # TEST WITHOUT MIGRATIONS #####################################################
 
 INSTALLED_APPS += ('test_without_migrations', )
