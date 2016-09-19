@@ -3,6 +3,10 @@
 # Install Node modules, Bower components and Python requirements, create a
 # database, apply Django migrations, and execute a command.
 
+cat <<EOF
+# `whoami`@`hostname`:$PWD$ setup-django.sh $@
+EOF
+
 set -e
 
 # Install Node modules.
