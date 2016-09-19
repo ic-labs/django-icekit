@@ -7,6 +7,8 @@
   * You can now define `help_text` for a fluent placeholder in
     `FLUENT_CONTENTS_PLACEHOLDER_CONFIG`
 
+  * Improved ICEkitURLField, which uses correct Page queryset.
+
 ## 0.13.1 (14 September 2016)
 
   * Refactored templates so as to only use bootstrap markup when layout is
