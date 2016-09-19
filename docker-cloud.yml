@@ -21,7 +21,7 @@ common:
   volumes:
     - /opt/icekit-project
 celery:
-  command: entrypoint.sh celery.sh
+  command: entrypoint.sh setup-django.sh celery.sh
   extends: common
   links:
     - elasticsearch
@@ -30,14 +30,14 @@ celery:
   volumes_from:
     - django
 celerybeat:
-  command: entrypoint.sh celerybeat.sh
+  command: entrypoint.sh setup-django.sh celerybeat.sh
   extends: common
   links:
     - redis
   volumes_from:
     - django
 celeryflower:
-  command: entrypoint.sh celeryflower.sh
+  command: entrypoint.sh setup-django.sh celeryflower.sh
   environment:
     VIRTUAL_HOST: flower.*
     VIRTUAL_HOST_WEIGHT: 1
@@ -49,7 +49,7 @@ celeryflower:
   volumes_from:
     - django
 django:
-  command: entrypoint.sh supervisord.sh
+  command: entrypoint.sh setup-django.sh supervisord.sh
   environment:
     VIRTUAL_HOST: "*"
   extends: common
