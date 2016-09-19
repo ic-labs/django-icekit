@@ -46,8 +46,11 @@ VAR_DIR = os.path.join(PROJECT_DIR, 'var')
 # environment variable, to ensure we are in sync with the external environment.
 if ICEKIT_DIR != os.path.abspath(os.environ['ICEKIT_DIR']):
     raise Exception(
-        "Mismatching paths for project setting ICEKIT_DIR and env var"
-        " $ICEKIT_DIR: %s != %s" % (ICEKIT_DIR, os.path.abspath(os.environ['ICEKIT_DIR']))
+        'Mismatching paths for project setting ICEKIT_DIR and env var '
+        '$ICEKIT_DIR: %s != %s' % (
+            ICEKIT_DIR,
+            os.path.abspath(os.environ['ICEKIT_DIR']),
+        )
     )
 
 # DJANGO CHECKLIST ############################################################
@@ -287,7 +290,8 @@ TEMPLATES_DJANGO = {
             'icekit.project.context_processors.environment',
         ],
         'loaders': [
-            # Must come first. See: https://github.com/Fantomas42/django-app-namespace-template-loader/issues/16
+            # Must come first. See:
+            # https://github.com/Fantomas42/django-app-namespace-template-loader/issues/16
             'app_namespace.Loader',
 
             # Default.
@@ -456,7 +460,8 @@ FLUENT_DASHBOARD_DEFAULT_MODULE = 'ModelList'
 FLUENT_MARKUP_LANGUAGES = ('restructuredtext', 'markdown', 'textile')
 FLUENT_MARKUP_MARKDOWN_EXTRAS = ()
 
-FLUENT_PAGES_PARENT_ADMIN_MIXIN = 'icekit.publishing.admin.ICEKitFluentPagesParentAdminMixin'
+FLUENT_PAGES_PARENT_ADMIN_MIXIN = \
+    'icekit.publishing.admin.ICEKitFluentPagesParentAdminMixin'
 
 # Avoid an exception because fluent-pages wants `TEMPLATE_DIRS[0]` to be
 # defined, even though that setting is going away. This might not be necessary
