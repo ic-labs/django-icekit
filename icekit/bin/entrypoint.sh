@@ -114,41 +114,4 @@ export REDIS_ADDRESS="${REDIS_ADDRESS:-localhost:6379}"
 # be just `django`.
 export SUPERVISORD_CONFIG_INCLUDE="${SUPERVISORD_CONFIG_INCLUDE:-supervisord-django.conf supervisord-no-docker.conf}"
 
-# Run bash by default without any user customisations from rc or profile files
-# to reduce the chance of user customisations clashing with our paths etc.
-DEFAULT_SHELL_COMMAND="bash --norc --noprofile"
-
-COMMAND="${@:-$DEFAULT_SHELL_COMMAND}"
-
-if [[ "$COMMAND" == "$DEFAULT_SHELL_COMMAND" ]]; then
-    cat <<EOF
-
-You are running an interactive shell. Here is a list of frequently used
-commands you might want to run:
-
-    bower-install.sh <DIR>
-    celery.sh
-    celerybeat.sh
-    celeryflower.sh
-    gunicorn.sh
-    manage.py [COMMAND [ARGS]]
-    migrate.sh
-    nginx.sh
-    npm-install.sh <DIR>
-    pip-install.sh <DIR>
-    runserver.sh [ARGS]
-    runtests.sh [ARGS]
-    setup-django.sh [COMMAND]
-    setup-postgres.sh
-    supervisorctl.sh [OPTIONS] [ACTION [ARGS]]
-    supervisord.sh [ARGS]
-    transfer.sh <FILE>
-
-For more info on each command, run:
-
-    help.sh
-
-EOF
-fi
-
-exec $COMMAND
+exec "${@:-bash.sh}"
