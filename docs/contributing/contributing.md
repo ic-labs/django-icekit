@@ -16,9 +16,9 @@ Build a Docker image:
 
     $ docker-compose build --pull
 
-Start all services:
+Run the project:
 
-    $ docker-compose up
+    $ docker-compose run --rm --service-ports django
 
 This will take a few minutes. You will know it is ready when you see:
 
@@ -32,7 +32,7 @@ Now you can open the site in a browser:
 
 Create a superuser account:
 
-    $ docker-compose exec django entrypoint.sh manage.py createsuperuser
+    $ docker-compose run --rm django entrypoint.sh manage.py createsuperuser
 
 Stop all services:
 

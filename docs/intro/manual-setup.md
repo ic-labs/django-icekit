@@ -53,7 +53,7 @@ Create a superuser account:
 
     $ manage.py createsuperuser
 
-Start all services:
+Run the project:
 
     $ supervisord.sh
 

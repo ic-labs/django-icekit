@@ -89,7 +89,7 @@ If you haven't already, go install Docker:
 Build an image and start the project:
 
     $ docker-compose build --pull
-    $ docker-compose up  # Watch for the admin account credentials that get created on first run
+    $ docker-compose run --rm --service-ports django
 
 This will take a few minutes the first time. When you see the following
 message, you will know it is ready:
@@ -100,7 +100,11 @@ message, you will know it is ready:
 
 Now you can open the site:
 
-    http://icekit.lvh.me:8000  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
+    http://localhost:8000
+
+Create a superuser account:
+
+    $ docker-compose run --rm django entrypoint.sh manage.py createsuperuser
 
 Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/${BRANCH}/docs/docker-quick-start.md)
 guide for more info on running an ICEkit project with Docker.

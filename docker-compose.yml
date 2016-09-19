@@ -21,10 +21,6 @@ services:
       - ./:/opt/django-icekit
   elasticsearch:
     image: interaction/elasticsearch-icu:1
-  haproxy:
-    image: dockercloud/haproxy:1.5.1
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
   postgres:
     image: onjin/alpine-postgres:9.4
   redis:

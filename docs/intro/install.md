@@ -27,7 +27,7 @@ NOTE: Windows users should run this command in Git Bash, which comes with
 
     $ cd <project_name>
     $ docker-compose build --pull
-    $ docker-compose up
+    $ docker-compose run --rm --service-ports django
 
 This will build a Docker image, download and install all dependencies, and
 start all required services.
@@ -41,7 +41,7 @@ you will know it is ready:
 
 Create a superuser account:
 
-    $ docker-compose exec django entrypoint.sh manage.py createsuperuser
+    $ docker-compose run --rm django entrypoint.sh manage.py createsuperuser
 
 ## 3. That's it!
 
