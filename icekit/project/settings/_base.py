@@ -251,7 +251,6 @@ SILENCED_SYSTEM_CHECKS = (
 STATICFILES_DIRS = (
     os.path.join(PROJECT_DIR, 'static'),
     os.path.join(PROJECT_DIR, 'bower_components'),
-    os.path.join(ICEKIT_DIR, 'bower_components'),
 )
 
 STATICFILES_FINDERS = (
@@ -374,13 +373,13 @@ COMPRESS_PRECOMPILERS = (
     (
         'text/less',
         '%s {infile} {outfile} --autoprefix' % (
-            os.path.join(ICEKIT_DIR, 'node_modules', '.bin', 'lessc'),
+            os.path.join(PROJECT_DIR, 'node_modules', '.bin', 'lessc'),
         ),
     ),
     (
         'text/x-scss',
         '%s {infile} {outfile} --autoprefix --include-path %s' % (
-            os.path.join(ICEKIT_DIR, 'node_modules', '.bin', 'node-sass'),
+            os.path.join(PROJECT_DIR, 'node_modules', '.bin', 'node-sass'),
             STATIC_ROOT,
         ),
     ),

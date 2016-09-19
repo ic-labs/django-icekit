@@ -6,11 +6,9 @@
 set -e
 
 # Install Node modules.
-waitlock.sh npm-install.sh "$ICEKIT_DIR"
 waitlock.sh npm-install.sh "$ICEKIT_PROJECT_DIR"
 
 # Install Bower components.
-waitlock.sh bower-install.sh "$ICEKIT_DIR"
 waitlock.sh bower-install.sh "$ICEKIT_PROJECT_DIR"
 
 # Install Python requirements.
