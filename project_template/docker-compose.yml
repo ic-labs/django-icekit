@@ -10,7 +10,7 @@ services:
     command: entrypoint.sh setup-django.sh celeryflower.sh
     extends: django
   django:
-    command: entrypoint.sh setup-django.sh supervisord.sh
+    command: entrypoint.sh setup-django.sh runserver.sh
     environment:
       BASE_SETTINGS_MODULE: develop
       TERM: # Get from environment
