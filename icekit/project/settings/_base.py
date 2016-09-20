@@ -425,7 +425,7 @@ THUMBNAIL_ALIASES = {
             'size': (150, 150),
         },
         'content_image': {
-            'size': (1138, ), # maximum width of a content column
+            'size': (1138, 0), # maximum width of a content column
         }
     }
 }
