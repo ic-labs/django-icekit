@@ -12,18 +12,21 @@ set -e
 # See: http://stackoverflow.com/a/4774063
 export ICEKIT_PROJECT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}"); pwd -P)
 
-# Create virtualenv.
-if [[ ! -d "$ICEKIT_PROJECT_DIR/var/venv/bin/pip" ]]; then
-    virtualenv "$ICEKIT_PROJECT_DIR/var/venv"
+# Set location of virtualenv.
+export ICEKIT_VENV="$ICEKIT_PROJECT_DIR/var/go.sh-venv"
+
+# Create local (non-Docker) virtualenv.
+if [[ ! -d "$ICEKIT_VENV" ]]; then
+    virtualenv "$ICEKIT_VENV"
 fi
 
-# Install ICEkit.
-if [[ -z $("$ICEKIT_PROJECT_DIR/var/venv/bin/pip" freeze | grep django-icekit) ]]; then
-    "$ICEKIT_PROJECT_DIR/var/venv/bin/pip" install -r requirements.txt
+# Install ICEKit project.
+if [[ -z $("$ICEKIT_VENV/bin/pip" freeze | grep django-icekit) ]]; then
+    "$ICEKIT_VENV/bin/pip" install -r requirements-icekit.txt
 fi
 
 # Get absolute directory for the `icekit` package.
-export ICEKIT_DIR=$("$ICEKIT_PROJECT_DIR/var/venv/bin/python" -c 'import icekit, os; print os.path.dirname(icekit.__file__);')
+export ICEKIT_DIR=$("$ICEKIT_VENV/bin/python" -c 'import icekit, os; print os.path.dirname(icekit.__file__);')
 
 # Execute entrypoint and command.
-exec "$ICEKIT_DIR/bin/entrypoint.sh" "$@"
+exec "$ICEKIT_DIR/bin/entrypoint.sh" ${@:-setup-django.sh bash.sh}

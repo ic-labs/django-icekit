@@ -1,8 +1,8 @@
 [run]
 branch = True
-data_file = project_template/var/.coverage
-omit = */migrations/__init__.py, */tests.py, */tests/*
-source = icekit
+data_file = var/.coverage
+omit = */migrations/__init__.py, */tests.py, */tests/*, var/*
+source = .
 
 [report]
 exclude_lines =

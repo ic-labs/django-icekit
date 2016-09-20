@@ -1,5 +1,5 @@
 django:
-  command: entrypoint.sh runtests.sh
+  command: runtests.sh
   environment:
     TRAVIS:
     TRAVIS_BRANCH:

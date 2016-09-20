@@ -17,14 +17,14 @@ RUN wget -nv -O - "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION
 RUN ln -s "/opt/node-v${NODE_VERSION}-linux-x64/bin/node" /usr/local/bin/
 RUN ln -s "/opt/node-v${NODE_VERSION}-linux-x64/bin/npm" /usr/local/bin/
 
-WORKDIR /opt/django-icekit/icekit/
+WORKDIR /opt/django-icekit/project_template/
 
-COPY icekit/package.json /opt/django-icekit/icekit/
+COPY project_template/package.json /opt/django-icekit/project_template/
 RUN npm install && rm -rf /root/.npm
 RUN md5sum package.json > package.json.md5
-ENV PATH=/opt/django-icekit/icekit/node_modules/.bin:$PATH
+ENV PATH=/opt/django-icekit/project_template/node_modules/.bin:$PATH
 
-COPY icekit/bower.json /opt/django-icekit/icekit/
+COPY project_template/bower.json /opt/django-icekit/project_template/
 RUN bower install --allow-root && rm -rf /root/.cache/bower
 RUN md5sum bower.json > bower.json.md5
 
@@ -61,14 +61,12 @@ ENV PATH=/opt/django-icekit/icekit/bin:$PATH
 ENV PGHOST=postgres
 ENV PGUSER=postgres
 ENV REDIS_ADDRESS=redis:6379
-ENV RUNTESTS_PACKAGE=icekit
 ENV SUPERVISORD_CONFIG_INCLUDE=supervisord-django.conf
 ENV WAITLOCK_ENABLE=1
 
 VOLUME /root
 
-ENTRYPOINT ["tini", "--"]
-CMD ["entrypoint.sh"]
+ENTRYPOINT ["tini", "--", "entrypoint.sh"]
 
 COPY . /opt/django-icekit/
 

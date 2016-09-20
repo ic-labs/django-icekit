@@ -12,9 +12,12 @@ CACHES['default'].update({
 CSRF_COOKIE_SECURE = False  # Don't require HTTPS for CSRF cookie
 SESSION_COOKIE_SECURE = False  # Don't require HTTPS for session cookie
 
+_DATABASE_NAME = 'test_' + DATABASES['default']['NAME']
+
 DATABASES['default'].update({
+    'NAME': _DATABASE_NAME,
     'TEST': {
-        'NAME': DATABASES['default']['NAME'],
+        'NAME': _DATABASE_NAME,
         # See: https://docs.djangoproject.com/en/1.7/ref/settings/#serialize
         'SERIALIZE': False,
     },

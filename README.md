@@ -38,29 +38,33 @@ NOTE: Windows users should run this command in Git Bash, which comes with
 
 ## 2. Run the project
 
+Build a Docker image:
+
     $ cd <project_name>
     $ docker-compose build --pull
-    $ docker-compose up
 
-This will build a Docker image, download and install all dependencies, and
-start all required services.
+Run a `django` container and all of its dependancies:
 
-It will take a few minutes the first time. When you see the following message,
-you will know it is ready:
-
-    #
-    # READY.
-    #
+    $ docker-compose run --rm --service-ports django
 
 Create a superuser account:
 
-    $ docker-compose exec django entrypoint.sh manage.py createsuperuser
+    # manage.py createsuperuser
+
+Run the Django dev server:
+
+    # runserver.sh
 
 ## 3. That's it!
 
-Open your new site in a browser:
+Open the site in a browser:
 
     http://localhost:8000
+
+When you're done, exit the container and stop all of its dependencies:
+
+    # exit
+    $ docker-compose stop
 
 # Next steps
 

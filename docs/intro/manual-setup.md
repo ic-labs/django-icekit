@@ -16,6 +16,7 @@ Install required system packages:
   * PostgreSQL
   * Python 2.7
   * Redis
+  * zlib
 
 On OS X, we recommend [Postgres.app](http://postgresapp.com/). It is easy to
 install, start, stop, and upgrade.
@@ -23,6 +24,12 @@ install, start, stop, and upgrade.
 The rest can be installed with [Homebrew](http://brew.sh/):
 
     $ brew install elasticsearch md5sha1sum nginx npm pv python redis
+
+zlib needs to be installed from the `dupes` repository and force linked:
+
+    $ brew tap homebrew/dupes
+    $ brew install zlib
+    $ brew link zlib --force
 
 You need to configure Elasticsearch, PostgreSQL and Redis to start
 automatically, or start them manually before you start the project.
@@ -46,7 +53,7 @@ Create a superuser account:
 
     $ manage.py createsuperuser
 
-Start all services:
+Run the project:
 
     $ supervisord.sh
 
