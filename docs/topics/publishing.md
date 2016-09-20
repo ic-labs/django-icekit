@@ -41,7 +41,16 @@ To make a `FluentContentsPage` model publishable:
 * subclass your model from `icekit.publishing.models.PublishableFluentContentsPage`
 * subclass your model's admin from `FluentContentsPageAdmin` and `icekit.publishing.admin.PublishingAdmin`
 
-Once you have modified your project's models in this way, make new DB
+#### Note: Validating slug uniqueness
+
+In publishable models, both the draft and published slugs will be identical,
+which means declaring your `SlugField` with `unique=True` will cause Integrity
+Errors when you try to publish a model instance.
+
+To address this, add `unique_together = (("slug", "publishing_is_draft"),)` to
+your model's `Meta` class.
+
+Once you have modified your project's models, make new DB
 migrations to apply the additional database fields required for publishing.
 
 ### Setting up Admin if you are using Fluent Pages
