@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django_dynamic_fixture import G
 from django_webtest import WebTest
+from easy_thumbnails.files import get_thumbnailer
 
 from . import models
 from icekit.models import Layout
@@ -61,5 +62,6 @@ class ImageItem(WebTest):
         # been rendered and cached. That is, enabling caching for unit test
         # runs will cause `response.templates` comparisons to be unreliable.
         self.assertTrue('<div class="image-container">' in response.content)
-        self.assertTrue('src="%s"' % self.image_1.image.url
-                        in response.content)
+
+        thumb_url = get_thumbnailer(self.image_1.image)['content_image'].url
+        self.assertTrue('src="%s"' % thumb_url in response.content)
