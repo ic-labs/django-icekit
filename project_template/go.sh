@@ -29,4 +29,4 @@ fi
 export ICEKIT_DIR=$("$ICEKIT_VENV/bin/python" -c 'import icekit, os; print os.path.dirname(icekit.__file__);')
 
 # Execute entrypoint and command.
-exec "$ICEKIT_DIR/bin/entrypoint.sh" "$@"
+exec "$ICEKIT_DIR/bin/entrypoint.sh" ${@:-setup-django.sh bash.sh}
