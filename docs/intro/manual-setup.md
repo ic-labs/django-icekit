@@ -44,27 +44,14 @@ Open a shell with the environment appropriately configured:
 
     $ ./go.sh
 
-Install Node modules, Bower components and Python requirements, create a
-database, and apply Django migrations:
-
-    $ setup-django.sh
-
 Create a superuser account:
 
     $ manage.py createsuperuser
 
-Run the project:
+Run the Django dev server:
 
-    $ supervisord.sh
+    $ runserver.sh
 
 Now you can open the site in a browser:
 
     http://localhost:8000
-
-Stop all services:
-
-    $ supervisorctl.sh stop all
-
-Run the tests:
-
-    $ runtests.sh
