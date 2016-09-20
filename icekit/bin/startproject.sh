@@ -6,11 +6,13 @@ DEST_DIR="$1"
 BRANCH="${2:-master}"
 
 if [[ -z "$DEST_DIR" ]];
+then
     >&2 echo 'You must specify a destination directory.'
     exit 1
 fi
 
 if [[ -d "$DEST_DIR" ]];
+then
     >&2 echo "Destination directory '$DEST_DIR' already exists."
     exit 1
 fi
