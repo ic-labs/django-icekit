@@ -16,8 +16,10 @@ services:
   django:
     build: .
     links:
-      - elasticsearch
       - celery
+      - celerybeat
+      - celeryflower
+      - elasticsearch
       - redis
     ports:
       - 8000:8000
