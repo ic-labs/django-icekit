@@ -1,5 +1,21 @@
 # Changelog
 
+## Next release
+
+  * ICEkit gets a facelift. Content editing now looks cleaner and easier to
+    scan. Reordering items is animated, meaning it's easier to keep track of
+    what got moved.
+
+  * Improved Image controls, optionally including a title in the caption.
+
+  * `alt_text` is no longer required - some images don't provide content that
+    is useful to users who can't see them, though the `alt=` attribute is still
+    always included in HTML.
+
+  * Fix a bug where looking for help_text in a placeholder slot that had no
+    manual configuration raised a 500, resulting in no layout data found
+
+
 ## 0.14 (20 September 2016)
 
   * Update the recommended method of running projects via `Docker` and `go.sh`
