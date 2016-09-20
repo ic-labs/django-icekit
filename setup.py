@@ -54,6 +54,7 @@ setuptools.setup(
     packages=find_packages('icekit'),
     include_package_data=True,
     install_requires=[
+        'django-any-urlfield',
         'django-app-namespace-template-loader',
         'django-bootstrap3',
         'django-compressor',
