@@ -1,5 +1,4 @@
 # Installing ICEkit
-<!-- keep identical with README -->
 
 If you haven't already, install [Docker](docker.md):
 
