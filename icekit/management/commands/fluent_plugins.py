@@ -8,10 +8,10 @@ from django.utils.encoding import force_text
 class Command(BaseCommand):
     help = '''\
 Outputs a list of the installed fluent plugins.
-Usage: ./manage.py fluent_plugins
+Usage: manage.py fluent_plugins
 
 Accepts an optional keyword for filtering of plugins.
-Usage: ./manage.py fluent_plugins video
+Usage: manage.py fluent_plugins video
     '''
 
     def handle(self, plugin_filter=None, *args, **options):

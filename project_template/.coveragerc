@@ -1,0 +1,13 @@
+[run]
+branch = True
+data_file = var/.coverage
+omit = */migrations/__init__.py, */tests.py, */tests/*, var/*
+source = .
+
+[report]
+exclude_lines =
+    def __repr__
+    pragma: no cover
+    raise AssertionError
+    raise NotImplementedError
+show_missing = True

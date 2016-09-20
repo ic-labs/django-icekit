@@ -1,20 +1,20 @@
 version: "2"
 services:
   celery:
-    command: entrypoint.sh celery.sh
+    command: setup-django.sh celery.sh
     extends: django
   celerybeat:
-    command: entrypoint.sh celerybeat.sh
+    command: setup-django.sh celerybeat.sh
     extends: django
   celeryflower:
-    command: entrypoint.sh celeryflower.sh
+    command: setup-django.sh celeryflower.sh
     extends: django
   django:
-    command: entrypoint.sh supervisord.sh
+    command: setup-django.sh bash.sh
     environment:
-      BASE_SETTINGS_MODULE: docker
-      PGHOST: postgres
-      PGUSER: postgres
+      BASE_SETTINGS_MODULE: develop
+      MASTER_PASSWORD: # Get from environment
+      TERM: # Get from environment
     image: interaction/icekit:latest
     tmpfs:
       - /tmp
@@ -22,10 +22,6 @@ services:
       - ./:/opt/django-icekit
   elasticsearch:
     image: interaction/elasticsearch-icu:1
-  haproxy:
-    image: dockercloud/haproxy:1.5.1
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
   postgres:
     image: onjin/alpine-postgres:9.4
   redis:

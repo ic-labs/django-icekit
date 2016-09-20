@@ -11,12 +11,16 @@ variable, and override settings in `local.py`.
 import hashlib
 import multiprocessing
 import os
+import re
 
 from django.core.urlresolvers import reverse_lazy
 from django.utils.text import slugify
 from kombu import Exchange, Queue
 
 BASE_SETTINGS_MODULE = os.environ.get('BASE_SETTINGS_MODULE', '')
+
+# Get Redis host and port.
+REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
 
 # Uniquely identify the base settings module, so we can avoid conflicts with
 # other projects running on the same system.
@@ -25,7 +29,10 @@ SETTINGS_MODULE_HASH = hashlib.md5(__file__ + BASE_SETTINGS_MODULE).hexdigest()
 SITE_NAME = os.environ.get('SITE_NAME', 'ICEkit')
 SITE_SLUG = slugify(unicode(SITE_NAME))
 
-SITE_DOMAIN = os.environ.get('SITE_DOMAIN', '%s.lvh.me' % SITE_SLUG)
+SITE_DOMAIN = re.sub(
+    r'[^-.0-9A-Za-z]',
+    '-',
+    os.environ.get('SITE_DOMAIN', '%s.lvh.me' % SITE_SLUG))
 SITE_PORT = 8000
 
 # FILE SYSTEM PATHS ###########################################################
@@ -34,6 +41,17 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
 ICEKIT_DIR = os.path.join(BASE_DIR, 'icekit')
 PROJECT_DIR = os.path.abspath(os.environ['ICEKIT_PROJECT_DIR'])
 VAR_DIR = os.path.join(PROJECT_DIR, 'var')
+
+# Sanity-check the ICEKIT_DIR in our settings matches the $ICEKIT_DIR
+# environment variable, to ensure we are in sync with the external environment.
+if ICEKIT_DIR != os.path.abspath(os.environ['ICEKIT_DIR']):
+    raise Exception(
+        'Mismatching paths for project setting ICEKIT_DIR and env var '
+        '$ICEKIT_DIR: %s != %s' % (
+            ICEKIT_DIR,
+            os.path.abspath(os.environ['ICEKIT_DIR']),
+        )
+    )
 
 # DJANGO CHECKLIST ############################################################
 
@@ -236,7 +254,6 @@ SILENCED_SYSTEM_CHECKS = (
 STATICFILES_DIRS = (
     os.path.join(PROJECT_DIR, 'static'),
     os.path.join(PROJECT_DIR, 'bower_components'),
-    os.path.join(ICEKIT_DIR, 'bower_components'),
 )
 
 STATICFILES_FINDERS = (
@@ -273,7 +290,8 @@ TEMPLATES_DJANGO = {
             'icekit.project.context_processors.environment',
         ],
         'loaders': [
-            # Must come first. See: https://github.com/Fantomas42/django-app-namespace-template-loader/issues/16
+            # Must come first. See:
+            # https://github.com/Fantomas42/django-app-namespace-template-loader/issues/16
             'app_namespace.Loader',
 
             # Default.
@@ -321,7 +339,7 @@ SITE_ID = 1
 
 # CELERY ######################################################################
 
-BROKER_URL = CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+BROKER_URL = CELERY_RESULT_BACKEND = 'redis://%s/0' % REDIS_ADDRESS
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']  # 'pickle'
 CELERY_DEFAULT_QUEUE = SITE_SLUG
 
@@ -359,13 +377,13 @@ COMPRESS_PRECOMPILERS = (
     (
         'text/less',
         '%s {infile} {outfile} --autoprefix' % (
-            os.path.join(ICEKIT_DIR, 'node_modules', '.bin', 'lessc'),
+            os.path.join(PROJECT_DIR, 'node_modules', '.bin', 'lessc'),
         ),
     ),
     (
         'text/x-scss',
         '%s {infile} {outfile} --autoprefix --include-path %s' % (
-            os.path.join(ICEKIT_DIR, 'node_modules', '.bin', 'node-sass'),
+            os.path.join(PROJECT_DIR, 'node_modules', '.bin', 'node-sass'),
             STATIC_ROOT,
         ),
     ),
@@ -395,14 +413,19 @@ INSTALLED_APPS += ('easy_thumbnails', )
 # Scoped aliases allows us to pre-generate all the necessary thumbnails for a
 # given model/field, without generating additional unecessary thumbnails. This
 # is essential when using a remote storage backend.
-# THUMBNAIL_ALIASES = {
+THUMBNAIL_ALIASES = {
 #     'app[.model][.field]': {
 #         'name-WxH': {
 #             'size': (W, H),
 #             ...,
 #         },
 #     },
-# }
+    '': {
+        'admin': {
+            'size': (150, 150),
+        }
+    }
+}
 
 THUMBNAIL_BASEDIR = 'thumbs'
 THUMBNAIL_HIGH_RESOLUTION = True
@@ -437,7 +460,8 @@ FLUENT_DASHBOARD_DEFAULT_MODULE = 'ModelList'
 FLUENT_MARKUP_LANGUAGES = ('restructuredtext', 'markdown', 'textile')
 FLUENT_MARKUP_MARKDOWN_EXTRAS = ()
 
-FLUENT_PAGES_PARENT_ADMIN_MIXIN = 'icekit.publishing.admin.ICEKitFluentPagesParentAdminMixin'
+FLUENT_PAGES_PARENT_ADMIN_MIXIN = \
+    'icekit.publishing.admin.ICEKitFluentPagesParentAdminMixin'
 
 # Avoid an exception because fluent-pages wants `TEMPLATE_DIRS[0]` to be
 # defined, even though that setting is going away. This might not be necessary
@@ -670,27 +694,6 @@ INSTALLED_APPS += ('storages', )
 #     'fluent_suit',
 #     'suit',
 # )
-
-# SUPERVISOR ##################################################################
-
-INSTALLED_APPS += ('djsupervisor', )
-
-SUPERVISOR = {
-    'celery': 'celery -A icekit.project worker -l info',
-    'celerybeat':
-        'celery -A icekit.project beat '
-        '-l info '
-        '-S djcelery.schedulers.DatabaseScheduler '
-        '--pidfile=',
-    'celeryflower': 'celery -A icekit.project flower',
-    'django': (
-        'gunicorn '
-        '-b {WSGI_ADDRESS}:{WSGI_PORT} '
-        '-w {WSGI_WORKERS} '
-        '-t {WSGI_TIMEOUT} '
-        'icekit.project.wsgi:application'
-    ),
-}
 
 # TEST WITHOUT MIGRATIONS #####################################################
 

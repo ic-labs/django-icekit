@@ -10,7 +10,7 @@ from . import forms, models
 @plugin_pool.register
 class TwitterEmbedPlugin(ContentPlugin):
     model = models.TwitterEmbedItem
-    category = _('Media')
+    category = _('Assets')
     render_template = 'icekit/plugins/twitter_embed/default.html'
     form = forms.TwitterEmbedAdminForm
 
