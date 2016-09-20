@@ -13,6 +13,23 @@ class ImagePlugin(ContentPlugin):
     model = models.ImageItem
     category = _('Assets')
     raw_id_fields = ['image', ]
+    fieldsets =  (
+        (None, {
+            'fields': (
+                'image',
+                # 'rendered_caption',
+            )
+        }),
+        ('Caption', {
+            'classes': ('collapse',),
+            'fields': (
+                ('show_title', 'show_caption'),
+                'title_override',
+                'caption_override',
+            )
+        })
+    )
+    # readonly_fields = ('rendered_caption', )
 
     def get_render_template(self, request, instance, **kwargs):
         opts = type(instance.parent)._meta
