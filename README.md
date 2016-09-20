@@ -12,7 +12,6 @@ of [django-fluent-pages] and [django-fluent-contents]. See
 ICEkit underpins [GLAMkit](http://glamkit.org) and many individual sites.
 
 # Quickstart, with Docker
-<!-- keep identical with docs/intro/install.md, except for link relativity. -->
 
 If you haven't already, install [Docker](docs/intro/docker.md):
 
@@ -71,8 +70,6 @@ When you're done, exit the container and stop all of its dependencies:
   * [Start building your site](docs/howto/start.md)
   * [Architectural overview](docs/intro/architecture.md)
   * [Read the Documentation](http://icekit.readthedocs.io)
-
-<!-- editors guide -->
 
 [django-fluent-contents]: https://github.com/edoburu/django-fluent-contents
 [django-fluent-pages]: https://github.com/edoburu/django-fluent-pages
