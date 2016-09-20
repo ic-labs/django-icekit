@@ -22,6 +22,11 @@
 {% block extrahead %}
 	{% compress js %}
 		<script src="{% static 'jquery/dist/jquery.js' %}"></script>
+	{% endcompress %}
+{% endblock %}
+
+{% block blockbots %}{# hackily ensuring our js loads last, so we can monkey-patch fluent's JS #}
+	{% compress js %}
 	    <script src="{% static 'admin/js/icekit_dashboard.js' %}"></script>
 	{% endcompress %}
 {% endblock %}
