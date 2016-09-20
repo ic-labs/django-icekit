@@ -34,6 +34,7 @@ fi
 mkdir -p "$DEST_DIR"
 cd "$DEST_DIR"
 
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.coveragerc"
 curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.dockerignore"
 curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.gitignore"
 curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/bower.json"
@@ -44,6 +45,8 @@ curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/pro
 curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/icekit_settings.py"
 curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/package.json"
 curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements-icekit.txt"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements.txt"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/test_initial_data.sql"
 
 chmod +x go.sh
 touch requirements.txt
@@ -52,7 +55,7 @@ touch requirements.txt
 find . -type f -exec sed -e "s/project_template/$DEST_DIR_BASENAME/g" -i '' {} \;
 
 # Replace editable with package requirement.
-sed -e "s/-e ../django-icekit/" -i '' requirements.txt
+sed -e "s/-e ../django-icekit/" -i '' requirements-icekit.txt
 
 if [[ -n $(which git) ]]; then
     echo
@@ -83,21 +86,30 @@ If you haven't already, go install Docker:
   * [Linux](https://docs.docker.com/engine/installation/linux/)
   * [Windows](https://download.docker.com/win/stable/InstallDocker.msi)
 
-Build an image and start the project:
+Build a Docker image:
 
     $ docker-compose build --pull
-    $ docker-compose up  # Watch for the admin account credentials that get created on first run
 
-This will take a few minutes the first time. When you see the following
-message, you will know it is ready:
+Run a 'django' container and all of its dependancies:
 
-    #
-    # READY.
-    #
+    $ docker-compose run --rm --service-ports django
 
-Now you can open the site:
+Create a superuser account:
 
-    http://icekit.lvh.me:8000  # *.lvh.me is a wildcard DNS that maps to 127.0.0.1
+    # manage.py createsuperuser
+
+Run the Django dev server:
+
+    # runserver.sh
+
+Open the site in a browser:
+
+    http://localhost:8000
+
+When you're done, exit the container and stop all of its dependencies:
+
+    # exit
+    $ docker-compose stop
 
 Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/${BRANCH}/docs/docker-quick-start.md)
 guide for more info on running an ICEkit project with Docker.

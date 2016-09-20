@@ -12,35 +12,41 @@ Get the code:
     $ git clone https://github.com/ic-labs/django-icekit.git
     $ cd django-icekit
 
-Build a Docker image:
+Run a `django` container and all of its dependancies:
 
-    $ docker-compose build --pull
-
-Start all services:
-
-    $ docker-compose up
-
-This will take a few minutes. You will know it is ready when you see:
-
-    #
-    # READY.
-    #
-
-Now you can open the site in a browser:
-
-    http://localhost:8000
-
-Create a superuser account:
-
-    $ docker-compose exec django entrypoint.sh manage.py createsuperuser
-
-Stop all services:
-
-    $ docker-compose stop
+    $ docker-compose run --rm --service-ports django
 
 Run the tests:
 
-    $ docker-compose run --rm django entrypoint.sh runtests.sh
+    # runtests.sh
+
+Create a superuser account:
+
+    # manage.py createsuperuser
+
+Run the Django dev server:
+
+    # runserver.sh
+
+Open the site in a browser:
+
+    http://localhost:8000
+
+When you're done, exit the container and stop all of its dependencies:
+
+    # exit
+    $ docker-compose stop
+
+## Running multiple containers
+
+Only one container can bind a fixed service port on the host at a time.
+
+If you want to run a second container, for example to run tests in while
+running the Django dev server, you will need to run it with a different fixed
+port or a dynamic port:
+
+    $ docker-compose run --rm -p 8001:8000 django  # fixed: 8001->8000
+    $ docker-compose run --rm -p 8000 django  # dynamic, check with docker-compose ps
 
 # Run without Docker
 

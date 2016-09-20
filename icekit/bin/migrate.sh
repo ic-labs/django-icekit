@@ -8,7 +8,7 @@ EOF
 
 set -e
 
-DIR="${1:-$PWD}"
+DIR="${1:-$ICEKIT_PROJECT_DIR/var}"
 
 mkdir -p "$DIR"
 

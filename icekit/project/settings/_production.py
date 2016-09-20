@@ -32,10 +32,6 @@ TEMPLATES_DJANGO['OPTIONS']['loaders'] = [
 
 CELERY_EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-# NEW RELIC ###################################################################
-
-# SUPERVISOR['django'] = 'newrelic-admin run-program %s' % SUPERVISOR['django']
-
 # STORAGES ####################################################################
 
 # AWS_ACCESS_KEY_ID = ''

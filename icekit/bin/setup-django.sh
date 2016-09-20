@@ -3,14 +3,16 @@
 # Install Node modules, Bower components and Python requirements, create a
 # database, apply Django migrations, and execute a command.
 
+cat <<EOF
+# `whoami`@`hostname`:$PWD$ setup-django.sh $@
+EOF
+
 set -e
 
 # Install Node modules.
-waitlock.sh npm-install.sh "$ICEKIT_DIR"
 waitlock.sh npm-install.sh "$ICEKIT_PROJECT_DIR"
 
 # Install Bower components.
-waitlock.sh bower-install.sh "$ICEKIT_DIR"
 waitlock.sh bower-install.sh "$ICEKIT_PROJECT_DIR"
 
 # Install Python requirements.
