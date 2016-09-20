@@ -423,6 +423,9 @@ THUMBNAIL_ALIASES = {
     '': {
         'admin': {
             'size': (150, 150),
+        },
+        'content_image': {
+            'size': (1138, 0), # maximum width of a content column
         }
     }
 }

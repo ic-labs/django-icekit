@@ -153,7 +153,10 @@ class LayoutAdmin(admin.ModelAdmin):
 
             # inject placeholder help text, if any is set
             for p in placeholders:
-                p['help_text'] = settings.FLUENT_CONTENTS_PLACEHOLDER_CONFIG.get(p['slot']).get('help_text')
+                try:
+                    p['help_text'] = settings.FLUENT_CONTENTS_PLACEHOLDER_CONFIG.get(p['slot']).get('help_text')
+                except AttributeError:
+                    p['help_text'] = None
 
             json = {
                 'id': layout.id,
