@@ -15,6 +15,25 @@
   * Fix a bug where looking for help_text in a placeholder slot that had no
     manual configuration raised a 500, resulting in no layout data found
 
+  * Fix bug where the content items and placeholders associated with a
+    fluent content model (other than a page) were not included in the
+    published copy.
+
+  * Provide `icekit.publishing.models.PublishableFluentContents` and
+    `icekit.publishing.admin.PublishableFluentContentsAdmin` as base
+    classes for fluent content models and admins, to help keep things
+    DRY.
+
+### Breaking changes
+
+  * Import model mixins `FluentFieldsMixin`, `LayoutFieldMixin`, and
+    `ReadabilityMixin` from `icekit.mixins` module instead of
+    `icekit.abstract_models`.
+
+  * Import admin mixin `FluentLayoutsMixin` from `icekit.admin_mixins`
+    module instead of `icekit.admin`.
+
+
 
 ## 0.14 (20 September 2016)
 
