@@ -53,12 +53,6 @@ class TestPublishingModelAndQueryset(TestCase):
             pk=1,
             defaults={'name': 'example.com', 'domain': 'example.com'})
         self.user_1 = G(User)
-        self.page_layout_1 = G(Layout)
-        self.page_1 = LayoutPage.objects.create(
-            author=self.user_1,
-            title='Test title',
-            layout=self.page_layout_1,
-        )
         self.staff_1 = G(
             User,
             is_staff=True,
@@ -66,7 +60,7 @@ class TestPublishingModelAndQueryset(TestCase):
             is_superuser=True,
         )
 
-        # Create initial publishable SlideShow
+        # Create initial publishable SlideShow, a simple publishable model
         self.slide_show_1 = SlideShow.objects.create(
             title='Test Slideshow',
         )
@@ -184,49 +178,6 @@ class TestPublishingModelAndQueryset(TestCase):
             # draft and published copies of an item could be shown)
             self.assertFalse(self.slide_show_1.publishing_linked.is_visible)
 
-    def test_model_is_within_publication_dates(self):
-        # Empty publication start/end dates
-        self.assertTrue(self.page_1.is_within_publication_dates())
-        # Test publication start date
-        self.page_1.publication_date = timezone.now() - timedelta(seconds=1)
-        self.page_1.save()
-        self.assertTrue(self.page_1.is_within_publication_dates())
-        self.page_1.publication_date = timezone.now() + timedelta(seconds=1)
-        self.page_1.save()
-        self.assertFalse(self.page_1.is_within_publication_dates())
-        # Reset
-        self.page_1.publication_date = None
-        self.page_1.save()
-        self.assertTrue(self.page_1.is_within_publication_dates())
-        # Test publication end date
-        self.page_1.publication_end_date = \
-            timezone.now() + timedelta(seconds=1)
-        self.page_1.save()
-        self.assertTrue(self.page_1.is_within_publication_dates())
-        self.page_1.publication_end_date = \
-            timezone.now() - timedelta(seconds=1)
-        self.page_1.save()
-        self.assertFalse(self.page_1.is_within_publication_dates())
-        # Reset
-        self.page_1.publication_end_date = None
-        self.page_1.save()
-        self.assertTrue(self.page_1.is_within_publication_dates())
-        # Test both publication start and end dates against arbitrary timestamp
-        self.page_1.publication_date = timezone.now() - timedelta(seconds=1)
-        self.page_1.publication_end_date = \
-            timezone.now() + timedelta(seconds=1)
-        self.assertTrue(self.page_1.is_within_publication_dates())
-        self.assertTrue(
-            self.page_1.is_within_publication_dates(timezone.now()))
-        # Timestamp exactly at publication start date is acceptable
-        self.assertTrue(
-            self.page_1.is_within_publication_dates(
-                self.page_1.publication_date))
-        # Timestamp exactly at publication end date is not acceptable
-        self.assertFalse(
-            self.page_1.is_within_publication_dates(
-                self.page_1.publication_end_date))
-
     def test_model_is_published(self):
         # Only actual published copy returns True for `is_published`
         self.assertFalse(self.slide_show_1.is_published)
@@ -285,42 +236,6 @@ class TestPublishingModelAndQueryset(TestCase):
         self.assertEqual(
             set([self.slide_show_1.publishing_linked]),
             set(SlideShow.objects.published(force_exchange=True)))
-
-    def test_queryset_published_with_urlnode_based_publishing_model(self):
-        self.assertEqual(
-            [], list(LayoutPage.objects.published()))
-        self.page_1.publish()
-        # Return only published items
-        self.assertEqual(
-            [self.page_1.publishing_linked],  # Compare published copy
-            list(LayoutPage.objects.published()))
-        # Confirm we only get published items regardless of
-        # `is_draft_request_context`
-        with patch('icekit.publishing.apps.is_draft_request_context') as p:
-            p.return_value = True
-            self.assertEqual(
-                [self.page_1.publishing_linked],
-                list(LayoutPage.objects.published()))
-        # Delegates to `visible` if `for_user` provided
-        with patch('icekit.publishing.managers.PublishingQuerySet.visible') \
-                as p:
-            p.return_value = 'success!'
-            self.assertEqual(
-                'success!',
-                LayoutPage.objects.published(for_user=self.staff_1))
-            self.assertEqual(
-                'success!', LayoutPage.objects.published(for_user=None))
-            self.assertEqual(
-                'success!', LayoutPage.objects.published(for_user='whatever'))
-        # Confirm draft-for-published exchange is disabled by default...
-        self.page_1.unpublish()
-        self.assertEqual(
-            set([]), set(LayoutPage.objects.published()))
-        # ... but exchange can be forced
-        self.page_1.publish()
-        self.assertEqual(
-            set([self.page_1.publishing_linked]),
-            set(LayoutPage.objects.published(force_exchange=True)))
 
     def test_queryset_visible(self):
         self.slide_show_1.publish()
@@ -463,6 +378,109 @@ class TestPublishingModelAndQueryset(TestCase):
         self.assertEqual(
             self.slide_show_1.publishing_linked,
             self.slide_show_1.publishing_linked.get_published())
+
+
+class TestPublishableFluentContentsPage(TestCase):
+    """ Test publishing features with a Fluent Contents Page """
+
+    def setUp(self):
+        self.site, __ = Site.objects.get_or_create(
+            pk=1,
+            defaults={'name': 'example.com', 'domain': 'example.com'})
+
+        self.user_1 = G(User)
+        self.staff_1 = G(
+            User,
+            is_staff=True,
+            is_active=True,
+            is_superuser=True,
+        )
+
+        self.page_layout_1 = G(Layout)
+        self.page_1 = LayoutPage.objects.create(
+            author=self.user_1,
+            title='Test title',
+            layout=self.page_layout_1,
+        )
+
+    def test_model_is_within_publication_dates(self):
+        # Empty publication start/end dates
+        self.assertTrue(self.page_1.is_within_publication_dates())
+        # Test publication start date
+        self.page_1.publication_date = timezone.now() - timedelta(seconds=1)
+        self.page_1.save()
+        self.assertTrue(self.page_1.is_within_publication_dates())
+        self.page_1.publication_date = timezone.now() + timedelta(seconds=1)
+        self.page_1.save()
+        self.assertFalse(self.page_1.is_within_publication_dates())
+        # Reset
+        self.page_1.publication_date = None
+        self.page_1.save()
+        self.assertTrue(self.page_1.is_within_publication_dates())
+        # Test publication end date
+        self.page_1.publication_end_date = \
+            timezone.now() + timedelta(seconds=1)
+        self.page_1.save()
+        self.assertTrue(self.page_1.is_within_publication_dates())
+        self.page_1.publication_end_date = \
+            timezone.now() - timedelta(seconds=1)
+        self.page_1.save()
+        self.assertFalse(self.page_1.is_within_publication_dates())
+        # Reset
+        self.page_1.publication_end_date = None
+        self.page_1.save()
+        self.assertTrue(self.page_1.is_within_publication_dates())
+        # Test both publication start and end dates against arbitrary timestamp
+        self.page_1.publication_date = timezone.now() - timedelta(seconds=1)
+        self.page_1.publication_end_date = \
+            timezone.now() + timedelta(seconds=1)
+        self.assertTrue(self.page_1.is_within_publication_dates())
+        self.assertTrue(
+            self.page_1.is_within_publication_dates(timezone.now()))
+        # Timestamp exactly at publication start date is acceptable
+        self.assertTrue(
+            self.page_1.is_within_publication_dates(
+                self.page_1.publication_date))
+        # Timestamp exactly at publication end date is not acceptable
+        self.assertFalse(
+            self.page_1.is_within_publication_dates(
+                self.page_1.publication_end_date))
+
+    def test_queryset_published_with_urlnode_based_publishing_model(self):
+        self.assertEqual(
+            [], list(LayoutPage.objects.published()))
+        self.page_1.publish()
+        # Return only published items
+        self.assertEqual(
+            [self.page_1.publishing_linked],  # Compare published copy
+            list(LayoutPage.objects.published()))
+        # Confirm we only get published items regardless of
+        # `is_draft_request_context`
+        with patch('icekit.publishing.apps.is_draft_request_context') as p:
+            p.return_value = True
+            self.assertEqual(
+                [self.page_1.publishing_linked],
+                list(LayoutPage.objects.published()))
+        # Delegates to `visible` if `for_user` provided
+        with patch('icekit.publishing.managers.PublishingQuerySet.visible') \
+                as p:
+            p.return_value = 'success!'
+            self.assertEqual(
+                'success!',
+                LayoutPage.objects.published(for_user=self.staff_1))
+            self.assertEqual(
+                'success!', LayoutPage.objects.published(for_user=None))
+            self.assertEqual(
+                'success!', LayoutPage.objects.published(for_user='whatever'))
+        # Confirm draft-for-published exchange is disabled by default...
+        self.page_1.unpublish()
+        self.assertEqual(
+            set([]), set(LayoutPage.objects.published()))
+        # ... but exchange can be forced
+        self.page_1.publish()
+        self.assertEqual(
+            set([self.page_1.publishing_linked]),
+            set(LayoutPage.objects.published(force_exchange=True)))
 
     def test_urlnodequerysetwithpublishingfeatures_for_publishing_model(self):
         # Create page with related pages relationships to Fluent Page
