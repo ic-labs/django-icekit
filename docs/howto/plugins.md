@@ -81,7 +81,7 @@ with two mixin classes:
 
     # admin.py
 
-    from icekit.admin import FluentLayoutsMixin
+    from icekit.admin_mixins import FluentLayoutsMixin
 
     class MyModelAdmin(FluentLayoutsMixin, MyModelAdminBase):
         ...
