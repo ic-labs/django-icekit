@@ -5,6 +5,7 @@ import urlparse
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Group
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseNotFound, QueryDict
@@ -610,6 +611,121 @@ class TestPublishableFluentContentsPage(TestCase):
             self.assertEqual(
                 set([self.fluent_page]),
                 set(test_page.related_pages.visible()))
+
+
+class TestPublishableFluentContents(TestCase):
+    """ Test publishing features with a Fluent Contents item (not a page) """
+
+    def setUp(self):
+        self.site, __ = Site.objects.get_or_create(
+            pk=1,
+            defaults={'name': 'example.com', 'domain': 'example.com'})
+
+        self.user_1 = G(User)
+        self.staff_1 = G(
+            User,
+            is_staff=True,
+            is_active=True,
+            is_superuser=True,
+        )
+
+        self.page_layout_1 = G(Layout)
+        self.fluent_contents = Article.objects.create(
+            title='Test title',
+            layout=self.page_layout_1,
+        )
+        self.placeholder = Placeholder.objects.create_for_object(
+            self.fluent_contents,
+            slot='test-slot',
+            role='t',
+            title='Test Placeholder',
+        )
+
+    def test_contentitems_and_placeholders_cloned_on_publish(self):
+        # Associate content items with page
+        article_ct = ContentType.objects.get_for_model(Article)
+        item_1 = RawHtmlItem.objects.create(
+            parent_type=article_ct,
+            parent_id=self.fluent_contents.id,
+            placeholder=self.placeholder,
+            html='<b>rawhtmlitem 1</b>'
+        )
+        item_2 = RawHtmlItem.objects.create(
+            parent_type=article_ct,
+            parent_id=self.fluent_contents.id,
+            placeholder=self.placeholder,
+            html='<b>rawhtmlitem 2</b>'
+        )
+        self.assertEqual(
+            2, self.fluent_contents.contentitem_set.count())
+        self.assertEqual(
+            list(self.fluent_contents.contentitem_set.all()),
+            [item_1, item_2])
+        self.assertEqual(
+            [i.html for i in self.fluent_contents.contentitem_set.all()],
+            ['<b>rawhtmlitem 1</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertEqual(
+            [i.placeholder for i in self.fluent_contents.contentitem_set.all()],
+            [self.placeholder, self.placeholder])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in self.fluent_contents.contentitem_set.all()],
+            ['test-slot', 'test-slot'])
+        # Publish page
+        self.fluent_contents.publish()
+        published_page = self.fluent_contents.publishing_linked
+        self.assertNotEqual(
+            self.fluent_contents.pk, published_page.pk)
+        # Confirm published page has cloned content items and placeholders
+        # (with different model instances (PKs) but same content)
+        self.assertEqual(
+            2, published_page.contentitem_set.count())
+        self.assertNotEqual(
+            list(published_page.contentitem_set.all()),
+            [item_1, item_2])
+        self.assertEqual(
+            [i.html for i in published_page.contentitem_set.all()],
+            ['<b>rawhtmlitem 1</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertNotEqual(
+            [i.placeholder for i in published_page.contentitem_set.all()],
+            [self.placeholder, self.placeholder])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in published_page.contentitem_set.all()],
+            ['test-slot', 'test-slot'])
+        # Modify content items and placeholders for draft page
+        item_1.html = '<b>rawhtmlitem 1 - updated</b>'
+        item_1.save()
+        self.placeholder.slot = 'test-slot-updated'
+        self.placeholder.save()
+        self.fluent_contents.save()  # Trigger timestamp change in draft page
+        self.assertEqual(
+            [i.html for i in self.fluent_contents.contentitem_set.all()],
+            ['<b>rawhtmlitem 1 - updated</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in self.fluent_contents.contentitem_set.all()],
+            ['test-slot-updated', 'test-slot-updated'])
+        # Confirm content items for published copy remain unchanged
+        published_page = self.fluent_contents.publishing_linked
+        self.assertEqual(
+            [i.html for i in published_page.contentitem_set.all()],
+            ['<b>rawhtmlitem 1</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in published_page.contentitem_set.all()],
+            ['test-slot', 'test-slot'])
+        # Re-publish page
+        self.fluent_contents.publish()
+        published_page = self.fluent_contents.publishing_linked
+        # Confirm published page has updated content items
+        self.assertEqual(
+            [i.html for i in published_page.contentitem_set.all()],
+            ['<b>rawhtmlitem 1 - updated</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in published_page.contentitem_set.all()],
+            ['test-slot-updated', 'test-slot-updated'])
 
 
 class TestDjangoDeleteCollectorPatchForProxyModels(TransactionTestCase):
