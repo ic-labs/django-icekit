@@ -267,9 +267,9 @@ class PublishingModel(models.Model):
 
             # As it is a new object we need to clone each of the
             # translatable fields, placeholders and required relations.
-            self.clone_translations(publish_obj)
-            self.clone_placeholder(publish_obj)
-            self.clone_relations(publish_obj)
+            self.clone_parler_translations(publish_obj)
+            self.clone_fluent_placeholders(publish_obj)
+            self.clone_fluent_contentitems(publish_obj)
 
             # Extra relationship-cloning smarts
             publish_obj.publishing_clone_relations(self)
@@ -458,7 +458,7 @@ class PublishingModel(models.Model):
                 published_placeholder.pk = None
                 published_placeholder.save()
 
-    def clone_translations(self, dst_obj):
+    def clone_parler_translations(self, dst_obj):
         """
         Clone each of the translations from an object and relate
         them to another.
@@ -483,7 +483,7 @@ class PublishingModel(models.Model):
                 translation.master = dst_obj
                 translation.save()
 
-    def clone_placeholder(self, dst_obj):
+    def clone_fluent_placeholders(self, dst_obj):
         """
         Clone each of the placeholder items.
 
@@ -507,7 +507,7 @@ class PublishingModel(models.Model):
             src_items = src_placeholder.get_content_items()
             src_items.copy_to_placeholder(dst_placeholder)
 
-    def clone_relations(self, dst_obj):
+    def clone_fluent_contentitems(self, dst_obj):
         """
         Find all MTM relationships on related ContentItem's and ensure the
         published M2M relationships directed back to the draft (src)
