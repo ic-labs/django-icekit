@@ -1,4 +1,4 @@
-from icekit.publishing.models import PublishableFluentModel
+from icekit.publishing.models import PublishableFluentContents
 from django.db import models
 
 
@@ -16,7 +16,7 @@ class TitleSlugMixin(models.Model):
         return self.title
 
 
-class PublishableArticle(PublishableFluentModel, TitleSlugMixin):
+class PublishableArticle(PublishableFluentContents, TitleSlugMixin):
     '''
     Basic Article type (ie that forms the basis of independent collections of
     publishable things).
@@ -24,4 +24,3 @@ class PublishableArticle(PublishableFluentModel, TitleSlugMixin):
 
     class Meta:
         abstract = True
-

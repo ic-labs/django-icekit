@@ -556,7 +556,7 @@ class PublishableFluentContentsPage(FluentContentsPage,
         abstract = True
 
 
-class PublishableFluentModel(FluentFieldsMixin, PublishingModel):
+class PublishableFluentContents(FluentFieldsMixin, PublishingModel):
 
     class Meta:
         abstract = True
