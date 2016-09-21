@@ -78,6 +78,8 @@
 			{% compress js file %}
 				{% block js %}{% endblock %}
 			{% endcompress %}
+			{# JS files and <script> elements that must remain uncompressed #}
+			{% block uncompressed_js %}{% endblock %}
 		{% endblock %}
 	</body>
 </html>
