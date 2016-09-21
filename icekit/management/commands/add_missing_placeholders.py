@@ -1,7 +1,7 @@
 from django.apps import apps
 from django.core.management.base import NoArgsCommand
 from django.utils.encoding import force_text
-from icekit.abstract_models import FluentFieldsMixin
+from icekit.mixins import FluentFieldsMixin
 
 
 class Command(NoArgsCommand):

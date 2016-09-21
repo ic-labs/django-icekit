@@ -11,6 +11,8 @@ from fluent_contents.models import Placeholder
 from fluent_pages.models import UrlNode
 from fluent_pages.integration.fluent_contents import FluentContentsPage
 
+from icekit.mixins import FluentFieldsMixin
+
 from .managers import PublishingManager, PublishingUrlNodeManager
 from .middleware import is_draft_request_context
 from .utils import PublishingException, assert_draft
@@ -549,6 +551,12 @@ class PublishableFluentContentsPage(FluentContentsPage,
     @property
     def is_published(self):
         return not self.publishing_is_draft
+
+    class Meta:
+        abstract = True
+
+
+class PublishableFluentModel(FluentFieldsMixin, PublishingModel):
 
     class Meta:
         abstract = True

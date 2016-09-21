@@ -74,7 +74,7 @@ with two mixin classes:
 
     # models.py
 
-    from icekit.abstract_models import FluentFieldsMixin
+    from icekit.mixins import FluentFieldsMixin
 
     class MyModel(FluentFieldsMixin, MyModelBase):
         ...

@@ -21,7 +21,7 @@ from fluent_contents.plugins.rawhtml.models import RawHtmlItem
 from fluent_pages.models import PageLayout
 from fluent_pages.pagetypes.fluentpage.models import FluentPage
 from forms_builder.forms.models import Form
-from icekit.abstract_models import LayoutFieldMixin
+from icekit.mixins import LayoutFieldMixin
 from icekit.page_types.layout_page.models import LayoutPage
 from icekit.plugins import descriptors
 from icekit.plugins.faq.models import FAQItem
