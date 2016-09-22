@@ -1,6 +1,7 @@
 [![Build Status](https://img.shields.io/travis/ic-labs/django-icekit.svg)](https://travis-ci.org/ic-labs/django-icekit)
 [![Coverage Status](https://img.shields.io/coveralls/ic-labs/django-icekit.svg)](https://coveralls.io/github/ic-labs/django-icekit)
 [![Documentation](https://readthedocs.org/projects/icekit/badge/)](https://icekit.readthedocs.io/)
+[![Requirements Status](https://img.shields.io/requires/github/ic-labs/django-icekit.svg)](https://requires.io/github/ic-labs/django-icekit/requirements/)
 [![Version](https://img.shields.io/pypi/v/django-icekit.svg)](https://pypi.python.org/pypi/django-icekit)
 
 [![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/)
