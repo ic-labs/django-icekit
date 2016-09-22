@@ -67,7 +67,7 @@ setuptools.setup(
         'django-polymorphic',
         'django-wysiwyg',
         'django_extensions',
-        'html5lib==0.999',
+        'html5lib==0.999999999',
         'nltk',
         'Pillow',
         'requests',
@@ -89,7 +89,7 @@ setuptools.setup(
             'Werkzeug',
         ],
         'django18': [
-            'Django>=1.8,<1.9',
+            'Django>=1.10,<1.11',
         ],
         'forms': [
             'django-forms-builder',
@@ -107,7 +107,7 @@ setuptools.setup(
             'django-polymorphic-auth',
             'django-post-office',
             'django-redis',
-            'django-reversion>=1.9.3,<1.10',  # 1.9.3+ use DB transactions 1.10 has breaking changes for Django 1.9'
+            'django-reversion>=2.0,<2.1',  # 1.9.3+ use DB transactions 1.10 has breaking changes for Django 1.9'
             'django-storages<1.2',  # See: https://github.com/jschneier/django-storages/blob/cf3cb76ca060f0dd82766daa43ee92fccca3dec7/storages/backends/s3boto.py#L28-L30'
             'django-test-without-migrations',
             'django-timezone',
