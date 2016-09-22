@@ -1,3 +1,5 @@
+[![Requirements Status](https://img.shields.io/requires/github/ic-labs/glamkit-sponsors.svg)](https://requires.io/github/ic-labs/glamkit-sponsors/requirements/)
+
 # GLAMkit sponsors
 
 This is a simple app to implement sponsor logos in GLAMkit pages
