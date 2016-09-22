@@ -1,6 +1,3 @@
-before_script:
-  - echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-
 language: python
 
 install:
@@ -10,11 +7,27 @@ script:
   - tox
 
 env:
-  - TOXENV=django17-py27
-  - TOXENV=django17-py32
-  - TOXENV=django17-py33
-  - TOXENV=django17-py34
   - TOXENV=django18-py27
-  - TOXENV=django18-py32
   - TOXENV=django18-py33
   - TOXENV=django18-py34
+  - TOXENV=django18-py35
+  - TOXENV=django19-py27
+  - TOXENV=django19-py34
+  - TOXENV=django19-py35
+  - TOXENV=django110-py27
+  - TOXENV=django110-py34
+  - TOXENV=django110-py35
+
+matrix:
+  allow_failures:
+    # - env: TOXENV=django18-py27
+    - env: TOXENV=django18-py33
+    - env: TOXENV=django18-py34
+    - env: TOXENV=django18-py35
+    - env: TOXENV=django19-py27
+    - env: TOXENV=django19-py34
+    - env: TOXENV=django19-py35
+    - env: TOXENV=django110-py27
+    - env: TOXENV=django110-py34
+    - env: TOXENV=django110-py35
+  fast_finish: true
