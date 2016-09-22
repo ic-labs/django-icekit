@@ -2,7 +2,7 @@ Readability
 ====================
 
 A collection of functions that measure the readability of a given body of text. I'd
-recommend checking out the wikipedia articles below--most of the metrics estimate 
+recommend checking out the wikipedia articles below--most of the metrics estimate
 the grade level required to comprehend a given block of text and may return odd results
 on small snippets of text.
 
