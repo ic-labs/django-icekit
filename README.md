@@ -1,3 +1,5 @@
+[![Requirements Status](https://img.shields.io/requires/github/ic-labs/glamkit-collections.svg)](https://requires.io/github/ic-labs/glamkit-collections/requirements/)
+
 # Overview
 
 This package contains common code for the SFMOMA website and collection
