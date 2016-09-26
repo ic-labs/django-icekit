@@ -25,5 +25,5 @@ after_success:
 
 env:
   global:
-    # Use `pull-N`, or Git tag, or Git branch as image tag.
+    # Use `pull-N`, or Git tag, or Git branch as Docker image tag.
     - TAG=$([[ "$TRAVIS_PULL_REQUEST" != "false" ]] && echo "pull-$TRAVIS_PULL_REQUEST" || echo ${TRAVIS_TAG:-$TRAVIS_BRANCH} | sed 's/[^.0-9A-Za-z]/-/g')
