@@ -12,7 +12,7 @@ install:
 before_script:
   - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
   - docker pull "interaction/icekit:${TAG}" || true
-  - docker build -t "interaction/icekit:${TAG}" .
+  - docker build --pull -t "interaction/icekit:${TAG}" .
 
 script:
   - docker-compose -f docker-compose.travis.yml run --rm django
