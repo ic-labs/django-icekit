@@ -1,0 +1,7 @@
+{# used on the front end AND to preview in admin #}
+{% if instance.caption or instance.title %}
+	<figcaption class="image-caption">
+		{% if instance.title %}<h4>{{ instance.title }}</h4>{% endif %}
+		{% if instance.caption %}<p>{{ instance.caption }}</p>{% endif %}
+	</figcaption>
+{% endif %}

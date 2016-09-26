@@ -13,8 +13,6 @@ export REUSE_DB=1
 export SETUP_POSTGRES_FORCE=1
 export SRC_PGDATABASE="$ICEKIT_PROJECT_DIR/test_initial_data.sql"
 
-unset WAITLOCK_ENABLED
-
 PGDATABASE="test_$PGDATABASE" setup-postgres.sh
 migrate.sh
 

@@ -2,21 +2,21 @@ Readability
 ====================
 
 A collection of functions that measure the readability of a given body of text. I'd
-recommend checking out the wikipedia articles below--most of the metrics estimate 
+recommend checking out the wikipedia articles below--most of the metrics estimate
 the grade level required to comprehend a given block of text and may return odd results
 on small snippets of text.
 
 To get up and running you'll need [NLTK](http://nltk.org/) and will need the punkt
 data set:
 
-    shell$ pip install nltk
-    shell$ python
-    >>import nltk
-    >>nltk.download('punkt')
+    $ pip install nltk
+    $ python
+    >>> import nltk
+    >>> nltk.download('punkt')
 
 Demo:
 
-    shell$ python readability.py
+    $ python readability.py
     Test text:
     "We are close to wrapping up our 10 week Rails Course. This week we will cover a handful of topics commonly encountered in Rails projects. We then wrap up with part 2 of our Reddit on Rails exercise!  By now you should be hard at work on your personal projects. The students in the course just presented in front of the class with some live demos and a brief intro to to the problems their app were solving. Maybe set aside some time this week to show someone your progress, block off 5 minutes and describe what goal you are working towards, the current state of the project (is it almost done, just getting started, needs UI, etc.), and then show them a quick demo of the app. Explain what type of feedback you are looking for (conceptual, design, usability, etc.) and see what they have to say.  As we are wrapping up the course you need to be focused on learning as much as you can, but also making sure you have the tools to succeed after the class is over."
 

@@ -14,10 +14,10 @@ If you're not ready for Docker, see [Manual Setup](manual-setup.md).
 
 ## 1. Create a new project
 
-    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) <project_name>
+    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) {project_name}
 
 This will create a new project from the ICEkit project template, in a directory
-named <project_name> in the current working directory.
+named `{project_name}` in the current working directory.
 
 NOTE: Windows users should run this command in Git Bash, which comes with
 [Git for Windows](https://git-for-windows.github.io/).
@@ -26,7 +26,7 @@ NOTE: Windows users should run this command in Git Bash, which comes with
 
 Build a Docker image:
 
-    $ cd <project_name>
+    $ cd {project_name}
     $ docker-compose build --pull
 
 Run a `django` container and all of its dependancies:
