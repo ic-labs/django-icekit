@@ -10,6 +10,9 @@ install:
   - sudo apt-get -o Dpkg::Options::="--force-confnew" -q -y --force-yes install docker-engine=1.9.1-0~trusty
 
 before_script:
+  - docker --version
+  - docker-compose --version
+  - docker-compose -f docker-compose.travis.yml config
   - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
   - docker pull "interaction/project_template:${TAG}" || true
   - docker build --pull -t "interaction/project_template:${TAG}" .
