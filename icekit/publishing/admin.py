@@ -238,12 +238,6 @@ class _PublishingHelpersMixin(object):
         if hasattr(obj, 'get_real_instance'):
             obj = obj.get_real_instance()
 
-        try:
-            published_obj_url = obj.get_absolute_url()
-            draft_obj_url = published_obj_url + '?edit'
-        except:
-            published_obj_url = draft_obj_url = None
-
         template_name = 'admin/publishing/_change_list_publishing_column.html'
         t = loader.get_template(template_name)
         c = Context({
@@ -251,8 +245,6 @@ class _PublishingHelpersMixin(object):
             'has_publish_permission':
                 self.has_publish_permission(self.request, obj),
             'img_path': settings.STATIC_URL + 'admin/img/',
-            'published_url': published_obj_url,
-            'draft_url': draft_obj_url,
         })
         try:
             if isinstance(obj, PublishingModel):
