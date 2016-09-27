@@ -111,6 +111,14 @@ var fluent_layouts = {
       {
         // Ask to update the tabs!
         fluent_contents.layout.load(layout);
+        // inject help text
+        for(i in layout.placeholders) {
+          var p = layout.placeholders[i];
+          var help_text = p.help_text;
+          if (help_text) {
+            $("div[data-tab-region='"+p.slot+"']").prepend("<div class='help placeholder-help' style='padding: 10px;'>"+help_text+"")
+          }
+        }
       },
       dataType: 'json',
       error: function(xhr, textStatus, ex)

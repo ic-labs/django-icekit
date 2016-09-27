@@ -11,7 +11,7 @@ Open a shell on an already running container (e.g. via `docker-compose up`):
 
 Or open a shell on a new container, and remove it on exit:
 
-    $ docker-compose run --rm django entrypoint.sh
+    $ docker-compose run --rm django
 
 Or open a shell without Docker from the ICEkit project template (or an ICEkit
 project) directory:
@@ -58,9 +58,9 @@ Display a list of other frequently used shell commands:
 
 ## Uninstalling an ICEkit project
 
-Delete all containers with a name matching `<project_name>`:
+Delete all containers with a name matching `{project_name}`:
 
-    $ docker rm $(docker ps -a -f "name=<project_name>" -q)
+    $ docker rm $(docker ps -a -f "name={project_name}" -q)
 
 To delete the associated images, run:
 
@@ -68,7 +68,7 @@ To delete the associated images, run:
 
 and for each image you want to delete:
 
-    $ docker rmi <image id>
+    $ docker rmi {image id}
 
 If you are running other ICEkit projects, then you only need to delete the
 image that starts with `[project_name]` - the other images will be used by

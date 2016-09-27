@@ -35,7 +35,76 @@ footer {
 }
 
 #content-main {
-	// width: 600px;
+    //make the fluent-contents editor cleaner
+  .cp-content .inline-related {
+      margin-bottom: 8px;
+
+      h2.cp-formset-item-title {
+          color: white;
+          background: #A4A3A3;
+          border-radius: 4px;
+      }
+
+      fieldset {
+          h2 {
+              //    nested fieldsets
+              background: #f1f1f1;
+              border-radius: 4px;
+              text-transform: none;
+          }
+          .collapse-toggle {
+              color: #8CB4AF
+          }
+      }
+  }
+
+  .cp-controls {
+    text-align: center;
+    padding: 10px 5px;
+    border: 1px dashed #A4A3A3;
+    border-radius: 3px;
+    input.button {
+      background-color: #79C8B6;
+      color: #FFF;
+    }
+  }
+
+    //nicer icons
+    .cp-item-icons, .cp-item-delete {
+        & > a {
+            // .fa class
+            //display: inline-block;
+            font: normal normal normal 14px/1 FontAwesome;
+            font-size: inherit;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            // turn off fluent behaviour
+            background: none;
+            &:before {
+                font-size: 16px;
+            }
+            //shared styles
+            color: #ccc;
+        }
+    }
+
+    a.cp-item-up:before {
+        content: "\f062";
+    }
+    a.cp-item-down:before {
+        content: "\f063";
+    }
+    a.cp-item-move:before {
+        content: "\f07e";
+    }
+    .cp-item-delete > a {
+        padding: 0 0 0 3px;
+        &:before {
+            color: #903b3b;
+            content: "\f00d";
+        }
+    }
 }
 
 #content-related {

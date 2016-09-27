@@ -36,7 +36,6 @@ from icekit.project.settings.calculated import *
 
 # These settings are absolute overrides. When overriding a calculated setting,
 # be sure to override all of its derivative settings as well.
-
 # Add apps for your project here.
 INSTALLED_APPS += (
     # 'debug_toolbar',
@@ -57,3 +56,11 @@ MIDDLEWARE_CLASSES += (
 FEATURED_APPS[0]['models']['glamkit_articles.Article'] = {
     'verbose_name_plural': 'Articles',
 }
+
+ICEKIT['LAYOUT_TEMPLATES'] += (
+    (
+        SITE_NAME,
+        os.path.join(PROJECT_DIR, 'templates/layouts'),
+        'layouts',
+    ),
+)

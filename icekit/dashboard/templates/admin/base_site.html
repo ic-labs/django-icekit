@@ -16,12 +16,17 @@
 	{% compress css %}
 		<link type="text/less" rel="stylesheet" href="{% static 'admin/css/icekit_dashboard.less' %}" />
 	{% endcompress %}
-	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
 {% endblock %}
 
 {% block extrahead %}
 	{% compress js %}
 		<script src="{% static 'jquery/dist/jquery.js' %}"></script>
+	{% endcompress %}
+{% endblock %}
+
+{% block blockbots %}{# hackily ensuring our js loads last, so we can monkey-patch fluent's JS #}
+	{% compress js %}
 	    <script src="{% static 'admin/js/icekit_dashboard.js' %}"></script>
 	{% endcompress %}
 {% endblock %}

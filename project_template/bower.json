@@ -1,6 +1,11 @@
 {
   "name": "project_template",
   "dependencies": {
+    "bootstrap": "^3.3.7",
+    "font-awesome": "^4.6.3",
+    "jquery": "^3.1.0",
+    "lodash": "^4.14.2",
+    "alloyeditor": "^1.2.3"
   },
   "private": true
 }

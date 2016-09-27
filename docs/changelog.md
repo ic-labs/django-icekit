@@ -1,8 +1,115 @@
 # Changelog
 
-## In Development
+## 0.14.1 (26 September 2016)
 
-  * An authors app
+  * ICEkit gets a facelift. Content editing now looks cleaner and easier to
+    scan. Reordering items is animated, meaning it's easier to keep track of
+    what got moved.
+
+  * Improved Image controls, optionally including a title in the caption.
+
+  * `alt_text` is no longer required - some images don't provide content that
+    is useful to users who can't see them, though the `alt=` attribute is still
+    always included in HTML.
+
+  * Fix a bug where looking for `help_text` in a placeholder slot that had no
+    manual configuration raised a 500, resulting in no layout data found.
+
+  * Fix fatal error (typo) in `startproject.sh` script.
+
+  * Update `.editorconfig`, and add to project template.
+
+  * Tag Docker images during build on Travis CI for release versions.
+
+## 0.14 (20 September 2016)
+
+  * Update the recommended method of running projects via `Docker` and `go.sh`
+    to provide a more consistent and familiar experience for developers.
+
+    Old:
+
+        $ docker-compose up                         # Run all services and log to stdout (no interactivity)
+        $ docker-compose exec django entrypoint.sh  # Shell into running `django` container to run interactive processes
+
+    New:
+
+        $ docker-compose run --rm --service-ports django  # Start dependant services and shell into a new `django` container
+
+    The benefits are that:
+
+     1. We start with an interactive terminal in which we can any number of
+        interactive processes in a familiar way.
+
+     2. It's much easier and quicker to stop and restart the main process (e.g.
+        the Django dev server) without having to stop and restart dependant
+        services.
+
+     3. We aren't overwhelmed by several screens of log output from all the
+        service dependencies.
+
+     4. We don't start a WSGI process in a non-interactive `django` service,
+        then have to shell into the container to stop it and replace it with
+        an interactive one.
+
+  * Use different locations for `PYTHONUSERBASE` (via Docker) and virtualenv
+    (via `go.sh`) directories, to avoid conflicts.
+
+  * Isolate the `go.sh` BASH shell from user's personal `.bashrc` and
+    `.profile` files to avoid conflicts and unexpected behaviour.
+
+  * Validate that manually installed dependencies are available when run via
+    `go.sh`, and fail loudly.
+
+  * Call `setup-django.sh` by default when `go.sh` is called without arguments,
+    to mimic `docker-compose run ... django` default behaviour.
+
+  * Improve the `runtests.sh` script:
+
+     1. Use a database name derived from project directory and Git branch.
+
+     2. Restore `test_initial_data.sql` instead of `initial_data.sql` before
+        running tests, so `initial_data.sql` can be used for development.
+
+     3. Only run and report on project tests when run in a project context.
+
+  * Improve detection of `*.sql` file vs source database to restore when
+    creating a database.
+
+  * Don't clobber the version of ICEkit installed into the base Docker image
+    when building a project image.
+
+  * Avoid failing test builds when Coveralls fails to push its update.
+
+  * Add an authors app.
+
+  * You can now define `help_text` for a fluent placeholder in
+    `FLUENT_CONTENTS_PLACEHOLDER_CONFIG`.
+
+  * Improved `ICEkitURLField`, which uses correct `Page` queryset.
+
+Backwards incompatible changes:
+
+  * The default command for `django` service now starts an interactive shell
+    instead of `supervisord.sh` (which starts Nginx and Gunicorn). Use the new
+    `docker-compose run --rm --service-ports django` command to shell into a
+    new `django` container and then manually call `runserver.sh` or
+    `supervisord.sh` instead of `docker-compose up`.
+
+  * The `entrypoint.sh` script is now executed via the `ENTRYPOINT` instruction
+    in `Dockerfile`. You don't need to explicitly include it as an argument to
+    `docker-compose run ...` commands or in `docker-compose.yml` services.
+
+  * Move Node modules and Bower components out of `icekit` package and into
+    project template for simplicity and greater visibility. Add ICEkit
+    dependencies to your project `bower.json` and `package.json` files.
+
+  * Remove `django-supervisor`. We are now using Supervisor directly because
+    it uses a lot of memory and is slow to invoke the whole Django machinery
+    just to render a `supervisord.conf` template before starting Supervisor.
+
+    Define additional services in `docker-compose.yml` and a Supervisor config
+    file (referenced by the `SUPERVISORD_CONFIG_INCLUDE` environment variable)
+    or shell scripts to run additional processes interactively.
 
 ## 0.13.1 (14 September 2016)
 
@@ -11,7 +118,7 @@
 
   * Added instructions covering uninstalling a docker project.
 
-  * Installation improvements
+  * Installation improvements.
 
   * Thumbnail configuration should now be specified in settings, not templates.
 

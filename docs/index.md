@@ -1,4 +1,5 @@
-<!-- Comments are items which are to come -->
+[//]: # (Comments are items which are to come)
+
 # First steps
 
 Are you new to ICEkit? Start here.
@@ -79,7 +80,8 @@ ICEkit is open and free to use. However if you have a query or business need
 that doesn't belong in the public community, please get in touch with the ICEkit
 team at [the Interaction Consortium]: [labs@interaction.net.au](mailto:labs@interaction.net.au).
 
-<!--internal links -->
+[//]: # (internal links)
+
 [ICEkit features]: intro/features.md
 [Architectural overview]: intro/architecture.md
 [Quick install guide]: intro/install.md
@@ -100,7 +102,9 @@ team at [the Interaction Consortium]: [labs@interaction.net.au](mailto:labs@inte
 [Standards and collaboration]: contributing/contributing.md
 [Code of Conduct]: contributing/conduct.md
 [Roadmap]: contributing/roadmap.md
-<!-- external links -->
+
+[//]: # (external links)
+
 [icekit-events]: https://github.com/ic-labs/icekit-events
 [icekit-press-releases]: https://github.com/ic-labs/icekit-press-releases
 [issues]: https://github.com/ic-labs/django-icekit/issues
