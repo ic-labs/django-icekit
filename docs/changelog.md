@@ -2,6 +2,10 @@
 
 ## In development
 
+  * Preview pages are now visually highlighted, and have a different HTML title.
+
+  
+
 ## 0.15 (27 September 2016)
 
   * Improvements to publishing to make it accomodate more types of content.
