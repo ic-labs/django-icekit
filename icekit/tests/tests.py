@@ -397,9 +397,14 @@ class Models(WebTest):
         mixin_layout.delete()
 
     def test_article_publishing_querysets(self):
+        article_listing = test_models.ArticleListing.objects.create(
+            title="Article listing",
+            author=self.user_1,
+        )
+
         article_1 = test_models.Article.objects.create(
             title='Test Article',
-            parent=self.page_1,
+            parent=article_listing,
         )
         self.assertIn(article_1, test_models.Article.objects.all())
         self.assertEqual(test_models.Article.objects.count(), 1)
@@ -677,7 +682,7 @@ class TestArticles(WebTest):
     """
 
     def setUp(self):
-        self.llayout = models.Layout.auto_add(
+        self.listing_layout = models.Layout.auto_add(
             'icekit/layouts/listing.html',
             ArticleListing,
         )
@@ -697,7 +702,7 @@ class TestArticles(WebTest):
             author=staff_1,
             title="Listing Test",
             slug="listing-test",
-            layout=self.llayout,
+            layout=self.listing_layout,
         )
 
         self.article = Article.objects.create(
@@ -710,7 +715,7 @@ class TestArticles(WebTest):
             author=staff_1,
             title="Listing Test 2",
             slug="listing-test-2",
-            layout=self.llayout,
+            layout=self.listing_layout,
         )
 
         self.article_2 = Article.objects.create(
@@ -783,7 +788,7 @@ class TestArticles(WebTest):
         self.article.unpublish()
 
     def test_publishing(self):
-        # checkw URLs 404 by default
+        # check URLs 404 by default
         self.listing_url = self.listing.get_absolute_url()
         self.article_url = self.article.get_absolute_url()
         response = self.app.get(self.listing_url, expect_errors=True)
@@ -796,8 +801,7 @@ class TestArticles(WebTest):
         self.listing_url = self.listing.get_published().get_absolute_url()
 
         # Check it works, but doesn't include the Article
-        response = self.app.get(
-            self.listing_url)
+        response = self.app.get(self.listing_url)
         self.assertEqual(response.status_code, 200)
 
         self.assertNotContains(response, self.article.title)
@@ -808,7 +812,6 @@ class TestArticles(WebTest):
         response = self.app.get(self.article_url)
         self.assertEqual(response.status_code, 200)
 
-
         # Check the article listing now includes the Article
         response = self.app.get(
             self.listing_url)
@@ -816,14 +819,12 @@ class TestArticles(WebTest):
 
         # Unpublish Article Listing
         self.listing.unpublish()
-        response = self.app.get(
-            self.listing_url, expect_errors=True)
+        response = self.app.get(self.listing_url, expect_errors=True)
         self.assertEqual(response.status_code, 404)
 
         # Unpublish Article to tidy up
         self.article.unpublish()
-        response = self.app.get(
-            self.article_url, expect_errors=True)
+        response = self.app.get(self.article_url, expect_errors=True)
         self.assertEqual(response.status_code, 404)
 
     def test_listing(self):
@@ -837,8 +838,7 @@ class TestArticles(WebTest):
         self.listing_url = self.listing.get_published().get_absolute_url()
         self.article_url = self.article.get_published().get_absolute_url()
 
-        response = self.app.get(
-            self.listing_url)
+        response = self.app.get(self.listing_url)
         self.assertContains(response, self.article.title)
         self.assertNotContains(response, self.article_2.title)
 
