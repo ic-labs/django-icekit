@@ -12,7 +12,7 @@ test database and restores from `test_initial_data.sql` if available,
 
 ### To run specific tests
 
-    runtets.sh foo.bar:Baz.test_foo
+    runtests.sh foo.bar:Baz.test_foo
 
 ### To discover tests in the current folder and run without migrations:
 
@@ -28,7 +28,12 @@ test database and restores from `test_initial_data.sql` if available,
 
 ### To speed up test running
 
-Use a data dump called `test_initial_data.sql` with migrations applied. It will
-be restored to the test database in `runtests.sh`, bypassing all migrations.
+    QUICK=1 runtests.sh ...
+
+This reuses the test databases, and skips collectstatic and compress steps.
+
+To achieve permanent speedip, create a data dump called `test_initial_data.sql`
+with migrations applied. It will be restored to the test database in
+`runtests.sh`, bypassing all migrations.
 
 
