@@ -581,8 +581,6 @@ INSTALLED_APPS += (
     'notifications',
 
     'icekit.authors',
-    'icekit.authors.page',
-
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
 

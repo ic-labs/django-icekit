@@ -2,19 +2,36 @@
 Model declaration for the `author` app.
 """
 import re
-from django.core.urlresolvers import NoReverseMatch
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.extensions import PluginHtmlField
 from fluent_contents.models import PlaceholderField
-from fluent_pages.urlresolvers import app_reverse, PageTypeNotMounted
+from icekit.articles.abstract_models import ListingPage, ArticleBase
 from icekit.validators import RelativeURLValidator
-from icekit.publishing.models import PublishingModel
 
 
-@python_2_unicode_compatible
-class Author(PublishingModel):
+class AuthorListing(ListingPage):
+    """
+    Author listing page to be mounted in fluent pages page tree.
+    """
+    class Meta:
+        verbose_name = 'Author listing'
+
+    def get_items(self):
+        """
+        :return: all published authors
+        """
+        return Author.objects.published()
+
+    def get_visible_items(self):
+        """
+        :return: all authors that can be viewed by the current user
+        """
+        return Author.objects.visible()
+
+
+class Author(ArticleBase):
     """
     An author model for use with article pages and assigning attribution.
     """
@@ -26,8 +43,6 @@ class Author(PublishingModel):
         max_length=255,
         blank=True,
     )
-
-    slug = models.SlugField()
 
     portrait = models.ForeignKey(
         'icekit_plugins_image.Image',
@@ -51,42 +66,6 @@ class Author(PublishingModel):
         'author_content'
     )
 
-    def __str__(self):
-        return self.get_full_name()
-
-    def title(self):
-        return self.get_full_name()
-
-    def get_full_name(self):
-        """
-        Obtain the full name for an author.
-        :return: String.
-        """
-        full_name = u'%s %s' % (self.given_name, self.family_name)
-        return full_name.strip()
-
-    def get_absolute_url(self):
-        """
-        Return the absolute URL for the author.
-
-        If there is no Authors Page available it will return a static URL
-        (which has to be hooked up automatically).
-
-        :return: String.
-        """
-
-        try:
-            # `app_reverse` is used here for compatibility with mounted
-            # `fluent_pages` URL structures.
-            return app_reverse(
-                'author-detail',
-                kwargs={'slug': self.slug},
-                ignore_multiple=True
-            )
-        except (PageTypeNotMounted, NoReverseMatch):
-            return "/authors/%s" % self.slug
-
-
     @property
     def url_link_text(self):
         """
@@ -105,6 +84,16 @@ class Author(PublishingModel):
         :return: List of all content that should show for this author.
         """
         return []
+
+    @property
+    def parent(self):
+        try:
+            return AuthorListing.objects.draft()[0]
+        except IndexError:
+            raise IndexError("You need to create a Author Listing Page")
+
+    def get_layout_template_name(self):
+        return "author/detail.html"
 
     class Meta:
         ordering = ('family_name', )

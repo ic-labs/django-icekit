@@ -17,6 +17,12 @@ class AuthorTests(WebTest):
             is_superuser=True,
         )
 
+        self.author_listing = models.AuthorListing.objects.create(
+            author=self.staff_1,
+            title="Authors",
+            slug="authors",
+        )
+
         self.author_1 = G(models.Author)
         self.author_2 = G(models.Author)
 
@@ -27,21 +33,13 @@ class AuthorTests(WebTest):
             'author_content'
         )
 
-    def test_str(self):
-        self.assertEqual(str(self.author_1), self.author_1.get_full_name())
-
     def test_get_absolute_url(self):
-        # since there's no author listing page, the URL should be static
         self.assertEqual(
             self.author_1.get_absolute_url(),
-            '/authors/%s' % (
+            '/authors/%s/' % (
                 self.author_1.slug
             )
         )
-
-        # (although the static URL isn't currently hooked up to a view.
-        # TODO: provide for this in instructions.
-
 
     def test_admin(self):
         admin_app_list = (
