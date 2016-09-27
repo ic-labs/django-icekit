@@ -36,3 +36,19 @@ from icekit.project.settings.calculated import *
 
 # These settings are absolute overrides. When overriding a calculated setting,
 # be sure to override all of its derivative settings as well.
+# Add apps for your project here.
+INSTALLED_APPS += (
+    # 'debug_toolbar',
+)
+
+MIDDLEWARE_CLASSES += (
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+)
+
+ICEKIT['LAYOUT_TEMPLATES'] += (
+    (
+        SITE_NAME,
+        os.path.join(PROJECT_DIR, 'templates/layouts'),
+        'layouts',
+    ),
+)
