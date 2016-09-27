@@ -9,6 +9,7 @@ from icekit.plugins import ICEkitFluentContentsPagePlugin
 
 class ListingPagePlugin(ICEkitFluentContentsPagePlugin):
     render_template = 'icekit/layouts/listing.html'
+    model_admin = LayoutPageAdmin
 
     def get_view_response(self, request, page, view_func, view_args, view_kwargs):
         """

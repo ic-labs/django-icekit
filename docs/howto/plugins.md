@@ -37,9 +37,10 @@ ICEkit also has a simpler `PublishableArticle` model, which implements a
 Publishable Fluent Contents model - ie it's a straightforward Django model
 that happens to have rich content and be publishable. This is useful for more
  normal Django collections-of-things, like Press Releases, People, Articles.
+
 It's common to have a collecton of items with a paired `AbstractLayoutPage`
-Page to list/navigate the collection. See the `icekit-press-releases`
-project for a worked example of this.
+Page to list/navigate the collection. See the `authors` app for a worked
+example of this.
 
 ### Adding help text to a Placeholder
 

@@ -414,18 +414,18 @@ INSTALLED_APPS += ('easy_thumbnails', )
 # given model/field, without generating additional unecessary thumbnails. This
 # is essential when using a remote storage backend.
 THUMBNAIL_ALIASES = {
-#     'app[.model][.field]': {
-#         'name-WxH': {
-#             'size': (W, H),
-#             ...,
-#         },
-#     },
+    # 'app[.model][.field]': {
+    #   'name-WxH': { 'size': (W, H), },
+    # },
     '': {
+        'author_portrait': {
+            'size': (360, 640),
+        },
         'admin': {
             'size': (150, 150),
         },
         'content_image': {
-            'size': (1138, 0), # maximum width of a content column
+            'size': (1138, 0), # maximum width of a bootstrap content column
         }
     }
 }

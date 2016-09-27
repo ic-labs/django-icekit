@@ -533,6 +533,19 @@ class PublishingModel(models.Model):
                 # re-created on publish thus always have empty M2M rels.
                 dst_m2m.add(*src_m2m.all())
 
+    def is_suppressed_message(self):
+        """
+        Occasionally items may not be visible to the public even if they have
+        been published and can be previewed. For example, if they belong to a
+        parent who is not published.
+
+        In that case, returning a string here will result in a red `published`
+        indicator in admin, and the string will be shown in the hyperlink
+        title.
+
+        :return: True always
+        """
+        return True
 
 class PublishableFluentContentsPage(FluentContentsPage,
                                     PublishingModel):
