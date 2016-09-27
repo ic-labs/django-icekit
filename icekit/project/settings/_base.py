@@ -580,6 +580,7 @@ INSTALLED_APPS += (
     'icekit.response_pages',
     'notifications',
 
+    'icekit.authors',
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
 

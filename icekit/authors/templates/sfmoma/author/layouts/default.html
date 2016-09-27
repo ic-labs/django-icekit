@@ -1,0 +1,19 @@
+{% extends "sfmoma/base.html" %}
+
+{% load placeholder_tags fluent_contents_tags static %}
+
+{% block body_class %}default-page{% endblock %}
+
+{% block content %}
+	<div class="container">
+		<div class="row">
+			{% page_placeholder "main" role="m" %}
+		</div>
+	</div>
+{% endblock %}
+
+{% block body_js %}
+	{{ block.super }}
+	{% render_content_items_media %}
+{% endblock %}
+

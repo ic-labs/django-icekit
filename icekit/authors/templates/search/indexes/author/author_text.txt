@@ -1,0 +1,13 @@
+{% load fluent_contents_tags sfmoma_utils %}{% spaceless %}
+
+{{ object.get_full_name|safe }}
+{{ object.introduction|safe }}
+
+{# As fluent requires a request object to process the page place holders we need to fake a request object here #}
+{% fake_request_indicating_search %}
+
+{% if object.content.contentitems.exists %}
+	{% render_placeholder object.content as content %}
+	{{ content|safe|striptags }}
+{% endif %}
+{% endspaceless %}
