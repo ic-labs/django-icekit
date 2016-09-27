@@ -398,7 +398,8 @@ class Models(WebTest):
 
     def test_article_publishing_querysets(self):
         article_1 = test_models.Article.objects.create(
-            title='Test Article'
+            title='Test Article',
+            parent=self.page_1,
         )
         self.assertIn(article_1, test_models.Article.objects.all())
         self.assertEqual(test_models.Article.objects.count(), 1)
