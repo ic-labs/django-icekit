@@ -8,7 +8,7 @@
                 {% else %}
                     <i class="fa fa-circle-o" style="visibility: hidden;"></i>
                 {% endif %}
-                <a target="_blank" href="{{ url }}" title="View published{% if not object.is_dirty %}/latest{% endif %} version"><i class="fa fa-circle"></i></a>
+                <a target="_blank" href="{{ url }}" title="{% if object.is_suppressed_message %}{{ object.is_suppressed_message }}{%  else %}View published{% if not object.is_dirty %}/latest{% endif %} version{% endif %}" {% if object.is_suppressed_message %}class="suppressed"{% endif %}><i class="fa fa-circle"></i></a>
             {% else %}
                 <a target="_blank" href="{{ url|get_draft_url }}" title="Preview draft version"><i class="fa fa-circle-o"></i></a>
             {% endif %}

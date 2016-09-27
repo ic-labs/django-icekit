@@ -1,10 +1,24 @@
 from django.contrib import admin
+from icekit.admin import FluentLayoutsMixin
+from icekit.articles.admin import PolymorphicArticleParentAdmin, \
+    PolymorphicArticleChildAdmin
+from .models import Article, LayoutArticle, RedirectArticle
 
-from icekit.articles.admin import PublishableArticleAdmin
-from .models import Article
+
+class ArticleChildAdmin(PolymorphicArticleChildAdmin):
+    base_model = Article
 
 
-class ArticleAdmin(PublishableArticleAdmin):
-    pass
+class LayoutArticleAdmin(ArticleChildAdmin, FluentLayoutsMixin):
+    base_model=LayoutArticle
 
-admin.site.register(Article, ArticleAdmin)
+
+class RedirectArticleAdmin(ArticleChildAdmin):
+    base_model=RedirectArticle
+
+
+@admin.register(Article)
+class ArticleParentAdmin(PolymorphicArticleParentAdmin):
+    base_model = Article
+    child_models = ((LayoutArticle, LayoutArticleAdmin),
+                    (RedirectArticle, RedirectArticleAdmin),)

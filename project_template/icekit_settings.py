@@ -44,7 +44,6 @@ INSTALLED_APPS += (
     # INSTALLED BY SETUP.PY
     'sponsors',
     'press_releases',
-    'press_releases.page',
 
     # INCLUDED IN PROJECT TEMPLATE
     'articles',
