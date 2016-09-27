@@ -1,4 +1,4 @@
-{% load compress static %}
+{% load compress static icekit_tags %}
 
 {% block doctype %}<!DOCTYPE html>{% endblock %}
 <html lang="{% block html_lang %}en{% endblock %}" {% block html_attributes %}{% endblock %}>
@@ -29,13 +29,14 @@
 				{% endif %}
 			{% endblock %}
 
-			<title>{% block title %}{% if title %}{{ title|safe }} - {% endif %}{{ SITE_NAME|safe }}{% endblock %}</title>
+			<title>{% if request.IS_DRAFT %}PREVIEW: {% endif %}{% block title %}{% if title %}{{ title|safe }} - {% endif %}{{ SITE_NAME|safe }}{% endblock %}</title>
 
 			{% block head_css %}
 				{# CSS files hosted externally #}
 				{% block external_css %}{% endblock %}
 				{# Base CSS files #}
 				{% compress css file %}
+					<link rel="stylesheet" type="text/x-scss" href="{% static 'icekit/scss/icekit.scss' %}">
 					{% block base_css %}{% endblock %}
 				{% endcompress %}
 				{# Extra CSS files - section/page specific, etc #}
@@ -52,13 +53,21 @@
 			{% endblock %}
 		{% endblock %}
 	</head>
-	<body class="{% block body_class %}{% endblock %}" {% block body_attributes %}{% endblock %}>
+	<body class="{% block body_class %}{% endblock %} {% if request.IS_DRAFT %}preview{% endif %}" {% block body_attributes %}{% endblock %}>
 		{% block body %}
 			{% block messages %}
 				{% include 'icekit/messages.html' %}
 			{% endblock %}
 			{% block content %}{% endblock content %}
 		{% endblock %}
+		
+		{% if request.IS_DRAFT %}
+		{% block preview_ribbon %}
+			<div class="preview-ribbon">
+				<span>PREVIEW</span>
+			</div>
+		{% endblock preview_ribbon %}
+		{% endif %}
 
 		{% block body_js %}
 			{# JS files hosted externally #}
@@ -71,7 +80,7 @@
 						window.ICEKIT_SHARE_USERNAME = '{{ ICEKIT_SHARE_USERNAME }}';
 						window.ICEKIT_SHARE_KEY = '{{ ICEKIT_SHARE_KEY }}';
 					</script>
-					<script src="{% static "icekit/js/link_share.js" %}"></script>
+					<script src="{% static 'icekit/js/link_share.js' %}"></script>
 				{% endif %}
 			{% endcompress %}
 			{# Extra JS files - section/page specific, etc #}
