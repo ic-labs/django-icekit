@@ -31,14 +31,9 @@ These instructions presume you already have an ICEkit project set up.
     }
     ```
 * Run migrations.
-* In the admin, create a Layout that uses the "press releases: Press
-Release" template, and is available to the "Press release" content type.
-
-#### To install the (recommended) press release listing page
-
-* Add `press_releases.page` to `settings.INSTALLED_APPS`.
-* Run migrations.
 * In the admin, create a Layout that uses the "Page: Press release listing"
 template, and is available to the "Press release listing" content type.
 * You can now create and publish a "Press release listing" page, at the URL of
 your choosing.
+* In the admin, create a Layout that uses the "press releases: Press
+Release" template, and is available to the "Press release" content type.

@@ -2,11 +2,25 @@ import os
 from django.core.urlresolvers import NoReverseMatch
 from fluent_contents.models import ContentItem
 from fluent_pages.urlresolvers import app_reverse, PageTypeNotMounted
-from icekit.articles.abstract_models import PublishableArticle
+from icekit.abstract_models import FluentFieldsMixin
+from icekit.articles.abstract_models import ArticleBase
 from timezone import timezone
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
+from icekit.articles.abstract_models import ListingPage
+
+
+class PressReleaseListing(ListingPage):
+    class Meta:
+        verbose_name = "Press release listing"
+
+    def get_items(self): # items that are shown in the listing
+        return PressRelease.objects.published()
+
+    def get_visible_items(self): # items that can be previewed
+        return PressRelease.objects.visible()
+
 
 
 @python_2_unicode_compatible
@@ -20,7 +34,6 @@ class PressContact(models.Model):
         return "{} ({})".format(self.name, self.title)
 
 
-
 @python_2_unicode_compatible
 class PressReleaseCategory(models.Model):
     name = models.CharField(max_length=255)
@@ -31,8 +44,8 @@ class PressReleaseCategory(models.Model):
     class Meta:
         verbose_name_plural = "press release categories"
 
-
-class PressRelease(PublishableArticle):
+python_2_unicode_compatible
+class PressRelease(ArticleBase, FluentFieldsMixin):
 
     category = models.ForeignKey(
         PressReleaseCategory, null=True, blank=True)
@@ -43,6 +56,7 @@ class PressRelease(PublishableArticle):
         blank=True
     )
 
+    # TODO: consider intersection with publishing fields - are both necessary?
     created = models.DateTimeField(
         default=timezone.now, db_index=True, editable=False)
     modified = models.DateTimeField(blank=True, null=True, db_index=True)
@@ -59,36 +73,23 @@ class PressRelease(PublishableArticle):
         name, extension = os.path.splitext(self.print_version.name)
         return extension[1:]
 
-    def get_absolute_url(self):
-        """
-        Return the absolute URL for the press-release page.
-
-        If there is no URL pattern available it will return an empty
-        string.
-
-        :return: String.
-        """
+    @property
+    def parent(self):
         try:
-            # `app_reverse` is used here for compatibility with mounted
-            # `fluent_pages` URL structures.
-            return app_reverse(
-                'press-release-detail',
-                kwargs={'slug': -self.slug},
-                ignore_multiple=True
-            )
-        except (PageTypeNotMounted, NoReverseMatch):
-            return ''
+            return PressReleaseListing.objects.draft()[0]
+        except IndexError:
+            raise IndexError("You need to create a Press Release Listing Page")
 
 
 @python_2_unicode_compatible
 class ContactItem(ContentItem):
     """
-    Promotional item for a Contact.
+    A content item that links to a Press Contact.
     """
     contact = models.ForeignKey(PressContact)
 
-    help_me_out_here = \
-        'A content plugin that allows you to add contact information.'
+    help_text = \
+        'A content plugin that allows you to add press contact information.'
 
     class Meta:
         verbose_name = _('Contact Item')
