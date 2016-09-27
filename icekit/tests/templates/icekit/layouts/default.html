@@ -1,5 +1,7 @@
 {% load placeholder_tags fluent_contents_tags %}
 
-{% page_placeholder "main" role="m" %}
+{% block content %}
+    {% page_placeholder "main" role="m" %}
+{% endblock %}
 
 {% render_content_items_media %}

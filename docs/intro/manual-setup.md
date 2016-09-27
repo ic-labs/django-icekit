@@ -34,6 +34,15 @@ zlib needs to be installed from the `dupes` repository and force linked:
 You need to configure Elasticsearch, PostgreSQL and Redis to start
 automatically, or start them manually before you start the project.
 
+### Installing after an OS X upgrade
+
+If you experience errors running `./go.sh` after an upgrade to OS X try
+installing Xcode command-line tools:
+
+    xcode-select --install
+
+You may also need to re-install system packages.
+
 ## Run without Docker
 
 Change to the ICEkit project template (or an ICEkit project) directory:

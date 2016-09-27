@@ -95,7 +95,7 @@ def delete_test_image(image_field):
     # ensure all thumbs are deleted
     for filename in glob.glob(
         os.path.join(
-            settings.BASE_DIR, 'public', 'media', 'thumbs', image_field.name.split('/')[-1]
+            settings.MEDIA_ROOT, 'thumbs', image_field.name.split('/')[-1]
         ) + '*'
     ):
         os.unlink(filename)

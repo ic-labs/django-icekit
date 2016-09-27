@@ -61,6 +61,6 @@ class TestingUtils(WebTest):
         testing.delete_test_image(image_test.image)
         self.assertFalse(os.path.exists(image_path))
 
-        # Ensure that the delete function remove the thumbnail style images.
-        # Commenting out temporarily to make tests pass.
-        # self.assertFalse(os.path.exists(dst_thumb_file))
+        # Ensure that the delete_test_image function removes the thumbnail
+        # style images.
+        self.assertFalse(os.path.exists(dst_thumb_file))
