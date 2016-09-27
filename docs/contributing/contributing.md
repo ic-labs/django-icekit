@@ -53,6 +53,12 @@ port or a dynamic port:
 Read [Manual Setup](../intro/manual-setup.md) for more info on running an
 ICEkit project without Docker.
 
+# Installing the ICEkit dev version on an existing project
+
+    $ docker-compose exec django entrypoint.sh
+    $ pip install -e git+https://github.com/ic-labs/django-icekit.git#egg=django-icekit
+
+
 # Git branching
 
 We are using the [Gitflow] branching model. Basically:
