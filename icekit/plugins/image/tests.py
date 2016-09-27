@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django_dynamic_fixture import G
 from django_webtest import WebTest
 from easy_thumbnails.files import get_thumbnailer
+from icekit.utils.testing import get_test_image, setup_with_context_manager
 
 from . import models
 from icekit.models import Layout
@@ -38,6 +39,13 @@ class ImageItem(WebTest):
             models.Image
         )
 
+        self._image_name = setup_with_context_manager(
+            self, get_test_image(self.image_1.image.storage)
+        ) # context is automatically exited on teardown.
+
+        self.image_1.image = self._image_name
+        self.image_1.save()
+
         self.image_item_1 = fluent_contents.create_content_instance(
             models.ImageItem,
             self.page_1,
@@ -54,7 +62,6 @@ class ImageItem(WebTest):
         self.image_item_1.caption = test_text
         self.assertEqual(self.image_item_1.caption, test_text)
 
-    @skip("Test fixture doesn't use a real image, so the thumbnailer doesn't like it")
     def test_render(self):
         self.page_1.publish()
         response = self.app.get(self.page_1.publishing_linked.get_absolute_url())
@@ -67,4 +74,5 @@ class ImageItem(WebTest):
         self.assertTrue('<div class="image-container">' in response.content)
 
         thumb_url = get_thumbnailer(self.image_1.image)['content_image'].url
+        self.assertTrue(thumb_url)
         self.assertTrue('src="%s"' % thumb_url in response.content)
