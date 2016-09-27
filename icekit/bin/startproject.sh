@@ -6,11 +6,13 @@ DEST_DIR="$1"
 BRANCH="${2:-master}"
 
 if [[ -z "$DEST_DIR" ]];
+then
     >&2 echo 'You must specify a destination directory.'
     exit 1
 fi
 
 if [[ -d "$DEST_DIR" ]];
+then
     >&2 echo "Destination directory '$DEST_DIR' already exists."
     exit 1
 fi
@@ -36,6 +38,7 @@ cd "$DEST_DIR"
 
 curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.coveragerc"
 curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.dockerignore"
+curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.editorconfig"
 curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.gitignore"
 curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/bower.json"
 curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/docker-compose.override.yml"

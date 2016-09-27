@@ -83,7 +83,7 @@ Here's a rough guide:
 | Static               | Yes                     | No          | `FluentContentsPage`                                      | `FluentContentsPageAdmin`                      |
 | Static               | Yes                     | Yes         | `PublishableFluentContentsPage` (use `PlaceholderField`s) | `(FluentContentsPageAdmin, PublishingAdmin)`   |
 | Dynamic              | No                      | No          | `FluentFieldsMixin`                                       | `FluentLayoutsMixin`                           |
-| Dynamic              | No                      | Yes         | `(FluentFieldsMixin, PublishingModel)`                    | `(FluentLayoutsMixin, PublishingAdmin)`        |
+| Dynamic              | No                      | Yes         | `PublishableFluentContents`                               | `PublishableFluentContentsAdmin`               |
 | Dynamic              | Yes                     | No          | `AbstractUnpublishableLayoutPage`                         | `UnpublishableLayoutPageAdmin`                 |
 | Dynamic              | Yes                     | Yes         | `AbstractLayoutPage`                                      | `LayoutPageAdmin`                              |
 

@@ -5,7 +5,7 @@ from django.db import models
 
 from fluent_pages.extensions import page_type_pool
 
-from icekit import abstract_models
+from icekit import abstract_models, mixins
 from icekit.articles.abstract_models import PublishableArticle
 from icekit.page_types.layout_page.abstract_models import \
     AbstractLayoutPage, AbstractUnpublishableLayoutPage
@@ -19,15 +19,15 @@ class BaseModel(abstract_models.AbstractBaseModel):
     pass
 
 
-class FooWithLayout(abstract_models.LayoutFieldMixin):
+class FooWithLayout(mixins.LayoutFieldMixin):
     pass
 
 
-class BarWithLayout(abstract_models.LayoutFieldMixin):
+class BarWithLayout(mixins.LayoutFieldMixin):
     pass
 
 
-class BazWithLayout(abstract_models.LayoutFieldMixin):
+class BazWithLayout(mixins.LayoutFieldMixin):
     pass
 
 

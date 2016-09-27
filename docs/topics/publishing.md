@@ -41,6 +41,11 @@ To make a `FluentContentsPage` model publishable:
 * subclass your model from `icekit.publishing.models.PublishableFluentContentsPage`
 * subclass your model's admin from `FluentContentsPageAdmin` and `icekit.publishing.admin.PublishingAdmin`
 
+To make a fluent contents model (see [ContentsPlugins]) publishable:
+
+* subclass your model from `icekit.publishing.models.PublishableFluentContents`
+* subclass your model's admin from `icekit.publishing.admin.PublishableFluentContentsAdmin`
+
 #### Note: Validating slug uniqueness
 
 In publishable models, both the draft and published slugs will be identical,
@@ -118,6 +123,8 @@ published items for everyone else:
   happens to be a draft or published copy. This is basically equivalent to
   `get_visible() is not None`.
 
+#### Draft Content Protection
+
 If you forget to explicitly look up the visible version of publishable items,
 you will get the draft version instead and could risk displaying draft
 content to the public. To avoid this, the publishing implementation includes
@@ -125,6 +132,12 @@ a booby trap that should raise a `PublishingException` in this situation with
 a message like *"Illegal attempt to access 'title' on a DRAFT publishable
 item..."*. If you see that, check that you are obtaining the correct visible
 or published version of items.
+
+If you are sure you want to access draft attributes within a published context,
+you can use `get_draft_payload()` on the draft item, or add the attribute to
+`PUBLISHING_PERMITTED_ATTRS` on the model. `pk` is accessible by default, but
+most other attributes (particularly reverse relations) will need to be added
+to `PUBLISHING_PERMITTED_ATTRS` individually.
 
 For some situations you might need to get just the published or draft copies
 of items, such as for the search indexes we only ever want published copies
@@ -162,6 +175,21 @@ To check if a publishable item has been published, regardless of whether the
 item you are working with happens to be a draft or published copy, use the
 `has_been_published` property. This returns `True` if the item is itself
 published, or is a draft that has a published copy.
+
+#### Relating/retrieving items that are related to draft versions
+
+Since only draft versions are shown in the admin, and a published version isn't
+constantly available, it usually makes sense to to define relations to the draft
+version of an object.
+
+That means that a published version won't have incoming relations, and accessing
+reverse relations on the draft version will set off the booby trap, unless the
+`related_name` is added to `PUBLISHING_PERMITTED_ATTRS`.
+
+A pattern like this is normally safest (`pk` is a permitted attribute):
+
+    RelatedModel.objects.filter(fk_id=self.get_draft().pk)
+
 
 ### Data model
 
@@ -225,3 +253,5 @@ rendering related content for the public and for site admins:
 There has been an issue discovered where `ManyToMany` fields referring both
 ways on models have the many to many data cloned for published and
 unpublished objects. This is currently being worked on.
+
+[ContentsPlugins]: ../howto/plugins.md

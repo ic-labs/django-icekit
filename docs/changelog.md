@@ -1,6 +1,26 @@
 # Changelog
 
-## Next release
+## In development
+
+  * Fix bug where the content items and placeholders associated with a
+    fluent content model (other than a page) were not included in the
+    published copy.
+
+  * Provide `icekit.publishing.models.PublishableFluentContents` and
+    `icekit.publishing.admin.PublishableFluentContentsAdmin` as base
+    classes for fluent content models and admins, to help keep things
+    DRY.
+
+### Breaking changes
+
+  * Import model mixins `FluentFieldsMixin`, `LayoutFieldMixin`, and
+    `ReadabilityMixin` from `icekit.mixins` module instead of
+    `icekit.abstract_models`.
+
+  * Import admin mixin `FluentLayoutsMixin` from `icekit.admin_mixins`
+    module instead of `icekit.admin`.
+
+## 0.14.1 (26 September 2016)
 
   * ICEkit gets a facelift. Content editing now looks cleaner and easier to
     scan. Reordering items is animated, meaning it's easier to keep track of
@@ -12,8 +32,14 @@
     is useful to users who can't see them, though the `alt=` attribute is still
     always included in HTML.
 
-  * Fix a bug where looking for help_text in a placeholder slot that had no
-    manual configuration raised a 500, resulting in no layout data found
+  * Fix a bug where looking for `help_text` in a placeholder slot that had no
+    manual configuration raised a 500, resulting in no layout data found.
+
+  * Fix fatal error (typo) in `startproject.sh` script.
+
+  * Update `.editorconfig`, and add to project template.
+
+  * Tag Docker images during build on Travis CI for release versions.
 
 
 ## 0.14 (20 September 2016)

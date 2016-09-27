@@ -1,6 +1,7 @@
 [![Build Status](https://img.shields.io/travis/ic-labs/django-icekit.svg)](https://travis-ci.org/ic-labs/django-icekit)
 [![Coverage Status](https://img.shields.io/coveralls/ic-labs/django-icekit.svg)](https://coveralls.io/github/ic-labs/django-icekit)
 [![Documentation](https://readthedocs.org/projects/icekit/badge/)](https://icekit.readthedocs.io/)
+[![Requirements Status](https://img.shields.io/requires/github/ic-labs/django-icekit.svg)](https://requires.io/github/ic-labs/django-icekit/requirements/)
 [![Version](https://img.shields.io/pypi/v/django-icekit.svg)](https://pypi.python.org/pypi/django-icekit)
 
 [![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/)
@@ -27,10 +28,10 @@ If you're not ready for Docker, see [Manual Setup](docs/intro/manual-setup.md).
 
 ## 1. Create a new project
 
-    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) <project_name>
+    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) {project_name}
 
 This will create a new project from the ICEkit project template, in a directory
-named <project_name> in the current working directory.
+named `{project_name}` in the current working directory.
 
 NOTE: Windows users should run this command in Git Bash, which comes with
 [Git for Windows](https://git-for-windows.github.io/).
@@ -39,7 +40,7 @@ NOTE: Windows users should run this command in Git Bash, which comes with
 
 Build a Docker image:
 
-    $ cd <project_name>
+    $ cd {project_name}
     $ docker-compose build --pull
 
 Run a `django` container and all of its dependancies:

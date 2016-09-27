@@ -41,19 +41,24 @@ AUTHENTICATION_BACKENDS = dedupe_and_sort(AUTHENTICATION_BACKENDS, [
 ])
 
 # Sort installed apps to override collect static and template load order.
-INSTALLED_APPS = dedupe_and_sort(INSTALLED_APPS, [
-    # First our apps.
-    'icekit',
-    'icekit.dashboard',
-    'icekit.integration.reversion',
-    'polymorphic_auth',
+INSTALLED_APPS = dedupe_and_sort(
+    INSTALLED_APPS,
+    [
+        # First our apps.
+        'icekit',
+        'icekit.dashboard',
+        'icekit.integration.reversion',
+        'polymorphic_auth',
 
-    # Then 3rd party apps.
-    'fluent_suit',
-    'suit',
-    'flat',
-    'test_without_migrations',
-])
+        # Then 3rd party apps.
+        'fluent_suit',
+        'suit',
+        'flat',
+        'test_without_migrations',
+    ],
+     # These apps last:
+     []
+)
 
 # Sort middleware according to documentation.
 MIDDLEWARE_CLASSES = dedupe_and_sort(MIDDLEWARE_CLASSES, [

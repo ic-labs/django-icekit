@@ -32,9 +32,10 @@ class ThumbnailAdminMixin(object):
     """
 
     thumbnail_field = None
-    thumbnail_options = settings.THUMBNAIL_ALIASES[''].get(
-        'admin', {'size': (100, 100),}
-    )
+    try:
+        thumbnail_options = settings.THUMBNAIL_ALIASES['']['admin']
+    except (KeyError, AttributeError):
+        thumbnail_options = {'size': (150, 150),}
     thumbnail_show_exceptions = False
 
     def get_thumbnail_source(self, obj):
