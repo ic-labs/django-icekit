@@ -54,6 +54,11 @@ class DraftItemBoobyTrap(object):
         'pk',
         'language_code',
         'get_current_language',
+        # Fields that need to be accessible by any_urlfield
+        # TODO: consider either patching fetching published model into
+        # ICEkitURLField or ensure that draft and published objects always
+        # have the same URL (that of the published object).
+        'get_absolute_url',
     ]
 
     def __init__(self, payload):
