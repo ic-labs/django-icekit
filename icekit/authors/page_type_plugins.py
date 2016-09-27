@@ -8,4 +8,3 @@ from .models import AuthorListing
 @page_type_pool.register
 class AuthorListingPlugin(ListingPagePlugin):
     model = AuthorListing
-    model_admin = LayoutPageAdmin

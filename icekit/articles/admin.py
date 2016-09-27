@@ -1,8 +1,7 @@
 from django.contrib import admin
 from polymorphic.admin import PolymorphicChildModelFilter, \
-    PolymorphicParentModelAdmin
+    PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
 
-from icekit.admin import FluentLayoutsMixin
 from icekit.publishing.admin import PublishingAdmin
 
 class TitleSlugAdmin(admin.ModelAdmin):
@@ -23,7 +22,7 @@ class PolymorphicArticleParentAdmin(PolymorphicParentModelAdmin, ArticleAdminBas
     list_filter = (PolymorphicChildModelFilter,)
 
 
-class PolymorphicArticleChildAdmin(ArticleAdminBase):
+class PolymorphicArticleChildAdmin(PolymorphicChildModelAdmin, ArticleAdminBase):
     pass
 
 

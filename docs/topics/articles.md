@@ -36,6 +36,12 @@ When viewed, ListingPage lists the items returned by `get_items()`.
 `get_visible_items()` is necessary because an editor may wish to preview
 unpublished items (that aren't returned by `get_items()`)
 
+## Admins
+
+For normal Articles, inherit from `ArticleAdminBase`. For polymorphic articles,
+inherit from `PolymorphicArticleParentAdmin` and `PolymorphicArticleChildAdmin`
+as shown in the example below.
+
 ## Bare-bones example
 
 The following defines a minimal rich content Article, mounted under a
@@ -87,7 +93,6 @@ In `page_type_plugins.py`:
     @page_type_pool.register
     class ArticleCategoryPagePlugin(ListingPagePlugin):
         model = ArticleCategoryPage
-        model_admin = LayoutPageAdmin
 
 
 ## Bare-bones polymorphic example
