@@ -4,7 +4,9 @@
 
   * Preview pages are now visually highlighted, and have a different HTML title.
 
-  
+  * "Slideshow" is now renamed "Image Gallery" and there is a new Image Gallery
+    content plugin available (which renders a grid of thumbnails into a
+    lightbox).
 
 ## 0.15 (27 September 2016)
 
