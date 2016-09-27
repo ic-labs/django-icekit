@@ -1,12 +1,12 @@
-from icekit.abstract_models import FluentFieldsMixin
-from icekit.publishing.models import PublishingModel
-from django.db import models
+from urlparse import urljoin
 
-# TODO: this should ideally be in icekit.abstract_models, but doing so
-# creates circular import errors.
-class PublishableFluentModel(FluentFieldsMixin, PublishingModel):
-    class Meta:
-        abstract = True
+from django.template.response import TemplateResponse
+
+from icekit.publishing.models import PublishingModel
+from polymorphic.models import PolymorphicModel
+
+from icekit.page_types.layout_page.abstract_models import AbstractLayoutPage
+from django.db import models
 
 class TitleSlugMixin(models.Model):
     # TODO: this should perhaps become part of a wider ICEkit mixin that covers
@@ -22,12 +22,102 @@ class TitleSlugMixin(models.Model):
         return self.title
 
 
-class PublishableArticle(PublishableFluentModel, TitleSlugMixin):
-    '''
-    Basic Article type (ie that forms the basis of independent collections of
-    publishable things).
-    '''
-
+class ListingPage(AbstractLayoutPage):
+    """
+    A Page type that serves lists of things. Good for
+    e.g. PressReleaseListingPage or ArticleCategoryPage.
+    """
     class Meta:
         abstract = True
 
+    def get_items(self):
+        """
+        Get the items that are listed on this page.
+        Remember that incoming relations will be on the draft version of
+        the page. Do something like this:
+
+            unpublished_pk = self.get_draft().pk
+            return Article.objects.published().filter(parent_id=unpublished_pk)
+
+        Editors normally expect to only see published() items in a listing, not
+        visible() items, unless clearly marked as such.
+
+        :return: the items that are associated with this page
+        """
+        raise NotImplementedError(
+            "Please implement `get_items()` on your ListingPage model"
+        )
+
+
+    def get_visible_items(self):
+        """
+        Get all items that are associated with this page and can be previewed
+        by the user.
+        Again, incoming relations will be on the draft version of
+        the page. Do something like this:
+
+            unpublished_pk = self.get_draft().pk
+            return Article.objects.visible().filter(parent_id=unpublished_pk)
+
+        Editors normally expect to only see published() items in a listing, not
+        visible() items, unless clearly marked as such.
+
+        :return: the items that are associated with this page
+        """
+        raise NotImplementedError(
+            "Please implement `get_visible_items()` on your ListingPage model"
+        )
+
+class ArticleBase(PublishingModel, TitleSlugMixin):
+    """
+    Articles can be mounted into a publishable listing page,
+    which has the URL returned by `get_parent_url()`.
+
+    Subclasses should define a `parent` attribute, or override either
+    `get_parent_url()` or `get_absolute_url()`.
+
+    Subclasses should also define get_response for rendering itself, or
+    get_layout_template_name() in order to render Rich Content.
+    """
+
+    class Meta:
+        abstract = True
+        unique_together = (('slug', 'publishing_is_draft', 'parent'),)
+
+    def get_parent_url(self):
+        if not hasattr(self, 'parent'):
+            raise NotImplementedError("PublishableArticle subclasses need to implement `parent` or `get_parent_url`.")
+
+        parent = self.parent.get_published() or self.parent.get_draft()
+        return parent.get_absolute_url()
+
+    def get_absolute_url(self):
+        parent_url = self.get_parent_url()
+        return urljoin(parent_url, self.slug) + "/"
+
+    def is_suppressed_message(self):
+        if not self.parent.has_been_published:
+            return "This article's parent needs to be published before it " \
+                "can be viewed by the public"
+        return None
+
+    def get_response(self, request, parent, *args, **kwargs):
+        context = {
+            'page': self,
+            'title': self.title
+        }
+        try:
+            return TemplateResponse(
+                request,
+                self.get_layout_template_name(),
+                context
+            )
+        except AttributeError:
+            raise AttributeError("You need to define "
+                 "`get_layout_template_name()` on your `ArticleBase` model, "
+                 "or override `get_response()`")
+
+
+class PolymorphicArticleBase(PolymorphicModel, ArticleBase):
+    class Meta:
+        abstract = True
