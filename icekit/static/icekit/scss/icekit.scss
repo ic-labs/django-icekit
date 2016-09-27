@@ -1,0 +1,33 @@
+/*
+    Basic styles for ICEkit
+*/
+
+.preview-ribbon {
+    background-color: #00b3ee;
+    overflow: hidden;
+    white-space: nowrap;
+    position: absolute;
+    right: -50px;
+    top: 40px;
+
+    -webkit-transform: rotate(44deg);
+       -moz-transform: rotate(44deg);
+        -ms-transform: rotate(44deg);
+         -o-transform: rotate(44deg);
+            transform: rotate(44deg);
+
+    -webkit-box-shadow: 0 0 7px #2e383c;
+       -moz-box-shadow: 0 0 7px #2e383c;
+            box-shadow: 0 0 7px #2e383c;
+}
+
+.preview-ribbon a, .preview-ribbon span {
+    border: 1px solid #0f74a8;
+    color: #fff;
+    display: block;
+    font: bold 80% 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin: 1px 0;
+    padding: 8px 90px;
+    text-align: center;
+    text-decoration: none;
+}
