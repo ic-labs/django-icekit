@@ -1,18 +1,11 @@
 from django.contrib import admin
 
-from icekit.admin import FluentLayoutsMixin
-from icekit.publishing.admin import PublishingAdmin
-
-class PublishableFluentModelAdmin(PublishingAdmin, FluentLayoutsMixin):
-    """
-    Add publishing features for non-Page rich content models
-    """
-    pass
+from icekit.publishing.admin import PublishableFluentContentsAdmin
 
 
 class TitleSlugAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
 
 
-class PublishableArticleAdmin(PublishableFluentModelAdmin, TitleSlugAdmin):
+class PublishableArticleAdmin(PublishableFluentContentsAdmin, TitleSlugAdmin):
     pass

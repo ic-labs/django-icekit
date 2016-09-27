@@ -11,6 +11,8 @@ from fluent_contents.models import Placeholder
 from fluent_pages.models import UrlNode
 from fluent_pages.integration.fluent_contents import FluentContentsPage
 
+from icekit.mixins import FluentFieldsMixin
+
 from .managers import PublishingManager, PublishingUrlNodeManager
 from .middleware import is_draft_request_context
 from .utils import PublishingException, assert_draft
@@ -267,9 +269,9 @@ class PublishingModel(models.Model):
 
             # As it is a new object we need to clone each of the
             # translatable fields, placeholders and required relations.
-            self.clone_translations(publish_obj)
-            self.clone_placeholder(publish_obj)
-            self.clone_relations(publish_obj)
+            self.clone_parler_translations(publish_obj)
+            self.clone_fluent_placeholders_and_content_items(publish_obj)
+            self.clone_fluent_contentitems_m2m_relationships(publish_obj)
 
             # Extra relationship-cloning smarts
             publish_obj.publishing_clone_relations(self)
@@ -456,7 +458,7 @@ class PublishingModel(models.Model):
                 published_placeholder.pk = None
                 published_placeholder.save()
 
-    def clone_translations(self, dst_obj):
+    def clone_parler_translations(self, dst_obj):
         """
         Clone each of the translations from an object and relate
         them to another.
@@ -481,11 +483,10 @@ class PublishingModel(models.Model):
                 translation.master = dst_obj
                 translation.save()
 
-    def clone_placeholder(self, dst_obj):
+    def clone_fluent_placeholders_and_content_items(self, dst_obj):
         """
-        Clone each of the placeholder items.
+        Clone each `Placeholder` and its `ContentItem`s.
 
-        :param self: The object which does not get used...
         :param self: The object for which the placeholders are
         to be cloned from.
         :param dst_obj: The object which the cloned placeholders
@@ -503,7 +504,7 @@ class PublishingModel(models.Model):
             src_items = src_placeholder.get_content_items()
             src_items.copy_to_placeholder(dst_placeholder)
 
-    def clone_relations(self, dst_obj):
+    def clone_fluent_contentitems_m2m_relationships(self, dst_obj):
         """
         Find all MTM relationships on related ContentItem's and ensure the
         published M2M relationships directed back to the draft (src)
@@ -548,6 +549,12 @@ class PublishableFluentContentsPage(FluentContentsPage,
     @property
     def is_published(self):
         return not self.publishing_is_draft
+
+    class Meta:
+        abstract = True
+
+
+class PublishableFluentContents(FluentFieldsMixin, PublishingModel):
 
     class Meta:
         abstract = True
