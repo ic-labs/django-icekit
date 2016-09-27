@@ -6,6 +6,10 @@ test database and restores from `test_initial_data.sql` if available,
 
 ## Recipes
 
+### To run icekit tests
+
+    runtests.sh path/to/icekit/
+
 ### To run specific tests
 
     runtets.sh foo.bar:Baz.test_foo
