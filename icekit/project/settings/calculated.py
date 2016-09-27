@@ -126,9 +126,3 @@ if RAVEN_CONFIG.get('dsn'):
 if ENABLE_S3_MEDIA:
     DEFAULT_FILE_STORAGE = 'icekit.utils.storage.S3DefaultStorage'
     THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
-
-# SUPERVISOR ##################################################################
-
-SUPERVISOR.update({
-    'django': SUPERVISOR['django'].format(**locals()),
-})

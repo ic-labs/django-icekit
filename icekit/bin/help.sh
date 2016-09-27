@@ -52,15 +52,26 @@ Here is a list of frequently used commands you might want to run:
     runtests.sh [ARGS]
         Configure the environment and run the Django 'test' management command.
 
+        This will drop and recreate the test database and re-run the Django
+        'collectstatic' and 'compress' management commands for consistency.
+
+        Set 'QUICK=1' to reuse the test database and collected static and
+        compressed files.
+
+            # QUICK=1 runtests.sh
+
     setup-django.sh [COMMAND]
         Install Node modules, Bower components and Python requirements, create
         a database, apply Django migrations, and execute a command.
 
     setup-postgres.sh
         Create a PostgreSQL database with a name derived from the current Git
-        branch and project directory. Seed the new database it with data from
-        the 'SRC_PG*' environment variables, if defined. Drop and recreate the
-        database if 'SETUP_POSTGRES_FORCE' is defined.
+        branch and project directory.
+
+        Seed the new database it with data from the 'SRC_PG*' environment
+        variables, if defined.
+
+        Drop and recreate the database if 'SETUP_POSTGRES_FORCE' is defined.
 
     supervisorctl.sh [OPTIONS] [ACTION [ARGS]]
         Run 'supervisorctl'. When using Docker, use this to manage Gunicorn and

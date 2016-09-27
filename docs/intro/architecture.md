@@ -89,7 +89,7 @@ See the [Publishing] docs for an overview.
 ICEkit comes with an admin dashboard that allows you to prioritise major
 content types.
 
-<!-- ## Response Pages -->
+[//]: # (Response Pages)
 
 [django-fluent-contents]: https://github.com/edoburu/django-fluent-contents
 [django-fluent-pages]: https://github.com/edoburu/django-fluent-pages

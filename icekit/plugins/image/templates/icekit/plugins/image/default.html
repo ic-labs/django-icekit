@@ -1,13 +1,8 @@
-<figure class="image">
+{% load thumbnail %}
+{% thumbnail instance.image.image "content_image" as thumb %}
+<figure class="image" style="max-width: {{ thumb.width }}px;">
 	<div class="image-container">
-		<img
-			src="{{ instance.image.image.url }}"
-			alt="{{ instance.image.image.alt_text }}"
-		/>
+		<img src="{{ thumb.url }}" alt="{{ instance.image.alt_text }}" />
 	</div>
-	{% if instance.caption %}
-		<figcaption class="image-caption">
-			{{ instance.caption }}
-		</figcaption>
-	{% endif %}
+	{% include instance.caption_template %}
 </figure>

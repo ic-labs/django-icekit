@@ -4,7 +4,7 @@ Admin configuration for ``icekit`` app.
 
 # Define `list_display`, `list_filter` and `search_fields` for each model.
 # These go a long way to making the admin more usable.
-
+from django.conf import settings
 from django.conf.urls import url, patterns
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
@@ -147,12 +147,21 @@ class LayoutAdmin(admin.ModelAdmin):
             status = 404
         else:
             placeholders = layout.get_placeholder_data()
-
             status = 200
+
+            placeholders = [p.as_dict() for p in placeholders]
+
+            # inject placeholder help text, if any is set
+            for p in placeholders:
+                try:
+                    p['help_text'] = settings.FLUENT_CONTENTS_PLACEHOLDER_CONFIG.get(p['slot']).get('help_text')
+                except AttributeError:
+                    p['help_text'] = None
+
             json = {
                 'id': layout.id,
                 'title': layout.title,
-                'placeholders': [p.as_dict() for p in placeholders],
+                'placeholders': placeholders,
             }
 
         return JsonResponse(json, status=status)
