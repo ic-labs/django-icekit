@@ -47,6 +47,7 @@ INSTALLED_APPS += (
 
     # INCLUDED IN PROJECT TEMPLATE
     'articles',
+    'events',
 )
 
 MIDDLEWARE_CLASSES += (
