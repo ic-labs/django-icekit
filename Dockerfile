@@ -61,6 +61,7 @@ ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/project_template
 ENV PATH=/opt/django-icekit/icekit/bin:$PATH
 ENV PGHOST=postgres
 ENV PGUSER=postgres
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV REDIS_ADDRESS=redis:6379
 ENV SUPERVISORD_CONFIG_INCLUDE=supervisord-django.conf
 ENV WAITLOCK_ENABLE=1
