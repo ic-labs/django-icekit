@@ -72,6 +72,12 @@ else
     export PATH="$ICEKIT_VENV/bin:$PATH"
 fi
 
+# Change to the project directory, so Python can import project packages that
+# aren't editable installs and so we don't accidentally import the Docker image
+# version of ICEkit when an editable version is also installed in the Python
+# userbase directory.
+cd "$ICEKIT_PROJECT_DIR"
+
 # Set default base settings module.
 export BASE_SETTINGS_MODULE="${BASE_SETTINGS_MODULE:-develop}"
 
@@ -79,7 +85,7 @@ export BASE_SETTINGS_MODULE="${BASE_SETTINGS_MODULE:-develop}"
 export CPU_CORES=$(python -c 'import multiprocessing; print multiprocessing.cpu_count();')
 
 # Get absolute directory for the `icekit` package.
-export ICEKIT_DIR=$(python -c 'import icekit, os; print os.path.dirname(icekit.__file__);')
+export ICEKIT_DIR=$(python -c 'import icekit, os; print os.path.abspath(os.path.dirname(icekit.__file__));')
 
 # Get project name from the project directory.
 export ICEKIT_PROJECT_NAME=$(basename "$ICEKIT_PROJECT_DIR")

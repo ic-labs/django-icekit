@@ -31,7 +31,7 @@ INSTALLED_APPS += (
 ROOT_URLCONF = 'icekit.tests.urls'
 
 TEMPLATES_DJANGO['DIRS'].insert(
-    0, os.path.join(BASE_DIR, 'icekit', 'tests', 'templates')),
+    0, os.path.join(ICEKIT_DIR, 'tests', 'templates')),
 
 # ICEKIT ######################################################################
 
