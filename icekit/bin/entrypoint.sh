@@ -44,13 +44,16 @@ if [[ -n "${DOCKER+1}" ]]; then
     # For some reason pip allows us to install sdist packages, but not editable
     # packages, when this directory doesn't exist. So make sure it does.
     mkdir -p "$PYTHONUSERBASE/lib/python2.7/site-packages"
+
+    # Add userbase bin directory to PATH.
+    export PATH="$PYTHONUSERBASE/bin:$PATH"
 else
     # When run via 'go.sh' (no Docker), we need to use a virtualenv for greater
     # isolation from system site packages, and we also verify that dependencies
     # are installed.
 
     # Fail loudly when required environment variables are missing.
-    for var in ICEKIT_DIR ICEKIT_PROJECT_DIR ICEKIT_VENV; do
+    for var in ICEKIT_PROJECT_DIR ICEKIT_VENV; do
         eval [[ -z \${$var+1} ]] && {
             >&2 echo "ERROR: Missing environment variable: $var"
             exit 1
@@ -65,8 +68,8 @@ else
         }
     done
 
-    # Add ICEkit and virtualenv bin directories to PATH.
-    export PATH="$ICEKIT_DIR/bin:$ICEKIT_VENV/bin:$PATH"
+    # Add virtualenv bin directory to PATH.
+    export PATH="$ICEKIT_VENV/bin:$PATH"
 fi
 
 # Set default base settings module.
@@ -75,11 +78,14 @@ export BASE_SETTINGS_MODULE="${BASE_SETTINGS_MODULE:-develop}"
 # Get number of CPU cores, so we know how many processes to run.
 export CPU_CORES=$(python -c 'import multiprocessing; print multiprocessing.cpu_count();')
 
+# Get absolute directory for the `icekit` package.
+export ICEKIT_DIR=$(python -c 'import icekit, os; print os.path.dirname(icekit.__file__);')
+
 # Get project name from the project directory.
 export ICEKIT_PROJECT_NAME=$(basename "$ICEKIT_PROJECT_DIR")
 
-# Add project bin directory to PATH.
-export PATH="$ICEKIT_PROJECT_DIR/bin:$PATH"
+# Add ICEkit project and ICEkit bin directories to PATH.
+export PATH="$ICEKIT_PROJECT_DIR/bin:$ICEKIT_DIR/bin:$PATH"
 
 # Configure Python.
 export PIP_DISABLE_PIP_VERSION_CHECK=on
