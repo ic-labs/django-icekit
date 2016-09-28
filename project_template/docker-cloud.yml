@@ -48,7 +48,7 @@ celeryflower:
   command: setup-django.sh celeryflower.sh
   deployment_strategy: high_availability
   environment:
-    VIRTUAL_HOST: flower.*
+    VIRTUAL_HOST: flower.project_template.*
     VIRTUAL_HOST_WEIGHT: 1
   environment:
     BASE_SETTINGS_MODULE: production
@@ -92,6 +92,7 @@ django:
     # SENTRY_DSN:
     # SITE_DOMAIN:
     # SITE_NAME:
+    VIRTUAL_HOST: project_template.*
   expose:
     - "8000"
   image: interaction/project_template:master
