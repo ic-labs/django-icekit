@@ -44,9 +44,6 @@ if [[ -n "${DOCKER+1}" ]]; then
     # For some reason pip allows us to install sdist packages, but not editable
     # packages, when this directory doesn't exist. So make sure it does.
     mkdir -p "$PYTHONUSERBASE/lib/python2.7/site-packages"
-
-    # Add userbase bin directory to PATH.
-    export PATH="$PYTHONUSERBASE/bin:$PATH"
 else
     # When run via 'go.sh' (no Docker), we need to use a virtualenv for greater
     # isolation from system site packages, and we also verify that dependencies
