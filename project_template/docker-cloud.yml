@@ -20,7 +20,7 @@ celery:
   image: interaction/project_template:master
   links:
     - elasticsearch
-    - postgres
+    # - postgres
     - redis
   volumes_from:
     - django
@@ -104,6 +104,7 @@ django:
   links:
     - elasticsearch
     - celery
+    # - postgres
     - redis
 elasticsearch:
   image: interaction/elasticsearch-icu:1
@@ -117,8 +118,8 @@ haproxy:
     - "443:443"
   roles:
     - global
-postgres:
-  image: onjin/alpine-postgres:9.4
+# postgres:
+#   image: onjin/alpine-postgres:9.4
 redis:
   command: redis-server --appendonly yes
   image: redis:3-alpine
