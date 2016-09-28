@@ -22,8 +22,6 @@ celery:
     - elasticsearch
     # - postgres
     - redis
-  volumes_from:
-    - django
 celerybeat:
   command: setup-django.sh celerybeat.sh
   deployment_strategy: high_availability
@@ -46,8 +44,6 @@ celerybeat:
   image: interaction/project_template:master
   links:
     - redis
-  volumes_from:
-    - django
 celeryflower:
   command: setup-django.sh celeryflower.sh
   deployment_strategy: high_availability
@@ -71,12 +67,10 @@ celeryflower:
     # SITE_DOMAIN:
     # SITE_NAME:
   expose:
-    - 5555
+    - "5555"
   image: interaction/project_template:master
   links:
     - redis
-  volumes_from:
-    - django
 django:
   command: setup-django.sh supervisord.sh
   deployment_strategy: high_availability
@@ -99,7 +93,7 @@ django:
     # SITE_DOMAIN:
     # SITE_NAME:
   expose:
-    - 8000
+    - "8000"
   image: interaction/project_template:master
   links:
     - elasticsearch
