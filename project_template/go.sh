@@ -20,7 +20,7 @@ if [[ ! -d "$ICEKIT_VENV" ]]; then
     virtualenv "$ICEKIT_VENV"
 fi
 
-# Install ICEKit project.
+# Install ICEKit.
 if [[ -z $("$ICEKIT_VENV/bin/pip" freeze | grep django-icekit) ]]; then
     "$ICEKIT_VENV/bin/pip" install -r requirements-icekit.txt
 fi
