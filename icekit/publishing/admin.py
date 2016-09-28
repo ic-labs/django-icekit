@@ -238,10 +238,16 @@ class _PublishingHelpersMixin(object):
         if hasattr(obj, 'get_real_instance'):
             obj = obj.get_real_instance()
 
+        try:
+            object_url = obj.get_absolute_url()
+        except NoReverseMatch:
+            object_url = ''
+
         template_name = 'admin/publishing/_change_list_publishing_column.html'
         t = loader.get_template(template_name)
         c = Context({
             'object': obj,
+            'object_url': object_url,
             'has_publish_permission':
                 self.has_publish_permission(self.request, obj),
             'img_path': settings.STATIC_URL + 'admin/img/',
@@ -465,6 +471,11 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
             else:
                 context['has_publish_permission'] = True
 
+                try:
+                    object_url = obj.get_absolute_url()
+                except NoReverseMatch:
+                    object_url = ''
+
                 # If the user has publishing permission and if there are
                 # changes which are to be published show the publish button
                 # with relevant URL.
@@ -495,6 +506,8 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
                     revert_btn = reverse(self.revert_reverse, args=(obj.pk, ))
 
                 context.update({
+                    'object': obj,
+                    'object_url': object_url,
                     'is_dirty': obj.is_dirty,
                     'has_been_published': obj.has_been_published,
                     'publish_btn': publish_btn,

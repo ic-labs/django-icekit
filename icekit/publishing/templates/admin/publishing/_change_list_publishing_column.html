@@ -1,28 +1,26 @@
 {% load i18n static publishing_tags %}
 <label class="publishing-links">
-    {% with object.get_absolute_url as url %}
-        {% if url %}
-            {% if object.has_been_published %}
-                {% if object.is_dirty %}
-                    <a target="_blank" href="{{ url|get_draft_url }}" title="Preview draft version"><i class="fa fa-circle-o"></i></a>
-                {% else %}
-                    <i class="fa fa-circle-o" style="visibility: hidden;"></i>
-                {% endif %}
-                <a target="_blank" href="{{ url }}" title="{% if object.is_suppressed_message %}{{ object.is_suppressed_message }}{%  else %}View published{% if not object.is_dirty %}/latest{% endif %} version{% endif %}" {% if object.is_suppressed_message %}class="suppressed"{% endif %}><i class="fa fa-circle"></i></a>
+    {% if object_url %}
+        {% if object.has_been_published %}
+            {% if object.is_dirty %}
+                <a target="_blank" href="{{ object_url|get_draft_url }}" title="Preview draft version"><i class="fa fa-circle-o"></i></a>
             {% else %}
-                <a target="_blank" href="{{ url|get_draft_url }}" title="Preview draft version"><i class="fa fa-circle-o"></i></a>
+                <i class="fa fa-circle-o" style="visibility: hidden;"></i>
             {% endif %}
+            <a target="_blank" href="{{ object_url }}" title="{% if object.is_suppressed_message %}{{ object.is_suppressed_message }}{%  else %}View published{% if not object.is_dirty %}/latest{% endif %} version{% endif %}" {% if object.is_suppressed_message %}class="suppressed"{% endif %}><i class="fa fa-circle"></i></a>
         {% else %}
-            {% if object.has_been_published %}
-                {% if object.is_dirty %}
-                    <i class="fa fa-circle-o"></i>
-                {% else %}
-                    <i class="fa fa-circle-o" style="visibility: hidden;"></i>
-                {% endif %}
-                <i class="fa fa-circle"></i>
-            {% else %}
-                <i class="fa fa-circle-o"></i>
-            {% endif %}
+            <a target="_blank" href="{{ object_url|get_draft_url }}" title="Preview draft version"><i class="fa fa-circle-o"></i></a>
         {% endif %}
-   {% endwith %}
+    {% else %}
+        {% if object.has_been_published %}
+            {% if object.is_dirty %}
+                <i class="fa fa-circle-o"></i>
+            {% else %}
+                <i class="fa fa-circle-o" style="visibility: hidden;"></i>
+            {% endif %}
+            <i class="fa fa-circle"></i>
+        {% else %}
+            <i class="fa fa-circle-o"></i>
+        {% endif %}
+    {% endif %}
 </label>
