@@ -17,7 +17,7 @@ celery:
     # SENTRY_DSN:
     # SITE_DOMAIN:
     # SITE_NAME:
-  image: interaction/icekit:master
+  image: interaction/project_template:master
   links:
     - elasticsearch
     - postgres
@@ -43,7 +43,7 @@ celerybeat:
     # SENTRY_DSN:
     # SITE_DOMAIN:
     # SITE_NAME:
-  image: interaction/icekit:master
+  image: interaction/project_template:master
   links:
     - redis
   volumes_from:
@@ -72,7 +72,7 @@ celeryflower:
     # SITE_NAME:
   expose:
     - 5555
-  image: interaction/icekit:master
+  image: interaction/project_template:master
   links:
     - redis
   volumes_from:
@@ -100,7 +100,7 @@ django:
     # SITE_NAME:
   expose:
     - 8000
-  image: interaction/icekit:master
+  image: interaction/project_template:master
   links:
     - elasticsearch
     - celery
