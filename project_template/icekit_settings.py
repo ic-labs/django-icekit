@@ -43,6 +43,7 @@ INSTALLED_APPS += (
     # INSTALLED BY SETUP.PY
     'sponsors',
     'press_releases',
+    'icekit_events',
 
     # INCLUDED IN PROJECT TEMPLATE
     'articles',

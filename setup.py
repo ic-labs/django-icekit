@@ -151,9 +151,9 @@ setuptools.setup(
             'WebTest',
         ],
         'glamkit': [
-            # 'glamkit-events', #SOON...
             'glamkit-sponsors',
             'icekit-press-releases',
+            'icekit-events',
         ]
     },
     **kwargs
