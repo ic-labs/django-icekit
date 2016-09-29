@@ -31,11 +31,10 @@ celeryflower:
   command: setup-django.sh celeryflower.sh
   deployment_strategy: high_availability
   environment:
-    VIRTUAL_HOST: flower.project_template.*
-    VIRTUAL_HOST_WEIGHT: 1
-  environment:
     DOTENV: production
+    FORCE_SSL: yes
     TRANSCRYPT_PASSWORD:
+    VIRTUAL_HOST: flower.project_template.*,https://flower.project_template.*
   expose:
     - "5555"
   image: interaction/project_template:master
@@ -50,8 +49,9 @@ django:
   deployment_strategy: high_availability
   environment:
     DOTENV: production
-    VIRTUAL_HOST: project_template.*
+    FORCE_SSL: yes
     TRANSCRYPT_PASSWORD:
+    VIRTUAL_HOST: project_template.*,https://project_template.*
   expose:
     - "8000"
   image: interaction/project_template:master
