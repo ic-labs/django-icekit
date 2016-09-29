@@ -1,17 +1,8 @@
-import dotenv
 import importlib
 import os
 import sys
 
 from icekit.utils.sequences import dedupe_and_sort
-
-# Load local dotenv file.
-dotenv.load_dotenv(os.path.join(
-    os.environ['ICEKIT_PROJECT_DIR'], '.env.local'))
-
-# Load environment specific dotenv file.
-dotenv.load_dotenv(os.path.join(
-    os.environ['ICEKIT_PROJECT_DIR'], '.env.%s' % os.environ.get('DOTENV')))
 
 # Emulate `from ... import *` with base settings module from environment.
 BASE_SETTINGS_MODULE = os.environ.setdefault('BASE_SETTINGS_MODULE', 'base')

@@ -8,6 +8,15 @@ EOF
 
 set -e
 
+# Source dotenv files.
+set -o allexport
+for filename in ".env.$DOTENV" .env.local; do
+    if [[ -f "$ICEKIT_PROJECT_DIR/$filename" ]]; then
+        source "$ICEKIT_PROJECT_DIR/$filename"
+    fi
+done
+set +o allexport
+
 if [[ -n "${DOCKER+1}" ]]; then
     # In our Docker image, the only system site packages are the ones that we
     # have installed, so we do not need a virtualenv for isolation. Using an
