@@ -14,6 +14,8 @@ celery:
     - elasticsearch
     # - postgres
     - redis
+  tags:
+    - production
 celerybeat:
   command: setup-django.sh celerybeat.sh
   deployment_strategy: high_availability
@@ -28,6 +30,8 @@ celerybeat:
   image: interaction/project_template:master
   links:
     - redis
+  tags:
+    - production
 celeryflower:
   command: setup-django.sh celeryflower.sh
   deployment_strategy: high_availability
@@ -47,6 +51,8 @@ celeryflower:
   image: interaction/project_template:master
   links:
     - redis
+  tags:
+    - production
 django:
   command: setup-django.sh supervisord.sh
   deployment_strategy: high_availability
@@ -67,8 +73,12 @@ django:
     - celery
     # - postgres
     - redis
+  tags:
+    - production
 elasticsearch:
   image: interaction/elasticsearch-icu:1
+  tags:
+    - production
 haproxy:
   image: dockercloud/haproxy:1.5.1
   links:
@@ -79,8 +89,14 @@ haproxy:
     - "443:443"
   roles:
     - global
+  tags:
+    - production
 # postgres:
 #   image: onjin/alpine-postgres:9.4
+#   tags:
+#     - production
 redis:
   command: redis-server --appendonly yes
   image: redis:3-alpine
+  tags:
+    - production
