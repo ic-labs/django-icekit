@@ -67,6 +67,11 @@ else
 
     # Add virtualenv bin directory to PATH.
     export PATH="$ICEKIT_VENV/bin:$PATH"
+
+    # Configure Python.
+    export PIP_DISABLE_PIP_VERSION_CHECK=on
+    export PYTHONHASHSEED=random
+    export PYTHONWARNINGS=ignore
 fi
 
 # Change to the project directory, so Python can import project packages that
@@ -90,11 +95,8 @@ export ICEKIT_PROJECT_NAME=$(basename "$ICEKIT_PROJECT_DIR")
 # Add ICEkit project and ICEkit bin directories to PATH.
 export PATH="$ICEKIT_PROJECT_DIR/bin:$ICEKIT_DIR/bin:$PATH"
 
-# Configure Python.
-export PIP_DISABLE_PIP_VERSION_CHECK=on
-export PYTHONHASHSEED=random
+# Add project directory to PYTHONPATH.
 export PYTHONPATH="$ICEKIT_PROJECT_DIR:$PYTHONPATH"
-export PYTHONWARNINGS=ignore
 
 # Derive 'PGDATABASE' from 'ICEKIT_PROJECT_NAME' and git branch or
 # 'BASE_SETTINGS_MODULE', if not already defined.
