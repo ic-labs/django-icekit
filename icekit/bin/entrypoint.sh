@@ -10,11 +10,9 @@ set -e
 
 # Source dotenv files.
 set -o allexport
-for filename in ".env.$DOTENV" .env.local; do
-    if [[ -f "$ICEKIT_PROJECT_DIR/$filename" ]]; then
-        source "$ICEKIT_PROJECT_DIR/$filename"
-    fi
-done
+if [[ -f "$ICEKIT_PROJECT_DIR/.env.${DOTENV:-local}" ]]; then
+    source "$ICEKIT_PROJECT_DIR/.env.${DOTENV:-local}"
+fi
 set +o allexport
 
 if [[ -n "${DOCKER+1}" ]]; then
