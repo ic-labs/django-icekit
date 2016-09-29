@@ -104,6 +104,9 @@ if [[ -z "$PGDATABASE" ]]; then
     if [[ -d .git ]]; then
         export PGDATABASE="${ICEKIT_PROJECT_NAME}_$(git rev-parse --abbrev-ref HEAD | sed 's/[^0-9A-Za-z]/_/g')"
         echo "Derived database name '$PGDATABASE' from 'ICEKIT_PROJECT_NAME' environment variable and git branch."
+    elif [[ -n "$DOTENV" ]]; then
+        export PGDATABASE="${ICEKIT_PROJECT_NAME}_$DOTENV"
+        echo "Derived database name '$PGDATABASE' from 'ICEKIT_PROJECT_NAME' and 'DOTENV' environment variables."
     elif [[ -n "$BASE_SETTINGS_MODULE" ]]; then
         export PGDATABASE="${ICEKIT_PROJECT_NAME}_$BASE_SETTINGS_MODULE"
         echo "Derived database name '$PGDATABASE' from 'ICEKIT_PROJECT_NAME' and 'BASE_SETTINGS_MODULE' environment variables."
