@@ -569,6 +569,11 @@ ICEKIT = {
             os.path.join(ICEKIT_DIR, 'layouts/templates'),
             'icekit/layouts',
         ),
+        (
+            SITE_NAME,
+            os.path.join(PROJECT_DIR, 'templates'),
+            'layouts',
+        ),
     ),
 }
 
