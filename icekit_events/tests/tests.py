@@ -703,6 +703,8 @@ class TestEventModel(TestCase):
     def test_event_without_occurrences(self):
         event = G(models.Event)
         self.assertEqual(0, event.occurrences.all().count())
+        self.assertEqual(
+            (None, None), event.get_occurrences_range())
 
 
 class TestEventRepeatsGeneratorModel(TestCase):
@@ -979,6 +981,12 @@ class TestEventOccurrences(TestCase):
             end = first_occurrence.end + timedelta(days=days_hence)
             self.assertTrue(end in occurrence_ends,
                             "Missing end time %d days hence" % days_hence)
+        # Confirm Event correctly returns first & last occurrences
+        self.assertEqual(
+            self.start, event.get_occurrences_range()[0].start)
+        self.assertEqual(
+            self.end + timedelta(days=19),
+            event.get_occurrences_range()[1].end)
 
     def test_limited_daily_repeating_occurrences(self):
         event = G(models.Event)

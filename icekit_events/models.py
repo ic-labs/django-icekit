@@ -21,6 +21,7 @@ from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
 from polymorphic_tree.models import PolymorphicModel, PolymorphicTreeForeignKey
 from timezone import timezone
 
+from icekit.fields import ICEkitURLField
 from icekit.publishing.models import PublishingModel
 from icekit.publishing.middleware import is_draft_request_context
 
@@ -200,6 +201,25 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
         help_text=_('Show this event in the public calendar'),
     )
 
+    human_dates = models.TextField(
+        blank=True,
+        help_text=_('Describe event dates in humane language.'),
+    )
+    human_times = models.TextField(
+        blank=True,
+        help_text=_('Describe event times in humane language.'),
+    )
+    special_instructions = models.TextField(
+        blank=True,
+        help_text=_('Describe special instructions for attending event.'),
+    )
+    attendance_url = ICEkitURLField(
+        blank=True,
+        null=True,
+        help_text=_('The URL where visitors can arrange to attend an event'
+                    ' by purchasing tickets or RSVPing.')
+    )
+
     class Meta:
         abstract = True
         ordering = ('title', 'pk')
@@ -343,6 +363,34 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
             generator.pk = None
             generator.event = dst_obj
             generator.save()
+
+    def get_occurrences_range(self):
+        """
+        Return the first and last chronological `Occurrence` for this event.
+        """
+        first = self.occurrences.order_by('start').first()
+        last = self.occurrences.order_by('-end').first()
+        return (first, last)
+
+    def describe_dates_range(self, date_format='%Y-%m-%d'):
+        if self.human_dates:
+            return self.human_dates
+        else:
+            first, last = self.get_occurrences_range()
+            return ' to '.join([
+                first.start.strftime(date_format),
+                last.end.strftime(date_format)
+            ])
+
+    def describe_times_range(self, time_format='%H:%M:%S'):
+        if self.human_times:
+            return self.human_times
+        else:
+            first, last = self.get_occurrences_range()
+            return ' to '.join([
+                first.start.strftime(time_format),
+                last.end.strftime(time_format)
+            ])
 
 
 class Event(AbstractEvent):

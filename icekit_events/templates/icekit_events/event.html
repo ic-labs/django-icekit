@@ -6,6 +6,16 @@
 	</p>
 
 	<h1>{{ event.title }}</h1>
+
+	<p>Dates: {{ event.describe_dates_range }}</p>
+	<p>Time: {{ event.describe_times_range }}</p>
+	{% if event.special_instructions %}
+		<p>Special instructions: {{ event.special_instructions }}</p>
+	{% endif %}
+	{% if event.attendance_url %}
+		<p><a href="{{ event.attendance_url }}">Arrange to attend</a></p>
+	{% endif %}
+
 	<h2>Occurences</h2>
 	<ul>
 	{% for occurrence in event.occurrences.all %}
