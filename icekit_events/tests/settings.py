@@ -22,6 +22,10 @@ DATABASES = {
 DEBUG = True
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+SITE_DOMAIN = SITE_NAME = 'localhost'
+SITE_PORT = '8080'
+SITE_ID = 1
+
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,6 +41,9 @@ INSTALLED_APPS = (
     'model_settings',
     'polymorphic',
     'compressor',
+
+    # Test ICEKit pages etc
+    'django.contrib.sites',
 )
 
 MIDDLEWARE_CLASSES = (
