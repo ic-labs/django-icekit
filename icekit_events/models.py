@@ -22,6 +22,7 @@ from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
 
 from polymorphic.models import PolymorphicModel
 
+from icekit.articles.abstract_models import ListingPage
 from icekit.fields import ICEkitURLField
 from icekit.publishing.models import PublishingModel
 from icekit.publishing.middleware import is_draft_request_context
@@ -731,6 +732,14 @@ class Occurrence(AbstractBaseModel):
             self.original_end = self.end
         super(Occurrence, self).save(*args, **kwargs)
 
+    # TODO Return __str__ as title for now, improve it later
+    def title(self):
+        return unicode(self)
+
+    def get_absolute_url(self):
+        return reverse('icekit_events_occurrence_detail',
+                       args=(self.event.pk, self.pk,))
+
 
 def get_occurrence_times_for_event(event):
     """
@@ -746,6 +755,28 @@ def get_occurrence_times_for_event(event):
         occurrences_starts.add(original_start or start)
         occurrences_ends.add(original_end or end)
     return occurrences_starts, occurrences_ends
+
+
+class AbstractEventListingPage(ListingPage):
+
+    class Meta:
+        abstract = True
+        verbose_name = "Event Listing"
+
+    def _occurrences_on_date(self, request):
+        try:
+            date_param = request.GET['date']
+            date = datetime.strptime(date_param, '%Y-%m-%d')
+        except:
+            date = datetime.utcnow()
+        return Occurrence.objects \
+            .within(date, date + timedelta(days=1))
+
+    def get_items(self):
+        return self._occurrences_on_date(self._plugin_request).visible()
+
+    def get_visible_items(self):
+        return self._occurrences_on_date(self._plugin_request).visible()
 
 
 def regenerate_event_occurrences(sender, instance, **kwargs):
