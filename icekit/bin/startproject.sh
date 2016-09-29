@@ -7,14 +7,14 @@ BRANCH="${2:-master}"
 
 if [[ -z "$DEST_DIR" ]];
 then
-    >&2 echo 'You must specify a destination directory.'
-    exit 1
+	>&2 echo 'You must specify a destination directory.'
+	exit 1
 fi
 
 if [[ -d "$DEST_DIR" ]];
 then
-    >&2 echo "Destination directory '$DEST_DIR' already exists."
-    exit 1
+	>&2 echo "Destination directory '$DEST_DIR' already exists."
+	exit 1
 fi
 
 DEST_DIR_BASENAME="$(basename $DEST_DIR)"
@@ -29,8 +29,8 @@ read -p 'Press CTRL-C to abort or any other key to continue...'
 echo
 
 if [[ -z $(which wget) ]]; then
-    echo "'wget' is not available. Please install it try again."
-    exit 1
+	echo "'wget' is not available. Please install it try again."
+	exit 1
 fi
 
 mkdir -p "$DEST_DIR"
@@ -70,22 +70,22 @@ sed -e "s/-e ../django-icekit/" -i '' requirements-icekit.txt
 sed -e "s/:local/:master/" -i '' Dockerfile
 
 if [[ -n $(which git) ]]; then
-    echo
-    read -p 'Would you like to initialize a Git repository for your new project and create an initial commit? (Y/n) ' -n 1 -r
-    echo
-    if [[ "${REPLY:-y}" =~ ^[Yy]$ ]]; then
-        git init
-        git add -A
-        git add -f .env.local icekit_settings.py
-        git commit -m 'Initial commit.'
-    fi
+	echo
+	read -p 'Would you like to initialize a Git repository for your new project and create an initial commit? (Y/n) ' -n 1 -r
+	echo
+	if [[ "${REPLY:-y}" =~ ^[Yy]$ ]]; then
+		git init
+		git add -A
+		git add -f .env.local icekit_settings.py
+		git commit -m 'Initial commit.'
+	fi
 fi
 
 cat <<EOF
 
 All done! What now? First, change to the project directory:
 
-    $ cd ${DEST_DIR}
+	$ cd ${DEST_DIR}
 
 # Run with Docker
 
@@ -101,28 +101,28 @@ If you haven't already, go install Docker:
 
 Build a Docker image:
 
-    $ docker-compose build --pull
+	$ docker-compose build --pull
 
 Run a 'django' container and all of its dependancies:
 
-    $ docker-compose run --rm --service-ports django
+	$ docker-compose run --rm --service-ports django
 
 Create a superuser account:
 
-    # manage.py createsuperuser
+	# manage.py createsuperuser
 
 Run the Django dev server:
 
-    # runserver.sh
+	# runserver.sh
 
 Open the site in a browser:
 
-    http://localhost:8000
+	http://localhost:8000
 
 When you're done, exit the container and stop all of its dependencies:
 
-    # exit
-    $ docker-compose stop
+	# exit
+	$ docker-compose stop
 
 Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/${BRANCH}/docs/docker-quick-start.md)
 guide for more info on running an ICEkit project with Docker.

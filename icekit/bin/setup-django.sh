@@ -10,7 +10,7 @@ EOF
 set -e
 
 if [[ -n "$WAITLOCK_ENABLE" ]]; then
-    cat <<EOF
+	cat <<EOF
 #
 # Do not be alarmed if you see "Waiting to acquire lock for command:" for
 # several minutes at a time. It might seem like nothing is happening, but the
