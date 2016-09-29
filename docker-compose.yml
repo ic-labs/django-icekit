@@ -15,7 +15,7 @@ services:
       BASE_SETTINGS_MODULE: develop
       MASTER_PASSWORD: # Get from environment
       TERM: # Get from environment
-    image: interaction/icekit:latest
+    image: interaction/icekit:local
     tmpfs:
       - /tmp
     volumes:

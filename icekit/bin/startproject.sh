@@ -63,8 +63,9 @@ touch requirements.txt
 # Find and replace 'project_template' with destination directory basename.
 find . -type f -exec sed -e "s/project_template/$DEST_DIR_BASENAME/g" -i '' {} \;
 
-# Replace editable with package requirement.
+# Use release versions of ICEkit.
 sed -e "s/-e ../django-icekit/" -i '' requirements-icekit.txt
+sed -e "s/:local/:master/" -i '' Dockerfile
 
 if [[ -n $(which git) ]]; then
     echo
