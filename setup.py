@@ -70,6 +70,7 @@ setuptools.setup(
         'html5lib==0.999',
         'nltk',
         'Pillow',
+        'python-dotenv',
         'requests',
         'unidecode',
     ],

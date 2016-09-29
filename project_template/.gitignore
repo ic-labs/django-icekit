@@ -6,9 +6,11 @@
 **/.DS_Store
 **/npm-debug.log
 **/requirements-local.txt
+/.env.local
 /.git/
 /.idea/
 /bower_components/
+/icekit_settings_local.py
 /node_modules/
 /static_root/
 /var/
