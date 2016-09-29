@@ -3,20 +3,12 @@ celery:
   deployment_strategy: high_availability
   environment:
     BASE_SETTINGS_MODULE: production
-    # EMAIL_HOST:
+    DOTENV: production
     # EMAIL_HOST_PASSWORD:
-    # EMAIL_HOST_USER:
-    # MEDIA_AWS_ACCESS_KEY_ID:
+    # MASTER_PASSWORD:
     # MEDIA_AWS_SECRET_ACCESS_KEY:
-    # MEDIA_AWS_STORAGE_BUCKET_NAME:
-    # PGDATABASE:
-    # PGHOST:
     # PGPASSWORD:
-    # PGPORT:
-    # PGUSER:
     # SENTRY_DSN:
-    # SITE_DOMAIN:
-    # SITE_NAME:
   image: interaction/project_template:master
   links:
     - elasticsearch
@@ -27,20 +19,12 @@ celerybeat:
   deployment_strategy: high_availability
   environment:
     BASE_SETTINGS_MODULE: production
-    # EMAIL_HOST:
+    DOTENV: production
     # EMAIL_HOST_PASSWORD:
-    # EMAIL_HOST_USER:
-    # MEDIA_AWS_ACCESS_KEY_ID:
+    # MASTER_PASSWORD:
     # MEDIA_AWS_SECRET_ACCESS_KEY:
-    # MEDIA_AWS_STORAGE_BUCKET_NAME:
-    # PGDATABASE:
-    # PGHOST:
     # PGPASSWORD:
-    # PGPORT:
-    # PGUSER:
     # SENTRY_DSN:
-    # SITE_DOMAIN:
-    # SITE_NAME:
   image: interaction/project_template:master
   links:
     - redis
@@ -52,20 +36,12 @@ celeryflower:
     VIRTUAL_HOST_WEIGHT: 1
   environment:
     BASE_SETTINGS_MODULE: production
-    # EMAIL_HOST:
+    DOTENV: production
     # EMAIL_HOST_PASSWORD:
-    # EMAIL_HOST_USER:
-    # MEDIA_AWS_ACCESS_KEY_ID:
+    # MASTER_PASSWORD:
     # MEDIA_AWS_SECRET_ACCESS_KEY:
-    # MEDIA_AWS_STORAGE_BUCKET_NAME:
-    # PGDATABASE:
-    # PGHOST:
     # PGPASSWORD:
-    # PGPORT:
-    # PGUSER:
     # SENTRY_DSN:
-    # SITE_DOMAIN:
-    # SITE_NAME:
   expose:
     - "5555"
   image: interaction/project_template:master
@@ -78,20 +54,12 @@ django:
     VIRTUAL_HOST: "*"
   environment:
     BASE_SETTINGS_MODULE: production
-    # EMAIL_HOST:
+    DOTENV: production
     # EMAIL_HOST_PASSWORD:
-    # EMAIL_HOST_USER:
-    # MEDIA_AWS_ACCESS_KEY_ID:
+    # MASTER_PASSWORD:
     # MEDIA_AWS_SECRET_ACCESS_KEY:
-    # MEDIA_AWS_STORAGE_BUCKET_NAME:
-    # PGDATABASE:
-    # PGHOST:
     # PGPASSWORD:
-    # PGPORT:
-    # PGUSER:
     # SENTRY_DSN:
-    # SITE_DOMAIN:
-    # SITE_NAME:
     VIRTUAL_HOST: project_template.*
   expose:
     - "8000"
