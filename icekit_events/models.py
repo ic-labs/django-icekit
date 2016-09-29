@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, time as datetime_time
 from dateutil import rrule
 import six
 import pytz
+from timezone import timezone
 
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -18,8 +19,8 @@ from django.utils import encoding
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
     get_current_timezone
-from polymorphic_tree.models import PolymorphicModel, PolymorphicTreeForeignKey
-from timezone import timezone
+
+from polymorphic.models import PolymorphicModel
 
 from icekit.fields import ICEkitURLField
 from icekit.publishing.models import PublishingModel
@@ -186,7 +187,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
     occurrences.
     """
 
-    derived_from = PolymorphicTreeForeignKey(
+    derived_from = models.ForeignKey(
         'self',
         blank=True,
         db_index=True,
@@ -425,7 +426,7 @@ class EventRepeatsGenerator(AbstractBaseModel):
     ensure the data meets these standards. Calling the `clean` method
     explicitly is most likely the easiest way to ensure this.
     """
-    event = PolymorphicTreeForeignKey(
+    event = models.ForeignKey(
         Event,
         db_index=True,
         editable=False,
@@ -642,7 +643,7 @@ class Occurrence(AbstractBaseModel):
     """
     objects = OccurrenceManager()
 
-    event = PolymorphicTreeForeignKey(
+    event = models.ForeignKey(
         Event,
         db_index=True,
         editable=False,
