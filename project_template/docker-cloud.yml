@@ -15,6 +15,7 @@ celery:
     - elasticsearch
     # - postgres
     - redis
+  restart: always
   tags:
     - production
 celerybeat:
@@ -32,6 +33,7 @@ celerybeat:
   image: interaction/project_template:master
   links:
     - redis
+  restart: always
   tags:
     - production
 celeryflower:
@@ -54,6 +56,7 @@ celeryflower:
   image: interaction/project_template:master
   links:
     - redis
+  restart: always
   tags:
     - production
 django:
@@ -77,11 +80,13 @@ django:
     - celery
     # - postgres
     - redis
+  restart: always
   tags:
     - production
 elasticsearch:
   # autoredeploy: true
   image: interaction/elasticsearch-icu:1
+  restart: always
   tags:
     - production
 haproxy:
@@ -93,6 +98,7 @@ haproxy:
   ports:
     - "80:80"
     - "443:443"
+  restart: always
   roles:
     - global
   tags:
@@ -100,11 +106,13 @@ haproxy:
 # postgres:
 #   # autoredeploy: true
 #   image: onjin/alpine-postgres:9.4
+#   restart: always
 #   tags:
 #     - production
 redis:
   # autoredeploy: true
   command: redis-server --appendonly yes
   image: redis:3-alpine
+  restart: always
   tags:
     - production
