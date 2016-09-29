@@ -153,7 +153,7 @@ setuptools.setup(
         'glamkit': [
             'glamkit-sponsors',
             'icekit-press-releases',
-            'icekit-events',
+            #'icekit-events', # TODO Not yet publicly available?
         ]
     },
     **kwargs
