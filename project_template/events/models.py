@@ -1,15 +1,7 @@
-from icekit.articles.abstract_models import ListingPage
-
-from icekit_events.models import Event
+from icekit_events.models import AbstractEventListingPage
 
 
-class EventListingPage(ListingPage):
+class EventListingPage(AbstractEventListingPage):
 
-    class Meta:
-        verbose_name = "Event Listing"
-
-    def get_items(self):
-        return Event.objects.published()
-
-    def get_visible_items(self):
-        return Event.objects.visible()
+    def get_response(self, request, parent, *args, **kwargs):
+        import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
