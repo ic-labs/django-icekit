@@ -1,0 +1,2 @@
+.env.production filter=crypt diff=crypt
+.env.staging filter=crypt diff=crypt
