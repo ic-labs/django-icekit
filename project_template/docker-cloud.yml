@@ -51,8 +51,6 @@ django:
   command: setup-django.sh supervisord.sh
   deployment_strategy: high_availability
   environment:
-    VIRTUAL_HOST: "*"
-  environment:
     BASE_SETTINGS_MODULE: production
     DOTENV: production
     # EMAIL_HOST_PASSWORD:
