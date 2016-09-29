@@ -1,4 +1,5 @@
 celery:
+  # autoredeploy: true
   command: setup-django.sh celery.sh
   deployment_strategy: high_availability
   environment:
@@ -17,6 +18,7 @@ celery:
   tags:
     - production
 celerybeat:
+  # autoredeploy: true
   command: setup-django.sh celerybeat.sh
   deployment_strategy: high_availability
   environment:
@@ -33,6 +35,7 @@ celerybeat:
   tags:
     - production
 celeryflower:
+  # autoredeploy: true
   command: setup-django.sh celeryflower.sh
   deployment_strategy: high_availability
   environment:
@@ -54,6 +57,7 @@ celeryflower:
   tags:
     - production
 django:
+  # autoredeploy: true
   command: setup-django.sh supervisord.sh
   deployment_strategy: high_availability
   environment:
@@ -76,10 +80,12 @@ django:
   tags:
     - production
 elasticsearch:
+  # autoredeploy: true
   image: interaction/elasticsearch-icu:1
   tags:
     - production
 haproxy:
+  # autoredeploy: true
   image: dockercloud/haproxy:1.5.1
   links:
     - celeryflower
@@ -92,10 +98,12 @@ haproxy:
   tags:
     - production
 # postgres:
+#   # autoredeploy: true
 #   image: onjin/alpine-postgres:9.4
 #   tags:
 #     - production
 redis:
+  # autoredeploy: true
   command: redis-server --appendonly yes
   image: redis:3-alpine
   tags:
