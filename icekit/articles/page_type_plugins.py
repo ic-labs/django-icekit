@@ -11,6 +11,13 @@ class ListingPagePlugin(ICEkitFluentContentsPagePlugin):
     render_template = 'icekit/layouts/listing.html'
     model_admin = LayoutPageAdmin
 
+    # TODO Awful hack to make request available to listing page class as
+    # `_request` class attribute. There must be a better way...
+    def get_response(self, request, page, **kwargs):
+        page._plugin_request = request
+        return super(ListingPagePlugin, self).get_response(
+            request, page, **kwargs)
+
     def get_view_response(self, request, page, view_func, view_args, view_kwargs):
         """
         Render the custom view that was exposed by the extra plugin URL patterns.
