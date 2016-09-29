@@ -379,7 +379,7 @@ class TestAdmin(WebTest):
         self.assertEqual(0, event.repeat_generators.count())
         self.assertEqual(0, event.occurrences.count())
         view_response = self.app.get(
-            reverse('icekit_events_detail', args=(event.pk,)),
+            reverse('icekit_events_event_detail', args=(event.pk,)),
             expect_errors=404)
         #######################################################################
         # Publish event, nothing much to clone yet
@@ -400,7 +400,7 @@ class TestAdmin(WebTest):
         self.assertEqual(0, published_event.repeat_generators.count())
         self.assertEqual(0, published_event.repeat_generators.count())
         view_response = self.app.get(
-            reverse('icekit_events_detail', args=(published_event.pk,)))
+            reverse('icekit_events_event_detail', args=(published_event.pk,)))
         self.assertEqual(200, view_response.status_code)
         self.assertTrue('Test Event' in view_response.content)
         #######################################################################
@@ -462,7 +462,7 @@ class TestAdmin(WebTest):
         self.assertEqual(0, published_event.repeat_generators.count())
         self.assertEqual(0, published_event.occurrences.count())
         view_response = self.app.get(
-            reverse('icekit_events_detail', args=(published_event.pk,)))
+            reverse('icekit_events_event_detail', args=(published_event.pk,)))
         self.assertEqual(200, view_response.status_code)
         self.assertFalse('Test Event - Update 1' in view_response.content)
         # Republish event
@@ -521,7 +521,7 @@ class TestAdmin(WebTest):
                 draft_occurrence.original_end,
                 published_occurrence.original_end)
         view_response = self.app.get(
-            reverse('icekit_events_detail', args=(published_event.pk,)))
+            reverse('icekit_events_event_detail', args=(published_event.pk,)))
         self.assertEqual(200, view_response.status_code)
         self.assertTrue('Test Event - Update 1' in view_response.content)
         #######################################################################
@@ -537,7 +537,7 @@ class TestAdmin(WebTest):
         self.assertTrue(event.is_draft)
         self.assertIsNone(event.get_published())
         view_response = self.app.get(
-            reverse('icekit_events_detail', args=(published_event.pk,)),
+            reverse('icekit_events_event_detail', args=(published_event.pk,)),
             expect_errors=404)
 
     def test_admin_calendar(self):

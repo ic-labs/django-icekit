@@ -9,7 +9,11 @@
 	<h2>Occurences</h2>
 	<ul>
 	{% for occurrence in event.occurrences.all %}
-		<li>{{ occurrence.start }} to {{ occurrence.end }}</li>
+	<li>
+		<a href="{% url 'icekit_events_occurrence_detail' occurrence.event.pk occurrence.pk %}">
+			{{ occurrence.start }} to {{ occurrence.end }}
+		</a>
+	</li>
 	{% endfor %}
 	</ul>
 {% endblock %}

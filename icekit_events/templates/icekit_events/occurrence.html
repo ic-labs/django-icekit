@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block body %}
+	<p>
+		<a href="{% url 'icekit_events_index' %}">&lt; All Events</a>
+	</p>
+
+	<p>
+		<a href="{% url 'icekit_events_event_detail' occurrence.event.pk %}">&lt; {{ occurrence.event.title }}</a>
+	</p>
+
+	<h1>{{ occurrence }}</h1>
+{% endblock %}
+

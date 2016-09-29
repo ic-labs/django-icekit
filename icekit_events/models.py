@@ -22,6 +22,7 @@ from polymorphic_tree.models import PolymorphicModel, PolymorphicTreeForeignKey
 from timezone import timezone
 
 from icekit.publishing.models import PublishingModel
+from icekit.publishing.middleware import is_draft_request_context
 
 from . import appsettings, validators, utils
 from .utils import time as utils_time
@@ -350,7 +351,7 @@ class Event(AbstractEvent):
     """
 
     def get_absolute_url(self):
-        return reverse('icekit_events_detail', args=(self.pk,))
+        return reverse('icekit_events_event_detail', args=(self.pk,))
 
 
 class GeneratorException(Exception):
@@ -534,6 +535,15 @@ class EventRepeatsGenerator(AbstractBaseModel):
 
 class OccurrenceQueryset(QuerySet):
     """ Custom queryset methods for ``Occurrence`` """
+
+    def visible(self):
+        if is_draft_request_context():
+            return self.draft()
+        else:
+            return self.published()
+
+    def published(self):
+        return self.filter(event__publishing_is_draft=False)
 
     def draft(self):
         return self.filter(event__publishing_is_draft=True)

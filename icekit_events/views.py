@@ -15,37 +15,38 @@ from .utils import permissions
 
 def index(request, is_preview=False):
     """
-    Listing page for events.
+    Listing page for event `Occurrence`s.
 
     :param request: Django request object.
-    :param is_preview: Should the listing page be generated as a preview? This will allow preview
-    specific actions to be done in the template such as turning off tracking options or adding links
-    to the admin.
+    :param is_preview: Should the listing page be generated as a preview? This
+                       will allow preview specific actions to be done in the
+                       template such as turning off tracking options or adding
+                       links to the admin.
     :return: TemplateResponse
     """
-    # If this is a preview make sure the user has appropriate permissions to view the preview.
+    # If this is a preview make sure the user has appropriate permissions.
     if is_preview and not permissions.allowed_to_preview(request.user):
         raise PermissionDenied
 
-    events = models.Event.objects.visible()
+    occurrences = models.Occurrence.objects.visible()
     context = {
         'is_preview': is_preview,
-        'events': events,
+        'occurrences': occurrences,
     }
     return TemplateResponse(request, 'icekit_events/index.html', context)
 
 
-def detail(request, event_id, is_preview=False):
+def event(request, event_id, is_preview=False):
     """
-
     :param request: Django request object.
     :param event_id: The `id` associated with the event.
-    :param is_preview: Should the listing page be generated as a preview? This will allow preview
-    specific actions to be done in the template such as turning off tracking options or adding links
-    to the admin.
+    :param is_preview: Should the listing page be generated as a preview? This
+                       will allow preview specific actions to be done in the
+                       template such as turning off tracking options or adding
+                       links to the admin.
     :return: TemplateResponse
     """
-    # If this is a preview make sure the user has appropriate permissions to view the preview.
+    # If this is a preview make sure the user has appropriate permissions.
     if is_preview and not permissions.allowed_to_preview(request.user):
         raise PermissionDenied
 
@@ -59,5 +60,35 @@ def detail(request, event_id, is_preview=False):
     }
     # TODO Not sure where the `Event.template` notion comes from, keeping it
     # here for now for backwards compatibility
-    template = getattr(event, 'template',  'icekit_events/detail.html')
+    template = getattr(event, 'template',  'icekit_events/event.html')
     return TemplateResponse(request, template, context)
+
+
+def occurrence(request, event_id, occurrence_id, is_preview=False):
+    """
+    :param request: Django request object.
+    :param event_id: The `id` associated with the occurrence's event.
+    :param occurrence_id: The `id` associated with the occurrence.
+    :param is_preview: Should the listing page be generated as a preview? This
+                       will allow preview specific actions to be done in the
+                       template such as turning off tracking options or adding
+                       links to the admin.
+    :return: TemplateResponse
+    """
+    # If this is a preview make sure the user has appropriate permissions.
+    if is_preview and not permissions.allowed_to_preview(request.user):
+        raise PermissionDenied
+
+    try:
+        occurrence = models.Occurrence.objects \
+            .filter(event_id=event_id, id=occurrence_id) \
+            .visible()[0]
+    except IndexError:
+        raise Http404
+
+    context = {
+        'is_preview': is_preview,
+        'occurrence': occurrence,
+    }
+    return TemplateResponse(
+        request,   'icekit_events/occurrence.html', context)
