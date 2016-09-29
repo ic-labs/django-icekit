@@ -12,6 +12,7 @@ import json
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.core.urlresolvers import reverse
@@ -52,10 +53,17 @@ class TestAdmin(WebTest):
         self.assertEqual(200, response.status_code)
 
     def test_create_event(self):
+        # Load admin Add page, which lists polymorphic event child models
         response = self.app.get(
             reverse('admin:icekit_events_event_add'),
             user=self.superuser,
-        ).follow()  # Need to follow to get "?ct_id=" GET parameter
+        )
+        # Choose event type from polymorphic child event choices
+        form = response.forms[0]
+        ct_id = ContentType.objects.get_for_model(models.Event).pk
+        form['ct_id'].select(ct_id)
+        response = form.submit().follow()  # Follow to get "?ct_id=" GET param
+        # Fill in and submit actual Event admin add form
         form = response.forms[0]
         form['title'].value = u"Test Event"
         response = form.submit()

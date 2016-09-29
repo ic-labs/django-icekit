@@ -399,8 +399,23 @@ class Event(AbstractEvent):
     A concrete polymorphic event model.
     """
 
+    class Meta:
+        verbose_name = 'Event'
+
     def get_absolute_url(self):
         return reverse('icekit_events_event_detail', args=(self.pk,))
+
+
+# TODO: This should extend icekit.articles.abstract_models.TitleSlugMixin but
+# cannot because AbstractEvent already has a `title` field.
+class EventPage(Event):
+    """
+    A concrete polymorphic event model intended to be a URL routable page.
+    """
+    slug = models.SlugField(max_length=255)
+
+    class Meta:
+        verbose_name = 'Event Page'
 
 
 class GeneratorException(Exception):

@@ -25,6 +25,7 @@ from icekit.admin import (
 from polymorphic.admin import PolymorphicChildModelAdmin
 from timezone import timezone
 
+from icekit.articles.admin import TitleSlugAdmin
 from icekit.publishing import admin as publishing_admin
 
 from . import admin_forms, forms, models, plugins
@@ -72,6 +73,11 @@ class EventChildAdmin(PolymorphicChildModelAdmin,
         'recurrence_rule', 'end_repeat', 'date_end_repeat', 'is_repeat',
     )
     save_on_top = True
+
+
+class EventPageChildAdmin(EventChildAdmin, TitleSlugAdmin):
+    base_form = admin_forms.BaseEventPageForm
+    base_model = models.EventPage
 
 
 class EventTypeFilter(ChildModelFilter):
