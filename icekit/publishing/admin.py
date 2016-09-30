@@ -240,7 +240,7 @@ class _PublishingHelpersMixin(object):
 
         try:
             object_url = obj.get_absolute_url()
-        except NoReverseMatch:
+        except (NoReverseMatch, AttributeError):
             object_url = ''
 
         template_name = 'admin/publishing/_change_list_publishing_column.html'
@@ -473,7 +473,7 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
 
                 try:
                     object_url = obj.get_absolute_url()
-                except NoReverseMatch:
+                except (NoReverseMatch, AttributeError):
                     object_url = ''
 
                 # If the user has publishing permission and if there are
