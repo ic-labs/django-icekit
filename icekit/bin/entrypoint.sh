@@ -14,18 +14,6 @@ set -e
 # userbase directory.
 cd "$ICEKIT_PROJECT_DIR"
 
-# Decrypt dotenv files.
-if [[ -n "$TRANSCRYPT_PASSWORD" ]]; then
-	"$ICEKIT_DIR/bin/transcrypt" -p "$TRANSCRYPT_PASSWORD" -y || true
-fi
-
-# Source dotenv files.
-set -o allexport
-if [[ -f "$ICEKIT_PROJECT_DIR/.env.${DOTENV:-local}" ]]; then
-	source "$ICEKIT_PROJECT_DIR/.env.${DOTENV:-local}"
-fi
-set +o allexport
-
 if [[ -n "${DOCKER+1}" ]]; then
 	# In our Docker image, the only system site packages are the ones that we
 	# have installed, so we do not need a virtualenv for isolation. Using an
@@ -140,4 +128,15 @@ export REDIS_ADDRESS="${REDIS_ADDRESS:-localhost:6379}"
 # be just `django`.
 export SUPERVISORD_CONFIG_INCLUDE="${SUPERVISORD_CONFIG_INCLUDE:-supervisord-django.conf supervisord-no-docker.conf}"
 
+# Decrypt dotenv files.
+setup-git-secret.sh
+
+# Source dotenv files.
+set -o allexport
+if [[ -f "$ICEKIT_PROJECT_DIR/.env.${DOTENV:-local}" ]]; then
+	source "$ICEKIT_PROJECT_DIR/.env.${DOTENV:-local}"
+fi
+set +o allexport
+
+# Execute command.
 exec "${@:-bash.sh}"

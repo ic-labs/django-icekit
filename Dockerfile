@@ -3,7 +3,9 @@ FROM buildpack-deps:jessie
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
+        apt-transport-https \
         gettext \
+        gnupg2 \
         jq \
         nano \
         nginx \
@@ -11,6 +13,13 @@ RUN apt-get update \
         python \
         python-dev \
         pv \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN echo 'deb https://dl.bintray.com/sobolevn/deb git-secret main' | tee -a /etc/apt/sources.list
+RUN wget -nv -O - https://api.bintray.com/users/sobolevn/keys/gpg/public.key | apt-key add -
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        git-secret \
     && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_VERSION=4.4.2

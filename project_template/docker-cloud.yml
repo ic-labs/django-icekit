@@ -4,7 +4,7 @@ celery:
   deployment_strategy: high_availability
   environment:
     DOTENV: production
-    TRANSCRYPT_PASSWORD:
+    GPG_PASSPHRASE:
   image: interaction/project_template:master
   links:
     - elasticsearch
@@ -19,7 +19,7 @@ celerybeat:
   deployment_strategy: high_availability
   environment:
     DOTENV: production
-    TRANSCRYPT_PASSWORD:
+    GPG_PASSPHRASE:
   image: interaction/project_template:master
   links:
     - redis
@@ -33,7 +33,7 @@ celeryflower:
   environment:
     DOTENV: production
     FORCE_SSL: yes
-    TRANSCRYPT_PASSWORD:
+    GPG_PASSPHRASE:
     VIRTUAL_HOST: flower.project_template.*,https://flower.project_template.*
   expose:
     - "5555"
@@ -50,7 +50,7 @@ django:
   environment:
     DOTENV: production
     FORCE_SSL: yes
-    TRANSCRYPT_PASSWORD:
+    GPG_PASSPHRASE:
     VIRTUAL_HOST: project_template.*,https://project_template.*
   expose:
     - "8000"

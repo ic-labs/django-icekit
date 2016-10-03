@@ -5,6 +5,8 @@
 **/*.swp
 **/.DS_Store
 **/npm-debug.log
+**/pubring.gpg~
+**/random_seed
 **/requirements-local.txt
 .env.local
 .idea/

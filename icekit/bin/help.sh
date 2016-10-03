@@ -64,6 +64,21 @@ Here is a list of frequently used commands you might want to run:
 		Install Node modules, Bower components and Python requirements, create
 		a database, apply Django migrations, and execute a command.
 
+	setup-git-secret.sh [COMMAND]
+		Initialise git-secret, generate a GPG encryption key, configure
+		git-secret, decrypt all known secrets, and execute a command.
+
+		Quick start:
+
+			$ git secret add file  # Add 'file' as a secret to be encrypted
+			$ git secret hide      # Encrypt all secrets
+			$ git secret reveal    # Decrypt all secrets
+
+		It is recommended to add 'git secret hide' to your pre-commit hook, so
+		you won't miss any changes.
+
+		For more information, see: http://sobolevn.github.io/git-secret/
+
 	setup-postgres.sh
 		Create a PostgreSQL database with a name derived from the current Git
 		branch and project directory.
