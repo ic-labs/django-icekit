@@ -9,6 +9,8 @@
 **/random_seed
 **/requirements-local.txt
 /.env.local
+/.env.production
+/.env.staging
 /.idea/
 /bower_components/
 /icekit_settings_local.py
