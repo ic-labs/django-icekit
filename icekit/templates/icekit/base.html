@@ -74,19 +74,20 @@
 			{% block external_js %}{% endblock %}
 			{# Base JS files #}
 			{% compress js file %}
-				{% block base_js %}{% endblock %}
-				{% if ICEKIT_SHARE_USERNAME and ICEKIT_SHARE_KEY %}
-					<script language="javascript">
-						window.ICEKIT_SHARE_USERNAME = '{{ ICEKIT_SHARE_USERNAME }}';
-						window.ICEKIT_SHARE_KEY = '{{ ICEKIT_SHARE_KEY }}';
-					</script>
+				{% block base_js %}
 					<script src="{% static 'icekit/js/link_share.js' %}"></script>
-				{% endif %}
+				{% endblock %}
 			{% endcompress %}
 			{# Extra JS files - section/page specific, etc #}
 			{% compress js file %}
 				{% block js %}{% endblock %}
 			{% endcompress %}
+			{% if ICEKIT_SHARE_USERNAME and ICEKIT_SHARE_KEY %}
+				<script language="javascript">
+					window.ICEKIT_SHARE_USERNAME = '{{ ICEKIT_SHARE_USERNAME }}';
+					window.ICEKIT_SHARE_KEY = '{{ ICEKIT_SHARE_KEY }}';
+				</script>
+			{% endif %}
 		{% endblock %}
 	</body>
 </html>
