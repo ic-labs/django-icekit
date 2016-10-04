@@ -1,7 +1,5 @@
-from icekit_events.models import AbstractEventListingPage
+from icekit_events.models import AbstractEventListingForDatePage
 
 
-class EventListingPage(AbstractEventListingPage):
-
-    def get_response(self, request, parent, *args, **kwargs):
-        import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
+class EventListingPage(AbstractEventListingForDatePage):
+    pass

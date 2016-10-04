@@ -18,13 +18,13 @@ class AuthorListing(ListingPage):
     class Meta:
         verbose_name = 'Author listing'
 
-    def get_items(self):
+    def get_items_to_list(self, request):
         """
         :return: all published authors
         """
         return Author.objects.published()
 
-    def get_visible_items(self):
+    def get_items_to_route(self, request):
         """
         :return: all authors that can be viewed by the current user
         """

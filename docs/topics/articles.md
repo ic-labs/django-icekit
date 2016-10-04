@@ -31,10 +31,12 @@ you to define articles of different shapes and mount them under the same
 ## `ListingPage`
 
 The `icekit.articles.models.ListingPage` model is a page type that requires
-`get_items()` and `get_visible_items()` to be defined in subclasses.
-When viewed, ListingPage lists the items returned by `get_items()`.
-`get_visible_items()` is necessary because an editor may wish to preview
-unpublished items (that aren't returned by `get_items()`)
+`get_items_to_list(HttpRequest)` and `get_items_to_route(HttpRequest)` to be
+defined in subclasses.
+
+When viewed, ListingPage lists the items returned by `get_items_to_list()`.
+`get_items_to_route()` is necessary because an editor may wish to preview
+unpublished items (that aren't returned by `get_items_to_list()`)
 
 ## Admins
 
@@ -55,11 +57,11 @@ In `models.py`:
 
 
     class ArticleCategoryPage(ListingPage):
-        def get_items(self):
+        def get_items_to_list(self, request):
             unpublished_pk = self.get_draft().pk
             return Article.objects.published().filter(parent_id=unpublished_pk)
 
-        def get_visible_items(self):
+        def get_items_to_route(self, request):
             unpublished_pk = self.get_draft().pk
             return Article.objects.visible().filter(parent_id=unpublished_pk)
 
@@ -112,11 +114,11 @@ In `models.py`:
 
 
     class ArticleCategoryPage(ListingPage):
-        def get_items(self):
+        def get_items_to_list(self, request):
             unpublished_pk = self.get_draft().pk
             return Article.objects.published().filter(parent_id=unpublished_pk)
 
-        def get_visible_items(self):
+        def get_items_to_route(self, request):
             unpublished_pk = self.get_draft().pk
             return Article.objects.visible().filter(parent_id=unpublished_pk)
 

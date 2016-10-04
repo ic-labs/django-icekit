@@ -30,9 +30,10 @@ class ListingPage(AbstractLayoutPage):
     class Meta:
         abstract = True
 
-    def get_items(self):
+    def get_items_to_list(self, request):
         """
-        Get the items that are listed on this page.
+        Get the items that will be show in this page's listing.
+
         Remember that incoming relations will be on the draft version of
         the page. Do something like this:
 
@@ -42,31 +43,28 @@ class ListingPage(AbstractLayoutPage):
         Editors normally expect to only see published() items in a listing, not
         visible() items, unless clearly marked as such.
 
-        :return: the items that are associated with this page
+        :return: the items to be rendered in the listing page
         """
         raise NotImplementedError(
-            "Please implement `get_items()` on your ListingPage model"
+            "Please implement `get_items_to_list(request)` on %e" % type(self)
         )
 
-
-    def get_visible_items(self):
+    def get_items_to_route(self, request):
         """
         Get all items that are associated with this page and can be previewed
-        by the user.
+        by the user at a URL.
         Again, incoming relations will be on the draft version of
         the page. Do something like this:
 
             unpublished_pk = self.get_draft().pk
             return Article.objects.visible().filter(parent_id=unpublished_pk)
 
-        Editors normally expect to only see published() items in a listing, not
-        visible() items, unless clearly marked as such.
-
-        :return: the items that are associated with this page
+        :return: the items with URL path endpoints under this page's path
         """
         raise NotImplementedError(
-            "Please implement `get_visible_items()` on your ListingPage model"
+            "Please implement `get_items_to_route(request)` on %r" % type(self)
         )
+
 
 class ArticleBase(PublishingModel, TitleSlugMixin):
     """

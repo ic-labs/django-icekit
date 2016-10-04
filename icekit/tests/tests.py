@@ -14,6 +14,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core import exceptions
 from django.core.urlresolvers import reverse
+from django.http.request import HttpRequest
 from django.test import TestCase
 from django.utils import six
 from django_dynamic_fixture import G
@@ -728,12 +729,19 @@ class TestArticles(WebTest):
         self.article.publish()
         self.article_2.publish()
         # test the listing contains the published article
-        self.assertTrue(self.article.get_published() in self.listing.get_items())
+        request = HttpRequest()
+        self.assertTrue(
+            self.article.get_published()
+            in self.listing.get_items_to_list(request))
         # ...not the draft one
-        self.assertTrue(self.article not in self.listing.get_items())
+        self.assertTrue(
+            self.article not in self.listing.get_items_to_list(request))
         # ...not an article that isn't associated with the listing
-        self.assertTrue(self.article_2 not in self.listing.get_items())
-        self.assertTrue(self.article_2.get_published() not in self.listing.get_items())
+        self.assertTrue(
+            self.article_2 not in self.listing.get_items_to_list(request))
+        self.assertTrue(
+            self.article_2.get_published()
+            not in self.listing.get_items_to_list(request))
         self.article.unpublish()
         self.article_2.unpublish()
 

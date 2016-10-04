@@ -11,12 +11,12 @@ class ListingPagePlugin(ICEkitFluentContentsPagePlugin):
     render_template = 'icekit/layouts/listing.html'
     model_admin = LayoutPageAdmin
 
-    # TODO Awful hack to make request available to listing page class as
-    # `_request` class attribute. There must be a better way...
-    def get_response(self, request, page, **kwargs):
-        page._plugin_request = request
-        return super(ListingPagePlugin, self).get_response(
+    def get_context(self, request, page, **kwargs):
+        """ Include in context items to be visible on listing page """
+        context = super(ListingPagePlugin, self).get_context(
             request, page, **kwargs)
+        context['items_to_list'] = page.get_items_to_list(request)
+        return context
 
     def get_view_response(self, request, page, view_func, view_args, view_kwargs):
         """
@@ -25,10 +25,9 @@ class ListingPagePlugin(ICEkitFluentContentsPagePlugin):
         """
         return view_func(request, page, *view_args, **view_kwargs)
 
-
     def _detail_view(request, parent, slug):
         try:
-            page = parent.get_visible_items().get(slug=slug)
+            page = parent.get_items_to_route(request).get(slug=slug)
         except:
             raise Http404
 

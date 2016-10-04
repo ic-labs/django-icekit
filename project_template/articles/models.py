@@ -13,7 +13,7 @@ class ArticleCategoryPage(ListingPage):
     class Meta:
         verbose_name = "Article category"
 
-    def get_items(self):
+    def get_items_to_list(self, request):
         """
         :return: articles attached to the draft version of this page that
         will be listed
@@ -21,7 +21,7 @@ class ArticleCategoryPage(ListingPage):
         unpublished_pk = self.get_draft().pk
         return Article.objects.published().filter(parent_id=unpublished_pk)
 
-    def get_visible_items(self):
+    def get_items_to_route(self, request):
         """
         :return: articles attached to the draft version of this page that can
         be previewed.

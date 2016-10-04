@@ -6,7 +6,7 @@
 	{{ block.super }}
 
 	<ul>
-		{% for item in page.get_items %}
+		{% for item in items_to_list %}
 			<li><a href="{{ item.get_absolute_url }}">
 				{{ item.title|safe }}
 			</a></li>
