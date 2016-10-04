@@ -123,7 +123,7 @@ export REDIS_ADDRESS="${REDIS_ADDRESS:-localhost:6379}"
 export SUPERVISORD_CONFIG_INCLUDE="${SUPERVISORD_CONFIG_INCLUDE:-supervisord-django.conf supervisord-no-docker.conf}"
 
 # Decrypt dotenv files.
-setup-git-secret.sh
+setup-git-secret.sh || true  # Don't exit if we can't decrypt secrets
 
 # Source dotenv files.
 set -o allexport
