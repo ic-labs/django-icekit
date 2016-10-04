@@ -491,6 +491,16 @@ class Views(WebTest):
                 user=self.super_user_1)
             self.assertEqual(response.status_code, 200)
 
+    # Test workaround applied for django-polymorphic 1.0+ per #31
+    def test_can_save_polymorphic_page_in_admin(self):
+        response = self.app.get(
+            reverse('admin:fluent_pages_page_change',
+                    args=(self.layoutpage_1.pk,)),
+            user=self.super_user_1)
+        # Hit 'Save' in form -- does nothing really, but will fail with
+        # `ParentAdminNotRegistered` if polymorphic issue #31 is present.
+        response.forms[0].submit()
+
     def test_response_pages(self):
         response = self.app.get(reverse('404'), expect_errors=404)
         self.assertEqual(response.status_code, 404)
