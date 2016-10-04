@@ -8,12 +8,6 @@ EOF
 
 set -e
 
-# Change to the project directory, so Python can import project packages that
-# aren't editable installs and so we don't accidentally import the Docker image
-# version of ICEkit when an editable version is also installed in the Python
-# userbase directory.
-cd "$ICEKIT_PROJECT_DIR"
-
 if [[ -n "${DOCKER+1}" ]]; then
 	# In our Docker image, the only system site packages are the ones that we
 	# have installed, so we do not need a virtualenv for isolation. Using an
