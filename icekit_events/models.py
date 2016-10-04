@@ -379,20 +379,34 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
             return self.human_dates
         else:
             first, last = self.get_occurrences_range()
-            return ' to '.join([
-                first.start.strftime(date_format),
-                last.end.strftime(date_format)
-            ])
+            if not (first or last):
+                return ''
+            elif first and not last:
+                return 'From %s' % first.start.strftime(date_format)
+            elif last and not first:
+                return 'To %s' % last.end.strftime(date_format)
+            else:
+                return ' to '.join([
+                    first.start.strftime(date_format),
+                    last.end.strftime(date_format)
+                ])
 
     def describe_times_range(self, time_format='%H:%M:%S'):
         if self.human_times:
             return self.human_times
         else:
             first, last = self.get_occurrences_range()
-            return ' to '.join([
-                first.start.strftime(time_format),
-                last.end.strftime(time_format)
-            ])
+            if not (first or last):
+                return ''
+            elif first and not last:
+                return 'From %s' % first.start.strftime(time_format),
+            elif last and not first:
+                return 'To %s' % last.end.strftime(time_format)
+            else:
+                return ' to '.join([
+                    first.start.strftime(time_format),
+                    last.end.strftime(time_format)
+                ])
 
 
 class Event(AbstractEvent):
