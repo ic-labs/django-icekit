@@ -22,7 +22,7 @@ from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
 
 from polymorphic.models import PolymorphicModel
 
-from icekit.articles.abstract_models import ListingPage
+from icekit.articles.abstract_models import ListingPage, SlugMixin
 from icekit.fields import ICEkitURLField
 from icekit.publishing.models import PublishingModel
 from icekit.publishing.middleware import is_draft_request_context
@@ -407,14 +407,10 @@ class Event(AbstractEvent):
         return reverse('icekit_events_event_detail', args=(self.pk,))
 
 
-# TODO: This should extend icekit.articles.abstract_models.TitleSlugMixin but
-# cannot because AbstractEvent already has a `title` field.
-class EventPage(Event):
+class EventPage(Event, SlugMixin):
     """
     A concrete polymorphic event model intended to be a URL routable page.
     """
-    slug = models.SlugField(max_length=255)
-
     class Meta:
         verbose_name = 'Event Page'
 
