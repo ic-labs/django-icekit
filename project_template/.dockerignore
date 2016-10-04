@@ -11,6 +11,7 @@
 .env.local
 .env.production
 .env.staging
+/.gnupg/gpg.conf
 .idea/
 bower_components/
 icekit_settings_local.py
