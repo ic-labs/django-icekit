@@ -1,5 +1,5 @@
 django:
-  command: runtests.sh
+  command: runtests.sh . icekit
   environment:
     TRAVIS:
     TRAVIS_BRANCH:
