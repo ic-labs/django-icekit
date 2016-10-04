@@ -331,7 +331,11 @@ class PublishingModel(models.Model):
 
     def publishing_prepare_published_copy(self, draft_obj):
         """ Prepare published copy of draft prior to saving it """
-        pass
+        # We call super here, somewhat perversely, to ensure this method will
+        # be called on publishable subclasses if implemented there.
+        mysuper = super(PublishingModel, self)
+        if hasattr(mysuper, 'publishing_prepare_published_copy'):
+            mysuper.publishing_prepare_published_copy(draft_obj)
 
     def publishing_clone_relations(self, src_obj):
         """

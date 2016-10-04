@@ -1,5 +1,6 @@
 from urlparse import urljoin
 
+from django.core.exceptions import ValidationError
 from django.template.response import TemplateResponse
 
 from icekit.publishing.models import PublishingModel
@@ -8,12 +9,45 @@ from polymorphic.models import PolymorphicModel
 from icekit.page_types.layout_page.abstract_models import AbstractLayoutPage
 from django.db import models
 
-class TitleSlugMixin(models.Model):
+
+class SlugMixin(models.Model):
+
+    slug = models.SlugField(max_length=255)
+
+    class Meta:
+        abstract = True
+
+    def validate_unique_slug(self):
+        """
+        Ensure slug is unique for this model. This check is aware of publishing
+        but is otherwise fairly basic and will need to be customised for
+        situations where models with slugs are not in a flat hierarchy etc. 
+        """
+        clashes_qs = type(self).objects.filter(slug=self.slug)
+        if self.pk:
+            clashes_qs = clashes_qs.exclude(pk=self.pk)
+        if isinstance(self, PublishingModel):
+            clashes_qs = clashes_qs.filter(
+                publishing_is_draft=self.publishing_is_draft)
+        if clashes_qs:
+            raise ValidationError(
+                "Slug '%s' clashes with other items: %s"
+                % (self.slug, clashes_qs))
+
+    def clean(self):
+        super(SlugMixin, self).clean()
+        self.validate_unique_slug()
+
+    def publishing_prepare_published_copy(self, draft_obj):
+        """ Perform slug validation on publish, not just when saving draft """
+        self.validate_unique_slug()
+
+
+class TitleSlugMixin(SlugMixin):
     # TODO: this should perhaps become part of a wider ICEkit mixin that covers
     # standard content behaviour.
 
     title = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=255)
 
     class Meta:
         abstract = True
