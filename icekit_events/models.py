@@ -763,6 +763,19 @@ class AbstractEventListingPage(ListingPage):
         abstract = True
         verbose_name = "Event Listing"
 
+    def get_items_to_list(self, request):
+        return Occurrence.objects.published()
+
+    def get_items_to_route(self, request):
+        return Occurrence.objects.visible()
+
+
+class AbstractEventListingForDatePage(ListingPage):
+
+    class Meta:
+        abstract = True
+        verbose_name = "Event Listing for Date"
+
     def _occurrences_on_date(self, request):
         try:
             date_param = request.GET['date']
@@ -772,11 +785,11 @@ class AbstractEventListingPage(ListingPage):
         return Occurrence.objects \
             .within(date, date + timedelta(days=1))
 
-    def get_items(self):
-        return self._occurrences_on_date(self._plugin_request).visible()
+    def get_items_to_list(self, request):
+        return self._occurrences_on_date(request).published()
 
-    def get_visible_items(self):
-        return self._occurrences_on_date(self._plugin_request).visible()
+    def get_items_to_route(self, request):
+        return self._occurrences_on_date(request).visible()
 
 
 def regenerate_event_occurrences(sender, instance, **kwargs):
