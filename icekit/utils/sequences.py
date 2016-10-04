@@ -1,4 +1,4 @@
-def dedupe_and_sort(sequence, sorted_sequence=None):
+def dedupe_and_sort(sequence, sorted_sequence=None, sorted_last_sequence=None):
     """
     De-dupe and partially sort a sequence. The `sorted_sequence` argument
     should contain all the items that might appear in `sequence` and for which
@@ -24,7 +24,12 @@ def dedupe_and_sort(sequence, sorted_sequence=None):
         if item not in new_sequence:
             new_sequence.append(item)
     # Return a sequence of the same type as given.
-    return type(sequence)(new_sequence)
+
+    sorted_last_sequence = sorted_last_sequence or []
+    newer_sequence = [i for i in new_sequence if i not in sorted_last_sequence]
+    newer_sequence += sorted_last_sequence
+
+    return type(sequence)(newer_sequence)
 
 
 def slice_sequences(sequences, start, end):

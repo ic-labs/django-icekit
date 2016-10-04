@@ -10,6 +10,27 @@ from nose.tools import nottest
 from PIL import Image, ImageDraw
 from six import BytesIO
 
+@nottest
+def setup_with_context_manager(testcase, cm):
+    """
+    Use a contextmanager in a test setUp that persists until teardown.
+    So instead of:
+
+    with ctxmgr(a, b, c) as v:
+        # do something with v that only persists for the `with` statement
+
+    use:
+
+    def setUp(self):
+        self.v = setup_with_context_manager(self, ctxmgr(a, b, c))
+
+    def test_foo(self):
+        # do something with self.v
+    """
+    val = cm.__enter__()
+    testcase.addCleanup(cm.__exit__, None, None, None)
+    return val
+
 
 @nottest
 @contextlib.contextmanager
@@ -95,7 +116,7 @@ def delete_test_image(image_field):
     # ensure all thumbs are deleted
     for filename in glob.glob(
         os.path.join(
-            settings.BASE_DIR, 'public', 'media', 'thumbs', image_field.name.split('/')[-1]
+            settings.MEDIA_ROOT, 'thumbs', image_field.name.split('/')[-1]
         ) + '*'
     ):
         os.unlink(filename)
