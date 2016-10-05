@@ -1,4 +1,4 @@
-FROM interaction/icekit:master
+FROM interaction/icekit:local
 
 WORKDIR /opt/project_template/
 

@@ -4,7 +4,7 @@
 [![Requirements Status](https://img.shields.io/requires/github/ic-labs/django-icekit.svg)](https://requires.io/github/ic-labs/django-icekit/requirements/)
 [![Version](https://img.shields.io/pypi/v/django-icekit.svg)](https://pypi.python.org/pypi/django-icekit)
 
-[![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/)
+[![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/ic-labs/django-icekit/)
 
 ICEkit is a next-generation CMS by [the Interaction Consortium], built on top
 of [django-fluent-pages] and [django-fluent-contents]. See

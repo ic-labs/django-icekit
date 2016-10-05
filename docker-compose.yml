@@ -13,9 +13,10 @@ services:
     command: setup-django.sh bash.sh
     environment:
       BASE_SETTINGS_MODULE: develop
+      GPG_PASSPHRASE: # Get from environment
       MASTER_PASSWORD: # Get from environment
       TERM: # Get from environment
-    image: interaction/icekit:latest
+    image: interaction/icekit:local
     tmpfs:
       - /tmp
     volumes:

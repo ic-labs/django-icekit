@@ -17,6 +17,8 @@ from django.core.urlresolvers import reverse_lazy
 from django.utils.text import slugify
 from kombu import Exchange, Queue
 
+import icekit
+
 BASE_SETTINGS_MODULE = os.environ.get('BASE_SETTINGS_MODULE', '')
 
 # Get Redis host and port.
@@ -37,8 +39,7 @@ SITE_PORT = 8000
 
 # FILE SYSTEM PATHS ###########################################################
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
-ICEKIT_DIR = os.path.join(BASE_DIR, 'icekit')
+ICEKIT_DIR = os.path.abspath(os.path.dirname(icekit.__file__))
 PROJECT_DIR = os.path.abspath(os.environ['ICEKIT_PROJECT_DIR'])
 VAR_DIR = os.path.join(PROJECT_DIR, 'var')
 
@@ -565,8 +566,13 @@ ICEKIT = {
     'LAYOUT_TEMPLATES': (
         (
             'ICEkit',
-            os.path.join(BASE_DIR, 'icekit/layouts/templates'),
+            os.path.join(ICEKIT_DIR, 'layouts/templates'),
             'icekit/layouts',
+        ),
+        (
+            SITE_NAME,
+            os.path.join(PROJECT_DIR, 'templates'),
+            'layouts',
         ),
     ),
 }

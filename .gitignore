@@ -9,7 +9,6 @@
 **/requirements-local.txt
 /*.egg-info/
 /.eggs/
-/.git/
 /.idea/
 /.tox/
 /dist/

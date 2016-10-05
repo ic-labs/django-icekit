@@ -1,8 +1,12 @@
 from fluent_contents.admin import PlaceholderEditorAdmin
 from fluent_contents.models import PlaceholderData
 
+from icekit.utils.admin.mixins import \
+    PolymorphicChildModelAdminGetParentAdminFix
 
-class FluentLayoutsMixin(PlaceholderEditorAdmin):
+
+class FluentLayoutsMixin(PlaceholderEditorAdmin,
+                         PolymorphicChildModelAdminGetParentAdminFix):
     """
     Mixin class for models that have a ``layout`` field and fluent content.
     """

@@ -2,6 +2,16 @@
 
 ## In development
 
+  * Preview pages are now visually highlighted, and have a different HTML title.
+
+  * "Slideshow" is now renamed "Image Gallery" and there is a new Image Gallery
+    content plugin available (which renders a grid of thumbnails into a
+    lightbox).
+
+## 0.15 (27 September 2016)
+
+  * Improvements to publishing to make it accomodate more types of content.
+
   * Fix bug where the content items and placeholders associated with a
     fluent content model (other than a page) were not included in the
     published copy.
@@ -10,6 +20,10 @@
     `icekit.publishing.admin.PublishableFluentContentsAdmin` as base
     classes for fluent content models and admins, to help keep things
     DRY.
+
+   * Minor docs on testing.
+
+   * Greater test coverage.
 
 ### Breaking changes
 
