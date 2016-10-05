@@ -35,7 +35,7 @@ celeryflower:
     - DOTENV=production
     - FORCE_SSL=yes
     - GPG_PASSPHRASE=
-    - VIRTUAL_HOST=flower.project_template.*,https://flower.project_template.*
+    - 'VIRTUAL_HOST=flower.project_template.*,https://flower.project_template.*'
   expose:
     - '5555'
   links:
@@ -52,7 +52,7 @@ django:
     - DOTENV=production
     - FORCE_SSL=yes
     - GPG_PASSPHRASE=
-    - VIRTUAL_HOST=project_template.*,https://project_template.*
+    - 'VIRTUAL_HOST=project_template.*,https://project_template.*'
   expose:
     - '8000'
   links:
