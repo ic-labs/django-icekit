@@ -541,6 +541,8 @@ INSTALLED_APPS += ('haystack', )
 
 # ICEKIT ######################################################################
 
+ICEKIT_CONTEXT_PROCESSOR_SETTINGS = ()
+
 FEATURED_APPS = (
     {
         'verbose_name': 'Content',
