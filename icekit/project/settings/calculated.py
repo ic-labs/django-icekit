@@ -4,11 +4,9 @@ import sys
 
 from icekit.utils.sequences import dedupe_and_sort
 
-BASE_SETTINGS_MODULE = os.environ.setdefault('BASE_SETTINGS_MODULE', 'base')
-
-print '# BASE_SETTINGS_MODULE: %s' % BASE_SETTINGS_MODULE
-
 # Emulate `from ... import *` with base settings module from environment.
+BASE_SETTINGS_MODULE = os.environ.setdefault('BASE_SETTINGS_MODULE', 'base')
+print '# BASE_SETTINGS_MODULE: %s' % BASE_SETTINGS_MODULE
 try:
     locals().update(importlib.import_module(
         'icekit.project.settings._%s' % BASE_SETTINGS_MODULE).__dict__)

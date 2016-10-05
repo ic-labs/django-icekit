@@ -8,6 +8,7 @@ from polymorphic.models import PolymorphicModel
 from icekit.page_types.layout_page.abstract_models import AbstractLayoutPage
 from django.db import models
 
+
 class TitleSlugMixin(models.Model):
     # TODO: this should perhaps become part of a wider ICEkit mixin that covers
     # standard content behaviour.

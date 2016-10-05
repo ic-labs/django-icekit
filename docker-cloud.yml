@@ -1,11 +1,11 @@
-common:
+celery:
+  command: setup-django.sh celery.sh
   deployment_strategy: high_availability
   environment:
     BASE_SETTINGS_MODULE: production
     # EMAIL_HOST:
     # EMAIL_HOST_PASSWORD:
     # EMAIL_HOST_USER:
-    ICEKIT_PROJECT_DIR: /opt/icekit-project
     # MEDIA_AWS_ACCESS_KEY_ID:
     # MEDIA_AWS_SECRET_ACCESS_KEY:
     # MEDIA_AWS_STORAGE_BUCKET_NAME:
@@ -18,46 +18,87 @@ common:
     # SITE_DOMAIN:
     # SITE_NAME:
   image: interaction/icekit:master
-  volumes:
-    - /opt/icekit-project
-celery:
-  command: setup-django.sh celery.sh
-  extends: common
   links:
     - elasticsearch
-    - postgres
+    # - postgres
     - redis
-  volumes_from:
-    - django
 celerybeat:
   command: setup-django.sh celerybeat.sh
-  extends: common
+  deployment_strategy: high_availability
+  environment:
+    BASE_SETTINGS_MODULE: production
+    # EMAIL_HOST:
+    # EMAIL_HOST_PASSWORD:
+    # EMAIL_HOST_USER:
+    # MEDIA_AWS_ACCESS_KEY_ID:
+    # MEDIA_AWS_SECRET_ACCESS_KEY:
+    # MEDIA_AWS_STORAGE_BUCKET_NAME:
+    # PGDATABASE:
+    # PGHOST:
+    # PGPASSWORD:
+    # PGPORT:
+    # PGUSER:
+    # SENTRY_DSN:
+    # SITE_DOMAIN:
+    # SITE_NAME:
+  image: interaction/icekit:master
   links:
     - redis
-  volumes_from:
-    - django
 celeryflower:
   command: setup-django.sh celeryflower.sh
+  deployment_strategy: high_availability
   environment:
     VIRTUAL_HOST: flower.*
     VIRTUAL_HOST_WEIGHT: 1
-  extends: common
+  environment:
+    BASE_SETTINGS_MODULE: production
+    # EMAIL_HOST:
+    # EMAIL_HOST_PASSWORD:
+    # EMAIL_HOST_USER:
+    # MEDIA_AWS_ACCESS_KEY_ID:
+    # MEDIA_AWS_SECRET_ACCESS_KEY:
+    # MEDIA_AWS_STORAGE_BUCKET_NAME:
+    # PGDATABASE:
+    # PGHOST:
+    # PGPASSWORD:
+    # PGPORT:
+    # PGUSER:
+    # SENTRY_DSN:
+    # SITE_DOMAIN:
+    # SITE_NAME:
   expose:
-    - 5555
+    - "5555"
+  image: interaction/icekit:master
   links:
     - redis
-  volumes_from:
-    - django
 django:
   command: setup-django.sh supervisord.sh
+  deployment_strategy: high_availability
   environment:
     VIRTUAL_HOST: "*"
-  extends: common
+  environment:
+    BASE_SETTINGS_MODULE: production
+    # EMAIL_HOST:
+    # EMAIL_HOST_PASSWORD:
+    # EMAIL_HOST_USER:
+    # MEDIA_AWS_ACCESS_KEY_ID:
+    # MEDIA_AWS_SECRET_ACCESS_KEY:
+    # MEDIA_AWS_STORAGE_BUCKET_NAME:
+    # PGDATABASE:
+    # PGHOST:
+    # PGPASSWORD:
+    # PGPORT:
+    # PGUSER:
+    # SENTRY_DSN:
+    # SITE_DOMAIN:
+    # SITE_NAME:
   expose:
-    - 8000
+    - "8000"
+  image: interaction/icekit:master
   links:
     - elasticsearch
     - celery
+    # - postgres
     - redis
 elasticsearch:
   image: interaction/elasticsearch-icu:1
@@ -71,8 +112,8 @@ haproxy:
     - "443:443"
   roles:
     - global
-postgres:
-  image: onjin/alpine-postgres:9.4
+# postgres:
+#   image: onjin/alpine-postgres:9.4
 redis:
   command: redis-server --appendonly yes
   image: redis:3-alpine

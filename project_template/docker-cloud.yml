@@ -1,0 +1,98 @@
+celery:
+  # autoredeploy: true
+  command: setup-django.sh celery.sh
+  deployment_strategy: high_availability
+  environment:
+    DOTENV: production
+    GPG_PASSPHRASE:
+  image: interaction/project_template:master
+  links:
+    - elasticsearch
+    # - postgres
+    - redis
+  restart: always
+  tags:
+    - production
+celerybeat:
+  # autoredeploy: true
+  command: setup-django.sh celerybeat.sh
+  deployment_strategy: high_availability
+  environment:
+    DOTENV: production
+    GPG_PASSPHRASE:
+  image: interaction/project_template:master
+  links:
+    - redis
+  restart: always
+  tags:
+    - production
+celeryflower:
+  # autoredeploy: true
+  command: setup-django.sh celeryflower.sh
+  deployment_strategy: high_availability
+  environment:
+    DOTENV: production
+    FORCE_SSL: yes
+    GPG_PASSPHRASE:
+    VIRTUAL_HOST: flower.project_template.*,https://flower.project_template.*
+  expose:
+    - "5555"
+  image: interaction/project_template:master
+  links:
+    - redis
+  restart: always
+  tags:
+    - production
+django:
+  # autoredeploy: true
+  command: setup-django.sh supervisord.sh
+  deployment_strategy: high_availability
+  environment:
+    DOTENV: production
+    FORCE_SSL: yes
+    GPG_PASSPHRASE:
+    VIRTUAL_HOST: project_template.*,https://project_template.*
+  expose:
+    - "8000"
+  image: interaction/project_template:master
+  links:
+    - elasticsearch
+    - celery
+    # - postgres
+    - redis
+  restart: always
+  tags:
+    - production
+elasticsearch:
+  # autoredeploy: true
+  image: interaction/elasticsearch-icu:1
+  restart: always
+  tags:
+    - production
+haproxy:
+  # autoredeploy: true
+  image: dockercloud/haproxy:1.5.1
+  links:
+    - celeryflower
+    - django
+  ports:
+    - "80:80"
+    - "443:443"
+  restart: always
+  roles:
+    - global
+  tags:
+    - production
+# postgres:
+#   # autoredeploy: true
+#   image: onjin/alpine-postgres:9.4
+#   restart: always
+#   tags:
+#     - production
+redis:
+  # autoredeploy: true
+  command: redis-server --appendonly yes
+  image: redis:3-alpine
+  restart: always
+  tags:
+    - production

@@ -9,6 +9,20 @@ EOF
 
 set -e
 
+if [[ -n "$WAITLOCK_ENABLE" ]]; then
+	cat <<EOF
+#
+# Do not be alarmed if you see "Waiting to acquire lock for command:" for
+# several minutes at a time. It might seem like nothing is happening, but the
+# command is already running in another background container.
+#
+# You can see the logs for all containers with:
+#
+#     $ docker-compose logs -f
+#
+EOF
+fi
+
 # Install Node modules.
 waitlock.sh npm-install.sh "$ICEKIT_PROJECT_DIR"
 

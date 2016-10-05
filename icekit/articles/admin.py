@@ -24,5 +24,3 @@ class PolymorphicArticleParentAdmin(PolymorphicParentModelAdmin, ArticleAdminBas
 
 class PolymorphicArticleChildAdmin(PolymorphicChildModelAdmin, ArticleAdminBase):
     pass
-
-

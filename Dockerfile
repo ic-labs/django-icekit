@@ -1,8 +1,11 @@
 FROM buildpack-deps:jessie
 
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
+        apt-transport-https \
         gettext \
+        gnupg2 \
         jq \
         nano \
         nginx \
@@ -10,6 +13,13 @@ RUN apt-get update \
         python \
         python-dev \
         pv \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN echo 'deb https://dl.bintray.com/sobolevn/deb git-secret main' | tee -a /etc/apt/sources.list
+RUN wget -nv -O - https://api.bintray.com/users/sobolevn/keys/gpg/public.key | apt-key add -
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        git-secret \
     && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_VERSION=4.4.2
@@ -60,6 +70,10 @@ ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/project_template
 ENV PATH=/opt/django-icekit/icekit/bin:$PATH
 ENV PGHOST=postgres
 ENV PGUSER=postgres
+ENV PIP_DISABLE_PIP_VERSION_CHECK=on
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONHASHSEED=random
+ENV PYTHONWARNINGS=ignore
 ENV REDIS_ADDRESS=redis:6379
 ENV SUPERVISORD_CONFIG_INCLUDE=supervisord-django.conf
 ENV WAITLOCK_ENABLE=1
