@@ -28,7 +28,8 @@ REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
 # other projects running on the same system.
 SETTINGS_MODULE_HASH = hashlib.md5(__file__ + BASE_SETTINGS_MODULE).hexdigest()
 
-SITE_NAME = os.environ.get('SITE_NAME', 'ICEkit')
+SITE_NAME = os.environ.get(
+    'SITE_NAME', os.environ.get('ICEKIT_PROJECT_NAME', 'ICEkit'))
 SITE_SLUG = slugify(unicode(SITE_NAME))
 
 SITE_DOMAIN = re.sub(
