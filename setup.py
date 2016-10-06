@@ -62,14 +62,15 @@ setuptools.setup(
         'django-fluent-contents',
         'django-fluent-pages',
         'django-model-settings',
-        'django-mptt!=0.8.5',  # See: https://github.com/django-fluent/django-fluent-pages/commit/98a35e43fbedf78c190e2dee38dd12f88a496bf3
+        'django-mptt',
         'django-multiurl',
         'django-polymorphic',
         'django-wysiwyg',
         'django_extensions',
-        'html5lib==0.999',
+        'html5lib',
         'nltk',
         'Pillow',
+        'pip-tools',
         'requests',
         'unidecode',
     ],
@@ -89,18 +90,19 @@ setuptools.setup(
             'Werkzeug',
         ],
         'django18': [
-            'Django>=1.8,<1.9',
+            'Django>=1.8,<1.9',  # LTS
         ],
         'forms': [
             'django-forms-builder',
         ],
         'project': [
+            'boto<=2.27',  # See: https://interaction-p.assembla.com/spaces/sfmoma/tickets/484/details?comment=824169603
             'celery[redis]',
             'ConcurrentLogHandler',
             'django-celery',
             'django-celery-email',
             'django-extensions',
-            'django-flat-theme<1.1.3',  # See: https://github.com/elky/django-flat-theme/issues/30'
+            'django-flat-theme<1.1.3',  # See: https://github.com/elky/django-flat-theme/issues/30
             'django-fluent-contents[markupoembeditemtext]',
             'django-fluent-pages[redirectnodereversion]',
             'django-master-password',
@@ -108,7 +110,7 @@ setuptools.setup(
             'django-post-office',
             'django-redis',
             'django-reversion>=1.9.3,<1.10',  # 1.9.3+ use DB transactions 1.10 has breaking changes for Django 1.9'
-            'django-storages<1.2',  # See: https://github.com/jschneier/django-storages/blob/cf3cb76ca060f0dd82766daa43ee92fccca3dec7/storages/backends/s3boto.py#L28-L30'
+            'django-storages',
             'django-test-without-migrations',
             'django-timezone',
             'docutils',
@@ -117,18 +119,13 @@ setuptools.setup(
             'gunicorn',
             'icekit-notifications',
             'ixc-django-compressor',
-            # 'ixc-redactor',
             'ixc-whitenoise',
             'Jinja2',
-            # 'newrelic',
             'psycopg2',
             'python-redis-lock[django]',
             'pytz',
             'raven',
             'supervisor',
-
-            # Override incompatible versions for nested dependencies.
-            'boto<=2.27',  # See: https://github.com/danilop/yas3fs/issues/26
         ],
         'search': [
             'django-fluent-pages[flatpage,fluentpage]',
