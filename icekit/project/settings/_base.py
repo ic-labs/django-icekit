@@ -232,8 +232,6 @@ MIDDLEWARE_CLASSES = (
 
     # Extra.
     'django.contrib.admindocs.middleware.XViewMiddleware',
-
-    'icekit.publishing.middleware.PublishingMiddleware',
 )
 
 ROOT_URLCONF = 'icekit.project.urls'
@@ -609,6 +607,8 @@ INSTALLED_APPS += (
     'icekit.plugins.slideshow',
     'icekit.plugins.twitter_embed',
 )
+
+MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
 
 # MASTER PASSWORD #############################################################
 
