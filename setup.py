@@ -96,7 +96,7 @@ setuptools.setup(
             'django-forms-builder',
         ],
         'project': [
-            'boto<=2.27',  # See: https://interaction-p.assembla.com/spaces/sfmoma/tickets/484/details?comment=824169603
+            'boto3',
             'celery[redis]',
             'ConcurrentLogHandler',
             'django-celery',
