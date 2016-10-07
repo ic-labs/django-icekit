@@ -26,13 +26,13 @@ from .models import PublishingModel
 
 def make_published(modeladmin, request, queryset):
     for row in queryset.all():
-        row.publish()
+        row.publish(request.user)
 make_published.short_description = _('Publish')
 
 
 def make_unpublished(modeladmin, request, queryset):
     for row in queryset.all():
-        row.unpublish()
+        row.unpublish(request.user)
 make_unpublished.short_description = _('Unpublish')
 
 
@@ -112,6 +112,30 @@ class PublishingStatusFilter(SimpleListFilter):
             return queryset.filter(
                 publishing_modified_at__lte=F(
                     'publishing_linked__publishing_modified_at'))
+
+
+class MyRecentModificationsFilter(SimpleListFilter):
+    """
+    Filter by my recent modifications
+
+    qs filter publishing_modified_by
+    ordering by publishing_modified_at
+    """
+    title = _('my modifications')
+    parameter_name = 'my_modifications'
+
+    MY_MODIFICATIONS = "my_modifications"
+
+    def lookups(self, request, model_admin):
+        lookups = (
+            (self.MY_MODIFICATIONS, _('My Recent Modifications')),
+        )
+        return lookups
+
+    def queryset(self, request, queryset):
+        if self.value() == self.MY_MODIFICATIONS:
+            qs = queryset.filter(publishing_modified_by=request.user)
+            return qs.order_by('-publishing_modified_at')
 
 
 class PublishingAdminForm(forms.ModelForm):
@@ -267,7 +291,7 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
     # page so we disable it for now, until we can investigate it further.
     # actions = (make_published, make_unpublished, )
     list_display = ('publishing_object_title', 'publishing_column', 'publishing_modified_at')
-    list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
+    list_filter = (MyRecentModificationsFilter, PublishingStatusFilter, PublishingPublishedFilter,)
 
     actions = ['publish', 'unpublish']
 
@@ -426,7 +450,7 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         if not self.has_publish_permission(request, obj):
             raise PermissionDenied
 
-        obj.unpublish()
+        obj.unpublish(request.user)
 
         if not request.is_ajax():
             messages.success(request, _('Published version has been deleted.'))
@@ -440,7 +464,7 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         if not self.has_publish_permission(request, obj):
             raise PermissionDenied
 
-        obj.publish()
+        obj.publish(request.user)
 
         if not request.is_ajax():
             messages.success(request, _('Draft version has been published.'))
@@ -588,7 +612,7 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         except AttributeError:
             pass
         for q in qs:
-            q.publish()
+            q.publish(request.user)
 
     def unpublish(self, request, qs):
         # Convert polymorphic queryset instances to real ones if/when necessary
@@ -597,7 +621,7 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         except AttributeError:
             pass
         for q in qs:
-            q.unpublish()
+            q.unpublish(request.user)
 
 
 class PublishingFluentPagesParentAdminMixin(_PublishingHelpersMixin):
@@ -629,7 +653,11 @@ class ICEKitFluentPagesParentAdminMixin(
         PublishingFluentPagesParentAdminMixin, UrlNodeParentAdmin,
 ):
     """ Add publishing features for FluentPage parent admin (listing) pages """
-    list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
+    list_filter = (
+        PublishingStatusFilter,
+        PublishingPublishedFilter,
+        MyRecentModificationsFilter
+    )
 
 
 class PublishableFluentContentsAdmin(PublishingAdmin, FluentLayoutsMixin):

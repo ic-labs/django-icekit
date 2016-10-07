@@ -6,6 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.dispatch import receiver
 from django.utils import timezone
+from django.conf import settings
 
 from fluent_contents.models import Placeholder
 from fluent_pages.models import UrlNode
@@ -26,6 +27,11 @@ class PublishingModel(models.Model):
     objects = PublishingManager()
     _default_manager = PublishingManager()
 
+    publishing_modified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        editable=False,
+        null=True,
+        blank=True)
     publishing_linked = models.OneToOneField(
         'self',
         related_name='publishing_draft',
@@ -46,6 +52,7 @@ class PublishingModel(models.Model):
         'publishing_linked',
         'publishing_is_draft',
         'publishing_modified_at',
+        'publishing_modified_by',
         'publishing_draft',
     )
     publishing_ignore_fields = publishing_fields + (
@@ -210,7 +217,7 @@ class PublishingModel(models.Model):
         return placeholder_fields
 
     @assert_draft
-    def publish(self):
+    def publish(self, user=None):
         """
         Publishes the object.
 
@@ -258,6 +265,10 @@ class PublishingModel(models.Model):
             # Set the date the object should be published at.
             publish_obj.publishing_published_at = self.publishing_published_at
 
+            # Set the publishing_modified_by
+            if user:
+                publish_obj.publishing_modified_by = user
+
             # Perform per-model preparation before saving published copy
             publish_obj.publishing_prepare_published_copy(self)
 
@@ -297,7 +308,7 @@ class PublishingModel(models.Model):
             return publish_obj
 
     @assert_draft
-    def unpublish(self):
+    def unpublish(self, user=None):
         """
         Un-publish the current object.
         """
@@ -315,6 +326,10 @@ class PublishingModel(models.Model):
             # validation that breaks when unlinked published objects exist.
             self.publishing_linked = None
             self.publishing_published_at = None
+
+            # Set the publishing_modified_by
+            if user:
+                self.publishing_modified_by = user
 
             # Save the draft to remove its relationship with the published copy
             publishing_signals.publishing_unpublish_save_draft.send(

@@ -7,6 +7,11 @@
   * "Slideshow" is now renamed "Image Gallery" and there is a new Image Gallery
     content plugin available (which renders a grid of thumbnails into a
     lightbox).
+    
+### Breaking changes
+
+  * PublishingModel now has a foreign key to AUTH_USER_MODEL. Any concrete model
+    that inherits from PublishingModel will need a new migration.
 
 ## 0.15 (27 September 2016)
 
