@@ -19,7 +19,7 @@
 								title="{% if item.title %}{{ item.title }}{% endif %}{% if item.title and item.caption %}<br>{% endif %}{% if item.caption %}{{ item.caption }}{% endif %}"
 							{% endif %}
 						>
-							<img src="{% thumbnail item.image.image 200x0 upscale %}" alt="{{ item.image.alt_text }}" />
+							<img src="{% thumbnail item.image.image "gallery" upscale %}" alt="{{ item.image.alt_text }}" />
 						</a>
 					</div>
 					{% if forloop.last or forloop.counter|divisibleby:4 %}
