@@ -8,6 +8,19 @@
     content plugin available (which renders a grid of thumbnails into a
     lightbox).
 
+Breaking changes:
+
+  * The initial migration for `icekit.plugins.slideshow` had the wrong database
+    table name, which meant that the `0004_auto_20160821_2140` migration would
+    not have correctly renamed the database table when upgrading to `>=0.10`
+    from an earlier version.
+
+    To fix this, run the following SQL manually:
+
+        ALTER TABLE "slideshow_slideshow" RENAME TO "icekit_plugins_slideshow_slideshow";
+
+    If you have yet to upgrade from `<0.10`, you don't need to do anything.
+
 ## 0.15 (27 September 2016)
 
   * Improvements to publishing to make it accomodate more types of content.
