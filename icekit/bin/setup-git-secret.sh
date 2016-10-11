@@ -11,9 +11,6 @@ set -e
 
 cd "$ICEKIT_PROJECT_DIR"
 
-# Place GPG home directory in project directory.
-export GNUPGHOME="$ICEKIT_PROJECT_DIR/.gnupg"
-
 # Derive a fictitious email address for the encryption key.
 export GPG_EMAIL="${GPG_EMAIL:-git-secret@$ICEKIT_PROJECT_NAME.icekit.interaction.net.au}"
 

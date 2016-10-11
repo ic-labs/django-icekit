@@ -43,7 +43,7 @@ WORKDIR /opt/django-icekit/
 RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python
 
 COPY requirements.txt setup.py /opt/django-icekit/
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt -U
 RUN touch requirements-local.txt
 RUN md5sum requirements.txt requirements-local.txt > requirements.md5
 

@@ -54,8 +54,6 @@ INSTALLED_APPS = dedupe_and_sort(
         'flat',
         'test_without_migrations',
     ],
-     # These apps last:
-     []
 )
 
 # Sort middleware according to documentation.

@@ -1,35 +1,35 @@
-def dedupe_and_sort(sequence, sorted_sequence=None, sorted_last_sequence=None):
+def dedupe_and_sort(sequence, first=None, last=None):
     """
-    De-dupe and partially sort a sequence. The `sorted_sequence` argument
-    should contain all the items that might appear in `sequence` and for which
-    the order (relative to each other) is important.
+    De-dupe and partially sort a sequence.
+
+    The `first` argument should contain all the items that might appear in
+    `sequence` and for which the order (relative to each other) is important.
+
+    The `last` argument is the same, but matching items will be placed at the
+    end of the sequence.
 
     For example, `INSTALLED_APPS` and `MIDDLEWARE_CLASSES` settings.
 
-    Items from `sorted_sequence` will only be included if they also appear in
-    `sequence`.
+    Items from `first` will only be included if they also appear in `sequence`.
 
-    Items from `sequence` that don't appear in `sorted_sequence` will come
+    Items from `sequence` that don't appear in `first` will come
     after any that do, and retain their existing order.
 
     Returns a sequence of the same as given.
     """
-    sorted_sequence = sorted_sequence or []
-    # First, add items from the sorted sequence that intersect with the main
-    # sequence.
-    new_sequence = [i for i in sorted_sequence if i in sequence]
-    # Then, add the remaining items from the main sequence in their current
-    # order, ignoring duplicates.
+    first = first or []
+    last = last or []
+    # Add items that should be sorted first.
+    new_sequence = [i for i in first if i in sequence]
+    # Add remaining items in their current order, ignoring duplicates and items
+    # that should be sorted last.
     for item in sequence:
-        if item not in new_sequence:
+        if item not in new_sequence and item not in last:
             new_sequence.append(item)
+    # Add items that should be sorted last.
+    new_sequence.extend([i for i in last if i in sequence])
     # Return a sequence of the same type as given.
-
-    sorted_last_sequence = sorted_last_sequence or []
-    newer_sequence = [i for i in new_sequence if i not in sorted_last_sequence]
-    newer_sequence += sorted_last_sequence
-
-    return type(sequence)(newer_sequence)
+    return type(sequence)(new_sequence)
 
 
 def slice_sequences(sequences, start, end):

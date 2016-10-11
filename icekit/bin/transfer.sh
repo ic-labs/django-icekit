@@ -4,10 +4,10 @@ set -e
 
 if [ $# -eq 0 ]; then
 	cat <<-EOF
-Usage:
-	$(basename "$0") /tmp/test.md
-	cat /tmp/test.md | $(basename "$0") test.md
-EOF
+	Usage:
+		$(basename "$0") /tmp/test.md
+		cat /tmp/test.md | $(basename "$0") test.md
+	EOF
 	exit 1
 fi
 

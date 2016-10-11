@@ -1,11 +1,11 @@
 celery:
+  image: 'interaction/project_template:master'
   # autoredeploy: true
-  command: setup-django.sh celery.sh
+  command: 'setup-django.sh celery.sh'
   deployment_strategy: high_availability
   environment:
-    DOTENV: production
-    GPG_PASSPHRASE:
-  image: interaction/project_template:master
+    - DOTENV=production
+    - GPG_PASSPHRASE=
   links:
     - elasticsearch
     # - postgres
@@ -14,47 +14,47 @@ celery:
   tags:
     - production
 celerybeat:
+  image: 'interaction/project_template:master'
   # autoredeploy: true
-  command: setup-django.sh celerybeat.sh
+  command: 'setup-django.sh celerybeat.sh'
   deployment_strategy: high_availability
   environment:
-    DOTENV: production
-    GPG_PASSPHRASE:
-  image: interaction/project_template:master
+    - DOTENV=production
+    - GPG_PASSPHRASE=
   links:
     - redis
   restart: always
   tags:
     - production
 celeryflower:
+  image: 'interaction/project_template:master'
   # autoredeploy: true
-  command: setup-django.sh celeryflower.sh
+  command: 'setup-django.sh celeryflower.sh'
   deployment_strategy: high_availability
   environment:
-    DOTENV: production
-    FORCE_SSL: yes
-    GPG_PASSPHRASE:
-    VIRTUAL_HOST: flower.project_template.*,https://flower.project_template.*
+    - DOTENV=production
+    - FORCE_SSL=yes
+    - GPG_PASSPHRASE=
+    - 'VIRTUAL_HOST=flower.project_template.*,https://flower.project_template.*'
   expose:
-    - "5555"
-  image: interaction/project_template:master
+    - '5555'
   links:
     - redis
   restart: always
   tags:
     - production
 django:
+  image: 'interaction/project_template:master'
   # autoredeploy: true
-  command: setup-django.sh supervisord.sh
+  command: 'setup-django.sh supervisord.sh'
   deployment_strategy: high_availability
   environment:
-    DOTENV: production
-    FORCE_SSL: yes
-    GPG_PASSPHRASE:
-    VIRTUAL_HOST: project_template.*,https://project_template.*
+    - DOTENV=production
+    - FORCE_SSL=yes
+    - GPG_PASSPHRASE=
+    - 'VIRTUAL_HOST=project_template.*,https://project_template.*'
   expose:
-    - "8000"
-  image: interaction/project_template:master
+    - '8000'
   links:
     - elasticsearch
     - celery
@@ -64,35 +64,35 @@ django:
   tags:
     - production
 elasticsearch:
+  image: 'interaction/elasticsearch-icu:1'
   # autoredeploy: true
-  image: interaction/elasticsearch-icu:1
   restart: always
   tags:
     - production
 haproxy:
+  image: 'dockercloud/haproxy:1.5.1'
   # autoredeploy: true
-  image: dockercloud/haproxy:1.5.1
   links:
     - celeryflower
     - django
   ports:
-    - "80:80"
-    - "443:443"
+    - '80:80'
+    - '443:443'
   restart: always
   roles:
     - global
   tags:
     - production
 # postgres:
+#   image: 'onjin/alpine-postgres:9.4'
 #   # autoredeploy: true
-#   image: onjin/alpine-postgres:9.4
 #   restart: always
 #   tags:
 #     - production
 redis:
+  image: 'redis:3-alpine'
   # autoredeploy: true
-  command: redis-server --appendonly yes
-  image: redis:3-alpine
+  command: 'redis-server --appendonly yes'
   restart: always
   tags:
     - production

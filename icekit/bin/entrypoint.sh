@@ -80,6 +80,9 @@ export BASE_SETTINGS_MODULE="${BASE_SETTINGS_MODULE:-develop}"
 # Get number of CPU cores, so we know how many processes to run.
 export CPU_CORES=$(python -c 'import multiprocessing; print multiprocessing.cpu_count();')
 
+# Place GPG home directory in project directory.
+export GNUPGHOME="$ICEKIT_PROJECT_DIR/.gnupg"
+
 # Get absolute directory for the `icekit` package.
 export ICEKIT_DIR=$(python -c 'import icekit, os; print os.path.abspath(os.path.dirname(icekit.__file__));')
 
