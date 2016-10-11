@@ -99,15 +99,15 @@ class Author(AbstractCollectedContent, PublishingModel):
         return []
 
     @property
-    def collection(self):
+    def parent(self):
         try:
             return AuthorListing.objects.draft()[0]
         except IndexError:
             raise IndexError("You need to create a Author Listing Page")
 
     def get_absolute_url(self):
-        parent_url = self.collection.get_absolute_url()
-        return urljoin(parent_url, self.slug)
+        parent_url = self.parent.get_absolute_url()
+        return urljoin(parent_url, self.slug + "/")
 
     def get_layout_template_name(self):
         return "icekit_authors/detail.html"
