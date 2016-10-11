@@ -75,14 +75,14 @@ with two mixin classes:
 
     # models.py
 
-    from icekit.abstract_models import FluentFieldsMixin
+    from icekit.mixins import FluentFieldsMixin
 
     class MyModel(FluentFieldsMixin, MyModelBase):
         ...
 
     # admin.py
 
-    from icekit.admin import FluentLayoutsMixin
+    from icekit.admin_mixins import FluentLayoutsMixin
 
     class MyModelAdmin(FluentLayoutsMixin, MyModelAdminBase):
         ...

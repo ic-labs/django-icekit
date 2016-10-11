@@ -5,10 +5,16 @@
 **/*.swp
 **/.DS_Store
 **/npm-debug.log
+**/pubring.gpg~
+**/random_seed
 **/requirements-local.txt
-/.git/
+/.env.local
+/.env.production
+/.env.staging
+/.gnupg/gpg.conf
 /.idea/
 /bower_components/
+/icekit_settings_local.py
 /node_modules/
 /static_root/
 /var/

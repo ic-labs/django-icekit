@@ -9,6 +9,7 @@ from fluent_pages.extensions import page_type_pool
 from icekit import abstract_models
 from icekit.articles.abstract_models import ListingPage, ArticleBase
 from icekit.articles.page_type_plugins import ListingPagePlugin
+
 from icekit.page_types.layout_page.abstract_models import \
     AbstractLayoutPage, AbstractUnpublishableLayoutPage
 from icekit.plugins import ICEkitFluentContentsPagePlugin
@@ -21,15 +22,15 @@ class BaseModel(abstract_models.AbstractBaseModel):
     pass
 
 
-class FooWithLayout(abstract_models.LayoutFieldMixin):
+class FooWithLayout(mixins.LayoutFieldMixin):
     pass
 
 
-class BarWithLayout(abstract_models.LayoutFieldMixin):
+class BarWithLayout(mixins.LayoutFieldMixin):
     pass
 
 
-class BazWithLayout(abstract_models.LayoutFieldMixin):
+class BazWithLayout(mixins.LayoutFieldMixin):
     pass
 
 

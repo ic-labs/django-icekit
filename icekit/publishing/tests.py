@@ -5,6 +5,7 @@ import urlparse
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Group
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseNotFound, QueryDict
@@ -19,6 +20,7 @@ from mock import patch, Mock
 from django_dynamic_fixture import G
 
 from fluent_contents.plugins.rawhtml.models import RawHtmlItem
+from fluent_contents.models import Placeholder
 
 from fluent_pages.models.db import UrlNode
 
@@ -53,12 +55,6 @@ class TestPublishingModelAndQueryset(TestCase):
             pk=1,
             defaults={'name': 'example.com', 'domain': 'example.com'})
         self.user_1 = G(User)
-        self.page_layout_1 = G(Layout)
-        self.page_1 = LayoutPage.objects.create(
-            author=self.user_1,
-            title='Test title',
-            layout=self.page_layout_1,
-        )
         self.staff_1 = G(
             User,
             is_staff=True,
@@ -66,7 +62,7 @@ class TestPublishingModelAndQueryset(TestCase):
             is_superuser=True,
         )
 
-        # Create initial publishable SlideShow
+        # Create initial publishable SlideShow, a simple publishable model
         self.slide_show_1 = SlideShow.objects.create(
             title='Test Slideshow',
         )
@@ -184,49 +180,6 @@ class TestPublishingModelAndQueryset(TestCase):
             # draft and published copies of an item could be shown)
             self.assertFalse(self.slide_show_1.publishing_linked.is_visible)
 
-    def test_model_is_within_publication_dates(self):
-        # Empty publication start/end dates
-        self.assertTrue(self.page_1.is_within_publication_dates())
-        # Test publication start date
-        self.page_1.publication_date = timezone.now() - timedelta(seconds=1)
-        self.page_1.save()
-        self.assertTrue(self.page_1.is_within_publication_dates())
-        self.page_1.publication_date = timezone.now() + timedelta(seconds=1)
-        self.page_1.save()
-        self.assertFalse(self.page_1.is_within_publication_dates())
-        # Reset
-        self.page_1.publication_date = None
-        self.page_1.save()
-        self.assertTrue(self.page_1.is_within_publication_dates())
-        # Test publication end date
-        self.page_1.publication_end_date = \
-            timezone.now() + timedelta(seconds=1)
-        self.page_1.save()
-        self.assertTrue(self.page_1.is_within_publication_dates())
-        self.page_1.publication_end_date = \
-            timezone.now() - timedelta(seconds=1)
-        self.page_1.save()
-        self.assertFalse(self.page_1.is_within_publication_dates())
-        # Reset
-        self.page_1.publication_end_date = None
-        self.page_1.save()
-        self.assertTrue(self.page_1.is_within_publication_dates())
-        # Test both publication start and end dates against arbitrary timestamp
-        self.page_1.publication_date = timezone.now() - timedelta(seconds=1)
-        self.page_1.publication_end_date = \
-            timezone.now() + timedelta(seconds=1)
-        self.assertTrue(self.page_1.is_within_publication_dates())
-        self.assertTrue(
-            self.page_1.is_within_publication_dates(timezone.now()))
-        # Timestamp exactly at publication start date is acceptable
-        self.assertTrue(
-            self.page_1.is_within_publication_dates(
-                self.page_1.publication_date))
-        # Timestamp exactly at publication end date is not acceptable
-        self.assertFalse(
-            self.page_1.is_within_publication_dates(
-                self.page_1.publication_end_date))
-
     def test_model_is_published(self):
         # Only actual published copy returns True for `is_published`
         self.assertFalse(self.slide_show_1.is_published)
@@ -285,42 +238,6 @@ class TestPublishingModelAndQueryset(TestCase):
         self.assertEqual(
             set([self.slide_show_1.publishing_linked]),
             set(SlideShow.objects.published(force_exchange=True)))
-
-    def test_queryset_published_with_urlnode_based_publishing_model(self):
-        self.assertEqual(
-            [], list(LayoutPage.objects.published()))
-        self.page_1.publish()
-        # Return only published items
-        self.assertEqual(
-            [self.page_1.publishing_linked],  # Compare published copy
-            list(LayoutPage.objects.published()))
-        # Confirm we only get published items regardless of
-        # `is_draft_request_context`
-        with patch('icekit.publishing.apps.is_draft_request_context') as p:
-            p.return_value = True
-            self.assertEqual(
-                [self.page_1.publishing_linked],
-                list(LayoutPage.objects.published()))
-        # Delegates to `visible` if `for_user` provided
-        with patch('icekit.publishing.managers.PublishingQuerySet.visible') \
-                as p:
-            p.return_value = 'success!'
-            self.assertEqual(
-                'success!',
-                LayoutPage.objects.published(for_user=self.staff_1))
-            self.assertEqual(
-                'success!', LayoutPage.objects.published(for_user=None))
-            self.assertEqual(
-                'success!', LayoutPage.objects.published(for_user='whatever'))
-        # Confirm draft-for-published exchange is disabled by default...
-        self.page_1.unpublish()
-        self.assertEqual(
-            set([]), set(LayoutPage.objects.published()))
-        # ... but exchange can be forced
-        self.page_1.publish()
-        self.assertEqual(
-            set([self.page_1.publishing_linked]),
-            set(LayoutPage.objects.published(force_exchange=True)))
 
     def test_queryset_visible(self):
         self.slide_show_1.publish()
@@ -464,6 +381,200 @@ class TestPublishingModelAndQueryset(TestCase):
             self.slide_show_1.publishing_linked,
             self.slide_show_1.publishing_linked.get_published())
 
+
+class TestPublishableFluentContentsPage(TestCase):
+    """ Test publishing features with a Fluent Contents Page """
+
+    def setUp(self):
+        self.site, __ = Site.objects.get_or_create(
+            pk=1,
+            defaults={'name': 'example.com', 'domain': 'example.com'})
+
+        self.user_1 = G(User)
+        self.staff_1 = G(
+            User,
+            is_staff=True,
+            is_active=True,
+            is_superuser=True,
+        )
+
+        self.page_layout_1 = G(Layout)
+        self.fluent_page = LayoutPage.objects.create(
+            author=self.user_1,
+            title='Test title',
+            layout=self.page_layout_1,
+        )
+        self.placeholder = Placeholder.objects.create_for_object(
+            self.fluent_page,
+            slot='test-slot',
+            role='t',
+            title='Test Placeholder',
+        )
+
+    def test_contentitems_and_placeholders_cloned_on_publish(self):
+        # Associate content items with page
+        item_1 = fluent_contents.create_content_instance(
+            RawHtmlItem,
+            self.fluent_page,
+            placeholder_name='test-slot',
+            html='<b>rawhtmlitem 1</b>'
+        )
+        item_2 = fluent_contents.create_content_instance(
+            RawHtmlItem,
+            self.fluent_page,
+            placeholder_name='test-slot',
+            html='<b>rawhtmlitem 2</b>'
+        )
+        self.assertEqual(
+            2, self.fluent_page.contentitem_set.count())
+        self.assertEqual(
+            list(self.fluent_page.contentitem_set.all()),
+            [item_1, item_2])
+        self.assertEqual(
+            [i.html for i in self.fluent_page.contentitem_set.all()],
+            ['<b>rawhtmlitem 1</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertEqual(
+            [i.placeholder for i in self.fluent_page.contentitem_set.all()],
+            [self.placeholder, self.placeholder])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in self.fluent_page.contentitem_set.all()],
+            ['test-slot', 'test-slot'])
+        # Publish page
+        self.fluent_page.publish()
+        published_page = self.fluent_page.publishing_linked
+        self.assertNotEqual(
+            self.fluent_page.pk, published_page.pk)
+        # Confirm published page has cloned content items and placeholders
+        # (with different model instances (PKs) but same content)
+        self.assertEqual(
+            2, published_page.contentitem_set.count())
+        self.assertNotEqual(
+            list(published_page.contentitem_set.all()),
+            [item_1, item_2])
+        self.assertEqual(
+            [i.html for i in published_page.contentitem_set.all()],
+            ['<b>rawhtmlitem 1</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertNotEqual(
+            [i.placeholder for i in published_page.contentitem_set.all()],
+            [self.placeholder, self.placeholder])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in published_page.contentitem_set.all()],
+            ['test-slot', 'test-slot'])
+        # Modify content items and placeholders for draft page
+        item_1.html = '<b>rawhtmlitem 1 - updated</b>'
+        item_1.save()
+        self.placeholder.slot = 'test-slot-updated'
+        self.placeholder.save()
+        self.fluent_page.save()  # Trigger timestamp change in draft page
+        self.assertEqual(
+            [i.html for i in self.fluent_page.contentitem_set.all()],
+            ['<b>rawhtmlitem 1 - updated</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in self.fluent_page.contentitem_set.all()],
+            ['test-slot-updated', 'test-slot-updated'])
+        # Confirm content items for published copy remain unchanged
+        published_page = self.fluent_page.publishing_linked
+        self.assertEqual(
+            [i.html for i in published_page.contentitem_set.all()],
+            ['<b>rawhtmlitem 1</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in published_page.contentitem_set.all()],
+            ['test-slot', 'test-slot'])
+        # Re-publish page
+        self.fluent_page.publish()
+        published_page = self.fluent_page.publishing_linked
+        # Confirm published page has updated content items
+        self.assertEqual(
+            [i.html for i in published_page.contentitem_set.all()],
+            ['<b>rawhtmlitem 1 - updated</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in published_page.contentitem_set.all()],
+            ['test-slot-updated', 'test-slot-updated'])
+
+    def test_model_is_within_publication_dates(self):
+        # Empty publication start/end dates
+        self.assertTrue(self.fluent_page.is_within_publication_dates())
+        # Test publication start date
+        self.fluent_page.publication_date = timezone.now() - timedelta(seconds=1)
+        self.fluent_page.save()
+        self.assertTrue(self.fluent_page.is_within_publication_dates())
+        self.fluent_page.publication_date = timezone.now() + timedelta(seconds=1)
+        self.fluent_page.save()
+        self.assertFalse(self.fluent_page.is_within_publication_dates())
+        # Reset
+        self.fluent_page.publication_date = None
+        self.fluent_page.save()
+        self.assertTrue(self.fluent_page.is_within_publication_dates())
+        # Test publication end date
+        self.fluent_page.publication_end_date = \
+            timezone.now() + timedelta(seconds=1)
+        self.fluent_page.save()
+        self.assertTrue(self.fluent_page.is_within_publication_dates())
+        self.fluent_page.publication_end_date = \
+            timezone.now() - timedelta(seconds=1)
+        self.fluent_page.save()
+        self.assertFalse(self.fluent_page.is_within_publication_dates())
+        # Reset
+        self.fluent_page.publication_end_date = None
+        self.fluent_page.save()
+        self.assertTrue(self.fluent_page.is_within_publication_dates())
+        # Test both publication start and end dates against arbitrary timestamp
+        self.fluent_page.publication_date = timezone.now() - timedelta(seconds=1)
+        self.fluent_page.publication_end_date = \
+            timezone.now() + timedelta(seconds=1)
+        self.assertTrue(self.fluent_page.is_within_publication_dates())
+        self.assertTrue(
+            self.fluent_page.is_within_publication_dates(timezone.now()))
+        # Timestamp exactly at publication start date is acceptable
+        self.assertTrue(
+            self.fluent_page.is_within_publication_dates(
+                self.fluent_page.publication_date))
+        # Timestamp exactly at publication end date is not acceptable
+        self.assertFalse(
+            self.fluent_page.is_within_publication_dates(
+                self.fluent_page.publication_end_date))
+
+    def test_queryset_published_with_urlnode_based_publishing_model(self):
+        self.assertEqual(
+            [], list(LayoutPage.objects.published()))
+        self.fluent_page.publish()
+        # Return only published items
+        self.assertEqual(
+            [self.fluent_page.publishing_linked],  # Compare published copy
+            list(LayoutPage.objects.published()))
+        # Confirm we only get published items regardless of
+        # `is_draft_request_context`
+        with patch('icekit.publishing.apps.is_draft_request_context') as p:
+            p.return_value = True
+            self.assertEqual(
+                [self.fluent_page.publishing_linked],
+                list(LayoutPage.objects.published()))
+        # Delegates to `visible` if `for_user` provided
+        with patch('icekit.publishing.managers.PublishingQuerySet.visible') \
+                as p:
+            p.return_value = 'success!'
+            self.assertEqual(
+                'success!',
+                LayoutPage.objects.published(for_user=self.staff_1))
+            self.assertEqual(
+                'success!', LayoutPage.objects.published(for_user=None))
+            self.assertEqual(
+                'success!', LayoutPage.objects.published(for_user='whatever'))
+        # Confirm draft-for-published exchange is disabled by default...
+        self.fluent_page.unpublish()
+        self.assertEqual(
+            set([]), set(LayoutPage.objects.published()))
+        # ... but exchange can be forced
+        self.fluent_page.publish()
+        self.assertEqual(
+            set([self.fluent_page.publishing_linked]),
+            set(LayoutPage.objects.published(force_exchange=True)))
+
     def test_urlnodequerysetwithpublishingfeatures_for_publishing_model(self):
         # Create page with related pages relationships to Fluent Page
         test_page = LayoutPageWithRelatedPages.objects.create(
@@ -471,10 +582,10 @@ class TestPublishingModelAndQueryset(TestCase):
             title='Test Page',
             layout=self.page_layout_1,
         )
-        test_page.related_pages.add(self.page_1)
-        self.page_1.publish()
+        test_page.related_pages.add(self.fluent_page)
+        self.fluent_page.publish()
         self.assertEqual(
-            set([self.page_1]),
+            set([self.fluent_page]),
             set(test_page.related_pages.all()))
         # Confirm relationship queryset is monkey-patched
         self.assertEqual(
@@ -482,7 +593,7 @@ class TestPublishingModelAndQueryset(TestCase):
             type(test_page.related_pages.all()))
         # Published -- exchange of draft-to-published items by default
         self.assertEqual(
-            set([self.page_1.get_published()]),
+            set([self.fluent_page.get_published()]),
             set(test_page.related_pages.published()))
         # Published -- exchange of draft-to-published items can be disabled
         self.assertEqual(
@@ -490,16 +601,131 @@ class TestPublishingModelAndQueryset(TestCase):
             set(test_page.related_pages.published(force_exchange=False)))
         # Draft
         self.assertEqual(
-            set([self.page_1]),
+            set([self.fluent_page]),
             set(test_page.related_pages.draft()))
         # Visible - published items unless we are in privileged context
         self.assertEqual(
-            set([self.page_1.get_published()]),
+            set([self.fluent_page.get_published()]),
             set(test_page.related_pages.visible()))
         with override_draft_request_context(True):
             self.assertEqual(
-                set([self.page_1]),
+                set([self.fluent_page]),
                 set(test_page.related_pages.visible()))
+
+
+class TestPublishableFluentContents(TestCase):
+    """ Test publishing features with a Fluent Contents item (not a page) """
+
+    def setUp(self):
+        self.site, __ = Site.objects.get_or_create(
+            pk=1,
+            defaults={'name': 'example.com', 'domain': 'example.com'})
+
+        self.user_1 = G(User)
+        self.staff_1 = G(
+            User,
+            is_staff=True,
+            is_active=True,
+            is_superuser=True,
+        )
+
+        self.page_layout_1 = G(Layout)
+        self.fluent_contents = Article.objects.create(
+            title='Test title',
+            layout=self.page_layout_1,
+        )
+        self.placeholder = Placeholder.objects.create_for_object(
+            self.fluent_contents,
+            slot='test-slot',
+            role='t',
+            title='Test Placeholder',
+        )
+
+    def test_contentitems_and_placeholders_cloned_on_publish(self):
+        # Associate content items with page
+        article_ct = ContentType.objects.get_for_model(Article)
+        item_1 = RawHtmlItem.objects.create(
+            parent_type=article_ct,
+            parent_id=self.fluent_contents.id,
+            placeholder=self.placeholder,
+            html='<b>rawhtmlitem 1</b>'
+        )
+        item_2 = RawHtmlItem.objects.create(
+            parent_type=article_ct,
+            parent_id=self.fluent_contents.id,
+            placeholder=self.placeholder,
+            html='<b>rawhtmlitem 2</b>'
+        )
+        self.assertEqual(
+            2, self.fluent_contents.contentitem_set.count())
+        self.assertEqual(
+            list(self.fluent_contents.contentitem_set.all()),
+            [item_1, item_2])
+        self.assertEqual(
+            [i.html for i in self.fluent_contents.contentitem_set.all()],
+            ['<b>rawhtmlitem 1</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertEqual(
+            [i.placeholder for i in self.fluent_contents.contentitem_set.all()],
+            [self.placeholder, self.placeholder])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in self.fluent_contents.contentitem_set.all()],
+            ['test-slot', 'test-slot'])
+        # Publish page
+        self.fluent_contents.publish()
+        published_page = self.fluent_contents.publishing_linked
+        self.assertNotEqual(
+            self.fluent_contents.pk, published_page.pk)
+        # Confirm published page has cloned content items and placeholders
+        # (with different model instances (PKs) but same content)
+        self.assertEqual(
+            2, published_page.contentitem_set.count())
+        self.assertNotEqual(
+            list(published_page.contentitem_set.all()),
+            [item_1, item_2])
+        self.assertEqual(
+            [i.html for i in published_page.contentitem_set.all()],
+            ['<b>rawhtmlitem 1</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertNotEqual(
+            [i.placeholder for i in published_page.contentitem_set.all()],
+            [self.placeholder, self.placeholder])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in published_page.contentitem_set.all()],
+            ['test-slot', 'test-slot'])
+        # Modify content items and placeholders for draft page
+        item_1.html = '<b>rawhtmlitem 1 - updated</b>'
+        item_1.save()
+        self.placeholder.slot = 'test-slot-updated'
+        self.placeholder.save()
+        self.fluent_contents.save()  # Trigger timestamp change in draft page
+        self.assertEqual(
+            [i.html for i in self.fluent_contents.contentitem_set.all()],
+            ['<b>rawhtmlitem 1 - updated</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in self.fluent_contents.contentitem_set.all()],
+            ['test-slot-updated', 'test-slot-updated'])
+        # Confirm content items for published copy remain unchanged
+        published_page = self.fluent_contents.publishing_linked
+        self.assertEqual(
+            [i.html for i in published_page.contentitem_set.all()],
+            ['<b>rawhtmlitem 1</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in published_page.contentitem_set.all()],
+            ['test-slot', 'test-slot'])
+        # Re-publish page
+        self.fluent_contents.publish()
+        published_page = self.fluent_contents.publishing_linked
+        # Confirm published page has updated content items
+        self.assertEqual(
+            [i.html for i in published_page.contentitem_set.all()],
+            ['<b>rawhtmlitem 1 - updated</b>', '<b>rawhtmlitem 2</b>'])
+        self.assertEqual(
+            [i.placeholder.slot
+             for i in published_page.contentitem_set.all()],
+            ['test-slot-updated', 'test-slot-updated'])
 
 
 class TestDjangoDeleteCollectorPatchForProxyModels(TransactionTestCase):

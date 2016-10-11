@@ -1,7 +1,7 @@
 from fluent_pages.integration.fluent_contents import FluentContentsPage
 
 from icekit.publishing.models import PublishableFluentContentsPage
-from icekit.abstract_models import LayoutFieldMixin
+from icekit.mixins import LayoutFieldMixin
 
 
 class AbstractUnpublishableLayoutPage(FluentContentsPage, LayoutFieldMixin):

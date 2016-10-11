@@ -1,5 +1,52 @@
 # Changelog
 
+## In development
+
+  * Preview pages are now visually highlighted, and have a different HTML title.
+
+  * "Slideshow" is now renamed "Image Gallery" and there is a new Image Gallery
+    content plugin available (which renders a grid of thumbnails into a
+    lightbox).
+
+Breaking changes:
+
+  * The initial migration for `icekit.plugins.slideshow` had the wrong database
+    table name, which meant that the `0004_auto_20160821_2140` migration would
+    not have correctly renamed the database table when upgrading to `>=0.10`
+    from an earlier version.
+
+    To fix this, run the following SQL manually:
+
+        ALTER TABLE "slideshow_slideshow" RENAME TO "icekit_plugins_slideshow_slideshow";
+
+    If you have yet to upgrade from `<0.10`, you don't need to do anything.
+
+## 0.15 (27 September 2016)
+
+  * Improvements to publishing to make it accomodate more types of content.
+
+  * Fix bug where the content items and placeholders associated with a
+    fluent content model (other than a page) were not included in the
+    published copy.
+
+  * Provide `icekit.publishing.models.PublishableFluentContents` and
+    `icekit.publishing.admin.PublishableFluentContentsAdmin` as base
+    classes for fluent content models and admins, to help keep things
+    DRY.
+
+   * Minor docs on testing.
+
+   * Greater test coverage.
+
+### Breaking changes
+
+  * Import model mixins `FluentFieldsMixin`, `LayoutFieldMixin`, and
+    `ReadabilityMixin` from `icekit.mixins` module instead of
+    `icekit.abstract_models`.
+
+  * Import admin mixin `FluentLayoutsMixin` from `icekit.admin_mixins`
+    module instead of `icekit.admin`.
+
 ## 0.14.1 (26 September 2016)
 
   * ICEkit gets a facelift. Content editing now looks cleaner and easier to
@@ -20,6 +67,7 @@
   * Update `.editorconfig`, and add to project template.
 
   * Tag Docker images during build on Travis CI for release versions.
+
 
 ## 0.14 (20 September 2016)
 

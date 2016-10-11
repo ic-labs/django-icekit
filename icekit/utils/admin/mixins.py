@@ -1,4 +1,5 @@
 import logging
+import inspect
 
 from django.conf import settings
 from django.contrib.admin.views.main import TO_FIELD_VAR
@@ -6,6 +7,10 @@ from django.contrib.admin.widgets import (ForeignKeyRawIdWidget,
     ManyToManyRawIdWidget,)
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
+
+from polymorphic.admin import PolymorphicParentModelAdmin
+from polymorphic.admin.childadmin import PolymorphicChildModelAdmin, \
+    ParentAdminNotRegistered
 
 from fluent_contents.admin.contentitems import (BaseContentItemInline,
     get_content_item_inlines,)
@@ -210,3 +215,42 @@ class PolymorphicFluentAdminRawIdFix(PolymorphicAdminRawIdFix):
 
 class PolymorphicReferringItemInline(PolymorphicAdminRawIdFix, BaseContentItemInline):
     pass
+
+
+class PolymorphicChildModelAdminGetParentAdminFix(PolymorphicChildModelAdmin):
+    """
+    Use this mixin to fix the ``ParentAdminNotRegistered`` error produced by
+    ``PolymorphicChildModelAdmin._get_parent_admin`` for django-polymorphic
+    versions 1.0+ because Fluent Pages' ``UrlNode`` is identified as the
+    content type "parent model" of pages instead of ``Page``, when only
+    ``Page`` is registered in the admin (and we definitely do not want to
+    register ``UrlNode``). See issue #31.
+    """
+
+    def _get_parent_admin(self):
+        """
+        Override problematic method with a version that detects parent admin
+        lookup failures and will find the nearest superclass for the model
+        which actually has an admin registered.
+        """
+        try:
+            super(PolymorphicChildModelAdminGetParentAdminFix, self) \
+                ._get_parent_admin()
+        except ParentAdminNotRegistered:
+            # Polymorphic content type model to which admin must apply
+            ctype_model = self.model._meta.get_field('polymorphic_ctype').model
+            for klass in inspect.getmro(self.model):
+                # Ignore model ancestors that are not subclasses of the target
+                # ctype model
+                if not issubclass(klass, ctype_model):
+                    continue
+                # Fetch admin instance of model class (may return None)
+                model_admin = self.admin_site._registry.get(klass)
+                # Ignore admin (or None) that isn't a polymorphic parent admin
+                if not issubclass(type(model_admin),
+                                  PolymorphicParentModelAdmin):
+                    continue
+                return model_admin  # Success!
+            # If we get this far without returning a parent admin, there really
+            # isn't one registered so we re-raise the original exception
+            raise
