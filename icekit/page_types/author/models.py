@@ -2,16 +2,21 @@
 Model declaration for the `author` app.
 """
 import re
+from urlparse import urljoin
+
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.extensions import PluginHtmlField
 from fluent_contents.models import PlaceholderField
-from icekit.articles.abstract_models import ListingPage, ArticleBase
+from icekit.publishing.models import PublishingModel
+
+from icekit.content_collections.abstract_models import AbstractListingPage, \
+    AbstractCollectedContent
 from icekit.validators import RelativeURLValidator
 
 
-class AuthorListing(ListingPage):
+class AuthorListing(AbstractListingPage):
     """
     Author listing page to be mounted in fluent pages page tree.
     """
@@ -30,12 +35,12 @@ class AuthorListing(ListingPage):
         """
         return Author.objects.visible()
 
-
-class Author(ArticleBase):
+@python_2_unicode_compatible
+class Author(AbstractCollectedContent, PublishingModel):
     """
     An author model for use with article pages and assigning attribution.
     """
-    given_name = models.CharField(
+    given_names = models.CharField(
         max_length=255,
     )
 
@@ -43,6 +48,8 @@ class Author(ArticleBase):
         max_length=255,
         blank=True,
     )
+
+    slug = models.SlugField(max_length=255)
 
     portrait = models.ForeignKey(
         'icekit_plugins_image.Image',
@@ -66,6 +73,12 @@ class Author(ArticleBase):
         'author_content'
     )
 
+    def __str__(self):
+        return self.title()
+
+    def title(self):
+        return " ".join((self.given_names, self.family_name))
+
     @property
     def url_link_text(self):
         """
@@ -86,14 +99,18 @@ class Author(ArticleBase):
         return []
 
     @property
-    def parent(self):
+    def collection(self):
         try:
             return AuthorListing.objects.draft()[0]
         except IndexError:
             raise IndexError("You need to create a Author Listing Page")
 
+    def get_absolute_url(self):
+        parent_url = self.collection.get_absolute_url()
+        return urljoin(parent_url, self.slug)
+
     def get_layout_template_name(self):
-        return "author/detail.html"
+        return "icekit_authors/detail.html"
 
     class Meta:
-        ordering = ('family_name', )
+        ordering = ('family_name', 'given_names', )

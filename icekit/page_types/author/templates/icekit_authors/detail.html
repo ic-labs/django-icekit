@@ -6,12 +6,11 @@
 
 {% block content %}
 	{% if page.category %}{{ page.category }}{% endif %}
-
 	<h1>{{ page.title }}</h1>
 
     {% if page.portrait.image %}
         <figure>
-            <img src="{{ page.portrait.image|thumbnail_url:'author_portrait' }}" alt="{{ page.get_full_name }}" title="{{ page.get_full_name }}" class="about-page.portrait-image img-responsive">
+            <img src="{{ page.portrait.image|thumbnail_url:'icekit_authors_portrait_large' }}" alt="{{ page.get_full_name }}" title="{{ page.get_full_name }}" class="about-page.portrait-image img-responsive">
             {% if page.portrait.caption %}
                 <figcaption>
                     {{ page.portrait.caption|safe }}
@@ -49,7 +48,7 @@
 
 {% endblock %}
 
-{% block base_js %}
+{% block body_js %}
 	{{ block.super }}
 	{% render_content_items_media %}
 {% endblock %}

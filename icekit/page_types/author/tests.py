@@ -17,6 +17,7 @@ class AuthorTests(WebTest):
             is_superuser=True,
         )
 
+        # used to make the author's URL
         self.author_listing = models.AuthorListing.objects.create(
             author=self.staff_1,
             title="Authors",
@@ -25,13 +26,6 @@ class AuthorTests(WebTest):
 
         self.author_1 = G(models.Author)
         self.author_2 = G(models.Author)
-
-        # Create the placeholder manually as we aren't using the admin view which normally creates
-        # the placeholders for us.
-        placeholder_1 = Placeholder.objects.create_for_object(
-            self.author_1,
-            'author_content'
-        )
 
     def test_get_absolute_url(self):
         self.assertEqual(
@@ -46,8 +40,6 @@ class AuthorTests(WebTest):
             ('icekit_authors_author', self.author_1),
         )
 
-        no_history = ()
-
         for admin_app, obj in admin_app_list:
             response = self.app.get(
                 reverse('admin:%s_changelist' % admin_app),
@@ -56,12 +48,11 @@ class AuthorTests(WebTest):
             self.assertEqual(response.status_code, 200)
             response = self.app.get(reverse('admin:%s_add' % admin_app), user=self.staff_1)
             self.assertEqual(response.status_code, 200)
-            if obj not in no_history:
-                response = self.app.get(
-                    reverse('admin:%s_history' % admin_app, args=(obj.id,)),
-                    user=self.staff_1
-                )
-                self.assertEqual(response.status_code, 200)
+            response = self.app.get(
+                reverse('admin:%s_history' % admin_app, args=(obj.id,)),
+                user=self.staff_1
+            )
+            self.assertEqual(response.status_code, 200)
             response = self.app.get(
                 reverse('admin:%s_delete' % admin_app, args=(obj.id,)),
                 user=self.staff_1

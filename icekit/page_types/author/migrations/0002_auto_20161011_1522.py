@@ -7,17 +7,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('icekit_authors', '0003_auto_20160901_1536'),
+        ('icekit_authors', '0001_initial'),
     ]
 
     operations = [
         migrations.AlterModelOptions(
             name='author',
-            options={'ordering': ('family_name',)},
+            options={'ordering': ('family_name', 'given_names')},
         ),
-        migrations.AlterField(
+        migrations.RenameField(
             model_name='author',
-            name='slug',
-            field=models.SlugField(),
+            old_name='given_name',
+            new_name='given_names',
         ),
     ]

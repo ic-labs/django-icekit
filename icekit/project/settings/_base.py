@@ -418,7 +418,7 @@ THUMBNAIL_ALIASES = {
     #   'name-WxH': { 'size': (W, H), },
     # },
     '': {
-        'author_portrait': {
+        'icekit_authors_portrait_large': {
             'size': (360, 640),
         },
         'admin': {
@@ -565,10 +565,19 @@ FEATURED_APPS = (
 
 ICEKIT = {
     'LAYOUT_TEMPLATES': (
+        # A list of 3-tuples, each containing a label prefix, a path to a
+        # templates directory that will be searched by the installed template
+        # loaders, and a template name prefix.
         (
             'ICEkit',
-            os.path.join(ICEKIT_DIR, 'layouts/templates'),
+            os.path.join(ICEKIT_DIR,
+                         'layouts/templates'),
             'icekit/layouts',
+        ),
+        (
+            'Content Collections',
+            os.path.join(ICEKIT_DIR, 'content_collections/templates'),
+            'icekit_content_collections/layouts',
         ),
         (
             SITE_NAME,
@@ -585,9 +594,10 @@ INSTALLED_APPS += (
     'icekit.layouts',
     'icekit.publishing',
     'icekit.response_pages',
+    'icekit.content_collections',
     'notifications',
 
-    'icekit.authors',
+    'icekit.page_types.author',
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
 

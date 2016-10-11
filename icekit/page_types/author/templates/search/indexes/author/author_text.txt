@@ -1,4 +1,4 @@
-{% load fluent_contents_tags sfmoma_utils %}{% spaceless %}
+{% load fluent_contents_tags %}{% spaceless %}
 
 {{ object.get_full_name|safe }}
 {{ object.introduction|safe }}

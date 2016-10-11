@@ -3,23 +3,11 @@
 {% load wysiwyg %}
 
 {% block extrahead %}
-
 	{{ block.super }}
-
 	{% wysiwyg_setup %}
-
-{% endblock %}
-
-{% block extrastyle %}
-
-	{{ block.super }}
-
 {% endblock %}
 
 {% block content %}
-
 	{{ block.super }}
-
 	{% wysiwyg_editor "id_introduction" %}
-
 {% endblock %}
