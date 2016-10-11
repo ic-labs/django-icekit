@@ -13,6 +13,7 @@ RUN apt-get update \
         python \
         python-dev \
         pv \
+        vim-tiny \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo 'deb https://dl.bintray.com/sobolevn/deb git-secret main' | tee -a /etc/apt/sources.list
