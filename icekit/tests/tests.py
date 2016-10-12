@@ -7,7 +7,6 @@ import os
 from unittest import skip
 
 from django.apps import apps
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.contenttypes.models import ContentType
@@ -39,8 +38,6 @@ from icekit.plugins.twitter_embed.models import TwitterEmbedItem
 from icekit.response_pages.models import ResponsePage
 from mock import patch, Mock
 
-from icekit.tests.models import Article
-from icekit.tests.models import ArticleListing
 from icekit.utils import fluent_contents, implementation
 from icekit.utils.admin import mixins
 from icekit.utils.pagination import describe_page_numbers
@@ -132,7 +129,7 @@ class Forms(WebTest):
         self.assertEqual(teaf.cleaned_data['twitter_url'], twitter_url)
 
 
-class Layout(WebTest):
+class LayoutTest(WebTest):
 
     def test_auto_add(self):
         # No layouts.

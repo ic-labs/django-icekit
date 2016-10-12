@@ -64,7 +64,7 @@ setuptools.setup(
         'django-model-settings',
         'django-mptt',
         'django-multiurl',
-        'django-polymorphic',
+        'django-polymorphic>=0.8', # import pattern changed in 0.8
         'django-wysiwyg',
         'django_extensions',
         'html5lib==0.999',  # See: https://github.com/html5lib/html5lib-python/issues/189 and https://github.com/pydanny-archive/django-wysiwyg/issues/61
@@ -147,11 +147,6 @@ setuptools.setup(
             'psycopg2',
             'WebTest',
         ],
-        'glamkit': [
-            # 'glamkit-events', #SOON...
-            'glamkit-sponsors',
-            'icekit-press-releases',
-        ]
     },
     **kwargs
 )
