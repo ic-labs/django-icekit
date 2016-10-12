@@ -32,49 +32,21 @@ def dedupe_and_sort(sequence, first=None, last=None):
     return type(sequence)(new_sequence)
 
 
-def slice_sequences(sequences, start, end):
+def _apply_slice(sequence, start, end):
+    return sequence[start:end]
+
+
+def slice_sequences(sequences, start, end, apply_slice=None):
     """
     Performs a slice across multiple sequences.
     Useful when paginating across chained collections.
-
-    ```
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 0, 2)
-    [1, 2]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 2, 4)
-    [3, 4]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 4, 6)
-    [5, 6]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 6, 8)
-    [7]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 0, 10)
-    [1, 2, 3, 4, 5, 6, 7]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 0, 4)
-    [1, 2, 3, 4]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 1, 5)
-    [2, 3, 4, 5]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 3, 11)
-    [4, 5, 6, 7]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 100, 200)
-    []
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], -100, 200)
-    Traceback (most recent call last):
-     ...
-    ValueError: Start and/or End out of range. Start: -100. End: 200
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 200, 100)
-    Traceback (most recent call last):
-     ...
-    ValueError: Start and/or End out of range. Start: 200. End: 100
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 100, 100)
-    Traceback (most recent call last):
-     ...
-    ValueError: Start and/or End out of range. Start: 100. End: 100
-
-    ```
 
     :param sequences: an iterable of iterables, each nested iterable should contain
       a sequence and its size
     :param start: starting index to apply the slice from
     :param end: index that the slice should end at
+    :param apply_slice: function that takes the sequence and start/end offsets, and
+      returns the sliced sequence
 
     :return: a list of the items sliced from the sequences
     """
@@ -86,16 +58,19 @@ def slice_sequences(sequences, start, end):
     items_passed = 0
     collected_items = []
 
-    for collection, count in sequences:
+    if apply_slice is None:
+        apply_slice = _apply_slice
+
+    for sequence, count in sequences:
         offset_start = start - items_passed
         offset_end = end - items_passed
 
         if items_passed == start:
-            items = collection[:items_to_take]
+            items = apply_slice(sequence, 0, items_to_take)
         elif 0 < offset_start < count:
-            items = collection[offset_start:offset_end]
+            items = apply_slice(sequence, offset_start, offset_end)
         elif offset_start < 0:
-            items = collection[:offset_end]
+            items = apply_slice(sequence, 0, offset_end)
         else:
             items = []
 
@@ -108,7 +83,3 @@ def slice_sequences(sequences, start, end):
             break
 
     return collected_items
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
