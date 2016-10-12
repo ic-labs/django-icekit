@@ -638,51 +638,6 @@ class TestIceKitTags(WebTest):
         response.mustcontain('div class="filter-fake-slot">None</div>')
 
 
-class TestDescribePageNumbers(TestCase):
-    def test_join_words(self):
-        self.assertEqual(
-            describe_page_numbers(1, 500, 10),
-            {
-                'numbers': [1, 2, 3, 4, None, 48, 49, 50],
-                'has_previous': False,
-                'has_next': True,
-                'previous_page': 0,
-                'current_page': 1,
-                'next_page': 2,
-                'total_count': 500,
-                'per_page': 10,
-            },
-        )
-
-        self.assertEqual(
-            describe_page_numbers(10, 500, 10),
-            {
-                'numbers': [1, 2, 3, None, 7, 8, 9, 10, 11, 12, 13, None, 48, 49, 50],
-                'has_previous': True,
-                'has_next': True,
-                'previous_page': 9,
-                'current_page': 10,
-                'next_page': 11,
-                'total_count': 500,
-                'per_page': 10,
-            },
-        )
-
-        self.assertEqual(
-            describe_page_numbers(50, 500, 10),
-            {
-                'numbers': [1, 2, 3, None, 47, 48, 49, 50],
-                'has_previous': True,
-                'has_next': False,
-                'previous_page': 49,
-                'current_page': 50,
-                'next_page': 51,
-                'total_count': 500,
-                'per_page': 10,
-            },
-        )
-
-
 class TestArticles(WebTest):
     """
     Test Article publishing
