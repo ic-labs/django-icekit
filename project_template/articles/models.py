@@ -14,4 +14,11 @@ class ArticleCategoryPage(AbstractListingPage):
 
 
 class Article(PublishableFluentContents, AbstractCollectedContent, TitleSlugMixin):
-    parent = models.ForeignKey("ArticleCategoryPage")
+    parent = models.ForeignKey(
+        "ArticleCategoryPage",
+        limit_choices_to={'publishing_is_draft': True},
+        on_delete=models.PROTECT,
+    )
+
+    class Meta:
+        unique_together = (('parent', 'slug', 'publishing_linked'),)
