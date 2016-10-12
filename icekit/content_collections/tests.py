@@ -1,5 +1,10 @@
+from django.contrib.auth import get_user_model
 from django_webtest import WebTest
 
+from icekit.tests.models import Article, ArticleListing
+from icekit.models import Layout
+
+User = get_user_model()
 
 class TestContentCollections(WebTest):
     """
@@ -7,8 +12,8 @@ class TestContentCollections(WebTest):
     """
 
     def setUp(self):
-        self.listing_layout = models.Layout.auto_add(
-            'icekit/layouts/listing.html',
+        self.listing_layout = Layout.auto_add(
+            'icekit_content_collections/layouts/default.html',
             ArticleListing,
         )
 

@@ -23,7 +23,7 @@ class AuthorListing(AbstractListingPage):
     class Meta:
         verbose_name = 'Author listing'
 
-    def get_items(self):
+    def get_public_items(self):
         """
         :return: all published authors
         """

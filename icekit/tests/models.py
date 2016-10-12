@@ -1,6 +1,8 @@
 """
 Test models for ``icekit`` app.
 """
+from urlparse import urljoin
+
 from django.db import models
 from django.http import HttpResponse
 
@@ -42,7 +44,7 @@ class ImageTest(models.Model):
 class ArticleListing(AbstractListingPage):
     """A page that lists articles that link to it as parent"""
 
-    def get_items(self):
+    def get_public_items(self):
         unpublished_pk = self.get_draft().pk
         return Article.objects.published().filter(parent_id=unpublished_pk)
 
@@ -65,6 +67,9 @@ class Article(AbstractCollectedContent, PublishingModel, mixins.LayoutFieldMixin
         return HttpResponse(
             u"%s: %s" % (self.parent.get_published().title, self.title)
         )
+
+    def get_absolute_url(self):
+        return urljoin(self.parent.get_absolute_url(), self.slug + "/")
 
 class LayoutPageWithRelatedPages(AbstractLayoutPage):
     related_pages = models.ManyToManyField('fluent_pages.Page')
