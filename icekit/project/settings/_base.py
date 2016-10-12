@@ -28,7 +28,8 @@ REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
 # other projects running on the same system.
 SETTINGS_MODULE_HASH = hashlib.md5(__file__ + BASE_SETTINGS_MODULE).hexdigest()
 
-SITE_NAME = os.environ.get('SITE_NAME', 'ICEkit')
+SITE_NAME = os.environ.get(
+    'SITE_NAME', os.environ.get('ICEKIT_PROJECT_NAME', 'ICEkit'))
 SITE_SLUG = slugify(unicode(SITE_NAME))
 
 SITE_DOMAIN = re.sub(
@@ -231,8 +232,6 @@ MIDDLEWARE_CLASSES = (
 
     # Extra.
     'django.contrib.admindocs.middleware.XViewMiddleware',
-
-    'icekit.publishing.middleware.PublishingMiddleware',
 )
 
 ROOT_URLCONF = 'icekit.project.urls'
@@ -541,6 +540,8 @@ INSTALLED_APPS += ('haystack', )
 
 # ICEKIT ######################################################################
 
+ICEKIT_CONTEXT_PROCESSOR_SETTINGS = ()
+
 FEATURED_APPS = (
     {
         'verbose_name': 'Content',
@@ -607,6 +608,8 @@ INSTALLED_APPS += (
     'icekit.plugins.slideshow',
     'icekit.plugins.twitter_embed',
 )
+
+MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
 
 # MASTER PASSWORD #############################################################
 

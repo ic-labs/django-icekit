@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage, get_storage_class
 # from ixc_whitenoise.storage import HashedMediaMixin
-from storages.backends.s3boto import S3BotoStorage
+from storages.backends.s3boto3 import S3Boto3Storage
 
 
 # MIXINS ######################################################################
@@ -58,7 +58,7 @@ class S3DefaultStorage(
         # HashedMediaMixin,
         S3MediaLocationMixin,
         S3PrivateMixin,
-        S3BotoStorage):
+        S3Boto3Storage):
 
     pass
 
