@@ -82,19 +82,7 @@ class AbstractCollectedContent(models.Model):
 
     class Meta:
         abstract = True
-#         unique_together = (('slug', 'publishing_is_draft', 'parent'),)
-#
-#     def get_parent_url(self):
-#         if not hasattr(self, 'parent'):
-#             raise NotImplementedError("ContentCollectionBase subclasses need to implement `parent` or override `get_parent_url` or `get_absolute_url`.")
-#
-#         parent = self.parent.get_published() or self.parent.get_draft()
-#         return parent.get_absolute_url()
-#
-#     def get_absolute_url(self):
-#         parent_url = self.get_parent_url()
-#         return urljoin(parent_url, self.slug) + "/"
-#
+
     def suppressed_message(self):
         parent = self.parent
         if not parent.has_been_published:

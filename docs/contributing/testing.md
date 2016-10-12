@@ -20,7 +20,7 @@ test database and restores from `test_initial_data.sql` if available,
 
 ### To create migrations for a test model
 
-    BASE_SETTINGS_MODULE=icekit.tests.settings manage.py makemigrations
+    BASE_SETTINGS_MODULE=test manage.py makemigrations
 
 ### To get an interactive shell to inspect the test database
 
