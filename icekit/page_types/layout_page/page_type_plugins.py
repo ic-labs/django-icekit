@@ -9,3 +9,4 @@ from icekit.plugins import ICEkitFluentContentsPagePlugin
 class LayoutPagePlugin(ICEkitFluentContentsPagePlugin):
     model = models.LayoutPage
     model_admin = admin.LayoutPageAdmin
+    sort_priority = 1

@@ -4,9 +4,20 @@
 
   * Preview pages are now visually highlighted, and have a different HTML title.
 
+  * "Preview draft" button is now near "View published" button.
+
   * "Slideshow" is now renamed "Image Gallery" and there is a new Image Gallery
     content plugin available (which renders a grid of thumbnails into a
     lightbox).
+
+  * `icekit.content_collections` app which defines an abstract listing page
+    type that lists a collection of content, and an abstract model for
+    collected content that appears in such a collection. This is a common
+    pattern.
+
+  * New `icekit.page_types.author` app which models a content author and a
+    listing page, based on the `content_collections` pattern.
+
 
 Breaking changes:
 
@@ -20,6 +31,8 @@ Breaking changes:
         ALTER TABLE "slideshow_slideshow" RENAME TO "icekit_plugins_slideshow_slideshow";
 
     If you have yet to upgrade from `<0.10`, you don't need to do anything.
+
+  * `icekit.articles` is no more. Functionality is moved to `icekit.content_collections`.
 
 ## 0.15 (27 September 2016)
 

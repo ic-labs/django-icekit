@@ -4,8 +4,9 @@ Tests for ``icekit`` app.
 import os
 
 # WebTest API docs: http://webtest.readthedocs.org/en/latest/api.html
+from unittest import skip
+
 from django.apps import apps
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.contenttypes.models import ContentType
@@ -128,7 +129,7 @@ class Forms(WebTest):
         self.assertEqual(teaf.cleaned_data['twitter_url'], twitter_url)
 
 
-class Layout(WebTest):
+class LayoutTest(WebTest):
 
     def test_auto_add(self):
         # No layouts.
@@ -393,8 +394,14 @@ class Models(WebTest):
         mixin_layout.delete()
 
     def test_article_publishing_querysets(self):
+        article_listing = test_models.ArticleListing.objects.create(
+            title="Article listing",
+            author=self.user_1,
+        )
+
         article_1 = test_models.Article.objects.create(
-            title='Test Article'
+            title='Test Article',
+            parent=article_listing,
         )
         self.assertIn(article_1, test_models.Article.objects.all())
         self.assertEqual(test_models.Article.objects.count(), 1)
