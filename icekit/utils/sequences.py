@@ -37,40 +37,6 @@ def slice_sequences(sequences, start, end):
     Performs a slice across multiple sequences.
     Useful when paginating across chained collections.
 
-    ```
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 0, 2)
-    [1, 2]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 2, 4)
-    [3, 4]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 4, 6)
-    [5, 6]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 6, 8)
-    [7]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 0, 10)
-    [1, 2, 3, 4, 5, 6, 7]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 0, 4)
-    [1, 2, 3, 4]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 1, 5)
-    [2, 3, 4, 5]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 3, 11)
-    [4, 5, 6, 7]
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 100, 200)
-    []
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], -100, 200)
-    Traceback (most recent call last):
-     ...
-    ValueError: Start and/or End out of range. Start: -100. End: 200
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 200, 100)
-    Traceback (most recent call last):
-     ...
-    ValueError: Start and/or End out of range. Start: 200. End: 100
-    >>> slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 100, 100)
-    Traceback (most recent call last):
-     ...
-    ValueError: Start and/or End out of range. Start: 100. End: 100
-
-    ```
-
     :param sequences: an iterable of iterables, each nested iterable should contain
       a sequence and its size
     :param start: starting index to apply the slice from
@@ -108,7 +74,3 @@ def slice_sequences(sequences, start, end):
             break
 
     return collected_items
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
