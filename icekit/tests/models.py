@@ -5,15 +5,16 @@ from django.db import models
 from django.http import HttpResponse
 
 from fluent_pages.extensions import page_type_pool
+from icekit.publishing.models import PublishingModel
 
 from icekit import abstract_models
-from icekit.articles.abstract_models import ListingPage, ArticleBase
-from icekit.articles.page_type_plugins import ListingPagePlugin
-
+from icekit.content_collections.abstract_models import AbstractListingPage, \
+    AbstractCollectedContent, TitleSlugMixin
+from icekit.content_collections.page_type_plugins import ListingPagePlugin
 from icekit.page_types.layout_page.abstract_models import \
     AbstractLayoutPage, AbstractUnpublishableLayoutPage
 from icekit.plugins import ICEkitFluentContentsPagePlugin
-
+from icekit import mixins
 
 class BaseModel(abstract_models.AbstractBaseModel):
     """
@@ -38,7 +39,7 @@ class ImageTest(models.Model):
     image = models.ImageField(upload_to='testing/')
 
 
-class ArticleListing(ListingPage):
+class ArticleListing(AbstractListingPage):
     """A page that lists articles that link to it as parent"""
 
     def get_items(self):
@@ -53,7 +54,7 @@ class ArticleListing(ListingPage):
         db_table = 'test_articlelisting'
 
 
-class Article(ArticleBase):
+class Article(AbstractCollectedContent, PublishingModel, mixins.LayoutFieldMixin, TitleSlugMixin):
     """Articles that belong to a particular listing"""
     parent = models.ForeignKey(ArticleListing)
 
