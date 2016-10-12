@@ -1,14 +1,16 @@
 from django.contrib import admin
-from icekit.admin import FluentLayoutsMixin
-from icekit.articles.admin import ArticleAdminBase
+from icekit.publishing.admin import PublishingAdmin
+
+from icekit.admin_mixins import FluentLayoutsMixin
 from . import models
 
-class PressReleaseAdmin(ArticleAdminBase, FluentLayoutsMixin):
-    list_display = ArticleAdminBase.list_display + ('released', 'modified',)
+class PressReleaseAdmin(PublishingAdmin, FluentLayoutsMixin):
+    list_display = PublishingAdmin.list_display + ('released', 'modified',)
     date_hierarchy = 'released'
-    list_filter = ArticleAdminBase.list_filter + ('category',)
+    list_filter = PublishingAdmin.list_filter + ('category',)
     search_fields = ('title', 'id', 'slug',)
     ordering = ('-released', )
+    prepopulated_fields = {'slug': ('title',)}
 
 
 class PressContactAdmin(admin.ModelAdmin):

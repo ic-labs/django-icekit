@@ -1,27 +1,20 @@
-{% extends "base.html" %}
+{% extends "icekit/layouts/default.html" %}
 
 {% load placeholder_tags fluent_contents_tags %}
 
-{% block title %}{{ page.title }}{% endblock %}
-
 {% block content %}
-	<h1>{{ page.title }}</h1>
-
-	{% page_placeholder "main" role="m" %}
+	{{ block.super }}
 
 	<ul>
-		{% for press_release in press_releases %}
-			<a href="{{ press_release.get_absolute_url }}">
-				{{ press_release.title|safe }}
+		{% for item in page.get_public_items %}
+			<li><a href="{{ item.get_absolute_url }}">
+				{{ item.title|safe }}
 				<br>
-				{{ press_release.released|date:"F j, Y" }}
-			</a>
+				{{ item.released|date:"F j, Y" }}
+			</a></li>
+        {% empty %}
+            <li>There are no items to show on this page</li>
 		{% endfor %}
 	</ul>
 
-{% endblock %}
-
-{% block base_js %}
-	{{ block.super }}
-	{% render_content_items_media %}
 {% endblock %}
