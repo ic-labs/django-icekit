@@ -39,7 +39,7 @@ from icekit.publishing.utils import get_draft_hmac, verify_draft_url, \
     get_draft_url, PublishingException, NotDraftException
 from icekit.publishing.tests_base import BaseAdminTest
 from icekit.tests.models import LayoutPageWithRelatedPages, \
-    UnpublishableLayoutPage, Article
+    UnpublishableLayoutPage, Article, ArticleListing
 
 User = get_user_model()
 
@@ -630,9 +630,21 @@ class TestPublishableFluentContents(TestCase):
         )
 
         self.page_layout_1 = G(Layout)
+        # self.listing_layout = Layout.auto_add(
+        #     'icekit_content_collections/layouts/default.html',
+        #     ArticleListing,
+        # )
+
+        self.listing = ArticleListing.objects.create(
+            author=self.staff_1,
+            title="Listing Test",
+            slug="listing-test",
+            layout=self.page_layout_1,
+        )
         self.fluent_contents = Article.objects.create(
             title='Test title',
             layout=self.page_layout_1,
+            parent=self.listing,
         )
         self.placeholder = Placeholder.objects.create_for_object(
             self.fluent_contents,

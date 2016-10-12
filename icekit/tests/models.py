@@ -7,7 +7,7 @@ from django.db import models
 from django.http import HttpResponse
 
 from fluent_pages.extensions import page_type_pool
-from icekit.publishing.models import PublishingModel
+from icekit.publishing.models import PublishableFluentContents
 
 from icekit import abstract_models
 from icekit.content_collections.abstract_models import AbstractListingPage, \
@@ -56,7 +56,7 @@ class ArticleListing(AbstractListingPage):
         db_table = 'test_articlelisting'
 
 
-class Article(AbstractCollectedContent, PublishingModel, mixins.LayoutFieldMixin, TitleSlugMixin):
+class Article(AbstractCollectedContent, PublishableFluentContents, TitleSlugMixin):
     """Articles that belong to a particular listing"""
     parent = models.ForeignKey(ArticleListing)
 
