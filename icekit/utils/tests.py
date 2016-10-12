@@ -7,6 +7,8 @@ from django_webtest import WebTest
 
 from icekit.utils import testing
 from icekit.tests.models import ImageTest
+from icekit.utils.sequences import slice_sequences
+from icekit.utils.pagination import describe_page_numbers
 
 
 class TestingUtils(WebTest):
@@ -64,3 +66,122 @@ class TestingUtils(WebTest):
         # Ensure that the delete_test_image function removes the thumbnail
         # style images.
         self.assertFalse(os.path.exists(dst_thumb_file))
+
+    def test_slice_sequences(self):
+        self.assertEqual(
+            slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 0, 2),
+            [1, 2],
+        )
+        self.assertEqual(
+            slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 2, 4),
+            [3, 4],
+        )
+        self.assertEqual(
+            slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 4, 6),
+            [5, 6],
+        )
+        self.assertEqual(
+            slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 6, 8),
+            [7],
+        )
+        self.assertEqual(
+            slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 0, 10),
+            [1, 2, 3, 4, 5, 6, 7],
+        )
+        self.assertEqual(
+            slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 0, 4),
+            [1, 2, 3, 4],
+        )
+        self.assertEqual(
+            slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 1, 5),
+            [2, 3, 4, 5],
+        )
+        self.assertEqual(
+            slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 3, 11),
+            [4, 5, 6, 7],
+        )
+        self.assertEqual(
+            slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 100, 200),
+            [],
+        )
+        
+    def test_describe_page_numbers(self):
+        self.assertEqual(
+            describe_page_numbers(1, 500, 10),
+            {'current_page': 1,
+             'has_next': True,
+             'has_previous': False,
+             'next_page': 2,
+             'numbers': [1, 2, 3, 4, None, 48, 49, 50],
+             'page_count': 50,
+             'per_page': 10,
+             'previous_page': 0,
+             'total_count': 500}
+        )
+
+        self.assertEqual(
+            describe_page_numbers(10, 500, 10),
+            {'current_page': 10,
+             'has_next': True,
+             'has_previous': True,
+             'next_page': 11,
+             'numbers': [1, 2, 3, None, 7, 8, 9, 10, 11, 12, 13, None, 48, 49, 50],
+             'page_count': 50,
+             'per_page': 10,
+             'previous_page': 9,
+             'total_count': 500},
+        )
+
+        self.assertEqual(
+            describe_page_numbers(50, 500, 10),
+            {'current_page': 50,
+             'has_next': False,
+             'has_previous': True,
+             'next_page': 51,
+             'numbers': [1, 2, 3, None, 47, 48, 49, 50],
+             'page_count': 50,
+             'per_page': 10,
+             'previous_page': 49,
+             'total_count': 500},
+        )
+
+        self.assertEqual(
+            describe_page_numbers(2, 40, 10),
+            {'current_page': 2,
+             'has_next': True,
+             'has_previous': True,
+             'next_page': 3,
+             'numbers': [1, 2, 3, 4],
+             'page_count': 4,
+             'per_page': 10,
+             'previous_page': 1,
+             'total_count': 40},
+        )
+
+        self.assertEqual(
+            # total_count / per_page == 0 - need float math
+            describe_page_numbers(1, 1, 20),
+            {'current_page': 1,
+             'has_next': False,
+             'has_previous': False,
+             'next_page': 2,
+             'numbers': [1],
+             'page_count': 1,
+             'per_page': 20,
+             'previous_page': 0,
+             'total_count': 1},
+        )
+
+        self.assertEqual(
+            # empty results - total_count==0
+            describe_page_numbers(1, 0, 20),
+            {'current_page': 1,
+             'has_next': False,
+             'has_previous': False,
+             'next_page': 2,
+             'numbers': [],
+             'page_count': 0,
+             'per_page': 20,
+             'previous_page': 0,
+             'total_count': 0},
+        )
