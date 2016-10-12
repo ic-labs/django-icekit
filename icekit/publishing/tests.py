@@ -630,10 +630,6 @@ class TestPublishableFluentContents(TestCase):
         )
 
         self.page_layout_1 = G(Layout)
-        # self.listing_layout = Layout.auto_add(
-        #     'icekit_content_collections/layouts/default.html',
-        #     ArticleListing,
-        # )
 
         self.listing = ArticleListing.objects.create(
             author=self.staff_1,
