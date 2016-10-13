@@ -28,14 +28,12 @@ REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
 # other projects running on the same system.
 SETTINGS_MODULE_HASH = hashlib.md5(__file__ + BASE_SETTINGS_MODULE).hexdigest()
 
-SITE_NAME = os.environ.get(
-    'SITE_NAME', os.environ.get('ICEKIT_PROJECT_NAME', 'ICEkit'))
-SITE_SLUG = slugify(unicode(SITE_NAME))
+PROJECT_NAME = os.environ.get('ICEKIT_PROJECT_NAME', 'ICEkit')
+PROJECT_SLUG = re.sub(r'[^0-9A-Za-z]+', '-', slugify(unicode(PROJECT_NAME)))
 
-SITE_DOMAIN = re.sub(
-    r'[^-.0-9A-Za-z]',
-    '-',
-    os.environ.get('SITE_DOMAIN', '%s.lvh.me' % SITE_SLUG))
+SITE_DOMAIN = os.environ.get('SITE_DOMAIN', '%s.lvh.me' % PROJECT_SLUG)
+SITE_NAME = os.environ.get('SITE_NAME', PROJECT_NAME)
+
 SITE_PORT = 8000
 
 # FILE SYSTEM PATHS ###########################################################
@@ -87,7 +85,7 @@ DATABASES = {
     'default': {
         'ATOMIC_REQUESTS': True,
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('PGDATABASE', SITE_SLUG),
+        'NAME': os.environ.get('PGDATABASE', PROJECT_SLUG),
         'HOST': os.environ.get('PGHOST'),
         'PORT': os.environ.get('PGPORT'),
         'USER': os.environ.get('PGUSER'),
@@ -153,7 +151,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'cloghandler.ConcurrentRotatingFileHandler',
             'filename': os.path.join(
-                VAR_DIR, 'logs', '%s.log' % SITE_SLUG),
+                VAR_DIR, 'logs', '%s.log' % PROJECT_SLUG),
             'maxBytes': 10 * 1024 * 1024,  # 10 MiB
             'backupCount': 10,
             'formatter': 'logfile',
@@ -341,7 +339,7 @@ SITE_ID = 1
 
 BROKER_URL = CELERY_RESULT_BACKEND = 'redis://%s/0' % REDIS_ADDRESS
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']  # 'pickle'
-CELERY_DEFAULT_QUEUE = SITE_SLUG
+CELERY_DEFAULT_QUEUE = PROJECT_SLUG
 
 CELERY_QUEUES = (
     Queue(
@@ -690,7 +688,7 @@ AWS_HEADERS = {
 AWS_SECRET_ACCESS_KEY = os.environ.get('MEDIA_AWS_SECRET_ACCESS_KEY')
 
 AWS_STORAGE_BUCKET_NAME = os.environ.get(
-    'MEDIA_AWS_STORAGE_BUCKET_NAME', '%s-stg' % SITE_SLUG)
+    'MEDIA_AWS_STORAGE_BUCKET_NAME', '%s-stg' % PROJECT_SLUG)
 
 ENABLE_S3_MEDIA = False
 INSTALLED_APPS += ('storages', )
