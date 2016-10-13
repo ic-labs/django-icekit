@@ -409,11 +409,11 @@ DDF_FILL_NULLABLE_FIELDS = False
 INSTALLED_APPS += ('easy_thumbnails', )
 
 # Scoped aliases allows us to pre-generate all the necessary thumbnails for a
-# given model/field, without generating additional unecessary thumbnails. This
+# given model/field, without generating additional unnecessary thumbnails. This
 # is essential when using a remote storage backend.
 THUMBNAIL_ALIASES = {
     # 'app[.model][.field]': {
-    #   'name-WxH': { 'size': (W, H), },
+    #   'name': { 'size': (W, H), },
     # },
     '': {
         'icekit_authors_portrait_large': {
@@ -424,6 +424,12 @@ THUMBNAIL_ALIASES = {
         },
         'content_image': {
             'size': (1138, 0), # maximum width of a bootstrap content column
+        },
+        'slideshow_slide': {
+            'size': (1138, 0),
+        },
+        'image_gallery_thumb': {
+            'size': (200, 0),
         }
     }
 }
