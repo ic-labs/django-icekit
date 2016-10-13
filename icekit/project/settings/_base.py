@@ -416,7 +416,7 @@ INSTALLED_APPS += ('easy_thumbnails', )
 # is essential when using a remote storage backend.
 THUMBNAIL_ALIASES = {
 #     'app[.model][.field]': {
-#         'name-WxH': {
+#         'name': {
 #             'size': (W, H),
 #             ...,
 #         },
@@ -428,10 +428,10 @@ THUMBNAIL_ALIASES = {
         'content_image': {
             'size': (1138, 0), # maximum width of a content column
         },
-        'slideshow': {
+        'slideshow_slide': {
             'size': (1200, 0),
         },
-        'gallery': {
+        'image_gallery_thumb': {
             'size': (200, 0),
         }
     }
