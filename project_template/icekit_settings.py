@@ -29,11 +29,6 @@ MIDDLEWARE_CLASSES += (
 FEATURED_APPS[0]['models']['glamkit_articles.Article'] = {
     'verbose_name_plural': 'Articles',
 }
-
-ICEKIT['LAYOUT_TEMPLATES'] += (
-    (
-        SITE_NAME,
-        os.path.join(PROJECT_DIR, 'templates/layouts'),
-        'layouts',
-    ),
-)
+FEATURED_APPS[0]['models']['icekit_press_releases.PressRelease'] = {
+    'verbose_name_plural': 'Press releases',
+}
