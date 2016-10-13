@@ -6,12 +6,7 @@ from fluent_pages import appsettings
 from fluent_pages.models import UrlNode
 from fluent_pages.models.managers import UrlNodeQuerySet
 
-try:
-    # Polymorphic >= 0.8
-    from polymorphic.models import PolymorphicModel
-except ImportError:
-    # Polymorphic < 0.8
-    from polymorphic.polymorphic_model import PolymorphicModel
+from polymorphic.models import PolymorphicModel
 
 from mptt.models import MPTTModel
 

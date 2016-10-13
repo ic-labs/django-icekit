@@ -16,9 +16,11 @@ from django.utils.translation import ugettext_lazy as _
 from django.template import loader, Context
 
 from fluent_pages.models.db import UrlNode
-from fluent_pages.adminui.pageadmin import DefaultPageChildAdmin, \
-    _select_template_name
+from fluent_pages.adminui.pageadmin import _select_template_name
 from fluent_pages.adminui.urlnodeparentadmin import UrlNodeParentAdmin
+
+from icekit.admin_mixins import FluentLayoutsMixin
+
 from .models import PublishingModel
 
 
@@ -250,7 +252,6 @@ class _PublishingHelpersMixin(object):
             'object_url': object_url,
             'has_publish_permission':
                 self.has_publish_permission(self.request, obj),
-            'img_path': settings.STATIC_URL + 'admin/img/',
         })
         try:
             if isinstance(obj, PublishingModel):
@@ -641,3 +642,10 @@ class ICEKitFluentPagesParentAdminMixin(
 ):
     """ Add publishing features for FluentPage parent admin (listing) pages """
     list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
+
+
+class PublishableFluentContentsAdmin(PublishingAdmin, FluentLayoutsMixin):
+    """
+    Add publishing admin features for models with Fluent Contents features
+    """
+    pass

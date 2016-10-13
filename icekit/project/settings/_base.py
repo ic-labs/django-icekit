@@ -17,6 +17,8 @@ from django.core.urlresolvers import reverse_lazy
 from django.utils.text import slugify
 from kombu import Exchange, Queue
 
+import icekit
+
 BASE_SETTINGS_MODULE = os.environ.get('BASE_SETTINGS_MODULE', '')
 
 # Get Redis host and port.
@@ -26,7 +28,8 @@ REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
 # other projects running on the same system.
 SETTINGS_MODULE_HASH = hashlib.md5(__file__ + BASE_SETTINGS_MODULE).hexdigest()
 
-SITE_NAME = os.environ.get('SITE_NAME', 'ICEkit')
+SITE_NAME = os.environ.get(
+    'SITE_NAME', os.environ.get('ICEKIT_PROJECT_NAME', 'ICEkit'))
 SITE_SLUG = slugify(unicode(SITE_NAME))
 
 SITE_DOMAIN = re.sub(
@@ -37,8 +40,7 @@ SITE_PORT = 8000
 
 # FILE SYSTEM PATHS ###########################################################
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
-ICEKIT_DIR = os.path.join(BASE_DIR, 'icekit')
+ICEKIT_DIR = os.path.abspath(os.path.dirname(icekit.__file__))
 PROJECT_DIR = os.path.abspath(os.environ['ICEKIT_PROJECT_DIR'])
 VAR_DIR = os.path.join(PROJECT_DIR, 'var')
 
@@ -230,8 +232,6 @@ MIDDLEWARE_CLASSES = (
 
     # Extra.
     'django.contrib.admindocs.middleware.XViewMiddleware',
-
-    'icekit.publishing.middleware.PublishingMiddleware',
 )
 
 ROOT_URLCONF = 'icekit.project.urls'
@@ -418,7 +418,7 @@ THUMBNAIL_ALIASES = {
     #   'name-WxH': { 'size': (W, H), },
     # },
     '': {
-        'author_portrait': {
+        'icekit_authors_portrait_large': {
             'size': (360, 640),
         },
         'admin': {
@@ -540,6 +540,8 @@ INSTALLED_APPS += ('haystack', )
 
 # ICEKIT ######################################################################
 
+ICEKIT_CONTEXT_PROCESSOR_SETTINGS = ()
+
 FEATURED_APPS = (
     {
         'verbose_name': 'Content',
@@ -563,10 +565,24 @@ FEATURED_APPS = (
 
 ICEKIT = {
     'LAYOUT_TEMPLATES': (
+        # A list of 3-tuples, each containing a label prefix, a path to a
+        # templates directory that will be searched by the installed template
+        # loaders, and a template name prefix.
         (
             'ICEkit',
-            os.path.join(BASE_DIR, 'icekit/layouts/templates'),
+            os.path.join(ICEKIT_DIR,
+                         'layouts/templates'),
             'icekit/layouts',
+        ),
+        (
+            'Content Collections',
+            os.path.join(ICEKIT_DIR, 'content_collections/templates'),
+            'icekit_content_collections/layouts',
+        ),
+        (
+            SITE_NAME,
+            os.path.join(PROJECT_DIR, 'templates'),
+            'layouts',
         ),
     ),
 }
@@ -578,9 +594,10 @@ INSTALLED_APPS += (
     'icekit.layouts',
     'icekit.publishing',
     'icekit.response_pages',
+    'icekit.content_collections',
     'notifications',
 
-    'icekit.authors',
+    'icekit.page_types.author',
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
 
@@ -601,6 +618,8 @@ INSTALLED_APPS += (
     'icekit.plugins.slideshow',
     'icekit.plugins.twitter_embed',
 )
+
+MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
 
 # MASTER PASSWORD #############################################################
 

@@ -15,19 +15,6 @@ CACHES['default'].update({
 
 LOGGING['handlers']['logfile']['backupCount'] = 100
 
-MIDDLEWARE_CLASSES = (
-    ('django.middleware.cache.UpdateCacheMiddleware', ) +
-    MIDDLEWARE_CLASSES +
-    ('django.middleware.cache.FetchFromCacheMiddleware', )
-)
-
-TEMPLATES_DJANGO['OPTIONS']['loaders'] = [
-    (
-        'django.template.loaders.cached.Loader',
-        TEMPLATES_DJANGO['OPTIONS']['loaders'],
-    ),
-]
-
 # CELERY EMAIL ################################################################
 
 CELERY_EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

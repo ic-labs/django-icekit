@@ -1,3 +1,4 @@
+import inspect
 from contextlib import contextmanager
 from threading import current_thread
 
@@ -33,7 +34,11 @@ class PublishingMiddleware(object):
     @staticmethod
     def is_draft_only_view(request):
         resolved = resolve(request.path)
-        name = '%s.%s' % (resolved.func.__module__, resolved.func.__name__)
+        if inspect.isfunction(resolved.func):
+            view_name = resolved.func.__name__
+        else:  # Possible class view
+            view_name = type(resolved.func).__name__
+        name = '%s.%s' % (resolved.func.__module__, view_name)
         return name in PublishingMiddleware._draft_only_views
 
     @staticmethod

@@ -26,6 +26,7 @@ list of frequently used commands you might want to run:
     runserver.sh [ARGS]
     runtests.sh [ARGS]
     setup-django.sh [COMMAND]
+    setup-git-secret.sh [COMMAND]
     setup-postgres.sh
     supervisorctl.sh [OPTIONS] [ACTION [ARGS]]
     supervisord.sh [ARGS]

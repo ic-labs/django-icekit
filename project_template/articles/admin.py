@@ -1,24 +1,10 @@
 from django.contrib import admin
-from icekit.admin import FluentLayoutsMixin
-from icekit.articles.admin import PolymorphicArticleParentAdmin, \
-    PolymorphicArticleChildAdmin
-from .models import Article, LayoutArticle, RedirectArticle
+from icekit.publishing.admin import PublishableFluentContentsAdmin
+from .models import Article
 
 
-class ArticleChildAdmin(PolymorphicArticleChildAdmin):
-    base_model = Article
+class ArticleAdmin(PublishableFluentContentsAdmin):
+    prepopulated_fields = {"slug": ("title",)}
+    list_filter = PublishableFluentContentsAdmin.list_filter + ('parent', )
 
-
-class LayoutArticleAdmin(ArticleChildAdmin, FluentLayoutsMixin):
-    base_model=LayoutArticle
-
-
-class RedirectArticleAdmin(ArticleChildAdmin):
-    base_model=RedirectArticle
-
-
-@admin.register(Article)
-class ArticleParentAdmin(PolymorphicArticleParentAdmin):
-    base_model = Article
-    child_models = ((LayoutArticle, LayoutArticleAdmin),
-                    (RedirectArticle, RedirectArticleAdmin),)
+admin.site.register(Article, ArticleAdmin)

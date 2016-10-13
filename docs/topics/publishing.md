@@ -41,6 +41,11 @@ To make a `FluentContentsPage` model publishable:
 * subclass your model from `icekit.publishing.models.PublishableFluentContentsPage`
 * subclass your model's admin from `FluentContentsPageAdmin` and `icekit.publishing.admin.PublishingAdmin`
 
+To make a fluent contents model (see [ContentsPlugins]) publishable:
+
+* subclass your model from `icekit.publishing.models.PublishableFluentContents`
+* subclass your model's admin from `icekit.publishing.admin.PublishableFluentContentsAdmin`
+
 #### Note: Validating slug uniqueness
 
 In publishable models, both the draft and published slugs will be identical,
@@ -248,3 +253,5 @@ rendering related content for the public and for site admins:
 There has been an issue discovered where `ManyToMany` fields referring both
 ways on models have the many to many data cloned for published and
 unpublished objects. This is currently being worked on.
+
+[ContentsPlugins]: ../howto/plugins.md

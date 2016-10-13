@@ -9,6 +9,7 @@ its dependencies manually.
 Install required system packages:
 
   * Elasticsearch
+  * git-secret
   * md5sum
   * Nginx
   * NPM
@@ -23,7 +24,7 @@ install, start, stop, and upgrade.
 
 The rest can be installed with [Homebrew](http://brew.sh/):
 
-    $ brew install elasticsearch md5sha1sum nginx npm pv python redis
+    $ brew install elasticsearch git-secret md5sha1sum nginx npm pv python redis
 
 zlib needs to be installed from the `dupes` repository and force linked:
 

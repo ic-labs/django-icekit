@@ -28,6 +28,8 @@ class AbstractUnpublishableSlideShow(models.Model):
 
     class Meta:
         abstract = True
+        verbose_name = "Image gallery"
+        verbose_name_plural = "Image galleries"
 
     def __str__(self):
         return self.title
@@ -38,6 +40,8 @@ class AbstractSlideShow(AbstractUnpublishableSlideShow, PublishingModel):
 
     class Meta:
         abstract = True
+        verbose_name = "Image gallery"
+        verbose_name_plural = "Image galleries"
 
     def __str__(self):
         return self.title
@@ -46,11 +50,11 @@ class AbstractSlideShow(AbstractUnpublishableSlideShow, PublishingModel):
 @python_2_unicode_compatible
 class AbstractSlideShowItem(ContentItem):
     """
-    An slide show from the SlideShow model.
+    A content item that renders an image gallery from the SlideShow model.
     """
     slide_show = models.ForeignKey(
         'SlideShow',
-        help_text=_('A slide show from the slide show library.')
+        help_text=_('An image gallery.')
     )
 
     class Meta:
