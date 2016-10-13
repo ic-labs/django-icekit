@@ -273,7 +273,7 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
     # publish or unpublish actions sometime makes the plugins disappear from
     # page so we disable it for now, until we can investigate it further.
     # actions = (make_published, make_unpublished, )
-    list_display = ('publishing_object_title', 'publishing_column',)
+    list_display = ('publishing_object_title', 'publishing_column', 'publishing_modified_at')
     list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
 
     actions = ['publish', 'unpublish']
