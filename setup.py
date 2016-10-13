@@ -152,7 +152,6 @@ setuptools.setup(
             'psycopg2',
             'WebTest',
         ],
-        ]
     },
     **kwargs
 )
