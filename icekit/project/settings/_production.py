@@ -22,5 +22,5 @@ CELERY_EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # STORAGES ####################################################################
 
 # AWS_ACCESS_KEY_ID = ''
-AWS_STORAGE_BUCKET_NAME = PROJECT_SLUG
+# AWS_STORAGE_BUCKET_NAME = ''
 ENABLE_S3_MEDIA = True
