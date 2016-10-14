@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% block title %}{{ event.title }}{% endblock %}
+
 {% block body %}
 	<p>
 		<a href="{% url 'icekit_events_index' %}">&lt; All Events</a>
@@ -13,18 +15,20 @@
 		<p>Special instructions: {{ event.special_instructions }}</p>
 	{% endif %}
 	{% if event.attendance_url %}
-		<p><a href="{{ event.attendance_url }}">Arrange to attend</a></p>
+		<p><a href="{{ event.attendance_url }}">Book now</a></p>
 	{% endif %}
 
-	<h2>Occurences</h2>
+	<h2>Occurrences</h2>
 	<ul>
-	{% for occurrence in event.occurrences.all %}
-	<li>
-		<a href="{% url 'icekit_events_occurrence_detail' occurrence.event.pk occurrence.pk %}">
-			{{ occurrence.start }} to {{ occurrence.end }}
-		</a>
-	</li>
-	{% endfor %}
+        {% for occurrence in event.occurrences.all %}
+        <li>
+            <a href="{% url 'icekit_events_occurrence_detail' occurrence.event.pk occurrence.pk %}">
+                {{ occurrence.start }} to {{ occurrence.end }}
+            </a>
+        </li>
+        {%  empty %}
+            <li>No occurrences for this event</li>
+        {% endfor %}
 	</ul>
 {% endblock %}
 

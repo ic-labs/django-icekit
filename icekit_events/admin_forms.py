@@ -64,11 +64,3 @@ class BaseEventForm(forms.ModelForm):
         fields = '__all__'
         model = models.Event
         widgets = DEFAULT_EVENT_FORM_WIDGETS
-
-
-class BaseEventPageForm(forms.ModelForm):
-
-    class Meta:
-        fields = '__all__'
-        model = models.EventPage
-        widgets = DEFAULT_EVENT_FORM_WIDGETS

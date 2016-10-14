@@ -22,7 +22,8 @@ from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
 
 from polymorphic.models import PolymorphicModel
 
-from icekit.articles.abstract_models import ListingPage, SlugMixin
+from icekit.content_collections.abstract_models import AbstractListingPage, \
+    SlugMixin
 from icekit.fields import ICEkitURLField
 from icekit.publishing.models import PublishingModel
 from icekit.publishing.middleware import is_draft_request_context
@@ -349,6 +350,14 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
         # Generate occurrences for this event
         self.extend_occurrences(until=until)
 
+    @transaction.atomic
+    def publish(self):
+        # Give the published version the occurrences
+        published = super(AbstractEvent, self).publish()
+        self.clone_relations(published)
+        published.regenerate_occurrences()
+        return published
+
     def clone_relations(self, dst_obj):
         """
         Clone related `EventRepeatsGenerator` and `Occurrence` items on publish
@@ -421,14 +430,6 @@ class Event(AbstractEvent):
         return reverse('icekit_events_event_detail', args=(self.pk,))
 
 
-class EventPage(Event, SlugMixin):
-    """
-    A concrete polymorphic event model intended to be a URL routable page.
-    """
-    class Meta:
-        verbose_name = 'Event Page'
-
-
 class GeneratorException(Exception):
     pass
 
@@ -465,10 +466,10 @@ class EventRepeatsGenerator(AbstractBaseModel):
             'event repeats.'),
         null=True,
     )
-    start = models.DateTimeField(
+    start = models.DateTimeField('first start',
         default=default_starts,
         db_index=True)
-    end = models.DateTimeField(
+    end = models.DateTimeField('first end',
         default=default_ends,
         db_index=True)
     is_all_day = models.BooleanField(
@@ -767,38 +768,47 @@ def get_occurrence_times_for_event(event):
     return occurrences_starts, occurrences_ends
 
 
-class AbstractEventListingPage(ListingPage):
+class AbstractEventListingPage(AbstractListingPage):
 
     class Meta:
         abstract = True
         verbose_name = "Event Listing"
 
     def get_items_to_list(self, request):
-        return Occurrence.objects.published()
+        return Occurrence.objects.published()\
+            .filter(event__show_in_calendar=True)
 
-    def get_items_to_route(self, request):
+    def get_items_to_mount(self, request):
         return Occurrence.objects.visible()
 
 
-class AbstractEventListingForDatePage(ListingPage):
+class AbstractEventListingForDatePage(AbstractListingPage):
 
     class Meta:
         abstract = True
         verbose_name = "Event Listing for Date"
 
     def _occurrences_on_date(self, request):
+
         try:
-            date_param = request.GET['date']
-            date = datetime.strptime(date_param, '%Y-%m-%d')
-        except:
-            date = datetime.utcnow()
-        return Occurrence.objects \
-            .within(date, date + timedelta(days=1))
+            days = int(request.GET.get('days', appsettings.DEFAULT_DAYS_TO_SHOW))
+        except ValueError:
+            days = appsettings.DEFAULT_DAYS_TO_SHOW
+
+        try:
+            starts = timezone.parse('%s 00:00' % request.GET.get('date'))
+        except ValueError:
+            starts = timezone.midnight()
+
+        ends = starts + timedelta(days=days)
+
+        return Occurrence.objects.within(starts, ends)
 
     def get_items_to_list(self, request):
-        return self._occurrences_on_date(request).published()
+        return self._occurrences_on_date(request).published()\
+            .filter(event__show_in_calendar=True)
 
-    def get_items_to_route(self, request):
+    def get_items_to_mount(self, request):
         return self._occurrences_on_date(request).visible()
 
 

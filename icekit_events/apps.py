@@ -12,6 +12,8 @@ from django.utils.module_loading import autodiscover_modules
 class AppConfig(AppConfig):
     name = '_'.join(__name__.split('.')[:-1])
     label = 'icekit_events'
+    verbose_name = "Events"
 
     def ready(self):
-        autodiscover_modules('icekit_events_plugins')
+        # look through installed apps to see what event types are registered
+        autodiscover_modules('event_type_plugins')
