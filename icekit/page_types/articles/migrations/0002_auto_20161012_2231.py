@@ -14,13 +14,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='article',
             name='slug',
-            field=models.SlugField(max_length=255, default='woo'),
+            field=models.SlugField(max_length=255),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='article',
             name='title',
-            field=models.CharField(max_length=255, default='woo'),
+            field=models.CharField(max_length=255),
             preserve_default=False,
         ),
     ]
