@@ -23,13 +23,13 @@ class AuthorListing(AbstractListingPage):
     class Meta:
         verbose_name = 'Author listing'
 
-    def get_public_items(self, request):
+    def get_items_to_list(self, request):
         """
         :return: all published authors
         """
         return Author.objects.published()
 
-    def get_visible_items(self, request):
+    def get_items_to_mount(self, request):
         """
         :return: all authors that can be viewed by the current user
         """

@@ -29,7 +29,7 @@ class ListingPagePlugin(ICEkitFluentContentsPagePlugin):
     def collected_content_view(request, parent, slug):
         try:
             # using .visible() here to acknowledge IS_DRAFT context.
-            page = parent.get_visible_items(request).get(slug=slug)
+            page = parent.get_items_to_mount(request).get(slug=slug)
         except ObjectDoesNotExist:
             raise Http404
 

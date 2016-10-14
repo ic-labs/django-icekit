@@ -64,7 +64,7 @@ class AbstractListingPage(AbstractLayoutPage):
     class Meta:
         abstract = True
 
-    def get_public_items(self, request):
+    def get_items_to_list(self, request):
         """
         Get the items that will be show in this page's listing.
 
@@ -83,7 +83,7 @@ class AbstractListingPage(AbstractLayoutPage):
             "Please implement `get_items_to_list(request)` on %r" % type(self)
         )
 
-    def get_visible_items(self, request):
+    def get_items_to_mount(self, request):
         """
         Get all items that are associated with this page and can be previewed
         by the user at a URL.
@@ -96,7 +96,7 @@ class AbstractListingPage(AbstractLayoutPage):
         :return: the items with URL path endpoints under this page's path
         """
         raise NotImplementedError(
-            "Please implement `get_visible_items(request)` on %r" % type(self)
+            "Please implement `get_items_to_mount(request)` on %r" % type(self)
         )
 
 class AbstractCollectedContent(models.Model):

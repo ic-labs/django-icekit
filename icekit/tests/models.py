@@ -45,11 +45,11 @@ class ImageTest(models.Model):
 class ArticleListing(AbstractListingPage):
     """A page that lists articles that link to it as parent"""
 
-    def get_public_items(self, request):
+    def get_items_to_list(self, request):
         unpublished_pk = self.get_draft().pk
         return Article.objects.published().filter(parent_id=unpublished_pk)
 
-    def get_visible_items(self, request):
+    def get_items_to_mount(self, request):
         unpublished_pk = self.get_draft().pk
         return Article.objects.visible().filter(parent_id=unpublished_pk)
 

@@ -58,12 +58,12 @@ class TestContentCollections(WebTest):
         self.article.publish()
         self.article_2.publish()
         # test the listing contains the published article
-        self.assertTrue(self.article.get_published() in self.listing.get_public_items())
+        self.assertTrue(self.article.get_published() in self.listing.get_items_to_list())
         # ...not the draft one
-        self.assertTrue(self.article not in self.listing.get_public_items())
+        self.assertTrue(self.article not in self.listing.get_items_to_list())
         # ...not an article that isn't associated with the listing
-        self.assertTrue(self.article_2 not in self.listing.get_public_items())
-        self.assertTrue(self.article_2.get_published() not in self.listing.get_public_items())
+        self.assertTrue(self.article_2 not in self.listing.get_items_to_list())
+        self.assertTrue(self.article_2.get_published() not in self.listing.get_items_to_list())
         self.article.unpublish()
         self.article_2.unpublish()
 

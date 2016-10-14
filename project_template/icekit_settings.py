@@ -17,10 +17,11 @@ INSTALLED_APPS += (
     'sponsors',
     'press_releases',
     'icekit_events',
+    'icekit_events.page_types.eventlistingfordate',
+    'icekit_events.event_types.simple',
 
     # INCLUDED IN PROJECT TEMPLATE
     'articles',
-    'events',
 )
 
 MIDDLEWARE_CLASSES += (
