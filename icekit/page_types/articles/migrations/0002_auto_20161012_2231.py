@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('glamkit_articles', '0001_initial'),
+        ('icekit_articles', '0001_initial'),
     ]
 
     operations = [

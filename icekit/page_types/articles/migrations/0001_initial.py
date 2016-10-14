@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('publishing_is_draft', models.BooleanField(db_index=True, editable=False, default=True)),
                 ('publishing_modified_at', models.DateTimeField(default=django.utils.timezone.now, editable=False)),
                 ('publishing_published_at', models.DateTimeField(null=True, editable=False)),
-                ('layout', models.ForeignKey(to='icekit.Layout', related_name='glamkit_articles_article_related', null=True, blank=True)),
+                ('layout', models.ForeignKey(to='icekit.Layout', related_name='icekit_articles_article_related', null=True, blank=True)),
             ],
             options={
                 'abstract': False,
@@ -34,11 +34,11 @@ class Migration(migrations.Migration):
                 ('publishing_is_draft', models.BooleanField(db_index=True, editable=False, default=True)),
                 ('publishing_modified_at', models.DateTimeField(default=django.utils.timezone.now, editable=False)),
                 ('publishing_published_at', models.DateTimeField(null=True, editable=False)),
-                ('layout', models.ForeignKey(to='icekit.Layout', related_name='glamkit_articles_articlecategorypage_related', null=True, blank=True)),
-                ('publishing_linked', models.OneToOneField(to='glamkit_articles.ArticleCategoryPage', null=True, editable=False, related_name='publishing_draft', on_delete=django.db.models.deletion.SET_NULL)),
+                ('layout', models.ForeignKey(to='icekit.Layout', related_name='icekit_articles_articlecategorypage_related', null=True, blank=True)),
+                ('publishing_linked', models.OneToOneField(to='icekit_articles.ArticleCategoryPage', null=True, editable=False, related_name='publishing_draft', on_delete=django.db.models.deletion.SET_NULL)),
             ],
             options={
-                'db_table': 'pagetype_glamkit_articles_articlecategorypage',
+                'db_table': 'pagetype_icekit_articles_articlecategorypage',
                 'abstract': False,
             },
             bases=('fluent_pages.htmlpage', models.Model),
@@ -46,11 +46,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='article',
             name='parent',
-            field=models.ForeignKey(to='glamkit_articles.ArticleCategoryPage'),
+            field=models.ForeignKey(to='icekit_articles.ArticleCategoryPage'),
         ),
         migrations.AddField(
             model_name='article',
             name='publishing_linked',
-            field=models.OneToOneField(to='glamkit_articles.Article', null=True, editable=False, related_name='publishing_draft', on_delete=django.db.models.deletion.SET_NULL),
+            field=models.OneToOneField(to='icekit_articles.Article', null=True, editable=False, related_name='publishing_draft', on_delete=django.db.models.deletion.SET_NULL),
         ),
     ]
