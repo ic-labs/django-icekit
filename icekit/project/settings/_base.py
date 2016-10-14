@@ -553,7 +553,7 @@ FEATURED_APPS = (
         'verbose_name': 'Content',
         'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
         'models': {
-            'icekit_articles.Article': {
+            'icekit_article.Article': {
                 'verbose_name_plural': 'Articles',
             },
             'fluent_pages.Page': {
@@ -606,7 +606,7 @@ INSTALLED_APPS += (
     'icekit.content_collections',
     'notifications',
 
-    'icekit.page_types.articles',
+    'icekit.page_types.article',
     'icekit.page_types.author',
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
