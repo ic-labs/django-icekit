@@ -553,6 +553,9 @@ FEATURED_APPS = (
         'verbose_name': 'Content',
         'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
         'models': {
+            'icekit_articles.Article': {
+                'verbose_name_plural': 'Articles',
+            },
             'fluent_pages.Page': {
                 'verbose_name_plural': 'Pages',
             },
@@ -603,6 +606,7 @@ INSTALLED_APPS += (
     'icekit.content_collections',
     'notifications',
 
+    'icekit.page_types.articles',
     'icekit.page_types.author',
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
@@ -626,6 +630,16 @@ INSTALLED_APPS += (
 )
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
+
+# ICEKIT PRESS RELEASES #######################################################
+
+FEATURED_APPS[0]['models'].update({
+    'icekit_press_releases.PressRelease': {
+        'verbose_name_plural': 'Press releases',
+    },
+})
+
+INSTALLED_APPS += ('press_releases', )
 
 # MASTER PASSWORD #############################################################
 
