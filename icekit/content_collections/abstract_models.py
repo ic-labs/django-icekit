@@ -89,6 +89,16 @@ class AbstractCollectedContent(models.Model):
             return "The '%s' page that this '%s' belongs to needs to be " \
                    "published before it can be viewed by the public" % (type(parent)._meta.verbose_name, type(self)._meta.verbose_name, )
         return None
+
+    def get_absolute_url(self):
+        """
+        The majority of the time, the URL is the parent's URL plus the slug.
+        If not, override this function.
+        """
+
+        # Appending "/" to avoid a) django redirect and b) incorrect edit slug
+        # for the admin.
+        return urljoin(self.parent.get_absolute_url(), self.slug + "/")
 #
     def get_response(self, request, parent, *args, **kwargs):
         """

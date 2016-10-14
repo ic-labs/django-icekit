@@ -8,6 +8,8 @@ Load environment specific settings via `BASE_SETTINGS_MODULE` environment
 variable, and override settings in `local.py`.
 """
 
+from __future__ import absolute_import
+
 import hashlib
 import multiprocessing
 import os

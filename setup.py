@@ -95,6 +95,11 @@ setuptools.setup(
         'forms': [
             'django-forms-builder',
         ],
+        'glamkit': [
+            'glamkit-sponsors',
+            # 'icekit-events',  # Soon...
+            'icekit-press-releases',
+        ],
         'project': [
             'boto3',
             'celery[redis]',
