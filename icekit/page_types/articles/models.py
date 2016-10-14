@@ -1,7 +1,8 @@
-from icekit.content_collections.abstract_models import AbstractCollectedContent, \
-    AbstractListingPage, TitleSlugMixin
-from icekit.publishing.models import PublishableFluentContents
 from django.db import models
+from icekit.content_collections.abstract_models import \
+    AbstractCollectedContent, AbstractListingPage, TitleSlugMixin
+from icekit.publishing.models import PublishableFluentContents
+
 
 class ArticleCategoryPage(AbstractListingPage):
     def get_public_items(self):
@@ -13,9 +14,10 @@ class ArticleCategoryPage(AbstractListingPage):
         return Article.objects.visible().filter(parent_id=unpublished_pk)
 
 
-class Article(PublishableFluentContents, AbstractCollectedContent, TitleSlugMixin):
+class Article(
+        PublishableFluentContents, AbstractCollectedContent, TitleSlugMixin):
     parent = models.ForeignKey(
-        "ArticleCategoryPage",
+        'ArticleCategoryPage',
         limit_choices_to={'publishing_is_draft': True},
         on_delete=models.PROTECT,
     )
