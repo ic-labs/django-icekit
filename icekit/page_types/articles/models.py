@@ -23,4 +23,4 @@ class Article(
     )
 
     class Meta:
-        unique_together = (('parent', 'slug', 'publishing_linked'),)
+        unique_together = (('slug', 'parent', 'publishing_linked'), )
