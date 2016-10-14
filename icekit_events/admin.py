@@ -15,20 +15,24 @@ import six
 from django.contrib import admin
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
+from django.db.models import Count, Min, Max
 from django.http import HttpResponse, JsonResponse
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.utils.timezone import get_current_timezone
 from django.views.decorators.csrf import csrf_exempt
+from icekit.plugins.base import BaseChildModelPlugin
+
+from icekit.plugins.base import PluginMount
+
 from icekit.admin import (
     ChildModelFilter, ChildModelPluginPolymorphicParentModelAdmin)
 from polymorphic.admin import PolymorphicChildModelAdmin
 from timezone import timezone
 
-from icekit.articles.admin import TitleSlugAdmin
 from icekit.publishing import admin as publishing_admin
 
-from . import admin_forms, forms, models, plugins
+from . import admin_forms, forms, models
 
 logger = logging.getLogger(__name__)
 
@@ -75,28 +79,35 @@ class EventChildAdmin(PolymorphicChildModelAdmin,
     save_on_top = True
 
 
-class EventPageChildAdmin(EventChildAdmin, TitleSlugAdmin):
-    base_form = admin_forms.BaseEventPageForm
-    base_model = models.EventPage
+class EventChildModelPlugin(six.with_metaclass(
+    PluginMount, BaseChildModelPlugin)):
+    """
+    Mount point for ``Event`` child model plugins.
+    """
+    model_admin = EventChildAdmin
 
 
 class EventTypeFilter(ChildModelFilter):
-    child_model_plugin_class = plugins.EventChildModelPlugin
+    child_model_plugin_class = EventChildModelPlugin
 
 
 class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
                  publishing_admin.PublishingAdmin):
     base_model = models.Event
     list_filter = (
-        EventTypeFilter, 'modified',
+        EventTypeFilter, 'modified', 'show_in_calendar',
         publishing_admin.PublishingStatusFilter,
         publishing_admin.PublishingPublishedFilter,
     )
     list_display = (
-        '__str__', 'get_type', 'modified', 'publishing_column')
+        '__str__', 'get_type', 'modified', 'publishing_column',
+        'show_in_calendar',
+        'occurrence_count',
+        'first_occurrence', 'last_occurrence',
+    )
     search_fields = ('title', )
 
-    child_model_plugin_class = plugins.EventChildModelPlugin
+    child_model_plugin_class = EventChildModelPlugin
     child_model_admin = EventChildAdmin
 
     class Media:
@@ -104,6 +115,24 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             'all': ('icekit_events/bower_components/'
                     'font-awesome/css/font-awesome.css',),
         }
+
+    def get_queryset(self, request):
+        return super(EventAdmin, self).get_queryset(request)\
+            .annotate(occurrence_count=Count('occurrences'))\
+            .annotate(first_occurrence=Min('occurrences__start'))\
+            .annotate(last_occurrence=Max('occurrences__start'))
+
+    def occurrence_count(self, inst):
+        return inst.occurrence_count
+    occurrence_count.admin_order_field = 'occurrence_count'
+
+    def first_occurrence(self, inst):
+        return inst.first_occurrence
+    first_occurrence.admin_order_field = 'first_occurrence"'
+
+    def last_occurrence(self, inst):
+        return inst.last_occurrence
+    last_occurrence.admin_order_field = 'last_occurrence'
 
     def get_urls(self):
         """
