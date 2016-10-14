@@ -9,33 +9,32 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('icekit', '0006_auto_20150911_0744'),
         ('fluent_pages', '0001_initial'),
+        ('icekit', '0006_auto_20150911_0744'),
     ]
 
     operations = [
         migrations.CreateModel(
             name='Article',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, serialize=False, verbose_name='ID', primary_key=True)),
                 ('publishing_is_draft', models.BooleanField(db_index=True, editable=False, default=True)),
-                ('publishing_modified_at', models.DateTimeField(default=django.utils.timezone.now, editable=False)),
+                ('publishing_modified_at', models.DateTimeField(editable=False, default=django.utils.timezone.now)),
                 ('publishing_published_at', models.DateTimeField(null=True, editable=False)),
-                ('layout', models.ForeignKey(to='icekit.Layout', related_name='icekit_articles_article_related', null=True, blank=True)),
+                ('title', models.CharField(max_length=255)),
+                ('slug', models.SlugField(max_length=255)),
+                ('layout', models.ForeignKey(related_name='icekit_articles_article_related', blank=True, null=True, to='icekit.Layout')),
             ],
-            options={
-                'abstract': False,
-            },
         ),
         migrations.CreateModel(
             name='ArticleCategoryPage',
             fields=[
-                ('urlnode_ptr', models.OneToOneField(to='fluent_pages.UrlNode', primary_key=True, auto_created=True, parent_link=True, serialize=False)),
+                ('urlnode_ptr', models.OneToOneField(serialize=False, primary_key=True, auto_created=True, parent_link=True, to='fluent_pages.UrlNode')),
                 ('publishing_is_draft', models.BooleanField(db_index=True, editable=False, default=True)),
-                ('publishing_modified_at', models.DateTimeField(default=django.utils.timezone.now, editable=False)),
+                ('publishing_modified_at', models.DateTimeField(editable=False, default=django.utils.timezone.now)),
                 ('publishing_published_at', models.DateTimeField(null=True, editable=False)),
-                ('layout', models.ForeignKey(to='icekit.Layout', related_name='icekit_articles_articlecategorypage_related', null=True, blank=True)),
-                ('publishing_linked', models.OneToOneField(to='icekit_articles.ArticleCategoryPage', null=True, editable=False, related_name='publishing_draft', on_delete=django.db.models.deletion.SET_NULL)),
+                ('layout', models.ForeignKey(related_name='icekit_articles_articlecategorypage_related', blank=True, null=True, to='icekit.Layout')),
+                ('publishing_linked', models.OneToOneField(null=True, related_name='publishing_draft', on_delete=django.db.models.deletion.SET_NULL, editable=False, to='icekit_articles.ArticleCategoryPage')),
             ],
             options={
                 'db_table': 'pagetype_icekit_articles_articlecategorypage',
@@ -46,11 +45,15 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='article',
             name='parent',
-            field=models.ForeignKey(to='icekit_articles.ArticleCategoryPage'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='icekit_articles.ArticleCategoryPage'),
         ),
         migrations.AddField(
             model_name='article',
             name='publishing_linked',
-            field=models.OneToOneField(to='icekit_articles.Article', null=True, editable=False, related_name='publishing_draft', on_delete=django.db.models.deletion.SET_NULL),
+            field=models.OneToOneField(null=True, related_name='publishing_draft', on_delete=django.db.models.deletion.SET_NULL, editable=False, to='icekit_articles.Article'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='article',
+            unique_together=set([('slug', 'parent', 'publishing_linked')]),
         ),
     ]
