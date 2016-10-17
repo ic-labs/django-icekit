@@ -58,11 +58,17 @@ class TestAdmin(WebTest):
             reverse('admin:icekit_events_event_add'),
             user=self.superuser,
         )
-        # Choose event type from polymorphic child event choices
-        form = response.forms[0]
-        ct_id = ContentType.objects.get_for_model(models.Event).pk
-        form['ct_id'].select(ct_id)
-        response = form.submit().follow()  # Follow to get "?ct_id=" GET param
+        # If there are multiple polymorphic child event choices, choose Event
+        # type from these choices (no choices are presented unless there are
+        # multiple polymorphic child types)
+        if response.status_code == 302:
+            # Single polymorphic child type, so we immediately get redirected
+            response = response.follow()
+        else:
+            form = response.forms[0]
+            ct_id = ContentType.objects.get_for_model(models.Event).pk
+            form['ct_id'].select(ct_id)
+            response = form.submit().follow()  # Follow to get "?ct_id=" param
         # Fill in and submit actual Event admin add form
         form = response.forms[0]
         form['title'].value = u"Test Event"
