@@ -4,10 +4,6 @@
 {% block title %}{{ event.title }}{% endblock %}
 
 {% block content %}
-    {% with event.parent.get_published as parent %}
-        {% if event %}<p class="breadcrumbs"><a href="{{ event.get_absolute_url }}">&laquo;&nbsp;{{ event }}</a></p>{% endif %}
-    {% endwith %}
-
 	<h1>{{ event.title }}</h1>
 
 	<p>Date{{ event.start_dates_set|pluralize }}: {{ event.describe_dates_range }}</p>

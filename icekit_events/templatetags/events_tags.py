@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django import template
 from django.template.defaultfilters import time
 
@@ -11,3 +12,7 @@ def times(times_list, format=None):
     :return: the times, formatted according to the format
     """
     return [time(t, format) for t in times_list]
+
+@register.filter
+def add_days(date, days):
+    return date + timedelta(days)

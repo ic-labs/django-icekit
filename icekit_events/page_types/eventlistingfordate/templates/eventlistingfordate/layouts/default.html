@@ -1,0 +1,87 @@
+{% extends 'icekit_content_collections/layouts/default.html' %}
+
+{%  load static events_tags icekit_tags %}
+
+{% block title %}{{ page.get_title }} {{ start|date }}{% endblock %}
+
+{% block content %}
+    <h1>{{ page.get_title }}</h1>
+    <h2>{{ start|date }}</h2>
+
+    <ul>
+		{% for item in items_to_list %}
+			<li><a href="{{ item.get_absolute_url }}">
+				{{ item.title|safe }}
+			</a></li>
+        {% empty %}
+            <li>There are no events happening today</li>
+		{% endfor %}
+	</ul>
+
+
+    {% with tomorrow=start.date|add_days:1 yesterday=start.date|add_days:-1 %}
+        <p><a href="?{% update_GET 'date' = yesterday %}">{{ yesterday }}</a></p>
+        <p><a href="?{% update_GET 'date' = tomorrow %}">{{ tomorrow }}</a></p>
+    {% endwith %}
+
+    <div class="events-datepicker" id="datepicker" data-period="{{ days }}" data-start="{{ start|date:'Y-m-d' }}"></div>
+
+{% endblock %}
+
+{% block base_js %}
+	{{ block.super }}
+	<script src="{% static 'icekit_events/js/jquery-querystring.js' %}"></script>
+	<script src="{% static 'icekit_events/bower_components/jquery-ui/jquery-ui.min.js' %}"></script>
+	<script>
+		$(function() {
+			function init() {
+				var datepicker = $('#datepicker');
+
+				datepicker.datepicker({
+{#					nextText: "",#}
+{#					prevText: "",#}
+					dateFormat: "yy-mm-dd",
+					onSelect: function(date) {
+						var queryParams = $.querystring(window.location.toString());
+						queryParams.date = date;
+						var new_url = window.location.pathname + '?' + $.querystring(queryParams);
+{#						ajax_in_listing(new_url)#}
+                        window.location = new_url;
+					}
+				});
+
+				datepicker.datepicker('setDate', datepicker.data('start'));
+
+				// Hack this a little to get the date range selected
+				var datepickerCells = $('.ui-datepicker-calendar td');
+				var index = datepickerCells.index($('.ui-datepicker-current-day'));
+				datepickerCells.slice(index, index + parseInt(datepicker.data("period"))).addClass('active');
+			};
+			init();
+
+            {%  comment %}Ajax behaviour to come
+			function ajax_in_listing(href) {
+				window.history.pushState(null, window.title, href);
+				$("#eventlistingcontainer").load(href+" #eventlisting",
+					function() { init(); }
+				);
+			}
+
+			// ajax in other pages if a filter or date is clicked.
+			$(document).on('click', 'a.event-category-filter-list-button, .events-to-show-links a', function(e) {
+				if (e.which === 1) { //standard click only
+			      	e.preventDefault();
+					ajax_in_listing(this.href);
+				}
+			});
+
+			$(document).on({
+				ajaxStart: function() { $(".loading-takeover").fadeIn(200); },
+				ajaxStop: function() { $(".loading-takeover").fadeOut(200); }
+			});
+            {%  endcomment %}
+
+
+		});
+	</script>
+{% endblock %}

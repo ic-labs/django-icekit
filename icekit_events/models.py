@@ -432,7 +432,6 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
     def get_absolute_url(self):
         return reverse('icekit_events_eventbase_detail', args=(self.slug,))
 
-
 class GeneratorException(Exception):
     pass
 
@@ -791,23 +790,26 @@ class AbstractEventListingForDatePage(AbstractListingPage):
 
     class Meta:
         abstract = True
-        verbose_name = "Event Listing for Date"
 
-    def _occurrences_on_date(self, request):
+    def get_start(self, request):
+        try:
+            start = timezone.parse('%s 00:00' % request.GET.get('date'))
+        except ValueError:
+            start = timezone.midnight()
+        return start
 
+    def get_days(self, request):
         try:
             days = int(request.GET.get('days', appsettings.DEFAULT_DAYS_TO_SHOW))
         except ValueError:
             days = appsettings.DEFAULT_DAYS_TO_SHOW
+        return days
 
-        try:
-            starts = timezone.parse('%s 00:00' % request.GET.get('date'))
-        except ValueError:
-            starts = timezone.midnight()
-
-        ends = starts + timedelta(days=days)
-
-        return Occurrence.objects.within(starts, ends)
+    def _occurrences_on_date(self, request):
+        days = self.get_days(request)
+        start = self.get_start(request)
+        end = start + timedelta(days=days)
+        return Occurrence.objects.within(start, end)
 
     def get_items_to_list(self, request):
         return self._occurrences_on_date(request).published()\
