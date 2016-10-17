@@ -1,6 +1,7 @@
 django:
   command: runtests.sh
   environment:
+    QUICK: 1
     TRAVIS:
     TRAVIS_BRANCH:
     TRAVIS_JOB_ID:

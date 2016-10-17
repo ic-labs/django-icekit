@@ -28,6 +28,16 @@ class AppObject(object):
     pass
 
 
+def models_key(model):
+    """
+    Return verbose name (plural), verbose name, or model name, to use as a
+    comparison key when sorting.
+    """
+    return model.get(
+        'verbose_name', model.get(
+            'verbose_name_plural', model['object_name']))
+
+
 @register.filter
 def filter_featured_apps(admin_apps, request):
     """
@@ -100,6 +110,7 @@ def filter_featured_apps(admin_apps, request):
 
         # Only add the panel if more than one model listed.
         if len(new_app.models) > 0:
+            new_app.models.sort(key=models_key)
             featured_apps.append(new_app)
 
     return featured_apps

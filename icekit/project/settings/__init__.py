@@ -1,6 +1,12 @@
 from __future__ import absolute_import
 
 try:
-    from icekit_settings import *
+    try:
+        # Local (override) project settings.
+        from project_settings_local import *
+    except ImportError:
+        # Project settings.
+        from project_settings import *
 except ImportError:
-    from .calculated import *
+    # ICEkit settings.
+    from .icekit import *

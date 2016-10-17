@@ -63,7 +63,7 @@ In the app whose label is being updated, make the following changes:
     with a deprecation warning.
 
   * Add a `db_table: {old app label}` option to all `CreateModel` operations in
-    existing migrations, if not already defined, giving the current app label
+    existing migrations, if not already defined, giving the previous app label
     as the value.
 
   * Run `manage.py makemigrations {app_label}`. Django will detect that the

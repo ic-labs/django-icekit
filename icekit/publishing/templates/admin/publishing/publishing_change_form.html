@@ -55,13 +55,26 @@
 							<a href="{{ unpublish_btn }}" class="button default">Unpublish</a>
 						{% endif %}
 					{% endif %}
-                    {% with original.get_absolute_url as preview_url %}
-                        {% if preview_draft_btn and preview_url %}
-                            <a href="{{ preview_url|get_draft_url }}" target="_blank" class="button default">Preview draft <i class="fa fa-external-link"></i></a>
-                        {% endif %}
-					{% endwith %}
 				</div>
 			</div>
 		</div>
 	{% endif %}
+{% endblock %}
+
+
+{% block object-tools-items %}
+{#  Overriding view on site behaviour  #}
+
+    <li>
+        {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
+        <a href="{% add_preserved_filters history_url %}" class="historylink">{% trans "History" %}</a>
+    </li>
+
+    {% with original.get_absolute_url as preview_url %}
+        {% if preview_draft_btn and preview_url %}
+            <li><a href="{{ preview_url|get_draft_url }}" target="_blank">Preview draft <i class="fa fa-circle-o"></i></a></li>
+        {% endif %}
+        {% if has_absolute_url and has_been_published %}<li><a href="{{ absolute_url }}" target="_blank">{% trans "View published" %} <i class="fa fa-circle"></i></a></li>{% endif %}
+    {% endwith %}
+
 {% endblock %}

@@ -15,8 +15,11 @@ end_of_line = crlf
 indent_size = 2
 indent_style = tab
 
-[*.{py,sh}]
+[*.{md,py}]
 indent_style = space
+
+[*.sh]
+indent_style = tab
 
 [*.yml]
 indent_size = 2

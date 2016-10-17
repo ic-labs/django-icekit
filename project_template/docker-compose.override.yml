@@ -20,6 +20,7 @@ services:
       - celerybeat
       - celeryflower
       - elasticsearch
+      - postgres
       - redis
     ports:
       - 8000:8000

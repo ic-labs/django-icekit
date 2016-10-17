@@ -24,15 +24,20 @@ Add custom functionality to your site.
 * [Placeholders]
 * [Publishing]
 * [Page trees and mptt]
+* [Articles]
 * [Writing portable apps]
 
 
 # Apps for ICEkit
 ## Included apps, pagetypes and plugins
 
+  * Apps:
+      * `authors` - descriptions of site contributors
+
   * Page type plugins:
       * `layout_page` - integrates with our flexible layouts system.
       * `search_page` - integrates with [Haystack].
+      * `authors.page.AuthorListing` - a list of Authors
   * Modular content plugins:
       * `brightcove`
       * `child_pages`
@@ -88,6 +93,7 @@ team at [the Interaction Consortium]: [labs@interaction.net.au](mailto:labs@inte
 [Creating content plugins]: howto/plugins.md
 [Deploying ICEkit]: howto/deployment.md
 [Layouts]: topics/layouts.md
+[Articles]: topics/articles.md
 [Placeholders]: topics/placeholders.md
 [Publishing]: topics/publishing.md
 [Page trees and mptt]: topics/page-trees-and-mptt.md
