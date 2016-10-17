@@ -20,7 +20,7 @@ INSTALLED_APPS += (
 
     # INCLUDED IN PROJECT TEMPLATE
     'articles',
-    'events',
+    'icekit_events.page_types.eventlistingfordate',
 )
 
 MIDDLEWARE_CLASSES += (
