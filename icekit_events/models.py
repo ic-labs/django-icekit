@@ -175,9 +175,9 @@ class RecurrenceRule(AbstractBaseModel):
 
 
 @encoding.python_2_unicode_compatible
-class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
+class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel):
     """
-    An abstract polymorphic event model, with the bare minimum fields.
+    A polymorphic event model with all basic event features.
 
     An event may have associated ``Occurrence``s that determine when the event
     occurs in the calendar. An event with no occurrences does not happen at
@@ -224,8 +224,8 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
     )
 
     class Meta:
-        abstract = True
         ordering = ('title', 'pk')
+        verbose_name = 'Event'
 
     def __str__(self):
         return self.title
@@ -351,7 +351,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
         self.extend_occurrences(until=until)
 
     def publishing_clone_relations(self, src_obj):
-        super(AbstractEvent, self).publishing_clone_relations(src_obj)
+        super(EventBase, self).publishing_clone_relations(src_obj)
         src_obj.clone_event_relationships(self)
 
     def clone_event_relationships(self, dst_obj):
@@ -414,17 +414,8 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
                     last.end.strftime(time_format)
                 ])
 
-
-class Event(AbstractEvent):
-    """
-    A concrete polymorphic event model.
-    """
-
-    class Meta:
-        verbose_name = 'Event'
-
     def get_absolute_url(self):
-        return reverse('icekit_events_event_detail', args=(self.pk,))
+        return reverse('icekit_events_eventbase_detail', args=(self.pk,))
 
 
 class GeneratorException(Exception):
@@ -451,7 +442,7 @@ class EventRepeatsGenerator(AbstractBaseModel):
     explicitly is most likely the easiest way to ensure this.
     """
     event = models.ForeignKey(
-        Event,
+        EventBase,
         db_index=True,
         editable=False,
         related_name='repeat_generators',
@@ -668,7 +659,7 @@ class Occurrence(AbstractBaseModel):
     objects = OccurrenceManager()
 
     event = models.ForeignKey(
-        Event,
+        EventBase,
         db_index=True,
         editable=False,
         related_name='occurrences',

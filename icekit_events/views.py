@@ -50,7 +50,7 @@ def event(request, event_id, is_preview=False):
     if is_preview and not permissions.allowed_to_preview(request.user):
         raise PermissionDenied
 
-    event = get_object_or_404(models.Event, pk=event_id).get_visible()
+    event = get_object_or_404(models.EventBase, pk=event_id).get_visible()
     if not event:
         raise Http404
 
