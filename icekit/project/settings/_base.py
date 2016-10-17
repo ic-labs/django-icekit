@@ -562,12 +562,13 @@ FEATURED_APPS = (
         },
     },
     {
-        'verbose_name': 'Media',
+        'verbose_name': 'Assets',
         'icon_html': '<i class="content-type-icon fa fa-file-image-o"></i>',
         'models': {
-            'image.Image': {},
-            'slideshow.Slideshow': {},
-            'sharedcontent.SharedContent': {},
+            'icekit_plugins_image.Image': {},
+            'icekit_plugins_file.File': {},
+            'icekit_plugins_slideshow.SlideShow': {},
+            # 'sharedcontent.SharedContent': {},
         },
     },
 )
