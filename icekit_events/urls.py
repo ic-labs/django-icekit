@@ -7,11 +7,9 @@ URLconf for ``icekit_events`` app.
 
 from django.conf.urls import url
 
-from icekit_events.views import index, event, occurrence
+from icekit_events.views import event
 
 urlpatterns = [
-    url(r'^$',
-        index, name='icekit_events_index'),
-    url(r'^(?P<event_id>[\d]+)/$',
+    url(r'^(?P<slug>[\w-]+)/$',
         event, name='icekit_events_eventbase_detail'),
 ]
