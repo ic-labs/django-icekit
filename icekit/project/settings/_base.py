@@ -505,8 +505,8 @@ INSTALLED_APPS += (
     # 'fluent_contents.plugins.googledocsviewer',
     'fluent_contents.plugins.iframe',
     # 'fluent_contents.plugins.markup',
-    'fluent_contents.plugins.oembeditem',
-    'fluent_contents.plugins.picture',
+    # 'fluent_contents.plugins.oembeditem',
+    # 'fluent_contents.plugins.picture',
     'fluent_contents.plugins.rawhtml',
     'fluent_contents.plugins.sharedcontent',
     'fluent_contents.plugins.text',
@@ -627,6 +627,7 @@ INSTALLED_APPS += (
     'icekit.plugins.quote',
     'icekit.plugins.reusable_form',
     'icekit.plugins.slideshow',
+    'icekit.plugins.image_gallery',
     'icekit.plugins.twitter_embed',
 )
 
