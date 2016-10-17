@@ -95,6 +95,11 @@ setuptools.setup(
         'forms': [
             'django-forms-builder',
         ],
+        'glamkit': [
+            'glamkit-sponsors',
+            'icekit-events',
+            'icekit-press-releases',
+        ],
         'project': [
             'boto3',
             'celery[redis]',
@@ -132,11 +137,6 @@ setuptools.setup(
             'django-haystack',
             'elasticsearch',
             'elasticstack',
-        ],
-        'glamkit': [
-            'icekit-events',
-            'glamkit-sponsors',
-            'icekit-press-releases',
         ],
         'test': [
             'celery[redis]',
