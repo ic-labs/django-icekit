@@ -18,6 +18,8 @@
   * New `icekit.page_types.author` app which models a content author and a
     listing page, based on the `content_collections` pattern.
 
+  * New `icekit.page_types.article` app which is a concrete implementation of
+    the content collections pattern.
 
 Breaking changes:
 

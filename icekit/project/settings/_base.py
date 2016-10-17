@@ -8,6 +8,8 @@ Load environment specific settings via `BASE_SETTINGS_MODULE` environment
 variable, and override settings in `local.py`.
 """
 
+from __future__ import absolute_import
+
 import hashlib
 import multiprocessing
 import os
@@ -28,14 +30,12 @@ REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
 # other projects running on the same system.
 SETTINGS_MODULE_HASH = hashlib.md5(__file__ + BASE_SETTINGS_MODULE).hexdigest()
 
-SITE_NAME = os.environ.get(
-    'SITE_NAME', os.environ.get('ICEKIT_PROJECT_NAME', 'ICEkit'))
-SITE_SLUG = slugify(unicode(SITE_NAME))
+PROJECT_NAME = os.environ.get('ICEKIT_PROJECT_NAME', 'ICEkit')
+PROJECT_SLUG = re.sub(r'[^0-9A-Za-z]+', '-', slugify(unicode(PROJECT_NAME)))
 
-SITE_DOMAIN = re.sub(
-    r'[^-.0-9A-Za-z]',
-    '-',
-    os.environ.get('SITE_DOMAIN', '%s.lvh.me' % SITE_SLUG))
+SITE_DOMAIN = os.environ.get('SITE_DOMAIN', '%s.lvh.me' % PROJECT_SLUG)
+SITE_NAME = os.environ.get('SITE_NAME', PROJECT_NAME)
+
 SITE_PORT = 8000
 
 # FILE SYSTEM PATHS ###########################################################
@@ -87,7 +87,7 @@ DATABASES = {
     'default': {
         'ATOMIC_REQUESTS': True,
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('PGDATABASE', SITE_SLUG),
+        'NAME': os.environ.get('PGDATABASE', PROJECT_SLUG),
         'HOST': os.environ.get('PGHOST'),
         'PORT': os.environ.get('PGPORT'),
         'USER': os.environ.get('PGUSER'),
@@ -153,7 +153,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'cloghandler.ConcurrentRotatingFileHandler',
             'filename': os.path.join(
-                VAR_DIR, 'logs', '%s.log' % SITE_SLUG),
+                VAR_DIR, 'logs', '%s.log' % PROJECT_SLUG),
             'maxBytes': 10 * 1024 * 1024,  # 10 MiB
             'backupCount': 10,
             'formatter': 'logfile',
@@ -341,7 +341,7 @@ SITE_ID = 1
 
 BROKER_URL = CELERY_RESULT_BACKEND = 'redis://%s/0' % REDIS_ADDRESS
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']  # 'pickle'
-CELERY_DEFAULT_QUEUE = SITE_SLUG
+CELERY_DEFAULT_QUEUE = PROJECT_SLUG
 
 CELERY_QUEUES = (
     Queue(
@@ -411,11 +411,11 @@ DDF_FILL_NULLABLE_FIELDS = False
 INSTALLED_APPS += ('easy_thumbnails', )
 
 # Scoped aliases allows us to pre-generate all the necessary thumbnails for a
-# given model/field, without generating additional unecessary thumbnails. This
+# given model/field, without generating additional unnecessary thumbnails. This
 # is essential when using a remote storage backend.
 THUMBNAIL_ALIASES = {
     # 'app[.model][.field]': {
-    #   'name-WxH': { 'size': (W, H), },
+    #   'name': { 'size': (W, H), },
     # },
     '': {
         'icekit_authors_portrait_large': {
@@ -426,6 +426,12 @@ THUMBNAIL_ALIASES = {
         },
         'content_image': {
             'size': (1138, 0), # maximum width of a bootstrap content column
+        },
+        'slideshow_slide': {
+            'size': (1138, 0),
+        },
+        'image_gallery_thumb': {
+            'size': (200, 0),
         }
     }
 }
@@ -547,6 +553,9 @@ FEATURED_APPS = (
         'verbose_name': 'Content',
         'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
         'models': {
+            'icekit_article.Article': {
+                'verbose_name_plural': 'Articles',
+            },
             'fluent_pages.Page': {
                 'verbose_name_plural': 'Pages',
             },
@@ -597,6 +606,7 @@ INSTALLED_APPS += (
     'icekit.content_collections',
     'notifications',
 
+    'icekit.page_types.article',
     'icekit.page_types.author',
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
@@ -620,6 +630,16 @@ INSTALLED_APPS += (
 )
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
+
+# ICEKIT PRESS RELEASES #######################################################
+
+FEATURED_APPS[0]['models'].update({
+    'icekit_press_releases.PressRelease': {
+        'verbose_name_plural': 'Press releases',
+    },
+})
+
+INSTALLED_APPS += ('press_releases', )
 
 # MASTER PASSWORD #############################################################
 
@@ -701,7 +721,7 @@ AWS_HEADERS = {
 AWS_SECRET_ACCESS_KEY = os.environ.get('MEDIA_AWS_SECRET_ACCESS_KEY')
 
 AWS_STORAGE_BUCKET_NAME = os.environ.get(
-    'MEDIA_AWS_STORAGE_BUCKET_NAME', '%s-stg' % SITE_SLUG)
+    'MEDIA_AWS_STORAGE_BUCKET_NAME', '%s-stg' % PROJECT_SLUG)
 
 ENABLE_S3_MEDIA = False
 INSTALLED_APPS += ('storages', )

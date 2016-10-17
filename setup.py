@@ -64,7 +64,9 @@ setuptools.setup(
         'django-model-settings',
         'django-mptt',
         'django-multiurl',
-        'django-polymorphic>=0.8', # import pattern changed in 0.8
+        # import pattern changed in 0.8; version 1 to 1.0.1 has bug with parent
+        # admins: github.com/django-polymorphic/django-polymorphic/pull/246
+        'django-polymorphic>=0.8,!=1,!=1.0.1',
         'django-wysiwyg',
         'django_extensions',
         'html5lib==0.999',  # See: https://github.com/html5lib/html5lib-python/issues/189 and https://github.com/pydanny-archive/django-wysiwyg/issues/61
@@ -94,6 +96,11 @@ setuptools.setup(
         ],
         'forms': [
             'django-forms-builder',
+        ],
+        'glamkit': [
+            'glamkit-sponsors',
+            'icekit-events',
+            'icekit-press-releases>=0.7',
         ],
         'project': [
             'boto3',
@@ -132,11 +139,6 @@ setuptools.setup(
             'django-haystack',
             'elasticsearch',
             'elasticstack',
-        ],
-        'glamkit': [
-            'icekit-events',
-            'glamkit-sponsors',
-            'icekit-press-releases',
         ],
         'test': [
             'celery[redis]',
