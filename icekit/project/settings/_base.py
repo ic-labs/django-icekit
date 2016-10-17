@@ -548,31 +548,6 @@ INSTALLED_APPS += ('haystack', )
 
 ICEKIT_CONTEXT_PROCESSOR_SETTINGS = ()
 
-FEATURED_APPS = (
-    {
-        'verbose_name': 'Content',
-        'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
-        'models': {
-            'icekit_article.Article': {
-                'verbose_name_plural': 'Articles',
-            },
-            'fluent_pages.Page': {
-                'verbose_name_plural': 'Pages',
-            },
-        },
-    },
-    {
-        'verbose_name': 'Assets',
-        'icon_html': '<i class="content-type-icon fa fa-file-image-o"></i>',
-        'models': {
-            'icekit_plugins_image.Image': {},
-            'icekit_plugins_file.File': {},
-            'icekit_plugins_slideshow.SlideShow': {},
-            # 'sharedcontent.SharedContent': {},
-        },
-    },
-)
-
 ICEKIT = {
     'LAYOUT_TEMPLATES': (
         # A list of 3-tuples, each containing a label prefix, a path to a
@@ -594,6 +569,31 @@ ICEKIT = {
             os.path.join(PROJECT_DIR, 'templates'),
             'layouts',
         ),
+    ),
+
+    'DASHBOARD_FEATURED_APPS': (
+        {
+            'verbose_name': 'Content',
+            'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
+            'models': {
+                'icekit_article.Article': {
+                    'verbose_name_plural': 'Articles',
+                },
+                'fluent_pages.Page': {
+                    'verbose_name_plural': 'Pages',
+                },
+            },
+        },
+        {
+            'verbose_name': 'Assets',
+            'icon_html': '<i class="content-type-icon fa fa-file-image-o"></i>',
+            'models': {
+                'icekit_plugins_image.Image': {},
+                'icekit_plugins_file.File': {},
+                'icekit_plugins_slideshow.SlideShow': {},
+                # 'sharedcontent.SharedContent': {},
+            },
+        },
     ),
 }
 
@@ -632,16 +632,6 @@ INSTALLED_APPS += (
 )
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
-
-# ICEKIT PRESS RELEASES #######################################################
-
-FEATURED_APPS[0]['models'].update({
-    'icekit_press_releases.PressRelease': {
-        'verbose_name_plural': 'Press releases',
-    },
-})
-
-INSTALLED_APPS += ('press_releases', )
 
 # MASTER PASSWORD #############################################################
 
