@@ -175,7 +175,8 @@ class RecurrenceRule(AbstractBaseModel):
 
 
 @encoding.python_2_unicode_compatible
-class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel):
+class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
+                SlugMixin):
     """
     A polymorphic event model with all basic event features.
 

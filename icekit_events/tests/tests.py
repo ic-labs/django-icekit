@@ -72,6 +72,7 @@ class TestAdmin(WebTest):
         # Fill in and submit actual Event admin add form
         form = response.forms[0]
         form['title'].value = u"Test Event"
+        form['slug'].value = 'test-event'
         response = form.submit()
         self.assertEqual(302, response.status_code)
         response = response.follow()
