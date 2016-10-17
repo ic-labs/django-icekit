@@ -14,7 +14,7 @@
 /.gnupg/gpg.conf
 /.idea/
 /bower_components/
-/icekit_settings_local.py
+/project_settings_local.py
 /node_modules/
 /static_root/
 /var/
