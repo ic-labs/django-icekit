@@ -5,6 +5,7 @@ Models for ``icekit_events`` app.
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
 
 from datetime import datetime, timedelta, time as datetime_time
+
 from dateutil import rrule
 import six
 import pytz
@@ -21,12 +22,14 @@ from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
     get_current_timezone
 
 from polymorphic.models import PolymorphicModel
+from timezone.timezone import localize, now
 
 from icekit.content_collections.abstract_models import AbstractListingPage, \
-    SlugMixin
+    TitleSlugMixin
 from icekit.fields import ICEkitURLField
 from icekit.publishing.models import PublishingModel
 from icekit.publishing.middleware import is_draft_request_context
+from django.template.defaultfilters import date as datefilter
 
 from . import appsettings, validators, utils
 from .utils import time as utils_time
@@ -34,6 +37,8 @@ from .utils import time as utils_time
 
 # Constant object used as a flag for unset kwarg parameters
 UNSET = object()
+
+DATETIME_FORMAT = settings.DATE_FORMAT + " " + settings.TIME_FORMAT
 
 
 def zero_datetime(dt, tz=None):
@@ -176,7 +181,7 @@ class RecurrenceRule(AbstractBaseModel):
 
 @encoding.python_2_unicode_compatible
 class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
-                SlugMixin):
+                TitleSlugMixin):
     """
     A polymorphic event model with all basic event features.
 
@@ -198,7 +203,6 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         null=True,
         related_name='derivitives',
     )
-    title = models.CharField(max_length=255)
 
     show_in_calendar = models.BooleanField(
         default=True,
@@ -207,17 +211,18 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
 
     human_dates = models.TextField(
         blank=True,
-        help_text=_('Describe event dates in humane language.'),
-    )
-    human_times = models.TextField(
-        blank=True,
-        help_text=_('Describe event times in humane language.'),
+        help_text=_('Describe event dates in everyday language, e.g. "Every Sunday in March".'),
     )
     special_instructions = models.TextField(
         blank=True,
-        help_text=_('Describe special instructions for attending event.'),
+        help_text=_('Describe special instructions for attending event, '
+                    'e.g. "Enter via the Jones St entrance".'),
     )
-    attendance_url = ICEkitURLField(
+    cta_text = models.CharField(_("Call to action"),
+        blank=True,
+        max_length=255, default=_("Book now")
+    )
+    cta_url = ICEkitURLField(_("CTA URL"),
         blank=True,
         null=True,
         help_text=_('The URL where visitors can arrange to attend an event'
@@ -381,42 +386,51 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         last = self.occurrences.order_by('-end').first()
         return (first, last)
 
-    def describe_dates_range(self, date_format='%Y-%m-%d'):
+    def describe_dates_range(self, date_format=None):
         if self.human_dates:
             return self.human_dates
         else:
             first, last = self.get_occurrences_range()
+            start = first.local_start
+            end = last.local_end
             if not (first or last):
                 return ''
             elif first and not last:
-                return 'From %s' % first.start.strftime(date_format)
+                return 'From %s' % datefilter(start, date_format)
             elif last and not first:
-                return 'To %s' % last.end.strftime(date_format)
+                return 'To %s' % datefilter(end, date_format)
             else:
                 return ' to '.join([
-                    first.start.strftime(date_format),
-                    last.end.strftime(date_format)
+                    datefilter(start, date_format),
+                    datefilter(end, date_format)
                 ])
 
-    def describe_times_range(self, time_format='%H:%M:%S'):
-        if self.human_times:
-            return self.human_times
-        else:
-            first, last = self.get_occurrences_range()
-            if not (first or last):
-                return ''
-            elif first and not last:
-                return 'From %s' % first.start.strftime(time_format),
-            elif last and not first:
-                return 'To %s' % last.end.strftime(time_format)
-            else:
-                return ' to '.join([
-                    first.start.strftime(time_format),
-                    last.end.strftime(time_format)
-                ])
+    def start_dates_set(self):
+        """
+        :return: a sorted set of all the different dates that this event
+        happens on.
+        """
+        occurrences = self.occurrences.filter(
+            is_cancelled=False
+        )
+        dates = set([o.local_start.date() for o in occurrences])
+        sorted_dates = sorted(dates)
+        return sorted_dates
+
+    def start_times_set(self):
+        """
+        :return: a sorted set of all the different times that this event
+        happens on.
+        """
+        occurrences = self.occurrences.filter(
+            is_all_day=False, is_cancelled=False
+        )
+        times = set([o.local_start.time() for o in occurrences])
+        sorted_times = sorted(times)
+        return sorted_times
 
     def get_absolute_url(self):
-        return reverse('icekit_events_eventbase_detail', args=(self.pk,))
+        return reverse('icekit_events_eventbase_detail', args=(self.slug,))
 
 
 class GeneratorException(Exception):
@@ -588,15 +602,6 @@ class EventRepeatsGenerator(AbstractBaseModel):
         """
         return self.end - self.start
 
-    @property
-    def period(self):
-        """
-        Return "AM" or "PM", depending on when this event starts.
-        """
-        if self.is_all_day:
-            return
-        return 'PM' if timezone.localize(self.start).hour >= 12 else 'AM'
-
 
 class OccurrenceQueryset(QuerySet):
     """ Custom queryset methods for ``Occurrence`` """
@@ -645,6 +650,7 @@ class OccurrenceQueryset(QuerySet):
                 models.Q(is_all_day=True,
                          start__lte=zero_datetime(end))
             )
+
 
 
 OccurrenceManager = models.Manager.from_queryset(OccurrenceQueryset)
@@ -697,7 +703,15 @@ class Occurrence(AbstractBaseModel):
 
     def __str__(self):
         return u"""Occurrence of "{0}" {1} - {2}""".format(
-            self.event.title, self.start, self.end)
+            self.event.title, datefilter(self.local_start, DATETIME_FORMAT), datefilter(self.local_end, DATETIME_FORMAT))
+
+    @property
+    def local_start(self):
+        return localize(self.start)
+
+    @property
+    def local_end(self):
+        return localize(self.end)
 
     @property
     def is_generated(self):
@@ -735,6 +749,12 @@ class Occurrence(AbstractBaseModel):
     # TODO Return __str__ as title for now, improve it later
     def title(self):
         return unicode(self)
+
+    def is_past(self):
+        """
+        :return: True if this occurrence is entirely in the past
+        """
+        return self.end < now()
 
 
 def get_occurrence_times_for_event(event):
@@ -789,11 +809,11 @@ class AbstractEventListingForDatePage(AbstractListingPage):
 
         return Occurrence.objects.within(starts, ends)
 
-    def get_public_items(self, request):
+    def get_items_to_list(self, request):
         return self._occurrences_on_date(request).published()\
             .filter(event__show_in_calendar=True)
 
-    def get_visible_items(self, request):
+    def get_items_to_mount(self, request):
         return self._occurrences_on_date(request).visible()
 
 

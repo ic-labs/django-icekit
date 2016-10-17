@@ -59,7 +59,6 @@ class BaseOccurrenceForm(forms.ModelForm):
 
 # DEFAULT_EVENT_FORM_WIDGETS = {
 #     'human_dates': forms.Textarea({'cols': 80, 'rows': 3}),
-#     'human_times': forms.Textarea({'cols': 80, 'rows': 3}),
 #     'special_instructions': forms.Textarea({'cols': 80, 'rows': 4}),
 # }
 #

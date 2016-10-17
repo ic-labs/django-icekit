@@ -839,54 +839,6 @@ class TestEventRepeatsGeneratorModel(TestCase):
             ).duration
         )
 
-    def test_period(self):
-        now = timezone.localize(timezone.now())
-        self.assertIsNone(
-            G(
-                models.EventRepeatsGenerator,
-                is_all_day=True,
-                start=self.start,
-                end=self.start,
-                event=G(models.EventBase),
-            ).period
-        )
-        self.assertEquals(
-            'AM',
-            G(
-                models.EventRepeatsGenerator,
-                start=now.replace(hour=0),
-                end=now.replace(hour=0) + timedelta(hours=1),
-                event=G(models.EventBase),
-            ).period
-        )
-        self.assertEquals(
-            'AM',
-            G(
-                models.EventRepeatsGenerator,
-                start=now.replace(hour=11),
-                end=now.replace(hour=11) + timedelta(hours=1),
-                event=G(models.EventBase),
-            ).period
-        )
-        self.assertEquals(
-            'PM',
-            G(
-                models.EventRepeatsGenerator,
-                start=now.replace(hour=12),
-                end=now.replace(hour=12) + timedelta(hours=1),
-                event=G(models.EventBase),
-            ).period
-        )
-        self.assertEquals(
-            'PM',
-            G(
-                models.EventRepeatsGenerator,
-                start=now.replace(hour=23),
-                end=now.replace(hour=23) + timedelta(hours=1),
-                event=G(models.EventBase),
-            ).period
-        )
-
     def test_limited_daily_repeating_generator(self):
         generator = G(
             models.EventRepeatsGenerator,

@@ -1,32 +1,47 @@
 {% extends 'base.html' %}
+{% load placeholder_tags fluent_contents_tags icekit_tags events_tags %}
 
 {% block title %}{{ event.title }}{% endblock %}
 
-{% block body %}
-	<p>
-		<a href="{% url 'icekit_events_index' %}">&lt; All Events</a>
-	</p>
+{% block content %}
+    {% with event.parent.get_published as parent %}
+        {% if event %}<p class="breadcrumbs"><a href="{{ event.get_absolute_url }}">&laquo;&nbsp;{{ event }}</a></p>{% endif %}
+    {% endwith %}
 
 	<h1>{{ event.title }}</h1>
 
-	<p>Dates: {{ event.describe_dates_range }}</p>
-	<p>Time: {{ event.describe_times_range }}</p>
+	<p>Date{{ event.start_dates_set|pluralize }}: {{ event.describe_dates_range }}</p>
+	<p>Time{{ event.start_times_set|pluralize }}: {{ event.start_times_set|times|grammatical_join:" or " }}</p>
 	{% if event.special_instructions %}
 		<p>Special instructions: {{ event.special_instructions }}</p>
 	{% endif %}
-	{% if event.attendance_url %}
-		<p><a href="{{ event.attendance_url }}">Book now</a></p>
+	{% if event.cta_url %}
+		<p><a href="{{ event.cta_url }}">{{  event.cta_text }}</a></p>
 	{% endif %}
 
-	<h2>Occurrences</h2>
-	<ul>
-        {% for occurrence in event.occurrences.all %}
-        <li>
-            {{ occurrence.start }} to {{ occurrence.end }}
-        </li>
-        {%  empty %}
-            <li>No occurrences for this event</li>
-        {% endfor %}
-	</ul>
+    {% regroup event.occurrences.all by local_start.date.year as year_groups %}
+
+    {% for group in year_groups %}
+        <h2>{{ group.grouper }}</h2>
+        {% regroup group.list by local_start.date as date_groups %}
+        <dl>
+            {% for dg in date_groups %}
+                <dt>{{ dg.grouper|date:"N j" }}</dt>
+                {% for occurrence in dg.list %}
+                    <dd {% if occurrence.is_past or occurrence.is_cancelled %}style="text-decoration:line-through;"{% endif %}>{% if occurrence.is_all_day %}All day{% else %}{{ occurrence.local_start|time }}{% endif %}</dd>
+                {% endfor %}
+            {% endfor %}
+        </dl>
+    {%  empty %}
+        <p>This event doesn't have published times</p>
+    {% endfor %}
+
+
+{#    {% page_placeholder "main" role="m" %}#}
+
 {% endblock %}
 
+{% block body_js %}
+	{{ block.super }}
+	{% render_content_items_media %}
+{% endblock %}

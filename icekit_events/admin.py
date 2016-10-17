@@ -21,6 +21,8 @@ from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.utils.timezone import get_current_timezone
 from django.views.decorators.csrf import csrf_exempt
+
+from icekit.content_collections.admin import TitleSlugAdmin
 from icekit.plugins.base import BaseChildModelPlugin
 
 from icekit.plugins.base import PluginMount
@@ -60,8 +62,11 @@ class OccurrencesInline(admin.TabularInline):
     readonly_fields = ('is_user_modified', 'is_cancelled',)
 
 
-class EventChildAdmin(PolymorphicChildModelAdmin,
-                      publishing_admin.PublishingAdmin):
+class EventChildAdmin(
+    PolymorphicChildModelAdmin,
+    publishing_admin.PublishingAdmin,
+    TitleSlugAdmin
+):
     """
     Abstract admin class for polymorphic child event models.
     """
