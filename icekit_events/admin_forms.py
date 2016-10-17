@@ -51,16 +51,21 @@ class BaseOccurrenceForm(forms.ModelForm):
         return super(BaseOccurrenceForm, self).save(*args, **kwargs)
 
 
-DEFAULT_EVENT_FORM_WIDGETS = {
-    'human_dates': forms.Textarea({'cols': 80, 'rows': 3}),
-    'human_times': forms.Textarea({'cols': 80, 'rows': 3}),
-    'special_instructions': forms.Textarea({'cols': 80, 'rows': 4}),
-}
+# For some reason, BaseEventForm doesn't play well with AnyURLField before
+# migrations have been applied. Since all it does is resize text widgets,
+# leaving it commented for now.
+# IC Slack: https://theicteam.slack.com/files/jamesmurty/F2Q2S4S8N/vexing_contenttypes_issue_enabling_icekit_events.txt
+# TODO: figure out why
 
-
-class BaseEventForm(forms.ModelForm):
-
-    class Meta:
-        fields = '__all__'
-        model = models.EventBase
-        widgets = DEFAULT_EVENT_FORM_WIDGETS
+# DEFAULT_EVENT_FORM_WIDGETS = {
+#     'human_dates': forms.Textarea({'cols': 80, 'rows': 3}),
+#     'human_times': forms.Textarea({'cols': 80, 'rows': 3}),
+#     'special_instructions': forms.Textarea({'cols': 80, 'rows': 4}),
+# }
+#
+# class BaseEventForm(forms.ModelForm):
+#
+#     class Meta:
+#         fields = '__all__'
+#         model = models.EventBase
+#         widgets = DEFAULT_EVENT_FORM_WIDGETS

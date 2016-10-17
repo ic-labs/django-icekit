@@ -65,7 +65,7 @@ class EventChildAdmin(PolymorphicChildModelAdmin,
     """
     Abstract admin class for polymorphic child event models.
     """
-    base_form = admin_forms.BaseEventForm
+    # base_form = admin_forms.BaseEventForm
     base_model = models.EventBase
     inlines = [
         EventRepeatGeneratorsInline,
