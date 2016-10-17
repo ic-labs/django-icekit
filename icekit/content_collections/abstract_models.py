@@ -10,8 +10,11 @@ from icekit.page_types.layout_page.abstract_models import AbstractLayoutPage
 from django.db import models
 
 
-class SlugMixin(models.Model):
+class TitleSlugMixin(models.Model):
+    # TODO: this should perhaps become part of a wider ICEkit mixin that covers
+    # standard content behaviour.
 
+    title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
 
     class Meta:
@@ -35,22 +38,12 @@ class SlugMixin(models.Model):
                 % (self.slug, clashes_qs))
 
     def clean(self):
-        super(SlugMixin, self).clean()
+        super(TitleSlugMixin, self).clean()
         self.validate_unique_slug()
 
     def publishing_prepare_published_copy(self, draft_obj):
         """ Perform slug validation on publish, not just when saving draft """
         self.validate_unique_slug()
-
-
-class TitleSlugMixin(SlugMixin):
-    # TODO: this should perhaps become part of a wider ICEkit mixin that covers
-    # standard content behaviour.
-
-    title = models.CharField(max_length=255)
-
-    class Meta:
-        abstract = True
 
     def __unicode__(self):
         return self.title
