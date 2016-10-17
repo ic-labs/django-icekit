@@ -759,11 +759,11 @@ class AbstractEventListingPage(AbstractListingPage):
         abstract = True
         verbose_name = "Event Listing"
 
-    def get_items_to_list(self, request):
+    def get_public_items(self, request):
         return Occurrence.objects.published()\
             .filter(event__show_in_calendar=True)
 
-    def get_items_to_mount(self, request):
+    def get_visible_items(self, request):
         return Occurrence.objects.visible()
 
 
@@ -789,11 +789,11 @@ class AbstractEventListingForDatePage(AbstractListingPage):
 
         return Occurrence.objects.within(starts, ends)
 
-    def get_items_to_list(self, request):
+    def get_public_items(self, request):
         return self._occurrences_on_date(request).published()\
             .filter(event__show_in_calendar=True)
 
-    def get_items_to_mount(self, request):
+    def get_visible_items(self, request):
         return self._occurrences_on_date(request).visible()
 
 
