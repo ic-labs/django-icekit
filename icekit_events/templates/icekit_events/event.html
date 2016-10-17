@@ -22,9 +22,7 @@
 	<ul>
         {% for occurrence in event.occurrences.all %}
         <li>
-            <a href="{% url 'icekit_events_occurrence_detail' occurrence.event.pk occurrence.pk %}">
-                {{ occurrence.start }} to {{ occurrence.end }}
-            </a>
+            {{ occurrence.start }} to {{ occurrence.end }}
         </li>
         {%  empty %}
             <li>No occurrences for this event</li>

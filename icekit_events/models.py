@@ -736,10 +736,6 @@ class Occurrence(AbstractBaseModel):
     def title(self):
         return unicode(self)
 
-    def get_absolute_url(self):
-        return reverse('icekit_events_occurrence_detail',
-                       args=(self.event.pk, self.pk,))
-
 
 def get_occurrence_times_for_event(event):
     """

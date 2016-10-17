@@ -5,9 +5,7 @@
 		{% for occurrence in occurrences %}
 			<ul>
 				<li>
-					<a href="{% url 'icekit_events_eventbase_detail' occurrence.event.pk %}">{{ occurrence.event.title }}</a>
-					&mdash;
-					<a href="{% url 'icekit_events_occurrence_detail' occurrence.event.pk occurrence.pk %}">{{ occurrence.start }} - {{ occurrence.end }}</a>
+					{{ occurrence.event.title }} &mdash; {{ occurrence.start }} - {{ occurrence.end }}
 				</li>
 			</ul>
 		{% endfor %}
