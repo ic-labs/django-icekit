@@ -80,7 +80,7 @@ class AbstractListingPage(AbstractLayoutPage):
         :return: the items to be rendered in the listing page
         """
         raise NotImplementedError(
-            "Please implement `get_items_to_list(request)` on %r" % type(self)
+            "Please implement `get_public_items(request)` on %r" % type(self)
         )
 
     def get_visible_items(self, request):

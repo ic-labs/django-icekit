@@ -16,7 +16,7 @@ class ListingPagePlugin(ICEkitFluentContentsPagePlugin):
         """ Include in context items to be visible on listing page """
         context = super(ListingPagePlugin, self).get_context(
             request, page, **kwargs)
-        context['items_to_list'] = page.get_items_to_list(request)
+        context['items_to_list'] = page.get_public_items(request)
         return context
 
     def get_view_response(self, request, page, view_func, view_args, view_kwargs):
