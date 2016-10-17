@@ -8,7 +8,7 @@ from django_dynamic_fixture import G
 from timezone import timezone
 
 from icekit_events import appsettings
-from icekit_events.models import Event, RecurrenceRule
+from icekit_events.models import EventBase, RecurrenceRule
 from icekit_events.utils import time
 
 
@@ -32,7 +32,7 @@ def forwards(apps, schema_editor):
     yearly = recurrence_rules['Yearly']
 
     daily_event = G(
-        Event,
+        EventBase,
         title='Daily Event',
         starts=starts + timedelta(hours=9),
         ends=ends + timedelta(hours=9),
@@ -40,7 +40,7 @@ def forwards(apps, schema_editor):
     )
 
     weekday_event = G(
-        Event,
+        EventBase,
         title='Weekday Event',
         starts=starts + timedelta(hours=11),
         ends=ends + timedelta(hours=11),
@@ -48,7 +48,7 @@ def forwards(apps, schema_editor):
     )
 
     weekend_event = G(
-        Event,
+        EventBase,
         title='Weekend Event',
         starts=starts + timedelta(hours=13),
         ends=ends + timedelta(hours=13),
@@ -56,7 +56,7 @@ def forwards(apps, schema_editor):
     )
 
     weekly_event = G(
-        Event,
+        EventBase,
         title='Weekly Event',
         starts=starts + timedelta(hours=15),
         ends=ends + timedelta(hours=15),
@@ -64,7 +64,7 @@ def forwards(apps, schema_editor):
     )
 
     monthly_event = G(
-        Event,
+        EventBase,
         title='Monthly Event',
         starts=starts + timedelta(hours=17),
         ends=ends + timedelta(hours=17),
@@ -72,7 +72,7 @@ def forwards(apps, schema_editor):
     )
 
     yearly_event = G(
-        Event,
+        EventBase,
         title='Yearly Event',
         starts=starts + timedelta(hours=19),
         ends=ends + timedelta(hours=19),
@@ -92,7 +92,7 @@ def backwards(apps, schema_editor):
         'Monthly Event',
         'Yearly Event',
     ]
-    samples = Event.objects.filter(title__in=titles)
+    samples = EventBase.objects.filter(title__in=titles)
     samples.delete()
 
 

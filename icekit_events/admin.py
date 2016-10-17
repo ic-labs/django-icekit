@@ -66,7 +66,7 @@ class EventChildAdmin(PolymorphicChildModelAdmin,
     Abstract admin class for polymorphic child event models.
     """
     base_form = admin_forms.BaseEventForm
-    base_model = models.Event
+    base_model = models.EventBase
     inlines = [
         EventRepeatGeneratorsInline,
         OccurrencesInline,
@@ -82,7 +82,7 @@ class EventChildAdmin(PolymorphicChildModelAdmin,
 class EventChildModelPlugin(six.with_metaclass(
     PluginMount, BaseChildModelPlugin)):
     """
-    Mount point for ``Event`` child model plugins.
+    Mount point for ``EventBase`` child model plugins.
     """
     model_admin = EventChildAdmin
 
@@ -93,7 +93,7 @@ class EventTypeFilter(ChildModelFilter):
 
 class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
                  publishing_admin.PublishingAdmin):
-    base_model = models.Event
+    base_model = models.EventBase
     list_filter = (
         EventTypeFilter, 'modified', 'show_in_calendar',
         publishing_admin.PublishingStatusFilter,
@@ -145,12 +145,12 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             url(
                 r'^calendar/$',
                 self.admin_site.admin_view(self.calendar),
-                name='icekit_events_event_calendar'
+                name='icekit_events_eventbase_calendar'
             ),
             url(
                 r'^calendar_data/$',
                 self.admin_site.admin_view(self.calendar_data),
-                name='icekit_events_event_calendar_data'
+                name='icekit_events_eventbase_calendar_data'
             ),
         )
         return my_urls + urls
@@ -217,7 +217,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             'allDay': occurrence.is_all_day,
             'start': start,
             'end': end,
-            'url': reverse('admin:icekit_events_event_change',
+            'url': reverse('admin:icekit_events_eventbase_change',
                            args=[occurrence.event.pk]),
             'className': self._calendar_classes_for_occurrence(occurrence),
         }
@@ -228,7 +228,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         """
         classes = [slugify(occurrence.event.polymorphic_ctype.name)]
 
-        # quick-and-dirty way to get a color for the Event type.
+        # quick-and-dirty way to get a color for the EventBase type.
         # There are 12 colors defined in the css file
         classes.append("color-%s" % (
             occurrence.event.polymorphic_ctype_id % 12))
@@ -295,5 +295,5 @@ class RecurrenceRuleAdmin(admin.ModelAdmin):
         return JsonResponse(data)
 
 
-admin.site.register(models.Event, EventAdmin)
+admin.site.register(models.EventBase, EventAdmin)
 admin.site.register(models.RecurrenceRule, RecurrenceRuleAdmin)

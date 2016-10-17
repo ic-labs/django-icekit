@@ -62,5 +62,5 @@ class BaseEventForm(forms.ModelForm):
 
     class Meta:
         fields = '__all__'
-        model = models.Event
+        model = models.EventBase
         widgets = DEFAULT_EVENT_FORM_WIDGETS
