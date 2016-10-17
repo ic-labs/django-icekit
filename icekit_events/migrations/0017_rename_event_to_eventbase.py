@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+import django.db.models.deletion
 
 
 def NO_OP(apps, schema_editor):
@@ -38,7 +39,36 @@ class Migration(migrations.Migration):
         migrations.RunPython(
             NO_OP,
             purge_django_content_type_backward),
-        migrations.RenameModel('event', 'eventbase'),
+
+        migrations.RenameModel(
+            'event',
+            'eventbase'),
+        migrations.AlterField(
+            model_name='eventbase',
+            name='derived_from',
+            field=models.ForeignKey(related_name='derivitives', blank=True, editable=False, to='icekit_events.EventBase', null=True),
+        ),
+        migrations.AlterField(
+            model_name='eventbase',
+            name='polymorphic_ctype',
+            field=models.ForeignKey(related_name='polymorphic_icekit_events.eventbase_set+', editable=False, to='contenttypes.ContentType', null=True),
+        ),
+        migrations.AlterField(
+            model_name='eventbase',
+            name='publishing_linked',
+            field=models.OneToOneField(related_name='publishing_draft', null=True, on_delete=django.db.models.deletion.SET_NULL, editable=False, to='icekit_events.EventBase'),
+        ),
+        migrations.AlterField(
+            model_name='eventrepeatsgenerator',
+            name='event',
+            field=models.ForeignKey(related_name='repeat_generators', editable=False, to='icekit_events.EventBase'),
+        ),
+        migrations.AlterField(
+            model_name='occurrence',
+            name='event',
+            field=models.ForeignKey(related_name='occurrences', editable=False, to='icekit_events.EventBase'),
+        ),
+
         migrations.RunPython(
             purge_django_content_type_forward,
             NO_OP),
