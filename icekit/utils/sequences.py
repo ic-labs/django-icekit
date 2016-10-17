@@ -83,8 +83,3 @@ def slice_sequences(sequences, start, end, apply_slice=None):
             break
 
     return collected_items
-
-def grammatical_join(l, initial_joins=", ", final_join=" and "):
-    # Return items concatenated with commas and "and" before the final one.
-    # http://stackoverflow.com/questions/19838976/grammatical-list-join-in-python
-    return initial_joins.join(l[:-2] + [final_join.join(l[-2:])])
