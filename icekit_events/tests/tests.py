@@ -19,6 +19,7 @@ from django.core.urlresolvers import reverse
 from django.forms.models import fields_for_model
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.utils.timezone import make_naive
 
 from django_dynamic_fixture import G
 from django_webtest import WebTest
@@ -27,8 +28,6 @@ from icekit_events import appsettings, forms, models
 from icekit_events.event_types.simple.models import SimpleEvent
 from icekit_events.models import get_occurrence_times_for_event
 from icekit_events.utils import timeutils
-
-from timezone.timezone import localize, now
 
 
 class TestAdmin(WebTest):
@@ -727,9 +726,9 @@ class TestEventModel(TestCase):
 
 class TestEventRepeatsGeneratorStrangeness(TestCase):
     def setUp(self):
-        self.start = datetime(2016,10,1, 9,0)
-        self.end = datetime(2016,10,1, 17,0)
-        self.repeat_end = datetime(2016,10,31, 17,0)
+        self.start = timezone.datetime(2016,10,1, 9,0)
+        self.end = timezone.datetime(2016,10,1, 17)
+        self.repeat_end = timezone.datetime(2016,10,31, 17)
 
         self.event = G(SimpleEvent)
 
@@ -745,14 +744,14 @@ class TestEventRepeatsGeneratorStrangeness(TestCase):
         occurrences = self.event.occurrences.all()
         self.assertEquals(occurrences.count(), 31)
 
-        st = localize(self.start).time()
-        et = localize(self.end).time()
+        st = timezone.localize(self.start).time()
+        et = timezone.localize(self.end).time()
         self.assertEquals(st, time(9,0))
         self.assertEquals(et, time(17,0))
 
         for o in occurrences:
-            self.assertEquals(localize(o.start).time(), st)
-            self.assertEquals(localize(o.end).time(), et)
+            self.assertEquals(timezone.localize(o.start).time(), st)
+            self.assertEquals(timezone.localize(o.end).time(), et)
 
 class TestEventRepeatsGeneratorModel(TestCase):
 
@@ -763,6 +762,11 @@ class TestEventRepeatsGeneratorModel(TestCase):
             precision=timedelta(days=1),
             rounding=timeutils.ROUND_DOWN)
         self.end = self.start + appsettings.DEFAULT_ENDS_DELTA
+
+        self.naive_start = make_naive(
+            self.start, timezone.get_current_timezone())
+        self.naive_end = make_naive(
+            self.end, timezone.get_current_timezone())
 
     def test_uses_recurrencerulefield(self):
         """
@@ -882,28 +886,28 @@ class TestEventRepeatsGeneratorModel(TestCase):
         # Repeating generator has expected date entries in its RRULESET
         rruleset = generator.get_rruleset()
         self.assertEqual(20, rruleset.count())
-        self.assertTrue(self.start in rruleset)
-        self.assertTrue(self.start + timedelta(days=1) in rruleset)
-        self.assertTrue(self.start + timedelta(days=2) in rruleset)
-        self.assertTrue(self.start + timedelta(days=19) in rruleset)
-        self.assertFalse(self.start + timedelta(days=20) in rruleset)
+        self.assertTrue(self.naive_start in rruleset)
+        self.assertTrue(self.naive_start + timedelta(days=1) in rruleset)
+        self.assertTrue(self.naive_start + timedelta(days=2) in rruleset)
+        self.assertTrue(self.naive_start + timedelta(days=19) in rruleset)
+        self.assertFalse(self.naive_start + timedelta(days=20) in rruleset)
         # Repeating generator generates expected start/end times
         start_and_end_times_list = list(generator.generate())
         self.assertEqual(20, len(start_and_end_times_list))
         self.assertEqual(
-            (self.start, self.end),
+            (self.naive_start, self.naive_end),
             start_and_end_times_list[0])
         self.assertEqual(
-            (self.start + timedelta(days=1), self.end + timedelta(days=1)),
+            (self.naive_start + timedelta(days=1), self.naive_end + timedelta(days=1)),
             start_and_end_times_list[1])
         self.assertEqual(
-            (self.start + timedelta(days=2), self.end + timedelta(days=2)),
+            (self.naive_start + timedelta(days=2), self.naive_end + timedelta(days=2)),
             start_and_end_times_list[2])
         self.assertEqual(
-            (self.start + timedelta(days=19), self.end + timedelta(days=19)),
+            (self.naive_start + timedelta(days=19), self.naive_end + timedelta(days=19)),
             start_and_end_times_list[19])
         self.assertFalse(
-            (self.start + timedelta(days=20), self.end + timedelta(days=20))
+            (self.naive_start + timedelta(days=20), self.naive_end + timedelta(days=20))
             in start_and_end_times_list)
 
     def test_unlimited_daily_repeating_generator(self):
@@ -915,33 +919,33 @@ class TestEventRepeatsGeneratorModel(TestCase):
         )
         # Repeating generator has expected date entries in its RRULESET
         rruleset = generator.get_rruleset()
-        self.assertTrue(self.start in rruleset)
-        self.assertTrue(self.start + timedelta(days=1) in rruleset)
-        self.assertTrue(self.start + timedelta(days=2) in rruleset)
+        self.assertTrue(self.naive_start in rruleset)
+        self.assertTrue(self.naive_start + timedelta(days=1) in rruleset)
+        self.assertTrue(self.naive_start + timedelta(days=2) in rruleset)
         # Default ``appsettings.REPEAT_LIMIT`` is 13 weeks
-        self.assertTrue(self.start + timedelta(days=7 * 13) in rruleset)
-        self.assertFalse(self.start + timedelta(days=7 * 13 + 1) in rruleset)
+        self.assertTrue(self.naive_start + timedelta(days=7 * 13) in rruleset)
+        self.assertFalse(self.naive_start + timedelta(days=7 * 13 + 1) in rruleset)
         # Repeating generator generates expected start/end times
         start_and_end_times = generator.generate()
         self.assertEqual(
-            (self.start, self.end),
+            (self.naive_start, self.naive_end),
             next(start_and_end_times))
         self.assertEqual(
-            (self.start + timedelta(days=1), self.end + timedelta(days=1)),
+            (self.naive_start + timedelta(days=1), self.naive_end + timedelta(days=1)),
             next(start_and_end_times))
         self.assertEqual(
-            (self.start + timedelta(days=2), self.end + timedelta(days=2)),
+            (self.naive_start + timedelta(days=2), self.naive_end + timedelta(days=2)),
             next(start_and_end_times))
         for i in range(16):
             next(start_and_end_times)
         self.assertEqual(
-            (self.start + timedelta(days=19), self.end + timedelta(days=19)),
+            (self.naive_start + timedelta(days=19), self.naive_end + timedelta(days=19)),
             next(start_and_end_times))
         # Default ``appsettings.REPEAT_LIMIT`` is 13 weeks
         for i in range(13 * 7 - 20):
             next(start_and_end_times)
         self.assertEqual(
-            (self.start + timedelta(days=91), self.end + timedelta(days=91)),
+            (self.naive_start + timedelta(days=91), self.naive_end + timedelta(days=91)),
             next(start_and_end_times))
 
 
@@ -975,11 +979,15 @@ class TestEventOccurrences(TestCase):
         first_occurrence = event.occurrences.all()[0]
         for days_hence in range(20):
             start = first_occurrence.start + timedelta(days=days_hence)
-            self.assertTrue(start in occurrence_starts,
-                            "Missing start time %d days hence" % days_hence)
+            self.assertTrue(
+                make_naive(start, timezone.get_current_timezone())
+                in occurrence_starts,
+                "Missing start time %d days hence" % days_hence)
             end = first_occurrence.end + timedelta(days=days_hence)
-            self.assertTrue(end in occurrence_ends,
-                            "Missing end time %d days hence" % days_hence)
+            self.assertTrue(
+                make_naive(end, timezone.get_current_timezone())
+                in occurrence_ends,
+                "Missing end time %d days hence" % days_hence)
         # Confirm Event correctly returns first & last occurrences
         self.assertEqual(
             self.start, event.get_occurrences_range()[0].start)
@@ -1036,11 +1044,18 @@ class TestEventOccurrences(TestCase):
             event.occurrences.all()[19].start)
         # Default repeat limit prevents far-future occurrences but we can
         # override that if we want
-        event.extend_occurrences(until=self.end + timedelta(days=999))
+        event.extend_occurrences(
+            until=self.end + timedelta(days=999, seconds=1))
         self.assertEqual(1000, event.occurrences.all().count())
-        self.assertEqual(
-            self.start + timedelta(days=999),
-            event.occurrences.all()[999].start)
+        # We need to be careful comparing timese because our test start time
+        # is affected by daylight savings changes whereas the occurrence start
+        # time will remain at 9am (for example) regardless of daylight saving
+        # changes.
+        delta = \
+            self.start + timedelta(days=999) \
+            - event.occurrences.all()[999].start
+        self.assertTrue(
+            delta <= timedelta(hours=1) or delta <= timedelta(hours=-1))
 
     def test_add_arbitrary_occurrence_to_nonrepeating_event(self):
         event = G(SimpleEvent)
@@ -1060,8 +1075,12 @@ class TestEventOccurrences(TestCase):
         self.assertTrue(added_occurrence.is_user_modified)
 
     def test_add_arbitrary_occurrences_to_repeating_event(self):
-        arbitrary_dt1 = self.start + timedelta(days=3, hours=-2)
-        arbitrary_dt2 = self.start + timedelta(days=7, hours=5)
+        arbitrary_dt1 = make_naive(
+            self.start + timedelta(days=3, hours=-2),
+            timezone.get_current_timezone())
+        arbitrary_dt2 = make_naive(
+            self.start + timedelta(days=7, hours=5),
+            timezone.get_current_timezone())
         event = G(SimpleEvent)
         generator = G(
             models.EventRepeatsGenerator,
@@ -1123,8 +1142,12 @@ class TestEventOccurrences(TestCase):
         occurrence_to_cancel_1 = event.occurrences.all()[3]
         occurrence_to_cancel_2 = event.occurrences.all()[5]
         occurrence_starts, __ = get_occurrence_times_for_event(event)
-        self.assertTrue(occurrence_to_cancel_1.start in occurrence_starts)
-        self.assertTrue(occurrence_to_cancel_2.start in occurrence_starts)
+        self.assertTrue(
+            make_naive(occurrence_to_cancel_1.start, timezone.get_current_timezone())
+            in occurrence_starts)
+        self.assertTrue(
+            make_naive(occurrence_to_cancel_2.start, timezone.get_current_timezone())
+            in occurrence_starts)
         # Cancel occurrences
         event.cancel_occurrence(occurrence_to_cancel_1)
         event.cancel_occurrence(
@@ -1228,5 +1251,5 @@ class Time(TestCase):
         )
         for dt1, dt2, precision, rounding in data:
             self.assertEqual(
-                timeutils.ROUND_datetime(datetime(*dt1), precision, rounding),
+                timeutils.round_datetime(datetime(*dt1), precision, rounding),
                 datetime(*dt2))

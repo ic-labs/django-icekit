@@ -76,13 +76,18 @@ def default_date_ends():
     return default_date_starts() + appsettings.DEFAULT_DATE_ENDS_DELTA
 
 
-def format_ical_dt(date_or_datetime):
-    """ Return datetime formatted for use in iCal """
+def format_naive_ical_dt(date_or_datetime):
+    """
+    Return datetime formatted for use in iCal as a *naive* datetime value to
+    work more like people expect, e.g. creating a series of events starting
+    at 9am should not create some occurrences that start at 8am or 10am after
+    a daylight savings change.
+    """
     dt = coerce_dt_awareness(date_or_datetime)
     if is_naive(dt):
         return dt.strftime('%Y%m%dT%H%M%S')
     else:
-        return dt.astimezone(pytz.utc).strftime('%Y%m%dT%H%M%SZ')
+        return dt.astimezone(get_current_timezone()).strftime('%Y%m%dT%H%M%S')
 
 
 def coerce_dt_awareness(date_or_datetime, tz=None):
@@ -91,19 +96,35 @@ def coerce_dt_awareness(date_or_datetime, tz=None):
     timezone-naive `datetime` result, depending on which is appropriate for
     the project's settings.
     """
-    if tz is None:
-        tz = get_current_timezone()
     if isinstance(date_or_datetime, datetime):
         dt = date_or_datetime
     else:
         dt = datetime.combine(date_or_datetime, datetime_time())
     is_project_tz_aware = settings.USE_TZ
-    if is_project_tz_aware and is_naive(dt):
-        return make_aware(dt, tz)
-    elif not is_project_tz_aware and is_aware(dt):
-        return make_naive(dt, tz)
+    if is_project_tz_aware:
+        return coerce_aware(dt, tz)
+    elif not is_project_tz_aware:
+        return coerce_naive(dt, tz)
     # No changes necessary
     return dt
+
+
+def coerce_naive(dt, tz=None):
+    if is_naive(dt):
+        return dt
+    else:
+        if tz is None:
+            tz = get_current_timezone()
+        return make_naive(dt, tz)
+
+
+def coerce_aware(dt, tz=None):
+    if is_aware(dt):
+        return dt
+    else:
+        if tz is None:
+            tz = get_current_timezone()
+        return make_aware(dt, tz)
 
 # FIELDS ######################################################################
 
@@ -506,6 +527,10 @@ class EventRepeatsGenerator(AbstractBaseModel):
                 until = self.repeat_end
             else:
                 until = timezone.now() + appsettings.REPEAT_LIMIT
+        # Make datetimes naive, since RRULE spec contains naive datetimes so
+        # our constraints must be the same
+        start_dt = coerce_naive(start_dt)
+        until = coerce_naive(until)
         # Determine duration to add to each start time
         occurrence_duration = self.duration or timedelta(days=1)
         # `start_dt` and `until` datetimes are exclusive for our rruleset
@@ -538,13 +563,13 @@ class EventRepeatsGenerator(AbstractBaseModel):
                 or timezone.now() + appsettings.REPEAT_LIMIT
         # We assume `recurrence_rule` is always a RRULE repeat spec of the form
         # "FREQ=DAILY", "FREQ=WEEKLY", etc?
-        rrule_spec = "DTSTART:%s" % format_ical_dt(start_dt)
+        rrule_spec = "DTSTART:%s" % format_naive_ical_dt(start_dt)
         if not self.recurrence_rule:
-            rrule_spec += "\nRDATE:%s" % format_ical_dt(start_dt)
+            rrule_spec += "\nRDATE:%s" % format_naive_ical_dt(start_dt)
         else:
             rrule_spec += "\nRRULE:%s" % self.recurrence_rule
             # Apply this event's end repeat
-            rrule_spec += ";UNTIL=%s" % format_ical_dt(
+            rrule_spec += ";UNTIL=%s" % format_naive_ical_dt(
                 until - timedelta(seconds=1))
         return rrule_spec
 
@@ -782,19 +807,24 @@ class Occurrence(AbstractBaseModel):
     def get_absolute_url(self):
         return self.event.get_absolute_url()
 
+
 def get_occurrence_times_for_event(event):
     """
-    Return a tuple with two sets containing the (start, end) datetimes of an
-    Event's Occurrences, or the original start datetime if an Occurrence's
-    start was modified by a user.
+    Return a tuple with two sets containing the (start, end) *naive* datetimes
+    of an Event's Occurrences, or the original start datetime if an
+    Occurrence's start was modified by a user.
     """
     occurrences_starts = set()
     occurrences_ends = set()
     for start, original_start, end, original_end in \
             event.occurrences.all().values_list('start', 'original_start',
                                                 'end', 'original_end'):
-        occurrences_starts.add(original_start or start)
-        occurrences_ends.add(original_end or end)
+        occurrences_starts.add(
+            coerce_naive(original_start or start)
+        )
+        occurrences_ends.add(
+            coerce_naive(original_end or end)
+        )
     return occurrences_starts, occurrences_ends
 
 
