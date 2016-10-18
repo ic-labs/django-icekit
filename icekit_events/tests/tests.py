@@ -725,6 +725,35 @@ class TestEventModel(TestCase):
             (None, None), event.get_occurrences_range())
 
 
+class TestEventRepeatsGeneratorStrangeness(TestCase):
+    def setUp(self):
+        self.start = datetime(2016,10,1, 9,0)
+        self.end = datetime(2016,10,1, 17,0)
+        self.repeat_end = datetime(2016,10,31, 17,0)
+
+        self.event = G(SimpleEvent)
+
+    def test_daily_occurrences(self):
+        generator = models.EventRepeatsGenerator.objects.create(
+            event=self.event,
+            start=self.start,
+            end=self.end,
+            repeat_end=self.repeat_end,
+            recurrence_rule='RRULE:FREQ=DAILY',
+        ) # This generates occurrences
+
+        occurrences = self.event.occurrences.all()
+        self.assertEquals(occurrences.count(), 31)
+
+        st = localize(self.start).time()
+        et = localize(self.end).time()
+        self.assertEquals(st, time(9,0))
+        self.assertEquals(et, time(17,0))
+
+        for o in occurrences:
+            self.assertEquals(localize(o.start).time(), st)
+            self.assertEquals(localize(o.end).time(), et)
+
 class TestEventRepeatsGeneratorModel(TestCase):
 
     def setUp(self):
