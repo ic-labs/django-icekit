@@ -49,9 +49,8 @@ def zero_datetime(dt, tz=None):
     if dt is None:
         return None
     if tz is None:
-        tz = pytz.utc
-    return dt.replace(
-        hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc)
+        tz = get_current_timezone()
+    return coerce_naive(dt).replace(hour=0, minute=0, second=0, microsecond=0)
 
 
 def default_starts():
@@ -453,6 +452,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
     def get_absolute_url(self):
         return reverse('icekit_events_eventbase_detail', args=(self.slug,))
 
+
 class GeneratorException(Exception):
     pass
 
@@ -489,10 +489,12 @@ class EventRepeatsGenerator(AbstractBaseModel):
             'event repeats.'),
         null=True,
     )
-    start = models.DateTimeField('first start',
+    start = models.DateTimeField(
+        'first start',
         default=default_starts,
         db_index=True)
-    end = models.DateTimeField('first end',
+    end = models.DateTimeField(
+        'first end',
         default=default_ends,
         db_index=True)
     is_all_day = models.BooleanField(
@@ -567,9 +569,17 @@ class EventRepeatsGenerator(AbstractBaseModel):
             rrule_spec += "\nRDATE:%s" % format_naive_ical_dt(start_dt)
         else:
             rrule_spec += "\nRRULE:%s" % self.recurrence_rule
-            # Apply this event's end repeat
-            rrule_spec += ";UNTIL=%s" % format_naive_ical_dt(
-                until - timedelta(seconds=1))
+            # Apply this event's end repeat date as an *exclusive* UNTIL
+            # constraint. UNTIL in RRULE specs is inclusive by default, so we
+            # fake exclusivity by adjusting the end time by a microsecond.
+            if self.is_all_day:
+                # For all-day generator, make the UNTIL constraint the last
+                # microsecond of the repeat end date to ensure the end date is
+                # included in the generated set as users expect.
+                until += timedelta(days=1, microseconds=-1)
+            else:
+                until -= timedelta(microseconds=1)
+            rrule_spec += ";UNTIL=%s" % format_naive_ical_dt(until)
         return rrule_spec
 
     def save(self, *args, **kwargs):
@@ -615,7 +625,8 @@ class EventRepeatsGenerator(AbstractBaseModel):
         # UTC timezone when we save an all-day occurrence
         if self.is_all_day:
             self.start = zero_datetime(self.start)
-            self.end = zero_datetime(self.end)
+            self.end = zero_datetime(self.end) \
+                + timedelta(days=1, microseconds=-1)
 
         super(EventRepeatsGenerator, self).save(*args, **kwargs)
 
@@ -738,9 +749,13 @@ class Occurrence(AbstractBaseModel):
 
     def time_range_string(self):
         if self.is_all_day:
-            return u"""{0} - {1}, all day""".format(
-                datefilter(self.local_start, DATE_FORMAT),
-                datefilter(self.local_end, DATE_FORMAT))
+            if self.duration <= timedelta(days=1):
+                return u"""{0}, all day""".format(
+                    datefilter(self.local_start, DATE_FORMAT))
+            else:
+                return u"""{0} - {1}, all day""".format(
+                    datefilter(self.local_start, DATE_FORMAT),
+                    datefilter(self.local_end, DATE_FORMAT))
         else:
             return u"""{0} - {1}""".format(
                 datefilter(self.local_start, DATETIME_FORMAT),

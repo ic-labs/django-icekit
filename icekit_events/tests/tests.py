@@ -152,17 +152,17 @@ class TestAdmin(WebTest):
             13 * 2, daily_wend_occurrences.count())
         self.assertEqual(
             5,  # Saturday
-            daily_wend_occurrences[0].start.weekday())
+            coerce_naive(daily_wend_occurrences[0].start).weekday())
         self.assertEqual(
             6,  # Sunday
-            daily_wend_occurrences[1].start.weekday())
+            coerce_naive(daily_wend_occurrences[1].start).weekday())
         # Start and end dates of all-day occurrences are zeroed
         self.assertEqual(
-            models.zero_datetime(daily_wend_occurrences[0].start),
-            daily_wend_occurrences[0].start)
+            time(0, 0),
+            daily_wend_occurrences[0].start.astimezone(djtz.get_current_timezone()).time())
         self.assertEqual(
-            models.zero_datetime(daily_wend_occurrences[0].end),
-            daily_wend_occurrences[0].end)
+            time(0, 0),
+            daily_wend_occurrences[0].end.astimezone(djtz.get_current_timezone()).time())
         #######################################################################
         # Delete "Daily" repeat generator
         #######################################################################
@@ -220,17 +220,15 @@ class TestAdmin(WebTest):
         self.assertEqual(2, event.occurrences.count())
         all_day_occurrence = event.occurrences.all()[1]
         self.assertTrue(timed_occurrence.is_user_modified)
-        self.assertEqual(
-            models.zero_datetime(all_day_start), all_day_occurrence.start)
-        self.assertEqual(
-            models.zero_datetime(all_day_start), all_day_occurrence.end)
         # Start and end dates of all-day occurrences are zeroed
         self.assertEqual(
-            models.zero_datetime(all_day_occurrence.start),
-            all_day_occurrence.start)
+            time(0, 0),
+            all_day_occurrence.start.astimezone(
+                djtz.get_current_timezone()).time())
         self.assertEqual(
-            models.zero_datetime(all_day_occurrence.end),
-            all_day_occurrence.end)
+            time(0, 0),
+            all_day_occurrence.end.astimezone(
+                djtz.get_current_timezone()).time())
         #######################################################################
         # Cancel first (timed) event
         #######################################################################
@@ -863,7 +861,7 @@ class TestEventRepeatsGeneratorModel(TestCase):
             ).duration
         )
         self.assertEquals(
-            timedelta(),
+            timedelta(days=1, microseconds=-1),
             G(
                 models.EventRepeatsGenerator,
                 is_all_day=True,
@@ -945,6 +943,25 @@ class TestEventRepeatsGeneratorModel(TestCase):
         self.assertEqual(
             (self.naive_start + timedelta(days=91), self.naive_end + timedelta(days=91)),
             next(start_and_end_times))
+
+    def test_daily_repeating_every_day_in_month(self):
+        start = djtz.datetime(2016,10,1, 0,0)
+        end = djtz.datetime(2016,10,1, 0,0)
+        repeat_end = djtz.datetime(2016,10,31, 0,0)
+        generator = G(
+            models.EventRepeatsGenerator,
+            start=start,
+            end=end,
+            is_all_day=True,
+            recurrence_rule='FREQ=DAILY',
+            repeat_end=repeat_end,
+        )
+        # Repeating generator has expected date entries in its RRULESET
+        rruleset = generator.get_rruleset()
+        self.assertTrue(31, rruleset.count())
+        self.assertTrue(coerce_naive(start) in rruleset)
+        self.assertTrue(
+            coerce_naive(djtz.datetime(2016,10,31, 0,0)) in rruleset)
 
 
 class TestEventOccurrences(TestCase):
