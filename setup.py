@@ -100,7 +100,7 @@ setuptools.setup(
         'glamkit': [
             'glamkit-sponsors',
             'icekit-events',
-            'icekit-press-releases>=0.7',
+            'icekit-press-releases>=0.8',
         ],
         'project': [
             'boto3',
