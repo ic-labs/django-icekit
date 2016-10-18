@@ -11,7 +11,7 @@
     <ul>
 		{% for item in items_to_list %}
 			<li><a href="{{ item.get_absolute_url }}">
-				{{ item.title|safe }}
+				{{ item.event|safe }}: {{ item.time_range_string }}
 			</a></li>
         {% empty %}
             <li>There are no events happening today</li>

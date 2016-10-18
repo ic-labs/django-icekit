@@ -24,8 +24,8 @@ from django_dynamic_fixture import G
 from django_webtest import WebTest
 
 from icekit_events import appsettings, forms, models
+from icekit_events.event_types.simple.models import SimpleEvent
 from icekit_events.models import get_occurrence_times_for_event
-from icekit_events.tests import models as test_models
 from icekit_events.utils import time
 
 
@@ -76,13 +76,13 @@ class TestAdmin(WebTest):
         response = form.submit()
         self.assertEqual(302, response.status_code)
         response = response.follow()
-        event = models.EventBase.objects.get(title=u"Test Event")
+        event = SimpleEvent.objects.get(title=u"Test Event")
         self.assertEqual(0, event.repeat_generators.count())
         self.assertEqual(0, event.occurrences.count())
 
     def test_event_with_eventrepeatsgenerators(self):
         event = G(
-            models.EventBase,
+            SimpleEvent,
             title='Test Event',
         )
         response = self.app.get(
@@ -111,7 +111,7 @@ class TestAdmin(WebTest):
             repeat_end.strftime('%H:%M:%S')
         response = form.submit(name='_continue')
         # Check occurrences created
-        event = models.EventBase.objects.get(pk=event.pk)
+        event = SimpleEvent.objects.get(pk=event.pk)
         self.assertEqual(1, event.repeat_generators.count())
         self.assertEqual(7, event.occurrences.count())
         self.assertEqual(
@@ -140,7 +140,7 @@ class TestAdmin(WebTest):
         form['repeat_generators-1-end_1'].value = '00:00:00'
         response = form.submit('_continue')
         # Check occurrences created
-        event = models.EventBase.objects.get(pk=event.pk)
+        event = SimpleEvent.objects.get(pk=event.pk)
         daily_generator = event.repeat_generators.all()[0]
         daily_wend_generator = event.repeat_generators.all()[1]
         daily_occurrences = event.occurrences.filter(generator=daily_generator)
@@ -169,13 +169,13 @@ class TestAdmin(WebTest):
         form = response.follow().forms[0]
         form['repeat_generators-0-DELETE'].value = True
         response = form.submit('_continue')
-        event = models.EventBase.objects.get(pk=event.pk)
+        event = SimpleEvent.objects.get(pk=event.pk)
         self.assertEqual(1, event.repeat_generators.count())
         self.assertEqual(13 * 2, event.occurrences.count())
 
     def test_event_with_user_modified_occurrences(self):
         event = G(
-            models.EventBase,
+            SimpleEvent,
             title='Test Event',
         )
         response = self.app.get(
@@ -216,7 +216,7 @@ class TestAdmin(WebTest):
         form['occurrences-1-end_1'].value = '00:00:00'
         form['occurrences-1-is_all_day'].value = True
         response = form.submit('_continue')
-        event = models.EventBase.objects.get(pk=event.pk)
+        event = SimpleEvent.objects.get(pk=event.pk)
         self.assertEqual(2, event.occurrences.count())
         all_day_occurrence = event.occurrences.all()[1]
         self.assertTrue(timed_occurrence.is_user_modified)
@@ -251,7 +251,7 @@ class TestAdmin(WebTest):
 
     def test_event_with_repeatsgenerators_and_user_modified_occurrences(self):
         event = G(
-            models.EventBase,
+            SimpleEvent,
             title='Test Event',
         )
         G(
@@ -308,7 +308,7 @@ class TestAdmin(WebTest):
         form['occurrences-6-start_1'].value =\
             shifted_occurrence_start.strftime('%H:%M:%S')
         response = form.submit('_continue')
-        event = models.EventBase.objects.get(pk=event.pk)
+        event = SimpleEvent.objects.get(pk=event.pk)
         self.assertEqual(10 + 1, event.occurrences.count())
         shifted_occurrence = models.Occurrence.objects.get(
             pk=shifted_occurrence.pk)
@@ -327,7 +327,7 @@ class TestAdmin(WebTest):
         self.assertFalse(converted_occurrence.is_user_modified)
         form['occurrences-2-is_all_day'].value = True
         response = form.submit('_continue')
-        event = models.EventBase.objects.get(pk=event.pk)
+        event = SimpleEvent.objects.get(pk=event.pk)
         self.assertEqual(10 + 1, event.occurrences.count())
         converted_occurrence = models.Occurrence.objects.get(
             pk=converted_occurrence.pk)
@@ -342,7 +342,7 @@ class TestAdmin(WebTest):
         self.assertFalse(cancelled_occurrence.is_user_modified)
         form['occurrences-3-cancel_reason'].value = 'Sold out'
         response = form.submit('_continue')
-        event = models.EventBase.objects.get(pk=event.pk)
+        event = SimpleEvent.objects.get(pk=event.pk)
         self.assertEqual(10 + 1, event.occurrences.count())
         cancelled_occurrence = models.Occurrence.objects.get(
             pk=cancelled_occurrence.pk)
@@ -384,17 +384,17 @@ class TestAdmin(WebTest):
         # Create unpublished (draft) event
         #######################################################################
         event = G(
-            models.EventBase,
+            SimpleEvent,
             title='Test Event',
         )
         self.assertTrue(event.is_draft)
-        self.assertEqual([event], list(models.EventBase.objects.draft()))
+        self.assertEqual([event], list(SimpleEvent.objects.draft()))
         self.assertIsNone(event.get_published())
-        self.assertEqual([], list(models.EventBase.objects.published()))
+        self.assertEqual([], list(SimpleEvent.objects.published()))
         self.assertEqual(0, event.repeat_generators.count())
         self.assertEqual(0, event.occurrences.count())
         view_response = self.app.get(
-            reverse('icekit_events_eventbase_detail', args=(event.pk,)),
+            reverse('icekit_events_eventbase_detail', args=(event.slug,)),
             expect_errors=404)
         #######################################################################
         # Publish event, nothing much to clone yet
@@ -404,18 +404,19 @@ class TestAdmin(WebTest):
             user=self.superuser,
         )
         self.assertEqual(302, response.status_code)
-        event = models.EventBase.objects.get(pk=event.pk)
+        event = SimpleEvent.objects.get(pk=event.pk)
         self.assertTrue(event.is_draft)
-        self.assertEqual([event], list(models.EventBase.objects.draft()))
+        self.assertEqual([event], list(SimpleEvent.objects.draft()))
         self.assertIsNotNone(event.get_published())
         published_event = event.get_published()
         self.assertEqual(
-            [published_event], list(models.EventBase.objects.published()))
+            [published_event], list(SimpleEvent.objects.published()))
         self.assertEqual(event.title, published_event.title)
         self.assertEqual(0, published_event.repeat_generators.count())
         self.assertEqual(0, published_event.repeat_generators.count())
+
         view_response = self.app.get(
-            reverse('icekit_events_eventbase_detail', args=(published_event.pk,)))
+            reverse('icekit_events_eventbase_detail', args=(published_event.slug,)))
         self.assertEqual(200, view_response.status_code)
         self.assertTrue('Test Event' in view_response.content)
         #######################################################################
@@ -460,7 +461,7 @@ class TestAdmin(WebTest):
         # Submit form
         response = form.submit(name='_continue')
         self.assertEqual(302, response.status_code)
-        event = models.EventBase.objects.get(pk=event.pk)
+        event = SimpleEvent.objects.get(pk=event.pk)
         # Convert a generated occurrence to all-day
         form = response.follow().forms[0]
         converted_occurrence = event.occurrences.all()[3]
@@ -472,12 +473,12 @@ class TestAdmin(WebTest):
         # Republish event, ensure everything is cloned
         #######################################################################
         # First check that published copy remains unchanged so far
-        published_event = models.EventBase.objects.get(pk=published_event.pk)
+        published_event = SimpleEvent.objects.get(pk=published_event.pk)
         self.assertEqual('Test Event', published_event.title)
         self.assertEqual(0, published_event.repeat_generators.count())
         self.assertEqual(0, published_event.occurrences.count())
         view_response = self.app.get(
-            reverse('icekit_events_eventbase_detail', args=(published_event.pk,)))
+            reverse('icekit_events_eventbase_detail', args=(published_event.slug,)))
         self.assertEqual(200, view_response.status_code)
         self.assertFalse('Test Event - Update 1' in view_response.content)
         # Republish event
@@ -486,10 +487,10 @@ class TestAdmin(WebTest):
             user=self.superuser,
         )
         self.assertEqual(302, response.status_code)
-        event = models.EventBase.objects.get(pk=event.pk)
+        event = SimpleEvent.objects.get(pk=event.pk)
         # Original published event record has been deleted
         self.assertEqual(
-            0, models.EventBase.objects.filter(pk=published_event.pk).count())
+            0, SimpleEvent.objects.filter(pk=published_event.pk).count())
         # Confirm cloning of published event's repeat rules and occurrences
         published_event = event.get_published()
         self.assertEqual('Test Event - Update 1', published_event.title)
@@ -536,7 +537,7 @@ class TestAdmin(WebTest):
                 draft_occurrence.original_end,
                 published_occurrence.original_end)
         view_response = self.app.get(
-            reverse('icekit_events_eventbase_detail', args=(published_event.pk,)))
+            reverse('icekit_events_eventbase_detail', args=(published_event.slug,)))
         self.assertEqual(200, view_response.status_code)
         self.assertTrue('Test Event - Update 1' in view_response.content)
         #######################################################################
@@ -548,16 +549,16 @@ class TestAdmin(WebTest):
             user=self.superuser,
         )
         self.assertEqual(302, response.status_code)
-        event = models.EventBase.objects.get(pk=event.pk)
+        event = SimpleEvent.objects.get(pk=event.pk)
         self.assertTrue(event.is_draft)
         self.assertIsNone(event.get_published())
         view_response = self.app.get(
-            reverse('icekit_events_eventbase_detail', args=(published_event.pk,)),
+            reverse('icekit_events_eventbase_detail', args=(published_event.slug,)),
             expect_errors=404)
 
     def test_admin_calendar(self):
         event = G(
-            models.EventBase,
+            SimpleEvent,
             title='Test Event',
         )
         repeat_end = self.end + timedelta(days=7)
@@ -679,18 +680,18 @@ class TestEventModel(TestCase):
             rounding=time.ROUND_DOWN)
         self.end = self.start
 
-    def test_basemodel_modified(self):
+    def test_modified(self):
         """
         Test that ``modified`` field is updated on save.
         """
-        obj = G(test_models.BaseModel)
+        obj = G(SimpleEvent)
         modified = obj.modified
         obj.save()
         self.assertNotEqual(obj.modified, modified)
 
     def test_str(self):
         event = G(
-            models.EventBase,
+            SimpleEvent,
             title="Event title",
         )
         occurrence = models.Occurrence(event=event)
@@ -698,7 +699,7 @@ class TestEventModel(TestCase):
 
     def test_derived_from(self):
         # Original is originating event for itself.
-        event = G(models.EventBase)
+        event = G(SimpleEvent)
         G(
             models.EventRepeatsGenerator,
             event=event,
@@ -716,7 +717,7 @@ class TestEventModel(TestCase):
         self.assertEqual(event, variation.derived_from)
 
     def test_event_without_occurrences(self):
-        event = G(models.EventBase)
+        event = G(SimpleEvent)
         self.assertEqual(0, event.occurrences.all().count())
         self.assertEqual(
             (None, None), event.get_occurrences_range())
@@ -760,7 +761,7 @@ class TestEventRepeatsGeneratorModel(TestCase):
         generator = models.EventRepeatsGenerator.objects.create(
             start=self.start,
             end=self.start,
-            event=G(models.EventBase),
+            event=G(SimpleEvent),
         )
         self.assertEqual(timedelta(), generator.duration)
         # Repeat end cannot be set without a recurrence rule
@@ -797,7 +798,7 @@ class TestEventRepeatsGeneratorModel(TestCase):
             is_all_day=True,
             start=self.start,
             end=self.start + timedelta(hours=24),
-            event=G(models.EventBase),
+            event=G(SimpleEvent),
         )
         self.assertRaisesRegexp(
             models.GeneratorException,
@@ -816,7 +817,7 @@ class TestEventRepeatsGeneratorModel(TestCase):
                 models.EventRepeatsGenerator,
                 start=self.start,
                 end=self.start + timedelta(minutes=73),
-                event=G(models.EventBase),
+                event=G(SimpleEvent),
             ).duration
         )
         self.assertEquals(
@@ -825,7 +826,7 @@ class TestEventRepeatsGeneratorModel(TestCase):
                 models.EventRepeatsGenerator,
                 start=self.start,
                 end=self.start,
-                event=G(models.EventBase),
+                event=G(SimpleEvent),
             ).duration
         )
         self.assertEquals(
@@ -835,7 +836,7 @@ class TestEventRepeatsGeneratorModel(TestCase):
                 is_all_day=True,
                 start=self.start,
                 end=self.start,
-                event=G(models.EventBase),
+                event=G(SimpleEvent),
             ).duration
         )
 
@@ -926,7 +927,7 @@ class TestEventOccurrences(TestCase):
         self.end = self.start + appsettings.DEFAULT_ENDS_DELTA
 
     def test_initial_event_occurrences_automatically_created(self):
-        event = G(models.EventBase)
+        event = G(SimpleEvent)
         self.assertEqual(event.occurrences.count(), 0)
         # Occurrences generated for event when `EventRepeatsGenerator` added
         G(
@@ -956,7 +957,7 @@ class TestEventOccurrences(TestCase):
             event.get_occurrences_range()[1].end)
 
     def test_limited_daily_repeating_occurrences(self):
-        event = G(models.EventBase)
+        event = G(SimpleEvent)
         G(
             models.EventRepeatsGenerator,
             event=event,
@@ -980,7 +981,7 @@ class TestEventOccurrences(TestCase):
             event.occurrences.all()[19].start)
 
     def test_unlimited_daily_repeating_occurrences(self):
-        event = G(models.EventBase)
+        event = G(SimpleEvent)
         G(
             models.EventRepeatsGenerator,
             event=event,
@@ -1011,7 +1012,7 @@ class TestEventOccurrences(TestCase):
             event.occurrences.all()[999].start)
 
     def test_add_arbitrary_occurrence_to_nonrepeating_event(self):
-        event = G(models.EventBase)
+        event = G(SimpleEvent)
         self.assertEqual(0, event.occurrences.count())
         # Add an arbitrary occurrence
         arbitrary_dt1 = self.start + timedelta(days=3, hours=-2)
@@ -1030,7 +1031,7 @@ class TestEventOccurrences(TestCase):
     def test_add_arbitrary_occurrences_to_repeating_event(self):
         arbitrary_dt1 = self.start + timedelta(days=3, hours=-2)
         arbitrary_dt2 = self.start + timedelta(days=7, hours=5)
-        event = G(models.EventBase)
+        event = G(SimpleEvent)
         generator = G(
             models.EventRepeatsGenerator,
             event=event,
@@ -1077,7 +1078,7 @@ class TestEventOccurrences(TestCase):
         self.assertTrue(added_occurrence_2 in event.occurrences.all())
 
     def test_cancel_arbitrary_occurrence_from_repeating_event(self):
-        event = G(models.EventBase)
+        event = G(SimpleEvent)
         G(
             models.EventRepeatsGenerator,
             event=event,
@@ -1125,7 +1126,7 @@ class TestEventOccurrences(TestCase):
         self.assertEqual(6, event.occurrences.exclude(is_cancelled=True).count())
         # Removing invalid occurrences has no effect
         some_other_event = G(
-            models.EventBase,
+            SimpleEvent,
             start=self.start,
             end=self.end,
         )
@@ -1138,7 +1139,7 @@ class TestEventOccurrences(TestCase):
         self.assertEqual(8, event.occurrences.count())
 
     def test_create_missing_event_occurrences(self):
-        event = G(models.EventBase)
+        event = G(SimpleEvent)
         G(
             models.EventRepeatsGenerator,
             event=event,
@@ -1155,14 +1156,7 @@ class TestEventOccurrences(TestCase):
         call_command('create_event_occurrences')
         self.assertEqual(len(list(event.missing_occurrence_data())), 0)
         self.assertEqual(event.occurrences.count(), 20)
-        self.assertEqual(models.EventBase.objects.count(), 1)
-
-
-class Views(WebTest):
-
-    def test_index(self):
-        response = self.app.get(reverse('icekit_events_index'))
-        response.mustcontain('There are no events.')
+        self.assertEqual(SimpleEvent.objects.count(), 1)
 
 
 class Time(TestCase):

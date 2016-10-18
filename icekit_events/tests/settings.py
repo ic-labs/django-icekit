@@ -34,6 +34,8 @@ INSTALLED_APPS = (
     'django_nose',
     'icekit',
     'icekit_events',
+    'icekit_events.event_types.simple',
+    'icekit_events.page_types.eventlistingfordate',
     'icekit_events.tests',
 
     # Apps required for publishing features
