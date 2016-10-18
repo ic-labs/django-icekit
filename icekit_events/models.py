@@ -46,8 +46,6 @@ def zero_datetime(dt, tz=None):
     Return the given datetime with hour/minutes/seconds/ms zeroed and the
     timezone coerced to the given ``tz`` (or UTC if none is given).
     """
-    if dt is None:
-        return None
     if tz is None:
         tz = get_current_timezone()
     return coerce_naive(dt).replace(hour=0, minute=0, second=0, microsecond=0)
@@ -68,10 +66,6 @@ def default_ends():
 
 def default_date_starts():
     return djtz.date()
-
-
-def default_date_ends():
-    return default_date_starts() + appsettings.DEFAULT_DATE_ENDS_DELTA
 
 
 def format_naive_ical_dt(date_or_datetime):
@@ -755,7 +749,7 @@ class Occurrence(AbstractBaseModel):
 
     def time_range_string(self):
         if self.is_all_day:
-            if self.duration <= timedelta(days=1):
+            if self.duration < timedelta(days=1):
                 return u"""{0}, all day""".format(
                     datefilter(self.local_start, DATE_FORMAT))
             else:

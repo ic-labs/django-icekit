@@ -987,6 +987,38 @@ class TestEventOccurrences(TestCase):
             rounding=timeutils.ROUND_DOWN)
         self.end = self.start + appsettings.DEFAULT_ENDS_DELTA
 
+    def test_time_range_string(self):
+        event = G(SimpleEvent)
+
+        timed_occurrence = models.Occurrence.objects.create(
+            event=event,
+            start=djtz.datetime(2016,10,1, 9,0),
+            end=djtz.datetime(2016,10,1, 19,0),
+        )
+        self.assertEquals(
+            'Oct. 1, 2016 9 a.m. - Oct. 1, 2016 7 p.m.',
+            timed_occurrence.time_range_string())
+
+        single_day_all_day_occurrence = models.Occurrence.objects.create(
+            event=event,
+            start=djtz.datetime(2016,10,1, 0,0),
+            end=djtz.datetime(2016,10,1, 0,0),
+            is_all_day=True,
+        )
+        self.assertEquals(
+            'Oct. 1, 2016, all day',
+            single_day_all_day_occurrence.time_range_string())
+
+        multi_day_all_day_occurrence = models.Occurrence.objects.create(
+            event=event,
+            start=djtz.datetime(2016,10,1, 0,0),
+            end=djtz.datetime(2016,10,2, 0,0),
+            is_all_day=True,
+        )
+        self.assertEquals(
+            'Oct. 1, 2016 - Oct. 2, 2016, all day',
+            multi_day_all_day_occurrence.time_range_string())
+
     def test_initial_event_occurrences_automatically_created(self):
         event = G(SimpleEvent)
         self.assertEqual(event.occurrences.count(), 0)
