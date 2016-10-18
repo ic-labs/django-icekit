@@ -677,7 +677,7 @@ class OccurrenceQueryset(QuerySet):
                 # Exclusive for datetime, inclusive for date.
                 models.Q(is_all_day=False, end__gt=start) |
                 models.Q(is_all_day=True,
-                         end__gt=zero_datetime(start)) # TODO: would be gte, except the generated days seem janky
+                         end__gte=zero_datetime(start))
             )
 
         # This was:
