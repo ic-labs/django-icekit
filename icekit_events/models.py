@@ -32,7 +32,7 @@ from icekit.publishing.middleware import is_draft_request_context
 from django.template.defaultfilters import date as datefilter
 
 from . import appsettings, validators, utils
-from .utils import time as utils_time
+from .utils import timeutils
 
 
 # Constant object used as a flag for unset kwarg parameters
@@ -56,10 +56,10 @@ def zero_datetime(dt, tz=None):
 
 
 def default_starts():
-    when = utils_time.round_datetime(
+    when = timeutils.round_datetime(
         when=timezone.now(),
         precision=appsettings.DEFAULT_STARTS_PRECISION,
-        rounding=utils.time.ROUND_UP,
+        rounding=timeutils.ROUND_UP,
     )
     return when
 

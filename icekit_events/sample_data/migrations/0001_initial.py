@@ -9,17 +9,17 @@ from timezone import timezone
 
 from icekit_events import appsettings
 from icekit_events.models import EventBase, RecurrenceRule
-from icekit_events.utils import time
+from icekit_events.utils import timeutils
 
 
 def forwards(apps, schema_editor):
     """
     Create sample events.
     """
-    starts = time.round_datetime(
+    starts = timeutils.round_datetime(
         when=timezone.now(),
         precision=timedelta(days=1),
-        rounding=time.ROUND_DOWN)
+        rounding=timeutils.ROUND_DOWN)
     ends = starts + appsettings.DEFAULT_ENDS_DELTA
 
     recurrence_rules = dict(

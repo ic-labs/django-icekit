@@ -6,7 +6,7 @@ Tests for ``icekit_events`` app.
 # WebTest API docs: http://webtest.readthedocs.org/en/latest/api.html
 
 from timezone import timezone
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 import six
 import json
 
@@ -26,7 +26,9 @@ from django_webtest import WebTest
 from icekit_events import appsettings, forms, models
 from icekit_events.event_types.simple.models import SimpleEvent
 from icekit_events.models import get_occurrence_times_for_event
-from icekit_events.utils import time
+from icekit_events.utils import timeutils
+
+from timezone.timezone import localize, now
 
 
 class TestAdmin(WebTest):
@@ -39,10 +41,10 @@ class TestAdmin(WebTest):
             is_superuser=True,
         )
         self.superuser.set_password('abc123')
-        self.start = time.round_datetime(
+        self.start = timeutils.round_datetime(
             when=timezone.now(),
             precision=timedelta(minutes=1),
-            rounding=time.ROUND_DOWN)
+            rounding=timeutils.ROUND_DOWN)
         self.end = self.start + timedelta(minutes=45)
 
     def test_urls(self):
@@ -674,10 +676,10 @@ class TestRecurrenceRule(TestCase):
 class TestEventModel(TestCase):
 
     def setUp(self):
-        self.start = time.round_datetime(
+        self.start = timeutils.round_datetime(
             when=timezone.now(),
             precision=timedelta(minutes=1),
-            rounding=time.ROUND_DOWN)
+            rounding=timeutils.ROUND_DOWN)
         self.end = self.start
 
     def test_modified(self):
@@ -727,10 +729,10 @@ class TestEventRepeatsGeneratorModel(TestCase):
 
     def setUp(self):
         """ Create a daily recurring event with no end date """
-        self.start = time.round_datetime(
+        self.start = timeutils.round_datetime(
             when=timezone.now(),
             precision=timedelta(days=1),
-            rounding=time.ROUND_DOWN)
+            rounding=timeutils.ROUND_DOWN)
         self.end = self.start + appsettings.DEFAULT_ENDS_DELTA
 
     def test_uses_recurrencerulefield(self):
@@ -920,10 +922,10 @@ class TestEventOccurrences(TestCase):
         """
         Create an event with a daily repeat generator.
         """
-        self.start = time.round_datetime(
+        self.start = timeutils.round_datetime(
             when=timezone.now(),
             precision=timedelta(days=1),
-            rounding=time.ROUND_DOWN)
+            rounding=timeutils.ROUND_DOWN)
         self.end = self.start + appsettings.DEFAULT_ENDS_DELTA
 
     def test_initial_event_occurrences_automatically_created(self):
@@ -1168,34 +1170,34 @@ class Time(TestCase):
         # Input, output, precision, rounding.
         data = (
             # Round nearest.
-            ((1999, 12, 31, 0, 0, 29), (1999, 12, 31, 0, 0, 0), m, time.ROUND_NEAREST),
-            ((1999, 12, 31, 0, 0, 30), (1999, 12, 31, 0, 1, 0), m, time.ROUND_NEAREST),
+            ((1999, 12, 31, 0, 0, 29), (1999, 12, 31, 0, 0, 0), m, timeutils.ROUND_NEAREST),
+            ((1999, 12, 31, 0, 0, 30), (1999, 12, 31, 0, 1, 0), m, timeutils.ROUND_NEAREST),
             # Round up and down.
-            ((1999, 12, 31, 0, 0, 29), (1999, 12, 31, 0, 1, 0), m, time.ROUND_UP),
-            ((1999, 12, 31, 0, 0, 30), (1999, 12, 31, 0, 0, 0), m, time.ROUND_DOWN),
+            ((1999, 12, 31, 0, 0, 29), (1999, 12, 31, 0, 1, 0), m, timeutils.ROUND_UP),
+            ((1999, 12, 31, 0, 0, 30), (1999, 12, 31, 0, 0, 0), m, timeutils.ROUND_DOWN),
             # Strip microseconds.
-            ((1999, 12, 31, 0, 0, 30, 999), (1999, 12, 31, 0, 1, 0), m, time.ROUND_NEAREST),
+            ((1999, 12, 31, 0, 0, 30, 999), (1999, 12, 31, 0, 1, 0), m, timeutils.ROUND_NEAREST),
             # Timedelta as precision.
-            ((1999, 12, 31, 0, 0, 30), (1999, 12, 31, 0, 1, 0), timedelta(seconds=m), time.ROUND_NEAREST),
+            ((1999, 12, 31, 0, 0, 30), (1999, 12, 31, 0, 1, 0), timedelta(seconds=m), timeutils.ROUND_NEAREST),
             # Precisions: 5, 10, 15 20, 30 minutes, 1, 12 hours, 1 day.
-            ((1999, 12, 31, 0, 2, 30), (1999, 12, 31, 0, 5, 0), m * 5, time.ROUND_NEAREST),
-            ((1999, 12, 31, 0, 5, 0), (1999, 12, 31, 0, 10, 0), m * 10, time.ROUND_NEAREST),
-            ((1999, 12, 31, 0, 7, 30), (1999, 12, 31, 0, 15, 0), m * 15, time.ROUND_NEAREST),
-            ((1999, 12, 31, 0, 10, 0), (1999, 12, 31, 0, 20, 0), m * 20, time.ROUND_NEAREST),
-            ((1999, 12, 31, 0, 15, 0), (1999, 12, 31, 0, 30, 0), m * 30, time.ROUND_NEAREST),
-            ((1999, 12, 31, 0, 30, 0), (1999, 12, 31, 1, 0, 0), h, time.ROUND_NEAREST),
-            ((1999, 12, 31, 6, 0, 0), (1999, 12, 31, 12, 0, 0), h * 12, time.ROUND_NEAREST),
-            ((1999, 12, 31, 12, 0, 0), (2000, 1, 1, 0, 0, 0), d, time.ROUND_NEAREST),
+            ((1999, 12, 31, 0, 2, 30), (1999, 12, 31, 0, 5, 0), m * 5, timeutils.ROUND_NEAREST),
+            ((1999, 12, 31, 0, 5, 0), (1999, 12, 31, 0, 10, 0), m * 10, timeutils.ROUND_NEAREST),
+            ((1999, 12, 31, 0, 7, 30), (1999, 12, 31, 0, 15, 0), m * 15, timeutils.ROUND_NEAREST),
+            ((1999, 12, 31, 0, 10, 0), (1999, 12, 31, 0, 20, 0), m * 20, timeutils.ROUND_NEAREST),
+            ((1999, 12, 31, 0, 15, 0), (1999, 12, 31, 0, 30, 0), m * 30, timeutils.ROUND_NEAREST),
+            ((1999, 12, 31, 0, 30, 0), (1999, 12, 31, 1, 0, 0), h, timeutils.ROUND_NEAREST),
+            ((1999, 12, 31, 6, 0, 0), (1999, 12, 31, 12, 0, 0), h * 12, timeutils.ROUND_NEAREST),
+            ((1999, 12, 31, 12, 0, 0), (2000, 1, 1, 0, 0, 0), d, timeutils.ROUND_NEAREST),
             # Weekday as precision. 3 Jan 2000 = Monday.
-            ((1999, 12, 30, 12, 0, 0), (2000, 1, 3, 0, 0, 0), time.MON, time.ROUND_NEAREST),
-            ((1999, 12, 31, 12, 0, 0), (2000, 1, 4, 0, 0, 0), time.TUE, time.ROUND_NEAREST),
-            ((2000, 1, 1, 12, 0, 0), (2000, 1, 5, 0, 0, 0), time.WED, time.ROUND_NEAREST),
-            ((2000, 1, 2, 12, 0, 0), (2000, 1, 6, 0, 0, 0), time.THU, time.ROUND_NEAREST),
-            ((2000, 1, 3, 12, 0, 0), (2000, 1, 7, 0, 0, 0), time.FRI, time.ROUND_NEAREST),
-            ((2000, 1, 4, 12, 0, 0), (2000, 1, 8, 0, 0, 0), time.SAT, time.ROUND_NEAREST),
-            ((2000, 1, 5, 12, 0, 0), (2000, 1, 9, 0, 0, 0), time.SUN, time.ROUND_NEAREST),
+            ((1999, 12, 30, 12, 0, 0), (2000, 1, 3, 0, 0, 0), timeutils.MON, timeutils.ROUND_NEAREST),
+            ((1999, 12, 31, 12, 0, 0), (2000, 1, 4, 0, 0, 0), timeutils.TUE, timeutils.ROUND_NEAREST),
+            ((2000, 1, 1, 12, 0, 0), (2000, 1, 5, 0, 0, 0), timeutils.WED, timeutils.ROUND_NEAREST),
+            ((2000, 1, 2, 12, 0, 0), (2000, 1, 6, 0, 0, 0), timeutils.THU, timeutils.ROUND_NEAREST),
+            ((2000, 1, 3, 12, 0, 0), (2000, 1, 7, 0, 0, 0), timeutils.FRI, timeutils.ROUND_NEAREST),
+            ((2000, 1, 4, 12, 0, 0), (2000, 1, 8, 0, 0, 0), timeutils.SAT, timeutils.ROUND_NEAREST),
+            ((2000, 1, 5, 12, 0, 0), (2000, 1, 9, 0, 0, 0), timeutils.SUN, timeutils.ROUND_NEAREST),
         )
         for dt1, dt2, precision, rounding in data:
             self.assertEqual(
-                time.round_datetime(datetime(*dt1), precision, rounding),
+                timeutils.ROUND_datetime(datetime(*dt1), precision, rounding),
                 datetime(*dt2))
