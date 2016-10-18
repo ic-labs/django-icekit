@@ -168,7 +168,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             'is_popup': bool(int(request.GET.get('_popup', 0))),
         }
         return TemplateResponse(
-            request, 'admin/icekit_events/event/calendar.html', context)
+            request, 'admin/icekit_events/eventbase/calendar.html', context)
 
     def calendar_data(self, request):
         """
