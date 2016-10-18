@@ -723,7 +723,8 @@ class TestEventModel(TestCase):
             (None, None), event.get_occurrences_range())
 
 
-class TestEventRepeatsGeneratorStrangeness(TestCase):
+class TestEventRepeatOccurrencesRespectLocalTimeDefinition(TestCase):
+
     def setUp(self):
         self.start = djtz.datetime(2016,10,1, 9,0)
         self.end = djtz.datetime(2016,10,1, 17)
@@ -731,7 +732,7 @@ class TestEventRepeatsGeneratorStrangeness(TestCase):
 
         self.event = G(SimpleEvent)
 
-    def test_daily_occurrences(self):
+    def test_daily_occurrences_spanning_aus_daylight_saving_change(self):
         generator = models.EventRepeatsGenerator.objects.create(
             event=self.event,
             start=self.start,
