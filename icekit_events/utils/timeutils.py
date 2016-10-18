@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from timezone import timezone
+from timezone import timezone as djtz  # django-timezone
 
 ROUND_DOWN = 'ROUND_DOWN'
 ROUND_NEAREST = 'ROUND_NEAREST'
@@ -40,7 +40,7 @@ def round_datetime(when=None, precision=60, rounding=ROUND_NEAREST):
             The rounding method to use (ROUND_DOWN, ROUND_NEAREST, ROUND_UP).
 
     """
-    when = when or timezone.now()
+    when = when or djtz.now()
     weekday = WEEKDAYS.get(precision, WEEKDAYS['MON'])
     if precision in WEEKDAYS:
         precision = int(timedelta(days=7).total_seconds())
@@ -49,7 +49,7 @@ def round_datetime(when=None, precision=60, rounding=ROUND_NEAREST):
     # Get delta between the beginning of time and the given datetime object.
     # If precision is a weekday, the beginning of time must be that same day.
     when_min = when.min + timedelta(days=weekday)
-    if timezone.is_aware(when):
+    if djtz.is_aware(when):
         # It doesn't seem to be possible to localise `datetime.min` without
         # raising `OverflowError`, so create a timezone aware object manually.
         when_min = datetime(tzinfo=when.tzinfo, *when_min.timetuple()[:3])

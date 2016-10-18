@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, time as datetime_time
 from dateutil import rrule
 import six
 import pytz
-from timezone import timezone
+from timezone import timezone as djtz  # django-timezone
 
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -22,7 +22,6 @@ from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
     get_current_timezone
 
 from polymorphic.models import PolymorphicModel
-from timezone.timezone import localize, now
 
 from icekit.content_collections.abstract_models import AbstractListingPage, \
     TitleSlugMixin
@@ -31,7 +30,7 @@ from icekit.publishing.models import PublishingModel
 from icekit.publishing.middleware import is_draft_request_context
 from django.template.defaultfilters import date as datefilter
 
-from . import appsettings, validators, utils
+from . import appsettings, validators
 from .utils import timeutils
 
 
@@ -47,17 +46,14 @@ def zero_datetime(dt, tz=None):
     Return the given datetime with hour/minutes/seconds/ms zeroed and the
     timezone coerced to the given ``tz`` (or UTC if none is given).
     """
-    if dt is None:
-        return None
     if tz is None:
-        tz = pytz.utc
-    return dt.replace(
-        hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc)
+        tz = get_current_timezone()
+    return coerce_naive(dt).replace(hour=0, minute=0, second=0, microsecond=0)
 
 
 def default_starts():
     when = timeutils.round_datetime(
-        when=timezone.now(),
+        when=djtz.now(),
         precision=appsettings.DEFAULT_STARTS_PRECISION,
         rounding=timeutils.ROUND_UP,
     )
@@ -69,20 +65,21 @@ def default_ends():
 
 
 def default_date_starts():
-    return timezone.date()
+    return djtz.date()
 
 
-def default_date_ends():
-    return default_date_starts() + appsettings.DEFAULT_DATE_ENDS_DELTA
-
-
-def format_ical_dt(date_or_datetime):
-    """ Return datetime formatted for use in iCal """
+def format_naive_ical_dt(date_or_datetime):
+    """
+    Return datetime formatted for use in iCal as a *naive* datetime value to
+    work more like people expect, e.g. creating a series of events starting
+    at 9am should not create some occurrences that start at 8am or 10am after
+    a daylight savings change.
+    """
     dt = coerce_dt_awareness(date_or_datetime)
     if is_naive(dt):
         return dt.strftime('%Y%m%dT%H%M%S')
     else:
-        return dt.astimezone(pytz.utc).strftime('%Y%m%dT%H%M%SZ')
+        return dt.astimezone(get_current_timezone()).strftime('%Y%m%dT%H%M%S')
 
 
 def coerce_dt_awareness(date_or_datetime, tz=None):
@@ -91,19 +88,35 @@ def coerce_dt_awareness(date_or_datetime, tz=None):
     timezone-naive `datetime` result, depending on which is appropriate for
     the project's settings.
     """
-    if tz is None:
-        tz = get_current_timezone()
     if isinstance(date_or_datetime, datetime):
         dt = date_or_datetime
     else:
         dt = datetime.combine(date_or_datetime, datetime_time())
     is_project_tz_aware = settings.USE_TZ
-    if is_project_tz_aware and is_naive(dt):
-        return make_aware(dt, tz)
-    elif not is_project_tz_aware and is_aware(dt):
-        return make_naive(dt, tz)
+    if is_project_tz_aware:
+        return coerce_aware(dt, tz)
+    elif not is_project_tz_aware:
+        return coerce_naive(dt, tz)
     # No changes necessary
     return dt
+
+
+def coerce_naive(dt, tz=None):
+    if is_naive(dt):
+        return dt
+    else:
+        if tz is None:
+            tz = get_current_timezone()
+        return make_naive(dt, tz)
+
+
+def coerce_aware(dt, tz=None):
+    if is_aware(dt):
+        return dt
+    else:
+        if tz is None:
+            tz = get_current_timezone()
+        return make_aware(dt, tz)
 
 # FIELDS ######################################################################
 
@@ -140,9 +153,9 @@ class AbstractBaseModel(models.Model):
     """
 
     created = models.DateTimeField(
-        default=timezone.now, db_index=True, editable=False)
+        default=djtz.now, db_index=True, editable=False)
     modified = models.DateTimeField(
-        default=timezone.now, db_index=True, editable=False)
+        default=djtz.now, db_index=True, editable=False)
 
     class Meta:
         abstract = True
@@ -153,7 +166,7 @@ class AbstractBaseModel(models.Model):
         """
         Update ``self.modified``.
         """
-        self.modified = timezone.now()
+        self.modified = djtz.now()
         super(AbstractBaseModel, self).save(*args, **kwargs)
 
 
@@ -433,6 +446,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
     def get_absolute_url(self):
         return reverse('icekit_events_eventbase_detail', args=(self.slug,))
 
+
 class GeneratorException(Exception):
     pass
 
@@ -469,10 +483,12 @@ class EventRepeatsGenerator(AbstractBaseModel):
             'event repeats.'),
         null=True,
     )
-    start = models.DateTimeField('first start',
+    start = models.DateTimeField(
+        'first start',
         default=default_starts,
         db_index=True)
-    end = models.DateTimeField('first end',
+    end = models.DateTimeField(
+        'first end',
         default=default_ends,
         db_index=True)
     is_all_day = models.BooleanField(
@@ -492,8 +508,8 @@ class EventRepeatsGenerator(AbstractBaseModel):
     def generate(self, until=None):
         """
         Return a list of datetime objects for event occurrence start and end
-        times, up to the given ``until`` parameter or up to the configured
-        ``REPEAT_LIMIT`` for unlimited events.
+        times, up to the given ``until`` parameter, or up to the ``repeat_end``
+        time, or to the configured ``REPEAT_LIMIT`` for unlimited events.
         """
         # Get starting datetime just before this event's start date or time
         # (must be just before since start & end times are *excluded* by the
@@ -505,7 +521,17 @@ class EventRepeatsGenerator(AbstractBaseModel):
             if self.repeat_end:
                 until = self.repeat_end
             else:
-                until = timezone.now() + appsettings.REPEAT_LIMIT
+                until = djtz.now() + appsettings.REPEAT_LIMIT
+            # For all-day occurrence generation, make the `until` constraint
+            # the next date from of the repeat end date to ensure the end
+            # date is included in the generated set as users expect (and
+            # remembering the `between` method used below is exclusive).
+            if self.is_all_day:
+                until += timedelta(days=1)
+        # Make datetimes naive, since RRULE spec contains naive datetimes so
+        # our constraints must be the same
+        start_dt = coerce_naive(start_dt)
+        until = coerce_naive(until)
         # Determine duration to add to each start time
         occurrence_duration = self.duration or timedelta(days=1)
         # `start_dt` and `until` datetimes are exclusive for our rruleset
@@ -535,17 +561,25 @@ class EventRepeatsGenerator(AbstractBaseModel):
             start_dt = self.start
         if until is None:
             until = self.repeat_end \
-                or timezone.now() + appsettings.REPEAT_LIMIT
+                or djtz.now() + appsettings.REPEAT_LIMIT
         # We assume `recurrence_rule` is always a RRULE repeat spec of the form
         # "FREQ=DAILY", "FREQ=WEEKLY", etc?
-        rrule_spec = "DTSTART:%s" % format_ical_dt(start_dt)
+        rrule_spec = "DTSTART:%s" % format_naive_ical_dt(start_dt)
         if not self.recurrence_rule:
-            rrule_spec += "\nRDATE:%s" % format_ical_dt(start_dt)
+            rrule_spec += "\nRDATE:%s" % format_naive_ical_dt(start_dt)
         else:
             rrule_spec += "\nRRULE:%s" % self.recurrence_rule
-            # Apply this event's end repeat
-            rrule_spec += ";UNTIL=%s" % format_ical_dt(
-                until - timedelta(seconds=1))
+            # Apply this event's end repeat date as an *exclusive* UNTIL
+            # constraint. UNTIL in RRULE specs is inclusive by default, so we
+            # fake exclusivity by adjusting the end time by a microsecond.
+            if self.is_all_day:
+                # For all-day generator, make the UNTIL constraint the last
+                # microsecond of the repeat end date to ensure the end date is
+                # included in the generated set as users expect.
+                until += timedelta(days=1, microseconds=-1)
+            else:
+                until -= timedelta(microseconds=1)
+            rrule_spec += ";UNTIL=%s" % format_naive_ical_dt(until)
         return rrule_spec
 
     def save(self, *args, **kwargs):
@@ -572,26 +606,20 @@ class EventRepeatsGenerator(AbstractBaseModel):
 
         if self.is_all_day:
             # An all-day generator's start time must be at 00:00
-            if self.start.hour or self.start.minute or self.start.second \
-                    or self.start.microsecond:
+            naive_start = coerce_naive(self.start)
+            if naive_start.hour or naive_start.minute or naive_start.second \
+                    or naive_start.microsecond:
                 raise GeneratorException(
                     'Start date/time must be at 00:00:00 hours/minutes/seconds'
-                    ' for all-day generators: {0}'.format(self.start)
-                )
-
-            # An all-day generator duration must be a whole multiple of days
-            duration = self.duration
-            if duration.seconds or duration.microseconds:
-                raise GeneratorException(
-                    'Duration between start and end times must be multiples of'
-                    ' a day for all-day generators: {0}'.format(self.duration)
+                    ' for all-day generators: {0}'.format(naive_start)
                 )
 
         # Convert datetime field values to date-compatible versions in the
         # UTC timezone when we save an all-day occurrence
         if self.is_all_day:
             self.start = zero_datetime(self.start)
-            self.end = zero_datetime(self.end)
+            self.end = zero_datetime(self.end) \
+                + timedelta(days=1, microseconds=-1)
 
         super(EventRepeatsGenerator, self).save(*args, **kwargs)
 
@@ -649,7 +677,7 @@ class OccurrenceQueryset(QuerySet):
                 # Exclusive for datetime, inclusive for date.
                 models.Q(is_all_day=False, end__gt=start) |
                 models.Q(is_all_day=True,
-                         end__gt=zero_datetime(start)) # TODO: would be gte, except the generated days seem janky
+                         end__gte=zero_datetime(start))
             )
 
         # This was:
@@ -714,9 +742,13 @@ class Occurrence(AbstractBaseModel):
 
     def time_range_string(self):
         if self.is_all_day:
-            return u"""{0} - {1}, all day""".format(
-                datefilter(self.local_start, DATE_FORMAT),
-                datefilter(self.local_end, DATE_FORMAT))
+            if self.duration < timedelta(days=1):
+                return u"""{0}, all day""".format(
+                    datefilter(self.local_start, DATE_FORMAT))
+            else:
+                return u"""{0} - {1}, all day""".format(
+                    datefilter(self.local_start, DATE_FORMAT),
+                    datefilter(self.local_end, DATE_FORMAT))
         else:
             return u"""{0} - {1}""".format(
                 datefilter(self.local_start, DATETIME_FORMAT),
@@ -730,11 +762,11 @@ class Occurrence(AbstractBaseModel):
 
     @property
     def local_start(self):
-        return localize(self.start)
+        return djtz.localize(self.start)
 
     @property
     def local_end(self):
-        return localize(self.end)
+        return djtz.localize(self.end)
 
     @property
     def is_generated(self):
@@ -777,24 +809,29 @@ class Occurrence(AbstractBaseModel):
         """
         :return: True if this occurrence is entirely in the past
         """
-        return self.end < now()
+        return self.end < djtz.now()
 
     def get_absolute_url(self):
         return self.event.get_absolute_url()
 
+
 def get_occurrence_times_for_event(event):
     """
-    Return a tuple with two sets containing the (start, end) datetimes of an
-    Event's Occurrences, or the original start datetime if an Occurrence's
-    start was modified by a user.
+    Return a tuple with two sets containing the (start, end) *naive* datetimes
+    of an Event's Occurrences, or the original start datetime if an
+    Occurrence's start was modified by a user.
     """
     occurrences_starts = set()
     occurrences_ends = set()
     for start, original_start, end, original_end in \
             event.occurrences.all().values_list('start', 'original_start',
                                                 'end', 'original_end'):
-        occurrences_starts.add(original_start or start)
-        occurrences_ends.add(original_end or end)
+        occurrences_starts.add(
+            coerce_naive(original_start or start)
+        )
+        occurrences_ends.add(
+            coerce_naive(original_end or end)
+        )
     return occurrences_starts, occurrences_ends
 
 
@@ -819,9 +856,9 @@ class AbstractEventListingForDatePage(AbstractListingPage):
 
     def get_start(self, request):
         try:
-            start = timezone.parse('%s 00:00' % request.GET.get('date'))
+            start = djtz.parse('%s 00:00' % request.GET.get('date'))
         except ValueError:
-            start = timezone.midnight()
+            start = djtz.midnight()
         return start
 
     def get_days(self, request):
