@@ -962,6 +962,17 @@ class TestEventRepeatsGeneratorModel(TestCase):
         self.assertTrue(coerce_naive(start) in rruleset)
         self.assertTrue(
             coerce_naive(djtz.datetime(2016,10,31, 0,0)) in rruleset)
+        # Repeating generator `generate` method produces expected date entries
+        start_and_end_times_list = list(generator.generate())
+        self.assertEqual(31, len(start_and_end_times_list))
+        self.assertEqual(
+            (coerce_naive(start),
+             coerce_naive(end) + timedelta(days=1, microseconds=-1)),
+            start_and_end_times_list[0])
+        self.assertEqual(
+            (coerce_naive(repeat_end),
+             coerce_naive(repeat_end) + timedelta(days=1, microseconds=-1)),
+            start_and_end_times_list[-1])
 
 
 class TestEventOccurrences(TestCase):

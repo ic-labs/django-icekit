@@ -514,8 +514,8 @@ class EventRepeatsGenerator(AbstractBaseModel):
     def generate(self, until=None):
         """
         Return a list of datetime objects for event occurrence start and end
-        times, up to the given ``until`` parameter or up to the configured
-        ``REPEAT_LIMIT`` for unlimited events.
+        times, up to the given ``until`` parameter, or up to the ``repeat_end``
+        time, or to the configured ``REPEAT_LIMIT`` for unlimited events.
         """
         # Get starting datetime just before this event's start date or time
         # (must be just before since start & end times are *excluded* by the
@@ -528,6 +528,12 @@ class EventRepeatsGenerator(AbstractBaseModel):
                 until = self.repeat_end
             else:
                 until = djtz.now() + appsettings.REPEAT_LIMIT
+            # For all-day occurrence generation, make the `until` constraint
+            # the next date from of the repeat end date to ensure the end
+            # date is included in the generated set as users expect (and
+            # remembering the `between` method used below is exclusive).
+            if self.is_all_day:
+                until += timedelta(days=1)
         # Make datetimes naive, since RRULE spec contains naive datetimes so
         # our constraints must be the same
         start_dt = coerce_naive(start_dt)
