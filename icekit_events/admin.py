@@ -184,7 +184,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         end = timezone.localize(
             datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d'), tz)
 
-        all_occurrences = models.Occurrence.objects.draft().within(start, end)
+        all_occurrences = models.Occurrence.objects.draft().overlapping(start, end)
 
         data = []
         for occurrence in all_occurrences.all():

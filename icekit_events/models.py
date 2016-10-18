@@ -38,6 +38,7 @@ from .utils import time as utils_time
 # Constant object used as a flag for unset kwarg parameters
 UNSET = object()
 
+DATE_FORMAT = settings.DATE_FORMAT
 DATETIME_FORMAT = settings.DATE_FORMAT + " " + settings.TIME_FORMAT
 
 
@@ -632,25 +633,36 @@ class OccurrenceQueryset(QuerySet):
     def regeneratable(self):
         return self.unmodified_by_user()
 
-    def within(self, start, end):
+    def overlapping(self, start, end):
         """
-        Return occurrences within the given start and end datetimes, inclusive.
+        Return occurrences overlapping the given start and end datetimes,
+        inclusive.
         Special logic is applied for all-day occurrences, for which the start
         and end times are zeroed to find all occurrences that occur on a DATE
         as opposed to within DATETIMEs.
         """
         return self.filter(
-                models.Q(is_all_day=False, start__gte=start) |
-                models.Q(is_all_day=True,
-                         start__gte=zero_datetime(start))
-            ).filter(
-                # Exclusive for datetime, inclusive for date.
                 models.Q(is_all_day=False, start__lt=end) |
                 models.Q(is_all_day=True,
-                         start__lte=zero_datetime(end))
+                         start__lt=zero_datetime(end))
+            ).filter(
+                # Exclusive for datetime, inclusive for date.
+                models.Q(is_all_day=False, end__gt=start) |
+                models.Q(is_all_day=True,
+                         end__gt=zero_datetime(start)) # TODO: would be gte, except the generated days seem janky
             )
 
-
+        # This was:
+        # return self.filter(
+        #     models.Q(is_all_day=False, start__gte=start) |
+        #     models.Q(is_all_day=True,
+        #              start__gte=zero_datetime(start))
+        # ).filter(
+        #     # Exclusive for datetime, inclusive for date.
+        #     models.Q(is_all_day=False, start__lt=end) |
+        #     models.Q(is_all_day=True,
+        #              start__lte=zero_datetime(end))
+        # )
 
 OccurrenceManager = models.Manager.from_queryset(OccurrenceQueryset)
 OccurrenceManager.use_for_related_fields = True
@@ -700,9 +712,21 @@ class Occurrence(AbstractBaseModel):
     class Meta:
         ordering = ['start', '-is_all_day', 'event', 'pk']
 
+    def time_range_string(self):
+        if self.is_all_day:
+            return u"""{0} - {1}, all day""".format(
+                datefilter(self.local_start, DATE_FORMAT),
+                datefilter(self.local_end, DATE_FORMAT))
+        else:
+            return u"""{0} - {1}""".format(
+                datefilter(self.local_start, DATETIME_FORMAT),
+                datefilter(self.local_end, DATETIME_FORMAT))
+
     def __str__(self):
-        return u"""Occurrence of "{0}" {1} - {2}""".format(
-            self.event.title, datefilter(self.local_start, DATETIME_FORMAT), datefilter(self.local_end, DATETIME_FORMAT))
+        return u"""Occurrence of "{0}" {1}""".format(
+            self.event.title,
+            self.time_range_string()
+        )
 
     @property
     def local_start(self):
@@ -755,6 +779,8 @@ class Occurrence(AbstractBaseModel):
         """
         return self.end < now()
 
+    def get_absolute_url(self):
+        return self.event.get_absolute_url()
 
 def get_occurrence_times_for_event(event):
     """
@@ -809,7 +835,7 @@ class AbstractEventListingForDatePage(AbstractListingPage):
         days = self.get_days(request)
         start = self.get_start(request)
         end = start + timedelta(days=days)
-        return Occurrence.objects.within(start, end)
+        return Occurrence.objects.overlapping(start, end)
 
     def get_items_to_list(self, request):
         return self._occurrences_on_date(request).published()\
@@ -820,6 +846,12 @@ class AbstractEventListingForDatePage(AbstractListingPage):
 
 
 def regenerate_event_occurrences(sender, instance, **kwargs):
-    instance.event.regenerate_occurrences()
+    try:
+        e = instance.event
+    except EventBase.DoesNotExist:
+        # this can happen if deleting an EventRepeatsGenerator as part of
+        # deleting an event
+        return
+    e.regenerate_occurrences()
 post_save.connect(regenerate_event_occurrences, sender=EventRepeatsGenerator)
 post_delete.connect(regenerate_event_occurrences, sender=EventRepeatsGenerator)
