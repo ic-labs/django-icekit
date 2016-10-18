@@ -606,19 +606,12 @@ class EventRepeatsGenerator(AbstractBaseModel):
 
         if self.is_all_day:
             # An all-day generator's start time must be at 00:00
-            if self.start.hour or self.start.minute or self.start.second \
-                    or self.start.microsecond:
+            naive_start = coerce_naive(self.start)
+            if naive_start.hour or naive_start.minute or naive_start.second \
+                    or naive_start.microsecond:
                 raise GeneratorException(
                     'Start date/time must be at 00:00:00 hours/minutes/seconds'
-                    ' for all-day generators: {0}'.format(self.start)
-                )
-
-            # An all-day generator duration must be a whole multiple of days
-            duration = self.duration
-            if duration.seconds or duration.microseconds:
-                raise GeneratorException(
-                    'Duration between start and end times must be multiples of'
-                    ' a day for all-day generators: {0}'.format(self.duration)
+                    ' for all-day generators: {0}'.format(naive_start)
                 )
 
         # Convert datetime field values to date-compatible versions in the

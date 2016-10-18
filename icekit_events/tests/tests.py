@@ -831,15 +831,6 @@ class TestEventRepeatsGeneratorModel(TestCase):
             end=self.start + timedelta(hours=24),
             event=G(SimpleEvent),
         )
-        self.assertRaisesRegexp(
-            models.GeneratorException,
-            'Duration between start and end times must be multiples of a day'
-            ' for all-day generators',
-            models.EventRepeatsGenerator.objects.create,
-            is_all_day=True,
-            start=self.start,
-            end=self.start + timedelta(hours=24, seconds=1),
-        )
 
     def test_duration(self):
         self.assertEquals(
