@@ -9,6 +9,7 @@ import warnings
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.template import RequestContext
 from django.template.response import TemplateResponse
 
 from . import models
@@ -63,11 +64,10 @@ def event(request, slug, is_preview=False):
     if not event:
         raise Http404
 
-    context = {
+    context = RequestContext(request, {
         'is_preview': is_preview,
         'event': event,
-        'request': request,
-    }
+    })
     # TODO Not sure where the `Event.template` notion comes from, keeping it
     # here for now for backwards compatibility
     template = getattr(event, 'template',  'icekit_events/event.html')
