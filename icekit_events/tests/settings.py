@@ -32,6 +32,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django_nose',
+    'fluent_pages',
     'icekit',
     'icekit_events',
     'icekit_events.event_types.simple',
