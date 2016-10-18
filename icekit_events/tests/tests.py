@@ -5,7 +5,7 @@ Tests for ``icekit_events`` app.
 
 # WebTest API docs: http://webtest.readthedocs.org/en/latest/api.html
 
-from timezone import timezone
+from timezone import timezone as djtz  # django-timezone
 from datetime import datetime, timedelta, time
 import six
 import json
@@ -19,14 +19,13 @@ from django.core.urlresolvers import reverse
 from django.forms.models import fields_for_model
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils.timezone import make_naive
 
 from django_dynamic_fixture import G
 from django_webtest import WebTest
 
 from icekit_events import appsettings, forms, models
 from icekit_events.event_types.simple.models import SimpleEvent
-from icekit_events.models import get_occurrence_times_for_event
+from icekit_events.models import get_occurrence_times_for_event, coerce_naive
 from icekit_events.utils import timeutils
 
 
@@ -41,7 +40,7 @@ class TestAdmin(WebTest):
         )
         self.superuser.set_password('abc123')
         self.start = timeutils.round_datetime(
-            when=timezone.now(),
+            when=djtz.now(),
             precision=timedelta(minutes=1),
             rounding=timeutils.ROUND_DOWN)
         self.end = self.start + timedelta(minutes=45)
@@ -275,9 +274,9 @@ class TestAdmin(WebTest):
         #######################################################################
         form = response.forms[0]
         extra_occurrence_start = (first_occurrence.start - timedelta(days=3)) \
-            .astimezone(timezone.get_current_timezone())
+            .astimezone(djtz.get_current_timezone())
         extra_occurrence_end = (first_occurrence.end - timedelta(days=3)) \
-            .astimezone(timezone.get_current_timezone())
+            .astimezone(djtz.get_current_timezone())
         form['occurrences-10-start_0'].value = \
             extra_occurrence_start.strftime('%Y-%m-%d')
         form['occurrences-10-start_1'].value = \
@@ -303,7 +302,7 @@ class TestAdmin(WebTest):
         self.assertFalse(shifted_occurrence.is_user_modified)
         shifted_occurrence_start = \
             (shifted_occurrence.start + timedelta(minutes=30)) \
-            .astimezone(timezone.get_current_timezone())
+            .astimezone(djtz.get_current_timezone())
         form['occurrences-6-start_0'].value = \
             shifted_occurrence_start.strftime('%Y-%m-%d')
         form['occurrences-6-start_1'].value =\
@@ -449,7 +448,7 @@ class TestAdmin(WebTest):
             repeat_end.strftime('%H:%M:%S')
         # Add ad-hoc occurrence
         extra_occurrence_start = (self.start - timedelta(days=30)) \
-            .astimezone(timezone.get_current_timezone())
+            .astimezone(djtz.get_current_timezone())
         extra_occurrence_end = extra_occurrence_start + timedelta(hours=3)
         form['occurrences-0-start_0'].value = \
             extra_occurrence_start.strftime('%Y-%m-%d')
@@ -601,7 +600,7 @@ class TestAdmin(WebTest):
         data = json.loads(response.content)
         self.assertEqual(2, len(data))
         def format_dt_like_fullcalendar(dt):
-            formatted = dt.astimezone(timezone.get_current_timezone()) \
+            formatted = dt.astimezone(djtz.get_current_timezone()) \
                 .strftime('%Y-%m-%dT%H:%M:%S%z')
             # FullCalendar includes ':' between hour & minute portions of the
             # timzone offset. There's no way to do this directly with Python's
@@ -676,7 +675,7 @@ class TestEventModel(TestCase):
 
     def setUp(self):
         self.start = timeutils.round_datetime(
-            when=timezone.now(),
+            when=djtz.now(),
             precision=timedelta(minutes=1),
             rounding=timeutils.ROUND_DOWN)
         self.end = self.start
@@ -726,9 +725,9 @@ class TestEventModel(TestCase):
 
 class TestEventRepeatsGeneratorStrangeness(TestCase):
     def setUp(self):
-        self.start = timezone.datetime(2016,10,1, 9,0)
-        self.end = timezone.datetime(2016,10,1, 17)
-        self.repeat_end = timezone.datetime(2016,10,31, 17)
+        self.start = djtz.datetime(2016,10,1, 9,0)
+        self.end = djtz.datetime(2016,10,1, 17)
+        self.repeat_end = djtz.datetime(2016,10,31, 17)
 
         self.event = G(SimpleEvent)
 
@@ -744,29 +743,27 @@ class TestEventRepeatsGeneratorStrangeness(TestCase):
         occurrences = self.event.occurrences.all()
         self.assertEquals(occurrences.count(), 31)
 
-        st = timezone.localize(self.start).time()
-        et = timezone.localize(self.end).time()
+        st = djtz.localize(self.start).time()
+        et = djtz.localize(self.end).time()
         self.assertEquals(st, time(9,0))
         self.assertEquals(et, time(17,0))
 
         for o in occurrences:
-            self.assertEquals(timezone.localize(o.start).time(), st)
-            self.assertEquals(timezone.localize(o.end).time(), et)
+            self.assertEquals(djtz.localize(o.start).time(), st)
+            self.assertEquals(djtz.localize(o.end).time(), et)
 
 class TestEventRepeatsGeneratorModel(TestCase):
 
     def setUp(self):
         """ Create a daily recurring event with no end date """
         self.start = timeutils.round_datetime(
-            when=timezone.now(),
+            when=djtz.now(),
             precision=timedelta(days=1),
             rounding=timeutils.ROUND_DOWN)
         self.end = self.start + appsettings.DEFAULT_ENDS_DELTA
 
-        self.naive_start = make_naive(
-            self.start, timezone.get_current_timezone())
-        self.naive_end = make_naive(
-            self.end, timezone.get_current_timezone())
+        self.naive_start = coerce_naive(self.start)
+        self.naive_end = coerce_naive(self.end)
 
     def test_uses_recurrencerulefield(self):
         """
@@ -956,7 +953,7 @@ class TestEventOccurrences(TestCase):
         Create an event with a daily repeat generator.
         """
         self.start = timeutils.round_datetime(
-            when=timezone.now(),
+            when=djtz.now(),
             precision=timedelta(days=1),
             rounding=timeutils.ROUND_DOWN)
         self.end = self.start + appsettings.DEFAULT_ENDS_DELTA
@@ -980,13 +977,11 @@ class TestEventOccurrences(TestCase):
         for days_hence in range(20):
             start = first_occurrence.start + timedelta(days=days_hence)
             self.assertTrue(
-                make_naive(start, timezone.get_current_timezone())
-                in occurrence_starts,
+                coerce_naive(start) in occurrence_starts,
                 "Missing start time %d days hence" % days_hence)
             end = first_occurrence.end + timedelta(days=days_hence)
             self.assertTrue(
-                make_naive(end, timezone.get_current_timezone())
-                in occurrence_ends,
+                coerce_naive(end) in occurrence_ends,
                 "Missing end time %d days hence" % days_hence)
         # Confirm Event correctly returns first & last occurrences
         self.assertEqual(
@@ -1075,12 +1070,10 @@ class TestEventOccurrences(TestCase):
         self.assertTrue(added_occurrence.is_user_modified)
 
     def test_add_arbitrary_occurrences_to_repeating_event(self):
-        arbitrary_dt1 = make_naive(
-            self.start + timedelta(days=3, hours=-2),
-            timezone.get_current_timezone())
-        arbitrary_dt2 = make_naive(
-            self.start + timedelta(days=7, hours=5),
-            timezone.get_current_timezone())
+        arbitrary_dt1 = coerce_naive(
+            self.start + timedelta(days=3, hours=-2))
+        arbitrary_dt2 = coerce_naive(
+            self.start + timedelta(days=7, hours=5))
         event = G(SimpleEvent)
         generator = G(
             models.EventRepeatsGenerator,
@@ -1143,10 +1136,10 @@ class TestEventOccurrences(TestCase):
         occurrence_to_cancel_2 = event.occurrences.all()[5]
         occurrence_starts, __ = get_occurrence_times_for_event(event)
         self.assertTrue(
-            make_naive(occurrence_to_cancel_1.start, timezone.get_current_timezone())
+            coerce_naive(occurrence_to_cancel_1.start)
             in occurrence_starts)
         self.assertTrue(
-            make_naive(occurrence_to_cancel_2.start, timezone.get_current_timezone())
+            coerce_naive(occurrence_to_cancel_2.start)
             in occurrence_starts)
         # Cancel occurrences
         event.cancel_occurrence(occurrence_to_cancel_1)

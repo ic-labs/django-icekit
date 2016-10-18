@@ -30,7 +30,7 @@ from icekit.plugins.base import PluginMount
 from icekit.admin import (
     ChildModelFilter, ChildModelPluginPolymorphicParentModelAdmin)
 from polymorphic.admin import PolymorphicChildModelAdmin
-from timezone import timezone
+from timezone import timezone as djtz  # django-timezone
 
 from icekit.publishing import admin as publishing_admin
 
@@ -176,12 +176,12 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         to be loaded in an iframe.
         """
         if 'timezone' in request.GET:
-            tz = timezone.get(request.GET.get('timezone'))
+            tz = djtz.get(request.GET.get('timezone'))
         else:
             tz = get_current_timezone()
-        start = timezone.localize(
+        start = djtz.localize(
             datetime.datetime.strptime(request.GET['start'], '%Y-%m-%d'), tz)
-        end = timezone.localize(
+        end = djtz.localize(
             datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d'), tz)
 
         all_occurrences = models.Occurrence.objects.draft().overlapping(start, end)
@@ -210,8 +210,8 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             # included in the calendar.
             end = occurrence.start + timedelta(days=1)
         else:
-            start = timezone.localize(occurrence.start)
-            end = timezone.localize(occurrence.end)
+            start = djtz.localize(occurrence.start)
+            end = djtz.localize(occurrence.end)
         if occurrence.is_cancelled and occurrence.cancel_reason:
             title = u"{0} [{1}]".format(
                 occurrence.event.title, occurrence.cancel_reason)
@@ -288,7 +288,7 @@ class RecurrenceRuleAdmin(admin.ModelAdmin):
         limit = int(request.POST.get('limit', 10))
         try:
             rruleset = rrule.rrulestr(
-                recurrence_rule, dtstart=timezone.now(), forceset=True)
+                recurrence_rule, dtstart=djtz.now(), forceset=True)
         except ValueError as e:
             data = {
                 'error': six.text_type(e),

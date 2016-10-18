@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, time as datetime_time
 from dateutil import rrule
 import six
 import pytz
-from timezone import timezone
+from timezone import timezone as djtz  # django-timezone
 
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -22,7 +22,6 @@ from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
     get_current_timezone
 
 from polymorphic.models import PolymorphicModel
-from timezone.timezone import localize, now
 
 from icekit.content_collections.abstract_models import AbstractListingPage, \
     TitleSlugMixin
@@ -31,7 +30,7 @@ from icekit.publishing.models import PublishingModel
 from icekit.publishing.middleware import is_draft_request_context
 from django.template.defaultfilters import date as datefilter
 
-from . import appsettings, validators, utils
+from . import appsettings, validators
 from .utils import timeutils
 
 
@@ -57,7 +56,7 @@ def zero_datetime(dt, tz=None):
 
 def default_starts():
     when = timeutils.round_datetime(
-        when=timezone.now(),
+        when=djtz.now(),
         precision=appsettings.DEFAULT_STARTS_PRECISION,
         rounding=timeutils.ROUND_UP,
     )
@@ -69,7 +68,7 @@ def default_ends():
 
 
 def default_date_starts():
-    return timezone.date()
+    return djtz.date()
 
 
 def default_date_ends():
@@ -161,9 +160,9 @@ class AbstractBaseModel(models.Model):
     """
 
     created = models.DateTimeField(
-        default=timezone.now, db_index=True, editable=False)
+        default=djtz.now, db_index=True, editable=False)
     modified = models.DateTimeField(
-        default=timezone.now, db_index=True, editable=False)
+        default=djtz.now, db_index=True, editable=False)
 
     class Meta:
         abstract = True
@@ -174,7 +173,7 @@ class AbstractBaseModel(models.Model):
         """
         Update ``self.modified``.
         """
-        self.modified = timezone.now()
+        self.modified = djtz.now()
         super(AbstractBaseModel, self).save(*args, **kwargs)
 
 
@@ -526,7 +525,7 @@ class EventRepeatsGenerator(AbstractBaseModel):
             if self.repeat_end:
                 until = self.repeat_end
             else:
-                until = timezone.now() + appsettings.REPEAT_LIMIT
+                until = djtz.now() + appsettings.REPEAT_LIMIT
         # Make datetimes naive, since RRULE spec contains naive datetimes so
         # our constraints must be the same
         start_dt = coerce_naive(start_dt)
@@ -560,7 +559,7 @@ class EventRepeatsGenerator(AbstractBaseModel):
             start_dt = self.start
         if until is None:
             until = self.repeat_end \
-                or timezone.now() + appsettings.REPEAT_LIMIT
+                or djtz.now() + appsettings.REPEAT_LIMIT
         # We assume `recurrence_rule` is always a RRULE repeat spec of the form
         # "FREQ=DAILY", "FREQ=WEEKLY", etc?
         rrule_spec = "DTSTART:%s" % format_naive_ical_dt(start_dt)
@@ -755,11 +754,11 @@ class Occurrence(AbstractBaseModel):
 
     @property
     def local_start(self):
-        return localize(self.start)
+        return djtz.localize(self.start)
 
     @property
     def local_end(self):
-        return localize(self.end)
+        return djtz.localize(self.end)
 
     @property
     def is_generated(self):
@@ -802,7 +801,7 @@ class Occurrence(AbstractBaseModel):
         """
         :return: True if this occurrence is entirely in the past
         """
-        return self.end < now()
+        return self.end < djtz.now()
 
     def get_absolute_url(self):
         return self.event.get_absolute_url()
@@ -849,9 +848,9 @@ class AbstractEventListingForDatePage(AbstractListingPage):
 
     def get_start(self, request):
         try:
-            start = timezone.parse('%s 00:00' % request.GET.get('date'))
+            start = djtz.parse('%s 00:00' % request.GET.get('date'))
         except ValueError:
-            start = timezone.midnight()
+            start = djtz.midnight()
         return start
 
     def get_days(self, request):
