@@ -67,3 +67,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DDF_FILL_NULLABLE_FIELDS = False
 FLUENT_PAGES_TEMPLATE_DIR = os.path.join(BASE_DIR, '..', 'templates')
+
+TEMPLATE_CONTEXT_PROCESSORS = ['django.core.context_processors.request']
