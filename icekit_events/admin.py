@@ -44,6 +44,7 @@ class EventRepeatGeneratorsInline(admin.TabularInline):
     model = models.EventRepeatsGenerator
     form = admin_forms.BaseEventRepeatsGeneratorForm
     extra = 1
+    fields = ('is_all_day', 'start', 'end', 'recurrence_rule', 'repeat_end',)
     formfield_overrides = {
         models.RecurrenceRuleField: {
             'widget': forms.RecurrenceRuleWidget(attrs={
@@ -56,9 +57,15 @@ class EventRepeatGeneratorsInline(admin.TabularInline):
 class OccurrencesInline(admin.TabularInline):
     model = models.Occurrence
     form = admin_forms.BaseOccurrenceForm
-    exclude = ('generator', 'is_generated',)
+    fields = ('is_all_day', 'start', 'end', 'is_user_modified')
+    exclude = (
+        'generator', 'is_generated',
+        # is_hidden and is_cancelled aren't implemented yet,
+        # so hiding relevant fields
+        'is_hidden', 'is_cancelled', 'cancel_reason'
+    )
     extra = 1
-    readonly_fields = ('is_user_modified', 'is_cancelled',)
+    readonly_fields = ('is_user_modified', )#'is_cancelled',)
 
 
 class EventChildAdmin(
