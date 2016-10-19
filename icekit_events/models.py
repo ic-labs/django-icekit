@@ -26,7 +26,8 @@ from polymorphic.models import PolymorphicModel
 from icekit.content_collections.abstract_models import AbstractListingPage, \
     TitleSlugMixin
 from icekit.fields import ICEkitURLField
-from icekit.publishing.models import PublishingModel
+from icekit.mixins import FluentFieldsMixin
+from icekit.publishing.models import PublishingModel, PublishableFluentContents
 from icekit.publishing.middleware import is_draft_request_context
 from django.template.defaultfilters import date as datefilter
 
@@ -457,6 +458,15 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
 
     def get_absolute_url(self):
         return reverse('icekit_events_eventbase_detail', args=(self.slug,))
+
+class AbstractEventWithLayouts(EventBase, FluentFieldsMixin):
+
+    class Meta:
+        abstract = True
+
+    @property
+    def template(self):
+        return self.get_layout_template_name()
 
 
 class GeneratorException(Exception):

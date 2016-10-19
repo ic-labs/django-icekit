@@ -22,6 +22,7 @@ from django.template.response import TemplateResponse
 from django.utils.timezone import get_current_timezone
 from django.views.decorators.csrf import csrf_exempt
 
+from icekit.admin_mixins import FluentLayoutsMixin
 from icekit.content_collections.admin import TitleSlugAdmin
 from icekit.plugins.base import BaseChildModelPlugin
 
@@ -42,7 +43,6 @@ logger = logging.getLogger(__name__)
 class EventRepeatGeneratorsInline(admin.TabularInline):
     model = models.EventRepeatsGenerator
     form = admin_forms.BaseEventRepeatsGeneratorForm
-    exclude = ('event',)
     extra = 1
     formfield_overrides = {
         models.RecurrenceRuleField: {
@@ -254,6 +254,9 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         classes = ['fcc-%s' % class_ for class_ in classes]
 
         return classes
+
+class EventWithLayoutsAdmin(EventChildAdmin, FluentLayoutsMixin):
+    pass
 
 
 class RecurrenceRuleAdmin(admin.ModelAdmin):

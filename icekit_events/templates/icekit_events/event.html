@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load placeholder_tags fluent_contents_tags icekit_tags events_tags %}
+{% load placeholder_tags icekit_tags events_tags %}
 
 {% block title %}{{ event.title }}{% endblock %}
 
@@ -35,9 +35,6 @@
     {%  empty %}
         {% if not event.occurrences.different_day %}<p>This event doesn't have published times</p>{% endif %}
     {% endfor %}
-
-
-{#    {% page_placeholder "main" role="m" %}#}
 
 {% endblock %}
 

@@ -1,6 +1,6 @@
-from icekit_events.models import EventBase
+from icekit_events.models import AbstractEventWithLayouts
 
 
-class SimpleEvent(EventBase):
+class SimpleEvent(AbstractEventWithLayouts):
     class Meta:
         verbose_name = "Simple event"
