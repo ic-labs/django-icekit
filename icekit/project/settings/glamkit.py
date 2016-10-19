@@ -11,7 +11,10 @@ INSTALLED_APPS += (
     'icekit_events.page_types.eventlistingfordate',
 )
 
-ROOT_URLCONF = "icekit.project.glamkit_urls"
+# This settings file is loaded after calculated.py, so we don't want to
+# overwrite the urlconf if it is set to the test urls.
+if not 'test' in ROOT_URLCONF:
+    ROOT_URLCONF = "icekit.project.glamkit_urls"
 
 # ICEKIT PRESS RELEASES #######################################################
 
