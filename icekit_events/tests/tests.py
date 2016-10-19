@@ -1257,6 +1257,51 @@ class TestEventOccurrences(TestCase):
         self.assertEqual(event.occurrences.count(), 20)
         self.assertEqual(SimpleEvent.objects.count(), 1)
 
+    def test_same_day_occurrences(self):
+        event = G(SimpleEvent)
+        same_day1 = G(models.Occurrence, event=event,
+                 start=datetime(2016,10,01, 0,0,0),
+                 end=datetime(2016,10,01, 11,59,59)
+        )
+        same_day2 = G(models.Occurrence, event=event,
+                 start=datetime(2016,10,01, 0,0,0),
+                 end=datetime(2016,10,02, 0,0,0)
+        ) # midnight the next day counts as same day
+
+        same_day3 = G(models.Occurrence, event=event,
+                      start=datetime(2016, 10, 01, 14, 0, 0),
+                      end=datetime(2016, 10, 01, 15, 0, 0),
+                      is_all_day=True,
+                      )  # midnight the next day counts as same day
+
+        different_day1 = G(models.Occurrence, event=event,
+                      start=datetime(2016, 10, 01, 0, 0, 0),
+                      end=datetime(2016, 10, 31, 0, 0, 0)
+        )
+
+        different_day2 = G(models.Occurrence, event=event,
+                      start=datetime(2016, 10, 01, 0, 0, 0),
+                      end=datetime(2016, 10, 03, 0, 0, 0)
+        )
+
+        different_day3 = G(models.Occurrence, event=event,
+                      start=datetime(2016, 10, 01, 0, 0, 0),
+                      end=datetime(2016, 10, 02, 0, 0, 0),
+                      is_all_day= True,
+        )
+
+        occs = event.occurrences.all()
+        self.assertEquals(
+            set(occs.same_day()),
+            {same_day1, same_day2, same_day3}
+        )
+        self.assertEquals(
+            set(occs.different_day()),
+            {different_day1, different_day2, different_day3}
+        )
+
+
+
 
 class Time(TestCase):
 

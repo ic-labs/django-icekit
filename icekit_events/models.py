@@ -4,11 +4,11 @@ Models for ``icekit_events`` app.
 
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
 
-from datetime import datetime, timedelta, time as datetime_time
+from datetime import datetime, timedelta, time as datetime_time, time
 
 from dateutil import rrule
 import six
-import pytz
+from django.db.models import F
 from timezone import timezone as djtz  # django-timezone
 
 from django.core.urlresolvers import reverse
@@ -30,6 +30,8 @@ from icekit.publishing.models import PublishingModel
 from icekit.publishing.middleware import is_draft_request_context
 from django.template.defaultfilters import date as datefilter
 
+from icekit.templatetags.icekit_tags import grammatical_join
+from icekit_events.templatetags.events_tags import times as timesfilter
 from . import appsettings, validators
 from .utils import timeutils
 
@@ -419,6 +421,16 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
                     datefilter(end, date_format)
                 ])
 
+    def describe_times_range(self, time_format=None):
+        sts = timesfilter(self.start_times_set(), format=time_format)
+        all_days = self.occurrences.filter(is_all_day=True)
+        if all_days:
+            sts = ["all day"] + sts
+
+        times = grammatical_join(sts, final_join=", ")
+        return times
+
+
     def start_dates_set(self):
         """
         :return: a sorted set of all the different dates that this event
@@ -663,7 +675,7 @@ class OccurrenceQueryset(QuerySet):
 
     def overlapping(self, start, end):
         """
-        Return occurrences overlapping the given start and end datetimes,
+        :return: occurrences overlapping the given start and end datetimes,
         inclusive.
         Special logic is applied for all-day occurrences, for which the start
         and end times are zeroed to find all occurrences that occur on a DATE
@@ -680,17 +692,65 @@ class OccurrenceQueryset(QuerySet):
                          end__gte=zero_datetime(start))
             )
 
-        # This was:
-        # return self.filter(
-        #     models.Q(is_all_day=False, start__gte=start) |
-        #     models.Q(is_all_day=True,
-        #              start__gte=zero_datetime(start))
-        # ).filter(
-        #     # Exclusive for datetime, inclusive for date.
-        #     models.Q(is_all_day=False, start__lt=end) |
-        #     models.Q(is_all_day=True,
-        #              start__lte=zero_datetime(end))
-        # )
+    def start_within(self, start, end):
+        """
+        :return:  occurrences that start within the given start and end
+        datetimes, inclusive.
+        """
+        return self.filter(
+            models.Q(is_all_day=False, start__gte=start) |
+            models.Q(is_all_day=True,
+                     start__gte=zero_datetime(start))
+        ).filter(
+            # Exclusive for datetime, inclusive for date.
+            models.Q(is_all_day=False, start__lt=end) |
+            models.Q(is_all_day=True,
+                     start__lte=zero_datetime(end))
+        )
+
+    def _same_day_ids(self):
+        """
+        :return: ids of occurrences that finish on the same day that they
+        start, or midnight the next day.
+        """
+        # we can pre-filter to return only occurrences that are <=24h long,
+        # but until at least the `__date` can be used in F() statements
+        # we'll have to refine manually
+        qs = self.filter(end__lte=F('start') + timedelta(days=1))
+
+        # filter occurrences to those sharing the same end date, or
+        # midnight the next day (unless it's an all-day occurrence)
+        ids = [o.id for o in qs if (
+            (o.local_start.date() == o.local_end.date()) or
+            (
+                o.local_end.time() == time(0,0) and
+                o.local_end.date() == o.local_start.date() + timedelta(days=1) and
+                o.is_all_day == False
+            )
+        )]
+        return ids
+
+    def same_day(self):
+        """
+        :return: occurrences that finish on the same day that they start, or
+        midnight the next day.
+        These types of occurrences sometimes need to be treated differently.
+        """
+        return self.filter(id__in=self._same_day_ids())
+
+    def different_day(self):
+        """
+        :return: occurrences that finish on the a different day than they
+        start, unless it's midnight the next day.
+        These types of occurrences sometimes need to be treated differently.
+        """
+        # This is the complement of same_day above; might as well reuse the
+        # logic.
+        return self.exclude(id__in=self._same_day_ids())
+
+
+
+
 
 OccurrenceManager = models.Manager.from_queryset(OccurrenceQueryset)
 OccurrenceManager.use_for_related_fields = True

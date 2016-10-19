@@ -7,7 +7,7 @@
 	<h1>{{ event.title }}</h1>
 
 	<p>Date{{ event.start_dates_set|pluralize }}: {{ event.describe_dates_range }}</p>
-	<p>Time{{ event.start_times_set|pluralize }}: {{ event.start_times_set|times|grammatical_join:" or " }}</p>
+	<p>Time{{ event.start_times_set|pluralize }}: {{ event.describe_times_range }}</p>
 	{% if event.special_instructions %}
 		<p>Special instructions: {{ event.special_instructions }}</p>
 	{% endif %}
@@ -15,7 +15,11 @@
 		<p><a href="{{ event.cta_url }}">{{  event.cta_text }}</a></p>
 	{% endif %}
 
-    {% regroup event.occurrences.all by local_start.date.year as year_groups %}
+    {% for o in event.occurrences.different_day %}
+        <p>{{ o.time_range_string }}</p>
+    {% endfor %}
+
+    {% regroup event.occurrences.same_day by local_start.date.year as year_groups %}
 
     {% for group in year_groups %}
         <h2>{{ group.grouper }}</h2>
@@ -29,7 +33,7 @@
             {% endfor %}
         </dl>
     {%  empty %}
-        <p>This event doesn't have published times</p>
+        {% if not event.occurrences.different_day %}<p>This event doesn't have published times</p>{% endif %}
     {% endfor %}
 
 
