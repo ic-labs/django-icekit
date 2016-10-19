@@ -13,6 +13,9 @@ class ArticleCategoryPage(AbstractListingPage):
         unpublished_pk = self.get_draft().pk
         return Article.objects.visible().filter(parent_id=unpublished_pk)
 
+    class Meta:
+        verbose_name = "Article category page"
+
 
 class Article(
         PublishableFluentContents, AbstractCollectedContent, TitleSlugMixin):
