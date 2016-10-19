@@ -23,6 +23,7 @@ from django.test.utils import override_settings
 from django_dynamic_fixture import G
 from django_webtest import WebTest
 
+from icekit import models as icekit_models
 from icekit_events import appsettings, forms, models
 from icekit_events.event_types.simple.models import SimpleEvent
 from icekit_events.models import get_occurrence_times_for_event, coerce_naive
@@ -44,6 +45,10 @@ class TestAdmin(WebTest):
             precision=timedelta(minutes=1),
             rounding=timeutils.ROUND_DOWN)
         self.end = self.start + timedelta(minutes=45)
+        self.layout = icekit_models.Layout.auto_add(
+            'icekit_event_types_simple/layouts/default.html',
+            SimpleEvent,
+        )
 
     def test_urls(self):
         response = self.app.get(
@@ -84,6 +89,7 @@ class TestAdmin(WebTest):
         event = G(
             SimpleEvent,
             title='Test Event',
+            layout=self.layout,
         )
         response = self.app.get(
             reverse('admin:icekit_events_eventbase_change', args=(event.pk,)),
@@ -177,6 +183,7 @@ class TestAdmin(WebTest):
         event = G(
             SimpleEvent,
             title='Test Event',
+            layout=self.layout,
         )
         response = self.app.get(
             reverse('admin:icekit_events_eventbase_change', args=(event.pk,)),
@@ -229,16 +236,18 @@ class TestAdmin(WebTest):
             time(0, 0),
             all_day_occurrence.end.astimezone(
                 djtz.get_current_timezone()).time())
-        #######################################################################
-        # Cancel first (timed) event
-        #######################################################################
-        form = response.follow().forms[0]
-        form['occurrences-0-cancel_reason'].value = 'Sold out'
-        response = form.submit('_continue')
-        self.assertEqual(2, event.occurrences.count())
-        timed_occurrence = event.occurrences.all()[0]
-        self.assertEqual('Sold out', timed_occurrence.cancel_reason)
-        self.assertTrue(timed_occurrence.is_cancelled)
+        # Commenting out this test as the corresponding admin field is currently
+        # excluded.
+        # #######################################################################
+        # # Cancel first (timed) event
+        # #######################################################################
+        # form = response.follow().forms[0]
+        # form['occurrences-0-cancel_reason'].value = 'Sold out'
+        # response = form.submit('_continue')
+        # self.assertEqual(2, event.occurrences.count())
+        # timed_occurrence = event.occurrences.all()[0]
+        # self.assertEqual('Sold out', timed_occurrence.cancel_reason)
+        # self.assertTrue(timed_occurrence.is_cancelled)
         #######################################################################
         # Delete second (all-day) event
         #######################################################################
@@ -251,6 +260,7 @@ class TestAdmin(WebTest):
         event = G(
             SimpleEvent,
             title='Test Event',
+            layout=self.layout,
         )
         G(
             models.EventRepeatsGenerator,
@@ -332,22 +342,24 @@ class TestAdmin(WebTest):
         self.assertTrue(converted_occurrence.is_user_modified)
         self.assertTrue(converted_occurrence.is_generated)
         self.assertTrue(converted_occurrence.is_all_day)
-        #######################################################################
-        # Cancel a generated occurrence
-        #######################################################################
-        form = response.follow().forms[0]
-        cancelled_occurrence = event.occurrences.all()[3]
-        self.assertFalse(cancelled_occurrence.is_user_modified)
-        form['occurrences-3-cancel_reason'].value = 'Sold out'
-        response = form.submit('_continue')
-        event = SimpleEvent.objects.get(pk=event.pk)
-        self.assertEqual(10 + 1, event.occurrences.count())
-        cancelled_occurrence = models.Occurrence.objects.get(
-            pk=cancelled_occurrence.pk)
-        self.assertTrue(cancelled_occurrence.is_user_modified)
-        self.assertTrue(cancelled_occurrence.is_generated)
-        self.assertTrue(cancelled_occurrence.is_cancelled)
-        self.assertEqual('Sold out', cancelled_occurrence.cancel_reason)
+        # This test is commented as cancellation controls are currently excluded
+        # from the admin form
+        # #######################################################################
+        # # Cancel a generated occurrence
+        # #######################################################################
+        # form = response.follow().forms[0]
+        # cancelled_occurrence = event.occurrences.all()[3]
+        # self.assertFalse(cancelled_occurrence.is_user_modified)
+        # form['occurrences-3-cancel_reason'].value = 'Sold out'
+        # response = form.submit('_continue')
+        # event = SimpleEvent.objects.get(pk=event.pk)
+        # self.assertEqual(10 + 1, event.occurrences.count())
+        # cancelled_occurrence = models.Occurrence.objects.get(
+        #     pk=cancelled_occurrence.pk)
+        # self.assertTrue(cancelled_occurrence.is_user_modified)
+        # self.assertTrue(cancelled_occurrence.is_generated)
+        # self.assertTrue(cancelled_occurrence.is_cancelled)
+        # self.assertEqual('Sold out', cancelled_occurrence.cancel_reason)
         #######################################################################
         # Delete a generated occurrence (should be regenerated)
         #######################################################################
@@ -384,6 +396,7 @@ class TestAdmin(WebTest):
         event = G(
             SimpleEvent,
             title='Test Event',
+            layout=self.layout,
         )
         self.assertTrue(event.is_draft)
         self.assertEqual([event], list(SimpleEvent.objects.draft()))
@@ -558,6 +571,7 @@ class TestAdmin(WebTest):
         event = G(
             SimpleEvent,
             title='Test Event',
+            layout=self.layout,
         )
         repeat_end = self.end + timedelta(days=7)
         G(
@@ -691,6 +705,7 @@ class TestEventModel(TestCase):
         event = G(
             SimpleEvent,
             title="Event title",
+            layout=self.layout,
         )
         occurrence = models.Occurrence(event=event)
         self.assertTrue('"Event title"' in six.text_type(occurrence))
