@@ -13,6 +13,7 @@ from icekit import abstract_models
 from icekit.content_collections.abstract_models import AbstractListingPage, \
     AbstractCollectedContent, TitleSlugMixin
 from icekit.content_collections.page_type_plugins import ListingPagePlugin
+
 from icekit.page_types.layout_page.abstract_models import \
     AbstractLayoutPage, AbstractUnpublishableLayoutPage
 from icekit.plugins import ICEkitFluentContentsPagePlugin
@@ -68,8 +69,6 @@ class Article(AbstractCollectedContent, PublishableFluentContents, TitleSlugMixi
             u"%s: %s" % (self.parent.get_published().title, self.title)
         )
 
-    def get_absolute_url(self):
-        return urljoin(self.parent.get_absolute_url(), self.slug + "/")
 
 class LayoutPageWithRelatedPages(AbstractLayoutPage):
     related_pages = models.ManyToManyField('fluent_pages.Page')

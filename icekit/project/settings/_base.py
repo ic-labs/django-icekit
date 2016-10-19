@@ -8,6 +8,8 @@ Load environment specific settings via `BASE_SETTINGS_MODULE` environment
 variable, and override settings in `local.py`.
 """
 
+from __future__ import absolute_import
+
 import hashlib
 import multiprocessing
 import os
@@ -596,18 +598,22 @@ FEATURED_APPS = (
         'verbose_name': 'Content',
         'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
         'models': {
+            'icekit_article.Article': {
+                'verbose_name_plural': 'Articles',
+            },
             'fluent_pages.Page': {
                 'verbose_name_plural': 'Pages',
             },
         },
     },
     {
-        'verbose_name': 'Media',
+        'verbose_name': 'Assets',
         'icon_html': '<i class="content-type-icon fa fa-file-image-o"></i>',
         'models': {
-            'image.Image': {},
-            'slideshow.Slideshow': {},
-            'sharedcontent.SharedContent': {},
+            'icekit_plugins_image.Image': {},
+            'icekit_plugins_file.File': {},
+            'icekit_plugins_slideshow.SlideShow': {},
+            # 'sharedcontent.SharedContent': {},
         },
     },
 )
@@ -646,6 +652,7 @@ INSTALLED_APPS += (
     'icekit.content_collections',
     'notifications',
 
+    'icekit.page_types.article',
     'icekit.page_types.author',
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
@@ -665,10 +672,21 @@ INSTALLED_APPS += (
     'icekit.plugins.quote',
     'icekit.plugins.reusable_form',
     'icekit.plugins.slideshow',
+    'icekit.plugins.image_gallery',
     'icekit.plugins.twitter_embed',
 )
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
+
+# ICEKIT PRESS RELEASES #######################################################
+
+FEATURED_APPS[0]['models'].update({
+    'icekit_press_releases.PressRelease': {
+        'verbose_name_plural': 'Press releases',
+    },
+})
+
+INSTALLED_APPS += ('press_releases', )
 
 # MASTER PASSWORD #############################################################
 
