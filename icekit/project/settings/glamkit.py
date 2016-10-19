@@ -35,3 +35,24 @@ ICEKIT['DASHBOARD_FEATURED_APPS'] = (
 
 
 ) + ICEKIT['DASHBOARD_FEATURED_APPS']
+
+
+# GLAMKIT SPONSORS ############################################################
+_SPONSOR_PLUGINS = [
+    'BeginSponsorBlockPlugin',
+    'EndSponsorBlockPlugin',
+    'SponsorPromoPlugin',
+]
+DEFAULT_PLUGINS += _SPONSOR_PLUGINS
+
+# CONFIGURE PLACEHOLDERS ######################################################
+
+FLUENT_CONTENTS_PLACEHOLDER_CONFIG.update({
+    'main': {'plugins': DEFAULT_PLUGINS },
+    'pressrelease_contacts': {
+        'plugins': (
+            'ContactItemPlugin',
+            'TextPlugin',
+        ),
+    },
+})
