@@ -8,7 +8,7 @@ from . import models
 
 
 @plugin_pool.register
-class FAQ(ContentPlugin):
+class FAQPlugin(ContentPlugin):
     model = models.FAQItem
     category = _('Text')
     render_template = 'icekit/plugins/faq/default.html'
