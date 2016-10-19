@@ -343,7 +343,8 @@ class TestAdmin(WebTest):
         self.assertTrue(converted_occurrence.is_generated)
         self.assertTrue(converted_occurrence.is_all_day)
         # This test is commented as cancellation controls are currently excluded
-        # from the admin form
+        # from the admin form. This affects some uncommented assertions below,
+        # which are annotated with 'was x'
         # #######################################################################
         # # Cancel a generated occurrence
         # #######################################################################
@@ -375,9 +376,9 @@ class TestAdmin(WebTest):
         self.assertEqual(
             9,  # Down one, since we deleted a generated occurrence above
             event.occurrences.generated().count())
-        self.assertEqual(4, event.occurrences.modified_by_user().count())
-        self.assertEqual(6, event.occurrences.unmodified_by_user().count())
-        self.assertEqual(6, event.occurrences.regeneratable().count())
+        self.assertEqual(3, event.occurrences.modified_by_user().count()) # was 4
+        self.assertEqual(7, event.occurrences.unmodified_by_user().count()) # was 6
+        self.assertEqual(7, event.occurrences.regeneratable().count()) # was 6
         # Regenerate!
         event.regenerate_occurrences()
         self.assertEqual(11, event.occurrences.count())
@@ -385,9 +386,9 @@ class TestAdmin(WebTest):
         self.assertEqual(
             10,  # Deleted generated occurrence is recreated
             event.occurrences.generated().count())
-        self.assertEqual(4, event.occurrences.modified_by_user().count())
-        self.assertEqual(7, event.occurrences.unmodified_by_user().count())
-        self.assertEqual(7, event.occurrences.regeneratable().count())
+        self.assertEqual(3, event.occurrences.modified_by_user().count()) # was 4
+        self.assertEqual(8, event.occurrences.unmodified_by_user().count()) # was 7
+        self.assertEqual(8, event.occurrences.regeneratable().count()) # was 7
 
     def test_event_publishing(self):
         #######################################################################
@@ -705,7 +706,6 @@ class TestEventModel(TestCase):
         event = G(
             SimpleEvent,
             title="Event title",
-            layout=self.layout,
         )
         occurrence = models.Occurrence(event=event)
         self.assertTrue('"Event title"' in six.text_type(occurrence))
