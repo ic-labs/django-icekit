@@ -44,7 +44,6 @@ class EventRepeatGeneratorsInline(admin.TabularInline):
     form = admin_forms.BaseEventRepeatsGeneratorForm
     exclude = ('event',)
     extra = 1
-    max_num = 3
     formfield_overrides = {
         models.RecurrenceRuleField: {
             'widget': forms.RecurrenceRuleWidget(attrs={
