@@ -19,8 +19,8 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(help_text='The title is shown in the "title" attribute', max_length=255, blank=True)),
                 ('caption', models.TextField(blank=True)),
                 ('admin_notes', models.TextField(help_text='Internal notes for administrators only.', blank=True)),
-                ('categories', models.ManyToManyField(related_name='assets_asset_related', to='icekit.MediaCategory', blank=True)),
-                ('polymorphic_ctype', models.ForeignKey(related_name='polymorphic_assets.asset_set+', editable=False, to='contenttypes.ContentType', null=True)),
+                ('categories', models.ManyToManyField(related_name='icekit_asset_related', to='icekit.MediaCategory', blank=True)),
+                ('polymorphic_ctype', models.ForeignKey(related_name='polymorphic_icekit.asset_set+', editable=False, to='contenttypes.ContentType', null=True)),
             ],
             options={
                 'abstract': False,

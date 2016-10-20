@@ -9,7 +9,9 @@ from django.conf.urls import url, patterns
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
+from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
+from polymorphic.admin import PolymorphicChildModelFilter
 from polymorphic.admin import PolymorphicParentModelAdmin
 
 from icekit import models
@@ -166,5 +168,18 @@ class MediaCategoryAdmin(admin.ModelAdmin):
     pass
 
 
+class AssetParentAdmin(PolymorphicParentModelAdmin):
+    base_model = models.Asset
+    list_display = ['title', 'get_admin_thumbnail', 'get_child_type', 'caption', ]
+    list_display_links = ['title']
+    filter_horizontal = ['categories', ]
+    list_filter = [PolymorphicChildModelFilter, 'categories']
+    search_fields = ['title', 'caption', 'admin_notes']
+    polymorphic_list = True
+
+    def get_child_models(self):
+        return [import_string(kls) for kls in settings.ASSET_CLASSES]
+
+admin.site.register(models.Asset, AssetParentAdmin)
 admin.site.register(models.Layout, LayoutAdmin)
 admin.site.register(models.MediaCategory, MediaCategoryAdmin)

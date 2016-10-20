@@ -610,6 +610,8 @@ INSTALLED_APPS += (
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
 
+ASSET_CLASSES = ('icekit.plugins.image.models.Image',)
+
 # MASTER PASSWORD #############################################################
 
 AUTHENTICATION_BACKENDS += ('master_password.auth.ModelBackend', )

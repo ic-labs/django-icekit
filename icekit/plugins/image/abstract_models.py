@@ -1,16 +1,19 @@
 from django.core.exceptions import ValidationError
 from django.template import Context
 from django.template.loader import render_to_string
+from django.utils import six
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.db import models
 from django.utils import six
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItem
+from icekit.models import Asset
 
 
 @python_2_unicode_compatible
-class AbstractImage(models.Model):
+class AbstractImage(Asset):
     """
     A reusable image.
     """
@@ -18,38 +21,33 @@ class AbstractImage(models.Model):
         upload_to='uploads/images/',
         verbose_name=_('Image field'),
     )
-    title = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text=_('Can be included in captions'),
-    )
     alt_text = models.CharField(
         max_length=255,
         help_text=_("A description of the image for users who don't see images. Leave blank if the image has no informational value."),
         blank=True,
     )
-    caption = models.TextField(
-        blank=True,
-    )
-    categories = models.ManyToManyField(
-        'icekit.MediaCategory',
-        blank=True,
-        related_name='%(app_label)s_%(class)s_related',
-    )
-    admin_notes = models.TextField(
-        blank=True,
-        help_text=_('Internal notes for administrators only.'),
-    )
     is_active = models.BooleanField(
         default=True,
     )
+
+    class Meta:
+        abstract = True
 
     def clean(self):
         if not (self.title or self.alt_text):
             raise ValidationError("You must specify either title or alt text")
 
-    class Meta:
-        abstract = True
+    def get_admin_thumbnail(self, width=150, height=150):
+        try:
+            from easy_thumbnails.files import get_thumbnailer
+        except ImportError:
+            return 'Thumbnail error: easy_thumbnails not installed'
+        try:
+            thumbnailer = get_thumbnailer(self.image)
+            thumbnail = thumbnailer.get_thumbnail({'size': (width, height)})
+            return format_html('<img class="thumbnail" src="{0}" />'.format(thumbnail.url))
+        except Exception as ex:
+            return 'Thumbnail exception: {0}'.format(ex)
 
     def __str__(self):
         return self.title or self.alt_text
@@ -79,7 +77,7 @@ class AbstractImageItem(ContentItem):
         verbose_name_plural = _('Images')
 
     def __str__(self):
-        return six.text_type(self.image)
+        return six.text_type(self.asset)
 
     @property
     def caption(self):
@@ -95,7 +93,7 @@ class AbstractImageItem(ContentItem):
     @caption.setter
     def caption(self, value):
         """
-        If the caption property is assigned, make it use the
+        If the caption property is assigned to make it use the
         `caption_override` field.
 
         :param value: The caption value to be saved.
