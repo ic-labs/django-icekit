@@ -18,7 +18,7 @@
 	</style>
 	<script src='{% static "icekit_events/bower_components/iframe-resizer/src/iframeResizer.js" %}'></script>
 	<div class="results">
-		<iframe id="calendar" src="{% url "admin:icekit_events_event_calendar" %}?{{ request.GET.urlencode }}" scrolling="no"></iframe>
+		<iframe id="calendar" src="{% url "admin:icekit_events_eventbase_calendar" %}?{{ request.GET.urlencode }}" scrolling="no"></iframe>
 		<script>
 			(function($) {
 				$('#toggle-calendar').on('click', function(e) {

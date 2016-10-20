@@ -1,66 +1,98 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
-import polymorphic_tree.models
+from django.db import migrations, models
+import django.utils.timezone
+import icekit.fields
+import django.db.models.deletion
 import timezone.timezone
-from .. import models as icekit_events_models
+import icekit_events.models
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('contenttypes', '0001_initial'),
+        ('contenttypes', '0002_remove_content_type_name'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Event',
+            name='EventBase',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', models.DateTimeField(default=timezone.timezone.now, editable=False, db_index=True)),
-                ('modified', models.DateTimeField(default=timezone.timezone.now, editable=False, db_index=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
+                ('publishing_is_draft', models.BooleanField(editable=False, db_index=True, default=True)),
+                ('publishing_modified_at', models.DateTimeField(editable=False, default=django.utils.timezone.now)),
+                ('publishing_published_at', models.DateTimeField(null=True, editable=False)),
                 ('title', models.CharField(max_length=255)),
-                ('all_day', models.BooleanField(default=False)),
-                ('starts', models.DateTimeField(default=icekit_events_models.default_starts)),
-                ('ends', models.DateTimeField(default=icekit_events_models.default_ends)),
-                ('recurrence_rule', icekit_events_models.RecurrenceRuleField(help_text='An iCalendar (RFC2445) recurrence rule that defines when this event repeats.', null=True, blank=True)),
-                ('end_repeat', models.DateTimeField(help_text='If empty, this event will repeat indefinitely.', null=True, blank=True)),
-                ('is_repeat', models.BooleanField(default=True)),
-                ('lft', models.PositiveIntegerField(editable=False, db_index=True)),
-                ('rght', models.PositiveIntegerField(editable=False, db_index=True)),
-                ('tree_id', models.PositiveIntegerField(editable=False, db_index=True)),
-                ('level', models.PositiveIntegerField(editable=False, db_index=True)),
-                ('parent', polymorphic_tree.models.PolymorphicTreeForeignKey(related_name='children', blank=True, to='icekit_events.Event', null=True)),
-                ('polymorphic_ctype', models.ForeignKey(related_name='polymorphic_icekit_events.event_set+', editable=False, to='contenttypes.ContentType', null=True)),
+                ('slug', models.SlugField(max_length=255)),
+                ('created', models.DateTimeField(editable=False, db_index=True, default=timezone.timezone.now)),
+                ('modified', models.DateTimeField(editable=False, db_index=True, default=timezone.timezone.now)),
+                ('show_in_calendar', models.BooleanField(help_text='Show this event in the public calendar', default=True)),
+                ('human_dates', models.TextField(blank=True, help_text='Describe event dates in everyday language, e.g. "Every Sunday in March".')),
+                ('special_instructions', models.TextField(blank=True, help_text='Describe special instructions for attending event, e.g. "Enter via the Jones St entrance".')),
+                ('cta_text', models.CharField(blank=True, verbose_name='Call to action', max_length=255, default='Book now')),
+                ('cta_url', icekit.fields.ICEkitURLField(blank=True, null=True, verbose_name='CTA URL', max_length=300, help_text='The URL where visitors can arrange to attend an event by purchasing tickets or RSVPing.')),
+                ('derived_from', models.ForeignKey(blank=True, related_name='derivitives', to='icekit_events.EventBase', editable=False, null=True)),
+                ('polymorphic_ctype', models.ForeignKey(related_name='polymorphic_icekit_events.eventbase_set+', to='contenttypes.ContentType', editable=False, null=True)),
+                ('publishing_linked', models.OneToOneField(on_delete=django.db.models.deletion.SET_NULL, related_name='publishing_draft', to='icekit_events.EventBase', editable=False, null=True)),
             ],
             options={
-                'abstract': False,
-                # Legacy table name
-                'db_table': 'eventkit_event',
+                'verbose_name': 'Event',
+                'ordering': ('title', 'pk'),
             },
-            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='EventRepeatsGenerator',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
+                ('created', models.DateTimeField(editable=False, db_index=True, default=timezone.timezone.now)),
+                ('modified', models.DateTimeField(editable=False, db_index=True, default=timezone.timezone.now)),
+                ('recurrence_rule', icekit_events.models.RecurrenceRuleField(blank=True, null=True, help_text='An iCalendar (RFC2445) recurrence rule that defines when this event repeats.')),
+                ('start', models.DateTimeField(verbose_name=b'first start', db_index=True, default=icekit_events.models.default_starts)),
+                ('end', models.DateTimeField(verbose_name=b'first end', db_index=True, default=icekit_events.models.default_ends)),
+                ('is_all_day', models.BooleanField(db_index=True, default=False)),
+                ('repeat_end', models.DateTimeField(blank=True, null=True, help_text='If empty, this event will repeat indefinitely.')),
+                ('event', models.ForeignKey(related_name='repeat_generators', to='icekit_events.EventBase', editable=False)),
+            ],
+            options={
+                'ordering': ['pk'],
+            },
+        ),
+        migrations.CreateModel(
+            name='Occurrence',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
+                ('created', models.DateTimeField(editable=False, db_index=True, default=timezone.timezone.now)),
+                ('modified', models.DateTimeField(editable=False, db_index=True, default=timezone.timezone.now)),
+                ('start', models.DateTimeField(db_index=True)),
+                ('end', models.DateTimeField(db_index=True)),
+                ('is_all_day', models.BooleanField(db_index=True, default=False)),
+                ('is_user_modified', models.BooleanField(db_index=True, default=False)),
+                ('is_cancelled', models.BooleanField(default=False)),
+                ('is_hidden', models.BooleanField(default=False)),
+                ('cancel_reason', models.CharField(blank=True, null=True, max_length=255)),
+                ('original_start', models.DateTimeField(blank=True, null=True, editable=False)),
+                ('original_end', models.DateTimeField(blank=True, null=True, editable=False)),
+                ('event', models.ForeignKey(related_name='occurrences', to='icekit_events.EventBase', editable=False)),
+                ('generator', models.ForeignKey(blank=True, to='icekit_events.EventRepeatsGenerator', null=True)),
+            ],
+            options={
+                'ordering': ['start', '-is_all_day', 'event', 'pk'],
+            },
         ),
         migrations.CreateModel(
             name='RecurrenceRule',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', models.DateTimeField(default=timezone.timezone.now, editable=False, db_index=True)),
-                ('modified', models.DateTimeField(default=timezone.timezone.now, editable=False, db_index=True)),
-                ('description', models.TextField(help_text=b'Unique.', unique=True, max_length=255)),
-                ('recurrence_rule', icekit_events_models.RecurrenceRuleField(help_text='An iCalendar (RFC2445) recurrence rule that defines when an event repeats. Unique.', unique=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
+                ('created', models.DateTimeField(editable=False, db_index=True, default=timezone.timezone.now)),
+                ('modified', models.DateTimeField(editable=False, db_index=True, default=timezone.timezone.now)),
+                ('description', models.TextField(unique=True, help_text=b'Unique.', max_length=255)),
+                ('recurrence_rule', icekit_events.models.RecurrenceRuleField(help_text='An iCalendar (RFC2445) recurrence rule that defines when an event repeats. Unique.', unique=True)),
             ],
             options={
-                'ordering': ('-id',),
-                'abstract': False,
                 'get_latest_by': 'pk',
-                # Legacy table name
-                'db_table': 'eventkit_recurrencerule',
+                'abstract': False,
+                'ordering': ('-id',),
             },
-            bases=(models.Model,),
-        ),
-        migrations.AlterUniqueTogether(
-            name='event',
-            unique_together=set([('starts', 'parent')]),
         ),
     ]

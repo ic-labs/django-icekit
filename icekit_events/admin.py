@@ -15,19 +15,27 @@ import six
 from django.contrib import admin
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
+from django.db.models import Count, Min, Max
 from django.http import HttpResponse, JsonResponse
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
 from django.utils.timezone import get_current_timezone
 from django.views.decorators.csrf import csrf_exempt
+
+from icekit.admin_mixins import FluentLayoutsMixin
+from icekit.content_collections.admin import TitleSlugAdmin
+from icekit.plugins.base import BaseChildModelPlugin
+
+from icekit.plugins.base import PluginMount
+
 from icekit.admin import (
     ChildModelFilter, ChildModelPluginPolymorphicParentModelAdmin)
 from polymorphic.admin import PolymorphicChildModelAdmin
-from timezone import timezone
+from timezone import timezone as djtz  # django-timezone
 
 from icekit.publishing import admin as publishing_admin
 
-from . import admin_forms, forms, models, plugins
+from . import admin_forms, forms, models
 
 logger = logging.getLogger(__name__)
 
@@ -35,9 +43,8 @@ logger = logging.getLogger(__name__)
 class EventRepeatGeneratorsInline(admin.TabularInline):
     model = models.EventRepeatsGenerator
     form = admin_forms.BaseEventRepeatsGeneratorForm
-    exclude = ('event',)
     extra = 1
-    max_num = 3
+    fields = ('is_all_day', 'start', 'end', 'recurrence_rule', 'repeat_end',)
     formfield_overrides = {
         models.RecurrenceRuleField: {
             'widget': forms.RecurrenceRuleWidget(attrs={
@@ -50,18 +57,27 @@ class EventRepeatGeneratorsInline(admin.TabularInline):
 class OccurrencesInline(admin.TabularInline):
     model = models.Occurrence
     form = admin_forms.BaseOccurrenceForm
-    exclude = ('generator', 'is_generated',)
+    fields = ('is_all_day', 'start', 'end', 'is_user_modified')
+    exclude = (
+        'generator', 'is_generated',
+        # is_hidden and is_cancelled aren't implemented yet,
+        # so hiding relevant fields
+        'is_hidden', 'is_cancelled', 'cancel_reason'
+    )
     extra = 1
-    readonly_fields = ('is_user_modified', 'is_cancelled',)
+    readonly_fields = ('is_user_modified', )#'is_cancelled',)
 
 
-class EventChildAdmin(PolymorphicChildModelAdmin,
-                      publishing_admin.PublishingAdmin):
+class EventChildAdmin(
+    PolymorphicChildModelAdmin,
+    publishing_admin.PublishingAdmin,
+    TitleSlugAdmin
+):
     """
     Abstract admin class for polymorphic child event models.
     """
-    base_form = admin_forms.BaseEventForm
-    base_model = models.Event
+    # base_form = admin_forms.BaseEventForm
+    base_model = models.EventBase
     inlines = [
         EventRepeatGeneratorsInline,
         OccurrencesInline,
@@ -74,23 +90,35 @@ class EventChildAdmin(PolymorphicChildModelAdmin,
     save_on_top = True
 
 
+class EventChildModelPlugin(six.with_metaclass(
+    PluginMount, BaseChildModelPlugin)):
+    """
+    Mount point for ``EventBase`` child model plugins.
+    """
+    model_admin = EventChildAdmin
+
+
 class EventTypeFilter(ChildModelFilter):
-    child_model_plugin_class = plugins.EventChildModelPlugin
+    child_model_plugin_class = EventChildModelPlugin
 
 
 class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
                  publishing_admin.PublishingAdmin):
-    base_model = models.Event
+    base_model = models.EventBase
     list_filter = (
-        EventTypeFilter, 'modified',
+        EventTypeFilter, 'modified', 'show_in_calendar',
         publishing_admin.PublishingStatusFilter,
         publishing_admin.PublishingPublishedFilter,
     )
     list_display = (
-        '__str__', 'get_type', 'modified', 'publishing_column')
+        '__str__', 'get_type', 'modified', 'publishing_column',
+        'show_in_calendar',
+        'occurrence_count',
+        'first_occurrence', 'last_occurrence',
+    )
     search_fields = ('title', )
 
-    child_model_plugin_class = plugins.EventChildModelPlugin
+    child_model_plugin_class = EventChildModelPlugin
     child_model_admin = EventChildAdmin
 
     class Media:
@@ -98,6 +126,24 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             'all': ('icekit_events/bower_components/'
                     'font-awesome/css/font-awesome.css',),
         }
+
+    def get_queryset(self, request):
+        return super(EventAdmin, self).get_queryset(request)\
+            .annotate(occurrence_count=Count('occurrences'))\
+            .annotate(first_occurrence=Min('occurrences__start'))\
+            .annotate(last_occurrence=Max('occurrences__start'))
+
+    def occurrence_count(self, inst):
+        return inst.occurrence_count
+    occurrence_count.admin_order_field = 'occurrence_count'
+
+    def first_occurrence(self, inst):
+        return inst.first_occurrence
+    first_occurrence.admin_order_field = 'first_occurrence"'
+
+    def last_occurrence(self, inst):
+        return inst.last_occurrence
+    last_occurrence.admin_order_field = 'last_occurrence'
 
     def get_urls(self):
         """
@@ -110,12 +156,12 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             url(
                 r'^calendar/$',
                 self.admin_site.admin_view(self.calendar),
-                name='icekit_events_event_calendar'
+                name='icekit_events_eventbase_calendar'
             ),
             url(
                 r'^calendar_data/$',
                 self.admin_site.admin_view(self.calendar_data),
-                name='icekit_events_event_calendar_data'
+                name='icekit_events_eventbase_calendar_data'
             ),
         )
         return my_urls + urls
@@ -128,7 +174,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             'is_popup': bool(int(request.GET.get('_popup', 0))),
         }
         return TemplateResponse(
-            request, 'admin/icekit_events/event/calendar.html', context)
+            request, 'admin/icekit_events/eventbase/calendar.html', context)
 
     def calendar_data(self, request):
         """
@@ -136,15 +182,15 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         to be loaded in an iframe.
         """
         if 'timezone' in request.GET:
-            tz = timezone.get(request.GET.get('timezone'))
+            tz = djtz.get(request.GET.get('timezone'))
         else:
             tz = get_current_timezone()
-        start = timezone.localize(
+        start = djtz.localize(
             datetime.datetime.strptime(request.GET['start'], '%Y-%m-%d'), tz)
-        end = timezone.localize(
+        end = djtz.localize(
             datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d'), tz)
 
-        all_occurrences = models.Occurrence.objects.draft().within(start, end)
+        all_occurrences = models.Occurrence.objects.draft().overlapping(start, end)
 
         data = []
         for occurrence in all_occurrences.all():
@@ -170,8 +216,8 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             # included in the calendar.
             end = occurrence.start + timedelta(days=1)
         else:
-            start = timezone.localize(occurrence.start)
-            end = timezone.localize(occurrence.end)
+            start = djtz.localize(occurrence.start)
+            end = djtz.localize(occurrence.end)
         if occurrence.is_cancelled and occurrence.cancel_reason:
             title = u"{0} [{1}]".format(
                 occurrence.event.title, occurrence.cancel_reason)
@@ -182,7 +228,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             'allDay': occurrence.is_all_day,
             'start': start,
             'end': end,
-            'url': reverse('admin:icekit_events_event_change',
+            'url': reverse('admin:icekit_events_eventbase_change',
                            args=[occurrence.event.pk]),
             'className': self._calendar_classes_for_occurrence(occurrence),
         }
@@ -193,7 +239,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         """
         classes = [slugify(occurrence.event.polymorphic_ctype.name)]
 
-        # quick-and-dirty way to get a color for the Event type.
+        # quick-and-dirty way to get a color for the EventBase type.
         # There are 12 colors defined in the css file
         classes.append("color-%s" % (
             occurrence.event.polymorphic_ctype_id % 12))
@@ -215,6 +261,9 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         classes = ['fcc-%s' % class_ for class_ in classes]
 
         return classes
+
+class EventWithLayoutsAdmin(EventChildAdmin, FluentLayoutsMixin):
+    pass
 
 
 class RecurrenceRuleAdmin(admin.ModelAdmin):
@@ -248,7 +297,7 @@ class RecurrenceRuleAdmin(admin.ModelAdmin):
         limit = int(request.POST.get('limit', 10))
         try:
             rruleset = rrule.rrulestr(
-                recurrence_rule, dtstart=timezone.now(), forceset=True)
+                recurrence_rule, dtstart=djtz.now(), forceset=True)
         except ValueError as e:
             data = {
                 'error': six.text_type(e),
@@ -260,5 +309,5 @@ class RecurrenceRuleAdmin(admin.ModelAdmin):
         return JsonResponse(data)
 
 
-admin.site.register(models.Event, EventAdmin)
+admin.site.register(models.EventBase, EventAdmin)
 admin.site.register(models.RecurrenceRule, RecurrenceRuleAdmin)

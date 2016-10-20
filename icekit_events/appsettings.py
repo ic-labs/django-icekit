@@ -33,3 +33,5 @@ DEFAULT_DATE_ENDS_DELTA = ICEKIT_EVENTS.get(
 # Repeat events that start later than this far in the future will not be
 # created until a later date.
 REPEAT_LIMIT = ICEKIT_EVENTS.get('REPEAT_LIMIT', timedelta(weeks=13))
+
+DEFAULT_DAYS_TO_SHOW = ICEKIT_EVENTS.get('DEFAULT_DAYS_TO_SHOW', 1)

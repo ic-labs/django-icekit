@@ -4,10 +4,12 @@ Models for ``icekit_events`` app.
 
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
 
-from datetime import datetime, timedelta, time as datetime_time
+from datetime import datetime, timedelta, time as datetime_time, time
+
 from dateutil import rrule
 import six
-import pytz
+from django.db.models import F
+from timezone import timezone as djtz  # django-timezone
 
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -18,17 +20,28 @@ from django.utils import encoding
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
     get_current_timezone
-from polymorphic_tree.models import PolymorphicModel, PolymorphicTreeForeignKey
-from timezone import timezone
 
-from icekit.publishing.models import PublishingModel
+from polymorphic.models import PolymorphicModel
 
-from . import appsettings, validators, utils
-from .utils import time as utils_time
+from icekit.content_collections.abstract_models import AbstractListingPage, \
+    TitleSlugMixin
+from icekit.fields import ICEkitURLField
+from icekit.mixins import FluentFieldsMixin
+from icekit.publishing.models import PublishingModel, PublishableFluentContents
+from icekit.publishing.middleware import is_draft_request_context
+from django.template.defaultfilters import date as datefilter
+
+from icekit.templatetags.icekit_tags import grammatical_join
+from icekit_events.templatetags.events_tags import times as timesfilter
+from . import appsettings, validators
+from .utils import timeutils
 
 
 # Constant object used as a flag for unset kwarg parameters
 UNSET = object()
+
+DATE_FORMAT = settings.DATE_FORMAT
+DATETIME_FORMAT = settings.DATE_FORMAT + " " + settings.TIME_FORMAT
 
 
 def zero_datetime(dt, tz=None):
@@ -36,19 +49,16 @@ def zero_datetime(dt, tz=None):
     Return the given datetime with hour/minutes/seconds/ms zeroed and the
     timezone coerced to the given ``tz`` (or UTC if none is given).
     """
-    if dt is None:
-        return None
     if tz is None:
-        tz = pytz.utc
-    return dt.replace(
-        hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc)
+        tz = get_current_timezone()
+    return coerce_naive(dt).replace(hour=0, minute=0, second=0, microsecond=0)
 
 
 def default_starts():
-    when = utils_time.round_datetime(
-        when=timezone.now(),
+    when = timeutils.round_datetime(
+        when=djtz.now(),
         precision=appsettings.DEFAULT_STARTS_PRECISION,
-        rounding=utils.time.ROUND_UP,
+        rounding=timeutils.ROUND_UP,
     )
     return when
 
@@ -58,20 +68,21 @@ def default_ends():
 
 
 def default_date_starts():
-    return timezone.date()
+    return djtz.date()
 
 
-def default_date_ends():
-    return default_date_starts() + appsettings.DEFAULT_DATE_ENDS_DELTA
-
-
-def format_ical_dt(date_or_datetime):
-    """ Return datetime formatted for use in iCal """
+def format_naive_ical_dt(date_or_datetime):
+    """
+    Return datetime formatted for use in iCal as a *naive* datetime value to
+    work more like people expect, e.g. creating a series of events starting
+    at 9am should not create some occurrences that start at 8am or 10am after
+    a daylight savings change.
+    """
     dt = coerce_dt_awareness(date_or_datetime)
     if is_naive(dt):
         return dt.strftime('%Y%m%dT%H%M%S')
     else:
-        return dt.astimezone(pytz.utc).strftime('%Y%m%dT%H%M%SZ')
+        return dt.astimezone(get_current_timezone()).strftime('%Y%m%dT%H%M%S')
 
 
 def coerce_dt_awareness(date_or_datetime, tz=None):
@@ -80,19 +91,35 @@ def coerce_dt_awareness(date_or_datetime, tz=None):
     timezone-naive `datetime` result, depending on which is appropriate for
     the project's settings.
     """
-    if tz is None:
-        tz = get_current_timezone()
     if isinstance(date_or_datetime, datetime):
         dt = date_or_datetime
     else:
         dt = datetime.combine(date_or_datetime, datetime_time())
     is_project_tz_aware = settings.USE_TZ
-    if is_project_tz_aware and is_naive(dt):
-        return make_aware(dt, tz)
-    elif not is_project_tz_aware and is_aware(dt):
-        return make_naive(dt, tz)
+    if is_project_tz_aware:
+        return coerce_aware(dt, tz)
+    elif not is_project_tz_aware:
+        return coerce_naive(dt, tz)
     # No changes necessary
     return dt
+
+
+def coerce_naive(dt, tz=None):
+    if is_naive(dt):
+        return dt
+    else:
+        if tz is None:
+            tz = get_current_timezone()
+        return make_naive(dt, tz)
+
+
+def coerce_aware(dt, tz=None):
+    if is_aware(dt):
+        return dt
+    else:
+        if tz is None:
+            tz = get_current_timezone()
+        return make_aware(dt, tz)
 
 # FIELDS ######################################################################
 
@@ -129,9 +156,9 @@ class AbstractBaseModel(models.Model):
     """
 
     created = models.DateTimeField(
-        default=timezone.now, db_index=True, editable=False)
+        default=djtz.now, db_index=True, editable=False)
     modified = models.DateTimeField(
-        default=timezone.now, db_index=True, editable=False)
+        default=djtz.now, db_index=True, editable=False)
 
     class Meta:
         abstract = True
@@ -142,7 +169,7 @@ class AbstractBaseModel(models.Model):
         """
         Update ``self.modified``.
         """
-        self.modified = timezone.now()
+        self.modified = djtz.now()
         super(AbstractBaseModel, self).save(*args, **kwargs)
 
 
@@ -170,9 +197,10 @@ class RecurrenceRule(AbstractBaseModel):
 
 
 @encoding.python_2_unicode_compatible
-class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
+class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
+                TitleSlugMixin):
     """
-    An abstract polymorphic event model, with the bare minimum fields.
+    A polymorphic event model with all basic event features.
 
     An event may have associated ``Occurrence``s that determine when the event
     occurs in the calendar. An event with no occurrences does not happen at
@@ -184,7 +212,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
     occurrences.
     """
 
-    derived_from = PolymorphicTreeForeignKey(
+    derived_from = models.ForeignKey(
         'self',
         blank=True,
         db_index=True,
@@ -192,16 +220,35 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
         null=True,
         related_name='derivitives',
     )
-    title = models.CharField(max_length=255)
 
     show_in_calendar = models.BooleanField(
         default=True,
         help_text=_('Show this event in the public calendar'),
     )
 
+    human_dates = models.TextField(
+        blank=True,
+        help_text=_('Describe event dates in everyday language, e.g. "Every Sunday in March".'),
+    )
+    special_instructions = models.TextField(
+        blank=True,
+        help_text=_('Describe special instructions for attending event, '
+                    'e.g. "Enter via the Jones St entrance".'),
+    )
+    cta_text = models.CharField(_("Call to action"),
+        blank=True,
+        max_length=255, default=_("Book now")
+    )
+    cta_url = ICEkitURLField(_("CTA URL"),
+        blank=True,
+        null=True,
+        help_text=_('The URL where visitors can arrange to attend an event'
+                    ' by purchasing tickets or RSVPing.')
+    )
+
     class Meta:
-        abstract = True
         ordering = ('title', 'pk')
+        verbose_name = 'Event'
 
     def __str__(self):
         return self.title
@@ -257,7 +304,7 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
             **defaults
         )
         variation_event.save()
-        self.clone_relations(variation_event)
+        self.clone_event_relationships(variation_event)
 
         # Adjust this event so its occurrences stop at point variation splits
         self.end_repeat = occurrence.start
@@ -326,9 +373,14 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
         # Generate occurrences for this event
         self.extend_occurrences(until=until)
 
-    def clone_relations(self, dst_obj):
+    def publishing_clone_relations(self, src_obj):
+        super(EventBase, self).publishing_clone_relations(src_obj)
+        src_obj.clone_event_relationships(self)
+
+    def clone_event_relationships(self, dst_obj):
         """
-        Clone related `EventRepeatsGenerator` and `Occurrence` items on publish
+        Clone related `EventRepeatsGenerator` and `Occurrence` relationships
+        from a source to destination event.
         """
         # Clone only the user-modified Occurrences, all others will be
         # auto-generated by the generators cloned above.
@@ -343,14 +395,78 @@ class AbstractEvent(PolymorphicModel, AbstractBaseModel, PublishingModel):
             generator.event = dst_obj
             generator.save()
 
+    def get_occurrences_range(self):
+        """
+        Return the first and last chronological `Occurrence` for this event.
+        """
+        first = self.occurrences.order_by('start').first()
+        last = self.occurrences.order_by('-end').first()
+        return (first, last)
 
-class Event(AbstractEvent):
-    """
-    A concrete polymorphic event model.
-    """
+    def describe_dates_range(self, date_format=None):
+        if self.human_dates:
+            return self.human_dates
+        else:
+            first, last = self.get_occurrences_range()
+            start = first.local_start
+            end = last.local_end
+            if not (first or last):
+                return ''
+            elif first and not last:
+                return 'From %s' % datefilter(start, date_format)
+            elif last and not first:
+                return 'To %s' % datefilter(end, date_format)
+            else:
+                return ' to '.join([
+                    datefilter(start, date_format),
+                    datefilter(end, date_format)
+                ])
+
+    def describe_times_range(self, time_format=None):
+        sts = timesfilter(self.start_times_set(), format=time_format)
+        all_days = self.occurrences.filter(is_all_day=True)
+        if all_days:
+            sts = ["all day"] + sts
+
+        times = grammatical_join(sts, final_join=", ")
+        return times
+
+
+    def start_dates_set(self):
+        """
+        :return: a sorted set of all the different dates that this event
+        happens on.
+        """
+        occurrences = self.occurrences.filter(
+            is_cancelled=False
+        )
+        dates = set([o.local_start.date() for o in occurrences])
+        sorted_dates = sorted(dates)
+        return sorted_dates
+
+    def start_times_set(self):
+        """
+        :return: a sorted set of all the different times that this event
+        happens on.
+        """
+        occurrences = self.occurrences.filter(
+            is_all_day=False, is_cancelled=False
+        )
+        times = set([o.local_start.time() for o in occurrences])
+        sorted_times = sorted(times)
+        return sorted_times
 
     def get_absolute_url(self):
-        return reverse('icekit_events_detail', args=(self.pk,))
+        return reverse('icekit_events_eventbase_detail', args=(self.slug,))
+
+class AbstractEventWithLayouts(EventBase, FluentFieldsMixin):
+
+    class Meta:
+        abstract = True
+
+    @property
+    def template(self):
+        return self.get_layout_template_name()
 
 
 class GeneratorException(Exception):
@@ -376,8 +492,8 @@ class EventRepeatsGenerator(AbstractBaseModel):
     ensure the data meets these standards. Calling the `clean` method
     explicitly is most likely the easiest way to ensure this.
     """
-    event = PolymorphicTreeForeignKey(
-        Event,
+    event = models.ForeignKey(
+        EventBase,
         db_index=True,
         editable=False,
         related_name='repeat_generators',
@@ -390,9 +506,11 @@ class EventRepeatsGenerator(AbstractBaseModel):
         null=True,
     )
     start = models.DateTimeField(
+        'first start',
         default=default_starts,
         db_index=True)
     end = models.DateTimeField(
+        'first end',
         default=default_ends,
         db_index=True)
     is_all_day = models.BooleanField(
@@ -412,8 +530,8 @@ class EventRepeatsGenerator(AbstractBaseModel):
     def generate(self, until=None):
         """
         Return a list of datetime objects for event occurrence start and end
-        times, up to the given ``until`` parameter or up to the configured
-        ``REPEAT_LIMIT`` for unlimited events.
+        times, up to the given ``until`` parameter, or up to the ``repeat_end``
+        time, or to the configured ``REPEAT_LIMIT`` for unlimited events.
         """
         # Get starting datetime just before this event's start date or time
         # (must be just before since start & end times are *excluded* by the
@@ -425,7 +543,17 @@ class EventRepeatsGenerator(AbstractBaseModel):
             if self.repeat_end:
                 until = self.repeat_end
             else:
-                until = timezone.now() + appsettings.REPEAT_LIMIT
+                until = djtz.now() + appsettings.REPEAT_LIMIT
+            # For all-day occurrence generation, make the `until` constraint
+            # the next date from of the repeat end date to ensure the end
+            # date is included in the generated set as users expect (and
+            # remembering the `between` method used below is exclusive).
+            if self.is_all_day:
+                until += timedelta(days=1)
+        # Make datetimes naive, since RRULE spec contains naive datetimes so
+        # our constraints must be the same
+        start_dt = coerce_naive(start_dt)
+        until = coerce_naive(until)
         # Determine duration to add to each start time
         occurrence_duration = self.duration or timedelta(days=1)
         # `start_dt` and `until` datetimes are exclusive for our rruleset
@@ -455,17 +583,25 @@ class EventRepeatsGenerator(AbstractBaseModel):
             start_dt = self.start
         if until is None:
             until = self.repeat_end \
-                or timezone.now() + appsettings.REPEAT_LIMIT
+                or djtz.now() + appsettings.REPEAT_LIMIT
         # We assume `recurrence_rule` is always a RRULE repeat spec of the form
         # "FREQ=DAILY", "FREQ=WEEKLY", etc?
-        rrule_spec = "DTSTART:%s" % format_ical_dt(start_dt)
+        rrule_spec = "DTSTART:%s" % format_naive_ical_dt(start_dt)
         if not self.recurrence_rule:
-            rrule_spec += "\nRDATE:%s" % format_ical_dt(start_dt)
+            rrule_spec += "\nRDATE:%s" % format_naive_ical_dt(start_dt)
         else:
             rrule_spec += "\nRRULE:%s" % self.recurrence_rule
-            # Apply this event's end repeat
-            rrule_spec += ";UNTIL=%s" % format_ical_dt(
-                until - timedelta(seconds=1))
+            # Apply this event's end repeat date as an *exclusive* UNTIL
+            # constraint. UNTIL in RRULE specs is inclusive by default, so we
+            # fake exclusivity by adjusting the end time by a microsecond.
+            if self.is_all_day:
+                # For all-day generator, make the UNTIL constraint the last
+                # microsecond of the repeat end date to ensure the end date is
+                # included in the generated set as users expect.
+                until += timedelta(days=1, microseconds=-1)
+            else:
+                until -= timedelta(microseconds=1)
+            rrule_spec += ";UNTIL=%s" % format_naive_ical_dt(until)
         return rrule_spec
 
     def save(self, *args, **kwargs):
@@ -492,26 +628,20 @@ class EventRepeatsGenerator(AbstractBaseModel):
 
         if self.is_all_day:
             # An all-day generator's start time must be at 00:00
-            if self.start.hour or self.start.minute or self.start.second \
-                    or self.start.microsecond:
+            naive_start = coerce_naive(self.start)
+            if naive_start.hour or naive_start.minute or naive_start.second \
+                    or naive_start.microsecond:
                 raise GeneratorException(
                     'Start date/time must be at 00:00:00 hours/minutes/seconds'
-                    ' for all-day generators: {0}'.format(self.start)
-                )
-
-            # An all-day generator duration must be a whole multiple of days
-            duration = self.duration
-            if duration.seconds or duration.microseconds:
-                raise GeneratorException(
-                    'Duration between start and end times must be multiples of'
-                    ' a day for all-day generators: {0}'.format(self.duration)
+                    ' for all-day generators: {0}'.format(naive_start)
                 )
 
         # Convert datetime field values to date-compatible versions in the
         # UTC timezone when we save an all-day occurrence
         if self.is_all_day:
             self.start = zero_datetime(self.start)
-            self.end = zero_datetime(self.end)
+            self.end = zero_datetime(self.end) \
+                + timedelta(days=1, microseconds=-1)
 
         super(EventRepeatsGenerator, self).save(*args, **kwargs)
 
@@ -522,18 +652,18 @@ class EventRepeatsGenerator(AbstractBaseModel):
         """
         return self.end - self.start
 
-    @property
-    def period(self):
-        """
-        Return "AM" or "PM", depending on when this event starts.
-        """
-        if self.is_all_day:
-            return
-        return 'PM' if timezone.localize(self.start).hour >= 12 else 'AM'
-
 
 class OccurrenceQueryset(QuerySet):
     """ Custom queryset methods for ``Occurrence`` """
+
+    def visible(self):
+        if is_draft_request_context():
+            return self.draft()
+        else:
+            return self.published()
+
+    def published(self):
+        return self.filter(event__publishing_is_draft=False)
 
     def draft(self):
         return self.filter(event__publishing_is_draft=True)
@@ -553,23 +683,83 @@ class OccurrenceQueryset(QuerySet):
     def regeneratable(self):
         return self.unmodified_by_user()
 
-    def within(self, start, end):
+    def overlapping(self, start, end):
         """
-        Return occurrences within the given start and end datetimes, inclusive.
+        :return: occurrences overlapping the given start and end datetimes,
+        inclusive.
         Special logic is applied for all-day occurrences, for which the start
         and end times are zeroed to find all occurrences that occur on a DATE
         as opposed to within DATETIMEs.
         """
         return self.filter(
-                models.Q(is_all_day=False, start__gte=start) |
-                models.Q(is_all_day=True,
-                         start__gte=zero_datetime(start))
-            ).filter(
-                # Exclusive for datetime, inclusive for date.
                 models.Q(is_all_day=False, start__lt=end) |
                 models.Q(is_all_day=True,
-                         start__lte=zero_datetime(end))
+                         start__lt=zero_datetime(end))
+            ).filter(
+                # Exclusive for datetime, inclusive for date.
+                models.Q(is_all_day=False, end__gt=start) |
+                models.Q(is_all_day=True,
+                         end__gte=zero_datetime(start))
             )
+
+    def start_within(self, start, end):
+        """
+        :return:  occurrences that start within the given start and end
+        datetimes, inclusive.
+        """
+        return self.filter(
+            models.Q(is_all_day=False, start__gte=start) |
+            models.Q(is_all_day=True,
+                     start__gte=zero_datetime(start))
+        ).filter(
+            # Exclusive for datetime, inclusive for date.
+            models.Q(is_all_day=False, start__lt=end) |
+            models.Q(is_all_day=True,
+                     start__lte=zero_datetime(end))
+        )
+
+    def _same_day_ids(self):
+        """
+        :return: ids of occurrences that finish on the same day that they
+        start, or midnight the next day.
+        """
+        # we can pre-filter to return only occurrences that are <=24h long,
+        # but until at least the `__date` can be used in F() statements
+        # we'll have to refine manually
+        qs = self.filter(end__lte=F('start') + timedelta(days=1))
+
+        # filter occurrences to those sharing the same end date, or
+        # midnight the next day (unless it's an all-day occurrence)
+        ids = [o.id for o in qs if (
+            (o.local_start.date() == o.local_end.date()) or
+            (
+                o.local_end.time() == time(0,0) and
+                o.local_end.date() == o.local_start.date() + timedelta(days=1) and
+                o.is_all_day == False
+            )
+        )]
+        return ids
+
+    def same_day(self):
+        """
+        :return: occurrences that finish on the same day that they start, or
+        midnight the next day.
+        These types of occurrences sometimes need to be treated differently.
+        """
+        return self.filter(id__in=self._same_day_ids())
+
+    def different_day(self):
+        """
+        :return: occurrences that finish on the a different day than they
+        start, unless it's midnight the next day.
+        These types of occurrences sometimes need to be treated differently.
+        """
+        # This is the complement of same_day above; might as well reuse the
+        # logic.
+        return self.exclude(id__in=self._same_day_ids())
+
+
+
 
 
 OccurrenceManager = models.Manager.from_queryset(OccurrenceQueryset)
@@ -584,8 +774,8 @@ class Occurrence(AbstractBaseModel):
     """
     objects = OccurrenceManager()
 
-    event = PolymorphicTreeForeignKey(
-        Event,
+    event = models.ForeignKey(
+        EventBase,
         db_index=True,
         editable=False,
         related_name='occurrences',
@@ -620,9 +810,33 @@ class Occurrence(AbstractBaseModel):
     class Meta:
         ordering = ['start', '-is_all_day', 'event', 'pk']
 
+    def time_range_string(self):
+        if self.is_all_day:
+            if self.duration < timedelta(days=1):
+                return u"""{0}, all day""".format(
+                    datefilter(self.local_start, DATE_FORMAT))
+            else:
+                return u"""{0} - {1}, all day""".format(
+                    datefilter(self.local_start, DATE_FORMAT),
+                    datefilter(self.local_end, DATE_FORMAT))
+        else:
+            return u"""{0} - {1}""".format(
+                datefilter(self.local_start, DATETIME_FORMAT),
+                datefilter(self.local_end, DATETIME_FORMAT))
+
     def __str__(self):
-        return u"""Occurrence of "{0}" {1} - {2}""".format(
-            self.event.title, self.start, self.end)
+        return u"""Occurrence of "{0}" {1}""".format(
+            self.event.title,
+            self.time_range_string()
+        )
+
+    @property
+    def local_start(self):
+        return djtz.localize(self.start)
+
+    @property
+    def local_end(self):
+        return djtz.localize(self.end)
 
     @property
     def is_generated(self):
@@ -657,24 +871,94 @@ class Occurrence(AbstractBaseModel):
             self.original_end = self.end
         super(Occurrence, self).save(*args, **kwargs)
 
+    # TODO Return __str__ as title for now, improve it later
+    def title(self):
+        return unicode(self)
+
+    def is_past(self):
+        """
+        :return: True if this occurrence is entirely in the past
+        """
+        return self.end < djtz.now()
+
+    def get_absolute_url(self):
+        return self.event.get_absolute_url()
+
 
 def get_occurrence_times_for_event(event):
     """
-    Return a tuple with two sets containing the (start, end) datetimes of an
-    Event's Occurrences, or the original start datetime if an Occurrence's
-    start was modified by a user.
+    Return a tuple with two sets containing the (start, end) *naive* datetimes
+    of an Event's Occurrences, or the original start datetime if an
+    Occurrence's start was modified by a user.
     """
     occurrences_starts = set()
     occurrences_ends = set()
     for start, original_start, end, original_end in \
             event.occurrences.all().values_list('start', 'original_start',
                                                 'end', 'original_end'):
-        occurrences_starts.add(original_start or start)
-        occurrences_ends.add(original_end or end)
+        occurrences_starts.add(
+            coerce_naive(original_start or start)
+        )
+        occurrences_ends.add(
+            coerce_naive(original_end or end)
+        )
     return occurrences_starts, occurrences_ends
 
 
+class AbstractEventListingPage(AbstractListingPage):
+
+    class Meta:
+        abstract = True
+        verbose_name = "Event Listing"
+
+    def get_public_items(self, request):
+        return Occurrence.objects.published()\
+            .filter(event__show_in_calendar=True)
+
+    def get_visible_items(self, request):
+        return Occurrence.objects.visible()
+
+
+class AbstractEventListingForDatePage(AbstractListingPage):
+
+    class Meta:
+        abstract = True
+
+    def get_start(self, request):
+        try:
+            start = djtz.parse('%s 00:00' % request.GET.get('date'))
+        except ValueError:
+            start = djtz.midnight()
+        return start
+
+    def get_days(self, request):
+        try:
+            days = int(request.GET.get('days', appsettings.DEFAULT_DAYS_TO_SHOW))
+        except ValueError:
+            days = appsettings.DEFAULT_DAYS_TO_SHOW
+        return days
+
+    def _occurrences_on_date(self, request):
+        days = self.get_days(request)
+        start = self.get_start(request)
+        end = start + timedelta(days=days)
+        return Occurrence.objects.overlapping(start, end)
+
+    def get_items_to_list(self, request):
+        return self._occurrences_on_date(request).published()\
+            .filter(event__show_in_calendar=True)
+
+    def get_items_to_mount(self, request):
+        return self._occurrences_on_date(request).visible()
+
+
 def regenerate_event_occurrences(sender, instance, **kwargs):
-    instance.event.regenerate_occurrences()
+    try:
+        e = instance.event
+    except EventBase.DoesNotExist:
+        # this can happen if deleting an EventRepeatsGenerator as part of
+        # deleting an event
+        return
+    e.regenerate_occurrences()
 post_save.connect(regenerate_event_occurrences, sender=EventRepeatsGenerator)
 post_delete.connect(regenerate_event_occurrences, sender=EventRepeatsGenerator)

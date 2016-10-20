@@ -22,14 +22,22 @@ DATABASES = {
 DEBUG = True
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+SITE_DOMAIN = SITE_NAME = 'localhost'
+SITE_PORT = '8080'
+SITE_ID = 1
+
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django_nose',
+    'fluent_pages',
+    'fluent_contents',
     'icekit',
     'icekit_events',
+    'icekit_events.event_types.simple',
+    'icekit_events.page_types.eventlistingfordate',
     'icekit_events.tests',
 
     # Apps required for publishing features
@@ -37,6 +45,9 @@ INSTALLED_APPS = (
     'model_settings',
     'polymorphic',
     'compressor',
+
+    # Test ICEKit pages etc
+    'django.contrib.sites',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -56,3 +67,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DDF_FILL_NULLABLE_FIELDS = False
 FLUENT_PAGES_TEMPLATE_DIR = os.path.join(BASE_DIR, '..', 'templates')
+
+TEMPLATE_CONTEXT_PROCESSORS = ['django.core.context_processors.request']
