@@ -87,7 +87,7 @@ setuptools.setup(
             'django-debug-toolbar',
             # 'glamkit-fallbackserve',
             'ipdb',
-            'ipython',
+            'ipython<5',  # Prompt does not work in Docker Cloud web terminal
             'mkdocs',
             'Werkzeug',
         ],
