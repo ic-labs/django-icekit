@@ -11,7 +11,7 @@
 .env.local
 .env.production
 .env.staging
-/.gnupg/gpg.conf
+.gnupg/gpg.conf
 .idea/
 bower_components/
 project_settings_local.py
