@@ -18,6 +18,8 @@ The template for a layout should define placeholders for modular content:
 Models that have modular content will have a `layout` field in the admin change
 form, allowing the selection of a layout that is compatible with that model.
 
+See 'plugins.md' to add Layouts-driven content to your model.
+
 ## TemplateNameField
 
 `TemplateNameField` behaves like a choice field and populates its list of

@@ -7,3 +7,5 @@ LAYOUT_TEMPLATES = ICEKIT.get('LAYOUT_TEMPLATES', [])
 
 # File class referenced by `icekit.plugins.file.abstract_models.AbstractFileItem`.
 FILE_CLASS = ICEKIT.get('FILE_CLASS', 'icekit_plugins_file.File')
+
+DASHBOARD_FEATURED_APPS = ICEKIT.get('DASHBOARD_FEATURED_APPS', ())

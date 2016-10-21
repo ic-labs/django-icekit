@@ -452,13 +452,53 @@ INSTALLED_APPS += ('flat', )
 DJANGO_WYSIWYG_FLAVOR = 'alloyeditor'
 DJANGO_WYSIWYG_MEDIA_URL = STATIC_URL + 'alloyeditor/dist/alloy-editor/'
 
+_BASIC_PLUGINS = [
+    'RawHtmlPlugin',
+    'TextPlugin',
+    'HorizontalRulePlugin',
+]
+
+_TEXT_PLUGINS = [
+    'FAQPlugin',
+    'QuotePlugin',
+]
+
+_ASSETS_PLUGINS = [
+    'SlideShowPlugin',
+    'ImagePlugin',
+    'ImageGalleryPlugin',
+    'FilePlugin',
+    'SharedContentPlugin',
+]
+
+_EMBED_PLUGINS = [
+    'IframePlugin',
+    'MapPlugin',
+    'MapWithTextPlugin',
+
+    # Oembeds
+    'InstagramEmbedPlugin',
+    'OEmbedWithCaptionPlugin',
+    'TwitterEmbedPlugin',
+]
+
+_NAVIGATION_PLUGINS = [
+    'PageAnchorPlugin',
+    'PageAnchorListPlugin',
+    'ChildPagesPlugin',
+]
+
+DEFAULT_PLUGINS = \
+    _BASIC_PLUGINS + \
+    _TEXT_PLUGINS + \
+    _ASSETS_PLUGINS + \
+    _EMBED_PLUGINS + \
+    _NAVIGATION_PLUGINS
+
 FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
-    # 'home': {
-    #     'plugins': ('...', ),
-    # },
-    # 'main': {
-    #     'plugins': ('...', ),
-    # },
+    'main': {
+        'plugins': DEFAULT_PLUGINS,
+    },
     # 'sidebar': {
     #     'plugins': ('...', ),
     # },
@@ -505,7 +545,12 @@ INSTALLED_APPS += (
     # 'fluent_contents.plugins.googledocsviewer',
     'fluent_contents.plugins.iframe',
     # 'fluent_contents.plugins.markup',
-    # 'fluent_contents.plugins.oembeditem',
+    # oembeditem isn't needed, but commenting it out means it gets
+    # erroneously registered, possibly by being imported by oembed_with_caption.
+    # Registering it without installing/migratig the model results in
+    # `ProgrammingError: relation "contentitem_fluent_contents_oembeditem" does not exist`
+    # errors. For now, exclude it in the available content plugins.
+    'fluent_contents.plugins.oembeditem',
     # 'fluent_contents.plugins.picture',
     'fluent_contents.plugins.rawhtml',
     'fluent_contents.plugins.sharedcontent',
@@ -548,31 +593,6 @@ INSTALLED_APPS += ('haystack', )
 
 ICEKIT_CONTEXT_PROCESSOR_SETTINGS = ()
 
-FEATURED_APPS = (
-    {
-        'verbose_name': 'Content',
-        'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
-        'models': {
-            'icekit_article.Article': {
-                'verbose_name_plural': 'Articles',
-            },
-            'fluent_pages.Page': {
-                'verbose_name_plural': 'Pages',
-            },
-        },
-    },
-    {
-        'verbose_name': 'Assets',
-        'icon_html': '<i class="content-type-icon fa fa-file-image-o"></i>',
-        'models': {
-            'icekit_plugins_image.Image': {},
-            'icekit_plugins_file.File': {},
-            'icekit_plugins_slideshow.SlideShow': {},
-            # 'sharedcontent.SharedContent': {},
-        },
-    },
-)
-
 ICEKIT = {
     'LAYOUT_TEMPLATES': (
         # A list of 3-tuples, each containing a label prefix, a path to a
@@ -594,6 +614,31 @@ ICEKIT = {
             os.path.join(PROJECT_DIR, 'templates'),
             'layouts',
         ),
+    ),
+
+    'DASHBOARD_FEATURED_APPS': (
+        {
+            'verbose_name': 'Content',
+            'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
+            'models': {
+                'icekit_article.Article': {
+                    'verbose_name_plural': 'Articles',
+                },
+                'fluent_pages.Page': {
+                    'verbose_name_plural': 'Pages',
+                },
+            },
+        },
+        {
+            'verbose_name': 'Assets',
+            'icon_html': '<i class="content-type-icon fa fa-file-image-o"></i>',
+            'models': {
+                'icekit_plugins_image.Image': {},
+                'icekit_plugins_file.File': {},
+                'icekit_plugins_slideshow.SlideShow': {},
+                # 'sharedcontent.SharedContent': {},
+            },
+        },
     ),
 }
 
@@ -632,16 +677,6 @@ INSTALLED_APPS += (
 )
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
-
-# ICEKIT PRESS RELEASES #######################################################
-
-FEATURED_APPS[0]['models'].update({
-    'icekit_press_releases.PressRelease': {
-        'verbose_name_plural': 'Press releases',
-    },
-})
-
-INSTALLED_APPS += ('press_releases', )
 
 # MASTER PASSWORD #############################################################
 

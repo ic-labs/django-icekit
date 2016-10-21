@@ -8,7 +8,7 @@ create the features of your site.
 You will need to provide some basic information to configure your project.
 
 You can do so with environment variables, or by editing the `docker-cloud.yml`
-and `icekit_settings.py` files.
+and `project_settings.py` files.
 
 All settings are optional, but you can provide:
 
@@ -52,7 +52,7 @@ default ICEkit static files and templates.
 You can specify additional Bower components in `bower.json`, Node modules in
 `package.json`, and Python packages in `requirements.txt`.
 
-The `icekit_settings.py` file is a Django settings module. You can override any
+The `project_settings.py` file is a Django settings module. You can override any
 default Django/ICEkit settings or configure apps installed via `requirements
 .txt`.
 

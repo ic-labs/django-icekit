@@ -1,10 +1,11 @@
 from django import template
 from django.apps import apps
-from django.conf import settings
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.loading import get_model
 from django.template.defaultfilters import stringfilter
+
+from icekit import appsettings
 
 register = template.Library()
 
@@ -44,18 +45,18 @@ def filter_featured_apps(admin_apps, request):
     Given a list of apps return a set of sudo apps considered featured.
 
     Apps are considered featured if the are defined in the settings
-    property called `FEATURED_APPS` which contains a list of the apps
+    property called `DASHBOARD_FEATURED_APPS` which contains a list of the apps
     that are considered to be featured.
 
     :param admin_apps: A list of apps.
     :param request: Django request.
     :return: Subset of app like objects that are listed in
-    the settings `FEATURED_APPS` setting.
+    the settings `DASHBOARD_FEATURED_APPS` setting.
     """
     featured_apps = []
 
     # Build the featured apps list based upon settings.
-    for featured_app in settings.FEATURED_APPS:
+    for featured_app in appsettings.DASHBOARD_FEATURED_APPS:
         # Create a new sudo app like object we can add attributes to.
         new_app = AppObject()
 
