@@ -30,6 +30,7 @@ from icekit.plugins.base import PluginMount
 
 from icekit.admin import (
     ChildModelFilter, ChildModelPluginPolymorphicParentModelAdmin)
+from icekit.utils.admin.urls import admin_link
 from polymorphic.admin import PolymorphicChildModelAdmin
 from timezone import timezone as djtz  # django-timezone
 
@@ -113,11 +114,11 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
     )
     list_display = (
         '__str__', 'get_type', 'modified', 'publishing_column',
-        'show_in_calendar',
+        'part_of_display', 'show_in_calendar',
         'occurrence_count',
         'first_occurrence', 'last_occurrence',
     )
-    search_fields = ('title', )
+    search_fields = ('title', 'part_of__title', )
 
     child_model_plugin_class = EventChildModelPlugin
     child_model_admin = EventChildAdmin
@@ -145,6 +146,12 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
     def last_occurrence(self, inst):
         return inst.last_occurrence
     last_occurrence.admin_order_field = 'last_occurrence'
+
+    def part_of_display(self, inst):
+        return admin_link(inst.part_of)
+    part_of_display.admin_order_field = "part_of__title"
+    part_of_display.short_description = "Part of"
+    part_of_display.allow_tags = True
 
     def get_urls(self):
         """

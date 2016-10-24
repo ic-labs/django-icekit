@@ -5,15 +5,33 @@
 
 {% block content %}
 	<h1>{{ event.title }}</h1>
-
+    {% with event.part_of.get_visible as part_of %}
+        {% if part_of %}
+            <p>Part of <a href="{{ part_of.get_absolute_url}}">{{ part_of }}</a></p>
+        {% endif %}
+    {% endwith %}
 	<p>Date{{ event.start_dates_set|pluralize }}: {{ event.describe_dates_range }}</p>
 	<p>Time{{ event.start_times_set|pluralize }}: {{ event.describe_times_range }}</p>
+	{% if event.price_line %}
+		<p>Price: {{ event.price_line|safe }}</p>
+	{% endif %}
 	{% if event.special_instructions %}
-		<p>Special instructions: {{ event.special_instructions }}</p>
+		<p>Special instructions: {{ event.special_instructions|linebreaksbr }}</p>
 	{% endif %}
 	{% if event.cta_url %}
 		<p><a href="{{ event.cta_url }}">{{  event.cta_text }}</a></p>
 	{% endif %}
+
+    {% with event.get_contained_events as contained_events %}
+        {% if contained_events %}
+        <h2>Contains</h2>
+        <ul>
+            {% for e in contained_events %}
+                <li><a href="{{ e.get_absolute_url }}">{{ e }}</a></li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
 
     {% for o in event.occurrences.different_day %}
         <p>{{ o.time_range_string }}</p>

@@ -219,7 +219,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         related_name="contained_events",
         null=True,
         help_text="If this event is part of another event, select it here."
-    )
+    ) # access visible contained_events via get_contained_events()
     derived_from = models.ForeignKey(
         'self',
         blank=True,
@@ -239,6 +239,12 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         blank=True,
         help_text=_('Describe event dates in everyday language, e.g. "Every Sunday in March".'),
     )
+
+    price_line = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text='A one-line description of the price for this event, e.g. "$12 / $10 / $6"')
+
     special_instructions = models.TextField(
         blank=True,
         help_text=_('Describe special instructions for attending event, '
@@ -467,6 +473,11 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
 
     def get_absolute_url(self):
         return reverse('icekit_events_eventbase_detail', args=(self.slug,))
+
+    def get_contained_events(self):
+        return EventBase.objects.filter(
+            id__in=self.contained_events.values_list('id', flat=True)
+        ).visible()
 
 class AbstractEventWithLayouts(EventBase, FluentFieldsMixin):
 
