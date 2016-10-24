@@ -27,13 +27,18 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=[
-        'colorweave',
         'django-icekit',
         'django-object-actions<0.6',  # See: https://github.com/crccheck/django-object-actions/issues/45
         'Django>=1.7',
         'pyparsing',
         'unidecode',
-        'django-brightcove',
     ],
+    extras_require={
+        'colors': [
+            'webcolors==1.5',
+            'colormath==2.1.1',
+            'colorweave==0.1+0.ce27c83b4e06a8185531538fa11c18c5ea2c1aba.ixc',
+        ],
+    },
     setup_requires=['setuptools_scm'],
 )
