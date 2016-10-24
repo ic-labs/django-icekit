@@ -18,6 +18,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'verbose_name': 'Simple event',
+                'db_table': 'icekit_event_types_simple_simpleevent',
             },
             bases=('icekit_events.eventbase',),
         ),

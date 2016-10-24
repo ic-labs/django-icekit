@@ -212,6 +212,14 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
     occurrences.
     """
 
+    part_of = models.ForeignKey(
+        'self',
+        blank=True,
+        db_index=True,
+        related_name="contained_events",
+        null=True,
+        help_text="If this event is part of another event, select it here."
+    )
     derived_from = models.ForeignKey(
         'self',
         blank=True,
@@ -226,7 +234,8 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         help_text=_('Show this event in the public calendar'),
     )
 
-    human_dates = models.TextField(
+    human_dates = models.CharField(
+        max_length=255,
         blank=True,
         help_text=_('Describe event dates in everyday language, e.g. "Every Sunday in March".'),
     )

@@ -87,6 +87,7 @@ class EventChildAdmin(
         'all_day', 'starts', 'ends', 'date_starts', 'date_ends',
         'recurrence_rule', 'end_repeat', 'date_end_repeat', 'is_repeat',
     )
+    raw_id_fields = ('part_of', )
     save_on_top = True
 
 
