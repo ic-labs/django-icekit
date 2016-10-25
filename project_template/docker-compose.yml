@@ -26,11 +26,11 @@ services:
       - redis
   celeryflower:
     command: setup-django.sh celeryflower.sh
-    expose:
-      - 5555
     extends: base
     links:
       - redis
+    ports:
+      - 5555
   django:
     build: .
     command: setup-django.sh bash.sh
@@ -45,15 +45,15 @@ services:
     ports:
       - 8000:8000
   elasticsearch:
-    expose:
-      - 9200
     image: interaction/elasticsearch-icu:1
+    ports:
+      - 9200
   postgres:
     expose:
       - 5432
     image: onjin/alpine-postgres:9.4
   redis:
     command: redis-server --appendonly yes
-    expose:
-      - 6379
     image: redis:3-alpine
+    ports:
+      - 6379
