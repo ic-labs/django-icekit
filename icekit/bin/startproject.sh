@@ -55,6 +55,7 @@ curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/pr
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/project_settings_local.sample.py"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/package.json"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements-icekit.txt"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements.in"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements.txt"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/test_initial_data.sql"
 
