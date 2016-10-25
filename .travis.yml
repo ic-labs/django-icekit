@@ -15,13 +15,13 @@ before_script:
   - docker-compose -f docker-compose.travis.yml config
   - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
   - docker pull "interaction/icekit:$TAG" || true
-  - docker build --pull -t "interaction/icekit:$TAG" .
+  - docker build --pull -t "interaction/icekit:$TAG" -t "interaction/icekit:$TRAVIS_COMMIT" .
 
 script:
   - docker-compose -f docker-compose.travis.yml run --rm django
 
 after_success:
-  - docker push "interaction/icekit:$TAG"
+  - docker push "interaction/icekit:$TAG" "interaction/icekit:$TRAVIS_COMMIT"
 
 env:
   global:
