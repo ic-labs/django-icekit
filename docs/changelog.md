@@ -39,6 +39,8 @@ Breaking changes:
 
   * `icekit.articles` is no more. Functionality is moved to `icekit.content_collections`.
 
+  * The `FEATURED_APPS` setting has moved to `ICEKIT['DASHBOARD_FEATURED_APPS']`.
+
 ## 0.15 (27 September 2016)
 
   * Improvements to publishing to make it accomodate more types of content.
