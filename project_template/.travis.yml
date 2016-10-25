@@ -21,7 +21,7 @@ script:
   - docker-compose -f docker-compose.travis.yml run --rm django
 
 after_success:
-  - docker tag "interaction/icekit:$TAG" "interaction/icekit:$TRAVIS_COMMIT"
+  - docker tag "interaction/project_template:$TAG" "interaction/project_template:$TRAVIS_COMMIT"
   - docker push "interaction/project_template:$TAG"
   - docker push "interaction/project_template:$TRAVIS_COMMIT"
 
