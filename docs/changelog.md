@@ -21,6 +21,9 @@
   * New `icekit.page_types.article` app which is a concrete implementation of
     the content collections pattern.
 
+  * Ignore `.env` and `docker-cloud.*.yml` files, which frequently contain
+    secrets that should not be committed.
+
 Breaking changes:
 
   * The initial migration for `icekit.plugins.slideshow` had the wrong database

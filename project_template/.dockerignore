@@ -8,6 +8,7 @@
 **/pubring.gpg~
 **/random_seed
 **/requirements-local.txt
+.env
 .env.local
 .env.production
 .env.staging
@@ -15,6 +16,7 @@
 .idea/
 bower_components/
 project_settings_local.py
+docker-cloud.*.yml
 node_modules/
 static_root/
 var/
