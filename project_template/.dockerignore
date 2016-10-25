@@ -15,8 +15,8 @@
 .gnupg/gpg.conf
 .idea/
 bower_components/
-project_settings_local.py
 docker-cloud.*.yml
 node_modules/
+project_settings_local.py
 static_root/
 var/
