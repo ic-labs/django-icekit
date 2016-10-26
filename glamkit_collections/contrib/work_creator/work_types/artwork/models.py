@@ -1,3 +1,6 @@
+from glamkit_collections.contrib.work_creator.models import WorkBase
+from django.db import models
+
 class Artwork(WorkBase):
     medium_display = models.CharField(
         blank=True,

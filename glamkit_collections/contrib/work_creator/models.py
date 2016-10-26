@@ -1,4 +1,19 @@
-class CreatorBase(FluentFieldsMixin, BoostedTermsMixin, PublishingModel, PolymorphicModel):
+from django_countries.fields import CountryField
+from icekit.content_collections.abstract_models import TitleSlugMixin
+from icekit.mixins import FluentFieldsMixin, ListableMixin
+from icekit.plugins.image.models import Image
+from icekit.publishing.models import PublishingModel
+from polymorphic.models import PolymorphicModel
+from django.db import models
+from django.utils.translation import ugettext_lazy as _
+
+
+class CreatorBase(
+    PolymorphicModel,
+    FluentFieldsMixin,
+    PublishingModel,
+    ListableMixin,
+):
     name_display = models.CharField(
         max_length=255,
         help_text='The commonly known or generally recognized name of the '
@@ -11,13 +26,12 @@ class CreatorBase(FluentFieldsMixin, BoostedTermsMixin, PublishingModel, Polymor
     #for URLs
     slug = models.CharField(
         max_length=255,
-        unique=True,
         db_index=True,
     )  # Alt slug redirects to it.
     alt_slug = models.SlugField(
         max_length=255,
-        unique=True,
-        db_index=True
+        blank=True,
+        db_index=True,
     )   # use unidecode + slugify for alt slug.
     # Alt slug matches should redirect to the canonical view.
     portrait = models.ForeignKey(
@@ -29,6 +43,9 @@ class CreatorBase(FluentFieldsMixin, BoostedTermsMixin, PublishingModel, Polymor
         blank=True,
         max_length=255,
     )
+    wikipedia_link = models.URLField(blank=True, help_text="e.g. 'https://en.wikipedia.org/wiki/Pablo_Picasso'")
+
+    admin_notes = models.TextField(blank=True)
 
     name_sort = models.CharField(
         max_length=255,
@@ -39,8 +56,9 @@ class CreatorBase(FluentFieldsMixin, BoostedTermsMixin, PublishingModel, Polymor
     )
 
     class Meta:
-        abstract = True
+        verbose_name = "creator"
         ordering = ('name_sort', )
+        unique_together = ('slug', 'publishing_is_draft',)
 
     def __unicode__(self):
         return self.name_display
@@ -48,27 +66,32 @@ class CreatorBase(FluentFieldsMixin, BoostedTermsMixin, PublishingModel, Polymor
     def get_public_works(self):
         return self.works.all().published()
 
-    def get_work_count(self):
+    def get_works_count(self):
         return self.works.count()
 
-    def get_public_work_count(self):
-        return self.public_works.count()
+    def get_public_works_count(self):
+        return self.get_public_works().count()
 
 
-class WorkBase(FluentFieldsMixin, BoostedTermsMixin, PublishingModel, PolymorphicModel):
+class WorkBase(
+    PolymorphicModel,
+    FluentFieldsMixin,
+    PublishingModel,
+    ListableMixin,
+):
     # meta
-    slug = models.CharField(max_length=255, unique=True, db_index=True)
+    slug = models.CharField(max_length=255, db_index=True)
     # using accession number (URL-encoded) for canonical slug
-    alt_slug = models.SlugField(max_length=255, unique=True, db_index=True)
+    alt_slug = models.SlugField(max_length=255, blank=True, db_index=True)
     # using slugified, no-hyphens. Alt slug matches should redirect to the
     # canonical view.
 
     # what's it called
-    title_display = models.CharField(
+    title = models.CharField(
         max_length=255,
         help_text='The official title of this object. Includes series title '
                   'when appropriate.'
-    )  # used on 'Explore Modern Art'
+    )
 
     # who made it
     creators = models.ManyToManyField(
@@ -76,12 +99,14 @@ class WorkBase(FluentFieldsMixin, BoostedTermsMixin, PublishingModel, Polymorphi
     )
 
     date_display = models.CharField(
+        "Date (display)",
         blank=True,
         max_length=255,
         help_text='Displays date as formatted for labels and reports, rather '
                   'than sorting.'
     )  # used on 'Explore Modern Art' 53841 records
     date_edtf = models.CharField(
+        "Date (EDTF)",
         blank=True,
         null=True,
         max_length=64,
@@ -94,26 +119,23 @@ class WorkBase(FluentFieldsMixin, BoostedTermsMixin, PublishingModel, Polymorphi
     # where was it made
     origin_continent = models.CharField(
         blank=True,
-        max_length=255)  # 10616. This is a mess - has all kinds of data, inc. countries.
-    origin_country = models.CharField(
-        blank=True,
-        max_length=255)  # 11105
+        max_length=255)
+    origin_country = CountryField(blank=True)
     origin_state_province = models.CharField(
         blank=True,
-        max_length=255)  # 6613
+        max_length=255)
     origin_city = models.CharField(
         blank=True,
-        max_length=255)  # 5672
+        max_length=255)
     origin_neighborhood = models.CharField(
         blank=True,
-        max_length=255)  # 693
+        max_length=255)
     origin_colloquial = models.CharField(
         blank=True,
         max_length=255,
         help_text='The colloquial or historical name of the place at the time '
                   'of the object\'s creation, e.g., "East Bay"'
-    )  # 1100
-
+    )
 
     credit_line = models.TextField(
         blank=True,
@@ -124,156 +146,86 @@ class WorkBase(FluentFieldsMixin, BoostedTermsMixin, PublishingModel, Polymorphi
                   # "accessed by visitors to the collection through the "
                   # "scrolling list of Notes & Histories on page 4 of the "
                   # "Object Info layout."
-    )  # used on 'Explore Modern Art'. 68031 records.
+    )
 
 
-    thumbnail_override = models.ForeignKey(
-        'image.Image',
+    thumbnail_override = models.ImageField(
         blank=True,
         null=True,
-        on_delete=models.SET_NULL,
-        help_text=_("An optional override to use when the work is displayed at thumbnail dimensions"),
-        related_name='%(app_label)s_%(class)s_related',
+        help_text=_(
+            "An optional override to use when the work is displayed at thumbnail dimensions"
+        ),
     )
 
     # how we got it
     accession_number = models.CharField(
+        blank=True,
         max_length=255,
         help_text="The five components of the Accession number concatenated "
-                  "in a single string for efficiency of display and retrieval."
-    )  # used on 'Explore Modern Art'  # 77143 - that's all of them
+                  " in a single string for efficiency of display and retrieval."
+    )
 
-
-    external_url = models.URLField(
+    website = models.URLField(
         help_text="A URL at which to view this work, if available online",
         blank=True,
     )
 
+    wikipedia_link = models.URLField(blank=True, help_text="e.g. 'https://en.wikipedia.org/wiki/Beauty_and_the_Beast_(2014_film)'")
+
+    admin_notes = models.TextField(blank=True)
 
     class Meta:
-        abstract = True
-        ordering= ("date_sort_latest", )
+        verbose_name = "work"
+        unique_together = ('slug', 'publishing_is_draft',)
+        # ordering= ("date_sort_latest", )
 
     def __unicode__(self):
-        # tempted to use self.title_text, but risk recursion error
-        return u"%s (%s)" % (self.title_full or self.title_display, self.date_display)
+        if self.date_display:
+            return u"%s (%s)" % (self.title, self.date_display)
+        return self.title
 
 
-    def public_images(self):
-        # using Optimizing manager will prefetch a list.
-        if hasattr(self, 'prefetched_public_images'):
-            return self.prefetched_public_images
-
-        queryset = self.images.filter(self.PUBLIC_IMAGE_QS).order_by_view()
-        return queryset
-
-    def get_hero_image(self):
-        if not hasattr(self, "_hero_image"):
-            try:
-                self._hero_image = self.public_images()[0]
-            except IndexError:
-                self._hero_image = None
-        return self._hero_image
-
-    def get_thumbnail_image(self):
-        """
-        Returns the most appropriate ImageField for use as an artwork's thumbnail
-        """
-        if self.thumbnail_override:
-            return self.thumbnail_override.image
-        if self.hero_image:
-            return self.hero_image.downloaded_image
-
-    def creator_name_pairs(self):
-        return [(a.name_display, a.name_sort) for a in self.primary_creators()]
-
-    ### different sublists of creators
-    def creators_with_role(self, role):
-        if hasattr(self, 'prefetched_artworkcreators'):
-            paa = self.prefetched_artworkcreators
-            return [a.creator for a in paa if (a.role.lower() == role and a.creator.is_ok_for_web)]
-        else:
-            return [a.creator for a in self.artworkcreator_set.filter(role__iexact=role, creator__is_ok_for_web=True)]
+    # def public_images(self):
+    #     # using Optimizing manager will prefetch a list.
+    #     if hasattr(self, 'prefetched_public_images'):
+    #         return self.prefetched_public_images
+    #
+    #     queryset = self.images.filter(self.PUBLIC_IMAGE_QS).order_by_view()
+    #     return queryset
+    #
+    # def get_hero_image(self):
+    #     if not hasattr(self, "_hero_image"):
+    #         try:
+    #             self._hero_image = self.public_images()[0]
+    #         except IndexError:
+    #             self._hero_image = None
+    #     return self._hero_image
+    #
+    # def get_thumbnail_image(self):
+    #     """
+    #     Returns the most appropriate ImageField for use as an artwork's thumbnail
+    #     """
+    #     if self.thumbnail_override:
+    #         return self.thumbnail_override.image
+    #     if self.hero_image:
+    #         return self.hero_image.downloaded_image
 
 
-    def primary_creators(self):
-        # returns the creators with role = Primary - hopefully just one.
-        # these are the creators to be used in the credit line
-        # in etl, we ensured that every work had at least one.
-        # implied order by 'Artworkcreator.order'
-        return self.creators_with_role("primary")
 
-    def nonprimary_creators(self):
-        # returns the creators with role = ""
-        return self.creators_with_role("")
+class Role(TitleSlugMixin):
+    past_tense = models.CharField(max_length=255, help_text="If the role is 'foundry', the past tense should be 'forged'. Use lower case.")
 
-    def primary_and_nonprimary_creators(self):
-        # returns the creators with role in "Primary" or "", with Primary coming first.
-        return self.primary_creators() + self.nonprimary_creators()
-
-    def non_creator_roles(self):
-        # returns the Artworkcreators with role not in (Primary, creator).
-        # this would be e.g. foundry page and ideally wouldn't have a URL.
-        if hasattr(self, 'prefetched_artworkcreators'):
-            return filter(
-                lambda a: (a.role != '') and (a.role.lower() != "primary") and a.creator.is_ok_for_web,
-                self.prefetched_artworkcreators
-            )
-        else:
-            return self.artworkcreator_set.filter(creator__is_ok_for_web=True).exclude(role="").exclude(role__iexact="primary") #implied order by 'Artworkcreator.order'
-
-
-    ### cleaned-up creator lists, titles and captions, for web and in plain text.
-
-    def creators_text(self):
-        return grammatical_join([a.name_display for a in self.primary_creators()])
-
-    def creators_html(self):
-        return mark_safe(grammatical_join([a.name_display_html() for a in self.primary_creators()]))
-
-    def title_text(self):
-        # ignoring self.title_short as it can have HTML tags
-        return self.title_full or self.title_display
-
-    def title_html(self):
-        """
-        Titles are <em> and sometimes have .noItalics in title_short.
-        """
-        return mark_safe(
-            "<em>" + (self.title_short or self.title_text()) + "</em>"
-        )
-
-    def short_caption_text(self):
-        t = Template("""{% spaceless %}
-            {{ work.creators_text }}, {{ work.title_text }}{% if work.date_display %}, {{ work.date_display }}{% endif %}
-        {% endspaceless %}""")
-        c = Context({'work': self})
-
-        return t.render(c)
-
-
-    def short_caption_html(self, link_creators=True, show_date=True):
-        t = Template("""
-        	{% if link_creators %}{{ work.creators_html }}{% else %}{{ work.creators_text }}{% endif %},
-			{{ work.title_html }}{% if work.date_display and show_date %}, {{ work.date_display }}{% endif %}
-        """)
-        c = Context({'work': self, 'link_creators': link_creators, 'show_date': show_date})
-
-        return t.render(c)
-
-
-class WorkCreatorBase(models.Model):
+class WorkCreator(models.Model):
     creator = models.ForeignKey(CreatorBase)
     work = models.ForeignKey(WorkBase)
 
-    order = models.PositiveIntegerField()
-    role = models.CharField(max_length=255)
+    order = models.PositiveIntegerField(help_text="Which order to show this creator in the list of all creators")
+    role = models.ForeignKey(Role, blank=True, null=True)
     is_primary = models.BooleanField(default=True)
 
     class Meta:
-        abstract = True
-        unique_together = ('artist', 'artwork', 'role')
+        unique_together = ('creator', 'work', 'role')
         ordering = ("order", )
 
     def __unicode__(self):
-        return unicode(self.artwork)
+        return "%s, %s by %s" % (unicode(self.work), self.role.past_tense, unicode(self.creator))

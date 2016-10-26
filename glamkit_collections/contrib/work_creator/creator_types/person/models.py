@@ -1,4 +1,8 @@
-class Person(CreatorBase):
+from django.utils.safestring import mark_safe
+from glamkit_collections.contrib.work_creator.models import CreatorBase
+from django.db import models
+
+class PersonCreator(CreatorBase):
     #more name fields
     name_full = models.CharField(
         max_length=255,
@@ -20,13 +24,17 @@ class Person(CreatorBase):
                   '"Sanzio," Raphael'
     )
 
-
     # what is their gender
     gender = models.CharField(
         blank=True,
         max_length=255,
         help_text='This field identifies the gender of the creator for rapid '
                   'retrieval and categorization, e.g., "male" or "female". Use lowercase.'
+    )
+
+    primary_occupation = models.CharField(
+        blank=True,
+        max_length=255,
     )
 
     life_info_birth_date_display = models.CharField(
@@ -112,6 +120,9 @@ class Person(CreatorBase):
         blank=True,
         max_length=255,)
 
+    class Meta:
+        verbose_name = "person"
+
     def lifespan_for_web(self, join="&nbsp;&ndash; "):
         """
         Returns lifespan formatted for the web, for example:
@@ -135,7 +146,3 @@ class Person(CreatorBase):
                 return mark_safe("n.d.&nbsp;&ndash;&nbsp;" + death)
 
         return mark_safe(join.join(filter(None, (birth, death))))
-
-    class Meta:
-        abstract = True
-

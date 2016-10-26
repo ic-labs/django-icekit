@@ -36,10 +36,6 @@ def alt_slugify(value):
         return ""
 alt_slugify = allow_lazy(alt_slugify, six.text_type)
 
-def grammatical_join(l, initial_joins=", ", final_join=" and "):
-    # Return items concatenated with commas and "and" before the final one.
-    # http://stackoverflow.com/questions/19838976/grammatical-list-join-in-python
-    return initial_joins.join(l[:-2] + [final_join.join(l[-2:])])
 
 def ensure_unique(qs, field_name, value, exclude_id=None):
     """
