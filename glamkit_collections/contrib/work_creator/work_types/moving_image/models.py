@@ -1,4 +1,5 @@
 from django_countries.fields import CountryField
+from fluent_contents.plugins.oembeditem.fields import OEmbedUrlField
 from glamkit_collections.contrib.work_creator.models import WorkBase
 from django.db import models
 from icekit.content_collections.abstract_models import TitleSlugMixin
@@ -25,6 +26,7 @@ class MovingImageMixin(
     rating_annotation = models.CharField(max_length=255, help_text="e.g. Contains flashing lights and quidditch", blank=True)
     genre = models.ForeignKey("Genre", blank=True, null=True)
     media_type = models.ForeignKey("MediaType", blank=True, null=True)
+    trailer = OEmbedUrlField(blank=True)
     imdb_link = models.URLField("IMDB link", blank=True, help_text="e.g. 'http://www.imdb.com/title/tt2316801/'")
 
     class Meta:

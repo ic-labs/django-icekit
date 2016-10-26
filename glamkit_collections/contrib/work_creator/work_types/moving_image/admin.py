@@ -12,6 +12,7 @@ class MovingImageWorkAdmin(WorkChildAdmin):
                 'media_type',
                 'rating',
                 'rating_annotation',
+                'trailer',
                 'imdb_link',
             )
         }),

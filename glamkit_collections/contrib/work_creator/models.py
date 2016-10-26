@@ -1,6 +1,11 @@
+from collections import OrderedDict
+
 from django_countries.fields import CountryField
+from glamkit_collections.contrib.work_creator.managers import \
+    WorkCreatorQuerySet, WorkImageQuerySet
 from icekit.content_collections.abstract_models import TitleSlugMixin
 from icekit.mixins import FluentFieldsMixin, ListableMixin
+from icekit.plugins.image.abstract_models import AbstractImageModel
 from icekit.publishing.models import PublishingModel
 from polymorphic.models import PolymorphicModel
 from django.db import models
@@ -43,9 +48,7 @@ class CreatorBase(
         max_length=255,
     )
     wikipedia_link = models.URLField(blank=True, help_text="e.g. 'https://en.wikipedia.org/wiki/Pablo_Picasso'")
-
     admin_notes = models.TextField(blank=True)
-
     name_sort = models.CharField(
         max_length=255,
         help_text='For searching and organizing, the name or sequence of names '
@@ -56,7 +59,7 @@ class CreatorBase(
 
     class Meta:
         verbose_name = "creator"
-        ordering = ('name_sort', )
+        ordering = ('name_sort', 'slug')
         unique_together = ('slug', 'publishing_is_draft',)
 
     def __unicode__(self):
@@ -70,6 +73,10 @@ class CreatorBase(
 
     def get_public_works_count(self):
         return self.get_public_works().count()
+
+    def get_hero_image(self):
+        if self.portrait:
+            return self.portrait.image
 
 
 class WorkBase(
@@ -135,7 +142,6 @@ class WorkBase(
         help_text='The colloquial or historical name of the place at the time '
                   'of the object\'s creation, e.g., "East Bay"'
     )
-
     credit_line = models.TextField(
         blank=True,
         help_text="A formal public credit statement about a transfer of "
@@ -145,15 +151,6 @@ class WorkBase(
                   # "accessed by visitors to the collection through the "
                   # "scrolling list of Notes & Histories on page 4 of the "
                   # "Object Info layout."
-    )
-
-
-    thumbnail_override = models.ImageField(
-        blank=True,
-        null=True,
-        help_text=_(
-            "An optional override to use when the work is displayed at thumbnail dimensions"
-        ),
     )
 
     # how we got it
@@ -169,15 +166,13 @@ class WorkBase(
         help_text='The curatorial unit responsible for the object, '
                   'e.g., "Western Painting."'
     )
-
     website = models.URLField(
         help_text="A URL at which to view this work, if available online",
         blank=True,
     )
-
     wikipedia_link = models.URLField(blank=True, help_text="e.g. 'https://en.wikipedia.org/wiki/Beauty_and_the_Beast_(2014_film)'")
-
     admin_notes = models.TextField(blank=True)
+    images = models.ManyToManyField('icekit_plugins_image.Image', through="WorkImage")
 
     class Meta:
         verbose_name = "work"
@@ -189,48 +184,58 @@ class WorkBase(
             return u"%s (%s)" % (self.title, self.date_display)
         return self.title
 
+    def get_images(self, **kwargs):
+        # order images by the order given in WorkImage.
+        return self.images.filter(**kwargs).order_by('workimage')
 
-    # def public_images(self):
-    #     # using Optimizing manager will prefetch a list.
-    #     if hasattr(self, 'prefetched_public_images'):
-    #         return self.prefetched_public_images
-    #
-    #     queryset = self.images.filter(self.PUBLIC_IMAGE_QS).order_by_view()
-    #     return queryset
-    #
-    # def get_hero_image(self):
-    #     if not hasattr(self, "_hero_image"):
-    #         try:
-    #             self._hero_image = self.public_images()[0]
-    #         except IndexError:
-    #             self._hero_image = None
-    #     return self._hero_image
-    #
-    # def get_thumbnail_image(self):
-    #     """
-    #     Returns the most appropriate ImageField for use as an artwork's thumbnail
-    #     """
-    #     if self.thumbnail_override:
-    #         return self.thumbnail_override.image
-    #     if self.hero_image:
-    #         return self.hero_image.downloaded_image
-
+    def get_hero_image(self):
+        if not hasattr(self, "_hero_image"):
+            try:
+                self._hero_image = self.get_images()[0]
+            except IndexError:
+                self._hero_image = None
+        if self._hero_image:
+            return self._hero_image.image
 
 
 class Role(TitleSlugMixin):
     past_tense = models.CharField(max_length=255, help_text="If the role is 'foundry', the past tense should be 'forged'. Use lower case.")
 
+
 class WorkCreator(models.Model):
     creator = models.ForeignKey(CreatorBase)
     work = models.ForeignKey(WorkBase)
-
-    order = models.PositiveIntegerField(help_text="Which order to show this creator in the list of all creators")
     role = models.ForeignKey(Role, blank=True, null=True)
-    is_primary = models.BooleanField(default=True)
+    is_primary = models.BooleanField("Primary?", default=True)
+    order = models.PositiveIntegerField(help_text="Which order to show this creator in the list of creators.", default=0)
+
+    objects = WorkCreatorQuerySet.as_manager()
 
     class Meta:
         unique_together = ('creator', 'work', 'role')
-        ordering = ("order", )
+        ordering = ('order', '-is_primary')
+        verbose_name = "Work-Creator relation"
 
     def __unicode__(self):
-        return "%s, %s by %s" % (unicode(self.work), self.role.past_tense, unicode(self.creator))
+        if self.role:
+            return "%s, %s by %s" % (unicode(self.work), self.role.past_tense, unicode(self.creator))
+        else:
+            return "%s, created by %s" % (unicode(self.work), unicode(self.creator))
+
+
+class WorkImageType(TitleSlugMixin):
+    class Meta:
+        verbose_name = "Image type"
+
+
+class WorkImage(AbstractImageModel):
+    work = models.ForeignKey(WorkBase)
+    type = models.ForeignKey(WorkImageType, blank=True, null=True)
+    order = models.PositiveIntegerField(
+        help_text="Which order to show this image in the set of images.",
+        default=0)
+
+    objects = WorkImageQuerySet.as_manager()
+
+    class Meta:
+        ordering = ('order',)
