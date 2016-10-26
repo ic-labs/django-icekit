@@ -65,8 +65,8 @@ touch requirements.txt
 find . -type f -exec sed -e "s/project_template/$DEST_DIR_BASENAME/g" -i '' {} \;
 
 # Use release versions of ICEkit.
-sed -e "s/-e ../django-icekit/" -i '' requirements-icekit.txt
-sed -e "s/:local/:master/" -i '' Dockerfile
+sed -e "s|\.\.|git+https://github.com/ic-labs/django-icekit@master#egg=django-icekit|" -i '' requirements-icekit.txt
+sed -e "s|:local|:master|" -i '' Dockerfile
 
 if [[ -n $(which git) ]]; then
 	echo
