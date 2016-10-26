@@ -195,6 +195,7 @@ EMAIL_SUBJECT_PREFIX = '[%s] ' % SITE_NAME
 INSTALLED_APPS = (
     # 3rd party.
     'bootstrap3',
+    'django_countries',
     'django_extensions',
     'forms_builder.forms',
     # 'ixc_redactor',
