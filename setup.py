@@ -32,6 +32,7 @@ setuptools.setup(
         'Django>=1.7',
         'pyparsing',
         'unidecode',
+        'django-admin-sortable2',
     ],
     extras_require={
         'colors': [
