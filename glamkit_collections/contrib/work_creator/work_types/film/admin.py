@@ -5,15 +5,15 @@ from glamkit_collections.contrib.work_creator.work_types.moving_image.admin impo
 from icekit.content_collections.admin import TitleSlugAdmin
 
 class FilmAdmin(MovingImageWorkAdmin):
-    FILM_MIXIN_FIELDSET = (
-        'Film', {
+    FILM_MIXIN_FIELDSETS = (
+        ('Film', {
             'fields': (
                 'formats',
             )
-        }
+        }),
     )
 
-    fieldsets = MovingImageWorkAdmin.fieldsets[0:3] + (FILM_MIXIN_FIELDSET, ) + MovingImageWorkAdmin.fieldsets[3:]
+    fieldsets = MovingImageWorkAdmin.fieldsets[0:3] + FILM_MIXIN_FIELDSETS + MovingImageWorkAdmin.fieldsets[3:]
     filter_horizontal = ('formats',)
 
 admin.site.register(models.FilmFormat, TitleSlugAdmin)

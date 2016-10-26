@@ -5,17 +5,17 @@ from glamkit_collections.contrib.work_creator.work_types.moving_image.admin impo
 from icekit.content_collections.admin import TitleSlugAdmin
 
 class GameAdmin(MovingImageWorkAdmin):
-    GAME_MIXIN_FIELDSET = (
-        'Game', {
+    GAME_MIXIN_FIELDSETS = (
+        ('Game', {
             'fields': (
                 'platforms',
                 'is_single_player',
                 'is_multi_player',
                 'input_types',
             )
-        }
+        }),
     )
-    fieldsets = MovingImageWorkAdmin.fieldsets[0:3] + (GAME_MIXIN_FIELDSET, ) + MovingImageWorkAdmin.fieldsets[3:]
+    fieldsets = MovingImageWorkAdmin.fieldsets[0:3] + GAME_MIXIN_FIELDSETS + MovingImageWorkAdmin.fieldsets[3:]
     filter_horizontal = ('platforms', 'input_types',)
 
 

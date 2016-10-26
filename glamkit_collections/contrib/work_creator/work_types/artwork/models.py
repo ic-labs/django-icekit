@@ -48,10 +48,3 @@ class Artwork(WorkBase):
         null=True,
         help_text="The measurement of the object\'s width, in kilograms"
     )
-
-    department = models.CharField(
-        blank=True,
-        max_length=255,
-        help_text='The managerial unit responsible for the object, '
-                  'e.g., "Western Painting."'
-    )
