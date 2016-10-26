@@ -1,3 +1,4 @@
+from icekit.utils.attributes import first_of
 from unidecode import unidecode
 
 from django.db import models
@@ -150,7 +151,16 @@ class ListableMixin(models.Model):
         return self.title
 
     def get_list_image(self):
-        return self.list_image
+        """
+        :return: the ImageField to use for thumbnails in lists
+        """
+        list_image = first_of(
+            self,
+            'list_image',
+            'get_hero_image',
+            'image',
+        )
+        return list_image
 
 
 class HeroMixin(models.Model):
@@ -168,4 +178,5 @@ class HeroMixin(models.Model):
         abstract = True
 
     def get_hero_image(self):
-        return self.hero_image
+        """Return the ImageField"""
+        return self.hero_image.image

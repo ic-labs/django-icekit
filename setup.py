@@ -101,6 +101,7 @@ setuptools.setup(
             'glamkit-sponsors',
             'icekit-events',
             'icekit-press-releases>=0.8',
+            'glamkit-collections>=0.35',
         ],
         'project': [
             'boto3',
@@ -108,6 +109,7 @@ setuptools.setup(
             'ConcurrentLogHandler',
             'django-celery',
             'django-celery-email',
+            'django-countries',
             'django-extensions',
             'django-flat-theme<1.1.3',  # See: https://github.com/elky/django-flat-theme/issues/30
             'django-fluent-contents[markupoembeditemtext]',

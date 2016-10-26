@@ -16,7 +16,7 @@ class AbstractImage(models.Model):
     """
     image = models.ImageField(
         upload_to='uploads/images/',
-        verbose_name=_('Image field'),
+        verbose_name=_('Image file'),
     )
     title = models.CharField(
         max_length=255,
@@ -56,7 +56,7 @@ class AbstractImage(models.Model):
 
 
 @python_2_unicode_compatible
-class AbstractImageItem(ContentItem):
+class ImageLinkMixin(models.Model):
     """
     An image from the Image model.
     """
@@ -75,8 +75,6 @@ class AbstractImageItem(ContentItem):
 
     class Meta:
         abstract = True
-        verbose_name = _('Image')
-        verbose_name_plural = _('Images')
 
     def __str__(self):
         return six.text_type(self.image)
@@ -148,3 +146,13 @@ class AbstractImageItem(ContentItem):
     def displayed_caption(self):
         c = Context({'instance': self})
         return render_to_string(self.caption_template, c)
+
+@python_2_unicode_compatible
+class AbstractImageItem(ContentItem, ImageLinkMixin):
+    class Meta:
+        abstract = True
+        verbose_name = _('Image')
+        verbose_name_plural = _('Images')
+
+    def __str__(self):
+        return six.text_type(self.image)

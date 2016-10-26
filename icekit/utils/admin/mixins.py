@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from fluent_contents.admin.contentitems import (BaseContentItemInline,
     get_content_item_inlines,)
+from icekit.utils.attributes import resolve
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class ThumbnailAdminMixin(object):
     display.
     """
 
-    thumbnail_field = None
+    thumbnail_field = None # an attribute or callable on the object
     try:
         thumbnail_options = settings.THUMBNAIL_ALIASES['']['admin']
     except (KeyError, AttributeError):
@@ -46,7 +47,11 @@ class ThumbnailAdminMixin(object):
         :return: Image field for thumbnail or None if not found.
         """
         if hasattr(self, 'thumbnail_field') and self.thumbnail_field:
-            return getattr(obj, self.thumbnail_field)
+            return resolve(obj, self.thumbnail_field)
+
+        # try get_list_image, from ListableMixin
+        if hasattr(obj, 'get_list_image'):
+            return resolve(obj, "get_list_image")
 
         logger.warning('ThumbnailAdminMixin.thumbnail_field unspecified')
         return None
