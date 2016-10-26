@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.conf import settings
 
 from icekit.utils.admin.mixins import ThumbnailAdminMixin
 
@@ -16,8 +17,6 @@ class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
 
     # ThumbnailAdminMixin attributes
     thumbnail_field = 'image'
-    thumbnail_options = {
-        'size': (150, 150),
-    }
+    thumbnail_options = settings.THUMBNAIL_ALIASES['']['admin']
 
 admin.site.register(models.Image, ImageAdmin)
