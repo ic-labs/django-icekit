@@ -3,7 +3,8 @@ from django.utils.module_loading import autodiscover_modules
 
 
 class AppConfig(AppConfig):
-    name = 'gk_collections_work_creator'
+    name = '.'.join(__name__.split('.')[:-1])
+    label = 'gk_collections_work_creator'
     verbose_name = "Collection"
 
     def ready(self):

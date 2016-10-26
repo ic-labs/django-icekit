@@ -1,7 +1,6 @@
 from django_countries.fields import CountryField
 from icekit.content_collections.abstract_models import TitleSlugMixin
 from icekit.mixins import FluentFieldsMixin, ListableMixin
-from icekit.plugins.image.models import Image
 from icekit.publishing.models import PublishingModel
 from polymorphic.models import PolymorphicModel
 from django.db import models
@@ -35,7 +34,7 @@ class CreatorBase(
     )   # use unidecode + slugify for alt slug.
     # Alt slug matches should redirect to the canonical view.
     portrait = models.ForeignKey(
-        Image,
+        'icekit_plugins_image.Image',
         blank=True,
         null=True,
     )
