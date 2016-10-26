@@ -42,7 +42,6 @@ curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/pr
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.env.local.sample"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.env.production"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.env.staging"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.gitattributes"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.gitignore"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.travis.yml"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/bower.json"
@@ -51,9 +50,9 @@ curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/pr
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/docker-compose.yml"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/Dockerfile"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/go.sh"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/package.json"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/project_settings.py"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/project_settings_local.sample.py"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/package.json"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements-icekit.txt"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements.in"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements.txt"
@@ -66,8 +65,8 @@ touch requirements.txt
 find . -type f -exec sed -e "s/project_template/$DEST_DIR_BASENAME/g" -i '' {} \;
 
 # Use release versions of ICEkit.
-sed -e "s/-e ../django-icekit/" -i '' requirements-icekit.txt
-sed -e "s/:local/:master/" -i '' Dockerfile
+sed -e "s|\.\.|git+https://github.com/ic-labs/django-icekit@master#egg=django-icekit|" -i '' requirements-icekit.txt
+sed -e "s|:local|:master|" -i '' Dockerfile
 
 if [[ -n $(which git) ]]; then
 	echo
@@ -76,7 +75,6 @@ if [[ -n $(which git) ]]; then
 	if [[ "${REPLY:-y}" =~ ^[Yy]$ ]]; then
 		git init
 		git add -A
-		git add -f .env.local project_settings.py
 		git commit -m 'Initial commit.'
 	fi
 fi

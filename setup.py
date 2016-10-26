@@ -108,6 +108,7 @@ setuptools.setup(
             'ConcurrentLogHandler',
             'django-celery',
             'django-celery-email',
+            'django-countries',
             'django-extensions',
             'django-flat-theme<1.1.3',  # See: https://github.com/elky/django-flat-theme/issues/30
             'django-fluent-contents[markupoembeditemtext]',
