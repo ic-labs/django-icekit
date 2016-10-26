@@ -75,7 +75,6 @@ if [[ -n $(which git) ]]; then
 	if [[ "${REPLY:-y}" =~ ^[Yy]$ ]]; then
 		git init
 		git add -A
-		git add -f .env.local project_settings.py
 		git commit -m 'Initial commit.'
 	fi
 fi
