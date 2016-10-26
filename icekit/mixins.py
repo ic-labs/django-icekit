@@ -1,9 +1,9 @@
-from icekit.plugins.image.models import Image
 from unidecode import unidecode
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import striptags
+from django.utils.translation import ugettext_lazy as _
 
 from fluent_contents.models import \
     ContentItemRelation, Placeholder, PlaceholderRelation
@@ -11,6 +11,7 @@ from fluent_contents.rendering import render_content_items
 
 from icekit.tasks import store_readability_score
 from icekit.utils.readability.readability import Readability
+
 
 
 class LayoutFieldMixin(models.Model):
@@ -157,7 +158,7 @@ class HeroMixin(models.Model):
     Mixin for adding hero content
     """
     hero_image = models.ForeignKey(
-        Image,
+        'icekit_plugins_image.Image',
         help_text='The hero image for this content.',
         related_name="+",
         blank=True, null=True
