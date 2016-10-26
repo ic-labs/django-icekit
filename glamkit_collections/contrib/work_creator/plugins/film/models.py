@@ -1,7 +1,6 @@
 from glamkit_collections.contrib.work_creator.models import WorkBase
 from django.db import models
-from glamkit_collections.contrib.work_creator.work_types.moving_image.models import \
-    MovingImageMixin
+from ..moving_image.models import MovingImageMixin
 from icekit.content_collections.abstract_models import TitleSlugMixin
 
 
