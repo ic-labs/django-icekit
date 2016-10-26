@@ -3,7 +3,7 @@ from adminsortable2.admin import SortableInlineAdminMixin
 from django.contrib import admin
 from django.db.models import Count
 from icekit.admin import ChildModelPluginPolymorphicParentModelAdmin
-from icekit.admin_mixins import FluentLayoutsMixin, ListableAdmin
+from icekit.admin_mixins import FluentLayoutsMixin
 import models
 from icekit.content_collections.admin import TitleSlugAdmin
 from icekit.plugins.base import BaseChildModelPlugin, PluginMount
@@ -191,7 +191,7 @@ class CreatorBaseAdmin(
     ChildModelPluginPolymorphicParentModelAdmin,
     PublishingAdmin,
     FluentLayoutsMixin,
-    ListableAdmin,
+    ThumbnailAdminMixin,
 ):
     base_model = models.CreatorBase
     child_model_plugin_class = CreatorChildModelPlugin
@@ -225,7 +225,7 @@ class WorkBaseAdmin(
     ChildModelPluginPolymorphicParentModelAdmin,
     PublishingAdmin,
     FluentLayoutsMixin,
-    ListableAdmin,
+    ThumbnailAdminMixin,
 ):
     base_model = models.WorkBase
     child_model_plugin_class = WorkChildModelPlugin
