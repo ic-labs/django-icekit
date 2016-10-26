@@ -9,6 +9,7 @@ from django.conf.urls import url, patterns
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
+from django.utils.text import capfirst
 from django.utils.translation import ugettext_lazy as _
 from polymorphic.admin import PolymorphicParentModelAdmin
 
@@ -75,11 +76,27 @@ class ChildModelPluginPolymorphicParentModelAdmin(PolymorphicParentModelAdmin):
         plugins = self.child_model_plugin_class.get_plugins()
         if plugins:
             labels = {
-                plugin.content_type.pk: plugin.verbose_name.title() for plugin in plugins
+                plugin.content_type.pk: capfirst(plugin.verbose_name) for plugin in plugins
             }
             choices = [(ctype, labels[ctype]) for ctype, _ in choices]
             return sorted(choices, lambda a, b: cmp(a[1], b[1]))
         return choices
+
+    def _child_model_dict(self):
+        if not hasattr(self, "_child_model_dict_cache"):
+            self._child_model_dict_cache = dict([
+                (ContentType.objects.get_for_model(p.model, for_concrete_model=False).id, p.model) for p in
+                self.child_model_plugin_class.get_plugins()
+            ])
+        return self._child_model_dict_cache
+
+    def child_type_name(self, inst):
+        """
+        :param inst: a polymorphic parent instance
+        :return: The name of the polymorphic model
+        """
+        return capfirst(self._child_model_dict()[inst.polymorphic_ctype_id]._meta.verbose_name)
+    child_type_name.short_description = "Type"
 
 
 # MODELS ######################################################################
