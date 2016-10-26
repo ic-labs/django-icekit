@@ -1,7 +1,6 @@
 version: "2"
 services:
   base:
-    env_file: .env.local
     environment:
       BASE_SETTINGS_MODULE: develop
       GPG_PASSPHRASE: # Get from environment
