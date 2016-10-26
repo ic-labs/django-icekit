@@ -163,6 +163,12 @@ class WorkBase(
         help_text="The five components of the Accession number concatenated "
                   " in a single string for efficiency of display and retrieval."
     )
+    department = models.CharField(
+        blank=True,
+        max_length=255,
+        help_text='The curatorial unit responsible for the object, '
+                  'e.g., "Western Painting."'
+    )
 
     website = models.URLField(
         help_text="A URL at which to view this work, if available online",

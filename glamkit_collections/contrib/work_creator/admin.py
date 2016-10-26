@@ -40,7 +40,7 @@ class CreatorChildAdmin(
         ("Details", {
             'fields': (
                 'portrait',
-                'boosted_terms',
+                'boosted_search_terms',
                 'admin_notes',
             ),
         }),
@@ -98,6 +98,8 @@ class WorkChildAdmin(
                 'credit_line',
                 'thumbnail_override',
                 'accession_number',
+                'department',
+                'boosted_search_terms',
                 'admin_notes',
             ),
         }),
@@ -169,7 +171,6 @@ class WorkBaseAdmin(
         'accession_id',
         'credit_line',
     )
-
 
 admin.site.register(models.Role, TitleSlugAdmin)
 admin.site.register(models.CreatorBase, CreatorBaseAdmin)
