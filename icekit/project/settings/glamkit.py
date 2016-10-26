@@ -3,6 +3,8 @@ from .icekit import *
 # DJANGO ######################################################################
 
 INSTALLED_APPS += (
+    'django_countries',
+
     'sponsors',
     'press_releases',
 
