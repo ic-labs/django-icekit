@@ -5,7 +5,7 @@ from glamkit_collections.contrib.work_creator.managers import \
     WorkCreatorQuerySet, WorkImageQuerySet
 from icekit.content_collections.abstract_models import TitleSlugMixin
 from icekit.mixins import FluentFieldsMixin, ListableMixin
-from icekit.plugins.image.abstract_models import AbstractImageLink
+from icekit.plugins.image.abstract_models import ImageLinkMixin
 from icekit.publishing.models import PublishingModel
 from polymorphic.models import PolymorphicModel
 from django.db import models
@@ -228,7 +228,7 @@ class WorkImageType(TitleSlugMixin):
         verbose_name = "Image type"
 
 
-class WorkImage(AbstractImageLink):
+class WorkImage(ImageLinkMixin):
     work = models.ForeignKey(WorkBase)
     type = models.ForeignKey(WorkImageType, blank=True, null=True)
     order = models.PositiveIntegerField(
