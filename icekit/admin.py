@@ -75,7 +75,7 @@ class ChildModelPluginPolymorphicParentModelAdmin(PolymorphicParentModelAdmin):
         plugins = self.child_model_plugin_class.get_plugins()
         if plugins:
             labels = {
-                plugin.content_type.pk: plugin.verbose_name for plugin in plugins
+                plugin.content_type.pk: plugin.verbose_name.title() for plugin in plugins
             }
             choices = [(ctype, labels[ctype]) for ctype, _ in choices]
             return sorted(choices, lambda a, b: cmp(a[1], b[1]))
