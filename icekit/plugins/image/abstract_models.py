@@ -155,4 +155,4 @@ class AbstractImageItem(ContentItem, ImageLinkMixin):
         verbose_name_plural = _('Images')
 
     def __str__(self):
-        return super(AbstractImageItem, self).__str__()
+        return six.text_type(self.image)
