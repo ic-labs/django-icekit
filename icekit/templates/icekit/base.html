@@ -75,6 +75,7 @@
 			{# Base JS files #}
 			{% compress js file %}
 				{% block base_js %}
+					<script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
 					<script src="{% static 'icekit/js/link_share.js' %}"></script>
 				{% endblock %}
 			{% endcompress %}

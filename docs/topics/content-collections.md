@@ -61,10 +61,10 @@ Otherwise you'll need to implement the method yourself.
 ## `AbstractListingPage`
 
 The `AbstractListingPage` model is a page type that requires
-`get_public_items()` and `get_visible_items()` to be defined in subclasses.
-When viewed, ListingPage lists the items returned by `get_public_items()`.
-`get_visible_items()` is necessary because an editor may wish to preview
-urls for items that aren't returned by `get_public_items()`, such as draft
+`get_items_to_list()` and `get_items_to_mount()` to be defined in subclasses.
+When viewed, ListingPage lists the items returned by `get_items_to_list()`.
+`get_items_to_mount()` is necessary because an editor may wish to preview
+urls for items that aren't returned by `get_items_to_list()`, such as draft
 items.
 
 ## Admins

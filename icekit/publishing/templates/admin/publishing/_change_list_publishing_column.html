@@ -1,15 +1,26 @@
 {% load i18n static publishing_tags %}
 <label class="publishing-links">
-	{% if object.has_been_published and published_url %}
-		{% if object.is_dirty %}
-			<a target="_blank" href="{{ draft_url }}" title="Preview draft version"><i class="fa fa-circle-o"></i></a>
-		{% else %}
-			<i class="fa fa-circle-o" style="visibility: hidden;"></i>
-		{% endif %}
-		<a target="_blank" href="{{ published_url }}" title="{% if object.suppressed_message %}{{ object.suppressed_message }}{%  else %}View published{% if not object.is_dirty %}/latest{% endif %} version{% endif %}"><i class="fa fa-circle{% if object.suppressed_message %} suppressed {% endif %}"></i></a>
-	{% else %}
-		{% if draft_url %}
-			<a target="_blank" href="{{ draft_url }}" title="Preview draft version"><i class="fa fa-circle-o"></i></a>
-		{% endif %}
-	{% endif %}
+    {% if object_url %}
+        {% if object.has_been_published %}
+            {% if object.is_dirty %}
+                <a target="_blank" href="{{ object_url|get_draft_url }}" title="Preview draft version"><i class="fa fa-circle-o"></i></a>
+            {% else %}
+                <i class="fa fa-circle-o" style="visibility: hidden;"></i>
+            {% endif %}
+            <a target="_blank" href="{{ object_url }}" title="{% if object.suppressed_message %}{{ object.suppressed_message }}{%  else %}View published{% if not object.is_dirty %}/latest{% endif %} version{% endif %}" {% if object.suppressed_message %}class="suppressed"{% endif %}><i class="fa fa-circle"></i></a>
+        {% else %}
+            <a target="_blank" href="{{ object_url|get_draft_url }}" title="Preview draft version"><i class="fa fa-circle-o"></i></a>
+        {% endif %}
+    {% else %}
+        {% if object.has_been_published %}
+            {% if object.is_dirty %}
+                <i class="fa fa-circle-o"></i>
+            {% else %}
+                <i class="fa fa-circle-o" style="visibility: hidden;"></i>
+            {% endif %}
+            <i class="fa fa-circle"></i>
+        {% else %}
+            <i class="fa fa-circle-o"></i>
+        {% endif %}
+    {% endif %}
 </label>

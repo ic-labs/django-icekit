@@ -1,5 +1,6 @@
 from urlparse import urljoin
 
+from django.core.exceptions import ValidationError
 from django.template.response import TemplateResponse
 
 from icekit.publishing.models import PublishingModel
@@ -7,6 +8,7 @@ from polymorphic.models import PolymorphicModel
 
 from icekit.page_types.layout_page.abstract_models import AbstractLayoutPage
 from django.db import models
+
 
 class TitleSlugMixin(models.Model):
     # TODO: this should perhaps become part of a wider ICEkit mixin that covers
@@ -17,6 +19,31 @@ class TitleSlugMixin(models.Model):
 
     class Meta:
         abstract = True
+
+    def validate_unique_slug(self):
+        """
+        Ensure slug is unique for this model. This check is aware of publishing
+        but is otherwise fairly basic and will need to be customised for
+        situations where models with slugs are not in a flat hierarchy etc.
+        """
+        clashes_qs = type(self).objects.filter(slug=self.slug)
+        if self.pk:
+            clashes_qs = clashes_qs.exclude(pk=self.pk)
+        if isinstance(self, PublishingModel):
+            clashes_qs = clashes_qs.filter(
+                publishing_is_draft=self.publishing_is_draft)
+        if clashes_qs:
+            raise ValidationError(
+                "Slug '%s' clashes with other items: %s"
+                % (self.slug, clashes_qs))
+
+    def clean(self):
+        super(TitleSlugMixin, self).clean()
+        self.validate_unique_slug()
+
+    def publishing_prepare_published_copy(self, draft_obj):
+        """ Perform slug validation on publish, not just when saving draft """
+        self.validate_unique_slug()
 
     def __unicode__(self):
         return self.title
@@ -30,9 +57,10 @@ class AbstractListingPage(AbstractLayoutPage):
     class Meta:
         abstract = True
 
-    def get_public_items(self):
+    def get_items_to_list(self, request):
         """
-        Get the items that are listed on this page.
+        Get the items that will be show in this page's listing.
+
         Remember that incoming relations will be on the draft version of
         the page. Do something like this:
 
@@ -42,30 +70,26 @@ class AbstractListingPage(AbstractLayoutPage):
         Editors normally expect to only see published() items in a listing, not
         visible() items, unless clearly marked as such.
 
-        :return: the items that are associated with this page
+        :return: the items to be rendered in the listing page
         """
         raise NotImplementedError(
-            "Please implement `get_public_items()` on your ListingPage model"
+            "Please implement `get_items_to_list(request)` on %r" % type(self)
         )
 
-
-    def get_visible_items(self):
+    def get_items_to_mount(self, request):
         """
         Get all items that are associated with this page and can be previewed
-        by the user.
+        by the user at a URL.
         Again, incoming relations will be on the draft version of
         the page. Do something like this:
 
             unpublished_pk = self.get_draft().pk
             return Article.objects.visible().filter(parent_id=unpublished_pk)
 
-        Editors normally expect to only see published() items in a listing, not
-        visible() items, unless clearly marked as such.
-
-        :return: the items that are associated with this page
+        :return: the items with URL path endpoints under this page's path
         """
         raise NotImplementedError(
-            "Please implement `get_visible_items()` on your ListingPage model"
+            "Please implement `get_items_to_mount(request)` on %r" % type(self)
         )
 
 class AbstractCollectedContent(models.Model):
@@ -99,7 +123,7 @@ class AbstractCollectedContent(models.Model):
         # Appending "/" to avoid a) django redirect and b) incorrect edit slug
         # for the admin.
         return urljoin(self.parent.get_absolute_url(), self.slug + "/")
-#
+
     def get_response(self, request, parent, *args, **kwargs):
         """
         Render this collected content to a response.

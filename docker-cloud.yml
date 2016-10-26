@@ -1,119 +1,170 @@
 celery:
-  command: setup-django.sh celery.sh
+  image: 'interaction/icekit:master'
+  # autoredeploy: true
+  command: 'setup-django.sh celery.sh'
   deployment_strategy: high_availability
   environment:
-    BASE_SETTINGS_MODULE: production
-    # EMAIL_HOST:
-    # EMAIL_HOST_PASSWORD:
-    # EMAIL_HOST_USER:
-    # MEDIA_AWS_ACCESS_KEY_ID:
-    # MEDIA_AWS_SECRET_ACCESS_KEY:
-    # MEDIA_AWS_STORAGE_BUCKET_NAME:
-    # PGDATABASE:
-    # PGHOST:
-    # PGPASSWORD:
-    # PGPORT:
-    # PGUSER:
-    # SENTRY_DSN:
-    # SITE_DOMAIN:
-    # SITE_NAME:
-  image: interaction/icekit:master
+    - BASE_SETTINGS_MODULE=production
+    # - EMAIL_HOST=
+    # - EMAIL_HOST_PASSWORD=
+    # - EMAIL_HOST_USER=
+    # - MEDIA_AWS_ACCESS_KEY_ID=
+    # - MEDIA_AWS_SECRET_ACCESS_KEY=
+    # - MEDIA_AWS_STORAGE_BUCKET_NAME=
+    # - PGDATABASE=
+    # - PGHOST=
+    # - PGPASSWORD=
+    # - PGPORT=
+    # - PGUSER=
+    # - SENTRY_DSN=
+    # - SITE_DOMAIN=
+    # - SITE_NAME=
   links:
     - elasticsearch
-    # - postgres
+    - postgres
     - redis
+  restart: always
+  tags:
+    - icekit
+  volumes:
+    - /opt/django-icekit/project_template/var
 celerybeat:
-  command: setup-django.sh celerybeat.sh
+  image: 'interaction/icekit:master'
+  # autoredeploy: true
+  command: 'setup-django.sh celerybeat.sh'
   deployment_strategy: high_availability
   environment:
-    BASE_SETTINGS_MODULE: production
-    # EMAIL_HOST:
-    # EMAIL_HOST_PASSWORD:
-    # EMAIL_HOST_USER:
-    # MEDIA_AWS_ACCESS_KEY_ID:
-    # MEDIA_AWS_SECRET_ACCESS_KEY:
-    # MEDIA_AWS_STORAGE_BUCKET_NAME:
-    # PGDATABASE:
-    # PGHOST:
-    # PGPASSWORD:
-    # PGPORT:
-    # PGUSER:
-    # SENTRY_DSN:
-    # SITE_DOMAIN:
-    # SITE_NAME:
-  image: interaction/icekit:master
+    - BASE_SETTINGS_MODULE=production
+    # - EMAIL_HOST=
+    # - EMAIL_HOST_PASSWORD=
+    # - EMAIL_HOST_USER=
+    # - MEDIA_AWS_ACCESS_KEY_ID=
+    # - MEDIA_AWS_SECRET_ACCESS_KEY=
+    # - MEDIA_AWS_STORAGE_BUCKET_NAME=
+    # - PGDATABASE=
+    # - PGHOST=
+    # - PGPASSWORD=
+    # - PGPORT=
+    # - PGUSER=
+    # - SENTRY_DSN=
+    # - SITE_DOMAIN=
+    # - SITE_NAME=
   links:
     - redis
+  restart: always
+  tags:
+    - icekit
+  volumes:
+    - /opt/django-icekit/project_template/var
 celeryflower:
-  command: setup-django.sh celeryflower.sh
+  image: 'interaction/icekit:master'
+  # autoredeploy: true
+  command: 'setup-django.sh celeryflower.sh'
   deployment_strategy: high_availability
   environment:
-    VIRTUAL_HOST: flower.*
-    VIRTUAL_HOST_WEIGHT: 1
-  environment:
-    BASE_SETTINGS_MODULE: production
-    # EMAIL_HOST:
-    # EMAIL_HOST_PASSWORD:
-    # EMAIL_HOST_USER:
-    # MEDIA_AWS_ACCESS_KEY_ID:
-    # MEDIA_AWS_SECRET_ACCESS_KEY:
-    # MEDIA_AWS_STORAGE_BUCKET_NAME:
-    # PGDATABASE:
-    # PGHOST:
-    # PGPASSWORD:
-    # PGPORT:
-    # PGUSER:
-    # SENTRY_DSN:
-    # SITE_DOMAIN:
-    # SITE_NAME:
+    - BASE_SETTINGS_MODULE=production
+    # - EMAIL_HOST=
+    # - EMAIL_HOST_PASSWORD=
+    # - EMAIL_HOST_USER=
+    # - MEDIA_AWS_ACCESS_KEY_ID=
+    # - MEDIA_AWS_SECRET_ACCESS_KEY=
+    # - MEDIA_AWS_STORAGE_BUCKET_NAME=
+    # - PGDATABASE=
+    # - PGHOST=
+    # - PGPASSWORD=
+    # - PGPORT=
+    # - PGUSER=
+    # - SENTRY_DSN=
+    # - SITE_DOMAIN=
+    # - SITE_NAME=
+    - VIRTUAL_HOST=https://flower.example.com
   expose:
-    - "5555"
-  image: interaction/icekit:master
+    - '5555'
   links:
     - redis
+  restart: always
+  tags:
+    - icekit
+  volumes:
+    - /opt/django-icekit/project_template/var
 django:
-  command: setup-django.sh supervisord.sh
+  image: 'interaction/icekit:master'
+  # autoredeploy: true
+  command: 'setup-django.sh supervisord.sh'
   deployment_strategy: high_availability
   environment:
-    VIRTUAL_HOST: "*"
-  environment:
-    BASE_SETTINGS_MODULE: production
-    # EMAIL_HOST:
-    # EMAIL_HOST_PASSWORD:
-    # EMAIL_HOST_USER:
-    # MEDIA_AWS_ACCESS_KEY_ID:
-    # MEDIA_AWS_SECRET_ACCESS_KEY:
-    # MEDIA_AWS_STORAGE_BUCKET_NAME:
-    # PGDATABASE:
-    # PGHOST:
-    # PGPASSWORD:
-    # PGPORT:
-    # PGUSER:
-    # SENTRY_DSN:
-    # SITE_DOMAIN:
-    # SITE_NAME:
+    - BASE_SETTINGS_MODULE=production
+    # - EMAIL_HOST=
+    # - EMAIL_HOST_PASSWORD=
+    # - EMAIL_HOST_USER=
+    # - MEDIA_AWS_ACCESS_KEY_ID=
+    # - MEDIA_AWS_SECRET_ACCESS_KEY=
+    # - MEDIA_AWS_STORAGE_BUCKET_NAME=
+    # - PGDATABASE=
+    # - PGHOST=
+    # - PGPASSWORD=
+    # - PGPORT=
+    # - PGUSER=
+    # - SENTRY_DSN=
+    # - SITE_DOMAIN=
+    # - SITE_NAME=
+    - VIRTUAL_HOST=https://www.example.com
   expose:
-    - "8000"
-  image: interaction/icekit:master
+    - '8000'
   links:
-    - elasticsearch
     - celery
-    # - postgres
+    - celerybeat
+    - celeryflower
+    - elasticsearch
+    - postgres
     - redis
+  restart: always
+  tags:
+    - icekit
+  volumes:
+    - /opt/django-icekit/project_template/var
 elasticsearch:
-  image: interaction/elasticsearch-icu:1
+  image: 'interaction/elasticsearch-icu:1'
+  # autoredeploy: true
+  restart: always
+  tags:
+    - icekit
 haproxy:
-  image: dockercloud/haproxy:1.5.1
+  image: 'interaction/haproxy:master'
+  # autoredeploy: true
+  environment:
+    - 'EXTRA_SETTINGS=http-request add-header X-Forwarded-Proto https if { ssl_fc }'
   links:
     - celeryflower
     - django
   ports:
-    - "80:80"
-    - "443:443"
+    - '443:443'
+  restart: always
   roles:
     - global
-# postgres:
-#   image: onjin/alpine-postgres:9.4
+  tags:
+    - icekit
+  volumes_from:
+    - letsencrypt
+letsencrypt:
+  image: 'interaction/letsencrypt:master'
+  environment:
+    - DOMAINS=www.example.com,flower.example.com
+    - EMAIL=admin@example.com
+  ports:
+    - '80:80'
+  tags:
+    - icekit
+postgres:
+  image: 'onjin/alpine-postgres:9.4'
+  # autoredeploy: true
+  restart: always
+  tags:
+    - icekit
 redis:
-  command: redis-server --appendonly yes
-  image: redis:3-alpine
+  image: 'redis:3-alpine'
+  # autoredeploy: true
+  command: 'redis-server --appendonly yes'
+  restart: always
+  tags:
+    - icekit

@@ -333,7 +333,11 @@ class PublishingModel(models.Model):
 
     def publishing_prepare_published_copy(self, draft_obj):
         """ Prepare published copy of draft prior to saving it """
-        pass
+        # We call super here, somewhat perversely, to ensure this method will
+        # be called on publishable subclasses if implemented there.
+        mysuper = super(PublishingModel, self)
+        if hasattr(mysuper, 'publishing_prepare_published_copy'):
+            mysuper.publishing_prepare_published_copy(draft_obj)
 
     def publishing_clone_relations(self, src_obj):
         """
@@ -446,8 +450,15 @@ class PublishingModel(models.Model):
             dst = getattr(self, field_accessor_name)
             clone(src, dst)
 
+    def has_placeholder_relationships(self):
+        return hasattr(self, 'placeholder_set') \
+            or hasattr(self, 'placeholders')
+
     @assert_draft
     def patch_placeholders(self):
+        if not self.has_placeholder_relationships():
+            return
+
         published_obj = self.publishing_linked
 
         for draft_placeholder, published_placeholder in zip(
@@ -493,6 +504,9 @@ class PublishingModel(models.Model):
         are to be related.
         :return: None
         """
+        if not self.has_placeholder_relationships():
+            return
+
         for src_placeholder in Placeholder.objects.parent(self):
             dst_placeholder = Placeholder.objects.create_for_object(
                 dst_obj,
@@ -530,7 +544,7 @@ class PublishingModel(models.Model):
                 # re-created on publish thus always have empty M2M rels.
                 dst_m2m.add(*src_m2m.all())
 
-    def is_suppressed_message(self):
+    def suppressed_message(self):
         """
         Occasionally items may not be visible to the public even if they have
         been published and can be previewed. For example, if they belong to a
@@ -540,9 +554,10 @@ class PublishingModel(models.Model):
         indicator in admin, and the string will be shown in the hyperlink
         title.
 
-        :return: True always
+        :return: A message to be shown to the user only if the content can be
+        previewed but not published.
         """
-        return True
+        return None
 
 class PublishableFluentContentsPage(FluentContentsPage,
                                     PublishingModel):

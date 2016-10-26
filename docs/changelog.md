@@ -18,6 +18,11 @@
   * New `icekit.page_types.author` app which models a content author and a
     listing page, based on the `content_collections` pattern.
 
+  * New `icekit.page_types.article` app which is a concrete implementation of
+    the content collections pattern.
+
+  * Ignore `.env` and `docker-cloud.*.yml` files, which frequently contain
+    secrets that should not be committed.
 
 Breaking changes:
 
@@ -33,6 +38,8 @@ Breaking changes:
     If you have yet to upgrade from `<0.10`, you don't need to do anything.
 
   * `icekit.articles` is no more. Functionality is moved to `icekit.content_collections`.
+
+  * The `FEATURED_APPS` setting has moved to `ICEKIT['DASHBOARD_FEATURED_APPS']`.
 
 ## 0.15 (27 September 2016)
 

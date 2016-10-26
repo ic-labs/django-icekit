@@ -3,6 +3,7 @@ from unidecode import unidecode
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import striptags
+from django.utils.translation import ugettext_lazy as _
 
 from fluent_contents.models import \
     ContentItemRelation, Placeholder, PlaceholderRelation
@@ -10,6 +11,7 @@ from fluent_contents.rendering import render_content_items
 
 from icekit.tasks import store_readability_score
 from icekit.utils.readability.readability import Readability
+
 
 
 class LayoutFieldMixin(models.Model):
@@ -112,3 +114,58 @@ class ReadabilityMixin(models.Model):
         r = super(ReadabilityMixin, self).save(*args, **kwargs)
         self.store_readability_score()
         return r
+
+
+class ListableMixin(models.Model):
+    """
+    Mixin for showing content in lists. Lists normally have:
+    * Type
+    * Title
+    * Image
+    * URL (assume get_absolute_url)
+
+    ...and since they show in lists, they show in search results, so
+    this model also includes search-related fields.
+    """
+    list_image = models.ImageField(
+        blank=True,
+        upload_to="icekit/listable/list_image/",
+        help_text="image to use in listings. Default image is used if this isn't given"
+    )
+    boosted_search_terms = models.TextField(
+        blank=True,
+        help_text=_(
+            'Words (space-separated) added here are boosted in relevance for search results '
+            'increasing the chance of this appearing higher in the search results.'
+        ),
+    )
+
+    class Meta:
+        abstract = True
+
+    def get_type(self):
+        return type(self)._meta.verbose_name
+
+    def get_title(self):
+        return self.title
+
+    def get_list_image(self):
+        return self.list_image
+
+
+class HeroMixin(models.Model):
+    """
+    Mixin for adding hero content
+    """
+    hero_image = models.ForeignKey(
+        'icekit_plugins_image.Image',
+        help_text='The hero image for this content.',
+        related_name="+",
+        blank=True, null=True
+    )
+
+    class Meta:
+        abstract = True
+
+    def get_hero_image(self):
+        return self.hero_image

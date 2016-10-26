@@ -12,7 +12,9 @@ celery:
     - redis
   restart: always
   tags:
-    - production
+    - project_template
+  volumes:
+    - /opt/project_template/var
 celerybeat:
   image: 'interaction/project_template:master'
   # autoredeploy: true
@@ -25,7 +27,9 @@ celerybeat:
     - redis
   restart: always
   tags:
-    - production
+    - project_template
+  volumes:
+    - /opt/project_template/var
 celeryflower:
   image: 'interaction/project_template:master'
   # autoredeploy: true
@@ -33,16 +37,17 @@ celeryflower:
   deployment_strategy: high_availability
   environment:
     - DOTENV=production
-    - FORCE_SSL=yes
     - GPG_PASSPHRASE=
-    - 'VIRTUAL_HOST=flower.project_template.*,https://flower.project_template.*'
+    - VIRTUAL_HOST=https://flower.example.com
   expose:
     - '5555'
   links:
     - redis
   restart: always
   tags:
-    - production
+    - project_template
+  volumes:
+    - /opt/project_template/var
 django:
   image: 'interaction/project_template:master'
   # autoredeploy: true
@@ -52,47 +57,63 @@ django:
     - DOTENV=production
     - FORCE_SSL=yes
     - GPG_PASSPHRASE=
-    - 'VIRTUAL_HOST=project_template.*,https://project_template.*'
+    - VIRTUAL_HOST=https://www.example.com
   expose:
     - '8000'
   links:
-    - elasticsearch
     - celery
+    - celerybeat
+    - celeryflower
+    - elasticsearch
     # - postgres
     - redis
   restart: always
   tags:
-    - production
+    - project_template
+  volumes:
+    - /opt/project_template/var
 elasticsearch:
   image: 'interaction/elasticsearch-icu:1'
   # autoredeploy: true
   restart: always
   tags:
-    - production
+    - project_template
 haproxy:
-  image: 'dockercloud/haproxy:1.5.1'
+  image: 'interaction/haproxy:master'
   # autoredeploy: true
+  environment:
+    - 'EXTRA_SETTINGS=http-request add-header X-Forwarded-Proto https if { ssl_fc }'
   links:
     - celeryflower
     - django
   ports:
-    - '80:80'
     - '443:443'
   restart: always
   roles:
     - global
   tags:
-    - production
+    - project_template
+  volumes_from:
+    - letsencrypt
+letsencrypt:
+  image: 'interaction/letsencrypt:master'
+  environment:
+    - DOMAINS=www.example.com,flower.example.com
+    - EMAIL=admins@interaction.net.au
+  ports:
+    - '80'
+  tags:
+    - project_template
 # postgres:
 #   image: 'onjin/alpine-postgres:9.4'
 #   # autoredeploy: true
 #   restart: always
 #   tags:
-#     - production
+#     - project_template
 redis:
   image: 'redis:3-alpine'
   # autoredeploy: true
   command: 'redis-server --appendonly yes'
   restart: always
   tags:
-    - production
+    - project_template

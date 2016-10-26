@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('publishing_published_at', models.DateTimeField(null=True, editable=False)),
                 ('title', models.CharField(max_length=255)),
                 ('slug', models.SlugField(max_length=255)),
-                ('layout', models.ForeignKey(related_name='icekit_articles_article_related', blank=True, null=True, to='icekit.Layout')),
+                ('layout', models.ForeignKey(related_name='icekit_article_article_related', blank=True, null=True, to='icekit.Layout')),
             ],
         ),
         migrations.CreateModel(
@@ -33,11 +33,11 @@ class Migration(migrations.Migration):
                 ('publishing_is_draft', models.BooleanField(db_index=True, editable=False, default=True)),
                 ('publishing_modified_at', models.DateTimeField(editable=False, default=django.utils.timezone.now)),
                 ('publishing_published_at', models.DateTimeField(null=True, editable=False)),
-                ('layout', models.ForeignKey(related_name='icekit_articles_articlecategorypage_related', blank=True, null=True, to='icekit.Layout')),
-                ('publishing_linked', models.OneToOneField(null=True, related_name='publishing_draft', on_delete=django.db.models.deletion.SET_NULL, editable=False, to='icekit_articles.ArticleCategoryPage')),
+                ('layout', models.ForeignKey(related_name='icekit_article_articlecategorypage_related', blank=True, null=True, to='icekit.Layout')),
+                ('publishing_linked', models.OneToOneField(null=True, related_name='publishing_draft', on_delete=django.db.models.deletion.SET_NULL, editable=False, to='icekit_article.ArticleCategoryPage')),
             ],
             options={
-                'db_table': 'pagetype_icekit_articles_articlecategorypage',
+                'db_table': 'pagetype_icekit_article_articlecategorypage',
                 'abstract': False,
             },
             bases=('fluent_pages.htmlpage', models.Model),
@@ -45,12 +45,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='article',
             name='parent',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='icekit_articles.ArticleCategoryPage'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='icekit_article.ArticleCategoryPage'),
         ),
         migrations.AddField(
             model_name='article',
             name='publishing_linked',
-            field=models.OneToOneField(null=True, related_name='publishing_draft', on_delete=django.db.models.deletion.SET_NULL, editable=False, to='icekit_articles.Article'),
+            field=models.OneToOneField(null=True, related_name='publishing_draft', on_delete=django.db.models.deletion.SET_NULL, editable=False, to='icekit_article.Article'),
         ),
         migrations.AlterUniqueTogether(
             name='article',

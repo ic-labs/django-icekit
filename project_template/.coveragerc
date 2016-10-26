@@ -1,7 +1,7 @@
 [run]
 branch = True
 data_file = var/.coverage
-omit = */migrations/__init__.py, */tests.py, */tests/*, var/*
+omit = */migrations/*, */tests.py, */tests/*, var/*
 source = .
 
 [report]
