@@ -42,7 +42,6 @@ curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/pr
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.env.local.sample"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.env.production"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.env.staging"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.gitattributes"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.gitignore"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.travis.yml"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/bower.json"
