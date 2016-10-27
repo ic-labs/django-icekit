@@ -16,6 +16,7 @@ from icekit.content_collections.page_type_plugins import ListingPagePlugin
 
 from icekit.page_types.layout_page.abstract_models import \
     AbstractLayoutPage, AbstractUnpublishableLayoutPage
+from icekit.publishing.models import PublishingModel
 from icekit.plugins import ICEkitFluentContentsPagePlugin
 from icekit import mixins
 
@@ -99,3 +100,24 @@ class UnpublishableLayoutPagePlugin(ICEkitFluentContentsPagePlugin):
 @page_type_pool.register
 class ArticleListingPlugin(ListingPagePlugin):
     model = ArticleListing
+
+
+class PublishingM2MModelA(PublishingModel):
+    pass
+
+
+class PublishingM2MModelB(PublishingModel):
+    related_a_models = models.ManyToManyField(
+        PublishingM2MModelA,
+        related_name='related_b_models',
+    )
+    through_related_a_models = models.ManyToManyField(
+        PublishingM2MModelA,
+        related_name='through_related_b_models',
+        through='PublishingM2MThroughTable',
+    )
+
+
+class PublishingM2MThroughTable(models.Model):
+    a_model = models.ForeignKey(PublishingM2MModelA)
+    b_model = models.ForeignKey(PublishingM2MModelB)
