@@ -391,7 +391,7 @@ class PublishingModel(models.Model):
             - M2M relationships with an explicit through table defined, which
               are more difficult to handle because we must use the through
               model's manager to add/remove relationships. For this case we
-              have the `add_through_model_relationship` and
+              have the `clone_through_model_relationship` and
               `remove_through_model_relationship` functions and helpers.
 
         See unit tests in ``TestPublishingOfM2MRelationships``.
@@ -413,13 +413,18 @@ class PublishingModel(models.Model):
             dst_field = through_fks_by_class[type(rel_obj)]
             return (src_field.name, dst_field.name)
 
-        def add_through_model_relationship(through_model, src_obj, rel_obj):
+        def clone_through_model_relationship(
+                through_model, src_obj, dst_obj, rel_obj):
             src_field_name, dst_field_name = get_through_model_fields(
                 through_model, src_obj, rel_obj)
-            through_model.objects.create(**{
+            through_rel = through_model.objects.get(**{
                 src_field_name: src_obj,
-                dst_field_name: rel_obj,
+                dst_field_name: rel_obj.get_draft(),
             })
+            through_rel.pk = None
+            setattr(through_rel, src_field_name, dst_obj)
+            setattr(through_rel, dst_field_name, rel_obj)
+            through_rel.save()
 
         def remove_through_model_relationship(through_model, src_obj, rel_obj):
             src_field_name, dst_field_name = get_through_model_fields(
@@ -443,8 +448,8 @@ class PublishingModel(models.Model):
                         dst.add(rel_obj)
                     # Handle M2M *through* relationship
                     else:
-                        add_through_model_relationship(
-                            dst.through, self, rel_obj)
+                        clone_through_model_relationship(
+                            dst.through, src_obj, self, rel_obj)
                     # If the related object also has a published copy, we
                     # need to make sure the published copy also knows about
                     # this newly-published draft. We defer this until below
@@ -469,8 +474,8 @@ class PublishingModel(models.Model):
                 # Handle M2M *through* relationship
                 else:
                     for rel_obj in published_rel_obj_copies_to_add:
-                        add_through_model_relationship(
-                            src.through, src_obj, rel_obj)
+                        clone_through_model_relationship(
+                            src.through, src_obj, src_obj, rel_obj)
             # If related published copies have no corresponding related
             # draft after all the previous processing, the relationship is
             # obsolete and must be removed.
