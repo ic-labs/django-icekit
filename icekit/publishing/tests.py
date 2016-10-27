@@ -40,7 +40,7 @@ from icekit.publishing.utils import get_draft_hmac, verify_draft_url, \
 from icekit.publishing.tests_base import BaseAdminTest
 from icekit.tests.models import LayoutPageWithRelatedPages, \
     UnpublishableLayoutPage, Article, ArticleListing, PublishingM2MModelA, \
-    PublishingM2MModelB
+    PublishingM2MModelB, PublishingM2MThroughTable
 
 User = get_user_model()
 
@@ -1303,17 +1303,31 @@ class TestPublishingOfM2MRelationships(TestCase):
         model_b.related_a_models.remove(model_a)
         self.assertEqual([], list(model_a.related_b_models.all()))
 
+        # Add/remove M2M draft relationships works with *through* table
+        through_rel = PublishingM2MThroughTable.objects.create(
+            a_model=model_a, b_model=model_b)
+        self.assertEqual([model_b], list(model_a.through_related_b_models.all()))
+        self.assertEqual([model_a], list(model_b.through_related_a_models.all()))
+        through_rel.delete()
+        self.assertEqual([], list(model_a.through_related_b_models.all()))
+        self.assertEqual([], list(model_b.through_related_a_models.all()))
+
         ############################################
         # Now test M2M functionality with publishing
         ############################################
 
-        # Publish both sides
+        # Publish both sides: no relationships yet to published copies
         model_a.publish()
         model_b.publish()
         self.assertEqual(
             [], list(model_a.publishing_linked.related_b_models.all()))
         self.assertEqual(
             [], list(model_b.publishing_linked.related_a_models.all()))
+        self.assertEqual(
+            [], list(model_a.publishing_linked.through_related_b_models.all()))
+        self.assertEqual(
+            [], list(model_b.publishing_linked.through_related_a_models.all()))
+
         # Add M2M relationship: applies to draft copy, not published copies
         model_a.related_b_models.add(model_b)
         model_a.save()
@@ -1323,6 +1337,16 @@ class TestPublishingOfM2MRelationships(TestCase):
             [], list(model_a.publishing_linked.related_b_models.all()))
         self.assertEqual(
             [], list(model_b.publishing_linked.related_a_models.all()))
+        # Add through M2M relationship: applies to draft copy, not published copies
+        through_rel = PublishingM2MThroughTable.objects.create(
+            a_model=model_a, b_model=model_b)
+        self.assertEqual([model_b], list(model_a.through_related_b_models.all()))
+        self.assertEqual([model_a], list(model_b.through_related_a_models.all()))
+        self.assertEqual(
+            [], list(model_a.publishing_linked.through_related_b_models.all()))
+        self.assertEqual(
+            [], list(model_b.publishing_linked.through_related_a_models.all()))
+
         # Published PublishingM2MModelB is reverse-related to draft
         # PublishingM2MModelA *after* PublishingM2MModelA's relationship
         # addition is published
@@ -1331,6 +1355,12 @@ class TestPublishingOfM2MRelationships(TestCase):
             [model_b], list(model_a.publishing_linked.related_b_models.all()))
         self.assertEqual(
             [model_a], list(model_b.publishing_linked.related_a_models.all()))
+        # Same applies to the through relationship
+        self.assertEqual(
+            [model_b], list(model_a.publishing_linked.through_related_b_models.all()))
+        self.assertEqual(
+            [model_a], list(model_b.publishing_linked.through_related_a_models.all()))
+
         # Published PublishingM2MModelB remains reverse-related to draft
         # PublishingM2MModelA when relationship is removed from drafts but not
         # yet published
@@ -1340,12 +1370,25 @@ class TestPublishingOfM2MRelationships(TestCase):
             [model_b], list(model_a.publishing_linked.related_b_models.all()))
         self.assertEqual(
             [model_a], list(model_b.publishing_linked.related_a_models.all()))
+        # Same applies to the through relationship
+        through_rel.delete()
+        self.assertEqual(
+            [model_b], list(model_a.publishing_linked.through_related_b_models.all()))
+        self.assertEqual(
+            [model_a], list(model_b.publishing_linked.through_related_a_models.all()))
+
         # Remaining reverse relationship manifests as draft-to-published
         # relationships on our draft copies
         self.assertEqual(
             [model_b.publishing_linked], list(model_a.related_b_models.all()))
         self.assertEqual(
             [model_a.publishing_linked], list(model_b.related_a_models.all()))
+        # Same applies to the through relationship
+        self.assertEqual(
+            [model_b.publishing_linked], list(model_a.through_related_b_models.all()))
+        self.assertEqual(
+            [model_a.publishing_linked], list(model_b.through_related_a_models.all()))
+
         # Published PublishingM2MModelB is no longer reverse-related to draft
         # PublishingM2MModelA *after* relationship removal is published
         model_a.publish()
@@ -1355,3 +1398,10 @@ class TestPublishingOfM2MRelationships(TestCase):
             [], list(model_b.publishing_linked.related_a_models.all()))
         self.assertEqual([], list(model_b.related_a_models.all()))
         self.assertEqual([], list(model_a.related_b_models.all()))
+        # Same applies to the through relationship
+        self.assertEqual(
+            [], list(model_a.publishing_linked.through_related_b_models.all()))
+        self.assertEqual(
+            [], list(model_b.publishing_linked.through_related_a_models.all()))
+        self.assertEqual([], list(model_b.through_related_a_models.all()))
+        self.assertEqual([], list(model_a.through_related_b_models.all()))
