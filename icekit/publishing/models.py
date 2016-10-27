@@ -347,53 +347,104 @@ class PublishingModel(models.Model):
         confusing, but here is a summary that might help:
 
             - when a draft object is published, the "current" and definitive
-            relationships are cloned to the published copy. The definitive
-            relationships are the draft-to-draft ones, as set in the admin.
+              relationships are cloned to the published copy. The definitive
+              relationships are the draft-to-draft ones, as set in the admin.
             - a "related draft" is the draft object at the other side of
-            a draft-to-draft M2M relationship
+              a draft-to-draft M2M relationship
             - if a related draft also has a published copy, a draft-to-
-            published relationship is added to that published copy. This
-            makes our newly-published item also "published" from the reverse
-            direction
+              published relationship is added to that published copy. This
+              makes our newly-published item also "published" from the reverse
+              direction
             - if our draft object has a related published copy without a
-            correponding related draft -- that is, a draft-to-published
-            relation without a definitive draft-to-draft relation -- then
-            we remove that relation as it is no longer "current". This
-            makes our newly-published item "unpublished" from the reverse
-            direction when an admin removes the underlying relationship.
+              correponding related draft -- that is, a draft-to-published
+              relation without a definitive draft-to-draft relation -- then
+              we remove that relation as it is no longer "current". This
+              makes our newly-published item "unpublished" from the reverse
+              direction when an admin removes the underlying relationship.
 
         An example case:
 
             - We have Event "E" (unpublished) and Program "P" (published)
             - We add an M2M relationship from E to P. Until the relationship
-            change is published it only affects drafts. Relationships are:
-                E draft <-> P draft
+              change is published it only affects drafts. Relationships are:
+                  E draft <-> P draft
             - We publish E, applying the relationship to published copies on
-            both sides:
-                E draft <-> P draft
-                E published <-> P draft
-                P published <-> E draft
+              both sides:
+                  E draft <-> P draft
+                  E published <-> P draft
+                  P published <-> E draft
             - We remove the M2M relationship between E and P (We could do this
-            from either side: remove E from P; or, remove P from E). The
-            draft-to-draft relation is removed but published copy
-            relationships are not affected:
-                E published <-> P draft
-                P published <-> E draft
+              from either side: remove E from P; or, remove P from E). The
+              draft-to-draft relation is removed but published copy
+              relationships are not affected:
+                  E published <-> P draft
+                  P published <-> E draft
             - We publish P (or E) to apply the relationshp removal to
-            published copies on both sides. No relationships remain.
+              published copies on both sides. No relationships remain.
 
-        See unit test ``.test_m2m_handling_in_publishing_clone_relations``
-        in ``sfmoma.tests.tests.TestPagePublishing``
+        There are two kinds of M2M relationships to handle:
+
+            - standard M2M relationships with no explicit through table defined
+              (these get an auto-generated through table) which are easier to
+              handle because we can add/remove items with the relationship's
+              queryset directly
+            - M2M relationships with an explicit through table defined, which
+              are more difficult to handle because we must use the through
+              model's manager to add/remove relationships. For this case we
+              have the `add_through_model_relationship` and
+              `remove_through_model_relationship` functions and helpers.
+
+        See unit tests in ``TestPublishingOfM2MRelationships``.
         """
+        def get_through_model_fields(through_model, src_obj, rel_obj):
+            # Lookup fields for through model's to/from relationships
+            through_fks_by_class = {}
+            for field in through_model._meta.local_fields:
+                if not getattr(field, 'rel'):
+                    continue
+                rel_model = field.rel.model
+                if rel_model in through_fks_by_class:
+                    raise Exception(
+                        "Found multiple FK fields for model %r in through"
+                        " table model %r; this is a situation we don't handle."
+                        % (rel_model, through_model))
+                through_fks_by_class[rel_model] = field
+            src_field = through_fks_by_class[type(src_obj)]
+            dst_field = through_fks_by_class[type(rel_obj)]
+            return (src_field.name, dst_field.name)
+
+        def add_through_model_relationship(through_model, src_obj, rel_obj):
+            src_field_name, dst_field_name = get_through_model_fields(
+                through_model, src_obj, rel_obj)
+            through_model.objects.create(**{
+                src_field_name: src_obj,
+                dst_field_name: rel_obj,
+            })
+
+        def remove_through_model_relationship(through_model, src_obj, rel_obj):
+            src_field_name, dst_field_name = get_through_model_fields(
+                through_model, src_obj, rel_obj)
+            through_model.objects.filter(**{
+                src_field_name: src_obj,
+                dst_field_name: rel_obj,
+            }).delete()
+
         def clone(src, dst):
             published_rel_obj_copies_to_add = []
             published_rel_objs_maybe_obsolete = []
             for rel_obj in src.all():
-                # If the object referenced by the M2M is publishable we
-                # clone it only if it is a draft copy. If it is not a
-                # publishable object we also clone it (True by default).
+                # If the object referenced by the M2M is publishable we only
+                # clone the relationship if it is a draft copy, not if it is
+                # a published copy. If it is not a publishable object at all,
+                # then we always clone the relationship (True by default).
                 if getattr(rel_obj, 'publishing_is_draft', True):
-                    dst.add(rel_obj)
+                    # Handle standard M2M relationship (without through table)
+                    if dst.through._meta.auto_created:
+                        dst.add(rel_obj)
+                    # Handle M2M *through* relationship
+                    else:
+                        add_through_model_relationship(
+                            dst.through, self, rel_obj)
                     # If the related object also has a published copy, we
                     # need to make sure the published copy also knows about
                     # this newly-published draft. We defer this until below
@@ -412,7 +463,14 @@ class PublishingModel(models.Model):
             # Make published copies of related objects aware of our
             # newly-published draft, in case they weren't already.
             if published_rel_obj_copies_to_add:
-                src.add(*published_rel_obj_copies_to_add)
+                # Handle standard M2M relationship (without through table)
+                if src.through._meta.auto_created:
+                    src.add(*published_rel_obj_copies_to_add)
+                # Handle M2M *through* relationship
+                else:
+                    for rel_obj in published_rel_obj_copies_to_add:
+                        add_through_model_relationship(
+                            src.through, src_obj, rel_obj)
             # If related published copies have no corresponding related
             # draft after all the previous processing, the relationship is
             # obsolete and must be removed.
@@ -422,24 +480,32 @@ class PublishingModel(models.Model):
             for published_rel_obj in published_rel_objs_maybe_obsolete:
                 draft = published_rel_obj.get_draft()
                 if not draft or draft.pk not in current_draft_rel_pks:
-                    src.remove(published_rel_obj)
+                    # Handle standard M2M relationship (without through table)
+                    if src.through._meta.auto_created:
+                        src.remove(published_rel_obj)
+                    # Handle M2M *through* relationship
+                    else:
+                        remove_through_model_relationship(
+                            dst.through, src_obj, rel_obj)
+
         # Track the relationship through-tables we have processed to avoid
         # processing the same relationships in both forward and reverse
         # directions, which could otherwise happen in unusual cases like
         # for SFMOMA event M2M inter-relationships which are explicitly
         # defined both ways as a hack to expose form widgets.
         seen_rel_through_tables = set()
+
         # Forward.
         for field in src_obj._meta.many_to_many:
             src = getattr(src_obj, field.name)
             dst = getattr(self, field.name)
             clone(src, dst)
             seen_rel_through_tables.add(field.rel.through)
+
         # Reverse.
         for field in \
                 src_obj._meta.get_all_related_many_to_many_objects():
-            # Skip reverse relationship if we have already seen, see note
-            # about `seen_rel_through_tables` above.
+            # Skip reverse relationship we have already seen
             if field.field.rel.through in seen_rel_through_tables:
                 continue
             field_accessor_name = field.get_accessor_name()

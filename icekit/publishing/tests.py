@@ -1347,17 +1347,21 @@ class TestPublishingOfM2MRelationships(TestCase):
         self.assertEqual(
             [], list(model_b.publishing_linked.through_related_a_models.all()))
 
-        # Published PublishingM2MModelB is reverse-related to draft
-        # PublishingM2MModelA *after* PublishingM2MModelA's relationship
-        # addition is published
+        # Published PublishingM2MModelA is related to draft PublishingModelB
+        # when it is published
         model_a.publish()
         self.assertEqual(
             [model_b], list(model_a.publishing_linked.related_b_models.all()))
-        self.assertEqual(
-            [model_a], list(model_b.publishing_linked.related_a_models.all()))
         # Same applies to the through relationship
         self.assertEqual(
             [model_b], list(model_a.publishing_linked.through_related_b_models.all()))
+
+        # Published PublishingM2MModelB is reverse-related to draft
+        # PublishingM2MModelA *after* PublishingM2MModelA's relationship
+        # addition is published
+        self.assertEqual(
+            [model_a], list(model_b.publishing_linked.related_a_models.all()))
+        # Same applies to the through relationship
         self.assertEqual(
             [model_a], list(model_b.publishing_linked.through_related_a_models.all()))
 
