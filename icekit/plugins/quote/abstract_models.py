@@ -11,7 +11,8 @@ class AbstractQuoteItem(ContentItem):
     """
     quote = models.TextField()
     attribution = models.CharField(max_length=255, blank=True)
-    organisation = models.CharField(max_length=255, blank=True, help_text="only shown if attribution is given")
+    organisation = models.CharField(max_length=255, blank=True)
+    url = models.URLField(blank=True, help_text="link to the URL source")
 
     class Meta:
         abstract = True
