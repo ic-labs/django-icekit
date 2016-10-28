@@ -98,6 +98,9 @@ class WorkBase(
         help_text='The official title of this object. Includes series title '
                   'when appropriate.'
     )
+    subtitle = models.CharField(max_length=511, blank=True)
+    one_liner = models.CharField("One-liner", max_length=511, blank=True,
+                                 help_text="A pithy description of the work")
 
     # who made it
     creators = models.ManyToManyField(
@@ -197,6 +200,9 @@ class WorkBase(
         if self._hero_image:
             return self._hero_image.image
 
+    def get_one_liner(self):
+        return self.one_liner
+
 
 class Role(TitleSlugMixin):
     past_tense = models.CharField(max_length=255, help_text="If the role is 'foundry', the past tense should be 'forged'. Use lower case.")
@@ -239,3 +245,4 @@ class WorkImage(ImageLinkMixin):
 
     class Meta:
         ordering = ('order',)
+        verbose_name = "Image"

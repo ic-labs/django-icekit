@@ -1,7 +1,6 @@
 import models
 from django.contrib import admin
-from glamkit_collections.contrib.work_creator.work_types.moving_image.admin import \
-    MovingImageWorkAdmin
+from ..moving_image.admin import MovingImageWorkAdmin
 from icekit.content_collections.admin import TitleSlugAdmin
 
 class GameAdmin(MovingImageWorkAdmin):

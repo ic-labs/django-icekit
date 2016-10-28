@@ -10,6 +10,7 @@ class MovingImageWorkAdmin(WorkChildAdmin):
             'fields': (
                 'genre',
                 'media_type',
+                'duration_minutes',
                 'rating',
                 'rating_annotation',
                 'trailer',

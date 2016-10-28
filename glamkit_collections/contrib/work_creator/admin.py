@@ -152,7 +152,9 @@ class WorkChildAdmin(
         (None, {
             'fields': (
                 'title',
+                'subtitle',
                 'slug',
+                'one_liner',
             ),
         }),
         DATE_FIELDSET,
@@ -232,6 +234,7 @@ class WorkBaseAdmin(
     child_model_admin = WorkChildAdmin
 
     list_display = ('thumbnail',) + PublishingAdmin.list_display + (
+        'child_type_name',
         'creators_admin_links',
         'country_flag',
     )
