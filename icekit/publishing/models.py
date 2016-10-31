@@ -382,7 +382,10 @@ class PublishingModel(models.Model):
             - We publish P (or E) to apply the relationshp removal to
               published copies on both sides. No relationships remain.
 
-        There are two kinds of M2M relationships to handle:
+        To handle M2M relationships in general we iterate over entries in the
+        through-table relationship table to clone these entries, or remove
+        them, as appropriate. By processing the M2M relationships in this way
+        we can handle both kinds of M2M relationship:
 
             - standard M2M relationships with no explicit through table defined
               (these get an auto-generated through table) which are easier to
@@ -390,108 +393,73 @@ class PublishingModel(models.Model):
               queryset directly
             - M2M relationships with an explicit through table defined, which
               are more difficult to handle because we must use the through
-              model's manager to add/remove relationships. For this case we
-              have the `clone_through_model_relationship` and
-              `remove_through_model_relationship` functions and helpers.
+              model's manager to add/remove relationships.
 
         See unit tests in ``TestPublishingOfM2MRelationships``.
         """
-        def get_through_model_fields(through_model, src_obj, rel_obj):
-            # Lookup fields for through model's to/from relationships
-            through_fks_by_class = {}
-            for field in through_model._meta.local_fields:
-                if not getattr(field, 'rel'):
-                    continue
-                rel_model = field.rel.model
-                if rel_model in through_fks_by_class:
-                    raise Exception(
-                        "Found multiple FK fields for model %r in through"
-                        " table model %r; this is a situation we don't handle."
-                        % (rel_model, through_model))
-                through_fks_by_class[rel_model] = field
-            src_field = through_fks_by_class[type(src_obj)]
-            dst_field = through_fks_by_class[type(rel_obj)]
-            return (src_field.name, dst_field.name)
 
-        def clone_through_model_relationship(
-                through_model, src_obj, dst_obj, rel_obj):
-            src_field_name, dst_field_name = get_through_model_fields(
-                through_model, src_obj, rel_obj)
-            through_rel = through_model.objects.get(**{
-                src_field_name: src_obj,
-                dst_field_name: rel_obj.get_draft(),
-            })
-            through_rel.pk = None
-            setattr(through_rel, src_field_name, dst_obj)
-            setattr(through_rel, dst_field_name, rel_obj)
-            through_rel.save()
+        def clone_through_model_relationship(src_manager, through_entry,
+                                             dst_obj, rel_obj):
+            if src_manager.through.objects.filter(**{
+                src_manager.source_field_name: dst_obj,
+                src_manager.target_field_name: rel_obj,
+            }).exists():
+                return
+            through_entry.pk = None
+            setattr(through_entry, src_manager.source_field_name, dst_obj)
+            setattr(through_entry, src_manager.target_field_name, rel_obj)
+            through_entry.save()
 
-        def remove_through_model_relationship(through_model, src_obj, rel_obj):
-            src_field_name, dst_field_name = get_through_model_fields(
-                through_model, src_obj, rel_obj)
-            through_model.objects.filter(**{
-                src_field_name: src_obj,
-                dst_field_name: rel_obj,
+        def delete_through_model_relationship(src_manager, rel_obj):
+            src_manager.through.objects.filter(**{
+                src_manager.source_field_name: src_obj,
+                src_manager.target_field_name: rel_obj,
             }).delete()
 
-        def clone(src, dst):
-            published_rel_obj_copies_to_add = []
+        def clone(src_manager):
+            through_qs = src_manager.through.objects \
+                .filter(**{src_manager.source_field_name: src_obj}) \
+                .select_related('%s__publishing_linked'
+                                % src_manager.target_field_name)
             published_rel_objs_maybe_obsolete = []
-            for rel_obj in src.all():
+            current_draft_rel_pks = set()
+            for through_entry in through_qs:
+                rel_obj = getattr(
+                    through_entry, src_manager.target_field_name)
                 # If the object referenced by the M2M is publishable we only
-                # clone the relationship if it is a draft copy, not if it is
-                # a published copy. If it is not a publishable object at all,
-                # then we always clone the relationship (True by default).
+                # clone the relationship if it is to a draft copy, not if it is
+                # to a published copy. If it is not a publishable object at
+                # all then we always clone the relationship (True by default).
                 if getattr(rel_obj, 'publishing_is_draft', True):
-                    # Handle standard M2M relationship (without through table)
-                    if dst.through._meta.auto_created:
-                        dst.add(rel_obj)
-                    # Handle M2M *through* relationship
+                    clone_through_model_relationship(
+                        src_manager, through_entry, self, rel_obj)
+                    # If the related draft object also has a published copy,
+                    # we need to make sure the published copy also knows about
+                    # this newly-published draft.
+                    try:
+                        # Get published copy for related object, if any
+                        rel_obj_published = rel_obj.publishing_linked
+                    except AttributeError:
+                        pass  # Related item has no published copy
                     else:
                         clone_through_model_relationship(
-                            dst.through, src_obj, self, rel_obj)
-                    # If the related object also has a published copy, we
-                    # need to make sure the published copy also knows about
-                    # this newly-published draft. We defer this until below
-                    # when we are no longer iterating over the queryset
-                    # we need to modify.
-                    try:
-                        if rel_obj.publishing_linked:
-                            published_rel_obj_copies_to_add.append(
-                                rel_obj.publishing_linked)
-                    except AttributeError:
-                        pass  # No `publishing_linked` attr to handle
+                            src_manager, through_entry, src_obj,
+                            rel_obj_published)
+                    # Track IDs of related draft copies, so we can tell later
+                    # whether relationshps with published copies are obsolete
+                    current_draft_rel_pks.add(rel_obj.pk)
                 else:
                     # Track related published copies, in case they have
                     # become obsolete
                     published_rel_objs_maybe_obsolete.append(rel_obj)
-            # Make published copies of related objects aware of our
-            # newly-published draft, in case they weren't already.
-            if published_rel_obj_copies_to_add:
-                # Handle standard M2M relationship (without through table)
-                if src.through._meta.auto_created:
-                    src.add(*published_rel_obj_copies_to_add)
-                # Handle M2M *through* relationship
-                else:
-                    for rel_obj in published_rel_obj_copies_to_add:
-                        clone_through_model_relationship(
-                            src.through, src_obj, src_obj, rel_obj)
             # If related published copies have no corresponding related
             # draft after all the previous processing, the relationship is
             # obsolete and must be removed.
-            current_draft_rel_pks = set([
-                i.pk for i in src.all() if getattr(i, 'is_draft', False)
-            ])
             for published_rel_obj in published_rel_objs_maybe_obsolete:
                 draft = published_rel_obj.get_draft()
                 if not draft or draft.pk not in current_draft_rel_pks:
-                    # Handle standard M2M relationship (without through table)
-                    if src.through._meta.auto_created:
-                        src.remove(published_rel_obj)
-                    # Handle M2M *through* relationship
-                    else:
-                        remove_through_model_relationship(
-                            dst.through, src_obj, rel_obj)
+                    delete_through_model_relationship(
+                        src_manager, published_rel_obj)
 
         # Track the relationship through-tables we have processed to avoid
         # processing the same relationships in both forward and reverse
@@ -502,14 +470,12 @@ class PublishingModel(models.Model):
 
         # Forward.
         for field in src_obj._meta.many_to_many:
-            src = getattr(src_obj, field.name)
-            dst = getattr(self, field.name)
-            clone(src, dst)
+            src_manager = getattr(src_obj, field.name)
+            clone(src_manager)
             seen_rel_through_tables.add(field.rel.through)
 
         # Reverse.
-        for field in \
-                src_obj._meta.get_all_related_many_to_many_objects():
+        for field in src_obj._meta.get_all_related_many_to_many_objects():
             # Skip reverse relationship we have already seen
             if field.field.rel.through in seen_rel_through_tables:
                 continue
@@ -517,9 +483,8 @@ class PublishingModel(models.Model):
             # M2M relationships with `self` don't have accessor names
             if not field_accessor_name:
                 continue
-            src = getattr(src_obj, field_accessor_name)
-            dst = getattr(self, field_accessor_name)
-            clone(src, dst)
+            src_manager = getattr(src_obj, field_accessor_name)
+            clone(src_manager)
 
     def has_placeholder_relationships(self):
         return hasattr(self, 'placeholder_set') \
