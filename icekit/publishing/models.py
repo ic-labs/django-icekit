@@ -442,9 +442,10 @@ class PublishingModel(models.Model):
                     except AttributeError:
                         pass  # Related item has no published copy
                     else:
-                        clone_through_model_relationship(
-                            src_manager, through_entry, src_obj,
-                            rel_obj_published)
+                        if rel_obj_published:
+                            clone_through_model_relationship(
+                                src_manager, through_entry, src_obj,
+                                rel_obj_published)
                     # Track IDs of related draft copies, so we can tell later
                     # whether relationshps with published copies are obsolete
                     current_draft_rel_pks.add(rel_obj.pk)
