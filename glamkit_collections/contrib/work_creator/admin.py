@@ -35,6 +35,12 @@ class WorkCreatorsInlineForCreators(admin.TabularInline, ThumbnailAdminMixin):
             return admin_link(inst.work)
     link.allow_tags = True
 
+    def get_queryset(self, request):
+        return super(WorkCreatorsInlineForCreators, self) \
+            .get_queryset(request) \
+            .filter(work__publishing_is_draft=True,
+                    creator__publishing_is_draft=True)
+
 
 class WorkCreatorsInlineForWorks(SortableInlineAdminMixin, WorkCreatorsInlineForCreators):
     exclude = None
@@ -51,6 +57,12 @@ class WorkCreatorsInlineForWorks(SortableInlineAdminMixin, WorkCreatorsInlineFor
         else:
             return admin_link(inst.creator)
     link.allow_tags = True
+
+    def get_queryset(self, request):
+        return super(WorkCreatorsInlineForWorks, self) \
+            .get_queryset(request) \
+            .filter(work__publishing_is_draft=True,
+                    creator__publishing_is_draft=True)
 
 
 class WorkImageInline(
