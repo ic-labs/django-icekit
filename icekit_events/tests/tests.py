@@ -1316,6 +1316,136 @@ class TestEventOccurrences(TestCase):
         )
 
 
+class Timezones(TestCase):
+
+    def setUp(self):
+        # Occurrences based on Pacific timezone
+        self.occurrence_pacific_timed = G(
+            models.Occurrence,
+            event=G(SimpleEvent, title='Los Angeles Timed'),
+            start=djtz.datetime(2016, 10, 1, 9, 0, tzinfo='US/Pacific'),
+            end=djtz.datetime(2016, 10, 1, 13, 0, tzinfo='US/Pacific'),
+        )
+        self.occurrence_pacific_all_day = G(
+            models.Occurrence,
+            event=G(SimpleEvent, title='Los Angeles All-day'),
+            start=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='US/Pacific'),
+            end=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='US/Pacific'),
+            is_all_day=True,
+        )
+        # Occurrences based on UTC timezone
+        self.occurrence_utc_timed = G(
+            models.Occurrence,
+            event=G(SimpleEvent, title='UTC Timed'),
+            start=djtz.datetime(2016, 10, 1, 9, 0, tzinfo='UTC'),
+            end=djtz.datetime(2016, 10, 1, 13, 0, tzinfo='UTC'),
+        )
+        self.occurrence_utc_all_day = G(
+            models.Occurrence,
+            event=G(SimpleEvent, title='UTC All-day'),
+            start=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='UTC'),
+            end=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='UTC'),
+            is_all_day=True,
+        )
+        # Occurrences based on UK timezone
+        self.occurrence_uk_timed = G(
+            models.Occurrence,
+            event=G(SimpleEvent, title='London Timed'),
+            start=djtz.datetime(2016, 10, 1, 9, 0, tzinfo='Europe/London'),
+            end=djtz.datetime(2016, 10, 1, 13, 0, tzinfo='Europe/London'),
+        )
+        self.occurrence_uk_all_day = G(
+            models.Occurrence,
+            event=G(SimpleEvent, title='London All-day'),
+            start=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='Europe/London'),
+            end=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='Europe/London'),
+            is_all_day=True,
+        )
+        # Occurrences based on Australian Eastern timezone
+        self.occurrence_aest_timed = G(
+            models.Occurrence,
+            event=G(SimpleEvent, title='Sydney Timed'),
+            start=djtz.datetime(2016, 10, 1, 9, 0, tzinfo='Australia/Sydney'),
+            end=djtz.datetime(2016, 10, 1, 13, 0, tzinfo='Australia/Sydney'),
+        )
+        self.occurrence_aest_all_day = G(
+            models.Occurrence,
+            event=G(SimpleEvent, title='Sydney All-day'),
+            start=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='Australia/Sydney'),
+            end=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='Australia/Sydney'),
+            is_all_day=True,
+        )
+
+    def test_occurrence_default_ordering(self):
+        ordered_titles = [
+            o.event.title for o in models.Occurrence.objects.all()]
+        self.assertEqual(
+            # All-day occurrences are ordered first, by date then title
+            [u'London All-day',
+             u'Los Angeles All-day',
+             u'Sydney All-day',
+             u'UTC All-day',
+             # Timed occurrences are ordered after all-day occurrences, by
+             # datetime accounting for timezone
+             u'Los Angeles Timed',
+             u'UTC Timed',
+             u'London Timed',
+             u'Sydney Timed',
+             ],
+            ordered_titles
+        )
+
+    def test_overlapping_filter(self):
+        self.assertEqual(
+            # All-day occurrences are included in overlapping result for date
+            [u'London All-day',
+             u'Los Angeles All-day',
+             u'Sydney All-day',
+             u'UTC All-day',
+             # Timed occurrences are included in overlapping result only when
+             # their start & end times overlap
+             u'Los Angeles Timed',
+             ],
+            [o.event.title for o in models.Occurrence.objects.overlapping(
+                djtz.datetime(2016, 10, 1, 10, 0, tzinfo='US/Pacific'),
+                djtz.datetime(2016, 10, 1, 11, 0, tzinfo='US/Pacific'),
+            )]
+        )
+
+        self.assertEqual(
+            # All-day occurrences are included in overlapping result for date
+            [u'London All-day',
+             u'Los Angeles All-day',
+             u'Sydney All-day',
+             u'UTC All-day',
+             # Timed occurrences are included in overlapping result only when
+             # their start & end times overlap
+             u'Los Angeles Timed',
+             u'UTC Timed',
+             u'London Timed',
+             ],
+            [o.event.title for o in models.Occurrence.objects.overlapping(
+                djtz.datetime(2016, 10, 1, 12, 59, tzinfo='US/Pacific'),
+                djtz.datetime(2016, 10, 1, 9, 1, tzinfo='Europe/London'),
+            )]
+        )
+
+        self.assertEqual(
+            # All-day occurrences are included in overlapping result for date
+            [u'London All-day',
+             u'Los Angeles All-day',
+             u'Sydney All-day',
+             u'UTC All-day',
+             # Timed occurrences are included in overlapping result only when
+             # their start & end times overlap
+             u'London Timed',
+             u'Sydney Timed',
+             ],
+            [o.event.title for o in models.Occurrence.objects.overlapping(
+                djtz.datetime(2016, 10, 1, 13, 0, tzinfo='Europe/London'),
+                djtz.datetime(2016, 10, 1, 9, 0, tzinfo='Australia/Sydney'),
+            )]
+        )
 
 
 class Time(TestCase):
