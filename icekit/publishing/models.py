@@ -418,9 +418,7 @@ class PublishingModel(models.Model):
 
         def clone(src_manager):
             through_qs = src_manager.through.objects \
-                .filter(**{src_manager.source_field_name: src_obj}) \
-                .select_related('%s__publishing_linked'
-                                % src_manager.target_field_name)
+                .filter(**{src_manager.source_field_name: src_obj})
             published_rel_objs_maybe_obsolete = []
             current_draft_rel_pks = set()
             for through_entry in through_qs:
