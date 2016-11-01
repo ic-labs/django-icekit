@@ -6,7 +6,7 @@ Tests for ``icekit_events`` app.
 # WebTest API docs: http://webtest.readthedocs.org/en/latest/api.html
 
 from timezone import timezone as djtz  # django-timezone
-from datetime import datetime, timedelta, time
+from datetime import date, datetime, timedelta, time
 import six
 import json
 
@@ -1325,12 +1325,16 @@ class Timezones(TestCase):
             event=G(SimpleEvent, title='Los Angeles Timed'),
             start=djtz.datetime(2016, 10, 1, 9, 0, tzinfo='US/Pacific'),
             end=djtz.datetime(2016, 10, 1, 13, 0, tzinfo='US/Pacific'),
+            start_date=None,
+            end_date=None,
         )
         self.occurrence_pacific_all_day = G(
             models.Occurrence,
             event=G(SimpleEvent, title='Los Angeles All-day'),
-            start=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='US/Pacific'),
-            end=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='US/Pacific'),
+            start_date=date(2016, 10, 1),
+            end_date=date(2016, 10, 1),
+            start=None,
+            end=None,
             is_all_day=True,
         )
         # Occurrences based on UTC timezone
@@ -1339,12 +1343,16 @@ class Timezones(TestCase):
             event=G(SimpleEvent, title='UTC Timed'),
             start=djtz.datetime(2016, 10, 1, 9, 0, tzinfo='UTC'),
             end=djtz.datetime(2016, 10, 1, 13, 0, tzinfo='UTC'),
+            start_date=None,
+            end_date=None,
         )
         self.occurrence_utc_all_day = G(
             models.Occurrence,
             event=G(SimpleEvent, title='UTC All-day'),
-            start=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='UTC'),
-            end=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='UTC'),
+            start_date=date(2016, 10, 1),
+            end_date=date(2016, 10, 1),
+            start=None,
+            end=None,
             is_all_day=True,
         )
         # Occurrences based on UK timezone
@@ -1353,12 +1361,16 @@ class Timezones(TestCase):
             event=G(SimpleEvent, title='London Timed'),
             start=djtz.datetime(2016, 10, 1, 9, 0, tzinfo='Europe/London'),
             end=djtz.datetime(2016, 10, 1, 13, 0, tzinfo='Europe/London'),
+            start_date=None,
+            end_date=None,
         )
         self.occurrence_uk_all_day = G(
             models.Occurrence,
             event=G(SimpleEvent, title='London All-day'),
-            start=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='Europe/London'),
-            end=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='Europe/London'),
+            start_date=date(2016, 10, 1),
+            end_date=date(2016, 10, 1),
+            start=None,
+            end=None,
             is_all_day=True,
         )
         # Occurrences based on Australian Eastern timezone
@@ -1367,14 +1379,77 @@ class Timezones(TestCase):
             event=G(SimpleEvent, title='Sydney Timed'),
             start=djtz.datetime(2016, 10, 1, 9, 0, tzinfo='Australia/Sydney'),
             end=djtz.datetime(2016, 10, 1, 13, 0, tzinfo='Australia/Sydney'),
+            start_date=None,
+            end_date=None,
         )
         self.occurrence_aest_all_day = G(
             models.Occurrence,
             event=G(SimpleEvent, title='Sydney All-day'),
-            start=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='Australia/Sydney'),
-            end=djtz.datetime(2016, 10, 1, 0, 0, tzinfo='Australia/Sydney'),
+            start_date=date(2016, 10, 1),
+            end_date=date(2016, 10, 1),
+            start=None,
+            end=None,
             is_all_day=True,
         )
+
+    def test_start_and_end_times_have_expected_values_for_timed_events(self):
+        # Check that occurrence start times match expected value in AEST
+        aest_tz = djtz.pytz.timezone('Australia/Sydney')
+        self.assertEqual(
+            self.occurrence_pacific_timed.start.astimezone(aest_tz),
+            djtz.datetime(2016, 10, 2, 3, 0, tzinfo='Australia/Sydney'),
+        )
+        self.assertEqual(
+            self.occurrence_utc_timed.start.astimezone(aest_tz),
+            djtz.datetime(2016, 10, 1, 19, 0, tzinfo='Australia/Sydney'),
+        )
+        self.assertEqual(
+            self.occurrence_uk_timed.start.astimezone(aest_tz),
+            djtz.datetime(2016, 10, 1, 18, 0, tzinfo='Australia/Sydney'),
+        )
+        self.assertEqual(
+            self.occurrence_aest_timed.start.astimezone(aest_tz),
+            djtz.datetime(2016, 10, 1, 9, 0, tzinfo='Australia/Sydney'),
+        )
+
+    def test_start_date_and_end_date_fields_are_set_for_timed_occurrences(self):
+        # Start and end dates of timed events set to "local" date corresponding
+        # to the timezone of the original datetime start/end values
+        self.assertEqual(
+            self.occurrence_pacific_timed.start_date,
+            date(2016, 10, 1))
+        self.assertEqual(
+            self.occurrence_pacific_timed.end_date,
+            date(2016, 10, 1))
+        self.assertEqual(
+            self.occurrence_utc_timed.start_date,
+            date(2016, 10, 1))
+        self.assertEqual(
+            self.occurrence_utc_timed.end_date,
+            date(2016, 10, 1))
+        self.assertEqual(
+            self.occurrence_uk_timed.start_date,
+            date(2016, 10, 1))
+        self.assertEqual(
+            self.occurrence_uk_timed.end_date,
+            date(2016, 10, 1))
+        self.assertEqual(
+            self.occurrence_aest_timed.start_date,
+            date(2016, 10, 1))
+        self.assertEqual(
+            self.occurrence_aest_timed.end_date,
+            date(2016, 10, 1))
+
+    def test_start_and_end_fields_are_unset_for_all_day_occurrences(self):
+        # Start and end datetiems of all-day events set to None
+        self.assertIsNone(self.occurrence_pacific_all_day.start)
+        self.assertIsNone(self.occurrence_pacific_all_day.end)
+        self.assertIsNone(self.occurrence_utc_all_day.start)
+        self.assertIsNone(self.occurrence_utc_all_day.end)
+        self.assertIsNone(self.occurrence_uk_all_day.start)
+        self.assertIsNone(self.occurrence_uk_all_day.end)
+        self.assertIsNone(self.occurrence_aest_all_day.start)
+        self.assertIsNone(self.occurrence_aest_all_day.end)
 
     def test_occurrence_default_ordering(self):
         ordered_titles = [
@@ -1387,31 +1462,20 @@ class Timezones(TestCase):
              u'UTC All-day',
              # Timed occurrences are ordered after all-day occurrences, by
              # datetime accounting for timezone
-             u'Los Angeles Timed',
-             u'UTC Timed',
-             u'London Timed',
              u'Sydney Timed',
+             u'London Timed',
+             u'UTC Timed',
+             u'Los Angeles Timed',
              ],
             ordered_titles
         )
 
     def test_overlapping_filter(self):
-        self.assertEqual(
-            # All-day occurrences are included in overlapping result for date
-            [u'London All-day',
-             u'Los Angeles All-day',
-             u'Sydney All-day',
-             u'UTC All-day',
-             # Timed occurrences are included in overlapping result only when
-             # their start & end times overlap
-             u'Los Angeles Timed',
-             ],
-            [o.event.title for o in models.Occurrence.objects.overlapping(
+        actual = [
+            o.event.title for o in models.Occurrence.objects.overlapping(
                 djtz.datetime(2016, 10, 1, 10, 0, tzinfo='US/Pacific'),
                 djtz.datetime(2016, 10, 1, 11, 0, tzinfo='US/Pacific'),
             )]
-        )
-
         self.assertEqual(
             # All-day occurrences are included in overlapping result for date
             [u'London All-day',
@@ -1421,15 +1485,14 @@ class Timezones(TestCase):
              # Timed occurrences are included in overlapping result only when
              # their start & end times overlap
              u'Los Angeles Timed',
-             u'UTC Timed',
-             u'London Timed',
-             ],
-            [o.event.title for o in models.Occurrence.objects.overlapping(
-                djtz.datetime(2016, 10, 1, 12, 59, tzinfo='US/Pacific'),
-                djtz.datetime(2016, 10, 1, 9, 1, tzinfo='Europe/London'),
-            )]
+             ], actual
         )
 
+        actual = [
+            o.event.title for o in models.Occurrence.objects.overlapping(
+                djtz.datetime(2016, 10, 1, 12, 59, tzinfo='Europe/London'),
+                djtz.datetime(2016, 10, 1, 9, 1, tzinfo='US/Pacific'),
+            )]
         self.assertEqual(
             # All-day occurrences are included in overlapping result for date
             [u'London All-day',
@@ -1439,12 +1502,77 @@ class Timezones(TestCase):
              # Timed occurrences are included in overlapping result only when
              # their start & end times overlap
              u'London Timed',
-             u'Sydney Timed',
-             ],
-            [o.event.title for o in models.Occurrence.objects.overlapping(
-                djtz.datetime(2016, 10, 1, 13, 0, tzinfo='Europe/London'),
-                djtz.datetime(2016, 10, 1, 9, 0, tzinfo='Australia/Sydney'),
+             u'UTC Timed',
+             u'Los Angeles Timed',
+             ], actual
+        )
+
+        actual = [
+            o.event.title for o in models.Occurrence.objects.overlapping(
+                djtz.datetime(2016, 10, 1, 13, 0, tzinfo='Australia/Sydney'),
+                djtz.datetime(2016, 10, 1, 9, 0, tzinfo='Europe/London'),
             )]
+        self.assertEqual(
+            # All-day occurrences are included in overlapping result for date
+            [u'London All-day',
+             u'Los Angeles All-day',
+             u'Sydney All-day',
+             u'UTC All-day',
+             # Timed occurrences are included in overlapping result only when
+             # their start & end times overlap
+             # NOTE: 'Sydney Timed' not included due to exclusive start check
+             # NOTE: 'London Timed' not included due to exclusive end check
+             ], actual
+        )
+
+    def test_start_within_filter(self):
+        actual = [
+            o.event.title for o in models.Occurrence.objects.start_within(
+                djtz.datetime(2016, 10, 1, 9, 0, tzinfo='US/Pacific'),
+                djtz.datetime(2016, 10, 1, 9, 1, tzinfo='US/Pacific'),
+            )]
+        self.assertEqual(
+            # All-day occurrences are included in start_within result for date
+            [u'London All-day',
+             u'Los Angeles All-day',
+             u'Sydney All-day',
+             u'UTC All-day',
+             # Timed occurrences
+             u'Los Angeles Timed',
+             ], actual
+        )
+
+        actual = [
+            o.event.title for o in models.Occurrence.objects.start_within(
+                djtz.datetime(2016, 10, 1, 12, 59, tzinfo='Europe/London'),
+                djtz.datetime(2016, 10, 1, 9, 1, tzinfo='US/Pacific'),
+            )]
+        self.assertEqual(
+            # All-day occurrences are included in start_within result for date
+            [u'London All-day',
+             u'Los Angeles All-day',
+             u'Sydney All-day',
+             u'UTC All-day',
+             # Timed occurrences
+             u'Los Angeles Timed',
+             ], actual
+        )
+
+        actual = [
+            o.event.title for o in models.Occurrence.objects.start_within(
+                djtz.datetime(2016, 10, 1, 9, 0, tzinfo='Australia/Sydney'),
+                djtz.datetime(2016, 10, 1, 9, 0, tzinfo='Europe/London'),
+            )]
+        self.assertEqual(
+            # All-day occurrences are included in start_within result for date
+            [u'London All-day',
+             u'Los Angeles All-day',
+             u'Sydney All-day',
+             u'UTC All-day',
+             # Timed occurrences
+             u'Sydney Timed'  # Included due to inclusive start check
+             # NOTE: 'London Timed' not included due to exclusive end check
+             ], actual
         )
 
 

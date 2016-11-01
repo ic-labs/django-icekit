@@ -708,18 +708,18 @@ class OccurrenceQueryset(QuerySet):
         :return: occurrences overlapping the given start and end datetimes,
         inclusive.
         Special logic is applied for all-day occurrences, for which the start
-        and end times are zeroed to find all occurrences that occur on a DATE
-        as opposed to within DATETIMEs.
+        and end times are translated into naive date values in whichever
+        timezone the start/end datetimes are in.
         """
+        # Exclusive for datetime, inclusive for date.
         return self.filter(
                 models.Q(is_all_day=False, start__lt=end) |
                 models.Q(is_all_day=True,
-                         start__lt=zero_datetime(end))
+                         start_date__lte=end.date())
             ).filter(
-                # Exclusive for datetime, inclusive for date.
                 models.Q(is_all_day=False, end__gt=start) |
                 models.Q(is_all_day=True,
-                         end__gte=zero_datetime(start))
+                         end_date__gte=start.date())
             )
 
     def start_within(self, start, end):
@@ -728,14 +728,15 @@ class OccurrenceQueryset(QuerySet):
         datetimes, inclusive.
         """
         return self.filter(
+            # Inclusive for datetime and date.
             models.Q(is_all_day=False, start__gte=start) |
             models.Q(is_all_day=True,
-                     start__gte=zero_datetime(start))
+                     start_date__gte=start.date())
         ).filter(
             # Exclusive for datetime, inclusive for date.
             models.Q(is_all_day=False, start__lt=end) |
             models.Q(is_all_day=True,
-                     start__lte=zero_datetime(end))
+                     start_date__lte=end.date())
         )
 
     def _same_day_ids(self):
@@ -804,8 +805,12 @@ class Occurrence(AbstractBaseModel):
         EventRepeatsGenerator,
         blank=True, null=True)
     start = models.DateTimeField(
-        db_index=True)
+        blank=True, null=True, db_index=True)
     end = models.DateTimeField(
+        blank=True, null=True, db_index=True)
+    start_date = models.DateField(
+        db_index=True)
+    end_date = models.DateField(
         db_index=True)
     is_all_day = models.BooleanField(
         default=False, db_index=True)
@@ -826,23 +831,27 @@ class Occurrence(AbstractBaseModel):
         blank=True, null=True, editable=False)
     original_end = models.DateTimeField(
         blank=True, null=True, editable=False)
+    original_start_date = models.DateField(
+        blank=True, null=True, editable=False)
+    original_end_date = models.DateField(
+        blank=True, null=True, editable=False)
 
     class Meta:
-        ordering = ['start', '-is_all_day', 'event', 'pk']
+        ordering = ['start_date', '-is_all_day', 'start', 'event__title', 'pk']
 
     def time_range_string(self):
         if self.is_all_day:
             if self.duration < timedelta(days=1):
                 return u"""{0}, all day""".format(
-                    datefilter(self.local_start, DATE_FORMAT))
+                    datefilter(self.start_date, DATE_FORMAT))
             else:
                 return u"""{0} - {1}, all day""".format(
-                    datefilter(self.local_start, DATE_FORMAT),
-                    datefilter(self.local_end, DATE_FORMAT))
+                    datefilter(self.start_date, DATE_FORMAT),
+                    datefilter(self.end_date, DATE_FORMAT))
         else:
             return u"""{0} - {1}""".format(
-                datefilter(self.local_start, DATETIME_FORMAT),
-                datefilter(self.local_end, DATETIME_FORMAT))
+                datefilter(self.start, DATETIME_FORMAT),
+                datefilter(self.end, DATETIME_FORMAT))
 
     def __str__(self):
         return u"""Occurrence of "{0}" {1}""".format(
@@ -867,7 +876,10 @@ class Occurrence(AbstractBaseModel):
         """
         Return the duration between ``start`` and ``end`` as a timedelta.
         """
-        return self.end - self.start
+        if self.is_all_day:
+            return self.end_date - self.start_date + timedelta(days=1)
+        else:
+            return self.end - self.start
 
     @transaction.atomic
     def save(self, *args, **kwargs):
@@ -879,16 +891,34 @@ class Occurrence(AbstractBaseModel):
                 self.is_cancelled = True
             else:
                 self.is_cancelled = False
-        # Convert datetime field values to date-compatible versions in the
-        # UTC timezone when we save an all-day occurrence
+
+        # All-day events must be specified with `start_date` and `end_date`
+        # values, from which the `start` and `end` values are derived
         if self.is_all_day:
-            self.start = zero_datetime(self.start)
-            self.end = zero_datetime(self.end)
-        # Set original start/end times, if necessary
+            if self.start or self.end:
+                raise Exception(
+                    "Set only `start_date` and `end_date` date fields for an"
+                    "all-day occurrence, not `start` or `end` datetime fields")
+        # Timed events must be specified with `start` and `end` values, from
+        # which the `start_date` and `end_date` values are derived
+        else:
+            if self.start_date or self.end_date:
+                raise Exception(
+                    "Set only `start_date` and `end_date` date fields for an"
+                    "all-day occurrence, not `start` or `end` datetime fields")
+            self.start_date = self.start.date()
+            self.end_date = self.end.date()
+
+        # Set original start/end dates and times, if necessary
         if not self.original_start:
             self.original_start = self.start
         if not self.original_end:
             self.original_end = self.end
+        if not self.original_start_date:
+            self.original_start_date = self.start_date
+        if not self.original_end_date:
+            self.original_end_Date = self.end_date
+
         super(Occurrence, self).save(*args, **kwargs)
 
     # TODO Return __str__ as title for now, improve it later
