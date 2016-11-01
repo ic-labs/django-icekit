@@ -16,6 +16,7 @@
 /.idea/
 /bower_components/
 /docker-cloud.*.yml
+/docker-compose.override.yml
 /node_modules/
 /project_settings_local.py
 /static_root/

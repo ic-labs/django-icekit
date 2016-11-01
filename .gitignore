@@ -10,9 +10,11 @@
 /*.egg-info/
 /.eggs/
 /.env
+/.env.local
 /.idea/
 /.tox/
 /dist/
+/docker-compose.override.yml
 /project_template/bower_components/
 /project_template/node_modules/
 /project_template/static_root/

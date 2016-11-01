@@ -101,6 +101,7 @@ setuptools.setup(
             'glamkit-sponsors',
             'icekit-events',
             'icekit-press-releases>=0.8',
+            'glamkit-collections>=0.35',
         ],
         'project': [
             'boto3',

@@ -1,7 +1,6 @@
 version: "2"
 services:
   base:
-    env_file: .env.local
     environment:
       BASE_SETTINGS_MODULE: develop
       GPG_PASSPHRASE: # Get from environment
@@ -49,9 +48,9 @@ services:
     ports:
       - 9200
   postgres:
-    expose:
-      - 5432
     image: onjin/alpine-postgres:9.4
+    ports:
+      - 5432
   redis:
     command: redis-server --appendonly yes
     image: redis:3-alpine
