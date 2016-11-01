@@ -1,6 +1,10 @@
 <blockquote>
 	<p>{{ instance.quote|safe }}</p>
-	{% if instance.attribution %}
-		<footer>{{ instance.attribution}}{% if instance.organisation %}, <cite>{{ instance.organisation }}</cite>{% endif %}</footer>
+	{% if instance.attribution or instance.organisation %}
+		<footer>
+			{% if instance.url %}<a href="{{ instance.url }}" target="_blank">{% endif %}
+				{{ instance.attribution}}{% if instance.attribution and instance.organisation %}, {% endif %}{% if instance.organisation %}<cite>{{ instance.organisation }}</cite>{% endif %}
+			{% if instance.url %}</a>{% endif %}
+		</footer>
 	{% endif %}
 </blockquote>
