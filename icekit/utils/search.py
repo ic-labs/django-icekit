@@ -60,6 +60,9 @@ class FluentContentsPageModelSearchForm(ModelSearchForm):
         Add non-document fields to search query set so a) they are searched
         when querying, and b) any customisations like `boost` are applied.
         """
+        # TODO Find a way to detect all indexed fields across models and
+        # automatically add them to this filter, instead of requiring explicit
+        # naming of every indexed field.
         return self.searchqueryset.filter(
             SQ(content=AutoQuery(query)) |  # Search `text` document
             SQ(title=AutoQuery(query)) |
