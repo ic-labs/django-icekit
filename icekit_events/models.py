@@ -423,8 +423,11 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
             return self.human_dates
         else:
             first, last = self.get_occurrences_range()
-            start = first.local_start
-            end = last.local_end
+            if first:
+                start = first.local_start
+            if last:
+                end = last.local_end
+
             if not (first or last):
                 return ''
             elif first and not last:
