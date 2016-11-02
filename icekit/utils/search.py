@@ -1,4 +1,7 @@
 from haystack import indexes
+from haystack.backends import SQ
+from haystack.inputs import AutoQuery
+from haystack.forms import ModelSearchForm
 
 from icekit.publishing.models import PublishableFluentContentsPage
 
@@ -47,3 +50,54 @@ class FluentContentsPageIndexMixin(indexes.SearchIndex):
 
     def prepare_boosted_search_terms(self, obj):
         return getattr(obj, 'boosted_search_terms', '')
+
+
+class FluentContentsPageModelSearchForm(ModelSearchForm):
+    """ Custom search form to use the indexed fields defined above """
+
+    def get_searchqueryset(self, query):
+        """
+        Add non-document fields to search query set so a) they are searched
+        when querying, and b) any customisations like `boost` are applied.
+        """
+        return self.searchqueryset.filter(
+            SQ(content=AutoQuery(query)) |  # Search `text` document
+            SQ(title=AutoQuery(query)) |
+            SQ(slug=AutoQuery(query)) |
+            SQ(author=AutoQuery(query)) |
+
+            SQ(boosted_search_terms=AutoQuery(query)) |
+
+            SQ(meta_keywords=AutoQuery(query)) |
+            SQ(meta_description=AutoQuery(query)) |
+            SQ(meta_title=AutoQuery(query))
+        )
+
+    # TODO This is mostly a copy/paste of `haystack.forms:SearchForm.search`
+    # and `haystack.forms.ModelSearchForm.search` except for customisation of
+    # the `SearchQuerySet` to include our fields. There should be a better way
+    # of doing this, though this is what the docs recommend:
+    # http://django-haystack.readthedocs.io/en/v2.5.1/boost.html
+    def search(self):
+        if not self.is_valid():
+            return self.no_query_found()
+
+        if not self.cleaned_data.get('q'):
+            return self.no_query_found()
+
+        q = self.cleaned_data['q']
+
+        #######################################################################
+        # Customised
+        sqs = self.get_searchqueryset(q)
+        #######################################################################
+
+        if self.load_all:
+            sqs = sqs.load_all()
+
+        #######################################################################
+        # Customised - per `ModelSearchForm.search()`
+        sqs = sqs.models(*self.get_models())
+        #######################################################################
+
+        return sqs
