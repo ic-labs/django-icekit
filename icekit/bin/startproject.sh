@@ -59,7 +59,7 @@ find . -type f -exec sed -e "s/project_template/$DEST_DIR_BASENAME/g" -i.deletem
 find . -type f -iname "*.deleteme" -delete
 
 # Replace editable with package requirement.
-sed -e "s/-e ../django-icekit/" -i '' requirements-icekit.txt
+sed -e "s/-e ../django-icekit/" requirements-icekit.txt > requirements-icekit.txt
 
 if [[ -n $(which git) ]]; then
     echo
