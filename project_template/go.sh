@@ -26,7 +26,7 @@ if [[ -z $("$ICEKIT_VENV/bin/python" -m pip freeze | grep django-icekit) ]]; the
 fi
 
 # Get absolute directory for the `icekit` package.
-export ICEKIT_DIR=$("$ICEKIT_VENV/bin/python" -c 'import icekit, os; print os.path.dirname(icekit.__file__);')
+export ICEKIT_DIR=$("$ICEKIT_VENV/bin/python" -c 'from __future__ import print_function; import icekit, os; print(os.path.dirname(icekit.__file__));')
 
 # Execute entrypoint and command.
 exec "$ICEKIT_DIR/bin/entrypoint.sh" ${@:-setup-django.sh bash.sh}
