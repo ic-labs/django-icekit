@@ -378,13 +378,13 @@ COMPRESS_OFFLINE_CONTEXT = 'ixc_compressor.get_compress_offline_context'
 COMPRESS_PRECOMPILERS = (
     (
         'text/less',
-        '%s {infile} {outfile} --autoprefix' % (
+        '"%s" {infile} {outfile} --autoprefix' % (
             os.path.join(PROJECT_DIR, 'node_modules', '.bin', 'lessc'),
         ),
     ),
     (
         'text/x-scss',
-        '%s {infile} {outfile} --autoprefix --include-path %s' % (
+        '"%s" {infile} {outfile} --autoprefix --include-path %s' % (
             os.path.join(PROJECT_DIR, 'node_modules', '.bin', 'node-sass'),
             STATIC_ROOT,
         ),
