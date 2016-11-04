@@ -28,10 +28,11 @@ REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
 
 # Uniquely identify the base settings module, so we can avoid conflicts with
 # other projects running on the same system.
-SETTINGS_MODULE_HASH = hashlib.md5(__file__ + BASE_SETTINGS_MODULE).hexdigest()
+SETTINGS_MODULE_HASH = hashlib.md5(
+    u''.join((__file__, BASE_SETTINGS_MODULE)).encode('utf-8')).hexdigest()
 
 PROJECT_NAME = os.environ.get('ICEKIT_PROJECT_NAME', 'ICEkit')
-PROJECT_SLUG = re.sub(r'[^0-9A-Za-z]+', '-', slugify(unicode(PROJECT_NAME)))
+PROJECT_SLUG = re.sub(r'[^0-9A-Za-z]+', '-', slugify(PROJECT_NAME))
 
 SITE_DOMAIN = os.environ.get('SITE_DOMAIN', '%s.lvh.me' % PROJECT_SLUG)
 SITE_NAME = os.environ.get('SITE_NAME', PROJECT_NAME)

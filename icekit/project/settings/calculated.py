@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import importlib
 import os
@@ -8,7 +8,7 @@ from icekit.utils.sequences import dedupe_and_sort
 
 # Emulate `from ... import *` with base settings module from environment.
 BASE_SETTINGS_MODULE = os.environ.setdefault('BASE_SETTINGS_MODULE', 'base')
-print '# BASE_SETTINGS_MODULE: %s' % BASE_SETTINGS_MODULE
+print('# BASE_SETTINGS_MODULE: %s' % BASE_SETTINGS_MODULE)
 try:
     locals().update(importlib.import_module(
         'icekit.project.settings._%s' % BASE_SETTINGS_MODULE).__dict__)
@@ -95,7 +95,7 @@ except IOError:
         secret = open(SECRET_FILE, 'w')
         secret.write(SECRET_KEY)
         secret.close()
-        os.chmod(SECRET_FILE, 0400)
+        os.chmod(SECRET_FILE, 0o400)
     except IOError:
         raise Exception(
             'Please create a %s file with 50 random characters to set your '

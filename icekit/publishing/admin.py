@@ -1,4 +1,5 @@
 import json
+import six
 
 import django
 from django import forms
@@ -317,7 +318,7 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         Given a list of template names, find the first one that actually exists
         and is available.
         """
-        if isinstance(template_name_list, basestring):
+        if isinstance(template_name_list, six.string_types):
             return template_name_list
         else:
             # Take advantage of fluent_pages' internal implementation

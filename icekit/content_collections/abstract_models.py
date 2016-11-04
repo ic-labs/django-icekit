@@ -1,4 +1,7 @@
-from urlparse import urljoin
+try:
+	from urlparse import urljoin
+except ImportError:
+	from urllib.parse import urljoin
 
 from django.core.exceptions import ValidationError
 from django.template.response import TemplateResponse
