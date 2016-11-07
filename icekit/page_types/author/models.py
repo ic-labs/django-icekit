@@ -2,7 +2,10 @@
 Model declaration for the `author` app.
 """
 import re
-from urlparse import urljoin
+try:
+	from urlparse import urljoin
+except ImportError:
+	from urllib.parse import urljoin
 
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
