@@ -108,12 +108,13 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
                  publishing_admin.PublishingAdmin):
     base_model = models.EventBase
     list_filter = (
-        EventTypeFilter, 'modified', 'show_in_calendar',
+        EventTypeFilter, 'primary_type', 'secondary_types', 'modified', 'show_in_calendar',
         publishing_admin.PublishingStatusFilter,
         publishing_admin.PublishingPublishedFilter,
     )
     list_display = (
-        '__str__', 'get_type', 'modified', 'publishing_column',
+        '__str__', 'child_type_name', 'primary_type', 'modified',
+        'publishing_column',
         'part_of_display', 'show_in_calendar',
         'occurrence_count',
         'first_occurrence', 'last_occurrence',
@@ -130,10 +131,11 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         }
 
     def get_queryset(self, request):
-        return super(EventAdmin, self).get_queryset(request)\
-            .annotate(occurrence_count=Count('occurrences'))\
-            .annotate(first_occurrence=Min('occurrences__start'))\
-            .annotate(last_occurrence=Max('occurrences__start'))
+        return super(EventAdmin, self).get_queryset(request).annotate(
+            last_occurrence=Max('occurrences__start'),
+            first_occurrence=Min('occurrences__start'),
+            occurrence_count=Count('occurrences')
+        )
 
     def occurrence_count(self, inst):
         return inst.occurrence_count
@@ -141,7 +143,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
 
     def first_occurrence(self, inst):
         return inst.first_occurrence
-    first_occurrence.admin_order_field = 'first_occurrence"'
+    first_occurrence.admin_order_field = 'first_occurrence'
 
     def last_occurrence(self, inst):
         return inst.last_occurrence
@@ -205,11 +207,6 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             data.append(self._calendar_json_for_occurrence(occurrence))
         data = json.dumps(data, cls=DjangoJSONEncoder)
         return HttpResponse(content=data, content_type='application/json')
-
-    def get_type(self, obj):
-        return obj.get_real_concrete_instance_class() \
-            ._meta.verbose_name.title()
-    get_type.short_description = "type"
 
     def _calendar_json_for_occurrence(self, occurrence):
         """
@@ -317,5 +314,11 @@ class RecurrenceRuleAdmin(admin.ModelAdmin):
         return JsonResponse(data)
 
 
+class EventTypeAdmin(TitleSlugAdmin):
+    list_display = TitleSlugAdmin.list_display + ('is_public',)
+    list_filter = ('is_public',)
+
+
 admin.site.register(models.EventBase, EventAdmin)
+admin.site.register(models.EventType, EventTypeAdmin)
 admin.site.register(models.RecurrenceRule, RecurrenceRuleAdmin)

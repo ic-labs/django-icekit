@@ -195,6 +195,15 @@ class RecurrenceRule(AbstractBaseModel):
     def __str__(self):
         return self.description
 
+class EventType(TitleSlugMixin):
+    is_public = models.BooleanField(
+        "Show to public?",
+        default=True,
+        help_text="Public types are displayed to the public, e.g. 'talk', "
+                  "'workshop', etc. "
+                  "Non-public types are used to indicate special behaviour, "
+                  "such as education or members events."
+    )
 
 @encoding.python_2_unicode_compatible
 class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
@@ -211,6 +220,20 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
     instances that define the rules for automatically generating repeating
     occurrences.
     """
+
+    primary_type = models.ForeignKey(
+        EventType, blank=True, null=True,
+        help_text="The primary type of this event: Talk, workshop, etc. Only "
+                  "public Event Types can be primary.",
+        limit_choices_to={'is_public': True},
+        related_name="events",
+    )
+    secondary_types = models.ManyToManyField(
+        EventType, blank=True,
+        help_text="Additional/internal types: Education or members events, "
+                  "for example.",
+        related_name="secondary_events",
+    )
 
     part_of = models.ForeignKey(
         'self',
