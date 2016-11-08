@@ -43,8 +43,8 @@ RUN md5sum bower.json > bower.json.md5
 
 WORKDIR /opt/django-icekit/
 
-ENV PIP_SRC=/opt
 RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python
+ENV PIP_SRC=/opt
 
 COPY requirements.txt setup.py /opt/django-icekit/
 RUN pip install --no-cache-dir -r requirements.txt -U
