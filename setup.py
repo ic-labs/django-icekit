@@ -95,7 +95,7 @@ setuptools.setup(
             'django-forms-builder',
         ],
         'project': [
-            'celery[redis]',
+            'celery[redis]<4',
             'ConcurrentLogHandler',
             'django-celery',
             'django-celery-email',
@@ -137,7 +137,7 @@ setuptools.setup(
             'elasticstack',
         ],
         'test': [
-            'celery[redis]',
+            'celery[redis]<4',
             'coverage',
             'coveralls',
             'django-dynamic-fixture',
