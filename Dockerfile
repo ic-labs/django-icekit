@@ -4,6 +4,7 @@ RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
         apt-transport-https \
+        apt-utils \
         gettext \
         gnupg2 \
         jq \
