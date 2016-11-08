@@ -28,7 +28,7 @@ setuptools.setup(
     include_package_data=True,
     install_requires=[
         'django-icekit',
-        'django-object-actions<0.6',  # See: https://github.com/crccheck/django-object-actions/issues/45
+        'django-object-actions>=0.7',  # See: https://github.com/crccheck/django-object-actions/issues/45
         'Django>=1.7',
         'pyparsing',
         'unidecode',
