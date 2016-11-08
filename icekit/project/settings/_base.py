@@ -201,6 +201,7 @@ INSTALLED_APPS = (
     'forms_builder.forms',
     # 'ixc_redactor',
     'reversion',
+    'django_object_actions',
 
     # Default.
     'django.contrib.admin',

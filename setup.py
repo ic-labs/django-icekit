@@ -66,6 +66,7 @@ setuptools.setup(
         'django-multiurl',
         # import pattern changed in 0.8; version 1 to 1.0.1 has bug with parent
         # admins: github.com/django-polymorphic/django-polymorphic/pull/246
+        'django-object-actions>=0.7',  # See: https://github.com/crccheck/django-object-actions/issues/45
         'django-polymorphic>=0.8,!=1,!=1.0.1',
         'django-wysiwyg',
         'django_extensions',

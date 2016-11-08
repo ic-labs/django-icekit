@@ -63,7 +63,19 @@
 
 
 {% block object-tools-items %}
-{#  Overriding view on site behaviour  #}
+{# Overriding view on site behaviour to remove 'view on site' for unpublished items #}
+	{# copied from django_object_actions/change_form.html #}
+	  {% for tool in objectactions %}
+		<li class="objectaction-item" data-tool-name="{{ tool.name }}">
+		  <a href='{% url tools_view_name pk=object_id tool=tool.name %}' title="{{ tool.standard_attrs.title }}"
+			 {% for k, v in tool.custom_attrs.items %}
+			   {{ k }}="{{ v }}"
+			 {% endfor %}
+			 class="{{ tool.standard_attrs.class }}">
+		  {{ tool.label|capfirst }}
+		  </a>
+		</li>
+	  {% endfor %}
 
     <li>
         {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
