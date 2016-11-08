@@ -37,7 +37,7 @@ PROJECT_SLUG = re.sub(r'[^0-9A-Za-z]+', '-', slugify(PROJECT_NAME))
 SITE_DOMAIN = os.environ.get('SITE_DOMAIN', '%s.lvh.me' % PROJECT_SLUG)
 SITE_NAME = os.environ.get('SITE_NAME', PROJECT_NAME)
 
-SITE_PORT = 8000
+SITE_PORT = None
 
 # FILE SYSTEM PATHS ###########################################################
 

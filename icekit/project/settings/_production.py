@@ -1,7 +1,5 @@
 from ._base import *
 
-SITE_PUBLIC_PORT = None  # Default: SITE_PORT
-
 # DJANGO ######################################################################
 
 CACHES['default'].update({

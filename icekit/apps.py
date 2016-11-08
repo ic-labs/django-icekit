@@ -20,7 +20,7 @@ def update_site(sender, **kwargs):
     """
     Site = apps.get_model('sites', 'Site')
     domain = settings.SITE_DOMAIN
-    if settings.SITE_PORT not in (80, 443):
+    if settings.SITE_PORT:
         domain += ':%s' % settings.SITE_PORT
     Site.objects.update_or_create(
         pk=settings.SITE_ID,
