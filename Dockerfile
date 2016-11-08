@@ -7,6 +7,7 @@ RUN apt-get update \
         gettext \
         gnupg2 \
         jq \
+        locales \
         nano \
         nginx \
         postgresql-client \
@@ -64,6 +65,12 @@ RUN cd /usr/local/bin \
 # See: https://github.com/codekitchen/dinghy/issues/17#issuecomment-209545602
 # RUN echo "int chown() { return 0; }" > preload.c && gcc -shared -o /libpreload.so preload.c && rm preload.c
 # ENV LD_PRELOAD=/libpreload.so
+
+RUN echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
+RUN locale-gen
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 ENV CRONLOCK_HOST=redis
 ENV DOCKER=1
