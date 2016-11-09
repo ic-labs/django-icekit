@@ -557,7 +557,7 @@ INSTALLED_APPS += (
     # 'fluent_contents.plugins.picture',
     'fluent_contents.plugins.rawhtml',
     'fluent_contents.plugins.sharedcontent',
-    'fluent_contents.plugins.text',
+    # 'fluent_contents.plugins.text',
     # 'fluent_contents.plugins.twitterfeed',
 
     # Page type and content plugin dependencies.
@@ -677,6 +677,7 @@ INSTALLED_APPS += (
     'icekit.plugins.slideshow',
     'icekit.plugins.image_gallery',
     'icekit.plugins.twitter_embed',
+    'icekit.plugins.text',
 )
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
