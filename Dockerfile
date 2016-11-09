@@ -48,8 +48,7 @@ ENV PIP_SRC=/opt
 
 COPY requirements.txt setup.py /opt/django-icekit/
 RUN pip install --no-cache-dir -r requirements.txt -U
-RUN touch requirements-local.txt
-RUN md5sum requirements.txt requirements-local.txt > requirements.md5
+RUN md5sum requirements.txt > requirements.txt.md5
 
 ENV DOCKERIZE_VERSION=0.2.0
 RUN wget -nv -O - "https://github.com/jwilder/dockerize/releases/download/v${DOCKERIZE_VERSION}/dockerize-linux-amd64-v${DOCKERIZE_VERSION}.tar.gz" | tar -xz -C /usr/local/bin/ -f -
