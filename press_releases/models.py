@@ -24,18 +24,6 @@ class PressReleaseListing(AbstractListingPage):
         return PressRelease.objects.visible()
 
 
-
-@python_2_unicode_compatible
-class PressContact(models.Model):
-    name = models.CharField(max_length=255)
-    title = models.CharField(max_length=255, blank=True)
-    phone = models.CharField(max_length=255, blank=True)
-    email = models.EmailField(max_length=255, blank=True)
-
-    def __str__(self):
-        return "{} ({})".format(self.name, self.title)
-
-
 @python_2_unicode_compatible
 class PressReleaseCategory(models.Model):
     name = models.CharField(max_length=255)
@@ -81,20 +69,3 @@ class PressRelease(PublishingModel, AbstractCollectedContent, TitleSlugMixin, Fl
             return PressReleaseListing.objects.draft()[0]
         except IndexError:
             raise IndexError("You need to create a Press Release Listing Page")
-
-
-@python_2_unicode_compatible
-class ContactItem(ContentItem):
-    """
-    A content item that links to a Press Contact.
-    """
-    contact = models.ForeignKey(PressContact)
-
-    help_text = \
-        'A content plugin that allows you to add press contact information.'
-
-    class Meta:
-        verbose_name = _('Contact Item')
-
-    def __str__(self):
-        return str(self.contact)
