@@ -6,6 +6,7 @@ from django.views.generic import RedirectView, TemplateView
 from fluent_pages.sitemaps import PageSitemap
 
 from icekit.admin_forms import PasswordResetForm
+from icekit.views import index
 
 admin.autodiscover()
 
@@ -15,6 +16,8 @@ sitemaps = {
 
 urlpatterns = patterns(
     '',
+
+    url(r'^$', index, name="home"),
 
     # Test error templates.
     url(r'^404/$', TemplateView.as_view(template_name='404.html')),
