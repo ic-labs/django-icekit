@@ -1,7 +1,7 @@
 from django.db import models
 from icekit.content_collections.abstract_models import \
     AbstractCollectedContent, AbstractListingPage, TitleSlugMixin
-from icekit.mixins import ListableMixin
+from icekit.mixins import ListableMixin, HeroMixin
 from icekit.publishing.models import PublishableFluentContents
 
 
@@ -23,6 +23,7 @@ class AbstractArticle(
     PublishableFluentContents,
     AbstractCollectedContent,
     ListableMixin,
+    HeroMixin,
     TitleSlugMixin
 ):
     parent = models.ForeignKey(
