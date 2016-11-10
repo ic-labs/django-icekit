@@ -1,6 +1,7 @@
 from django.db import models
 from icekit.content_collections.abstract_models import \
     AbstractCollectedContent, AbstractListingPage, TitleSlugMixin
+from icekit.mixins import ListableMixin
 from icekit.publishing.models import PublishableFluentContents
 
 
@@ -21,10 +22,12 @@ class AbstractArticleCategoryPage(AbstractListingPage):
 class AbstractArticle(
     PublishableFluentContents,
     AbstractCollectedContent,
+    ListableMixin,
     TitleSlugMixin
 ):
     parent = models.ForeignKey(
         'ArticleCategoryPage',
+        verbose_name="Parent listing page",
         limit_choices_to={'publishing_is_draft': True},
         on_delete=models.PROTECT,
     )
