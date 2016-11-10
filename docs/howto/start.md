@@ -80,3 +80,13 @@ Or list just the additional packages that you have already installed:
 
 You can also create a `requirements-local.txt` file (ignored by Git) that will
 be installed automatically when the project is started.
+
+## How do I change the base template?
+
+All icekit templates extend a template named `base.html` which is automatically provided by
+icekit. To change the base template, you can add a file named `base.html` into your root 
+`templates` directory. This ensures that all icekit templates will now default to using
+your template as a base.
+
+To ensure maximum compatibility with icekit's conventions for block names, we strongly 
+recommend refering to [icekit's base template](/icekit/templates/icekit/base.html).

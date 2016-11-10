@@ -4,9 +4,11 @@ RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
         apt-transport-https \
+        apt-utils \
         gettext \
         gnupg2 \
         jq \
+        locales \
         nano \
         nginx \
         postgresql-client \
@@ -41,13 +43,12 @@ RUN md5sum bower.json > bower.json.md5
 
 WORKDIR /opt/django-icekit/
 
-ENV PIP_SRC=/opt
 RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python
+ENV PIP_SRC=/opt
 
 COPY requirements.txt setup.py /opt/django-icekit/
 RUN pip install --no-cache-dir -r requirements.txt -U
-RUN touch requirements-local.txt
-RUN md5sum requirements.txt requirements-local.txt > requirements.md5
+RUN md5sum requirements.txt > requirements.txt.md5
 
 ENV DOCKERIZE_VERSION=0.2.0
 RUN wget -nv -O - "https://github.com/jwilder/dockerize/releases/download/v${DOCKERIZE_VERSION}/dockerize-linux-amd64-v${DOCKERIZE_VERSION}.tar.gz" | tar -xz -C /usr/local/bin/ -f -
@@ -64,6 +65,12 @@ RUN cd /usr/local/bin \
 # See: https://github.com/codekitchen/dinghy/issues/17#issuecomment-209545602
 # RUN echo "int chown() { return 0; }" > preload.c && gcc -shared -o /libpreload.so preload.c && rm preload.c
 # ENV LD_PRELOAD=/libpreload.so
+
+RUN echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
+RUN locale-gen
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 ENV CRONLOCK_HOST=redis
 ENV DOCKER=1
