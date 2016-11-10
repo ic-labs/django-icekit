@@ -13,14 +13,10 @@ class PressReleaseAdmin(PublishingAdmin, FluentLayoutsMixin):
     prepopulated_fields = {'slug': ('title',)}
 
 
-class PressContactAdmin(admin.ModelAdmin):
-    pass
-
 class PressReleaseCategoryAdmin(admin.ModelAdmin):
     pass
 
 
 admin.site.register(models.PressRelease, PressReleaseAdmin)
-admin.site.register(models.PressContact, PressContactAdmin)
 admin.site.register(models.PressReleaseCategory, PressReleaseCategoryAdmin)
 
