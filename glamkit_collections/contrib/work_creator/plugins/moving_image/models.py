@@ -24,7 +24,7 @@ class MovingImageMixin(
 ):
     rating = models.ForeignKey("Rating", null=True, blank=True)
     rating_annotation = models.CharField(max_length=255, help_text="e.g. Contains flashing lights and quidditch", blank=True)
-    genre = models.ForeignKey("Genre", blank=True, null=True)
+    genres = models.ManyToManyField("Genre", blank=True)
     media_type = models.ForeignKey("MediaType", blank=True, null=True)
     duration_minutes = models.PositiveIntegerField("Duration (minutes)", blank=True, null=True, help_text="How long (in minutes) should a visitor spend with this content?")
     trailer = OEmbedUrlField(blank=True)

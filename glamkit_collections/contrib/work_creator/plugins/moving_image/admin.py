@@ -5,10 +5,11 @@ from icekit.content_collections.admin import TitleSlugAdmin
 
 
 class MovingImageWorkAdmin(WorkChildAdmin):
-    MOVING_IMAGE_FIELDSETS = (
+    fieldsets = WorkChildAdmin.fieldsets[0:3] + (
         ('Moving image', {
             'fields': (
-                'genre',
+                'genres',
+                'language',
                 'media_type',
                 'duration_minutes',
                 'rating',
@@ -17,8 +18,7 @@ class MovingImageWorkAdmin(WorkChildAdmin):
                 'imdb_link',
             )
         }),
-    )
-    fieldsets = WorkChildAdmin.fieldsets[0:3] + MOVING_IMAGE_FIELDSETS + WorkChildAdmin.fieldsets[3:]
+    ) + WorkChildAdmin.fieldsets[3:]
 
 admin.site.register(models.Genre, TitleSlugAdmin)
 admin.site.register(models.Rating, TitleSlugAdmin)

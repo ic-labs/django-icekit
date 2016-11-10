@@ -4,7 +4,7 @@ from ..moving_image.admin import MovingImageWorkAdmin
 from icekit.content_collections.admin import TitleSlugAdmin
 
 class GameAdmin(MovingImageWorkAdmin):
-    GAME_MIXIN_FIELDSETS = (
+    fieldsets = MovingImageWorkAdmin.fieldsets[0:3] + (
         ('Game', {
             'fields': (
                 'platforms',
@@ -13,8 +13,7 @@ class GameAdmin(MovingImageWorkAdmin):
                 'input_types',
             )
         }),
-    )
-    fieldsets = MovingImageWorkAdmin.fieldsets[0:3] + GAME_MIXIN_FIELDSETS + MovingImageWorkAdmin.fieldsets[3:]
+    ) + MovingImageWorkAdmin.fieldsets[3:]
     filter_horizontal = ('platforms', 'input_types',)
 
 

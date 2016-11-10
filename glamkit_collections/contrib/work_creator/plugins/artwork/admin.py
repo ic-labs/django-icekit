@@ -3,7 +3,7 @@ from glamkit_collections.contrib.work_creator.admin import WorkChildAdmin
 
 
 class ArtworkAdmin(WorkChildAdmin):
-    ARTWORK_FIELDSETS = (
+    fieldsets = WorkChildAdmin.fieldsets[0:3] + (
         ('Medium', {
             'fields': (
                 'medium_display',
@@ -20,5 +20,4 @@ class ArtworkAdmin(WorkChildAdmin):
                 'dimensions_weight_kg',
             )
         }),
-    )
-    fieldsets = WorkChildAdmin.fieldsets[0:3] + ARTWORK_FIELDSETS + WorkChildAdmin.fieldsets[3:]
+    ) + WorkChildAdmin.fieldsets[3:]
