@@ -19,6 +19,19 @@ These instructions presume you already have an ICEkit project set up.
 #### To install the press releases model
 
 * Add `press_releases` to `settings.INSTALLED_APPS`.
+* In `settings`,  enable the `ContactPersonPlugin` plugin for the  `Contacts`
+region in the template. Something like:
+
+        FLUENT_CONTENTS_PLACEHOLDER_CONFIG.update({
+            'main': {'plugins': DEFAULT_PLUGINS },
+            'pressrelease_contacts': {
+                'plugins': (
+                    'ContactPersonPlugin',
+                    'TextPlugin',
+                ),
+            },
+        })
+
 * Run migrations.
 * In the admin, create a Layout that uses the "Page: Press release listing"
 template, and is available to the "Press release listing" content type.
