@@ -24,7 +24,12 @@
   * Ignore `.env` and `docker-cloud.*.yml` files, which frequently contain
     secrets that should not be committed.
 
-Breaking changes:
+  * New `ContactPerson` model + and plugin added, allowing adding of staff
+    contacts to most types of content.
+
+  * Verbose Name for "o embed with caption" is now "Embedded media"
+
+### Breaking changes:
 
   * The initial migration for `icekit.plugins.slideshow` had the wrong database
     table name, which meant that the `0004_auto_20160821_2140` migration would
@@ -39,7 +44,18 @@ Breaking changes:
 
   * `icekit.articles` is no more. Functionality is moved to `icekit.content_collections`.
 
-  * The `FEATURED_APPS` setting has moved to `ICEKIT['DASHBOARD_FEATURED_APPS']`.
+  * The `FEATURED_APPS` setting has moved to `ICEKIT['DASHBOARD_FEATURED_APPS']`,
+    and is now a list, not a tuple, so as to support item assignment.
+
+  * Added HeroMixin and ListableMixin to LayoutPage and Article. This will break
+    ported/subclass models that define similarly-named fields. Either remove the
+    definition or migrate data somehow.
+
+  * The required version of Press Releases removes the `PressContact` model, in
+    favour of `ContactPerson`. If you have `PressContacts`, you will need to
+    migrate to the new model.
+
+
 
 ## 0.15 (27 September 2016)
 

@@ -54,7 +54,7 @@ FLUENT_CONTENTS_PLACEHOLDER_CONFIG.update({
     'main': {'plugins': DEFAULT_PLUGINS },
     'pressrelease_contacts': {
         'plugins': (
-            'ContactItemPlugin',
+            'ContactPersonPlugin',
             'TextPlugin',
         ),
     },

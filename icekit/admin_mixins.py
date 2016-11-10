@@ -1,3 +1,4 @@
+from django.contrib import admin
 from fluent_contents.admin import PlaceholderEditorAdmin
 from fluent_contents.models import PlaceholderData
 
@@ -31,3 +32,28 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin):
         else:
             data = obj.layout.get_placeholder_data()
         return data
+
+class HeroMixinAdmin(admin.ModelAdmin):
+    raw_id_fields = ('hero_image',)
+
+    # Alas, we cannot use 'fieldsets' as it causes a recursionerror on
+    # (polymorphic?) admins that use base_fieldsets.
+    FIELDSETS = (
+        ('Hero section', {
+            'fields': (
+                'hero_image',
+            )
+        }),
+    )
+
+
+class ListableMixinAdmin(admin.ModelAdmin):
+    FIELDSETS = (
+        ('Advanced listing options', {
+            'classes': ('collapse',),
+            'fields': (
+                'list_image',
+                'boosted_search_terms',
+            )
+        }),
+    )
