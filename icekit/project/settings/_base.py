@@ -619,7 +619,7 @@ ICEKIT = {
         ),
     ),
 
-    'DASHBOARD_FEATURED_APPS': (
+    'DASHBOARD_FEATURED_APPS': [
         {
             'verbose_name': 'Content',
             'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
@@ -642,7 +642,7 @@ ICEKIT = {
                 # 'sharedcontent.SharedContent': {},
             },
         },
-    ),
+    ],
 }
 
 INSTALLED_APPS += (

@@ -26,7 +26,7 @@ ICEKIT['DASHBOARD_FEATURED_APPS'][0]['models'].update({
 
 # ICEKIT EVENTS ###############################################################
 
-ICEKIT['DASHBOARD_FEATURED_APPS'] = (
+ICEKIT['DASHBOARD_FEATURED_APPS'] = [
     {
         'verbose_name': 'Events',
         'icon_html': '<i class="content-type-icon fa fa-calendar-o"></i>',
@@ -37,7 +37,7 @@ ICEKIT['DASHBOARD_FEATURED_APPS'] = (
     },
 
 
-) + ICEKIT['DASHBOARD_FEATURED_APPS']
+] + ICEKIT['DASHBOARD_FEATURED_APPS']
 
 
 # GLAMKIT SPONSORS ############################################################
