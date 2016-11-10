@@ -101,7 +101,7 @@ setuptools.setup(
         'glamkit': [
             'glamkit-sponsors',
             'icekit-events',
-            'icekit-press-releases>=0.8',
+            'icekit-press-releases>=0.81',
             'glamkit-collections>=0.35',
         ],
         'project': [
