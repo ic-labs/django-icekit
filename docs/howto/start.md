@@ -46,6 +46,10 @@ All settings are optional, but you can provide:
 
 ## Where to put files
 
+Put your layout template files in `templates/layouts/`.
+
+Put your static files (js/css/static images) in `static/`.
+
 Anything you put in the `static` or `templates` directories will override the
 default ICEkit static files and templates.
 
@@ -55,6 +59,27 @@ You can specify additional Bower components in `bower.json`, Node modules in
 The `project_settings.py` file is a Django settings module. You can override any
 default Django/ICEkit settings or configure apps installed via `requirements
 .txt`.
+
+
+## How do I add project-specific URLs?
+
+Create a `urls.py` file in a project folder of your choice, such as `myproject`.
+It can contain something like
+
+
+    from django.conf.urls import include, patterns, url
+
+    urlpatterns = patterns(
+        'myproject.views',
+        ... your URLs here ...
+        # finally, fall back to ICEkit/GLAMkit URLs.
+        url('', include('icekit.project.urls')), # use `glamkit_urls` if this is a GLAMkit project
+    ]
+
+Lastly, in `project_settings.py`, override the default URL path:
+
+    ROOT_URLCONF = 'myproject.urls'
+
 
 ## Where's my virtualenv? How do I modify a source package?
 
