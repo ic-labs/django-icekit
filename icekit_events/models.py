@@ -505,6 +505,13 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
             id__in=self.contained_events.values_list('id', flat=True)
         ).visible()
 
+
+    def get_cta_text(self):
+        return self.cta_text
+
+    def get_cta_url(self):
+        return self.cta_url
+
 class AbstractEventWithLayouts(EventBase, FluentFieldsMixin):
 
     class Meta:

@@ -67,6 +67,7 @@ def event(request, slug, is_preview=False):
     context = RequestContext(request, {
         'is_preview': is_preview,
         'event': event,
+        'page': event,
     })
     # TODO Not sure where the `Event.template` notion comes from, keeping it
     # here for now for backwards compatibility
