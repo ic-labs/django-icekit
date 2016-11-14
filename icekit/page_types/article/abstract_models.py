@@ -7,10 +7,12 @@ from icekit.publishing.models import PublishableFluentContents
 
 class AbstractArticleCategoryPage(AbstractListingPage):
     def get_items_to_list(self, request):
+        from .models import Article
         unpublished_pk = self.get_draft().pk
         return Article.objects.published().filter(parent_id=unpublished_pk)
 
     def get_items_to_mount(self, request):
+        from .models import Article
         unpublished_pk = self.get_draft().pk
         return Article.objects.visible().filter(parent_id=unpublished_pk)
 

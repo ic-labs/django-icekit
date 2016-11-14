@@ -153,6 +153,7 @@ class ListableMixin(models.Model):
     def get_list_image(self):
         """
         :return: the ImageField to use for thumbnails in lists
+        NB Image Field (since the override is just a field and we don't need alt text), not Image record.
         """
         list_image = first_of(
             self,
@@ -160,7 +161,7 @@ class ListableMixin(models.Model):
             'get_hero_image',
             'image',
         )
-        return list_image
+        return getattr(list_image, "image", list_image)
 
 
 class HeroMixin(models.Model):
@@ -178,5 +179,5 @@ class HeroMixin(models.Model):
         abstract = True
 
     def get_hero_image(self):
-        """Return the ImageField"""
-        return self.hero_image.image
+        """ Return the Image record to use as the Hero """
+        return self.hero_image
