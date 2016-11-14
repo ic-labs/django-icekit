@@ -1,8 +1,6 @@
 from django.conf.urls import patterns, url
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
-from django.template.response import TemplateResponse
-from fluent_pages.extensions import page_type_pool
 from icekit.page_types.layout_page.admin import LayoutPageAdmin
 
 from icekit.plugins import ICEkitFluentContentsPagePlugin
