@@ -4,7 +4,6 @@ Admin configuration for ``icekit`` app.
 
 # Define `list_display`, `list_filter` and `search_fields` for each model.
 # These go a long way to making the admin more usable.
-from django import forms
 from django.conf import settings
 from django.conf.urls import url, patterns
 from django.contrib import admin
