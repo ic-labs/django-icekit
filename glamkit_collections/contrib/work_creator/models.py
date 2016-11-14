@@ -108,14 +108,14 @@ class WorkBase(
     )
 
     date_display = models.CharField(
-        "Date (display)",
+        "Date of creation (display)",
         blank=True,
         max_length=255,
         help_text='Displays date as formatted for labels and reports, rather '
                   'than sorting.'
     )  # used on 'Explore Modern Art' 53841 records
     date_edtf = models.CharField(
-        "Date (EDTF)",
+        "Date of creation (EDTF)",
         blank=True,
         null=True,
         max_length=64,
@@ -198,7 +198,10 @@ class WorkBase(
             except IndexError:
                 self._hero_image = None
         if self._hero_image:
-            return self._hero_image.image
+            return self._hero_image
+
+    def get_subtitle(self):
+        return self.subtitle
 
     def get_one_liner(self):
         return self.one_liner
