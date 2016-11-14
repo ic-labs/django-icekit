@@ -66,19 +66,22 @@ default Django/ICEkit settings or configure apps installed via `requirements
 Create a `urls.py` file in a project folder of your choice, such as `myproject`.
 It can contain something like
 
+```python
+from django.conf.urls import include, patterns, url
 
-    from django.conf.urls import include, patterns, url
-
-    urlpatterns = patterns(
-        'myproject.views',
-        ... your URLs here ...
-        # finally, fall back to ICEkit/GLAMkit URLs.
-        url('', include('icekit.project.urls')), # use `glamkit_urls` if this is a GLAMkit project
-    ]
+urlpatterns = patterns(
+    'myproject.views',
+    ... your URLs here ...
+    # finally, fall back to ICEkit/GLAMkit URLs.
+    url('', include('icekit.project.urls')), # use `glamkit_urls` if this is a GLAMkit project
+]
+```
 
 Lastly, in `project_settings.py`, override the default URL path:
 
-    ROOT_URLCONF = 'myproject.urls'
+```python
+ROOT_URLCONF = 'myproject.urls'
+```
 
 
 ## Where's my virtualenv? How do I modify a source package?
