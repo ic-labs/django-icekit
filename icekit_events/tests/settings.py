@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'icekit_events.event_types.simple',
     'icekit_events.page_types.eventlistingfordate',
     'icekit_events.tests',
+    'icekit.plugins.image',
 
     # Apps required for publishing features
     'icekit.publishing',
