@@ -1,1 +1,1 @@
-default_app_config = 'icekit.page_types.layout_page.apps.LayoutConfig'
+default_app_config = '%s.apps.AppConfig' % __name__
