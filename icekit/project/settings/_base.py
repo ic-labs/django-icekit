@@ -356,6 +356,8 @@ CELERY_QUEUES = (
 
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 
+CELERYBEAT_SCHEDULE = {}
+
 INSTALLED_APPS += (
     'djcelery',
     'kombu.transport.django',
