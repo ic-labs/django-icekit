@@ -5,6 +5,10 @@ from icekit.utils.admin.mixins import ThumbnailAdminMixin
 
 from . import models
 
+try:
+    ADMIN_THUMB_ALIAS = settings.THUMBNAIL_ALIASES['']['admin']
+except (AttributeError, KeyError):
+    ADMIN_THUMB_ALIAS = {'size': (150, 150)}
 
 class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
     list_display = ['thumbnail', 'title', 'alt_text',]
@@ -17,6 +21,6 @@ class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
 
     # ThumbnailAdminMixin attributes
     thumbnail_field = 'image'
-    thumbnail_options = settings.THUMBNAIL_ALIASES['']['admin']
+    thumbnail_options = ADMIN_THUMB_ALIAS
 
 admin.site.register(models.Image, ImageAdmin)
