@@ -31,6 +31,9 @@
 
 ### Breaking changes:
 
+  * `AbstractLayoutPage` now includes ListableMixin and HeroMixin. All models
+    which inherit from this will need a new migration.
+
   * The initial migration for `icekit.plugins.slideshow` had the wrong database
     table name, which meant that the `0004_auto_20160821_2140` migration would
     not have correctly renamed the database table when upgrading to `>=0.10`
