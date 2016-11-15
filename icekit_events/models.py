@@ -233,7 +233,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         help_text="Additional/internal types: Education or members events, "
                   "for example.",
         related_name="secondary_events",
-    )
+    ) # use all_types to get the union of primary and secondary types
 
     part_of = models.ForeignKey(
         'self',
@@ -511,6 +511,16 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
 
     def get_cta_url(self):
         return self.cta_url
+
+    def get_all_types(self):
+        return self.secondary_types.all() | EventType.objects.filter(id__in=self.primary_type_id)
+
+    def is_educational(self):
+        raise NotImplementedError
+
+    def is_members(self):
+        raise NotImplementedError
+
 
 class AbstractEventWithLayouts(EventBase, FluentFieldsMixin):
 
