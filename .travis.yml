@@ -29,3 +29,7 @@ env:
   global:
     # Use `pull-N`, Git tag, or Git branch as Docker image tag.
     - TAG=$([[ "$TRAVIS_PULL_REQUEST" != "false" ]] && echo "pull-$TRAVIS_PULL_REQUEST" || echo ${TRAVIS_TAG:-$TRAVIS_BRANCH} | sed 's/[^.0-9A-Za-z]/-/g')
+
+notifications:
+  webhooks:
+    secure: "fuQLP69xYcIipFi1982mC9Q1o2IzBzclkDDpvqtevm20QJAGKYzNud7/ujH3r7tWZ6VcQ2fjXAQBfL68LLr0rgPi7Zy11/OiTGTGNxAF7HxZnX070fhh4tDNVYXQqRVWswGP/DyLBGMY3NDIDAY2s2U7SZeKisBFXZyv1JYcDxTWFCGpF5ia1+WprFNvDg9YQCAKqCFW37i1C+qsVUYfvKTpFiDcm9YrkvM3VH2i2ceupukkiBxh2Q8BI2TCc4Oj5dy+urOA40Zwy74HwGlpgi8IQF9BfD5GMzHTh26o10SxFwxNaQtbfXr+aH/df6+Qo0cXN82hjezcLwkQSf/G2A0hBA1TUuUwqGBEjTZ5evmGJKQEXDgEr4ZJmxZ4+2GvoCTHfC4fN6/VcdFD2JWVrfpkqJY1jpah50/K/PcorM/PI2IwIZ07AcG8IcMWo/WYOowUHnq6D7zjiXUU4S3WQ9pkl/MrE+EaLoEfFHf+y83WB8iOIRNSwWTAi73jXTFNFeK5HHtceMYwkYwI4tvPIDbzSV4sKBDL4qoJWqbHLwObfGbm3/kvYfv2h7lH6ZRGXUVO1FO8bVQxL0vQfh5R41RsVjy/hYlwgWrlai7QVWKBX3AbMvyKUEm0Ybnvm1LDQONLR+Oc/P5CZxZ8duba07tiIm5Y9X0X13HOyISg/lk="
