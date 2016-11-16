@@ -1,3 +1,5 @@
+# requirements-icekit.txt is used by go.sh to install whatever the icekit
+# Dockerfile installs into the icekit docker image
 -e ..[api,brightcove,dev,django18,forms,glamkit,project,search,test]
 -e git+https://github.com/ic-labs/icekit-events.git@develop#egg=icekit-events
 -e git+https://github.com/ixc/django-dynamic-fixture.git@ixc/master#egg=django-dynamic-fixture
