@@ -29,6 +29,8 @@
 
   * Verbose Name for "o embed with caption" is now "Embedded media"
 
+  * Text plugin now has a style setting
+
 ### Breaking changes:
 
   * `AbstractLayoutPage` now includes ListableMixin and HeroMixin. All models

@@ -1,1 +1,1 @@
-{{ instance.text|safe }}
+{% if text.style %}<div class="{{ text.style }}">{{ instance.text|safe }}</div>{% else %}{{ instance.text|safe }}{% endif %}
