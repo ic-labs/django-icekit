@@ -437,7 +437,10 @@ THUMBNAIL_ALIASES = {
         },
         'image_gallery_thumb': {
             'size': (200, 0),
-        }
+        },
+        'list_image': {
+            'size': (150, 0),
+        },
     }
 }
 
@@ -494,17 +497,25 @@ _NAVIGATION_PLUGINS = [
     'ChildPagesPlugin',
 ]
 
+_LINK_PLUGINS = [
+    'ArticleLinkPlugin',
+]
+
 DEFAULT_PLUGINS = \
     _BASIC_PLUGINS + \
     _TEXT_PLUGINS + \
     _ASSETS_PLUGINS + \
     _EMBED_PLUGINS + \
-    _NAVIGATION_PLUGINS
+    _NAVIGATION_PLUGINS + \
+    _LINK_PLUGINS
 
 FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     'main': {
         'plugins': DEFAULT_PLUGINS,
     },
+    'relations': {
+        'plugins': _LINK_PLUGINS,
+    }
     # 'sidebar': {
     #     'plugins': ('...', ),
     # },

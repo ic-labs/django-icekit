@@ -9,6 +9,9 @@ from django.template.loader import get_template
 from django.utils import encoding, timezone
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.analyzer import get_template_placeholder_data
+from fluent_contents.extensions import ContentPlugin
+from fluent_contents.models import ContentItem
+from icekit import appsettings
 
 from . import fields, plugins
 
@@ -141,3 +144,60 @@ class BoostedTermsMixin(models.Model):
 
     class Meta:
         abstract = True
+
+
+class AbstractLinkItem(ContentItem):
+    """
+    A content type that is a relation to another model.
+
+    Subclasses should define:
+
+        item = models.ForeignKey(to)
+
+    Assuming the 'to' model implements `ListableMixin` then the Item renders as
+    a list item.
+    """
+    style = models.CharField(_("Link style"), max_length=255, choices=appsettings.RELATION_STYLE_CHOICES, blank=True)
+    type_override = models.CharField(max_length=255, blank=True)
+    title_override = models.CharField(max_length=255, blank=True)
+    image_override = models.ImageField(
+        blank=True,
+        upload_to="icekit/listable/list_image/",
+    )
+
+    class Meta:
+        abstract = True
+
+    def __unicode__(self):
+        return _("Relation to '%s'") % unicode(self.item)
+
+    def get_type(self):
+        return self.type_override or self.item.get_type()
+
+    def get_title(self):
+        return self.title_override or self.item.get_title()
+
+    def get_list_image(self):
+        return self.image_override or self.item.get_list_image()
+
+
+class LinkPlugin(ContentPlugin):
+    category = _('Links')
+    raw_id_fields = ('item')
+    render_template = 'icekit/plugins/link/default.html'
+    fieldsets = (
+        (None, {
+           'fields': (
+               'item',
+               'style',
+           )
+        }),
+        ('Overrides', {
+           'fields': (
+               'type_override',
+               'title_override',
+               'image_override',
+           ),
+           'classes': ('collapse', )
+        }),
+    )

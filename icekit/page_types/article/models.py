@@ -1,4 +1,5 @@
 from icekit.content_collections.abstract_models import AbstractListingPage
+from icekit.models import content_link_item_factory
 from .abstract_models import  AbstractArticle
 
 
@@ -16,3 +17,6 @@ class ArticleCategoryPage(AbstractListingPage):
         return Article.objects.visible().filter(parent_id=unpublished_pk)
 
 
+class ArticleLink(content_link_item_factory("icekit_article.Article", verbose_name="Choose article")):
+    class Meta:
+        verbose_name = "Article link"

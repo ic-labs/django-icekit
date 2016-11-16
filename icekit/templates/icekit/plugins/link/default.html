@@ -1,0 +1,9 @@
+{% load thumbnail %}
+<div style="{{ instance.style }}">
+    <a href="{{ instance.get_absolute_url }}">
+        {% if instance.get_list_image %}<img src="{{ instance.get_list_image|thumbnail_url:"list_image" }}">{% endif %}
+        <p>{{ instance.get_type }}</p>
+        <h4>{{ instance.get_title }}</h4>
+        <p>{{ instance.get_oneliner }}</p>
+    </a>
+</div>
