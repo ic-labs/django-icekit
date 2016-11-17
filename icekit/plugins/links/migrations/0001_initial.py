@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fluent_contents', '0003_auto_20161021_1441'),
+        ('fluent_contents', '0001_initial'),
         ('fluent_pages', '0001_initial'),
         ('icekit_authors', '0003_auto_20161115_1118'),
         ('icekit_article', '0005_add_hero'),
