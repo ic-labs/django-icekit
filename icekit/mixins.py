@@ -124,6 +124,7 @@ class ListableMixin(models.Model):
     * Title
     * Image
     * URL (assume get_absolute_url)
+    Optional oneliner (implement `get_oneliner()`)
 
     ...and since they show in lists, they show in search results, so
     this model also includes search-related fields.
@@ -163,6 +164,8 @@ class ListableMixin(models.Model):
         )
         return getattr(list_image, "image", list_image)
 
+    def get_oneliner(self):
+        return getattr(self, 'oneliner', "")
 
 class HeroMixin(models.Model):
     """

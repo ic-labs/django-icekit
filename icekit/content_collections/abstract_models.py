@@ -1,3 +1,5 @@
+from icekit.mixins import ListableMixin
+
 try:
 	from urlparse import urljoin
 except ImportError:
@@ -95,7 +97,7 @@ class AbstractListingPage(AbstractLayoutPage):
             "Please implement `get_items_to_mount(request)` on %r" % type(self)
         )
 
-class AbstractCollectedContent(models.Model):
+class AbstractCollectedContent(ListableMixin):
     """
     Content collections can be mounted into a publishable listing page,
     which has the URL returned by `get_parent_url()`.

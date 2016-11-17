@@ -8,7 +8,6 @@ from icekit.publishing.models import PublishableFluentContents
 class AbstractArticle(
     PublishableFluentContents,
     AbstractCollectedContent,
-    ListableMixin,
     HeroMixin,
     TitleSlugMixin
 ):

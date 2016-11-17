@@ -460,18 +460,18 @@ INSTALLED_APPS += ('flat', )
 DJANGO_WYSIWYG_FLAVOR = 'alloyeditor'
 DJANGO_WYSIWYG_MEDIA_URL = STATIC_URL + 'alloyeditor/dist/alloy-editor/'
 
-_BASIC_PLUGINS = [
+BASIC_PLUGINS = [
     'RawHtmlPlugin',
     'TextPlugin',
     'HorizontalRulePlugin',
 ]
 
-_TEXT_PLUGINS = [
+TEXT_PLUGINS = [
     'FAQPlugin',
     'QuotePlugin',
 ]
 
-_ASSETS_PLUGINS = [
+ASSETS_PLUGINS = [
     'SlideShowPlugin',
     'ImagePlugin',
     'ImageGalleryPlugin',
@@ -480,7 +480,7 @@ _ASSETS_PLUGINS = [
     'ContactPersonPlugin',
 ]
 
-_EMBED_PLUGINS = [
+EMBED_PLUGINS = [
     'IframePlugin',
     'MapPlugin',
     'MapWithTextPlugin',
@@ -491,34 +491,33 @@ _EMBED_PLUGINS = [
     'TwitterEmbedPlugin',
 ]
 
-_NAVIGATION_PLUGINS = [
+NAVIGATION_PLUGINS = [
     'PageAnchorPlugin',
     'PageAnchorListPlugin',
     'ChildPagesPlugin',
 ]
 
-_LINK_PLUGINS = [
+LINK_PLUGINS = [
     'ArticleLinkPlugin',
+    'PageLinkPlugin',
+    'AuthorLinkPlugin',
 ]
 
 DEFAULT_PLUGINS = \
-    _BASIC_PLUGINS + \
-    _TEXT_PLUGINS + \
-    _ASSETS_PLUGINS + \
-    _EMBED_PLUGINS + \
-    _NAVIGATION_PLUGINS + \
-    _LINK_PLUGINS
+    BASIC_PLUGINS + \
+    TEXT_PLUGINS + \
+    ASSETS_PLUGINS + \
+    EMBED_PLUGINS + \
+    NAVIGATION_PLUGINS + \
+    LINK_PLUGINS
 
 FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     'main': {
         'plugins': DEFAULT_PLUGINS,
     },
     'relations': {
-        'plugins': _LINK_PLUGINS,
+        'plugins': LINK_PLUGINS,
     }
-    # 'sidebar': {
-    #     'plugins': ('...', ),
-    # },
 }
 
 FLUENT_DASHBOARD_DEFAULT_MODULE = 'ModelList'
@@ -682,6 +681,7 @@ INSTALLED_APPS += (
     'icekit.plugins.horizontal_rule',
     'icekit.plugins.image',
     'icekit.plugins.instagram_embed',
+    'icekit.plugins.links',
     'icekit.plugins.map',
     'icekit.plugins.map_with_text',
     'icekit.plugins.oembed_with_caption',

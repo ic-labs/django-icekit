@@ -42,6 +42,7 @@ class DraftItemBoobyTrap(object):
         'get_draft_payload',
         'get_published',
         'get_visible',
+        'get_published_or_draft',
         # NOTE: `get_draft` is not included here to discourage getting a draft
         'publishing_linked',
         'publishing_linked_id',

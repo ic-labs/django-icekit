@@ -12,3 +12,7 @@ class AbstractUnpublishableLayoutPage(FluentContentsPage, LayoutFieldMixin):
 class AbstractLayoutPage(PublishableFluentContentsPage, LayoutFieldMixin, HeroMixin, ListableMixin):
     class Meta:
         abstract = True
+
+    def get_type(self):
+        # we don't normally want pages to say they're a 'page'
+        return ""
