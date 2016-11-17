@@ -1,7 +1,7 @@
 from icekit.content_collections.abstract_models import AbstractListingPage
-from icekit.models import content_link_item_factory
+from plugins.models import AbstractACMILinkItem
 from .abstract_models import  AbstractArticle
-
+from django.db import models
 
 class Article(AbstractArticle):
     pass
@@ -17,6 +17,7 @@ class ArticleCategoryPage(AbstractListingPage):
         return Article.objects.visible().filter(parent_id=unpublished_pk)
 
 
-class ArticleLink(content_link_item_factory("icekit_article.Article", verbose_name="Choose article")):
+class ArticleLink(AbstractACMILinkItem):
+    item = models.ForeignKey("Article")
     class Meta:
         verbose_name = "Article link"
