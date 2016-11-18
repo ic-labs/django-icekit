@@ -65,5 +65,5 @@ FLUENT_CONTENTS_PLACEHOLDER_CONFIG.update({
             'TextPlugin',
         ),
     },
-    'relations': {'plugins': LINK_PLUGINS },
+    'related': {'plugins': LINK_PLUGINS },
 })

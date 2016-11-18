@@ -515,7 +515,7 @@ FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     'main': {
         'plugins': DEFAULT_PLUGINS,
     },
-    'relations': {
+    'related': {
         'plugins': LINK_PLUGINS,
     }
 }

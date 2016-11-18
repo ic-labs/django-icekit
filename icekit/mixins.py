@@ -40,18 +40,6 @@ class LayoutFieldMixin(models.Model):
             return self.layout.template_name
         return self.fallback_template
 
-
-class FluentFieldsMixin(LayoutFieldMixin):
-    """
-    Add ``layout``, ``contentitem_set`` and ``placeholder_set`` fields so we
-    can add modular content with ``django-fluent-contents``.
-    """
-    contentitem_set = ContentItemRelation()
-    placeholder_set = PlaceholderRelation()
-
-    class Meta:
-        abstract = True
-
     # HACK: This is needed to work-around a `django-fluent-contents` issue
     # where it cannot handle placeholders being added to a template after an
     # object already has placeholder data in the database.
@@ -75,6 +63,18 @@ class FluentFieldsMixin(LayoutFieldMixin):
                     ))
                 result = result or created
         return result
+
+
+class FluentFieldsMixin(LayoutFieldMixin):
+    """
+    Add ``layout``, ``contentitem_set`` and ``placeholder_set`` fields so we
+    can add modular content with ``django-fluent-contents``.
+    """
+    contentitem_set = ContentItemRelation()
+    placeholder_set = PlaceholderRelation()
+
+    class Meta:
+        abstract = True
 
     def placeholders(self):
         # return a dict of placeholders, organised by slot, for access in
