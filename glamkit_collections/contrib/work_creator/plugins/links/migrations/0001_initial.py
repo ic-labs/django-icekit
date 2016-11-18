@@ -8,7 +8,7 @@ import icekit.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fluent_contents', '0003_auto_20161021_1441'),
+        ('fluent_contents', '0001_initial'),
         ('gk_collections_work_creator', '0008_auto_20161114_1240'),
     ]
 
