@@ -49,8 +49,6 @@ SPONSOR_PLUGINS = [
 ]
 
 LINK_PLUGINS += [
-    'WorkLinkPlugin',
-    'CreatorLinkPlugin',
     'EventLinkPlugin',
 ]
 
