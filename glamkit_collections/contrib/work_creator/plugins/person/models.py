@@ -146,3 +146,11 @@ class PersonCreator(CreatorBase):
                 return mark_safe("n.d.&nbsp;&ndash;&nbsp;" + death)
 
         return mark_safe(join.join(filter(None, (birth, death))))
+
+    def get_type(self):
+        if self.primary_occupation:
+            return self.primary_occupation
+        roles = self.get_primary_roles()
+        if roles:
+            return roles[0].role.title
+        return "person"

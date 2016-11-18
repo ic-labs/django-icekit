@@ -21,9 +21,12 @@ class GameMixin(models.Model):
     class Meta:
         abstract = True
 
-    def get_media_type(self):
+    def get_type(self):
         return self.media_type or "game"
 
 
 class Game(WorkBase, GameMixin, MovingImageMixin):
-    pass
+    def get_type(self):
+        # for some reason (MRO) we have to call the get_type that we want.
+        # Swapping mixin order breaks other things.
+        return GameMixin.get_type(self)

@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from django_countries.fields import CountryField
 from glamkit_collections.contrib.work_creator.managers import \
     WorkCreatorQuerySet, WorkImageQuerySet
@@ -9,7 +7,6 @@ from icekit.plugins.image.abstract_models import ImageLinkMixin
 from icekit.publishing.models import PublishingModel
 from polymorphic.models import PolymorphicModel
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
 
 
 class CreatorBase(
@@ -78,6 +75,20 @@ class CreatorBase(
         if self.portrait:
             return self.portrait.image
 
+    def get_title(self):
+        return self.name_display
+
+    def get_type(self):
+        return "creator"
+
+    def get_roles(self):
+        """Return the m2m relations connecting me to works"""
+        return self.works.through.objects.filter(creator=self).select_related('role')
+
+    def get_primary_roles(self):
+        """Return the m2m relations connecting me to works as primary creator"""
+        return self.works.through.objects.filter(creator=self, is_primary=True).select_related('role')
+
 
 class WorkBase(
     PolymorphicModel,
@@ -99,7 +110,7 @@ class WorkBase(
                   'when appropriate.'
     )
     subtitle = models.CharField(max_length=511, blank=True)
-    one_liner = models.CharField("One-liner", max_length=511, blank=True,
+    oneliner = models.CharField("One-liner", max_length=511, blank=True,
                                  help_text="A pithy description of the work")
 
     # who made it
@@ -203,8 +214,11 @@ class WorkBase(
     def get_subtitle(self):
         return self.subtitle
 
-    def get_one_liner(self):
-        return self.one_liner
+    def get_oneliner(self):
+        return self.oneliner
+
+    def get_type(self):
+        return "work"
 
 
 class Role(TitleSlugMixin):

@@ -172,7 +172,7 @@ class WorkChildAdmin(
                 'title',
                 'subtitle',
                 'slug',
-                'one_liner',
+                'oneliner',
             ),
         }),
         DATE_FIELDSET,
