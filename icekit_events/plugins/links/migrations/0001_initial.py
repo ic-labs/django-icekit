@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('icekit_events', '0008_occurrence_external_ref'),
-        ('fluent_contents', '0003_auto_20161021_1441'),
+        ('fluent_contents', '0001_initial'),
     ]
 
     operations = [
