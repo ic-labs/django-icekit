@@ -154,8 +154,10 @@ class TestAdmin(WebTest):
             generator=daily_wend_generator)
         self.assertEqual(2, event.repeat_generators.count())
         self.assertEqual(7, daily_occurrences.count())
-        self.assertEqual(
-            13 * 2, daily_wend_occurrences.count())
+        # app_settings.REPEAT_LIMIT = 13 weeks
+        # when run on some days the next 13 weeks contains 1 more weekend day
+        self.assertTrue(
+            daily_wend_occurrences.count() in [13 * 2, 13 * 2 + 1])
         self.assertEqual(
             5,  # Saturday
             coerce_naive(daily_wend_occurrences[0].start).weekday())
@@ -177,7 +179,7 @@ class TestAdmin(WebTest):
         response = form.submit('_continue')
         event = SimpleEvent.objects.get(pk=event.pk)
         self.assertEqual(1, event.repeat_generators.count())
-        self.assertEqual(13 * 2, event.occurrences.count())
+        self.assertEqual(daily_wend_occurrences.count(), event.occurrences.count())
 
     def test_event_with_user_modified_occurrences(self):
         event = G(
