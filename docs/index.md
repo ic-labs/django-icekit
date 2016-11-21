@@ -23,6 +23,7 @@ Add custom functionality to your site.
 * [Layouts]
 * [Placeholders]
 * [Publishing]
+* [Workflow]
 * [Page trees and mptt]
 * [Articles]
 * [Writing portable apps]
@@ -96,6 +97,7 @@ team at [the Interaction Consortium]: [labs@interaction.net.au](mailto:labs@inte
 [Articles]: topics/articles.md
 [Placeholders]: topics/placeholders.md
 [Publishing]: topics/publishing.md
+[Workflow]: topics/workflow.md
 [Page trees and mptt]: topics/page-trees-and-mptt.md
 [Writing portable apps]: topics/portable-apps.md
 [Release notes]: changelog.md
