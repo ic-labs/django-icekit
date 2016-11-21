@@ -42,7 +42,6 @@
 			{{ block.super }}
 		</div>
 	</div>
-	{% if has_publish_permission or preview_draft_btn %}
 		<div class="row">
 			<div class="col-md-12">
 				<div class="submit-row">
@@ -58,7 +57,6 @@
 				</div>
 			</div>
 		</div>
-	{% endif %}
 {% endblock %}
 
 
@@ -83,10 +81,10 @@
     </li>
 
     {% with original.get_absolute_url as preview_url %}
-        {% if preview_draft_btn and preview_url %}
+        {% if preview_url and has_preview_permission %}
             <li><a href="{{ preview_url|get_draft_url }}" target="_blank">Preview draft <i class="fa fa-circle-o"></i></a></li>
         {% endif %}
-        {% if has_absolute_url and has_been_published %}<li><a href="{{ absolute_url }}" target="_blank">{% trans "View published" %} <i class="fa fa-circle"></i></a></li>{% endif %}
     {% endwith %}
+    {% if has_absolute_url and has_been_published %}<li><a href="{{ absolute_url }}" target="_blank">{% trans "View published" %} <i class="fa fa-circle"></i></a></li>{% endif %}
 
 {% endblock %}
