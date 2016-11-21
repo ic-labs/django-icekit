@@ -3,7 +3,7 @@ Models for ``icekit_events`` app.
 """
 
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
-
+from collections import OrderedDict
 from datetime import datetime, timedelta, time as datetime_time, time
 
 from dateutil import rrule
@@ -32,7 +32,7 @@ from icekit.publishing.middleware import is_draft_request_context
 from django.template.defaultfilters import date as datefilter
 
 from icekit.templatetags.icekit_tags import grammatical_join
-from icekit_events.templatetags.events_tags import times as timesfilter
+from icekit_events.templatetags.events_tags import timesf as timesfilter
 from . import appsettings, validators
 from .utils import timeutils
 
@@ -441,36 +441,16 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         last = self.occurrences.order_by('-end').first()
         return (first, last)
 
-    def describe_dates_range(self, date_format=None):
-        if self.human_dates:
-            return self.human_dates
-        else:
-            first, last = self.get_occurrences_range()
-            if first:
-                start = first.local_start
-            if last:
-                end = last.local_end
+    def get_occurrences_by_day(self):
+        """
+        :return: an iterable of (day, occurrences)
+        """
+        result = OrderedDict()
 
-            if not (first or last):
-                return ''
-            elif first and not last:
-                return 'From %s' % datefilter(start, date_format)
-            elif last and not first:
-                return 'To %s' % datefilter(end, date_format)
-            else:
-                return ' to '.join([
-                    datefilter(start, date_format),
-                    datefilter(end, date_format)
-                ])
+        for occ in self.occurrences.order_by('start'):
+            result.setdefault(occ.local_start.date, []).append(occ)
 
-    def describe_times_range(self, time_format=None):
-        sts = timesfilter(self.start_times_set(), format=time_format)
-        all_days = self.occurrences.filter(is_all_day=True)
-        if all_days:
-            sts = ["all day"] + sts
-
-        times = grammatical_join(sts, final_join=", ")
-        return times
+        return result.items()
 
 
     def start_dates_set(self):
@@ -506,11 +486,10 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         ).visible()
 
 
-    def get_cta_text(self):
-        return self.cta_text
-
-    def get_cta_url(self):
-        return self.cta_url
+    def get_cta(self):
+        if self.cta_url and self.cta_text:
+            return self.cta_url, self.cta_text
+        return ()
 
     def get_all_types(self):
         return self.secondary_types.all() | EventType.objects.filter(id__in=self.primary_type_id)

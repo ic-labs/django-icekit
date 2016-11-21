@@ -10,8 +10,8 @@
             <p>Part of <a href="{{ part_of.get_absolute_url}}">{{ part_of }}</a></p>
         {% endif %}
     {% endwith %}
-	<p>Date{{ event.start_dates_set|pluralize }}: {{ event.describe_dates_range }}</p>
-	<p>Time{{ event.start_times_set|pluralize }}: {{ event.describe_times_range }}</p>
+	<p>Date{{ event.start_dates_set|pluralize }}: {{ event|dates_range }}</p>
+	<p>Time{{ event.start_times_set|pluralize }}: {{ event|times_range }}</p>
 	{% if event.price_line %}
 		<p>Price: {{ event.price_line|safe }}</p>
 	{% endif %}
