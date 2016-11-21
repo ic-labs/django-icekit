@@ -220,6 +220,19 @@ class WorkBase(
     def get_type(self):
         return "work"
 
+    def get_roles(self):
+        """Return the m2m relations connecting me to works"""
+        return self.creators.through.objects.filter(
+            work=self
+        ).select_related('role')
+
+    def get_primary_roles(self):
+        """Return the m2m relations connecting me to works as primary creator"""
+        return self.creators.through.objects.filter(
+            work=self,
+            is_primary=True
+        ).select_related('role')
+
 
 class Role(TitleSlugMixin):
     past_tense = models.CharField(max_length=255, help_text="If the role is 'foundry', the past tense should be 'forged'. Use lower case.")

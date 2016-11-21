@@ -107,7 +107,9 @@ class CreatorChildAdmin(
         'fields': (
             'name_display',
             'slug',
+            'alt_slug',
             'name_sort',
+            'admin_notes',
         ),
     })
     LINKS_FIELDSET = ('Links', {
@@ -219,7 +221,7 @@ class CreatorBaseAdmin(
 
     search_fields = (
         "name_display",
-        "name_full",
+        "name_sort",
         "id",
         "admin_notes",
     )
