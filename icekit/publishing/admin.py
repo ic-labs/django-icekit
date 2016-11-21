@@ -57,8 +57,30 @@ class PublishingPublishedFilter(SimpleListFilter):
         except TypeError:
             return queryset
 
-        isnull = not value
-        return queryset.filter(publishing_linked__isnull=isnull)
+        show_published = bool(value)
+
+        # If admin is for a `PublishingModel` subclass use simple query...
+        if issubclass(queryset.model, PublishingModel):
+            return queryset.filter(
+                publishing_linked__isnull=not show_published)
+
+        # ...if admin is not for a `PublishingModel` subclass we must iterate
+        # over child model instances to keep compatibility with Fluent page
+        # admin and models not derived from `PublishingModel`.
+        pks_to_exclude = []
+        for item in queryset.get_real_instances():
+            if show_published:
+                if item.status == UrlNode.PUBLISHED:
+                    continue  # Published according to Fluent Pages' UrlNode
+                elif getattr(item, 'has_been_published', False):
+                    continue  # Published according to ICEKit Publishing
+            else:
+                if item.status == UrlNode.DRAFT \
+                        and not getattr(item, 'has_been_published', False):
+                    # Unpublished according to both Fluent and ICEKit
+                    continue
+            pks_to_exclude.append(item.pk)
+        return queryset.exclude(pk__in=pks_to_exclude)
 
 
 class PublishingStatusFilter(SimpleListFilter):
@@ -101,18 +123,52 @@ class PublishingStatusFilter(SimpleListFilter):
         return lookups
 
     def queryset(self, request, queryset):
-        if self.value() == 'unpublished':
-            return queryset.filter(publishing_linked__isnull=True)
-        elif self.value() == 'published':
-            return queryset.filter(publishing_linked__isnull=False)
-        elif self.value() == 'out_of_date':
-            return queryset.filter(
-                publishing_modified_at__gt=F(
-                    'publishing_linked__publishing_modified_at'))
-        elif self.value() == 'up_to_date':
-            return queryset.filter(
-                publishing_modified_at__lte=F(
-                    'publishing_linked__publishing_modified_at'))
+        value = self.value()
+        if not value:
+            return queryset
+        # If admin is for a `PublishingModel` subclass use simple queries...
+        if issubclass(queryset.model, PublishingModel):
+            if value == 'unpublished':
+                return queryset.filter(publishing_linked__isnull=True)
+            elif value == 'published':
+                return queryset.filter(publishing_linked__isnull=False)
+            elif value == 'out_of_date':
+                return queryset.filter(
+                    publishing_modified_at__gt=F(
+                        'publishing_linked__publishing_modified_at'))
+            elif value == 'up_to_date':
+                return queryset.filter(
+                    publishing_modified_at__lte=F(
+                        'publishing_linked__publishing_modified_at'))
+        # ...if admin is not for a `PublishingModel` subclass we must iterate
+        # over child model instances to keep compatibility with Fluent page
+        # admin and models not derived from `PublishingModel`.
+        pks_to_exclude = []
+        for item in queryset.get_real_instances():
+            if value == 'unpublished':
+                if item.status == UrlNode.DRAFT \
+                        and not getattr(item, 'has_been_published', False):
+                    # Unpublished according to both Fluent and ICEKit
+                    continue
+            elif value == 'published':
+                if item.status == UrlNode.PUBLISHED:
+                    continue  # Published according to Fluent Pages' UrlNode
+                elif getattr(item, 'has_been_published', False):
+                    continue  # Published according to ICEKit Publishing
+            elif value == 'out_of_date':
+                if (getattr(item, 'publishing_linked', None)
+                    and item.publishing_modified_at
+                    > item.publishing_linked.publishing_modified_at
+                ):
+                    continue  # Published and outdated according to ICEKit
+            elif value == 'up_to_date':
+                if (getattr(item, 'publishing_linked', None)
+                    and item.publishing_modified_at
+                    <= item.publishing_linked.publishing_modified_at
+                ):
+                    continue  # Published and up-to-date according to ICEKit
+            pks_to_exclude.append(item.pk)
+        return queryset.exclude(pk__in=pks_to_exclude)
 
 
 class PublishingAdminForm(forms.ModelForm):
