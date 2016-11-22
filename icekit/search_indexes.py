@@ -13,5 +13,11 @@ class PageIndex(AbstractLayoutIndex, indexes.Indexable):
         return Page
 
     def index_queryset(self, using=None):
+        """
+        Index current language translation of published objects.
+
+        TODO: Find a way to index all translations of the given model, not just
+        the current site language's translation.
+        """
         translation.activate(settings.LANGUAGE_CODE)
         return self.get_model().objects.filter(status=UrlNode.PUBLISHED).select_related()

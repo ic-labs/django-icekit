@@ -31,25 +31,23 @@ class AbstractLayoutIndex(indexes.SearchIndex):
     # Meta
     get_absolute_url = indexes.CharField(model_attr='get_absolute_url')
     get_list_image_url = indexes.CharField()
-    modification_date = indexes.DateTimeField(model_attr='modification_date')
-    language_code = indexes.CharField(model_attr='language_code')
+    modification_date = indexes.DateTimeField()
+    language_code = indexes.CharField()
 
     # SEO Translations
-    meta_keywords = indexes.CharField(model_attr='meta_keywords')
-    meta_description = indexes.CharField(model_attr='meta_description')
-    meta_title = indexes.CharField(model_attr='meta_title')
+    meta_keywords = indexes.CharField()
+    meta_description = indexes.CharField()
+    meta_title = indexes.CharField()
 
     # We add this for autocomplete.
     content_auto = indexes.EdgeNgramField(model_attr='get_title')
 
     def index_queryset(self, using=None):
         """
-        Index current language translation of published objects.
+        Index published objects.
 
-        TODO: Find a way to index all translations of the given model, not just
-        the current site language's translation.
         """
-        return self.get_model().objects.published().language()
+        return self.get_model().objects.published().select_related()
 
     def full_prepare(self, obj):
         """
@@ -70,6 +68,21 @@ class AbstractLayoutIndex(indexes.SearchIndex):
                 pass
         return ""
 
+    def prepare_modification_date(self, obj):
+        return getattr(obj, "modification_date", None)
+
+    def prepare_language_code(self, obj):
+        return getattr(obj, "language_code", None)
+
+    def prepare_meta_keywords(self, obj):
+        return getattr(obj, "meta_keywords", None)
+
+    def prepare_meta_description(self, obj):
+        return getattr(obj, "meta_description", None)
+
+    def prepare_meta_title(self, obj):
+        return getattr(obj, "meta_title", None)
+
 
 class ICEkitSearchForm(ModelSearchForm):
     """ Custom search form to use the indexed fields defined above """
@@ -79,20 +92,13 @@ class ICEkitSearchForm(ModelSearchForm):
         Add non-document fields to search query set so a) they are searched
         when querying, and b) any customisations like `boost` are applied.
         """
-        # TODO Find a way to detect all indexed fields across models and
-        # automatically add them to this filter, instead of requiring explicit
-        # naming of every indexed field.
+        # TODO Find a way to detect all (or boosted) indexed fields across
+        # models and automatically add them to this filter, instead of
+        # requiring explicit naming of every field to use in the query.
         return self.searchqueryset.filter(
             SQ(content=AutoQuery(query)) |  # Search `text` document
             SQ(title=AutoQuery(query)) |
-            SQ(slug=AutoQuery(query)) |
-            SQ(author=AutoQuery(query)) |
-
-            SQ(boosted_search_terms=AutoQuery(query)) |
-
-            SQ(meta_keywords=AutoQuery(query)) |
-            SQ(meta_description=AutoQuery(query)) |
-            SQ(meta_title=AutoQuery(query))
+            SQ(boosted_search_terms=AutoQuery(query))
         )
 
     # TODO This is mostly a copy/paste of `haystack.forms:SearchForm.search`

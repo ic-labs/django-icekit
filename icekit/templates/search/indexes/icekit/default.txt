@@ -5,6 +5,7 @@
     {% filter unescape %}
         {% block text %}
             {{ object.get_type }}
+            {{ object.slug }}
             {{ object.get_title }}
             {{ object.get_subtitle }}
             {{ object.get_oneliner }}
@@ -18,7 +19,9 @@
                 {% render_placeholder placeholder %}
             {% endfor %}
 
-            {{ object.boosted_search_terms }}{# may not be necessary if this is included/boosted in the query #}
+            {{ object.meta_keywords }}
+            {{ object.meta_description }}
+            {{ object.meta_title }}
         {% endblock %}
      {% endfilter %}
 {% endfilter %}
