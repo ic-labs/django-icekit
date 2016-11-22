@@ -16,7 +16,7 @@ WORKFLOW_STATUS_CHOICES = (
 
 
 @python_2_unicode_compatible
-class WorkflowStep(models.Model):
+class WorkflowState(models.Model):
     # Generic Foreign Key fields to arbitrary object
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
@@ -47,8 +47,8 @@ class WorkflowStep(models.Model):
         ])
 
 
-class WorkflowStepMixin(models.Model):
-    workflow_steps = GenericRelation(WorkflowStep)
+class WorkflowStateMixin(models.Model):
+    workflow_states = GenericRelation(WorkflowState)
 
     class Meta:
         abstract = True
