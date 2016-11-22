@@ -8,6 +8,7 @@ INSTALLED_APPS += (
 
     'icekit_events',
     'icekit_events.event_types.simple',
+    'icekit_events.plugins.links',
     'icekit_events.page_types.eventlistingfordate',
 )
 
@@ -26,7 +27,7 @@ ICEKIT['DASHBOARD_FEATURED_APPS'][0]['models'].update({
 
 # ICEKIT EVENTS ###############################################################
 
-ICEKIT['DASHBOARD_FEATURED_APPS'] = (
+ICEKIT['DASHBOARD_FEATURED_APPS'] = [
     {
         'verbose_name': 'Events',
         'icon_html': '<i class="content-type-icon fa fa-calendar-o"></i>',
@@ -37,16 +38,22 @@ ICEKIT['DASHBOARD_FEATURED_APPS'] = (
     },
 
 
-) + ICEKIT['DASHBOARD_FEATURED_APPS']
+] + ICEKIT['DASHBOARD_FEATURED_APPS']
 
 
 # GLAMKIT SPONSORS ############################################################
-_SPONSOR_PLUGINS = [
+SPONSOR_PLUGINS = [
     'BeginSponsorBlockPlugin',
     'EndSponsorBlockPlugin',
     'SponsorPromoPlugin',
 ]
-DEFAULT_PLUGINS += _SPONSOR_PLUGINS
+
+LINK_PLUGINS += [
+    'EventLinkPlugin',
+]
+
+DEFAULT_PLUGINS += SPONSOR_PLUGINS + LINK_PLUGINS
+
 
 # CONFIGURE PLACEHOLDERS ######################################################
 
@@ -54,8 +61,9 @@ FLUENT_CONTENTS_PLACEHOLDER_CONFIG.update({
     'main': {'plugins': DEFAULT_PLUGINS },
     'pressrelease_contacts': {
         'plugins': (
-            'ContactItemPlugin',
+            'ContactPersonPlugin',
             'TextPlugin',
         ),
     },
+    'related': {'plugins': LINK_PLUGINS },
 })

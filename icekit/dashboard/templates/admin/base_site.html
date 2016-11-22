@@ -1,4 +1,4 @@
-{% extends "admin/base.html" %}
+{% extends "icekit:admin/base_site.html" %}
 
 {% comment %}
 	* Set verbose site name as title.
@@ -15,6 +15,7 @@
 {% block extrastyle %}
 	{% compress css %}
 		<link type="text/less" rel="stylesheet" href="{% static 'admin/css/icekit_dashboard.less' %}" />
+		<link type="text/less" rel="stylesheet" href="{% static 'icekit/admin/css/override.less' %}" />
 	{% endcompress %}
 	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
 {% endblock %}

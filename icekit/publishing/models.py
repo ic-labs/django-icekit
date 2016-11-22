@@ -173,6 +173,21 @@ class PublishingModel(models.Model):
         else:
             return self.get_published()
 
+    def get_published_or_draft(self):
+        """
+        Return the published item, if it exists, otherwise, for privileged
+        users, return the draft version.
+        """
+        if self.is_published:
+            return self
+        elif self.publishing_linked:
+            return self.publishing_linked
+        if is_draft_request_context():
+            return self.get_draft()
+        # There is no public version, and there is no privilege to view the
+        # draft version
+        return None
+
     def get_unique_together(self):
         return self._meta.unique_together
 

@@ -2,7 +2,10 @@
 Model declaration for the `author` app.
 """
 import re
-from urlparse import urljoin
+try:
+	from urlparse import urljoin
+except ImportError:
+	from urllib.parse import urljoin
 
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
@@ -64,8 +67,9 @@ class Author(AbstractCollectedContent, PublishingModel):
         validators=[RelativeURLValidator(), ]
     )
 
-    introduction = PluginHtmlField(
-        _('introduction'),
+    oneliner = models.CharField(
+        max_length=255,
+        blank=True,
         help_text=_('An introduction about the author used on list pages.')
     )
 
@@ -74,8 +78,9 @@ class Author(AbstractCollectedContent, PublishingModel):
     )
 
     def __str__(self):
-        return self.title()
+        return self.title
 
+    @property
     def title(self):
         return " ".join((self.given_names, self.family_name))
 
@@ -111,6 +116,10 @@ class Author(AbstractCollectedContent, PublishingModel):
 
     def get_layout_template_name(self):
         return "icekit_authors/detail.html"
+
+    def get_list_image(self):
+        if self.portrait:
+            return self.portrait.image
 
     class Meta:
         ordering = ('family_name', 'given_names', )

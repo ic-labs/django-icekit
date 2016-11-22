@@ -1,0 +1,98 @@
+from fluent_contents.extensions import ContentPlugin
+from fluent_contents.models import ContentItem
+from django.db import models
+import appsettings
+from icekit.fields import ICEkitURLField
+from icekit.utils.admin.urls import admin_link
+from icekit.utils.attributes import resolve
+
+
+class AbstractLinkItem(ContentItem):
+    """
+    A content type that is a relation to another model.
+
+    Subclasses should define:
+
+        item = models.ForeignKey(to)
+
+    Assuming the 'to' model implements `ListableMixin` then the Item renders as
+    a list item.
+    """
+    style = models.CharField("Link style", max_length=255, choices=appsettings.RELATION_STYLE_CHOICES, blank=True)
+    type_override = models.CharField(max_length=255, blank=True)
+    title_override = models.CharField(max_length=255, blank=True)
+    oneliner_override = models.CharField(max_length=255, blank=True)
+    url_override = ICEkitURLField(max_length=255, blank=True)
+    image_override = models.ImageField(
+        blank=True,
+        upload_to="icekit/listable/list_image/",
+    )
+
+    class Meta:
+        abstract = True
+
+    def get_item(self):
+        "If the item is publishable, get the visible version"
+        if not hasattr(self, '_item'):
+            try:
+                self._item = self.item.get_published_or_draft()
+            except AttributeError:
+                # not publishable
+                self._item = self.item
+        return self._item
+
+    def __unicode__(self):
+        return "Relation to '%s'" % unicode(self.item)
+
+    def _resolve(self, attr):
+        return resolve(self.get_item(), attr)
+
+    def get_type(self):
+        return self.type_override or self._resolve('get_type')
+
+    def get_title(self):
+        return self.title_override or self._resolve('get_title')
+
+    def get_list_image(self):
+        return self.image_override or self._resolve('get_list_image')
+
+    def get_absolute_url(self):
+        return self.url_override or self._resolve('get_absolute_url')
+
+    def get_oneliner(self):
+        return self.oneliner_override or self._resolve('get_oneliner')
+
+    def admin_link(self):
+        return admin_link(self.item)
+
+class LinkPlugin(ContentPlugin):
+    category = 'Links'
+    raw_id_fields = ('item', )
+    render_template = 'plugins/link/default.html'
+    fieldsets = (
+        (None, {
+           'fields': (
+               ('item', 'admin_link',),
+               'style',
+           )
+        }),
+        ('Overrides', {
+           'fields': (
+               'type_override',
+               'title_override',
+               'oneliner_override',
+               'image_override',
+               'url_override',
+           ),
+           'classes': ('collapse', )
+        }),
+    )
+    readonly_fields = ('admin_link',)
+
+    def render(self, request, instance, **kwargs):
+        """
+        Only render the plugin if the item can be shown to the user
+        """
+        if instance.get_item():
+            return super(LinkPlugin, self).render(request, instance, **kwargs)
+        return ""

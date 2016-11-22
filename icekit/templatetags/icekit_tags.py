@@ -1,9 +1,14 @@
+import urlparse
+
 import re
 
 from django import template
+from django.conf import settings
 from django.http import QueryDict
 from django.template import Library
 from django.utils.encoding import force_text
+from django.utils.safestring import mark_safe
+from fluent_contents.plugins.oembeditem.backend import get_oembed_data
 
 register = Library()
 
@@ -184,3 +189,18 @@ class UpdateGetNode(template.Node):
                         GET.setlist(actual_attr, li)
 
         return fix_ampersands(GET.urlencode())
+
+
+@register.filter
+def oembed(url, params=""):
+    kwargs = dict(urlparse.parse_qsl(params))
+
+    try:
+        return mark_safe(get_oembed_data(
+            url,
+            **kwargs
+        )['html'])
+    except KeyError:
+        if settings.DEBUG:
+            return "No OEmbed data returned"
+        return ""

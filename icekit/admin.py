@@ -41,29 +41,30 @@ class ChildModelFilter(admin.SimpleListFilter):
 
 # MIXINS ######################################################################
 
+class PolymorphicAdminUtilsMixin(admin.ModelAdmin):
+    """
+    Utility methods for working with Polymorphic admins.
+    """
+    def child_type_name(self, inst):
+        """
+        e.g. for use in list_display
+        :param inst: a polymorphic parent instance
+        :return: The name of the polymorphic model
+        """
+        return capfirst(inst.polymorphic_ctype.name)
+    child_type_name.short_description = "Type"
 
-class ChildModelPluginPolymorphicParentModelAdmin(PolymorphicParentModelAdmin):
+
+class ChildModelPluginPolymorphicParentModelAdmin(
+    PolymorphicParentModelAdmin,
+    PolymorphicAdminUtilsMixin
+):
     """
     Get child models and choice labels from registered plugins.
     """
 
     child_model_plugin_class = None
     child_model_admin = None
-
-    def get_child_models(self):
-        """
-        Get child models from registered plugins. Fallback to the child model
-        admin and its base model if no plugins are registered.
-        """
-        child_models = []
-        for plugin in self.child_model_plugin_class.get_plugins():
-            child_models.append((plugin.model, plugin.model_admin))
-        if not child_models:
-            child_models.append((
-                self.child_model_admin.base_model,
-                self.child_model_admin,
-            ))
-        return child_models
 
     def get_child_type_choices(self, request, action):
         """
@@ -82,28 +83,28 @@ class ChildModelPluginPolymorphicParentModelAdmin(PolymorphicParentModelAdmin):
             return sorted(choices, lambda a, b: cmp(a[1], b[1]))
         return choices
 
-    def _child_model_dict(self):
-        if not hasattr(self, "_child_model_dict_cache"):
-            self._child_model_dict_cache = dict([
-                (ContentType.objects.get_for_model(p.model, for_concrete_model=False).id, p.model) for p in
-                self.child_model_plugin_class.get_plugins()
-            ])
-        return self._child_model_dict_cache
+    def get_child_models(self):
+        """
+        Get child models from registered plugins. Fallback to the child model
+        admin and its base model if no plugins are registered.
+        """
+        child_models = []
+        for plugin in self.child_model_plugin_class.get_plugins():
+            child_models.append((plugin.model, plugin.model_admin))
+        if not child_models:
+            child_models.append((
+                self.child_model_admin.base_model,
+                self.child_model_admin,
+            ))
+        return child_models
 
-    def child_type_name(self, inst):
-        """
-        :param inst: a polymorphic parent instance
-        :return: The name of the polymorphic model
-        """
-        return capfirst(self._child_model_dict()[inst.polymorphic_ctype_id]._meta.verbose_name)
-    child_type_name.short_description = "Type"
 
 
 # MODELS ######################################################################
 
 
 class LayoutAdmin(admin.ModelAdmin):
-    model = models.Layout
+    filter_horizontal = ('content_types',)
 
     def _get_ctypes(self):
         """
@@ -165,18 +166,12 @@ class LayoutAdmin(admin.ModelAdmin):
         )
         return my_urls + urls
 
-    def get_form(self, *args, **kwargs):
-        ctypes = self._get_ctypes()
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        if db_field.name == "content_types":
+            kwargs["queryset"] = ContentType.objects.filter(pk__in=self._get_ctypes())
 
-        class Form(super(LayoutAdmin, self).get_form(*args, **kwargs)):
-            def __init__(self, *args, **kwargs):
-                super(Form, self).__init__(*args, **kwargs)
-                self.fields['content_types'].queryset = self.fields[
-                    'content_types'].queryset.filter(
-                    pk__in=ctypes,
-                )
-
-        return Form
+        return super(LayoutAdmin, self)\
+            .formfield_for_manytomany(db_field, request, **kwargs)
 
 
 class MediaCategoryAdmin(admin.ModelAdmin):

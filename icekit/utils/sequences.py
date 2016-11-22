@@ -15,7 +15,7 @@ def dedupe_and_sort(sequence, first=None, last=None):
     Items from `sequence` that don't appear in `first` will come
     after any that do, and retain their existing order.
 
-    Returns a sequence of the same as given.
+    Returns a sequence of the same type as given.
     """
     first = first or []
     last = last or []

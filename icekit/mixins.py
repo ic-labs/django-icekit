@@ -40,18 +40,6 @@ class LayoutFieldMixin(models.Model):
             return self.layout.template_name
         return self.fallback_template
 
-
-class FluentFieldsMixin(LayoutFieldMixin):
-    """
-    Add ``layout``, ``contentitem_set`` and ``placeholder_set`` fields so we
-    can add modular content with ``django-fluent-contents``.
-    """
-    contentitem_set = ContentItemRelation()
-    placeholder_set = PlaceholderRelation()
-
-    class Meta:
-        abstract = True
-
     # HACK: This is needed to work-around a `django-fluent-contents` issue
     # where it cannot handle placeholders being added to a template after an
     # object already has placeholder data in the database.
@@ -75,6 +63,18 @@ class FluentFieldsMixin(LayoutFieldMixin):
                     ))
                 result = result or created
         return result
+
+
+class FluentFieldsMixin(LayoutFieldMixin):
+    """
+    Add ``layout``, ``contentitem_set`` and ``placeholder_set`` fields so we
+    can add modular content with ``django-fluent-contents``.
+    """
+    contentitem_set = ContentItemRelation()
+    placeholder_set = PlaceholderRelation()
+
+    class Meta:
+        abstract = True
 
     def placeholders(self):
         # return a dict of placeholders, organised by slot, for access in
@@ -124,6 +124,7 @@ class ListableMixin(models.Model):
     * Title
     * Image
     * URL (assume get_absolute_url)
+    Optional oneliner (implement `get_oneliner()`)
 
     ...and since they show in lists, they show in search results, so
     this model also includes search-related fields.
@@ -153,7 +154,6 @@ class ListableMixin(models.Model):
     def get_list_image(self):
         """
         :return: the ImageField to use for thumbnails in lists
-
         NB note that the Image Field is returned, not the ICEkit Image model as
         with get_hero_image (since the override is just a field and we don't
         need alt text), not Image record.
@@ -169,9 +169,12 @@ class ListableMixin(models.Model):
         # model) if there is one.
         return getattr(list_image, "image", list_image)
 
-
     def get_boosted_search_terms(self):
         return self.boosted_search_terms
+
+    def get_oneliner(self):
+        return getattr(self, 'oneliner', "")
+
 
 class HeroMixin(models.Model):
     """
@@ -188,5 +191,5 @@ class HeroMixin(models.Model):
         abstract = True
 
     def get_hero_image(self):
-        """Return the ImageField"""
-        return self.hero_image.image
+        """ Return the Image record to use as the Hero """
+        return self.hero_image
