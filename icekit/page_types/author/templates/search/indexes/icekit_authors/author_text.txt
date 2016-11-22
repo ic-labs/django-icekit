@@ -1,10 +1,10 @@
-{% load fluent_contents_tags %}{% spaceless %}
+{% load fluent_contents_tags search_tags %}{% spaceless %}
 
-{{ object.get_full_name|safe }}
+{{ object.title|safe }}
 {{ object.introduction|safe }}
 
 {# As fluent requires a request object to process the page place holders we need to fake a request object here #}
-{% fake_request_indicating_search %}
+{% fake_request %}
 
 {% if object.content.contentitems.exists %}
 	{% render_placeholder object.content as content %}

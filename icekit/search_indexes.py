@@ -1,43 +1,28 @@
-from fluent_pages.pagetypes.flatpage.models import FlatPage
-from fluent_pages.pagetypes.fluentpage.models import FluentPage
 from haystack import indexes
-from django.conf import settings
+
+from . import models
 
 
-# Optional search indexes which can be used with the default FluentPage and FlatPage models.
-if getattr(settings, 'ICEKIT_USE_SEARCH_INDEXES', True):
-    class FluentPageIndex(indexes.SearchIndex, indexes.Indexable):
+class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
+    """
+    Search index for a fluent page.
+    """
+    text = indexes.CharField(document=True, use_template=True)
+    title = indexes.CharField(model_attr='title', boost=2.0)
+    publication_date = indexes.DateTimeField(model_attr='publication_date', null=True)
+    url = indexes.CharField(model_attr='get_absolute_url')
+    has_url = indexes.BooleanField(model_attr='get_absolute_url')
+    # We add this for autocomplete.
+    content_auto = indexes.EdgeNgramField(model_attr='title')
+
+    def get_model(self):
         """
-        Search index for a fluent page.
+        Get the model for the search index.
         """
-        text = indexes.CharField(document=True, use_template=True)
-        author = indexes.CharField(model_attr='author')
-        publication_date = indexes.DateTimeField(model_attr='publication_date', null=True)
+        return models.Article
 
-        @staticmethod
-        def get_model():
-            """
-            Get the model for the search index.
-            """
-            return FluentPage
-
-        def index_queryset(self, using=None):
-            """
-            Queryset appropriate for this object to allow search for.
-            """
-            return self.get_model().objects.published()
-
-
-    class FlatPageIndex(FluentPageIndex):
+    def index_queryset(self, using=None):
         """
-        Search index for a flat page.
-
-        As everything except the model is the same as for a FluentPageIndex
-        we shall subclass it and overwrite the one part we need.
+        Index on the published objects
         """
-        @staticmethod
-        def get_model():
-            """
-            Get the model for the search index.
-            """
-            return FlatPage
+        return self.get_model().objects.published()
