@@ -2,57 +2,60 @@ from haystack import indexes
 from haystack.backends import SQ
 from haystack.inputs import AutoQuery
 from haystack.forms import ModelSearchForm
-
-from icekit.publishing.models import PublishableFluentContentsPage
+from icekit.mixins import LayoutFieldMixin
 
 
 # Doesn't extend `indexes.Indexable` to avoid auto-detection for 'Search In'
-class FluentContentsPageIndexMixin(indexes.SearchIndex):
+class AbstractLayoutIndex(indexes.SearchIndex):
     """
-    Base search index class for a publishable fluent contents page.
+    A search index for a publishable model that implements ListableMixin and
+    LayoutFieldMixin.
+
+    Subclasses will need to mix in `indexes.Indexable` and implement
+    `get_model(self)`. They may need to override the `text` field to specify
+    a different template name.
 
     Derived classes must override the `get_model()` method to return the
     specific class (not an instance) that the search index will use.
     """
-    text = indexes.CharField(document=True, use_template=True)
-    title = indexes.CharField(model_attr='title', boost=2.0)
-    slug = indexes.CharField(model_attr='slug')
+    # Content
+    text = indexes.CharField(document=True, use_template=True, template_name="search/indexes/icekit/default.txt")
+    type = indexes.CharField(model_attr='get_type')
+    title = indexes.CharField(model_attr='get_title', boost=2.0)
+    oneliner = indexes.CharField(model_attr='get_oneliner')
+    boosted_search_terms = indexes.CharField(model_attr="get_boosted_search_terms", boost=2.0, null=True)
+
+    # Meta
     url = indexes.CharField(model_attr='get_absolute_url')
-    author = indexes.CharField()
+    image = indexes.CharField(model_attr='get_list_image') #TODO: URL
     modification_date = indexes.DateTimeField(model_attr='modification_date')
-
     language_code = indexes.CharField(model_attr='language_code')
-
-    boosted_search_terms = indexes.CharField(boost=2.0, null=True)
 
     # SEO Translations
     meta_keywords = indexes.CharField(model_attr='meta_keywords')
     meta_description = indexes.CharField(model_attr='meta_description')
     meta_title = indexes.CharField(model_attr='meta_title')
 
-    def get_model(self):
-        """
-        Get the model for the search index.
-        """
-        return PublishableFluentContentsPage
+    # We add this for autocomplete.
+    content_auto = indexes.EdgeNgramField(model_attr='get_title')
 
     def index_queryset(self, using=None):
         """
-        Index current language translation of published pages.
+        Index current language translation of published objects.
 
         TODO: Find a way to index all translations of the given model, not just
         the current site language's translation.
         """
-        return self.get_model().objects.published().language()
+        return self.get_model.objects.published().language()
 
-    def prepare_author(self, obj):
-        return obj.author.get_full_name()
+    def get_model(self):
+        """
+        Get the model for the search index.
+        """
+        return LayoutFieldMixin
 
-    def prepare_boosted_search_terms(self, obj):
-        return getattr(obj, 'boosted_search_terms', '')
 
-
-class FluentContentsPageModelSearchForm(ModelSearchForm):
+class ICEkitSearchForm(ModelSearchForm):
     """ Custom search form to use the indexed fields defined above """
 
     def get_searchqueryset(self, query):

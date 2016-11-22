@@ -4,7 +4,7 @@ from fluent_pages.models import UrlNode
 from haystack.views import SearchView
 
 from icekit.plugins import ICEkitFluentContentsPagePlugin
-from icekit.utils.search import FluentContentsPageModelSearchForm
+from icekit.utils.search import ICEkitSearchForm
 
 from . import admin, models
 
@@ -18,11 +18,11 @@ class FluentSearchView(SearchView):
         features.
         """
         super(FluentSearchView, self).__init__(*args, **kwargs)
-        self.form_class = FluentContentsPageModelSearchForm
+        self.form_class = ICEkitSearchForm
 
     def extra_context(self):
         return {
-            'instance': UrlNode.objects.get_for_path(self.request.path)
+            'page': UrlNode.objects.get_for_path(self.request.path)
         }
 
 
@@ -39,6 +39,6 @@ class SearchPagePlugin(ICEkitFluentContentsPagePlugin):
             FluentSearchView(
                 template='icekit/page_types/search_page/default.html',
             ),
-            name='haystack_search'
+            name='search'
         ),
     )
