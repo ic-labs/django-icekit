@@ -664,6 +664,7 @@ INSTALLED_APPS += (
     'icekit.integration.reversion',
     'icekit.layouts',
     'icekit.publishing',
+    'icekit.workflow',
     'icekit.response_pages',
     'icekit.content_collections',
     'notifications',
