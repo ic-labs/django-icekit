@@ -32,6 +32,10 @@ class WorkflowStepTabularInline(GenericTabularInline):
 
 
 class WorkflowMixinAdmin(admin.ModelAdmin):
+    list_display = (
+        "created_by_column", "last_edited_by_column", "workflow_steps_column")
+    list_filter = (
+        "workflow_steps__status", "workflow_steps__assigned_to")
 
     def _get_obj_ct(self, obj):
         """ Look up and return object's content type and cache for reuse """
