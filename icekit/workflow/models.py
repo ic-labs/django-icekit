@@ -21,7 +21,7 @@ WORKFLOW_STATUS_CHOICES_DICT = dict(WORKFLOW_STATUS_CHOICES)
 class WorkflowStep(models.Model):
     # Generic Foreign Key fields to arbitrary object
     content_type = models.ForeignKey(ContentType)
-    object_id = models.CharField(max_length=254)
+    object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey(
         'content_type',
         'object_id',
@@ -49,7 +49,6 @@ class WorkflowStep(models.Model):
         ])
 
 
-@python_2_unicode_compatible
 class WorkflowStepMixin(models.Model):
     workflow_steps = GenericRelation(WorkflowStep)
 
