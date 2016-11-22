@@ -20,11 +20,16 @@ class FluentSearchView(SearchView):
         super(FluentSearchView, self).__init__(*args, **kwargs)
         self.form_class = ICEkitSearchForm
 
-    def extra_context(self):
-        return {
-            'page': UrlNode.objects.get_for_path(self.request.path)
-        }
+    def get_context(self):
+        """
+        Inject 'page' into the context. Because haystack already returns a
+        'page' context, rename that one to 'results_page'
+        """
+        context = super(FluentSearchView, self).get_context()
+        context['results_page'] = context['page']
+        context['page'] = UrlNode.objects.get_for_path(self.request.path)
 
+        return context
 
 # Register this plugin to the page plugin pool.
 @page_type_pool.register

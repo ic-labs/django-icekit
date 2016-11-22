@@ -18,32 +18,36 @@
 		<div class="page-header">
 			<h3>Results for <small>&ldquo;{{ query }}&rdquo;</small></h3>
 		</div>
-		{% for result in page.object_list %}
+		{% for result in results_page.object_list %}
 			<p>
-				<a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a>
+				<a href="{{ result.get_absolute_url }}">
+					{% if result.get_type %}{{ result.get_type }}:{% endif %}
+					{{ result.get_title }}
+					{% if result.get_list_image_url %}<img src="{{ result.get_list_image_url }}" alt="">{% endif %}
+				</a>
 			</p>
 		{% empty %}
 			<p>No results found.</p>
 		{% endfor %}
 
-		{% if page.has_previous or page.has_next %}
+		{% if results_page.has_previous or results_page.has_next %}
 			<nav class="text-center">
 				<ul class="pagination">
-					<li class="previous{% if not page.has_previous %} disabled{% endif %}">
-						<a href="{% if page.has_previous %}?q={{ query }}&amp;page={{ page.previous_page_number }}{% endif %}">
+					<li class="previous{% if not results_page.has_previous %} disabled{% endif %}">
+						<a href="{% if results_page.has_previous %}?q={{ query }}&amp;page={{ results_page.previous_page_number }}{% endif %}">
 							<span aria-hidden="true">&larr;</span> Previous
 						</a>
 					</li>
-					{% for pagination_number in page.paginator.page_range %}
-						<li {% if pagination_number == page.number %}class="active" {% endif %}>
+					{% for pagination_number in results_page.paginator.page_range %}
+						<li {% if pagination_number == results_page.number %}class="active" {% endif %}>
 							<a href="?q={{ query }}&amp;page={{ pagination_number }}">
 								{{ pagination_number }}
-								{% if pagination_number == page.number %}<span class="sr-only">(current)</span>{% endif %}
+								{% if pagination_number == results_page.number %}<span class="sr-only">(current)</span>{% endif %}
 							</a>
 						</li>
 					{% endfor %}
-					<li class="next{% if not page.has_next %} disabled{% endif %}">
-						<a href="{% if page.has_next %}?q={{ query }}&amp;page={{ page.next_page_number }}{% endif %}">
+					<li class="next{% if not results_page.has_next %} disabled{% endif %}">
+						<a href="{% if results_page.has_next %}?q={{ query }}&amp;page={{ results_page.next_page_number }}{% endif %}">
 							<span aria-hidden="true">&rarr;</span> Next
 						</a>
 					</li>

@@ -1,15 +1,18 @@
+from easy_thumbnails.exceptions import InvalidImageFormatError
+from easy_thumbnails.files import get_thumbnailer
 from haystack import indexes
 from haystack.backends import SQ
 from haystack.inputs import AutoQuery
 from haystack.forms import ModelSearchForm
+from haystack.utils import get_model_ct
 from icekit.mixins import LayoutFieldMixin
 
 
 # Doesn't extend `indexes.Indexable` to avoid auto-detection for 'Search In'
 class AbstractLayoutIndex(indexes.SearchIndex):
     """
-    A search index for a publishable model that implements ListableMixin and
-    LayoutFieldMixin.
+    A search index for a publishable polymorphic model that implements
+    ListableMixin and LayoutFieldMixin.
 
     Subclasses will need to mix in `indexes.Indexable` and implement
     `get_model(self)`. They may need to override the `text` field to specify
@@ -20,14 +23,14 @@ class AbstractLayoutIndex(indexes.SearchIndex):
     """
     # Content
     text = indexes.CharField(document=True, use_template=True, template_name="search/indexes/icekit/default.txt")
-    type = indexes.CharField(model_attr='get_type')
-    title = indexes.CharField(model_attr='get_title', boost=2.0)
-    oneliner = indexes.CharField(model_attr='get_oneliner')
+    get_type = indexes.CharField(model_attr='get_type')
+    get_title = indexes.CharField(model_attr='get_title', boost=2.0)
+    get_oneliner = indexes.CharField(model_attr='get_oneliner')
     boosted_search_terms = indexes.CharField(model_attr="get_boosted_search_terms", boost=2.0, null=True)
 
     # Meta
-    url = indexes.CharField(model_attr='get_absolute_url')
-    image = indexes.CharField(model_attr='get_list_image') #TODO: URL
+    get_absolute_url = indexes.CharField(model_attr='get_absolute_url')
+    get_list_image_url = indexes.CharField()
     modification_date = indexes.DateTimeField(model_attr='modification_date')
     language_code = indexes.CharField(model_attr='language_code')
 
@@ -46,13 +49,26 @@ class AbstractLayoutIndex(indexes.SearchIndex):
         TODO: Find a way to index all translations of the given model, not just
         the current site language's translation.
         """
-        return self.get_model.objects.published().language()
+        return self.get_model().objects.published().language()
 
-    def get_model(self):
+    def full_prepare(self, obj):
         """
-        Get the model for the search index.
+        Make django_ct equal to the type of get_model, to make polymorphic
+        children show up in results.
         """
-        return LayoutFieldMixin
+        prepared_data = super(AbstractLayoutIndex, self).full_prepare(obj)
+        prepared_data['django_ct'] = get_model_ct(self.get_model())
+        return prepared_data
+
+    def prepare_get_list_image_url(self, obj):
+        list_image = getattr(obj, "get_list_image", lambda x: None)()
+        if list_image:
+            # resize according to the `list_image` alias
+            try:
+                return get_thumbnailer(list_image)['list_image'].url
+            except InvalidImageFormatError:
+                pass
+        return ""
 
 
 class ICEkitSearchForm(ModelSearchForm):
