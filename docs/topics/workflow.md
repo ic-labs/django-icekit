@@ -25,11 +25,15 @@ relationship, and to store related workflow status information.
 
 ## Workflow Admin
 
+### WorkflowMixinAdmin
+
 The `icekit.workflow.admin.WorkflowMixinAdmin` provides convenient workflow-related
 information and features for use in your Django admin classes.
 
 Admin list views columns you can add to `list_display`:
 
+* `workflow_steps_column` renders text descriptions of the workflow steps assigned
+  to an item
 * `created_by_column` renders the user who first created an item in the Django admin
 * `last_edited_by_column` renders the user to last edited (added or changed) an
   item in the admin.
@@ -37,6 +41,11 @@ Admin list views columns you can add to `list_display`:
 NOTE: The model change tracking is based on Django admin's `LogEntry`
 mechanisms and is fairly simplistic: it will not track model changes performed
 outside the admin.
+
+### WorkflowStepTabularInline
+
+The `icekit.workflow.admin.WorkflowStepTabularInline` provides an inline for
+assigning and managing workflow step relationships with items in the Django admin.
 
 
 [publishing]: publishing.md
