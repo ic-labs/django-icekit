@@ -10,7 +10,7 @@ from future.utils import python_2_unicode_compatible
 WORKFLOW_STATUS_CHOICES = (
     # First item is the default
     ('', ''),
-    ('pending_review', 'Pending Review'),
+    ('ready_to_review', 'Ready to review'),
     ('approved', 'Approved'),
 )
 

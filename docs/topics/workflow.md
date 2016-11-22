@@ -24,12 +24,12 @@ To get started with ICEKit Workflow:
 A workflow step captures the current status of items within a workflow. Status
 information includes:
 
- * a brief description of the status, such as "Pending Review" or "Approved"
+ * a brief description of the status, such as "Ready to review" or "Approved"
  * an optional user assignment, if a particular individual is responsible for
    progressing the item through to the next step in the workflow.
 
 An item will generally have only a single workflow step assigned as it moves
-through a workflow process, such as from "Pending Review" to "Approved".
+through a workflow process, such as from "Ready to review" to "Approved".
 However it is also possible to relate many workflow steps to an item to handle
 branching workflows if necessary.
 
