@@ -4,6 +4,21 @@ ICEKit includes a very simple workflow system to help manage content generation
 and [publishing][].
 
 
+## Quick Start
+
+To get started with ICEKit Workflow:
+
+ * Add the `icekit.workflow` to `INSTALLED_APPS` (this is included by default)
+ * Models should extend the abstract model mixin `WorkflowStepMixin`
+ * Model admins should extend `WorkflowMixinAdmin` and:
+   * include `WorkflowStepTabularInline` in the admin's `inlines` attribute
+     so staff can manage workflow step relationships
+   * add some or all of `WorkflowMixinAdmin.list_display` items to show
+     workflow information in admin listing pages
+   * add some or all of `WorkflowMixinAdmin.list_filter` items to permit
+     filtering by workflow properties in admin listing pages
+
+
 ## Workflow Step
 
 A workflow step captures the current status of items within a workflow. Status
