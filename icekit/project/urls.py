@@ -42,7 +42,6 @@ urlpatterns = patterns(
     # Installed apps.
     url(r'^api/pages/', include('icekit.pages_api.urls')),
     url(r'^forms/', include('forms_builder.forms.urls')),
-    url(r'^search/', include('haystack.urls')),
 
     # Get admin URLs prefix from settings.
     # Handle admin and front-end authentication separately.

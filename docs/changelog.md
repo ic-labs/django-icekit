@@ -31,6 +31,9 @@
 
   * Text plugin now has a style setting
 
+  * Overhaul of search system, using a consistent approach to index and depict
+    rich/publishable/polymorphic models.
+
 ### Breaking changes:
 
   * `AbstractLayoutPage` now includes ListableMixin and HeroMixin. All models
