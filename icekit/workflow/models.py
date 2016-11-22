@@ -14,6 +14,8 @@ WORKFLOW_STATUS_CHOICES = (
     ('approved', 'Approved'),
 )
 
+WORKFLOW_STATUS_CHOICES_DICT = dict(WORKFLOW_STATUS_CHOICES)
+
 
 @python_2_unicode_compatible
 class WorkflowStep(models.Model):
@@ -41,7 +43,9 @@ class WorkflowStep(models.Model):
 
     def __str__(self):
         return ' '.join([
-            self.content_object, self.status, self.assigned_to
+            WORKFLOW_STATUS_CHOICES_DICT[self.status],
+            'by',
+            str(self.assigned_to),
         ])
 
 
