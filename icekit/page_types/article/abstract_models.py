@@ -1,12 +1,12 @@
 from django.db import models
 from icekit.content_collections.abstract_models import \
-    AbstractCollectedContent, AbstractListingPage, TitleSlugMixin
-from icekit.mixins import ListableMixin, HeroMixin
-from icekit.publishing.models import PublishableFluentContents
+    AbstractCollectedContent, TitleSlugMixin
+from icekit.mixins import HeroMixin
+from icekit.models import ICEkitFluentContentsMixin
 
 
 class AbstractArticle(
-    PublishableFluentContents,
+    ICEkitFluentContentsMixin,
     AbstractCollectedContent,
     HeroMixin,
     TitleSlugMixin
