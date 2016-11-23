@@ -47,3 +47,28 @@ class TestWorkflowStateModel(TestCase):
             assigned_to=self.user,
         )
         self.assertEqual('New : %s' % self.user, unicode(wfstate))
+
+
+class TestWorkflowStateMixin(TestCase):
+
+    def setUp(self):
+        self.obj_without_mixin = G(User)
+        self.obj_with_mixin = G(LayoutPage)
+
+    def test_can_associate_model_without_mixin_with_workflowstate(self):
+        models.WorkflowState.objects.create(
+            content_object=self.obj_without_mixin)
+
+    def test_model_without_mixin_has_no_reverse_relationship(self):
+        self.assertFalse(hasattr(self.obj_without_mixin, 'workflow_states'))
+
+    def test_model_with_mixin_has_reverse_relationship(self):
+        self.assertTrue(hasattr(self.obj_with_mixin, 'workflow_states'))
+        self.assertEqual(
+            [],
+            list(self.obj_with_mixin.workflow_states.all()))
+        wfstate = models.WorkflowState.objects.create(
+            content_object=self.obj_with_mixin)
+        self.assertEqual(
+            [wfstate],
+            list(self.obj_with_mixin.workflow_states.all()))
