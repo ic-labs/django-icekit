@@ -1,18 +1,8 @@
-import os
-from django.core.urlresolvers import NoReverseMatch
-from fluent_contents.models import ContentItem
-from fluent_pages.urlresolvers import app_reverse, PageTypeNotMounted
-from icekit.publishing.models import PublishingModel
-from timezone import timezone
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
-from icekit.content_collections.abstract_models import AbstractCollectedContent, \
-    TitleSlugMixin, AbstractListingPage
-from icekit.mixins import FluentFieldsMixin
-
-
+from fluent_contents.models import ContentItem
 
 
 @python_2_unicode_compatible
