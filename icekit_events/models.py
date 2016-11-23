@@ -433,12 +433,22 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
             generator.event = dst_obj
             generator.save()
 
+    def get_occurrences(self):
+        """
+        :return: My occurrences, or those of my part_of event
+        """
+        if self.occurrences.count():
+            return self.occurrences
+        elif self.part_of:
+            return self.part_of.get_occurrences()
+        return self.occurrences # will be empty, but at least queryable
+
     def get_occurrences_range(self):
         """
         Return the first and last chronological `Occurrence` for this event.
         """
-        first = self.occurrences.order_by('start').first()
-        last = self.occurrences.order_by('-end').first()
+        first = self.get_occurrences().order_by('start').first()
+        last = self.get_occurrences().order_by('-end').first()
         return (first, last)
 
     def get_occurrences_by_day(self):
@@ -447,7 +457,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         """
         result = OrderedDict()
 
-        for occ in self.occurrences.order_by('start'):
+        for occ in self.get_occurrences().order_by('start'):
             result.setdefault(occ.local_start.date, []).append(occ)
 
         return result.items()
@@ -458,7 +468,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         :return: a sorted set of all the different dates that this event
         happens on.
         """
-        occurrences = self.occurrences.filter(
+        occurrences = self.get_occurrences().filter(
             is_cancelled=False
         )
         dates = set([o.local_start.date() for o in occurrences])
@@ -470,7 +480,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         :return: a sorted set of all the different times that this event
         happens on.
         """
-        occurrences = self.occurrences.filter(
+        occurrences = self.get_occurrences().filter(
             is_all_day=False, is_cancelled=False
         )
         times = set([o.local_start.time() for o in occurrences])
