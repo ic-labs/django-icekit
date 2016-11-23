@@ -33,7 +33,7 @@ class WorkflowStateTabularInline(GenericTabularInline):
 
 class WorkflowMixinAdmin(admin.ModelAdmin):
     list_display = (
-        "created_by_column", "last_edited_by_column", "workflow_states_column")
+        "last_edited_by_column", "workflow_states_column")
     list_filter = (
         "workflow_states__status", "workflow_states__assigned_to")
 

@@ -118,12 +118,10 @@ class TestWorkflowMixinAdmin(WebTest):
         self.assertEqual(200, response.status_code)
         # Expected column names are present
         self.assertContains(response, '<span>Title</span>')
-        self.assertContains(response, '<span>Created by</span>')
         self.assertContains(response, '<span>Last edited by</span>')
         self.assertContains(response, '<span>Workflow States</span>')
         # Expected column values are present
         self.assertContains(response, 'Test Article')
-        self.assertContains(response, 'creator@email.com')
         self.assertContains(response, 'updater@email.com')
         self.assertContains(response, 'Ready to review : reviewer@email.com')
 
