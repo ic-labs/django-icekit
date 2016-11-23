@@ -54,12 +54,15 @@ class WorkflowMixinAdmin(admin.ModelAdmin):
 
     def created_by_column(self, obj):
         """ Return user who first created an item in Django admin """
-        first_addition_logentry = admin.models.LogEntry.objects.filter(
-            object_id=obj.pk,
-            content_type_id=self._get_obj_ct(obj).pk,
-            action_flag=admin.models.ADDITION,
-        ).get()
-        return first_addition_logentry.user
+        try:
+            first_addition_logentry = admin.models.LogEntry.objects.filter(
+                object_id=obj.pk,
+                content_type_id=self._get_obj_ct(obj).pk,
+                action_flag=admin.models.ADDITION,
+            ).get()
+            return first_addition_logentry.user
+        except admin.models.LogEntry.DoesNotExist:
+            return None
     created_by_column.short_description = 'Created by'
 
     def last_edited_by_column(self, obj):
@@ -72,5 +75,8 @@ class WorkflowMixinAdmin(admin.ModelAdmin):
             content_type_id=self._get_obj_ct(obj).pk,
             action_flag__in=[admin.models.ADDITION, admin.models.CHANGE],
         ).first()
-        return latest_logentry.user
+        if latest_logentry:
+            return latest_logentry.user
+        else:
+            return None
     last_edited_by_column.short_description = 'Last edited by'

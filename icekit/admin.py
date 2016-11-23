@@ -13,6 +13,10 @@ from django.utils.text import capfirst
 from django.utils.translation import ugettext_lazy as _
 from polymorphic.admin import PolymorphicParentModelAdmin
 
+from icekit.publishing.admin import PublishingAdmin, \
+    PublishableFluentContentsAdmin
+from icekit.workflow.admin import WorkflowMixinAdmin
+
 from icekit import models
 
 
@@ -40,6 +44,31 @@ class ChildModelFilter(admin.SimpleListFilter):
 
 
 # MIXINS ######################################################################
+
+
+class ICEkitContentsAdmin(PublishingAdmin, WorkflowMixinAdmin):
+    """
+    A base for generic admins that will include ICEkit features:
+
+     - publishing
+     - workflow
+    """
+    list_display = PublishingAdmin.list_display + \
+        WorkflowMixinAdmin.list_display
+    list_filter = PublishingAdmin.list_filter + \
+        WorkflowMixinAdmin.list_filter
+
+
+class ICEkitFluentContentsAdmin(
+        PublishableFluentContentsAdmin, WorkflowMixinAdmin):
+    """
+    A base for Fluent Contents admins that will include ICEkit features:
+
+     - publishing
+     - workflow
+    """
+    pass
+
 
 class PolymorphicAdminUtilsMixin(admin.ModelAdmin):
     """
