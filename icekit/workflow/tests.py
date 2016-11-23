@@ -1,9 +1,14 @@
 from django.contrib.auth import get_user_model
+from django.contrib.admin.models import LogEntry
+from django.contrib.contenttypes.models import ContentType
+from django.core.urlresolvers import reverse
 from django.db import transaction, IntegrityError
-from django.test import TestCase, override_settings
+from django.test import TestCase
 
 from django_dynamic_fixture import G
+from django_webtest import WebTest
 
+from icekit.page_types.article.models import Article
 from icekit.page_types.layout_page.models import LayoutPage
 
 from . import models
@@ -72,3 +77,108 @@ class TestWorkflowStateMixin(TestCase):
         self.assertEqual(
             [wfstate],
             list(self.obj_with_mixin.workflow_states.all()))
+
+
+class TestWorkflowMixinAdmin(WebTest):
+
+    def setUp(self):
+        self.superuser = G(
+            User, is_active=True, is_staff=True, is_superuser=True)
+        self.creator_user = G(User, is_staff=True, email='creator@email.com')
+        self.updater_user = G(User, is_staff=True, email='updater@email.com')
+        self.reviewer_user = G(User, is_staff=True, email='reviewer@email.com')
+        self.article = G(Article, title='Test Article')
+        # Create LogEntry records to simulate admin change history
+        article_ct_id = ContentType.objects.get_for_model(self.article).pk
+        LogEntry.objects.log_action(
+            user_id=self.creator_user.pk,
+            content_type_id=article_ct_id,
+            object_id=self.article.pk,
+            object_repr='',
+            action_flag=1,  # ADDITION
+        )
+        LogEntry.objects.log_action(
+            user_id=self.creator_user.pk,
+            content_type_id=article_ct_id,
+            object_id=self.article.pk,
+            object_repr='',
+            action_flag=2,  # CHANGE
+        )
+        # Add workflow state for article
+        models.WorkflowState.objects.create(
+            content_object=self.article,
+            status='ready_to_review',
+            assigned_to=self.reviewer_user,
+        )
+
+    def test_workflow_list_display_columns(self):
+        response = self.app.get(
+            reverse('admin:icekit_article_article_changelist'),
+            user=self.superuser)
+        self.assertEqual(200, response.status_code)
+        # Expected column names are present
+        self.assertContains(response, '<span>Title</span>')
+        self.assertContains(response, '<span>Created by</span>')
+        self.assertContains(response, '<span>Last edited by</span>')
+        self.assertContains(response, '<span>Workflow States</span>')
+        # Expected column values are present
+        self.assertContains(response, 'Test Article')
+        self.assertContains(response, 'creator@email.com')
+        self.assertContains(response, 'updater@email.com')
+        self.assertContains(response, 'Ready to review : reviewer@email.com')
+
+    def test_workflow_list_filters(self):
+        # Apply status filter with expected results
+        response = self.app.get(
+            reverse('admin:icekit_article_article_changelist') +
+            '?workflow_states__status__exact=ready_to_review',
+            user=self.superuser)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, 'Test Article')
+        # Apply status filter with no expected results
+        response = self.app.get(
+            reverse('admin:icekit_article_article_changelist') +
+            '?workflow_states__status__exact=approved',
+            user=self.superuser)
+        self.assertEqual(200, response.status_code)
+        self.assertNotContains(response, 'Test Article')
+
+        # Apply assigned user filter with expected results
+        response = self.app.get(
+            reverse('admin:icekit_article_article_changelist') +
+            '?workflow_states__assigned_to__id=%d' % self.reviewer_user.pk,
+            user=self.superuser)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, 'Test Article')
+        # Apply assigned user filter with no expected results
+        response = self.app.get(
+            reverse('admin:icekit_article_article_changelist') +
+            '?workflow_states__assigned_to__id=%d' % self.creator_user.pk,
+            user=self.superuser)
+        self.assertEqual(200, response.status_code)
+        self.assertNotContains(response, 'Test Article')
+
+    def test_workflow_state_tabular_inline(self):
+        # Load Article change form
+        response = self.app.get(
+            reverse('admin:icekit_article_article_change',
+                    args=(self.article.pk, )),
+            user=self.superuser)
+        self.assertEqual(200, response.status_code)
+        wfstate_prefix = 'workflow-workflowstate-content_type-object_id-0-'
+        # Check existing workflow status relationship with article
+        form = response.forms[0]
+        self.assertEqual(
+            'ready_to_review',
+            form[wfstate_prefix + 'status'].value)
+        self.assertEqual(
+            str(self.reviewer_user.pk),
+            form[wfstate_prefix + 'assigned_to'].value)
+        # Update workflow status relationship with article
+        form[wfstate_prefix + 'status'] = 'approved'
+        form[wfstate_prefix + 'assigned_to'] = self.superuser.pk
+        response = form.submit(name='_continue')
+        # Check workflow status is updated
+        wfstate = self.article.workflow_states.all()[0]
+        self.assertEqual('approved', wfstate.status)
+        self.assertEqual(self.superuser, wfstate.assigned_to)
