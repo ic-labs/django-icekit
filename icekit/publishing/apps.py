@@ -89,11 +89,17 @@ class AppConfig(AppConfig):
                 translations__language_code=language_code,
             )
 
-            obj = _filter_candidates_by_published_status(qs, self.model, path)
+            qs = _filter_candidates_by_published_status(qs)
+            try:
+                obj = qs[0]
+                # Explicitly set language to the state the object was fetched in.
+                obj.set_current_language(language_code)
+                return obj
+            except IndexError:
+                raise self.model.DoesNotExist(
+                    u"No published {0} found for the path '{1}'".format(
+                        self.model.__name__, path))
 
-            # Explicitly set language to the state the object was fetched in.
-            obj.set_current_language(language_code)
-            return obj
 
         # Monkey-patch `UrlNodeQuerySet.best_match_for_path` to add filtering
         # by publishing status.
@@ -105,33 +111,38 @@ class AppConfig(AppConfig):
             # Based on FeinCMS:
             paths = self._split_path_levels(path)
 
-            qs = self._single_site() \
+            try:
+                qs = self._single_site() \
                     .filter(translations___cached_url__in=paths,
                             translations__language_code=language_code) \
                     .extra(select={'_url_length': 'LENGTH(_cached_url)'}) \
-                    .order_by('-level', '-_url_length')
+                    .order_by('-level', '-_url_length')  # / and /news/ is both level 0
+                qs = _filter_candidates_by_published_status(qs)
+                obj = qs[0]
+                obj.set_current_language(
+                    language_code)  # NOTE: Explicitly set language to the state the object was fetched in.
+                return obj
+            except IndexError:
+                raise self.model.DoesNotExist(
+                    u"No published {0} found for the path '{1}'".format(
+                        self.model.__name__, path))
 
-            obj = _filter_candidates_by_published_status(qs, self.model, path)
-
-            obj.set_current_language(language_code)
-            return obj
-
-        def _filter_candidates_by_published_status(candidates, model, path):
+        def _filter_candidates_by_published_status(candidates):
             # Filter candidate results by published status, using
             # instance attributes instead of queryset filtering to
             # handle unpublishable and ICEKit publishing-enabled items.
-            objs = set()  # Set to avoid duplicates
+            objs = []  # Use a list to preserve ordering
             if is_draft_request_context():
                 for candidate in candidates:
                     # Keep candidates that are publishable draft copies, or
                     # that are not publishable (i.e. they don't have the
                     # `is_draft` attribute at all)
                     if getattr(candidate, 'is_draft', True):
-                        objs.add(candidate)
+                        objs.append(candidate)
                     # Also keep candidates where we have the published copy and
                     # can exchange to get the draft copy
                     elif hasattr(candidate, 'get_draft'):
-                        objs.add(candidate.get_draft())
+                        objs.append(candidate.get_draft())
             else:
                 for candidate in candidates:
                     # Keep candidates that are published, or that are not
@@ -145,23 +156,9 @@ class AppConfig(AppConfig):
                         ):
                             pass
                         else:
-                            objs.add(candidate)
+                            objs.append(candidate)
 
-            if not objs:
-                raise model.DoesNotExist(
-                    u"No published {0} found for the path '{1}'"
-                    .format(model.__name__, path))
-
-            if len(objs) > 1:
-                # TODO May need special handling for SFMOMA StoryPage slugs
-                # which can overlap. E.g. return the first one with no
-                # category, or the last one if they all have categories.
-
-                raise model.MultipleObjectsReturned(
-                    u"Multiple published {0} found for the path '{1}'"
-                    .format(model.__name__, path))
-
-            return objs.pop()
+            return objs
 
         # Monkey-patch method overrides for classes where we must do so to
         # avoid our custom versions from getting clobbered by versions higher
