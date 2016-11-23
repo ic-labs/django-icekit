@@ -38,14 +38,15 @@ To achieve permanent speedup, create a data dump called `test_initial_data.sql`
 with migrations applied. It will be restored to the test database in
 `runtests.sh`, bypassing all migrations.
 
-1. Create a fresh database `foo`
+1. Create a fresh database `test_foo`
+
 2. Run migrations:
 
-        manage.py migrate
+        BASE_SETTINGS_MODULE=test manage.py migrate
 
 3. Dump the database to `test_initial_data.sql`
 
-        `pg_dump -O -x -f test_initial_data.sql -d foo`
+        `pg_dump -O -x -f test_initial_data.sql -d test_foo`
 
 
 # To create fluent pages in tests.
