@@ -105,6 +105,7 @@ class ChildModelPluginPolymorphicParentModelAdmin(
 
 class LayoutAdmin(admin.ModelAdmin):
     filter_horizontal = ('content_types',)
+    list_display = ('title', 'display_template_name', 'display_content_types' )
 
     def _get_ctypes(self):
         """
@@ -118,6 +119,12 @@ class LayoutAdmin(admin.ModelAdmin):
                 for child in model.__subclasses__():
                     ctypes.append(ContentType.objects.get_for_model(child).pk)
         return ctypes
+
+    def display_content_types(self, obj):
+        return ", ".join([unicode(x) for x in obj.content_types.all()])
+
+    def display_template_name(self, obj):
+        return obj.template_name
 
     def placeholder_data_view(self, request, id):
         """
