@@ -8,11 +8,13 @@ from future.utils import python_2_unicode_compatible
 
 
 WORKFLOW_STATUS_CHOICES = (
-    # First item is the default
-    ('', ''),
+    ('new', 'New'),
     ('ready_to_review', 'Ready to review'),
     ('approved', 'Approved'),
 )
+
+# First status choice is the default
+WORKFLOW_STATUS_DEFAULT = WORKFLOW_STATUS_CHOICES[0][0]
 
 
 @python_2_unicode_compatible
@@ -30,7 +32,7 @@ class WorkflowState(models.Model):
     status = models.CharField(
         max_length=254,
         choices=WORKFLOW_STATUS_CHOICES,
-        default=WORKFLOW_STATUS_CHOICES[0][0],
+        default=WORKFLOW_STATUS_DEFAULT,
     )
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -40,11 +42,14 @@ class WorkflowState(models.Model):
     )
 
     def __str__(self):
-        return ' '.join([
-            self.get_status_display(),
-            'by',
-            str(self.assigned_to),
-        ])
+        if self.assigned_to:
+            return ' '.join([
+                self.get_status_display(),
+                ':',
+                str(self.assigned_to),
+            ])
+        else:
+            return self.get_status_display()
 
 
 class WorkflowStateMixin(models.Model):
