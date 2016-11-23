@@ -14,8 +14,9 @@ from django.utils.translation import ugettext_lazy as _
 from polymorphic.admin import PolymorphicParentModelAdmin
 
 from icekit.publishing.admin import PublishingAdmin, \
-    PublishableFluentContentsAdmin
-from icekit.workflow.admin import WorkflowMixinAdmin
+    PublishableFluentContentsAdmin, ICEKitFluentPagesParentAdminMixin
+from icekit.workflow.admin import WorkflowMixinAdmin, \
+    WorkflowStateTabularInline
 
 from icekit import models
 
@@ -57,6 +58,7 @@ class ICEkitContentsAdmin(PublishingAdmin, WorkflowMixinAdmin):
         WorkflowMixinAdmin.list_display
     list_filter = PublishingAdmin.list_filter + \
         WorkflowMixinAdmin.list_filter
+    inlines = [WorkflowStateTabularInline]
 
 
 class ICEkitFluentContentsAdmin(
@@ -69,6 +71,7 @@ class ICEkitFluentContentsAdmin(
     """
     list_display = ICEkitContentsAdmin.list_display
     list_filter = ICEkitContentsAdmin.list_filter
+    inlines = ICEkitContentsAdmin.inlines
 
 
 class PolymorphicAdminUtilsMixin(admin.ModelAdmin):
