@@ -129,14 +129,14 @@ class TestWorkflowMixinAdmin(WebTest):
         # Apply status filter with expected results
         response = self.app.get(
             reverse('admin:icekit_article_article_changelist') +
-            '?workflow_states__status__exact=ready_to_review',
+            '?workflow_status=ready_to_review',
             user=self.superuser)
         self.assertEqual(200, response.status_code)
         self.assertContains(response, 'Test Article')
         # Apply status filter with no expected results
         response = self.app.get(
             reverse('admin:icekit_article_article_changelist') +
-            '?workflow_states__status__exact=approved',
+            '?workflow_status=approved',
             user=self.superuser)
         self.assertEqual(200, response.status_code)
         self.assertNotContains(response, 'Test Article')
@@ -144,14 +144,14 @@ class TestWorkflowMixinAdmin(WebTest):
         # Apply assigned user filter with expected results
         response = self.app.get(
             reverse('admin:icekit_article_article_changelist') +
-            '?workflow_states__assigned_to__id=%d' % self.reviewer_user.pk,
+            '?assigned_to=%d' % self.reviewer_user.pk,
             user=self.superuser)
         self.assertEqual(200, response.status_code)
         self.assertContains(response, 'Test Article')
         # Apply assigned user filter with no expected results
         response = self.app.get(
             reverse('admin:icekit_article_article_changelist') +
-            '?workflow_states__assigned_to__id=%d' % self.creator_user.pk,
+            '?assigned_to=%d' % self.creator_user.pk,
             user=self.superuser)
         self.assertEqual(200, response.status_code)
         self.assertNotContains(response, 'Test Article')
