@@ -1,0 +1,1 @@
+-e git+https://github.com/ic-labs/django-icekit.git@develop#egg=icekit
