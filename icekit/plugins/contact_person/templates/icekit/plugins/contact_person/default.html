@@ -1,6 +1,6 @@
 {% block contact-person %}
     {% with contact=instance.contact %}
-        <div class="contact-card">
+        <div class="contact-person">
             <h5 class="contact-name-title">
                 {{ contact.name }}
                 {% if contact.title %}
@@ -9,6 +9,7 @@
 						</span>
                 {% endif %}
             </h5>
+            <p class="contact-name-details">
             {% if contact.phone %}
                 <a href="tel:+1{{ contact.phone }}" class="clearfix">
                     {{ contact.phone }}
@@ -19,6 +20,7 @@
                     {{ contact.email }}
                 </a>
             {% endif %}
+            </p>
 
         </div>
     {% endwith %}
