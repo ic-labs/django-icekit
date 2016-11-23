@@ -67,7 +67,8 @@ class ICEkitFluentContentsAdmin(
      - publishing
      - workflow
     """
-    pass
+    list_display = ICEkitContentsAdmin.list_display
+    list_filter = ICEkitContentsAdmin.list_filter
 
 
 class PolymorphicAdminUtilsMixin(admin.ModelAdmin):
