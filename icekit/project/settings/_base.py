@@ -526,7 +526,7 @@ FLUENT_MARKUP_LANGUAGES = ('restructuredtext', 'markdown', 'textile')
 FLUENT_MARKUP_MARKDOWN_EXTRAS = ()
 
 FLUENT_PAGES_PARENT_ADMIN_MIXIN = \
-    'icekit.publishing.admin.ICEKitFluentPagesParentAdminMixin'
+    'icekit.admin_mixins.ICEkitFluentPagesParentAdmin'
 
 # Avoid an exception because fluent-pages wants `TEMPLATE_DIRS[0]` to be
 # defined, even though that setting is going away. This might not be necessary
@@ -663,8 +663,8 @@ INSTALLED_APPS += (
     'icekit.dashboard',  # Must come before `django.contrib.admin` and `flat`
     'icekit.integration.reversion',
     'icekit.layouts',
-    'icekit.publishing',
     'icekit.workflow',
+    'icekit.publishing',
     'icekit.response_pages',
     'icekit.content_collections',
     'notifications',
