@@ -106,7 +106,7 @@ setuptools.setup(
         ],
         'project': [
             'boto3',
-            'celery[redis]<4',
+            'celery[redis]==3.1.24',
             'ConcurrentLogHandler',
             'django-celery',
             'django-celery-email',
@@ -144,7 +144,7 @@ setuptools.setup(
             'elasticstack',
         ],
         'test': [
-            'celery[redis]<4',
+            'celery[redis]==3.1.24',
             'coverage',
             'coveralls',
             'django-dynamic-fixture',

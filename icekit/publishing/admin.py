@@ -282,11 +282,38 @@ class _PublishingHelpersMixin(object):
         :return: Boolean.
         """
         user_obj = request.user
-        if user_obj.is_superuser:
-            return True
         if not user_obj.is_active:
             return False
+        if user_obj.is_superuser:
+            return True
         return user_obj.has_perm('%s.can_publish' % self.opts.app_label)
+
+    def has_preview_permission(self, request, obj=None):
+        """
+        Return `True` if the user has permissions to preview a publishable
+        item.
+
+        NOTE: this method does not actually change who can or cannot preview
+        any particular item, just whether to show the preview link. The real
+        dcision is made by a combination of:
+
+        - `PublishingMiddleware` which chooses who can view draft content
+        - the view code for a particular item, which may or may not render
+          draft content for a specific user.
+
+        :param request: Django request object.
+        :param obj: The object the user would preview, if permitted.
+        :return: Boolean.
+        """
+        # User who can publish always has preview permission.
+        if self.has_publish_permission(request, obj=obj):
+            return True
+        user_obj = request.user
+        if not user_obj.is_active:
+            return False
+        if user_obj.is_staff:
+            return True
+        return False
 
     def publishing_column(self, obj):
         """
@@ -309,6 +336,8 @@ class _PublishingHelpersMixin(object):
             'object_url': object_url,
             'has_publish_permission':
                 self.has_publish_permission(self.request, obj),
+            'has_preview_permission':
+                self.has_preview_permission(self.request, obj),
         })
         try:
             if isinstance(obj, PublishingModel):
@@ -521,6 +550,12 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         """
         obj = context.get('original', None)
         if obj:
+            context['object'] = obj
+            context['has_been_published'] = obj.has_been_published
+            context['is_dirty'] = obj.is_dirty
+            context['has_preview_permission'] = \
+                self.has_preview_permission(request, obj)
+
             if not self.has_publish_permission(request, obj):
                 context['has_publish_permission'] = False
             else:
@@ -547,12 +582,6 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
                     unpublish_btn = reverse(
                         self.unpublish_reverse(type(obj)), args=(obj.pk, ))
 
-                # By default don't show the preview draft button unless there
-                # is a `get_absolute_url` definition on the object.
-                preview_draft_btn = None
-                if callable(getattr(obj, 'get_absolute_url', None)):
-                    preview_draft_btn = True
-
                 # If the user has publishing permission, the object has draft
                 # changes and a published version show a revert button to
                 # change back to the published information.
@@ -561,13 +590,9 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
                     revert_btn = reverse(self.revert_reverse, args=(obj.pk, ))
 
                 context.update({
-                    'object': obj,
                     'object_url': object_url,
-                    'is_dirty': obj.is_dirty,
-                    'has_been_published': obj.has_been_published,
                     'publish_btn': publish_btn,
                     'unpublish_btn': unpublish_btn,
-                    'preview_draft_btn': preview_draft_btn,
                     'revert_btn': revert_btn,
                 })
 

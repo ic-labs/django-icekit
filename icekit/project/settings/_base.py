@@ -15,6 +15,8 @@ import multiprocessing
 import os
 import re
 
+from celery.schedules import crontab
+
 from django.core.urlresolvers import reverse_lazy
 from django.utils.text import slugify
 from kombu import Exchange, Queue
@@ -342,9 +344,12 @@ SITE_ID = 1
 
 # CELERY ######################################################################
 
-BROKER_URL = CELERY_RESULT_BACKEND = 'redis://%s/0' % REDIS_ADDRESS
+BROKER_URL = 'redis://%s/0' % REDIS_ADDRESS
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']  # 'pickle'
 CELERY_DEFAULT_QUEUE = PROJECT_SLUG
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+CELERYD_MAX_TASKS_PER_CHILD = 20
 
 CELERY_QUEUES = (
     Queue(
@@ -354,9 +359,23 @@ CELERY_QUEUES = (
     ),
 )
 
+# crontab(minute='*/15') = every 15 minutes
+# crontab(minute=0, hour=0) = daily at midnight
+CELERYBEAT_SCHEDULE = {
+    'UpdateSearchIndexTask': {
+        'task': 'icekit.tasks.UpdateSearchIndexTask',
+        'schedule': crontab(minute='*/15'),  # Every 15 minutes.
+    },
+}
+
+# Redis (by setting CELERY_RESULT_BACKEND to BROKER_URL) is an alternative
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 
-CELERYBEAT_SCHEDULE = {}
+# Log the celerybeat lock actions
+LOGGING['loggers']['icekit.tasks'] = {
+    'handlers': ['logfile'],
+    'level': 'DEBUG',
+}
 
 INSTALLED_APPS += (
     'djcelery',

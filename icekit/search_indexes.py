@@ -1,43 +1,23 @@
-from fluent_pages.pagetypes.flatpage.models import FlatPage
-from fluent_pages.pagetypes.fluentpage.models import FluentPage
-from haystack import indexes
 from django.conf import settings
+from django.utils import translation
+from fluent_pages.models import Page
+from haystack import indexes
+from fluent_pages.models.db import UrlNode
+from icekit.utils.search import AbstractLayoutIndex
 
 
-# Optional search indexes which can be used with the default FluentPage and FlatPage models.
-if getattr(settings, 'ICEKIT_USE_SEARCH_INDEXES', True):
-    class FluentPageIndex(indexes.SearchIndex, indexes.Indexable):
+class PageIndex(AbstractLayoutIndex, indexes.Indexable):
+    """Index all Fluent Pages"""
+
+    def get_model(self):
+        return Page
+
+    def index_queryset(self, using=None):
         """
-        Search index for a fluent page.
+        Index current language translation of published objects.
+
+        TODO: Find a way to index all translations of the given model, not just
+        the current site language's translation.
         """
-        text = indexes.CharField(document=True, use_template=True)
-        author = indexes.CharField(model_attr='author')
-        publication_date = indexes.DateTimeField(model_attr='publication_date', null=True)
-
-        @staticmethod
-        def get_model():
-            """
-            Get the model for the search index.
-            """
-            return FluentPage
-
-        def index_queryset(self, using=None):
-            """
-            Queryset appropriate for this object to allow search for.
-            """
-            return self.get_model().objects.published()
-
-
-    class FlatPageIndex(FluentPageIndex):
-        """
-        Search index for a flat page.
-
-        As everything except the model is the same as for a FluentPageIndex
-        we shall subclass it and overwrite the one part we need.
-        """
-        @staticmethod
-        def get_model():
-            """
-            Get the model for the search index.
-            """
-            return FlatPage
+        translation.activate(settings.LANGUAGE_CODE)
+        return self.get_model().objects.filter(status=UrlNode.PUBLISHED).select_related()

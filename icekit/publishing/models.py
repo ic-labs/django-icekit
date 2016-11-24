@@ -78,13 +78,12 @@ class PublishingModel(models.Model):
             return True
 
         # Get all placeholders + their plugins to find their modified date
-        for placeholder_field in self.get_placeholder_fields():
+        for placeholder_field in self.get_cms_placeholder_fields():
             placeholder = getattr(self, placeholder_field)
             for plugin in placeholder.get_plugins_list():
                 if plugin.changed_date \
                         > self.publishing_linked.publishing_modified_at:
                     return True
-
         return False
 
     @property
@@ -199,17 +198,18 @@ class PublishingModel(models.Model):
         except models.fields.FieldDoesNotExist:
             return None
 
-    def get_placeholder_fields(self, obj=None):
-        placeholder_fields = []
-
+    def get_cms_placeholder_fields(self, obj=None):
         try:
             from cms.models.placeholdermodel import Placeholder
+            return self.get_placeholder_fields(Placeholder, obj=obj)
         except ImportError:
-            return placeholder_fields
+            return []
 
+    def get_placeholder_fields(self, placeholder_class, obj=None):
         if obj is None:
             obj = self
 
+        placeholder_fields = []
         model_fields = obj.__class__._meta.get_all_field_names()
         for field in model_fields:
             if field in self.publishing_ignore_fields:
@@ -221,7 +221,6 @@ class PublishingModel(models.Model):
                     placeholder_fields.append(field)
             except (ObjectDoesNotExist, AttributeError):
                 continue
-
         return placeholder_fields
 
     @assert_draft
@@ -502,7 +501,8 @@ class PublishingModel(models.Model):
 
     def has_placeholder_relationships(self):
         return hasattr(self, 'placeholder_set') \
-            or hasattr(self, 'placeholders')
+            or hasattr(self, 'placeholders') \
+            or len(self.get_placeholder_fields(Placeholder)) > 0
 
     @assert_draft
     def patch_placeholders(self):

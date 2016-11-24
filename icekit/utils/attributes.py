@@ -1,13 +1,14 @@
-def resolve(obj, attr):
+def resolve(obj, attr, fallback=None):
     """
     Resolves obj.attr to a value, calling it as a function if necessary.
     :param obj:
     :param attr: a string name of a property or function
-    :return: the result of the attribute, or None if object/attr not found
+    :param fallback: the value to return if none can be resolved
+    :return: the result of the attribute, or fallback if object/attr not found
     """
     if obj is None:
-        return None
-    attr = getattr(obj, attr, None)
+        return fallback
+    attr = getattr(obj, attr, fallback)
     if callable(attr):
         return attr()
     return attr

@@ -1,28 +1,27 @@
-{% with contact=instance.contact %}
-<div class="content-block">
-	<div class="content-block--padded">
-		<div class="content-max-width">
-			<div class="content-block__body-copy">
-				<h6 class="contact-name-title">
-					{{ contact.name }}
-					{% if contact.title %}
-						<span>
+{% block contact-person %}
+    {% with contact=instance.contact %}
+        <div class="contact-person">
+            <h5 class="contact-name-title">
+                {{ contact.name }}
+                {% if contact.title %}
+                    <span>
 							{{ contact.title }}
 						</span>
-					{% endif %}
-				</h6>
-				{% if contact.phone %}
-					<a href="tel:+1{{ contact.phone }}" class="clearfix">
-						{{ contact.phone }}
-					</a>
-				{% endif %}
-				{% if contact.email %}
-					<a href="mailto:{{ contact.email }}" class="clearfix">
-						{{ contact.email }}
-					</a>
-				{% endif %}
-			</div>
-		</div>
-	</div>
-</div>
-{% endwith %}
+                {% endif %}
+            </h5>
+            <p class="contact-name-details">
+            {% if contact.phone %}
+                <a href="tel:+1{{ contact.phone }}" class="clearfix">
+                    {{ contact.phone }}
+                </a>
+            {% endif %}
+            {% if contact.email %}
+                <a href="mailto:{{ contact.email }}" class="clearfix">
+                    {{ contact.email }}
+                </a>
+            {% endif %}
+            </p>
+
+        </div>
+    {% endwith %}
+{% endblock %}

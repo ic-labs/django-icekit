@@ -12,7 +12,7 @@ from . import models
 User = get_user_model()
 
 
-class InstagramEmbedItemTestCase(WebTest):
+class ChildPagesTestCase(WebTest):
     def setUp(self):
         self.layout_1 = G(
             Layout,
@@ -32,7 +32,6 @@ class InstagramEmbedItemTestCase(WebTest):
             parent_site=Site.objects.first(),
             layout=self.layout_1,
             author=self.staff_1,
-            status='p',  # Publish the page
         )
         self.page_2 = LayoutPage.objects.create(
             title='Test Page 2',
@@ -40,7 +39,6 @@ class InstagramEmbedItemTestCase(WebTest):
             parent_site=Site.objects.first(),
             layout=self.layout_1,
             author=self.staff_1,
-            status='p',  # Publish the page
         )
         self.page_3 = LayoutPage.objects.create(
             title='Test Page 3',
@@ -48,7 +46,6 @@ class InstagramEmbedItemTestCase(WebTest):
             parent_site=Site.objects.first(),
             layout=self.layout_1,
             author=self.staff_1,
-            status='p',  # Publish the page
             parent=self.page_2,
         )
         self.page_4 = LayoutPage.objects.create(
@@ -57,24 +54,39 @@ class InstagramEmbedItemTestCase(WebTest):
             parent_site=Site.objects.first(),
             layout=self.layout_1,
             author=self.staff_1,
-            status='p',  # Publish the page
             parent=self.page_2,
         )
-        self.child_page_1 = fluent_contents.create_content_instance(
+        self.child_pages_1 = fluent_contents.create_content_instance(
             models.ChildPageItem,
             self.page_1,
         )
-        self.child_page_2 = fluent_contents.create_content_instance(
+        self.child_pages_2 = fluent_contents.create_content_instance(
             models.ChildPageItem,
             self.page_2,
         )
 
-    def test_str(self):
-        self.assertEqual(str(self.child_page_1), 'Child Pages')
+        self.page_1.publish()
+        self.page_2.publish()
+        self.page_3.publish()
+        # page_4 is not published
 
-    def test_get_child_pages(self):
-        self.assertEqual(self.child_page_1.get_child_pages().count(), 0)
-        self.assertEqual(self.child_page_2.get_child_pages().count(), 2)
+    def test_str(self):
+        self.assertEqual(str(self.child_pages_1), 'Child Pages')
+
+    def test_get_child_pages_draft(self):
+        self.assertEqual(len(self.child_pages_1.get_child_pages()), 0)
+        self.assertEqual(len(self.child_pages_2.get_child_pages()), 2)
         expected_children = [self.page_3, self.page_4]
         for child in expected_children:
-            self.assertIn(child, self.child_page_2.get_child_pages())
+            self.assertIn(child, self.child_pages_2.get_child_pages())
+
+
+    def test_get_child_pages_published(self):
+        pcp1 = self.page_1.get_published().contentitem_set.all()[0]
+        pcp2 = self.page_2.get_published().contentitem_set.all()[0]
+
+        self.assertEqual(len(pcp1.get_child_pages()), 0)
+        self.assertEqual(len(pcp2.get_child_pages()), 1)
+        expected_children = [self.page_3.get_published()]
+        for child in expected_children:
+            self.assertIn(child, pcp2.get_child_pages())

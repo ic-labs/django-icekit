@@ -1,1 +1,0 @@
-{% include 'search/indexes/fluentpage/fluentpage_text.txt' %}

@@ -154,7 +154,9 @@ class ListableMixin(models.Model):
     def get_list_image(self):
         """
         :return: the ImageField to use for thumbnails in lists
-        NB Image Field (since the override is just a field and we don't need alt text), not Image record.
+        NB note that the Image Field is returned, not the ICEkit Image model as
+        with get_hero_image (since the override is just a field and we don't
+        need alt text), not Image record.
         """
         list_image = first_of(
             self,
@@ -162,10 +164,17 @@ class ListableMixin(models.Model):
             'get_hero_image',
             'image',
         )
+
+        # return the `image` attribute (being the ImageField of the Image
+        # model) if there is one.
         return getattr(list_image, "image", list_image)
+
+    def get_boosted_search_terms(self):
+        return self.boosted_search_terms
 
     def get_oneliner(self):
         return getattr(self, 'oneliner', "")
+
 
 class HeroMixin(models.Model):
     """

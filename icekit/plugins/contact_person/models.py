@@ -13,7 +13,7 @@ class ContactPerson(models.Model):
     email = models.EmailField(max_length=255, blank=True)
 
     def __str__(self):
-        return "{} ({})".format(self.name, self.title)
+        return u"{} ({})".format(self.name, self.title)
 
     class Meta:
         verbose_name_plural = "Contact people"
