@@ -1,3 +1,5 @@
+import logging
+
 from any_urlfield.forms import SimpleRawIdWidget
 from any_urlfield.models import AnyUrlField
 from any_urlfield.registry import UrlTypeRegistry
@@ -10,6 +12,9 @@ from fluent_pages.models import Page
 from icekit.validators import RelativeURLValidator
 
 from . import validators
+
+
+logger = logging.getLogger(__name__)
 
 
 class TemplateNameField(six.with_metaclass(models.SubfieldBase, models.CharField)):
@@ -46,7 +51,17 @@ class ICEkitURLField(AnyUrlField):
     # inappropriate-for-us restriction to only-published Pages.
     _static_registry = UrlTypeRegistry()
 
-
+    @classmethod
+    def register_model_once(cls, ModelClass, **kwargs):
+        """
+        Tweaked version of `AnyUrlField.register_model` that only registers the
+        given model after checking that it is not already registered.
+        """
+        if cls._static_registry.get_for_model(ModelClass) is None:
+            logger.warn("Model is already registered with {0}: '{1}'"
+                        .format(cls, ModelClass))
+        else:
+            cls.register_model.register(ModelClass, **kwargs)
 
 
 # (Re-)Register Fluent's Page model in our fresh subclass,
