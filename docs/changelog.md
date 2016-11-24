@@ -2,6 +2,20 @@
 
 ## In development
 
+  * Add `icekit.workflow` application to associate, manage, and filter workflow
+    state information like status and user-assigment for arbitrary models.
+
+  * Add `ICEkitContentsMixin` and `ICEkitFluentContentsMixin` abstract classes
+    in `icekit.models` to use as a base for models that will include publishing
+    and workflow features.
+
+  * Add `ICEkitContentsAdmin` and `ICEkitFluentContentsAdmin` admin classes
+    in `icekit.admin` as bases for admins for models with publishing and
+    workflow features.
+
+  * Add workflow features to all publishable models in ICEkit using the new
+    abstract model mixins and admin base classes mentioned above.
+
   * Preview pages are now visually highlighted, and have a different HTML title.
 
   * "Preview draft" button is now near "View published" button.
