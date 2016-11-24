@@ -1,12 +1,12 @@
 from django.contrib import admin
-from icekit.publishing.admin import PublishableFluentContentsAdmin
+from icekit.admin import ICEkitFluentContentsAdmin
 
 from .models import Article
 
 
-class ArticleAdmin(PublishableFluentContentsAdmin):
+class ArticleAdmin(ICEkitFluentContentsAdmin):
     prepopulated_fields = {"slug": ("title",)}
-    list_filter = PublishableFluentContentsAdmin.list_filter + ('parent', )
+    list_filter = ICEkitFluentContentsAdmin.list_filter + ('parent', )
 
 
 admin.site.register(Article, ArticleAdmin)

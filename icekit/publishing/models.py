@@ -609,8 +609,8 @@ class PublishingModel(models.Model):
         """
         return None
 
-class PublishableFluentContentsPage(FluentContentsPage,
-                                    PublishingModel):
+
+class PublishableFluentContentsPage(FluentContentsPage, PublishingModel):
     """
     Basic Page subtype (ie that lives in the Page tree)
     """

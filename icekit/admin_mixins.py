@@ -1,6 +1,10 @@
 from django.contrib import admin
+
 from fluent_contents.admin import PlaceholderEditorAdmin
 from fluent_contents.models import PlaceholderData
+
+from icekit.workflow.admin import WorkflowMixinAdmin, \
+    WorkflowStateTabularInline
 
 
 class FluentLayoutsMixin(PlaceholderEditorAdmin):
@@ -33,6 +37,7 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin):
             data = obj.layout.get_placeholder_data()
         return data
 
+
 class HeroMixinAdmin(admin.ModelAdmin):
     raw_id_fields = ('hero_image',)
 
@@ -57,3 +62,27 @@ class ListableMixinAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+
+# This import must go here to avoid class loading errors
+from icekit.publishing.admin import ICEKitFluentPagesParentAdminMixin
+
+
+# WARNING: Beware of very closely named classes here
+class ICEkitFluentPagesParentAdmin(
+        ICEKitFluentPagesParentAdminMixin, WorkflowMixinAdmin):
+    """
+    A base for Fluent Pages parent admins that will include ICEkit features:
+
+     - publishing
+     - workflow
+    """
+    # Go through contortions here to make sure the 'actions_column' is last
+    list_display = [
+        display_column for display_column in (
+            ICEKitFluentPagesParentAdminMixin.list_display +
+            WorkflowMixinAdmin.list_display)
+        if display_column != 'actions_column'] + ['actions_column']
+    list_filter = ICEKitFluentPagesParentAdminMixin.list_filter + \
+        WorkflowMixinAdmin.list_filter
+    inlines = [WorkflowStateTabularInline]
