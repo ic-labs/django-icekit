@@ -593,7 +593,7 @@ INSTALLED_APPS += (
     # 'fluent_contents.plugins.twitterfeed',
 
     # Page type and content plugin dependencies.
-    # 'any_urlfield',
+    'any_urlfield',
     'django_wysiwyg',
     'micawber',
 )
