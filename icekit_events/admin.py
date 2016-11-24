@@ -58,7 +58,7 @@ class EventRepeatGeneratorsInline(admin.TabularInline):
 class OccurrencesInline(admin.TabularInline):
     model = models.Occurrence
     form = admin_forms.BaseOccurrenceForm
-    fields = ('is_all_day', 'start', 'end', 'is_user_modified')
+    fields = ('is_all_day', 'start', 'end', 'is_user_modified', 'external_ref',)
     exclude = (
         'generator', 'is_generated',
         # is_hidden and is_cancelled aren't implemented yet,
