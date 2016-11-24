@@ -1160,7 +1160,7 @@ class TestPublishingAdmin(BaseAdminTest):
 @modify_settings(MIDDLEWARE_CLASSES={
     'append': 'icekit.publishing.middleware.PublishingMiddleware',
 })
-class TestPublishingForPageViews(WebTest):
+class TestPublishingForPageViews(BaseAdminTest):
 
     def setUp(self):
         self.normal_user = G(User)
@@ -1178,6 +1178,7 @@ class TestPublishingForPageViews(WebTest):
         self.layoutpage = LayoutPage.objects.create(
             author=self.super_user,
             title='Test LayoutPage',
+            slug='test-layoutpage',
             layout=self.layout,
         )
         self.content_instance = fluent_contents.create_content_instance(
@@ -1197,6 +1198,72 @@ class TestPublishingForPageViews(WebTest):
             self.unpublishablelayoutpage,
             html='<b>test content instance</b>'
         )
+
+    def test_url_routing_for_draft_and_published_copies(self):
+        # Unpublished page is not visible to anonymous users
+        response = self.app.get('/test-layoutpage/', expect_errors=True)
+        self.assertEqual(response.status_code, 404)
+        # Unpublished page is visible to staff user with '?edit' param redirect
+        response = self.app.get(
+            '/test-layoutpage/',
+            user=self.super_user,
+        ).follow()
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test LayoutPage')
+
+        # Publish page
+        self.layoutpage.publish()
+        self.assertEqual(
+            '/test-layoutpage/',
+            self.layoutpage.get_published().get_absolute_url())
+
+        # Published page is visible to anonymous users
+        response = self.app.get('/test-layoutpage/')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test LayoutPage')
+
+        # Change Title and slug (URL) of draft page
+        self.layoutpage.title = 'Updated LayoutPage'
+        self.layoutpage.slug = 'updated-layoutpage'
+        self.layoutpage.save()
+        self.layoutpage = self.refresh(self.layoutpage)
+        self.assertEqual(
+            '/updated-layoutpage/', self.layoutpage.get_absolute_url())
+
+        # URL of published page remains unchanged
+        self.assertEqual(
+            '/test-layoutpage/',
+            self.layoutpage.get_published().get_absolute_url())
+
+        # Published page is at unchanged URL
+        response = self.app.get('/test-layoutpage/')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test LayoutPage')
+
+        # Draft page is at changed URL
+        response = self.app.get(
+            '/updated-layoutpage/',
+            user=self.super_user,
+        ).follow()
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Updated LayoutPage')
+
+        # Draft page is visible at changed URL via ?edit URL
+        response = self.app.get(
+            '/updated-layoutpage/?edit',
+            user=self.super_user,
+        ).follow()
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Updated LayoutPage')
+
+        # Draft page is *not* visible at ?edit URL of old (published page) URL
+        response = self.app.get(
+            '/test-layoutpage/?edit',
+            user=self.super_user,
+        )
+        self.assertEqual(response.status_code, 302)
+        response = response.follow(expect_errors=True)
+        self.assertEqual(response.status_code, 404)
 
     def test_verified_draft_url_for_publishingmodel(self):
         # Unpublished page is not visible to anonymous users

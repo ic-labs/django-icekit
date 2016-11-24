@@ -129,9 +129,12 @@ class AppConfig(AppConfig):
                     if getattr(candidate, 'is_draft', True):
                         objs.add(candidate)
                     # Also keep candidates where we have the published copy and
-                    # can exchange to get the draft copy
+                    # can exchange to get the draft copy with an identical URL
                     elif hasattr(candidate, 'get_draft'):
-                        objs.add(candidate.get_draft())
+                        draft_copy = candidate.get_draft()
+                        if draft_copy.get_absolute_url() == \
+                                candidate.get_absolute_url():
+                            objs.add(draft_copy)
             else:
                 for candidate in candidates:
                     # Keep candidates that are published, or that are not
