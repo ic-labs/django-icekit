@@ -54,13 +54,11 @@ class PageAnchorItemTestCase(WebTest):
         published_anchor_1 = self.page_1_published.contentitem_set.get(
             pageanchoritem__anchor_name='Jump Link')
         response.mustcontain(
-            '<a class="page-anchor" name="jump-link-%d"></a>'
-            % published_anchor_1.pk)
+            '<a class="page-anchor" name="jump-link"></a>')
 
     def test_increments_anchor_id(self):
         response = self.app.get(self.page_1_published.get_absolute_url())
         published_anchor_1 = self.page_1_published.contentitem_set.get(
             pageanchoritem__anchor_name='Jump Link')
         response.mustcontain(
-            '<a class="page-anchor" name="second-jump-link-%d"></a>'
-            % (published_anchor_1.pk + 1))
+            '<a class="page-anchor" name="second-jump-link"></a>')
