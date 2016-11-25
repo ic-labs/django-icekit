@@ -13,3 +13,6 @@ class ArticleCategoryPage(AbstractListingPage):
     def get_items_to_mount(self, request):
         unpublished_pk = self.get_draft().pk
         return Article.objects.visible().filter(parent_id=unpublished_pk)
+
+    class Meta:
+        db_table = "icekit_articlecategorypage"

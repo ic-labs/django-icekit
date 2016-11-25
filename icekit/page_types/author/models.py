@@ -37,6 +37,9 @@ class AuthorListing(AbstractListingPage):
         """
         return Author.objects.visible()
 
+    class Meta:
+        db_table = "icekit_authorpage"
+
 
 @python_2_unicode_compatible
 class Author(AbstractCollectedContent, ICEkitContentsMixin):
