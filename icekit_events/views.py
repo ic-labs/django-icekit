@@ -16,7 +16,7 @@ from . import models
 from .utils import permissions
 
 
-def index(request, is_preview=False):
+def index(request):
     """
     Listing page for event `Occurrence`s.
 
@@ -33,19 +33,14 @@ def index(request, is_preview=False):
         , DeprecationWarning
     )
 
-    # If this is a preview make sure the user has appropriate permissions.
-    if is_preview and not permissions.allowed_to_preview(request.user):
-        raise PermissionDenied
-
     occurrences = models.Occurrence.objects.visible()
     context = {
-        'is_preview': is_preview,
         'occurrences': occurrences,
     }
     return TemplateResponse(request, 'icekit_events/index.html', context)
 
 
-def event(request, slug, is_preview=False):
+def event(request, slug):
     """
     :param request: Django request object.
     :param event_id: The `id` associated with the event.
@@ -57,15 +52,11 @@ def event(request, slug, is_preview=False):
     """
     # If this is a preview make sure the user has appropriate permissions.
 
-    if is_preview and not permissions.allowed_to_preview(request.user):
-        raise PermissionDenied
-
     event = get_object_or_404(models.EventBase.objects.visible(), slug=slug)
     if not event:
         raise Http404
 
     context = RequestContext(request, {
-        'is_preview': is_preview,
         'event': event,
         'page': event,
     })
@@ -75,7 +66,7 @@ def event(request, slug, is_preview=False):
     return TemplateResponse(request, template, context)
 
 
-def occurrence(request, event_id, occurrence_id, is_preview=False):
+def occurrence(request, event_id, occurrence_id):
     """
     :param request: Django request object.
     :param event_id: The `id` associated with the occurrence's event.
@@ -93,9 +84,6 @@ def occurrence(request, event_id, occurrence_id, is_preview=False):
         , DeprecationWarning
     )
 
-    if is_preview and not permissions.allowed_to_preview(request.user):
-        raise PermissionDenied
-
     try:
         occurrence = models.Occurrence.objects \
             .filter(event_id=event_id, id=occurrence_id) \
@@ -104,7 +92,6 @@ def occurrence(request, event_id, occurrence_id, is_preview=False):
         raise Http404
 
     context = {
-        'is_preview': is_preview,
         'occurrence': occurrence,
     }
     return TemplateResponse(
