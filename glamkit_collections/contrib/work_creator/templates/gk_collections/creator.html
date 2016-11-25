@@ -1,0 +1,5 @@
+<h1>{{ page }}</h1>
+
+{% for work in page.get_works.visible %}
+    <li><a href="{{ work.get_absolute_url }}">{{ work }}</a></li>
+{% endfor %}

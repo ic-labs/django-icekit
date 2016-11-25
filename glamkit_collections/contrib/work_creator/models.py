@@ -1,3 +1,4 @@
+from django.core.urlresolvers import reverse
 from django_countries.fields import CountryField
 from glamkit_collections.contrib.work_creator.managers import \
     WorkCreatorQuerySet, WorkImageQuerySet
@@ -62,14 +63,30 @@ class CreatorBase(
     def __unicode__(self):
         return self.name_display
 
-    def get_public_works(self):
-        return self.works.all().published()
+    def get_absolute_url(self):
+        return reverse("gk_collections_creator", kwargs={'slug' :self.slug})
+
+    def get_works(self):
+        """
+        :return: The works that should be presented as visible on the front
+        end. If self is draft, show visible related items. If self is
+        published, show published related items.
+
+        """
+
+        # need to query the long way round as reverse relations don't get
+        # the publishing attributes.
+        qs = WorkBase.objects.filter(
+                id__in=[x.pk for x in self.get_draft().works.all()])
+
+        if self.is_draft:
+            return qs.published_or_draft()
+        else:
+            return qs.published()
 
     def get_works_count(self):
-        return self.works.count()
-
-    def get_public_works_count(self):
-        return self.get_public_works().count()
+        """To be used in Admin listings"""
+        return self.get_works().count()
 
     def get_hero_image(self):
         if self.portrait:
@@ -198,6 +215,9 @@ class WorkBase(
             return u"%s (%s)" % (self.title, self.date_display)
         return self.title
 
+    def get_absolute_url(self):
+        return reverse("gk_collections_work", kwargs={'slug' :self.slug})
+
     def get_images(self, **kwargs):
         # order images by the order given in WorkImage.
         return self.images.filter(**kwargs).order_by('workimage')
@@ -219,6 +239,20 @@ class WorkBase(
 
     def get_type(self):
         return "work"
+
+    def get_creators(self):
+        """
+        :return: The works that should be presented as visible on the front
+        end. If self is draft, show visible related items. If self is
+        published, show published related items.
+
+        """
+        qs = self.get_draft().creators
+        if self.is_draft:
+            return qs.published_or_draft()
+        else:
+            return qs.published()
+
 
     def get_roles(self):
         """Return the m2m relations connecting me to works"""
