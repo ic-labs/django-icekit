@@ -38,7 +38,7 @@ class AuthorListing(AbstractListingPage):
         return Author.objects.visible()
 
     class Meta:
-        db_table = "icekit_authorpage"
+        db_table = "icekit_authorlisting"
 
 
 @python_2_unicode_compatible

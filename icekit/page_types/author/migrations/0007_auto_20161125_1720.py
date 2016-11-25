@@ -17,6 +17,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelTable(
             name='authorlisting',
-            table='icekit_authorpage',
+            table='icekit_authorlisting',
         ),
     ]

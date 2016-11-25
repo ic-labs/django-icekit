@@ -15,4 +15,8 @@ class Migration(migrations.Migration):
             name='articlecategorypage',
             options={},
         ),
+        migrations.AlterModelTable(
+            name='articlecategorypage',
+            table='icekit_articlecategorypage',
+        ),
     ]
