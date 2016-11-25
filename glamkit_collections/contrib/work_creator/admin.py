@@ -107,7 +107,6 @@ class CreatorChildAdmin(
         'fields': (
             'name_display',
             'slug',
-            'alt_slug',
             'name_sort',
             'admin_notes',
         ),
