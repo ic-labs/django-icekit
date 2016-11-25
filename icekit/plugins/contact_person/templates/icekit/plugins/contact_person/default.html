@@ -11,13 +11,15 @@
             </h5>
             <p class="contact-name-details">
             {% if contact.phone %}
-                <a href="tel:+1{{ contact.phone }}" class="clearfix">
-                    {{ contact.phone }}
-                </a>
+                <a href="tel:+1{{ contact.phone }}">
+                    <i class="fa fa-mobile" aria-hidden="true"></i>
+                    <span class="contact-name-data">{{ contact.phone }}</span>
+                </a><br />
             {% endif %}
             {% if contact.email %}
                 <a href="mailto:{{ contact.email }}" class="clearfix">
-                    {{ contact.email }}
+                    <i class="fa fa-envelope" aria-hidden="true"></i>
+                    <span class="contact-name-data">{{ contact.email }}</span>
                 </a>
             {% endif %}
             </p>
