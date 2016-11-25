@@ -372,6 +372,11 @@ class TestPublishingModelAndQueryset(TestCase):
         self.assertEqual(
             self.slide_show_1, self.slide_show_1.publishing_linked.get_draft())
 
+        # get_draft always returns the unrwapped draft
+        self.assertFalse(isinstance(self.slide_show_1.get_draft(), DraftItemBoobyTrap))
+        self.assertFalse(isinstance(self.slide_show_1.publishing_linked.get_draft(), DraftItemBoobyTrap))
+        self.assertFalse(isinstance(self.slide_show_1.publishing_linked.publishing_draft.get_draft(), DraftItemBoobyTrap))
+
     def test_model_get_published(self):
         self.assertIsNone(self.slide_show_1.get_published())
         self.slide_show_1.publish()

@@ -53,6 +53,7 @@ class DraftItemBoobyTrap(object):
         'is_visible',
         # Fields that need to be accessible for Fluent Pages processing
         'pk',
+        'id',
         'language_code',
         'get_current_language',
         # Fields that need to be accessible by any_urlfield

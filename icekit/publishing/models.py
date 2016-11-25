@@ -145,7 +145,8 @@ class PublishingModel(models.Model):
         if self.is_draft:
             return self
         elif self.is_published:
-            return self.publishing_draft
+            # the reverse relation is DraftItemBoobyTrapped.
+            return self.publishing_draft.get_draft_payload()
         raise ValueError(  # pragma: no cover
             "Publishable object %r is neither draft nor published" % self)
 
