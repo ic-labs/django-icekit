@@ -33,12 +33,18 @@ class AbstractLinkItem(ContentItem):
 
     def get_item(self):
         "If the item is publishable, get the visible version"
+
+        if hasattr(self, 'get_draft'):
+            draft = self.get_draft()
+        else:
+            draft = self
+
         if not hasattr(self, '_item_cache'):
             try:
-                self._item_cache = self.item.get_published_or_draft()
+                self._item_cache = draft.item.get_published_or_draft()
             except AttributeError:
                 # not publishable
-                self._item_cache = self.item
+                self._item_cache = draft.item
         return self._item_cache
 
     def __unicode__(self):
