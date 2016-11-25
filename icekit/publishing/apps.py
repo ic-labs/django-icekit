@@ -1,5 +1,6 @@
 from django.apps import AppConfig, apps
 from django.core.exceptions import MultipleObjectsReturned
+from django.utils.datastructures import OrderedSet
 from django.utils.translation import get_language
 
 from fluent_pages import appsettings
@@ -89,17 +90,10 @@ class AppConfig(AppConfig):
                 translations__language_code=language_code,
             )
 
-            qs = _filter_candidates_by_published_status(qs)
-            try:
-                obj = qs[0]
-                # Explicitly set language to the state the object was fetched in.
-                obj.set_current_language(language_code)
-                return obj
-            except IndexError:
-                raise self.model.DoesNotExist(
-                    u"No published {0} found for the path '{1}'".format(
-                        self.model.__name__, path))
-
+            matches = _filter_candidates_by_published_status(qs)
+            return _get_first_routable(
+                matches, self.model, path, language_code,
+                enforce_single_result=True)
 
         # Monkey-patch `UrlNodeQuerySet.best_match_for_path` to add filtering
         # by publishing status.
@@ -111,38 +105,36 @@ class AppConfig(AppConfig):
             # Based on FeinCMS:
             paths = self._split_path_levels(path)
 
-            try:
-                qs = self._single_site() \
-                    .filter(translations___cached_url__in=paths,
-                            translations__language_code=language_code) \
-                    .extra(select={'_url_length': 'LENGTH(_cached_url)'}) \
-                    .order_by('-level', '-_url_length')  # / and /news/ is both level 0
-                qs = _filter_candidates_by_published_status(qs)
-                obj = qs[0]
-                obj.set_current_language(
-                    language_code)  # NOTE: Explicitly set language to the state the object was fetched in.
-                return obj
-            except IndexError:
-                raise self.model.DoesNotExist(
-                    u"No published {0} found for the path '{1}'".format(
-                        self.model.__name__, path))
+            qs = self._single_site() \
+                .filter(translations___cached_url__in=paths,
+                        translations__language_code=language_code) \
+                .extra(select={'_url_length': 'LENGTH(_cached_url)'}) \
+                .order_by('-level', '-_url_length')  # / and /news/ is both level 0
+
+            matches = _filter_candidates_by_published_status(qs)
+            return _get_first_routable(
+                matches, self.model, path, language_code,
+                enforce_single_result=False)
 
         def _filter_candidates_by_published_status(candidates):
             # Filter candidate results by published status, using
             # instance attributes instead of queryset filtering to
             # handle unpublishable and ICEKit publishing-enabled items.
-            objs = []  # Use a list to preserve ordering
+            objs = OrderedSet()  # preserve order & remove dupes
             if is_draft_request_context():
                 for candidate in candidates:
                     # Keep candidates that are publishable draft copies, or
                     # that are not publishable (i.e. they don't have the
                     # `is_draft` attribute at all)
                     if getattr(candidate, 'is_draft', True):
-                        objs.append(candidate)
+                        objs.add(candidate)
                     # Also keep candidates where we have the published copy and
-                    # can exchange to get the draft copy
+                    # can exchange to get the draft copy with an identical URL
                     elif hasattr(candidate, 'get_draft'):
-                        objs.append(candidate.get_draft())
+                        draft_copy = candidate.get_draft()
+                        if draft_copy.get_absolute_url() == \
+                                candidate.get_absolute_url():
+                            objs.add(draft_copy)
             else:
                 for candidate in candidates:
                     # Keep candidates that are published, or that are not
@@ -156,9 +148,38 @@ class AppConfig(AppConfig):
                         ):
                             pass
                         else:
-                            objs.append(candidate)
+                            objs.add(candidate)
+            # Convert `OrderedSet` to a list which supports `len`, see
+            # https://code.djangoproject.com/ticket/25093
+            return list(objs)
 
-            return objs
+        def _get_first_routable(item_list, model, path, language_code,
+                                enforce_single_result=False):
+            """
+            Return the first item in the given list of routable items.
+
+            Raise `DoesNotExist` if the list is empty.
+
+            Raise `MultipleObjectsReturned` if the list contains multiple
+            objects and the `enforce_single_result` argument is set.
+            """
+            request_context_desc = \
+                'published' if is_draft_request_context() else 'draft'
+            # Check for invalid multiple results if requested
+            if enforce_single_result and len(item_list) > 1:
+                raise model.MultipleObjectsReturned(
+                    u"Multiple {0} {1} found for the path '{2}'"
+                    .format(request_context_desc, model.__name__, path))
+            # Get first result; error if none are available
+            try:
+                obj = item_list[0]
+                # Explicitly set language for object.
+                obj.set_current_language(language_code)
+                return obj
+            except IndexError:
+                raise model.DoesNotExist(
+                    u"No {0} {1} found for the path '{2}'"
+                    .format(request_context_desc, model.__name__, path))
 
         # Monkey-patch method overrides for classes where we must do so to
         # avoid our custom versions from getting clobbered by versions higher

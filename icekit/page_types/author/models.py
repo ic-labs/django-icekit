@@ -3,16 +3,15 @@ Model declaration for the `author` app.
 """
 import re
 try:
-	from urlparse import urljoin
+    from urlparse import urljoin
 except ImportError:
-	from urllib.parse import urljoin
+    from urllib.parse import urljoin
 
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
-from fluent_contents.extensions import PluginHtmlField
 from fluent_contents.models import PlaceholderField
-from icekit.publishing.models import PublishingModel
+from icekit.models import ICEkitContentsMixin
 
 from icekit.content_collections.abstract_models import AbstractListingPage, \
     AbstractCollectedContent
@@ -38,8 +37,9 @@ class AuthorListing(AbstractListingPage):
         """
         return Author.objects.visible()
 
+
 @python_2_unicode_compatible
-class Author(AbstractCollectedContent, PublishingModel):
+class Author(AbstractCollectedContent, ICEkitContentsMixin):
     """
     An author model for use with article pages and assigning attribution.
     """
