@@ -262,7 +262,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         blank=True,
         help_text=_('Describe event dates in everyday language, e.g. "Every Sunday in March".'),
     )
-
+    has_tickets_available = models.BooleanField(default=False, help_text="Check to show ticketing information")
     price_line = models.CharField(
         max_length=255,
         blank=True,
@@ -272,6 +272,11 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         blank=True,
         help_text=_('Describe special instructions for attending event, '
                     'e.g. "Enter via the Jones St entrance".'),
+    )
+    external_ref = models.CharField(
+        max_length=255,
+        blank=True, null=True,
+        help_text="The reference identifier used by an external events/tickets management system."
     )
     cta_text = models.CharField(_("Call to action"),
         blank=True,
