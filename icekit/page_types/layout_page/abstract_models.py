@@ -16,3 +16,8 @@ class AbstractLayoutPage(PublishableFluentContentsPage, LayoutFieldMixin, HeroMi
     def get_type(self):
         # we don't normally want pages to say they're a 'page'
         return ""
+
+    def get_parent(self):
+        if self.parent:
+            return self.parent.get_visible()
+        return None

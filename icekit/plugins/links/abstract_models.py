@@ -33,13 +33,13 @@ class AbstractLinkItem(ContentItem):
 
     def get_item(self):
         "If the item is publishable, get the visible version"
-        if not hasattr(self, '_item'):
+        if not hasattr(self, '_item_cache'):
             try:
-                self._item = self.item.get_published_or_draft()
+                self._item_cache = self.item.get_published_or_draft()
             except AttributeError:
                 # not publishable
-                self._item = self.item
-        return self._item
+                self._item_cache = self.item
+        return self._item_cache
 
     def __unicode__(self):
         return "Relation to '%s'" % unicode(self.item)
