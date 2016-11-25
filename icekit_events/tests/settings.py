@@ -34,15 +34,19 @@ INSTALLED_APPS = (
     'django_nose',
     'fluent_pages',
     'fluent_contents',
-    'icekit',
+
     'icekit_events',
     'icekit_events.event_types.simple',
     'icekit_events.page_types.eventlistingfordate',
     'icekit_events.tests',
+
+    # ICEkit modules must be loaded *after* events to avoid import errors
+    'icekit',
+    'icekit.workflow',
+    'icekit.publishing',
     'icekit.plugins.image',
 
     # Apps required for publishing features
-    'icekit.publishing',
     'model_settings',
     'polymorphic',
     'compressor',
@@ -69,4 +73,18 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 DDF_FILL_NULLABLE_FIELDS = False
 FLUENT_PAGES_TEMPLATE_DIR = os.path.join(BASE_DIR, '..', 'templates')
 
-TEMPLATE_CONTEXT_PROCESSORS = ['django.core.context_processors.request']
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
+        'DIRS': [
+            os.path.join('icekit_events', 'tests', 'templates'),
+            os.path.join('icekit_events', 'templates'),
+        ],
+        'OPTIONS': {
+            'context_processors': [
+                'django.core.context_processors.request',
+            ],
+        },
+    },
+]
