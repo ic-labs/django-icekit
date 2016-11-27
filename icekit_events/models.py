@@ -505,7 +505,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
 
     def get_contained_events(self):
         return EventBase.objects.filter(
-            id__in=self.contained_events.values_list('id', flat=True)
+            id__in=self.get_draft().contained_events.values_list('id', flat=True)
         ).visible()
 
 
