@@ -111,14 +111,14 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
     """
     base_model = models.EventBase
     list_filter = (
-        EventTypeFilter, 'primary_type', 'secondary_types', 'modified', 'show_in_calendar', 'has_tickets_available',
+        EventTypeFilter, 'primary_type', 'secondary_types', 'modified', 'show_in_calendar', 'is_drop_in', 'has_tickets_available',
         publishing_admin.PublishingStatusFilter,
         publishing_admin.PublishingPublishedFilter,
     )
     list_display = (
         '__str__', 'child_type_name', 'primary_type', 'modified',
         'publishing_column',
-        'part_of_display', 'show_in_calendar', 'has_tickets_available',
+        'part_of_display', 'show_in_calendar', 'has_tickets_available', 'is_drop_in',
         'occurrence_count',
         'first_occurrence', 'last_occurrence',
     )

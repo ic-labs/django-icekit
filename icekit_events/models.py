@@ -262,6 +262,10 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         blank=True,
         help_text=_('Describe event dates in everyday language, e.g. "Every Sunday in March".'),
     )
+    is_drop_in = models.BooleanField(
+        default=False,
+        help_text="Check to indicate that the event/activity can be attended at any time within the given time range."
+    )
     has_tickets_available = models.BooleanField(default=False, help_text="Check to show ticketing information")
     price_line = models.CharField(
         max_length=255,
