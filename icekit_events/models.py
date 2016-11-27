@@ -438,14 +438,18 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
             generator.event = dst_obj
             generator.save()
 
+    def get_part_of(self):
+        if self.part_of:
+            return self.part_of.get_visible()
+
     def get_occurrences(self):
         """
-        :return: My occurrences, or those of my part_of event
+        :return: My occurrences, or those of my get_part_of() event
         """
         if self.occurrences.count():
             return self.occurrences
-        elif self.part_of:
-            return self.part_of.get_occurrences()
+        elif self.get_part_of():
+            return self.get_part_of().get_occurrences()
         return self.occurrences # will be empty, but at least queryable
 
     def get_occurrences_range(self):
