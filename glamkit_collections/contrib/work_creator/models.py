@@ -80,7 +80,7 @@ class CreatorBase(
                 id__in=[x.pk for x in self.get_draft().works.all()])
 
         if self.is_draft:
-            return qs.published_or_draft()
+            return qs.visible()
         else:
             return qs.published()
 
@@ -249,7 +249,7 @@ class WorkBase(
         """
         qs = self.get_draft().creators
         if self.is_draft:
-            return qs.published_or_draft()
+            return qs.visible()
         else:
             return qs.published()
 
