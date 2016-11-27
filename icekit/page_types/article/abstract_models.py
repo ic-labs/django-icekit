@@ -21,3 +21,6 @@ class AbstractArticle(
     class Meta:
         unique_together = (('slug', 'parent', 'publishing_linked'), )
         abstract = True
+
+    def get_parent(self):
+        return self.parent.get_visible()

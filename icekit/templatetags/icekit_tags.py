@@ -10,6 +10,7 @@ from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from fluent_contents.plugins.oembeditem.backend import get_oembed_data
 from icekit.utils.admin.urls import admin_link as admin_link_fn, admin_url as admin_url_fn
+from micawber import ProviderException
 
 register = Library()
 
@@ -201,7 +202,7 @@ def oembed(url, params=""):
             url,
             **kwargs
         )['html'])
-    except KeyError:
+    except (KeyError, ProviderException):
         if settings.DEBUG:
             return "No OEmbed data returned"
         return ""
@@ -215,3 +216,7 @@ def admin_link(obj):
 @register.filter
 def admin_url(obj):
     return admin_url_fn(obj)
+
+@register.filter
+def link(obj):
+    return mark_safe("<a href='{0}'>{1}</a>".format(obj.get_absolute_url(), unicode(obj)))

@@ -2,8 +2,6 @@
 
 {% load placeholder_tags fluent_contents_tags %}
 
-{% block title %}{{ page.title }}{% endblock %}
-
 {% block content %}
     {% with page.parent.get_published as parent %}
         {% if parent %}<p class="breadcrumbs"><a href="{{ parent.get_absolute_url }}">&laquo;&nbsp;{{ parent }}</a></p>{% endif %}
