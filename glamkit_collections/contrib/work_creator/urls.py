@@ -9,8 +9,8 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'^work/(?P<slug>[\w-]+)/$',
+    url(r'^works/(?P<slug>[\w-]+)/$',
         views.work, name='gk_collections_work'),
-    url(r'^creator/(?P<slug>[\w-]+)/$',
+    url(r'^creators/(?P<slug>[\w-]+)/$',
         views.creator, name='gk_collections_creator'),
 ]
