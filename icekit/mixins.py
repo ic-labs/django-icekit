@@ -151,7 +151,7 @@ class ListableMixin(models.Model):
     def get_title(self):
         return self.title
 
-    def get_list_image(self):
+    def __get_list_image(self):
         """
         :return: the ImageField to use for thumbnails in lists
         NB note that the Image Field is returned, not the ICEkit Image model as
@@ -168,6 +168,12 @@ class ListableMixin(models.Model):
         # return the `image` attribute (being the ImageField of the Image
         # model) if there is one.
         return getattr(list_image, "image", list_image)
+
+    def __getattr__(self, item):
+        """Only called if no class in the MRO defines the function"""
+        if item == 'get_list_image':
+            return self.__get_list_image
+        raise AttributeError(u"`{0}` is not an attribute of {1}".format(item, self.__class__))
 
     def get_boosted_search_terms(self):
         return self.boosted_search_terms
