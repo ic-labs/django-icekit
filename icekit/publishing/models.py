@@ -145,8 +145,11 @@ class PublishingModel(models.Model):
         if self.is_draft:
             return self
         elif self.is_published:
-            # the reverse relation is sometimes DraftItemBoobyTrapped.
             draft = self.publishing_draft
+            # Previously the reverse relation could be `DraftItemBoobyTrapped`
+            # in some cases. This should be fixed by extra monkey-patching of
+            # the `publishing_draft` field in icekit.publishing.apps, but we
+            # will leave this extra sanity check here just in case.
             if hasattr(draft, 'get_draft_payload'):
                 draft = draft.get_draft_payload()
             return draft
