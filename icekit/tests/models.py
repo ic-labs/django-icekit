@@ -60,7 +60,10 @@ class ArticleListing(AbstractListingPage):
 
 class Article(AbstractCollectedContent, PublishableFluentContents, TitleSlugMixin):
     """Articles that belong to a particular listing"""
-    parent = models.ForeignKey(ArticleListing)
+    parent = models.ForeignKey(
+        ArticleListing,
+        on_delete=models.PROTECT,
+    )
 
     class Meta:
         db_table = 'test_article'

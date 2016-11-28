@@ -184,7 +184,8 @@ class HeroMixin(models.Model):
         'icekit_plugins_image.Image',
         help_text='The hero image for this content.',
         related_name="+",
-        blank=True, null=True
+        blank=True, null=True,
+        on_delete=models.SET_NULL,
     )
 
     class Meta:

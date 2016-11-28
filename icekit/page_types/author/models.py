@@ -61,6 +61,7 @@ class Author(AbstractCollectedContent, ICEkitContentsMixin):
         'icekit_plugins_image.Image',
         blank=True,
         null=True,
+        on_delete=models.SET_NULL,
     )
 
     url = models.CharField(

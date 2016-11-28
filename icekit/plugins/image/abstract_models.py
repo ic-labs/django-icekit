@@ -62,7 +62,8 @@ class ImageLinkMixin(models.Model):
     """
     image = models.ForeignKey(
         'icekit_plugins_image.Image',
-        help_text=_('An image from the image library.')
+        help_text=_('An image from the image library.'),
+        on_delete=models.CASCADE,
     )
 
     show_title = models.BooleanField(default=False)

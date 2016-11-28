@@ -66,7 +66,8 @@ class AbstractFileItem(ContentItem):
     """
     file = models.ForeignKey(
         appsettings.FILE_CLASS,
-        help_text=_('A file from the file library.')
+        help_text=_('A file from the file library.'),
+        on_delete=models.CASCADE,
     )
 
     class Meta:

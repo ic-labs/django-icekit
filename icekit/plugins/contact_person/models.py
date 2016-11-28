@@ -24,7 +24,10 @@ class ContactPersonItem(ContentItem):
     """
     A content item that links to a Press Contact.
     """
-    contact = models.ForeignKey(ContactPerson)
+    contact = models.ForeignKey(
+        ContactPerson,
+        on_delete=models.CASCADE,
+    )
 
     help_text = \
         'A content plugin that allows you to add press contact information.'

@@ -39,6 +39,7 @@ class WorkflowState(models.Model):
         blank=True,
         null=True,
         help_text='User responsible for item at this stage in the workflow',
+        on_delete=models.SET_NULL,
     )
 
     def __str__(self):
