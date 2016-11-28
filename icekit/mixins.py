@@ -173,7 +173,7 @@ class ListableMixin(models.Model):
         """Only called if no class in the MRO defines the function"""
         if item == 'get_list_image':
             return self.__get_list_image
-        return getattr(super(ListableMixin, self), item)
+        return self.__getattribute__(item)
 
     def get_boosted_search_terms(self):
         return self.boosted_search_terms
