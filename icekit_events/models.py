@@ -227,12 +227,13 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
                   "public Event Types can be primary.",
         limit_choices_to={'is_public': True},
         related_name="events",
+        on_delete=models.SET_NULL,
     )
     secondary_types = models.ManyToManyField(
         EventType, blank=True,
         help_text="Additional/internal types: Education or members events, "
                   "for example.",
-        related_name="secondary_events",
+        related_name="secondary_events"
     ) # use all_types to get the union of primary and secondary types
 
     part_of = models.ForeignKey(
@@ -241,7 +242,8 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         db_index=True,
         related_name="contained_events",
         null=True,
-        help_text="If this event is part of another event, select it here."
+        help_text="If this event is part of another event, select it here.",
+        on_delete=models.SET_NULL
     ) # access visible contained_events via get_contained_events()
     derived_from = models.ForeignKey(
         'self',
@@ -250,6 +252,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
         editable=False,
         null=True,
         related_name='derivitives',
+        on_delete=models.SET_NULL
     )
 
     show_in_calendar = models.BooleanField(
@@ -562,6 +565,7 @@ class EventRepeatsGenerator(AbstractBaseModel):
         db_index=True,
         editable=False,
         related_name='repeat_generators',
+        on_delete=models.CASCADE
     )
     recurrence_rule = RecurrenceRuleField(
         blank=True,
@@ -844,10 +848,13 @@ class Occurrence(AbstractBaseModel):
         db_index=True,
         editable=False,
         related_name='occurrences',
+        on_delete=models.CASCADE
     )
     generator = models.ForeignKey(
         EventRepeatsGenerator,
-        blank=True, null=True)
+        blank=True, null=True,
+        on_delete=models.SET_NULL
+    )
     start = models.DateTimeField(
         db_index=True)
     end = models.DateTimeField(
