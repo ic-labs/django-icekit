@@ -219,4 +219,4 @@ def admin_url(obj):
 
 @register.filter
 def link(obj):
-    return mark_safe("<a href='{0}'>{1}</a>".format(obj.get_absolute_url(), unicode(obj)))
+    return mark_safe(u"<a href='{0}'>{1}</a>".format(obj.get_absolute_url(), unicode(obj)))
