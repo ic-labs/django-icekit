@@ -371,8 +371,17 @@ class TestPublishingModelAndQueryset(TestCase):
             self.slide_show_1, self.slide_show_1.get_draft())
         self.assertEqual(
             self.slide_show_1, self.slide_show_1.publishing_linked.get_draft())
+        self.assertEqual(
+            self.slide_show_1,
+            self.slide_show_1.publishing_linked.publishing_draft.get_draft())
+        # Ensure raw `publishing_draft` relationship also returns plain draft
+        self.assertEqual(
+            self.slide_show_1,
+            self.slide_show_1.publishing_linked.publishing_draft)
 
-        # get_draft always returns the unrwapped draft
+        # get_draft always returns the unwrapped draft
+        # TODO Beware, these tests never triggered actual failure case, and
+        # should be unnecessary given the model equality tests above
         self.assertFalse(isinstance(self.slide_show_1.get_draft(), DraftItemBoobyTrap))
         self.assertFalse(isinstance(self.slide_show_1.publishing_linked.get_draft(), DraftItemBoobyTrap))
         self.assertFalse(isinstance(self.slide_show_1.publishing_linked.publishing_draft.get_draft(), DraftItemBoobyTrap))
@@ -617,6 +626,20 @@ class TestPublishableFluentContentsPage(TestCase):
             self.assertEqual(
                 set([self.fluent_page]),
                 set(test_page.related_pages.visible()))
+
+    def test_fluent_page_model_get_draft(self):
+        self.fluent_page.publish()
+        self.assertEqual(
+            self.fluent_page, self.fluent_page.get_draft())
+        self.assertEqual(
+            self.fluent_page, self.fluent_page.publishing_linked.get_draft())
+        self.assertEqual(
+            self.fluent_page,
+            self.fluent_page.publishing_linked.publishing_draft.get_draft())
+        # Ensure raw `publishing_draft` relationship also returns plain draft
+        self.assertEqual(
+            self.fluent_page,
+            self.fluent_page.publishing_linked.publishing_draft)
 
 
 class TestPublishableFluentContents(TestCase):

@@ -16,7 +16,8 @@ from .managers import PublishingQuerySet, PublishingPolymorphicManager, \
     PublishingUrlNodeManager, UrlNodeQuerySetWithPublishingFeatures, \
     _queryset_iterator
 from .models import PublishingModel
-from .middleware import is_draft_request_context
+from .middleware import is_draft_request_context, \
+    override_draft_request_context
 
 
 def monkey_patch_override_method(klass):
@@ -33,6 +34,24 @@ def monkey_patch_override_method(klass):
             original_fn = getattr(klass, fn_name)
             setattr(klass, original_fn_name, original_fn)
             setattr(klass, fn_name, override_fn)
+    return perform_override
+
+
+def monkey_patch_override_instance_method(instance):
+    """
+    Override an instance method with a new version of the same name. The
+    original method implementation is made available within the override method
+    as `_original_<METHOD_NAME>`.
+    """
+    def perform_override(override_fn):
+        fn_name = override_fn.__name__
+        original_fn_name = '_original_' + fn_name
+        # Override instance method, if it hasn't already been done
+        if not hasattr(instance, original_fn_name):
+            original_fn = getattr(instance, fn_name)
+            setattr(instance, original_fn_name, original_fn)
+            bound_override_fn = override_fn.__get__(instance)
+            setattr(instance, fn_name, bound_override_fn)
     return perform_override
 
 
@@ -238,6 +257,18 @@ class AppConfig(AppConfig):
 
             if issubclass(model, PolymorphicModel) \
                     and not issubclass(model, UrlNode):
+
+                # Override `publishing_draft` 1-to-1 queryset traversal to
+                # avoid wrapping the draft copy result in `DraftItemBoobyTrap`
+                @monkey_patch_override_instance_method(model.publishing_draft)
+                def get_queryset(self, **kwargs):
+                    with override_draft_request_context(True):
+                        return f._original_get_queryset(**kwargs)
+
+                # NOTE: This odd assignment to `f` and its use in the override
+                # method above is vital! Perhaps because we are monkeying with
+                # descriptor rather than a normal method?
+                f = model.publishing_draft
 
                 PublishingPolymorphicManager().contribute_to_class(
                     model, 'objects')
