@@ -40,6 +40,7 @@ class CreatorBase(
         'icekit_plugins_image.Image',
         blank=True,
         null=True,
+        on_delete=models.SET_NULL,
     )
     website = models.CharField(
         blank=True,
@@ -273,9 +274,9 @@ class Role(TitleSlugMixin):
 
 
 class WorkCreator(models.Model):
-    creator = models.ForeignKey(CreatorBase)
-    work = models.ForeignKey(WorkBase)
-    role = models.ForeignKey(Role, blank=True, null=True)
+    creator = models.ForeignKey(CreatorBase, on_delete=models.CASCADE)
+    work = models.ForeignKey(WorkBase, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, blank=True, null=True, on_delete=models.SET_NULL,)
     is_primary = models.BooleanField("Primary?", default=True)
     order = models.PositiveIntegerField(help_text="Which order to show this creator in the list of creators.", default=0)
 
@@ -299,8 +300,8 @@ class WorkImageType(TitleSlugMixin):
 
 
 class WorkImage(ImageLinkMixin):
-    work = models.ForeignKey(WorkBase)
-    type = models.ForeignKey(WorkImageType, blank=True, null=True)
+    work = models.ForeignKey(WorkBase, on_delete=models.CASCADE)
+    type = models.ForeignKey(WorkImageType, blank=True, null=True, on_delete=models.SET_NULL)
     order = models.PositiveIntegerField(
         help_text="Which order to show this image in the set of images.",
         default=0)

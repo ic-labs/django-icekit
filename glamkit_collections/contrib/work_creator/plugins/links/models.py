@@ -10,7 +10,7 @@ class WorkLink(AbstractLinkItem):
 
 
 class CreatorLink(AbstractLinkItem):
-    item = models.ForeignKey("gk_collections_work_creator.CreatorBase")
+    item = models.ForeignKey("gk_collections_work_creator.CreatorBase", on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "Creator link"

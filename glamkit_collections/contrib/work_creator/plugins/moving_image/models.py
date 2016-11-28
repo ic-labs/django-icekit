@@ -22,10 +22,10 @@ class MovingImageMixin(
     # ACMIContent, ACMIAttributes,
     models.Model,
 ):
-    rating = models.ForeignKey("Rating", null=True, blank=True)
+    rating = models.ForeignKey("Rating", null=True, blank=True, on_delete=models.SET_NULL)
     rating_annotation = models.CharField(max_length=255, help_text="e.g. Contains flashing lights and quidditch", blank=True)
     genres = models.ManyToManyField("Genre", blank=True)
-    media_type = models.ForeignKey("MediaType", blank=True, null=True)
+    media_type = models.ForeignKey("MediaType", blank=True, null=True, on_delete=models.SET_NULL)
     duration_minutes = models.PositiveIntegerField("Duration (minutes)", blank=True, null=True, help_text="How long (in minutes) should a visitor spend with this content?")
     trailer = OEmbedUrlField(blank=True)
     imdb_link = models.URLField("IMDB link", blank=True, help_text="e.g. 'http://www.imdb.com/title/tt2316801/'")
