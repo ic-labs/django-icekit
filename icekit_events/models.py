@@ -25,9 +25,9 @@ from polymorphic.models import PolymorphicModel
 
 from icekit.content_collections.abstract_models import AbstractListingPage, \
     TitleSlugMixin
+from icekit.models import ICEkitContentsMixin
 from icekit.fields import ICEkitURLField
 from icekit.mixins import FluentFieldsMixin
-from icekit.publishing.models import PublishingModel, PublishableFluentContents
 from icekit.publishing.middleware import is_draft_request_context
 from django.template.defaultfilters import date as datefilter
 
@@ -206,7 +206,7 @@ class EventType(TitleSlugMixin):
     )
 
 @encoding.python_2_unicode_compatible
-class EventBase(PolymorphicModel, AbstractBaseModel, PublishingModel,
+class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
                 TitleSlugMixin):
     """
     A polymorphic event model with all basic event features.
