@@ -34,7 +34,7 @@ from icekit.utils.admin.urls import admin_link
 from polymorphic.admin import PolymorphicChildModelAdmin
 from timezone import timezone as djtz  # django-timezone
 
-from icekit.publishing import admin as publishing_admin
+from icekit import admin as icekit_admin
 
 from . import admin_forms, forms, models
 
@@ -71,7 +71,7 @@ class OccurrencesInline(admin.TabularInline):
 
 class EventChildAdmin(
     PolymorphicChildModelAdmin,
-    publishing_admin.PublishingAdmin,
+    icekit_admin.ICEkitContentsAdmin,
     TitleSlugAdmin
 ):
     """
@@ -82,7 +82,7 @@ class EventChildAdmin(
     inlines = [
         EventRepeatGeneratorsInline,
         OccurrencesInline,
-    ]
+    ] + icekit_admin.ICEkitContentsAdmin.inlines
     exclude = (
         # Legacy fields, will be removed soon
         'all_day', 'starts', 'ends', 'date_starts', 'date_ends',
@@ -105,22 +105,22 @@ class EventTypeFilter(ChildModelFilter):
 
 
 class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
-                 publishing_admin.PublishingAdmin):
+                 icekit_admin.ICEkitContentsAdmin):
     """
     Polymorphic parent admin for Events.
     """
     base_model = models.EventBase
     list_filter = (
         EventTypeFilter, 'primary_type', 'secondary_types', 'modified', 'show_in_calendar', 'is_drop_in', 'has_tickets_available',
-        publishing_admin.PublishingStatusFilter,
-        publishing_admin.PublishingPublishedFilter,
-    )
+    ) + icekit_admin.ICEkitContentsAdmin.list_filter
     list_display = (
         '__str__', 'child_type_name', 'primary_type', 'modified',
         'publishing_column',
         'part_of_display', 'show_in_calendar', 'has_tickets_available', 'is_drop_in',
         'occurrence_count',
         'first_occurrence', 'last_occurrence',
+        # ICEkit Workflow columns
+        'last_edited_by_column', 'workflow_states_column',
     )
     search_fields = ('title', 'part_of__title', )
 
