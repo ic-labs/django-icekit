@@ -255,21 +255,20 @@ class AppConfig(AppConfig):
             if not issubclass(model, PublishingModel):
                 continue
 
+            ##############################################################
+            # Override `publishing_draft` 1-to-1 queryset traversal to avoid
+            # wrapping the draft copy result in `DraftItemBoobyTrap`
+            # TODO Get this to actually work...
+
+            # @monkey_patch_override_instance_method(model.publishing_draft)
+            # def get_queryset(self, **kwargs):
+            #     with override_draft_request_context(True):
+            #         return self._original_get_queryset(**kwargs)
+
+            ##############################################################
+
             if issubclass(model, PolymorphicModel) \
                     and not issubclass(model, UrlNode):
-
-                # Override `publishing_draft` 1-to-1 queryset traversal to
-                # avoid wrapping the draft copy result in `DraftItemBoobyTrap`
-                @monkey_patch_override_instance_method(model.publishing_draft)
-                def get_queryset(self, **kwargs):
-                    with override_draft_request_context(True):
-                        return f._original_get_queryset(**kwargs)
-
-                # NOTE: This odd assignment to `f` and its use in the override
-                # method above is vital! Perhaps because we are monkeying with
-                # descriptor rather than a normal method?
-                f = model.publishing_draft
-
                 PublishingPolymorphicManager().contribute_to_class(
                     model, 'objects')
                 PublishingPolymorphicManager().contribute_to_class(
