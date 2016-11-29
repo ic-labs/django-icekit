@@ -26,8 +26,10 @@ class WorkflowStateStatusFilter(admin.SimpleListFilter):
 
         value = self.value()
 
-        # If admin is for a `WorkflowStateMixin` subclass use simple query...
-        if issubclass(queryset.model, models.WorkflowStateMixin):
+        # If admin is for a `WorkflowStateMixin` subclass use simple query,
+        # unless it's polymorphic which won't always work...
+        if issubclass(queryset.model, models.WorkflowStateMixin) \
+                and not hasattr(queryset, 'non_polymorphic'):
             return queryset.filter(
                 workflow_states__status=value)
 
@@ -60,8 +62,10 @@ class WorkflowStateAssignedToFilter(admin.SimpleListFilter):
 
         value = self.value()
 
-        # If admin is for a `WorkflowStateMixin` subclass use simple query...
-        if issubclass(queryset.model, models.WorkflowStateMixin):
+        # If admin is for a `WorkflowStateMixin` subclass use simple query,
+        # unless it's polymorphic which won't always work...
+        if issubclass(queryset.model, models.WorkflowStateMixin) \
+                and not hasattr(queryset, 'non_polymorphic'):
             return queryset.filter(
                 workflow_states__assigned_to=value)
 
