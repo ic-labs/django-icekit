@@ -8,10 +8,10 @@ def resolve(obj, attr, fallback=None):
     """
     if obj is None:
         return fallback
-    attr = getattr(obj, attr, fallback)
-    if callable(attr):
-        return attr()
-    return attr
+    value = getattr(obj, attr, fallback)
+    if callable(value):
+        return value()
+    return value
 
 def first_of(obj, *attrs):
     """
