@@ -5,7 +5,7 @@ from glamkit_collections.contrib.work_creator.managers import \
 from icekit.content_collections.abstract_models import TitleSlugMixin
 from icekit.mixins import FluentFieldsMixin, ListableMixin
 from icekit.plugins.image.abstract_models import ImageLinkMixin
-from icekit.publishing.models import PublishingModel
+from icekit.models import ICEkitContentsMixin
 from polymorphic.models import PolymorphicModel
 from django.db import models
 
@@ -13,7 +13,7 @@ from django.db import models
 class CreatorBase(
     PolymorphicModel,
     FluentFieldsMixin,
-    PublishingModel,
+    ICEkitContentsMixin,
     ListableMixin,
 ):
     name_display = models.CharField(
@@ -111,7 +111,7 @@ class CreatorBase(
 class WorkBase(
     PolymorphicModel,
     FluentFieldsMixin,
-    PublishingModel,
+    ICEkitContentsMixin,
     ListableMixin,
 ):
     # meta
