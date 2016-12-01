@@ -1,12 +1,16 @@
+from django.conf import settings
+from django.utils.text import capfirst
 from easy_thumbnails.exceptions import InvalidImageFormatError
 from easy_thumbnails.files import get_thumbnailer
+from fluent_pages.models import UrlNode
 from haystack import indexes
 from haystack.backends import SQ
+from haystack.generic_views import SearchView
 from haystack.inputs import AutoQuery
-from haystack.forms import ModelSearchForm
+from haystack.forms import SearchForm
 from haystack.utils import get_model_ct
-from icekit.mixins import LayoutFieldMixin
 
+SEARCH_SUBFACETS = getattr(settings, "SEARCH_SUBFACETS", {})
 
 # Doesn't extend `indexes.Indexable` to avoid auto-detection for 'Search In'
 class AbstractLayoutIndex(indexes.SearchIndex):
@@ -41,6 +45,10 @@ class AbstractLayoutIndex(indexes.SearchIndex):
 
     # We add this for autocomplete.
     content_auto = indexes.EdgeNgramField(model_attr='get_title')
+
+    # facets
+    # top-level result type
+    search_types = indexes.MultiValueField(faceted=True)
 
     def index_queryset(self, using=None):
         """
@@ -83,9 +91,20 @@ class AbstractLayoutIndex(indexes.SearchIndex):
     def prepare_meta_title(self, obj):
         return getattr(obj, "meta_title", None)
 
+    def prepare_search_types(self, obj):
+        r = [capfirst(obj.get_type_plural())]
+        if hasattr(obj, 'is_educational') and obj.is_educational():
+            r.append('Education')
+        return r
 
-class ICEkitSearchForm(ModelSearchForm):
-    """ Custom search form to use the indexed fields defined above """
+
+class ICEkitSearchForm(SearchForm):
+    """ Custom search form to use facets and the indexed fields defined above """
+
+    def __init__(self, *args, **kwargs):
+        self.applied_facets = kwargs.pop("applied_facets", {})
+        super(ICEkitSearchForm, self).__init__(*args, **kwargs)
+
 
     def get_searchqueryset(self, query):
         """
@@ -95,37 +114,142 @@ class ICEkitSearchForm(ModelSearchForm):
         # TODO Find a way to detect all (or boosted) indexed fields across
         # models and automatically add them to this filter, instead of
         # requiring explicit naming of every field to use in the query.
-        return self.searchqueryset.filter(
-            SQ(content=AutoQuery(query)) |  # Search `text` document
-            SQ(title=AutoQuery(query)) |
-            SQ(boosted_search_terms=AutoQuery(query))
-        )
+        sqs = self.searchqueryset.all()
 
-    # TODO This is mostly a copy/paste of `haystack.forms:SearchForm.search`
-    # and `haystack.forms.ModelSearchForm.search` except for customisation of
-    # the `SearchQuerySet` to include our fields. There should be a better way
-    # of doing this, though this is what the docs recommend:
-    # http://django-haystack.readthedocs.io/en/v2.5.1/boost.html
+        if query:
+            sqs = sqs.filter(
+                SQ(content=AutoQuery(query)) |  # Search `text` document
+                SQ(title=AutoQuery(query)) |
+                SQ(boosted_search_terms=AutoQuery(query))
+            )
+
+        # take a facet reading *before* applying the facets!
+        self.pre_facets = sqs.facet_counts()
+        self.pre_facet_count = sqs.count()
+
+        return sqs
+
+
     def search(self):
-        if not self.is_valid():
-            return self.no_query_found()
-
-        if not self.cleaned_data.get('q'):
-            return self.no_query_found()
-
-        q = self.cleaned_data['q']
-
-        #######################################################################
-        # Customised
+        q = getattr(self, 'cleaned_data', {'q': ''})['q']
         sqs = self.get_searchqueryset(q)
-        #######################################################################
+
+        if self.applied_facets:
+            for field, value_list in self.applied_facets.items():
+                for value in value_list:
+                    if value:
+                        sqs = sqs.narrow(u'%s:"%s"' % (field, sqs.query.clean(value)))
 
         if self.load_all:
             sqs = sqs.load_all()
 
-        #######################################################################
-        # Customised - per `ModelSearchForm.search()`
-        sqs = sqs.models(*self.get_models())
-        #######################################################################
-
         return sqs
+
+
+class ICEkitSearchView(SearchView):
+    """
+    A search view which arranges results according to a top facet ('type'),
+    then any of several sets of subfacets, depending on which top facet is
+    selected.
+
+    Only zero or one top facet can be active at a time, but many sub-facets
+    can be active at a time.
+    """
+    form_class = ICEkitSearchForm
+    top_facet = {
+        'title': '',
+        'field_name': 'search_types',
+        'select_many': False,
+    }
+
+    def get_subfacets(self):
+        """
+        return a tuple of {'title': , 'facet_field':} dicts describing the
+        subfacets that are currently active.
+        """
+        value = self.request.GET.get(self.top_facet['field_name'])
+        return SEARCH_SUBFACETS.get(value, ())
+
+    def get_facet_field_names(self):
+        """
+        Return a list of facet field names to be applied to the searchqueryset
+        """
+        r = [self.top_facet['field_name']]
+        for subfacet in self.get_subfacets():
+            r.append(subfacet['field_name'])
+
+        return r
+
+    def get_form_kwargs(self):
+        """Inject any selected facets into the form kwargs"""
+        kwargs = super(ICEkitSearchView, self).get_form_kwargs()
+
+        kwargs['applied_facets'] = {}
+        for name in self.get_facet_field_names():
+            vals = self.request.GET.getlist(name)
+            if vals:
+                kwargs['applied_facets'][name] = vals
+
+        return kwargs
+
+    def prepare_facet_context(self, sqs_facets):
+        """
+        A facet is defined by:
+
+        {
+            'title': 'Themes',
+            'field_name: 'education_themes',
+            'select_many': True,
+            'values': [
+                {'value': 'Technology & Culture, 'count': 36, 'active': True},
+                ...
+            ]
+        }
+
+        This function returns a tuple of relevant facets.
+        """
+
+        facets = (self.top_facet,) + self.get_subfacets()
+        for facet in facets:
+            field_name = facet['field_name']
+            facet['values'] = [
+                {
+                    'value': v,
+                    'count': c,
+                    'is_active': v in self.request.GET.getlist(field_name),
+                } for v, c in sqs_facets['fields'][field_name]
+            ]
+
+        return facets
+
+
+    def get_context_data(self, **kwargs):
+        """
+        Inject facets and 'page' into the context.
+        """
+        context = super(ICEkitSearchView, self).get_context_data(**kwargs)
+        sqs_facets = kwargs['form'].pre_facets
+        context.update({
+            'facets': self.prepare_facet_context(sqs_facets),
+            'applied_facets': kwargs['form'].applied_facets,
+            'pre_facet_count': kwargs['form'].pre_facet_count,
+            'page': UrlNode.objects.get_for_path(self.request.path),
+        })
+
+        return context
+
+    def get_queryset(self):
+        qs = super(ICEkitSearchView, self).get_queryset()
+        for field in self.get_facet_field_names():
+            qs = qs.facet(field)
+        return qs
+
+
+    def form_invalid(self, form):
+        self.queryset = form.search()
+        context = self.get_context_data(**{
+            self.form_name: form,
+            'query': "",
+            'object_list': self.queryset
+        })
+        return self.render_to_response(context)
