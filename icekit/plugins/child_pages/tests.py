@@ -76,10 +76,10 @@ class ChildPagesTestCase(WebTest):
     def test_get_child_pages_draft(self):
         self.assertEqual(len(self.child_pages_1.get_child_pages()), 0)
         self.assertEqual(len(self.child_pages_2.get_child_pages()), 2)
-        expected_children = [self.page_3, self.page_4]
+        expected_children = set([self.page_3.pk, self.page_4.pk])
         # test page ids, because the pages are boobytraps
-        for child in expected_children:
-            self.assertIn(child.pk, [x.pk for x in self.child_pages_2.get_child_pages()])
+        actual_children = set([x.pk for x in self.child_pages_2.get_child_pages()])
+        self.assertEqual(expected_children, actual_children)
 
     def test_get_child_pages_published(self):
         pcp1 = self.page_1.get_published().contentitem_set.all()[0]
