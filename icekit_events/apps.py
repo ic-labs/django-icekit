@@ -23,5 +23,5 @@ class AppConfig(AppConfig):
         autodiscover_modules('event_type_plugins')
 
         from .models import EventBase
-        ICEkitURLField.register_model_once(
+        ICEkitURLField.register_model(
             EventBase, widget=SimpleRawIdWidget(EventBase), title='Event')
