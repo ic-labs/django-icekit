@@ -210,15 +210,17 @@ class ICEkitSearchView(SearchView):
         """
 
         facets = (self.top_facet,) + self.get_subfacets()
-        for facet in facets:
-            field_name = facet['field_name']
-            facet['values'] = [
-                {
-                    'value': v,
-                    'count': c,
-                    'is_active': v in self.request.GET.getlist(field_name),
-                } for v, c in sqs_facets['fields'][field_name]
-            ]
+
+        if sqs_facets.has_key("fields"):
+            for facet in facets:
+                field_name = facet['field_name']
+                facet['values'] = [
+                    {
+                        'value': v,
+                        'count': c,
+                        'is_active': v in self.request.GET.getlist(field_name),
+                    } for v, c in sqs_facets['fields'][field_name]
+                ]
 
         return facets
 
