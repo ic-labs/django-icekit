@@ -14,13 +14,9 @@ class SearchPagePlugin(ICEkitFluentContentsPagePlugin):
     model = models.SearchPage
     model_admin = admin.SearchPageAdmin
 
-    urls = patterns(
-        '',
-        url(
-            r'^$',
-            ICEkitSearchView.as_view(
-                template_name='icekit/page_types/search_page/default.html',
-            ),
-            name='search'
-        ),
-    )
+    def get_response(self, request, page, **kwargs):
+
+        return ICEkitSearchView.as_view(
+            template_name='icekit/page_types/search_page/default.html',
+            fluent_page=page,
+        )(request)

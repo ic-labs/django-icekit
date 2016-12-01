@@ -1,33 +1,29 @@
 {% load icekit_tags humanize %}
 
-{% if facet.values %}
-    <div class="filter">
+{% if facet.get_values %}
+    <div class="filter {{ class }}">
         {% if facet.title %}<h4 class="filter__label">{{ facet.title }}</h4>{% endif %}
 
         <div class="filter__container">
             {% if facet.select_many %}
-                {% for value in facet.values %}
+                {% for value in facet.get_values %}
                     {% if value.is_active %}
-                        <a class="filter__link has-count active" href="?{% update_GET 'page' = None facet.field_name -= value.value %}">
-                            <button class="filter__btn">{{ value.value }} <span class="filter__count">({{ value.count|intcomma }})</span>
+                        <a class="filter__link has-count active" href="?{% update_GET 'page' = None facet.field_name -= value.get_value %}">
+                            <button class="filter__btn">{{ value.get_value }} <span class="filter__count">({{ value.count|intcomma }})</span>
                             </button>
                             <i class="fa fa-times" aria-hidden="true"></i>
                         </a>
                     {% else %}
-                        <a class="filter__link has-count" href="?{% update_GET 'page' = None facet.field_name += value.value %}">
-                            <button class="filter__btn">{{ value.value }} <span class="filter__count">({{ value.count|intcomma }})</span>
+                        <a class="filter__link has-count" href="?{% update_GET 'page' = None facet.field_name += value.get_value %}">
+                            <button class="filter__btn">{{ value.get_value }} <span class="filter__count">({{ value.count|intcomma }})</span>
                             </button>
                         </a>
                     {% endif %}
                 {% endfor %}
             {% else %}{# select one at a time #}
-                <a class="filter__link {# has-count #}{% if facet.field_name not in request.GET %} active {% endif %}" href="?{% update_GET 'page' = None facet.field_name = None %}">
-                    <button class="filter__btn">All results{#  <span class="filter__count">({{ pre_facet_count|intcomma }})</span> #}{# count isn't very useful here yet #}
-                    </button>
-                </a>
-                {% for value in facet.values %}
-                    <a class="filter__link has-count {% if value.is_active %}active{% endif %}" href="?{% update_GET 'page' = None facet.field_name = value.value %}">
-                        <button class="filter__btn">{{ value.value }} <span class="filter__count">({{ value.count|intcomma }})</span>
+                {% for value in facet.get_values %}
+                    <a class="filter__link has-count {% if value.is_active %}active{% endif %}" href="?{% update_GET 'page' = None facet.field_name = value.get_value %}">
+                        <button class="filter__btn">{{ value.label }}{% if value.count != None %} <span class="filter__count">({{ value.count|intcomma }}){% endif %}</span>
                         </button>
                     </a>
                 {% endfor %}

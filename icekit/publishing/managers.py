@@ -57,6 +57,7 @@ class DraftItemBoobyTrap(object):
         'id',
         'language_code',
         'get_current_language',
+        'set_current_language',
         # Fields that need to be accessible by any_urlfield
         # TODO: consider either patching fetching published model into
         # ICEkitURLField or ensure that draft and published objects always
