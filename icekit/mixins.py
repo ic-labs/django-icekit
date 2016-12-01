@@ -148,6 +148,9 @@ class ListableMixin(models.Model):
     def get_type(self):
         return type(self)._meta.verbose_name
 
+    def get_type_plural(self):
+        return unicode(type(self)._meta.verbose_name_plural)
+
     def get_title(self):
         return self.title
 

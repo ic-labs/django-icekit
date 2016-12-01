@@ -53,6 +53,17 @@ class TitleSlugMixin(models.Model):
     def __unicode__(self):
         return self.title
 
+class PluralTitleSlugMixin(TitleSlugMixin):
+    title_plural = models.CharField(max_length=255, blank=True, help_text="Optional plural version of title (if appending 's' isn't correct)")
+
+    class Meta:
+        abstract = True
+
+    def get_plural(self):
+        if self.title_plural:
+            return self.title_plural
+        return u"{0}s".format(self.title)
+
 
 class AbstractListingPage(AbstractLayoutPage):
     """

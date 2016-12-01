@@ -18,6 +18,9 @@ class AbstractLayoutPage(ICEkitFluentContentsPageMixin, LayoutFieldMixin,
         # we don't normally want pages to say they're a 'page'
         return ""
 
+    def get_type_plural(self):
+        return ""
+
     def get_parent(self):
         if self.parent:
             return self.parent.get_visible()
