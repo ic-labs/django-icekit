@@ -39,6 +39,7 @@ class DraftItemBoobyTrap(object):
     # Attribute or method names that are safe to access, for checking on draft
     # status or exchanging a draft payload for the published copy.
     DEFAULT_PERMITTED_ATTRS = [
+        'get_draft',
         'get_draft_payload',
         'get_published',
         'get_visible',
