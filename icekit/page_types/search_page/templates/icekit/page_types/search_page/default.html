@@ -9,52 +9,79 @@
 
 	{% page_placeholder page 'main' title='Main' role='m' fallback=True %}
 
-	<form method="get" class="search-form" action=".">
-		{% bootstrap_form form %}
-		<button type="submit" class="btn btn-primary">Search</button>
+	{% if query %}
+		<h2 class="hero-section__title">
+			Your {% if applied_facets %}refined {% endif %}search for <strong class="text-uppercase">&lsquo;{{ query }}&rsquo;</strong> produced <strong>{{ page_obj.paginator.count|intcomma }}
+			result{{ page_obj.paginator.count|pluralize }}</strong>
+		</h2>
+
+		<p>
+			<a class="hero-section__scroll-btn scroll-btn hidden-lg-up" href="#search-results">
+				<i class="fa fa-caret-down" aria-hidden="true"></i> <span class="underline">Skip to results</span>
+			</a>
+		</p>
+	{% else %}
+		<h2 class="hero-section__title">
+			Search ACMI
+		</h2>
+	{% endif %}
+
+	<form class="form-white" itemprop="potentialAction" itemscope
+		  itemtype="http://schema.org/SearchAction" method="get" action="/search/">
+		<fieldset class="form-group infield-btn">
+			<meta itemprop="target" content="#">
+			<label class="sr-only" for="q">New search</label>
+			<input class="form-control form-control--compact" id="q" name="q" type="text"
+				   itemprop="query-input" {% if query %} value="{{ query }}" {% else %} placeholder="Type keywords" autofocus {% endif %}/>
+			<button class="btn" type="submit"><span class="sr-only">Go</span> <i
+					class="fa fa-caret-right" aria-hidden="true"></i></button>
+		</fieldset>
 	</form>
 
-	{% if query %}
-		<div class="page-header">
-			<h3>Results for <small>&ldquo;{{ query }}&rdquo;</small></h3>
-		</div>
-		{% for result in results_page.object_list %}
-			<p>
-				<a href="{{ result.get_absolute_url }}">
-					{% if result.get_type %}{{ result.get_type }}:{% endif %}
-					{{ result.get_title }}
-					{% if result.get_list_image_url %}<img src="{{ result.get_list_image_url }}" alt="">{% endif %}
-				</a>
-			</p>
-		{% empty %}
-			<p>No results found.</p>
-		{% endfor %}
 
-		{% if results_page.has_previous or results_page.has_next %}
-			<nav class="text-center">
-				<ul class="pagination">
-					<li class="previous{% if not results_page.has_previous %} disabled{% endif %}">
-						<a href="{% if results_page.has_previous %}?q={{ query }}&amp;page={{ results_page.previous_page_number }}{% endif %}">
-							<span aria-hidden="true">&larr;</span> Previous
-						</a>
-					</li>
-					{% for pagination_number in results_page.paginator.page_range %}
-						<li {% if pagination_number == results_page.number %}class="active" {% endif %}>
-							<a href="?q={{ query }}&amp;page={{ pagination_number }}">
-								{{ pagination_number }}
-								{% if pagination_number == results_page.number %}<span class="sr-only">(current)</span>{% endif %}
-							</a>
-						</li>
-					{% endfor %}
-					<li class="next{% if not results_page.has_next %} disabled{% endif %}">
-						<a href="{% if results_page.has_next %}?q={{ query }}&amp;page={{ results_page.next_page_number }}{% endif %}">
-							<span aria-hidden="true">&rarr;</span> Next
-						</a>
-					</li>
-				</ul>
-			</nav>
-		{% endif %}
-	{% else %}
-		{# Show some example queries to run, maybe query syntax, something else? #}
+
+	{% for facet in facets %}
+		{% include "icekit/page_types/search_page/_facet.html" %}
+	{% endfor %}
+
+	{% for result in page_obj.object_list %}
+		<p>
+			<a href="{{ result.get_absolute_url }}">
+				{% if result.get_type %}{{ result.get_type }}:{% endif %}
+				{{ result.get_title }}
+				{% if result.get_list_image_url %}<img src="{{ result.get_list_image_url }}" alt="">{% endif %}
+			</a>
+		</p>
+	{% empty %}
+		<p>No results found.</p>
+	{% endfor %}
+
+	{% if page_obj.has_previous or page_obj.has_next %}
+		<nav aria-label="Page navigation">
+			<ul class="pagination">
+				<li class="page-item{% if not page_obj.has_previous %} disabled{% endif %}">
+					<a class="page-link" href="{% if page_obj.has_previous %}?{% update_GET 'page' = page_obj.previous_page_number %}{% endif %}" aria-label="Previous">
+						<span aria-hidden="true">&laquo;</span>
+						Previous
+						<!--<span class="sr-only">Previous</span>-->
+					</a>
+				</li>
+				{% comment %} for future
+				<li class="page-item"><a class="page-link" href="#">1</a></li>
+				<li class="page-item"><a class="page-link" href="#">2</a></li>
+				<li class="page-item"><a class="page-link" href="#">3</a></li>
+				<li class="page-item"><a class="page-link" href="#">4</a></li>
+				<li class="page-item"><a class="page-link" href="#">5</a></li>
+				{% endcomment %}
+				<li class="page-item{% if not page_obj.has_next %} disabled{% endif %}">
+					<a class="page-link" href="{% if page_obj.has_next %}?{% update_GET 'page' = page_obj.next_page_number %}{% endif %}" aria-label="Next">
+						<span aria-hidden="true">&raquo;</span>
+						<!--<span class="sr-only">Next</span>-->
+						Next
+					</a>
+				</li>
+			</ul>
+		</nav>
 	{% endif %}
+
 {% endblock %}
