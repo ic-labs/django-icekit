@@ -24,7 +24,7 @@ from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
 from polymorphic.models import PolymorphicModel
 
 from icekit.content_collections.abstract_models import AbstractListingPage, \
-    TitleSlugMixin
+    TitleSlugMixin, PluralTitleSlugMixin
 from icekit.models import ICEkitContentsMixin
 from icekit.fields import ICEkitURLField
 from icekit.mixins import FluentFieldsMixin
@@ -195,7 +195,7 @@ class RecurrenceRule(AbstractBaseModel):
     def __str__(self):
         return self.description
 
-class EventType(TitleSlugMixin):
+class EventType(PluralTitleSlugMixin):
     is_public = models.BooleanField(
         "Show to public?",
         default=True,
@@ -204,6 +204,7 @@ class EventType(TitleSlugMixin):
                   "Non-public types are used to indicate special behaviour, "
                   "such as education or members events."
     )
+
 
 @encoding.python_2_unicode_compatible
 class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
@@ -517,14 +518,25 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
             return self.cta_url, self.cta_text
         return ()
 
+    def get_type(self):
+        if self.primary_type:
+            return self.primary_type.title
+        return type(self)._meta.verbose_name
+
+    def get_type_plural(self):
+        if self.primary_type:
+            return self.primary_type.get_plural()
+        return unicode(type(self)._meta.verbose_name_plural)
+
+
     def get_all_types(self):
-        return self.secondary_types.all() | EventType.objects.filter(id__in=self.primary_type_id)
+        return self.secondary_types.all() | EventType.objects.filter(id__in=[self.primary_type_id])
 
     def is_educational(self):
-        raise NotImplementedError
+        return self.get_all_types().filter(slug='education')
 
     def is_members(self):
-        raise NotImplementedError
+        return self.get_all_types().filter(slug='members')
 
 
 class AbstractEventWithLayouts(EventBase, FluentFieldsMixin):
