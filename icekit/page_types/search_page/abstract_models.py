@@ -1,8 +1,6 @@
 from django.db import models
-
 from fluent_pages.integration.fluent_contents import FluentContentsPage
 from icekit.mixins import ListableMixin
-
 from icekit.models import ICEkitFluentContentsPageMixin
 
 
