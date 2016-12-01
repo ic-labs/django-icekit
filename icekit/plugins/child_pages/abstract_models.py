@@ -18,6 +18,6 @@ class AbstractChildPagesItem(ContentItem):
         parent = self.parent
 
         if parent.is_draft:
-            return [p for p in parent.get_children() if p.publishing_is_draft]
+            return [p for p in parent.get_draft().get_children() if p.publishing_is_draft]
         else:
             return parent.get_draft().get_children().published()
