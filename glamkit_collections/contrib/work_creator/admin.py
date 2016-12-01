@@ -7,7 +7,7 @@ from icekit.admin_mixins import FluentLayoutsMixin
 import models
 from icekit.content_collections.admin import TitleSlugAdmin
 from icekit.plugins.base import BaseChildModelPlugin, PluginMount
-from icekit.publishing.admin import PublishingAdmin
+from icekit.admin import ICEkitContentsAdmin
 from icekit.templatetags.icekit_tags import grammatical_join
 from icekit.utils.admin.mixins import ThumbnailAdminMixin
 from icekit.utils.admin.urls import admin_link, admin_url
@@ -93,14 +93,15 @@ class WorkImageInline(
 
 class CreatorChildAdmin(
     PolymorphicChildModelAdmin,
-    PublishingAdmin,
+    ICEkitContentsAdmin,
     FluentLayoutsMixin,
 ):
     base_model = models.CreatorBase
     raw_id_fields = ['portrait', ]
     exclude = ('layout', 'alt_slug',)
     prepopulated_fields = {"slug": ("name_display",)}
-    inlines = [WorkCreatorsInlineForCreators,]
+    inlines = [WorkCreatorsInlineForCreators] + \
+        ICEkitContentsAdmin.inlines
 
 
     NAME_FIELDSET =  ('Name', {
@@ -134,7 +135,7 @@ class CreatorChildAdmin(
 
 class WorkChildAdmin(
     PolymorphicChildModelAdmin,
-    PublishingAdmin,
+    ICEkitContentsAdmin,
     FluentLayoutsMixin,
     TitleSlugAdmin,
 ):
@@ -142,7 +143,8 @@ class WorkChildAdmin(
     exclude = ('layout', 'alt_slug',)
     prepopulated_fields = {"slug": ("accession_number", "title",)}
 
-    inlines = [WorkCreatorsInlineForWorks, WorkImageInline]
+    inlines = [WorkCreatorsInlineForWorks, WorkImageInline] + \
+        ICEkitContentsAdmin.inlines
 
     DATE_FIELDSET = ("Date", {
         'fields': (
@@ -210,7 +212,7 @@ class CreatorChildModelPlugin(six.with_metaclass(
 
 class CreatorBaseAdmin(
     ChildModelPluginPolymorphicParentModelAdmin,
-    PublishingAdmin,
+    ICEkitContentsAdmin,
     FluentLayoutsMixin,
     ThumbnailAdminMixin,
 ):
@@ -224,11 +226,11 @@ class CreatorBaseAdmin(
         "id",
         "admin_notes",
     )
-    list_display = ('thumbnail',) + PublishingAdmin.list_display + (
+    list_display = ('thumbnail',) + ICEkitContentsAdmin.list_display + (
         'works_count',
     )
     list_display_links = list_display[:2]
-    list_filter = PublishingAdmin.list_filter + (
+    list_filter = ICEkitContentsAdmin.list_filter + (
         PolymorphicChildModelFilter,
         'workcreator__role',
     )
@@ -244,7 +246,7 @@ class CreatorBaseAdmin(
 
 class WorkBaseAdmin(
     ChildModelPluginPolymorphicParentModelAdmin,
-    PublishingAdmin,
+    ICEkitContentsAdmin,
     FluentLayoutsMixin,
     ThumbnailAdminMixin,
 ):
@@ -252,7 +254,7 @@ class WorkBaseAdmin(
     child_model_plugin_class = WorkChildModelPlugin
     child_model_admin = WorkChildAdmin
 
-    list_display = ('thumbnail',) + PublishingAdmin.list_display + (
+    list_display = ('thumbnail',) + ICEkitContentsAdmin.list_display + (
         'child_type_name',
         'creators_admin_links',
         'country_flag',
@@ -266,7 +268,7 @@ class WorkBaseAdmin(
         'accession_number',
         'credit_line',
     )
-    list_filter = PublishingAdmin.list_filter + (
+    list_filter = ICEkitContentsAdmin.list_filter + (
         PolymorphicChildModelFilter,
         'department',
         'origin_continent',
