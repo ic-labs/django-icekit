@@ -56,26 +56,27 @@ class Facet(object):
         self._values = []
 
         # inject an 'All results' value (if there are other values):
-        if not self.select_many and sqs_facet_counts['fields'][self.field_name]:
+        if sqs_facet_counts.has_key('fields'):
+            if not self.select_many and sqs_facet_counts['fields'][self.field_name]:
+                self._values += [
+                    FacetValue(
+                        facet=self,
+                        value=None,
+                        label="All results",
+                        is_all_results=True,
+                    )
+                ]
+
+            # inject the values from the sqs
             self._values += [
                 FacetValue(
                     facet=self,
-                    value=None,
-                    label="All results",
-                    is_all_results=True,
+                    value=value,
+                    label=value,
+                    count=count
                 )
+                for value, count in sqs_facet_counts['fields'][self.field_name]
             ]
-
-        # inject the values from the sqs
-        self._values += [
-            FacetValue(
-                facet=self,
-                value=value,
-                label=value,
-                count=count
-            )
-            for value, count in sqs_facet_counts['fields'][self.field_name]
-        ]
 
     def apply_request_and_page_to_values(self, request, page=None):
         """
