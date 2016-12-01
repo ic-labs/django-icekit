@@ -216,6 +216,7 @@ INSTALLED_APPS = (
     # Extra.
     'django.contrib.admindocs',
     'django.contrib.sitemaps',
+    'django.contrib.humanize',
 )
 
 LANGUAGE_CODE = 'en-au'  # Default: en-us
