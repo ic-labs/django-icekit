@@ -22,7 +22,10 @@ class GameMixin(models.Model):
         abstract = True
 
     def get_type(self):
-        return self.media_type or "game"
+        return self.media_type.title or "game"
+
+    def get_type_plural(self):
+        return self.media_type.get_plural() or "games"
 
 
 class Game(WorkBase, GameMixin, MovingImageMixin):

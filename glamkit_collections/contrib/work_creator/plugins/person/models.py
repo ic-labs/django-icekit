@@ -154,3 +154,11 @@ class PersonCreator(CreatorBase):
         if roles:
             return roles[0].role.title
         return "person"
+
+    def get_type_plural(self):
+        if self.primary_occupation:
+            return self.primary_occupation
+        roles = self.get_primary_roles()
+        if roles:
+            return roles[0].role.get_plural()
+        return "people"

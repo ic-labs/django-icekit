@@ -1,8 +1,10 @@
 from django.core.urlresolvers import reverse
+from django.template.defaultfilters import pluralize
 from django_countries.fields import CountryField
 from glamkit_collections.contrib.work_creator.managers import \
     WorkCreatorQuerySet, WorkImageQuerySet
-from icekit.content_collections.abstract_models import TitleSlugMixin
+from icekit.content_collections.abstract_models import TitleSlugMixin, \
+    PluralTitleSlugMixin
 from icekit.mixins import FluentFieldsMixin, ListableMixin
 from icekit.plugins.image.abstract_models import ImageLinkMixin
 from icekit.publishing.models import PublishingModel
@@ -91,13 +93,20 @@ class CreatorBase(
 
     def get_hero_image(self):
         if self.portrait:
-            return self.portrait.image
+            return self.portrait
+
+    def get_list_image(self):
+        if self.portrait:
+            return self.list_image or self.portrait.image
 
     def get_title(self):
         return self.name_display
 
     def get_type(self):
         return "creator"
+
+    def get_type_plural(self):
+        return "creators"
 
     def get_roles(self):
         """Return the m2m relations connecting me to works"""
@@ -269,7 +278,7 @@ class WorkBase(
         ).select_related('role')
 
 
-class Role(TitleSlugMixin):
+class Role(PluralTitleSlugMixin):
     past_tense = models.CharField(max_length=255, help_text="If the role is 'foundry', the past tense should be 'forged'. Use lower case.")
 
 

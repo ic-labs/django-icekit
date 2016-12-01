@@ -1,8 +1,10 @@
+from django.template.defaultfilters import pluralize
 from django_countries.fields import CountryField
 from fluent_contents.plugins.oembeditem.fields import OEmbedUrlField
 from glamkit_collections.contrib.work_creator.models import WorkBase
 from django.db import models
-from icekit.content_collections.abstract_models import TitleSlugMixin
+from icekit.content_collections.abstract_models import TitleSlugMixin, \
+    PluralTitleSlugMixin
 
 
 class Rating(TitleSlugMixin):
@@ -14,9 +16,8 @@ class Genre(TitleSlugMixin):
     pass
 
 
-class MediaType(TitleSlugMixin):
+class MediaType(PluralTitleSlugMixin):
     pass
-
 
 class MovingImageMixin(
     # ACMIContent, ACMIAttributes,
@@ -36,6 +37,9 @@ class MovingImageMixin(
     def get_type(self):
         return self.media_type.title or "moving image work"
 
+    def get_type_plural(self):
+        return self.media_type.get_plural() or "moving image works"
+
     def get_duration(self):
         if self.duration_minutes is not None:
             return "%s mins" % self.duration_minutes
@@ -47,3 +51,8 @@ class MovingImageWork(WorkBase, MovingImageMixin):
         # for some reason (MRO) we have to call the get_type that we want.
         # Swapping mixin order breaks other things.
         return MovingImageMixin.get_type(self)
+
+    def get_type_plural(self):
+        # for some reason (MRO) we have to call the get_type that we want.
+        # Swapping mixin order breaks other things.
+        return MovingImageMixin.get_type_plural(self)
