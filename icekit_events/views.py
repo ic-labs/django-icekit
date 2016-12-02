@@ -7,6 +7,7 @@ Views for ``icekit_events`` app.
 import warnings
 
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
@@ -53,8 +54,6 @@ def event(request, slug):
     # If this is a preview make sure the user has appropriate permissions.
 
     event = get_object_or_404(models.EventBase.objects.visible(), slug=slug)
-    if not event:
-        raise Http404
 
     context = RequestContext(request, {
         'event': event,
@@ -64,6 +63,18 @@ def event(request, slug):
     # here for now for backwards compatibility
     template = getattr(event, 'template',  'icekit_events/event.html')
     return TemplateResponse(request, template, context)
+
+def event_type(request, slug):
+    type = get_object_or_404(models.EventType.objects.all(), slug=slug)
+    occurrences = models.Occurrence.objects.filter(Q(event__primary_type=type) | Q(event__secondary_types=type)).upcoming().visible()
+
+    context = RequestContext(request, {
+        'type': type,
+        'occurrences': occurrences,
+    })
+
+    return TemplateResponse(request, "icekit_events/type.html", context
+                            )
 
 
 def occurrence(request, event_id, occurrence_id):

@@ -15,6 +15,7 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.db import models, transaction
 from django.db.models.query import QuerySet
+from django.db.models import Q
 from django.db.models.signals import post_save, post_delete
 from django.utils import encoding
 from django.utils.translation import ugettext_lazy as _
@@ -31,8 +32,6 @@ from icekit.mixins import FluentFieldsMixin
 from icekit.publishing.middleware import is_draft_request_context
 from django.template.defaultfilters import date as datefilter
 
-from icekit.templatetags.icekit_tags import grammatical_join
-from icekit_events.templatetags.events_tags import timesf as timesfilter
 from . import appsettings, validators
 from .utils import timeutils
 
@@ -205,6 +204,8 @@ class EventType(PluralTitleSlugMixin):
                   "such as education or members events."
     )
 
+    def get_absolute_url(self):
+        return reverse("icekit_events_eventtype_detail", args=(self.slug, ))
 
 @encoding.python_2_unicode_compatible
 class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
@@ -511,6 +512,9 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
 
     def get_absolute_url(self):
         return reverse('icekit_events_eventbase_detail', args=(self.slug,))
+
+    def get_occurrence_url(self):
+        return self.get_absolute_url()
 
     def get_contained_events(self):
         return EventBase.objects.filter(
@@ -844,8 +848,15 @@ class OccurrenceQueryset(QuerySet):
         # logic.
         return self.exclude(id__in=self._same_day_ids())
 
-
-
+    def upcoming(self):
+        """
+        :return: Occurrences that start in the future, or, if the event
+         is_drop_in or is_all_day, that end in the future.
+        """
+        return self.filter(
+            Q(event__is_drop_in=False, start__gte=datetime.now) |
+            Q(Q(event__is_drop_in=True) | Q(is_all_day=True), end__gt=datetime.now)
+        )
 
 
 OccurrenceManager = models.Manager.from_queryset(OccurrenceQueryset)
@@ -981,7 +992,7 @@ class Occurrence(AbstractBaseModel):
         return self.end < djtz.now()
 
     def get_absolute_url(self):
-        return self.event.get_absolute_url()
+        return self.event.get_occurence_url(self)
 
 
 def get_occurrence_times_for_event(event):
