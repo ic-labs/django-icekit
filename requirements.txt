@@ -1,5 +1,5 @@
 # Add or remove a character to trick Docker into updating the image with the latest requirements.
 -e .[api,brightcove,dev,django18,forms,glamkit,project,search,test]
--e git+https://github.com/ic-labs/icekit-events.git@develop#egg=icekit-events
--e git+https://github.com/ic-labs/glamkit-collections.git@develop#egg=glamkit-collections
--e git+https://github.com/ixc/django-dynamic-fixture.git@ixc/master#egg=django-dynamic-fixture
+-e git+https://github.com/ic-labs/icekit-events.git@5f56a0603392eb8207a12b40e3d5158312a0f8e7#egg=icekit-events
+-e git+https://github.com/ic-labs/glamkit-collections.git@78c8142872ae1337f36d6fe640e6094dda84b9db#egg=glamkit-collections
+-e git+https://github.com/ixc/django-dynamic-fixture.git@caeb3427399edd3b0d589516993c7da55e0de560#egg=django-dynamic-fixture
