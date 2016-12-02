@@ -18,6 +18,9 @@ def timesf(times_list, format=None):
 
 @register.filter
 def times_range(event, format=None):
+    if event.human_times:
+        return event.human_times
+
     sts = timesf(event.start_times_set(), format=format)
     all_days = event.get_occurrences().filter(is_all_day=True)
     if all_days:

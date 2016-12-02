@@ -266,6 +266,11 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         blank=True,
         help_text=_('Describe event dates in everyday language, e.g. "Every Sunday in March".'),
     )
+    human_times = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text=_('Describe event times in everyday language, e.g. "10am&ndash;5pm, 8pm on Thursdays".'),
+    )
     is_drop_in = models.BooleanField(
         default=False,
         help_text="Check to indicate that the event/activity can be attended at any time within the given time range."
