@@ -110,11 +110,15 @@ class CreatorBase(
 
     def get_roles(self):
         """Return the m2m relations connecting me to works"""
-        return self.works.through.objects.filter(creator=self).select_related('role')
+        work_ids = WorkBase.objects.visible().filter(creators=self).values_list('id', flat=True)
+        return self.works.through.objects.filter(
+            creator=self.get_draft(),
+            work_id__in=work_ids,
+        ).select_related('role')
 
     def get_primary_roles(self):
         """Return the m2m relations connecting me to works as primary creator"""
-        return self.works.through.objects.filter(creator=self, is_primary=True).select_related('role')
+        return self.get_roles().filter(is_primary=True)
 
 
 class WorkBase(
@@ -265,17 +269,16 @@ class WorkBase(
 
 
     def get_roles(self):
-        """Return the m2m relations connecting me to works"""
+        """Return the m2m relations connecting me to creators"""
+        creator_ids = self.creators.visible().values_list('id', flat=True)
         return self.creators.through.objects.filter(
-            work=self
+            work=self.get_draft(),
+            creator_id__in=creator_ids,
         ).select_related('role')
 
     def get_primary_roles(self):
-        """Return the m2m relations connecting me to works as primary creator"""
-        return self.creators.through.objects.filter(
-            work=self,
-            is_primary=True
-        ).select_related('role')
+        """Return the m2m relations connecting me to creators as primary creator"""
+        return self.get_roles().filter(is_primary=True)
 
 
 class Role(PluralTitleSlugMixin):
