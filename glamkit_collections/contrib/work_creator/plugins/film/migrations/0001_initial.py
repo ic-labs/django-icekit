@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             bases=('gk_collections_work_creator.workbase', models.Model),
         ),
         migrations.CreateModel(
-            name='FilmFormat',
+            name='Format',
             fields=[
                 ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
                 ('title', models.CharField(max_length=255)),
@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='film',
             name='formats',
-            field=models.ManyToManyField(blank=True, to='gk_collections_film.FilmFormat'),
+            field=models.ManyToManyField(blank=True, to='gk_collections_film.Format'),
         ),
         migrations.AddField(
             model_name='film',

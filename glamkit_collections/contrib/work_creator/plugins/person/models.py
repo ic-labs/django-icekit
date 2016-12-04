@@ -152,7 +152,7 @@ class PersonCreator(CreatorBase):
             return self.primary_occupation
         roles = self.get_primary_roles()
         if roles:
-            return roles[0].role.title
+            return roles[0].role
         return "person"
 
     def get_type_plural(self):

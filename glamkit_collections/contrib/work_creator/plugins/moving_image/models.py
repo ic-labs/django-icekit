@@ -35,10 +35,7 @@ class MovingImageMixin(
         abstract = True
 
     def get_type(self):
-        return self.media_type.title or "moving image work"
-
-    def get_type_plural(self):
-        return self.media_type.get_plural() or "moving image works"
+        return self.media_type or "moving image work"
 
     def get_duration(self):
         if self.duration_minutes is not None:
@@ -51,8 +48,3 @@ class MovingImageWork(WorkBase, MovingImageMixin):
         # for some reason (MRO) we have to call the get_type that we want.
         # Swapping mixin order breaks other things.
         return MovingImageMixin.get_type(self)
-
-    def get_type_plural(self):
-        # for some reason (MRO) we have to call the get_type that we want.
-        # Swapping mixin order breaks other things.
-        return MovingImageMixin.get_type_plural(self)

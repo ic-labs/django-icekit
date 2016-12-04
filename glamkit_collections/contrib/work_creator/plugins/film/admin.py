@@ -13,4 +13,4 @@ class FilmAdmin(MovingImageWorkAdmin):
     ) + MovingImageWorkAdmin.fieldsets[3:]
     filter_horizontal = ('formats',)
 
-admin.site.register(models.FilmFormat, TitleSlugAdmin)
+admin.site.register(models.Format, TitleSlugAdmin)

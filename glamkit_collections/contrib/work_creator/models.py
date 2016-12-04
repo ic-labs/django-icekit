@@ -105,9 +105,6 @@ class CreatorBase(
     def get_type(self):
         return "creator"
 
-    def get_type_plural(self):
-        return "creators"
-
     def get_roles(self):
         """Return the m2m relations connecting me to works"""
         work_ids = WorkBase.objects.visible().filter(creators=self).values_list('id', flat=True)
