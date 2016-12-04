@@ -71,6 +71,7 @@ def event_type(request, slug):
     context = RequestContext(request, {
         'type': type,
         'occurrences': occurrences,
+        'page': type,
     })
 
     return TemplateResponse(request, "icekit_events/type.html", context

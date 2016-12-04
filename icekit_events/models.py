@@ -468,13 +468,8 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
 
     def get_type(self):
         if self.primary_type:
-            return self.primary_type.title
+            return self.primary_type
         return type(self)._meta.verbose_name
-
-    def get_type_plural(self):
-        if self.primary_type:
-            return self.primary_type.get_plural()
-        return unicode(type(self)._meta.verbose_name_plural)
 
     def get_all_types(self):
         return self.secondary_types.all() | EventType.objects.filter(id__in=[self.primary_type_id])
