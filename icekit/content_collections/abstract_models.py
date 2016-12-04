@@ -25,6 +25,9 @@ class TitleSlugMixin(models.Model):
     class Meta:
         abstract = True
 
+    def get_title(self):
+        return self.title
+
     def validate_unique_slug(self):
         """
         Ensure slug is unique for this model. This check is aware of publishing
@@ -63,6 +66,9 @@ class PluralTitleSlugMixin(TitleSlugMixin):
         if self.title_plural:
             return self.title_plural
         return u"{0}s".format(self.title)
+
+    def get_title(self):
+        return self.get_plural()
 
 
 class AbstractListingPage(AbstractLayoutPage):

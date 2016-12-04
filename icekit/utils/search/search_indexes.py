@@ -20,7 +20,7 @@ class AbstractLayoutIndex(indexes.SearchIndex):
     """
     # Content
     text = indexes.CharField(document=True, use_template=True, template_name="search/indexes/icekit/default.txt")
-    get_type = indexes.CharField(model_attr='get_type')
+    get_type = indexes.CharField()
     get_title = indexes.CharField(model_attr='get_title', boost=2.0)
     get_oneliner = indexes.CharField(model_attr='get_oneliner')
     boosted_search_terms = indexes.CharField(model_attr="get_boosted_search_terms", boost=2.0, null=True)
@@ -58,6 +58,11 @@ class AbstractLayoutIndex(indexes.SearchIndex):
         prepared_data = super(AbstractLayoutIndex, self).full_prepare(obj)
         prepared_data['django_ct'] = get_model_ct(self.get_model())
         return prepared_data
+
+    def prepare_get_type(self, obj):
+        if hasattr(obj, 'get_type'):
+            return unicode(obj.get_type())
+        return ""
 
     def prepare_get_list_image_url(self, obj):
         list_image = getattr(obj, "get_list_image", lambda x: None)()

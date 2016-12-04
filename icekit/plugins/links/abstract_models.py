@@ -56,9 +56,6 @@ class AbstractLinkItem(ContentItem):
     def get_type(self):
         return self.type_override or self._resolve('get_type')
 
-    def get_type_plural(self):
-        return self.type_override or self._resolve('get_type_plural')
-
     def get_title(self):
         return self.title_override or self._resolve('get_title')
 

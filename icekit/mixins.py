@@ -146,10 +146,26 @@ class ListableMixin(models.Model):
         abstract = True
 
     def get_type(self):
+        """
+        :return: a string OR object (with a get_absolute_url) indicating the public type of this object
+        """
         return type(self)._meta.verbose_name
 
     def get_type_plural(self):
+        """
+        :return: a string (event if get_type is an object) indicating the plural of the type name
+        """
+        t = self.get_type()
+        if t:
+            if hasattr(t, 'get_plural'):
+                return t.get_plural()
+            if t == type(self)._meta.verbose_name:
+                return unicode(type(self)._meta.verbose_name_plural)
+            return u"{0}s".format(t)
+
         return unicode(type(self)._meta.verbose_name_plural)
+
+
 
     def get_title(self):
         return self.title
