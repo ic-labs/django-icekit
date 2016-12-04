@@ -124,7 +124,7 @@ class Facet(object):
         try:
             return self.get_applicable_values()[0]
         except IndexError:
-            if not self.select_many:
+            if not self.select_many and self.get_values():
                 return self.get_values()[0]
 
 
