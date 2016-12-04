@@ -26,7 +26,8 @@ from django_webtest import WebTest
 from icekit import models as icekit_models
 from icekit_events import appsettings, forms, models
 from icekit_events.event_types.simple.models import SimpleEvent
-from icekit_events.models import get_occurrence_times_for_event, coerce_naive
+from icekit_events.models import get_occurrence_times_for_event, coerce_naive, \
+    Occurrence
 from icekit_events.utils import timeutils
 
 
@@ -736,6 +737,60 @@ class TestEventModel(TestCase):
         self.assertEqual(0, event.occurrences.all().count())
         self.assertEqual(
             (None, None), event.get_occurrences_range())
+
+
+class TestEventManager(TestCase):
+    def setUp(self):
+        now = djtz.now()
+        self.parent_event = G(SimpleEvent)
+
+        # occurrences in the past only
+        self.child_event_1 = G(SimpleEvent, part_of=self.parent_event)
+        occ1 = G(Occurrence, start=now-timedelta(hours=2), end=now-timedelta(hours=1))
+        self.child_event_1.occurrences.add(occ1)
+
+        # occurrences in the past and the future
+        self.child_event_2 = G(SimpleEvent, part_of=self.parent_event)
+        occ2a = G(Occurrence, start=now-timedelta(hours=2), end=now-timedelta(hours=1))
+        self.child_event_2.occurrences.add(occ2a)
+        occ2b = G(Occurrence, start=now+timedelta(hours=1), end=now+timedelta(hours=2))
+        self.child_event_2.occurrences.add(occ2b)
+
+        # no occurrences (inherits parent occurrences)
+        self.child_event_3 = G(SimpleEvent, part_of=self.parent_event)
+
+    def test_upcoming(self):
+        self.assertEqual(list(SimpleEvent.objects.with_upcoming_occurrences()), [
+            self.child_event_2,
+        ])
+
+        self.assertEqual(list(SimpleEvent.objects.with_no_occurrences()), [
+            self.parent_event,
+            self.child_event_3,
+        ])
+
+        self.assertEqual(list(SimpleEvent.objects.with_upcoming_or_no_occurrences()), [
+            self.parent_event,
+            self.child_event_2,
+            self.child_event_3,
+        ])
+
+    def test_contained(self):
+        self.assertEqual(list(self.parent_event.get_contained_events()), [
+            self.child_event_1,
+            self.child_event_2,
+            self.child_event_3,
+        ])
+        self.assertEqual(list(self.parent_event.get_contained_events().with_upcoming_occurrences()), [
+            self.child_event_2,
+        ])
+        self.assertEqual(list(self.parent_event.get_contained_events().with_no_occurrences()), [
+            self.child_event_3,
+        ])
+        self.assertEqual(list(self.parent_event.get_contained_events().with_upcoming_or_no_occurrences()), [
+            self.child_event_2,
+            self.child_event_3,
+        ])
 
 
 class TestEventRepeatOccurrencesRespectLocalTimeDefinition(TestCase):

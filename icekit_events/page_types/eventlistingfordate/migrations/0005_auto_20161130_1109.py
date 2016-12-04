@@ -8,6 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('icekit_plugins_image', '0009_auto_20161026_2044'),
         ('eventlistingfordate', '0004_auto_20161115_1118'),
     ]
 

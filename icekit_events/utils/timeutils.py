@@ -1,6 +1,9 @@
-from datetime import datetime, timedelta
-
+from datetime import datetime, timedelta, time as datetime_time
 from timezone import timezone as djtz  # django-timezone
+from django.conf import settings
+from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
+    get_current_timezone
+
 
 ROUND_DOWN = 'ROUND_DOWN'
 ROUND_NEAREST = 'ROUND_NEAREST'
@@ -62,3 +65,64 @@ def round_datetime(when=None, precision=60, rounding=ROUND_NEAREST):
             rounding == ROUND_NEAREST and remainder >= precision / 2):
         when += timedelta(seconds=precision)
     return when
+
+
+def zero_datetime(dt, tz=None):
+    """
+    Return the given datetime with hour/minutes/seconds/ms zeroed and the
+    timezone coerced to the given ``tz`` (or UTC if none is given).
+    """
+    if tz is None:
+        tz = get_current_timezone()
+    return coerce_naive(dt).replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def coerce_dt_awareness(date_or_datetime, tz=None):
+    """
+    Coerce the given `datetime` or `date` object into a timezone-aware or
+    timezone-naive `datetime` result, depending on which is appropriate for
+    the project's settings.
+    """
+    if isinstance(date_or_datetime, datetime):
+        dt = date_or_datetime
+    else:
+        dt = datetime.combine(date_or_datetime, datetime_time())
+    is_project_tz_aware = settings.USE_TZ
+    if is_project_tz_aware:
+        return coerce_aware(dt, tz)
+    elif not is_project_tz_aware:
+        return coerce_naive(dt, tz)
+    # No changes necessary
+    return dt
+
+
+def coerce_naive(dt, tz=None):
+    if is_naive(dt):
+        return dt
+    else:
+        if tz is None:
+            tz = get_current_timezone()
+        return make_naive(dt, tz)
+
+
+def coerce_aware(dt, tz=None):
+    if is_aware(dt):
+        return dt
+    else:
+        if tz is None:
+            tz = get_current_timezone()
+        return make_aware(dt, tz)
+
+
+def format_naive_ical_dt(date_or_datetime):
+    """
+    Return datetime formatted for use in iCal as a *naive* datetime value to
+    work more like people expect, e.g. creating a series of events starting
+    at 9am should not create some occurrences that start at 8am or 10am after
+    a daylight savings change.
+    """
+    dt = coerce_dt_awareness(date_or_datetime)
+    if is_naive(dt):
+        return dt.strftime('%Y%m%dT%H%M%S')
+    else:
+        return dt.astimezone(get_current_timezone()).strftime('%Y%m%dT%H%M%S')

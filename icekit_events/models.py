@@ -4,23 +4,21 @@ Models for ``icekit_events`` app.
 
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
 from collections import OrderedDict
-from datetime import datetime, timedelta, time as datetime_time, time
+from datetime import timedelta
 
 from dateutil import rrule
 import six
-from django.db.models import F
+from icekit_events.managers import EventManager, OccurrenceManager
+from icekit_events.utils.timeutils import coerce_naive, format_naive_ical_dt, \
+    zero_datetime
 from timezone import timezone as djtz  # django-timezone
 
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.db import models, transaction
-from django.db.models.query import QuerySet
-from django.db.models import Q
 from django.db.models.signals import post_save, post_delete
 from django.utils import encoding
 from django.utils.translation import ugettext_lazy as _
-from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
-    get_current_timezone
 
 from polymorphic.models import PolymorphicModel
 
@@ -29,7 +27,6 @@ from icekit.content_collections.abstract_models import AbstractListingPage, \
 from icekit.models import ICEkitContentsMixin
 from icekit.fields import ICEkitURLField
 from icekit.mixins import FluentFieldsMixin
-from icekit.publishing.middleware import is_draft_request_context
 from django.template.defaultfilters import date as datefilter
 
 from . import appsettings, validators
@@ -41,16 +38,6 @@ UNSET = object()
 
 DATE_FORMAT = settings.DATE_FORMAT
 DATETIME_FORMAT = settings.DATE_FORMAT + " " + settings.TIME_FORMAT
-
-
-def zero_datetime(dt, tz=None):
-    """
-    Return the given datetime with hour/minutes/seconds/ms zeroed and the
-    timezone coerced to the given ``tz`` (or UTC if none is given).
-    """
-    if tz is None:
-        tz = get_current_timezone()
-    return coerce_naive(dt).replace(hour=0, minute=0, second=0, microsecond=0)
 
 
 def default_starts():
@@ -69,56 +56,6 @@ def default_ends():
 def default_date_starts():
     return djtz.date()
 
-
-def format_naive_ical_dt(date_or_datetime):
-    """
-    Return datetime formatted for use in iCal as a *naive* datetime value to
-    work more like people expect, e.g. creating a series of events starting
-    at 9am should not create some occurrences that start at 8am or 10am after
-    a daylight savings change.
-    """
-    dt = coerce_dt_awareness(date_or_datetime)
-    if is_naive(dt):
-        return dt.strftime('%Y%m%dT%H%M%S')
-    else:
-        return dt.astimezone(get_current_timezone()).strftime('%Y%m%dT%H%M%S')
-
-
-def coerce_dt_awareness(date_or_datetime, tz=None):
-    """
-    Coerce the given `datetime` or `date` object into a timezone-aware or
-    timezone-naive `datetime` result, depending on which is appropriate for
-    the project's settings.
-    """
-    if isinstance(date_or_datetime, datetime):
-        dt = date_or_datetime
-    else:
-        dt = datetime.combine(date_or_datetime, datetime_time())
-    is_project_tz_aware = settings.USE_TZ
-    if is_project_tz_aware:
-        return coerce_aware(dt, tz)
-    elif not is_project_tz_aware:
-        return coerce_naive(dt, tz)
-    # No changes necessary
-    return dt
-
-
-def coerce_naive(dt, tz=None):
-    if is_naive(dt):
-        return dt
-    else:
-        if tz is None:
-            tz = get_current_timezone()
-        return make_naive(dt, tz)
-
-
-def coerce_aware(dt, tz=None):
-    if is_aware(dt):
-        return dt
-    else:
-        if tz is None:
-            tz = get_current_timezone()
-        return make_aware(dt, tz)
 
 # FIELDS ######################################################################
 
@@ -207,6 +144,7 @@ class EventType(PluralTitleSlugMixin):
     def get_absolute_url(self):
         return reverse("icekit_events_eventtype_detail", args=(self.slug, ))
 
+
 @encoding.python_2_unicode_compatible
 class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
                 TitleSlugMixin):
@@ -222,6 +160,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     instances that define the rules for automatically generating repeating
     occurrences.
     """
+    objects = EventManager()
 
     primary_type = models.ForeignKey(
         EventType, blank=True, null=True,
@@ -517,10 +456,10 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         return self.get_absolute_url()
 
     def get_contained_events(self):
-        return EventBase.objects.filter(
+        events = EventBase.objects.filter(
             id__in=self.get_draft().contained_events.values_list('id', flat=True)
-        ).visible()
-
+        )
+        return events
 
     def get_cta(self):
         if self.cta_url and self.cta_text:
@@ -536,7 +475,6 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         if self.primary_type:
             return self.primary_type.get_plural()
         return unicode(type(self)._meta.verbose_name_plural)
-
 
     def get_all_types(self):
         return self.secondary_types.all() | EventType.objects.filter(id__in=[self.primary_type_id])
@@ -741,126 +679,6 @@ class EventRepeatsGenerator(AbstractBaseModel):
         Return the duration between ``start`` and ``end`` as a timedelta.
         """
         return self.end - self.start
-
-
-class OccurrenceQueryset(QuerySet):
-    """ Custom queryset methods for ``Occurrence`` """
-
-    def visible(self):
-        if is_draft_request_context():
-            return self.draft()
-        else:
-            return self.published()
-
-    def published(self):
-        return self.filter(event__publishing_is_draft=False)
-
-    def draft(self):
-        return self.filter(event__publishing_is_draft=True)
-
-    def added_by_user(self):
-        return self.filter(generator__isnull=True, is_user_modified=True)
-
-    def modified_by_user(self):
-        return self.filter(is_user_modified=True)
-
-    def unmodified_by_user(self):
-        return self.filter(is_user_modified=False)
-
-    def generated(self):
-        return self.filter(generator__isnull=False)
-
-    def regeneratable(self):
-        return self.unmodified_by_user()
-
-    def overlapping(self, start, end):
-        """
-        :return: occurrences overlapping the given start and end datetimes,
-        inclusive.
-        Special logic is applied for all-day occurrences, for which the start
-        and end times are zeroed to find all occurrences that occur on a DATE
-        as opposed to within DATETIMEs.
-        """
-        return self.filter(
-                models.Q(is_all_day=False, start__lt=end) |
-                models.Q(is_all_day=True,
-                         start__lt=zero_datetime(end))
-            ).filter(
-                # Exclusive for datetime, inclusive for date.
-                models.Q(is_all_day=False, end__gt=start) |
-                models.Q(is_all_day=True,
-                         end__gte=zero_datetime(start))
-            )
-
-    def start_within(self, start, end):
-        """
-        :return:  occurrences that start within the given start and end
-        datetimes, inclusive.
-        """
-        return self.filter(
-            models.Q(is_all_day=False, start__gte=start) |
-            models.Q(is_all_day=True,
-                     start__gte=zero_datetime(start))
-        ).filter(
-            # Exclusive for datetime, inclusive for date.
-            models.Q(is_all_day=False, start__lt=end) |
-            models.Q(is_all_day=True,
-                     start__lte=zero_datetime(end))
-        )
-
-    def _same_day_ids(self):
-        """
-        :return: ids of occurrences that finish on the same day that they
-        start, or midnight the next day.
-        """
-        # we can pre-filter to return only occurrences that are <=24h long,
-        # but until at least the `__date` can be used in F() statements
-        # we'll have to refine manually
-        qs = self.filter(end__lte=F('start') + timedelta(days=1))
-
-        # filter occurrences to those sharing the same end date, or
-        # midnight the next day (unless it's an all-day occurrence)
-        ids = [o.id for o in qs if (
-            (o.local_start.date() == o.local_end.date()) or
-            (
-                o.local_end.time() == time(0,0) and
-                o.local_end.date() == o.local_start.date() + timedelta(days=1) and
-                o.is_all_day == False
-            )
-        )]
-        return ids
-
-    def same_day(self):
-        """
-        :return: occurrences that finish on the same day that they start, or
-        midnight the next day.
-        These types of occurrences sometimes need to be treated differently.
-        """
-        return self.filter(id__in=self._same_day_ids())
-
-    def different_day(self):
-        """
-        :return: occurrences that finish on the a different day than they
-        start, unless it's midnight the next day.
-        These types of occurrences sometimes need to be treated differently.
-        """
-        # This is the complement of same_day above; might as well reuse the
-        # logic.
-        return self.exclude(id__in=self._same_day_ids())
-
-    def upcoming(self):
-        """
-        :return: Occurrences that start in the future, or, if the event
-         is_drop_in or is_all_day, that end in the future.
-        """
-        return self.filter(
-            Q(event__is_drop_in=False, start__gte=datetime.now) |
-            Q(Q(event__is_drop_in=True) | Q(is_all_day=True), end__gt=datetime.now)
-        )
-
-
-OccurrenceManager = models.Manager.from_queryset(OccurrenceQueryset)
-OccurrenceManager.use_for_related_fields = True
 
 
 @encoding.python_2_unicode_compatible
