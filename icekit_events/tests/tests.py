@@ -159,12 +159,14 @@ class TestAdmin(WebTest):
         # when run on some days the next 13 weeks contains 1 more weekend day
         self.assertTrue(
             daily_wend_occurrences.count() in [13 * 2, 13 * 2 + 1])
-        self.assertEqual(
-            5,  # Saturday
-            coerce_naive(daily_wend_occurrences[0].start).weekday())
-        self.assertEqual(
-            6,  # Sunday
-            coerce_naive(daily_wend_occurrences[1].start).weekday())
+        today = djtz.now().date()
+        if today.weekday() not in [5, 6]: # if this is run on a weekend, the next generated occurrences differ
+            self.assertEqual(
+                5,  # Saturday
+                coerce_naive(daily_wend_occurrences[0].start).weekday())
+            self.assertEqual(
+                6,  # Sunday
+                coerce_naive(daily_wend_occurrences[1].start).weekday())
         # Start and end dates of all-day occurrences are zeroed
         self.assertEqual(
             time(0, 0),
@@ -586,7 +588,7 @@ class TestAdmin(WebTest):
             recurrence_rule="FREQ=DAILY;BYDAY=SA,SU",
             repeat_end=repeat_end,
         )
-        self.assertEqual(2, event.occurrences.count())
+        self.assertTrue(event.occurrences.count() in [2, 3]) # 3 on weekends
         #######################################################################
         # Fetch calendar HTML page
         #######################################################################
