@@ -280,7 +280,7 @@ class AppConfig(AppConfig):
                             u"`{0}` manager {1} on model {2} does not "
                             u"subclass `{3}`. Monkey-patching.".format(
                                 attr,
-                                type(attr),
+                                type(val),
                                 model,
                                 cls
                             )

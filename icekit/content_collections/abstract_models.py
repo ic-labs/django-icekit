@@ -114,6 +114,7 @@ class AbstractListingPage(AbstractLayoutPage):
             "Please implement `get_items_to_mount(request)` on %r" % type(self)
         )
 
+
 class AbstractCollectedContent(ListableMixin):
     """
     Content collections can be mounted into a publishable listing page,
