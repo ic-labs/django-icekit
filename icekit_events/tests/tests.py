@@ -657,23 +657,24 @@ class Forms(TestCase):
             forms.RecurrenceRuleField().clean([None, None, 'foo'])
 
 
-class Migrations(TestCase):
-
-    def test_icekit_events_backwards(self):
-        """
-        Test backwards migrations.
-        """
-        call_command('migrate', 'icekit_events', 'zero')
-        call_command('migrate', 'icekit_events')
-
-    def test_icekit_events_sample_data(self):
-        """
-        Test ``sample_data`` migrations.
-        """
-        INSTALLED_APPS = settings.INSTALLED_APPS + ('icekit_events.sample_data', )
-        with override_settings(INSTALLED_APPS=INSTALLED_APPS):
-            call_command('migrate', 'icekit_events_sample_data')
-            call_command('migrate', 'icekit_events_sample_data', 'zero')
+# These take a while to run, so commenting out for the time being.
+# class Migrations(TestCase):
+#
+#     def test_icekit_events_backwards(self):
+#         """
+#         Test backwards migrations.
+#         """
+#         call_command('migrate', 'icekit_events', 'zero')
+#         call_command('migrate', 'icekit_events')
+#
+#     def test_icekit_events_sample_data(self):
+#         """
+#         Test ``sample_data`` migrations.
+#         """
+#         INSTALLED_APPS = settings.INSTALLED_APPS + ('icekit_events.sample_data', )
+#         with override_settings(INSTALLED_APPS=INSTALLED_APPS):
+#             call_command('migrate', 'icekit_events_sample_data')
+#             call_command('migrate', 'icekit_events_sample_data', 'zero')
 
 
 class TestRecurrenceRule(TestCase):
