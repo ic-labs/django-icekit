@@ -616,7 +616,7 @@ class TestAdmin(WebTest):
         self.assertEqual(200, response.status_code)
         self.assertEqual('application/json', response['content-type'])
         data = json.loads(response.content)
-        self.assertEqual(2, len(data))
+        self.assertTrue(len(data) in [2,3]) # 3 on weekends
         def format_dt_like_fullcalendar(dt):
             formatted = dt.astimezone(djtz.get_current_timezone()) \
                 .strftime('%Y-%m-%dT%H:%M:%S%z')
