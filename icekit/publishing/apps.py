@@ -1,3 +1,4 @@
+import warnings
 from django.apps import AppConfig, apps
 from django.core.exceptions import MultipleObjectsReturned
 from django.utils.datastructures import OrderedSet
@@ -267,19 +268,35 @@ class AppConfig(AppConfig):
 
             ##############################################################
 
+            def _contribute_if_not_subclass(attr, cls):
+                if hasattr(model, attr):
+                    val = getattr(model, attr)
+                    if isinstance(val, cls):
+                        # the attribute is already an instance of the class
+                        # we want.
+                        return
+                    else:
+                        warnings.warn(
+                            u"`{0}` manager {1} on model {2} does not "
+                            u"subclass `{3}`. Monkey-patching.".format(
+                                attr,
+                                type(attr),
+                                model,
+                                cls
+                            )
+                        )
+                cls().contribute_to_class(model, attr)
+
+
             if issubclass(model, PolymorphicModel) \
                     and not issubclass(model, UrlNode):
-                PublishingPolymorphicManager().contribute_to_class(
-                    model, 'objects')
-                PublishingPolymorphicManager().contribute_to_class(
-                    model, '_default_manager')
+
+                _contribute_if_not_subclass('objects', PublishingPolymorphicManager)
+                _contribute_if_not_subclass('_default_manager', PublishingPolymorphicManager)
 
             if issubclass(model, UrlNode):
-
-                PublishingUrlNodeManager().contribute_to_class(
-                    model, 'objects')
-                PublishingUrlNodeManager().contribute_to_class(
-                    model, '_default_manager')
+                _contribute_if_not_subclass('objects', PublishingUrlNodeManager)
+                _contribute_if_not_subclass('_default_manager', PublishingUrlNodeManager)
 
                 @monkey_patch_override_method(model)
                 def _make_slug_unique(self, translation):
