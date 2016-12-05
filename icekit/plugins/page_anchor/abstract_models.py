@@ -6,7 +6,7 @@ from fluent_contents.models import ContentItem
 
 @python_2_unicode_compatible
 class AbstractPageAnchorItem(ContentItem):
-    anchor_name = models.CharField(max_length=60)
+    anchor_name = models.CharField(max_length=60, help_text="ID to use for this section, e.g. `foo`, without the `#`. Link to it with `#foo`.")
 
     class Meta:
         abstract = True

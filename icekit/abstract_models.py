@@ -9,6 +9,9 @@ from django.template.loader import get_template
 from django.utils import encoding, timezone
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.analyzer import get_template_placeholder_data
+from fluent_contents.extensions import ContentPlugin
+from fluent_contents.models import ContentItem
+from icekit import appsettings
 
 from . import fields, plugins
 

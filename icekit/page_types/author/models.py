@@ -2,14 +2,16 @@
 Model declaration for the `author` app.
 """
 import re
-from urlparse import urljoin
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
-from fluent_contents.extensions import PluginHtmlField
 from fluent_contents.models import PlaceholderField
-from icekit.publishing.models import PublishingModel
+from icekit.models import ICEkitContentsMixin
 
 from icekit.content_collections.abstract_models import AbstractListingPage, \
     AbstractCollectedContent
@@ -35,8 +37,12 @@ class AuthorListing(AbstractListingPage):
         """
         return Author.objects.visible()
 
+    class Meta:
+        db_table = "icekit_authorlisting"
+
+
 @python_2_unicode_compatible
-class Author(AbstractCollectedContent, PublishingModel):
+class Author(AbstractCollectedContent, ICEkitContentsMixin):
     """
     An author model for use with article pages and assigning attribution.
     """
@@ -55,6 +61,7 @@ class Author(AbstractCollectedContent, PublishingModel):
         'icekit_plugins_image.Image',
         blank=True,
         null=True,
+        on_delete=models.SET_NULL,
     )
 
     url = models.CharField(
@@ -64,8 +71,9 @@ class Author(AbstractCollectedContent, PublishingModel):
         validators=[RelativeURLValidator(), ]
     )
 
-    introduction = PluginHtmlField(
-        _('introduction'),
+    oneliner = models.CharField(
+        max_length=255,
+        blank=True,
         help_text=_('An introduction about the author used on list pages.')
     )
 
@@ -74,8 +82,9 @@ class Author(AbstractCollectedContent, PublishingModel):
     )
 
     def __str__(self):
-        return self.title()
+        return self.title
 
+    @property
     def title(self):
         return " ".join((self.given_names, self.family_name))
 
@@ -111,6 +120,10 @@ class Author(AbstractCollectedContent, PublishingModel):
 
     def get_layout_template_name(self):
         return "icekit_authors/detail.html"
+
+    def get_list_image(self):
+        if self.portrait:
+            return self.portrait.image
 
     class Meta:
         ordering = ('family_name', 'given_names', )

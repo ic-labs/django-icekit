@@ -68,3 +68,23 @@ Here are some of the most commonly used Docker commands when getting started:
     docker rm -f $(docker ps -a -q)
     docker rmi $(docker images -q)
     docker volume rm $(docker volume ls -q)
+
+# Docker-cloud commands
+
+The following commands can be run on a terminal on the docker-cloud container.
+First run `entrypoint.sh bash` to set up the environment for the following
+commands.
+
+    # Run Django's debug server on a cloud container - ge
+    $ supervisorctl.sh stop all
+    $ runserver.sh
+    # then when you've finished and Ctrl-C exited runserver
+    $ supervisorctl.sh start all
+
+    # Dump a database, encrypt it, and upload to the transfer.sh service, then delete the local copy
+    $ pg_dump -O -x -f ~/dump.sql && cat ~/dump.sql|gpg -ac -o-|curl -X PUT --upload-file "-" https://transfer.sh/dump.x && rm ~/dump.sql
+
+    # then on the destination machine, to download and decrypt:
+    $ curl [transfer.sh url] | gpg -o- > dump.sql
+    $ psql < dump.sql
+    $ rm dump.sql

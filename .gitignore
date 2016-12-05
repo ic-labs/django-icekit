@@ -13,6 +13,7 @@
 /.env.local
 /.idea/
 /.tox/
+/build/
 /dist/
 /docker-compose.override.yml
 /project_template/bower_components/

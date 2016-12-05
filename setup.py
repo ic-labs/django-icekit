@@ -59,13 +59,14 @@ setuptools.setup(
         'django-bootstrap3',
         'django-compressor',
         'django-el-pagination',
-        'django-fluent-contents',
+        'django-fluent-contents>=1.1.8',  # For JS compatibility, see #138
         'django-fluent-pages',
         'django-model-settings',
         'django-mptt',
         'django-multiurl',
         # import pattern changed in 0.8; version 1 to 1.0.1 has bug with parent
         # admins: github.com/django-polymorphic/django-polymorphic/pull/246
+        'django-object-actions>=0.7',  # See: https://github.com/crccheck/django-object-actions/issues/45
         'django-polymorphic>=0.8,!=1,!=1.0.1',
         'django-wysiwyg',
         'django_extensions',
@@ -100,12 +101,12 @@ setuptools.setup(
         'glamkit': [
             'glamkit-sponsors',
             'icekit-events',
-            'icekit-press-releases>=0.8',
+            'icekit-press-releases>=0.81',
             'glamkit-collections>=0.35',
         ],
         'project': [
             'boto3',
-            'celery[redis]',
+            'celery[redis]==3.1.24',
             'ConcurrentLogHandler',
             'django-celery',
             'django-celery-email',
@@ -143,7 +144,7 @@ setuptools.setup(
             'elasticstack',
         ],
         'test': [
-            'celery[redis]',
+            'celery[redis]==3.1.24',
             'coverage',
             'coveralls',
             'django-dynamic-fixture',

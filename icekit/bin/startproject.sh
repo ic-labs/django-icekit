@@ -63,11 +63,14 @@ chmod +x go.sh
 touch requirements.txt
 
 # Find and replace 'project_template' with destination directory basename.
-find . -type f -exec sed -e "s/project_template/$DEST_DIR_BASENAME/g" -i '' {} \;
+find . -type f -exec sed -e "s/project_template/$DEST_DIR_BASENAME/g" -i.deleteme {} \;
+find . -type f -iname "*.deleteme" -delete
 
 # Use release versions of ICEkit.
-sed -e "s|\.\.|git+https://github.com/ic-labs/django-icekit@master#egg=django-icekit|" -i '' requirements-icekit.txt
-sed -e "s|:local|:master|" -i '' Dockerfile
+sed -e "s|\.\.|git+https://github.com/ic-labs/django-icekit@master#egg=django-icekit|" requirements-icekit.txt > requirements-icekit.txt.replaced
+sed -e "s|:local|:master|" Dockerfile > Dockerfile.replaced
+mv requirements-icekit.txt.replaced requirements-icekit.txt
+mv Dockerfile.replaced Dockerfile
 
 if [[ -n $(which git) ]]; then
 	echo

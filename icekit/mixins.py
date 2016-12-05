@@ -40,18 +40,6 @@ class LayoutFieldMixin(models.Model):
             return self.layout.template_name
         return self.fallback_template
 
-
-class FluentFieldsMixin(LayoutFieldMixin):
-    """
-    Add ``layout``, ``contentitem_set`` and ``placeholder_set`` fields so we
-    can add modular content with ``django-fluent-contents``.
-    """
-    contentitem_set = ContentItemRelation()
-    placeholder_set = PlaceholderRelation()
-
-    class Meta:
-        abstract = True
-
     # HACK: This is needed to work-around a `django-fluent-contents` issue
     # where it cannot handle placeholders being added to a template after an
     # object already has placeholder data in the database.
@@ -75,6 +63,18 @@ class FluentFieldsMixin(LayoutFieldMixin):
                     ))
                 result = result or created
         return result
+
+
+class FluentFieldsMixin(LayoutFieldMixin):
+    """
+    Add ``layout``, ``contentitem_set`` and ``placeholder_set`` fields so we
+    can add modular content with ``django-fluent-contents``.
+    """
+    contentitem_set = ContentItemRelation()
+    placeholder_set = PlaceholderRelation()
+
+    class Meta:
+        abstract = True
 
     def placeholders(self):
         # return a dict of placeholders, organised by slot, for access in
@@ -124,6 +124,7 @@ class ListableMixin(models.Model):
     * Title
     * Image
     * URL (assume get_absolute_url)
+    Optional oneliner (implement `get_oneliner()`)
 
     ...and since they show in lists, they show in search results, so
     this model also includes search-related fields.
@@ -145,14 +146,36 @@ class ListableMixin(models.Model):
         abstract = True
 
     def get_type(self):
+        """
+        :return: a string OR object (with a get_absolute_url) indicating the public type of this object
+        """
         return type(self)._meta.verbose_name
+
+    def get_type_plural(self):
+        """
+        :return: a string (event if get_type is an object) indicating the plural of the type name
+        """
+        t = self.get_type()
+        if t:
+            if hasattr(t, 'get_plural'):
+                return t.get_plural()
+            if t == type(self)._meta.verbose_name:
+                return unicode(type(self)._meta.verbose_name_plural)
+            return u"{0}s".format(t)
+
+        return unicode(type(self)._meta.verbose_name_plural)
+
+
 
     def get_title(self):
         return self.title
 
-    def get_list_image(self):
+    def __get_list_image(self):
         """
         :return: the ImageField to use for thumbnails in lists
+        NB note that the Image Field is returned, not the ICEkit Image model as
+        with get_hero_image (since the override is just a field and we don't
+        need alt text), not Image record.
         """
         list_image = first_of(
             self,
@@ -160,7 +183,22 @@ class ListableMixin(models.Model):
             'get_hero_image',
             'image',
         )
-        return list_image
+
+        # return the `image` attribute (being the ImageField of the Image
+        # model) if there is one.
+        return getattr(list_image, "image", list_image)
+
+    def __getattr__(self, item):
+        """Only called if no class in the MRO defines the function"""
+        if item == 'get_list_image':
+            return self.__get_list_image
+        return self.__getattribute__(item)
+
+    def get_boosted_search_terms(self):
+        return self.boosted_search_terms
+
+    def get_oneliner(self):
+        return getattr(self, 'oneliner', "")
 
 
 class HeroMixin(models.Model):
@@ -171,12 +209,13 @@ class HeroMixin(models.Model):
         'icekit_plugins_image.Image',
         help_text='The hero image for this content.',
         related_name="+",
-        blank=True, null=True
+        blank=True, null=True,
+        on_delete=models.SET_NULL,
     )
 
     class Meta:
         abstract = True
 
     def get_hero_image(self):
-        """Return the ImageField"""
-        return self.hero_image.image
+        """ Return the Image record to use as the Hero """
+        return self.hero_image

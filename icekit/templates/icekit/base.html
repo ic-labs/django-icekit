@@ -17,7 +17,7 @@
 				<link rel="author" href="/humans.txt" />
 
 				{% block open_graph %}
-					<meta property="og:title" content="{% block og_title %}{% if title %}{{ title }} - {% endif %}{{ SITE_NAME }}{% endblock %}">
+					<meta property="og:title" content="{% block og_title %}{% if page.get_title %}{{ page.get_title|striptags }} - {% endif %}{{ SITE_NAME }}{% endblock %}">
 					<meta property="og:type" content="{% block og_type %}website{% endblock %}">
 					<meta property="og:image" content="{% block og_image %}{% endblock %}">
 					<meta property="og:site_name" content="{% block og_site_name %}{{ SITE_NAME }}{% endblock %}">
@@ -29,7 +29,7 @@
 				{% endif %}
 			{% endblock %}
 
-			<title>{% if request.IS_DRAFT %}PREVIEW: {% endif %}{% block title %}{% if title %}{{ title|safe }} - {% endif %}{{ SITE_NAME|safe }}{% endblock %}</title>
+			<title>{% if request.IS_DRAFT %}PREVIEW: {% endif %}{% block title %}{% if page.get_title %}{{ page.get_title|safe }} - {% endif %}{{ SITE_NAME|safe }}{% endblock %}</title>
 
 			{% block head_css %}
 				{# CSS files hosted externally #}

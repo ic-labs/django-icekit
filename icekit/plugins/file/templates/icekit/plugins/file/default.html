@@ -1,10 +1,13 @@
+{% block file %}
 {% if instance.file.is_active %}
 <p class="file">
 	<a class="file-link" href="{{ instance.file.file.url }}">
 		<i class="fa fa-cloud-download" aria-hidden="true"></i>
-		{{ instance.file }}
-		(<span class="file-size">{{ instance.file.file_size }}</span>
-		<span class="file-extension">.{{ instance.file.extension }}&nbsp;file</span>)
+		<span class="file-name">{{ instance.file }}</span><br />
+		<small class="file-meta-data">
+            (<span class="file-size">{{ instance.file.file_size }}</span> <span class="file-extension">.{{ instance.file.extension }}&nbsp;file</span>)
+        </small>
 	</a>
 </p>
 {% endif %}
+{% endblock %}

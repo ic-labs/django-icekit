@@ -39,9 +39,11 @@ class DraftItemBoobyTrap(object):
     # Attribute or method names that are safe to access, for checking on draft
     # status or exchanging a draft payload for the published copy.
     DEFAULT_PERMITTED_ATTRS = [
+        'get_draft',
         'get_draft_payload',
         'get_published',
         'get_visible',
+        'get_published_or_draft',
         # NOTE: `get_draft` is not included here to discourage getting a draft
         'publishing_linked',
         'publishing_linked_id',
@@ -52,8 +54,10 @@ class DraftItemBoobyTrap(object):
         'is_visible',
         # Fields that need to be accessible for Fluent Pages processing
         'pk',
+        'id',
         'language_code',
         'get_current_language',
+        'set_current_language',
         # Fields that need to be accessible by any_urlfield
         # TODO: consider either patching fetching published model into
         # ICEkitURLField or ensure that draft and published objects always

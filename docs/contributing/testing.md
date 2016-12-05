@@ -34,19 +34,27 @@ This reuses the test databases, and skips collectstatic and compress steps.
 
 ### To create a data dump with migrations applied
 
-To achieve permanent speedup, create a data dump called `test_initial_data.sql`
-with migrations applied. It will be restored to the test database in
-`runtests.sh`, bypassing all migrations.
+The slowest part of running tests from scratch is usually the "Rendering Model
+States..." stage of migrations. This can be speeded up by loading a pre-
+migrated database dump. ICEkit's `runtests.sh` automatically uses a file called
+`test_initial_data.sql`.
 
-1. Create a fresh database `foo`
+To create a data dump called `test_initial_data.sql`
+with migrations applied:
+
+1. Drop/recreate your test database
+
+        dropdb FOO_test_develop
+        createdb FOO_test_develop
+
 2. Run migrations:
 
-        manage.py migrate
+        BASE_SETTINGS_MODULE=test manage.py migrate
 
 3. Dump the database to `test_initial_data.sql`
 
-        `pg_dump -O -x -f test_initial_data.sql -d foo`
-
+        pg_dump -O -x -f test_initial_data.sql -d FOO_test_develop
+        git add test_initial_data.sql
 
 # To create fluent pages in tests.
 
@@ -59,6 +67,7 @@ We do this by using dynamic fixture:
     from django.contrib.sites.models import Site
     from icekit.models import Layout
     from icekit.page_types.layout_page.models import LayoutPage
+
 
     User = get_user_model()
 

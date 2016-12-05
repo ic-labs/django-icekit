@@ -1,7 +1,8 @@
 from fluent_pages.integration.fluent_contents.admin import FluentContentsPageAdmin
 
-from icekit.admin_mixins import FluentLayoutsMixin
-from icekit.publishing.admin import PublishingAdmin
+from icekit.admin_mixins import FluentLayoutsMixin, HeroMixinAdmin, \
+    ListableMixinAdmin
+from icekit.admin import ICEkitContentsAdmin
 
 
 class UnpublishableLayoutPageAdmin(FluentLayoutsMixin, FluentContentsPageAdmin):
@@ -9,5 +10,16 @@ class UnpublishableLayoutPageAdmin(FluentLayoutsMixin, FluentContentsPageAdmin):
 
 
 class LayoutPageAdmin(
-        FluentLayoutsMixin, FluentContentsPageAdmin, PublishingAdmin):
-    raw_id_fields = ('parent',)
+    FluentLayoutsMixin,
+    FluentContentsPageAdmin,
+    ICEkitContentsAdmin,
+    HeroMixinAdmin,
+    ListableMixinAdmin,
+):
+
+    raw_id_fields = HeroMixinAdmin.raw_id_fields + ('parent',)
+
+    base_fieldsets = FluentContentsPageAdmin.base_fieldsets[0:1] + \
+                     HeroMixinAdmin.FIELDSETS + \
+                     ListableMixinAdmin.FIELDSETS + \
+                     FluentContentsPageAdmin.base_fieldsets[1:]

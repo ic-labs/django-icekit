@@ -29,7 +29,6 @@ class ImagePlugin(ContentPlugin):
             )
         })
     )
-    # readonly_fields = ('rendered_caption', )
 
     def get_render_template(self, request, instance, **kwargs):
         opts = type(instance.parent)._meta
@@ -40,10 +39,10 @@ class ImagePlugin(ContentPlugin):
                 'icekit/plugins/image/default.html'
             ]
         )
-        # In Django >= 1.8 `select_template` returns and instance of
+        # In Django >= 1.8 `select_template` returns an instance of
         # `django.template.backends.django.Template` if the template exists. To obtain the
         # `django.template.base.Template` object we need to get the `template` attribute on it.
-        # Previous versions of Django return an `django.template.base.Template` object.
+        # Previous versions of Django return a `django.template.base.Template` object.
         if hasattr(template, 'template'):
             template = template.template
         return template.name

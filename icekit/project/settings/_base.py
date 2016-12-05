@@ -15,6 +15,8 @@ import multiprocessing
 import os
 import re
 
+from celery.schedules import crontab
+
 from django.core.urlresolvers import reverse_lazy
 from django.utils.text import slugify
 from kombu import Exchange, Queue
@@ -28,15 +30,16 @@ REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
 
 # Uniquely identify the base settings module, so we can avoid conflicts with
 # other projects running on the same system.
-SETTINGS_MODULE_HASH = hashlib.md5(__file__ + BASE_SETTINGS_MODULE).hexdigest()
+SETTINGS_MODULE_HASH = hashlib.md5(
+    u''.join((__file__, BASE_SETTINGS_MODULE)).encode('utf-8')).hexdigest()
 
 PROJECT_NAME = os.environ.get('ICEKIT_PROJECT_NAME', 'ICEkit')
-PROJECT_SLUG = re.sub(r'[^0-9A-Za-z]+', '-', slugify(unicode(PROJECT_NAME)))
+PROJECT_SLUG = re.sub(r'[^0-9A-Za-z]+', '-', slugify(PROJECT_NAME))
 
 SITE_DOMAIN = os.environ.get('SITE_DOMAIN', '%s.lvh.me' % PROJECT_SLUG)
 SITE_NAME = os.environ.get('SITE_NAME', PROJECT_NAME)
 
-SITE_PORT = 8000
+SITE_PORT = None
 
 # FILE SYSTEM PATHS ###########################################################
 
@@ -200,6 +203,7 @@ INSTALLED_APPS = (
     'forms_builder.forms',
     # 'ixc_redactor',
     'reversion',
+    'django_object_actions',
 
     # Default.
     'django.contrib.admin',
@@ -212,6 +216,7 @@ INSTALLED_APPS = (
     # Extra.
     'django.contrib.admindocs',
     'django.contrib.sitemaps',
+    'django.contrib.humanize',
 )
 
 LANGUAGE_CODE = 'en-au'  # Default: en-us
@@ -340,9 +345,12 @@ SITE_ID = 1
 
 # CELERY ######################################################################
 
-BROKER_URL = CELERY_RESULT_BACKEND = 'redis://%s/0' % REDIS_ADDRESS
+BROKER_URL = 'redis://%s/0' % REDIS_ADDRESS
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']  # 'pickle'
 CELERY_DEFAULT_QUEUE = PROJECT_SLUG
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+CELERYD_MAX_TASKS_PER_CHILD = 20
 
 CELERY_QUEUES = (
     Queue(
@@ -352,7 +360,23 @@ CELERY_QUEUES = (
     ),
 )
 
+# crontab(minute='*/15') = every 15 minutes
+# crontab(minute=0, hour=0) = daily at midnight
+CELERYBEAT_SCHEDULE = {
+    'UpdateSearchIndexTask': {
+        'task': 'icekit.tasks.UpdateSearchIndexTask',
+        'schedule': crontab(minute='*/15'),  # Every 15 minutes.
+    },
+}
+
+# Redis (by setting CELERY_RESULT_BACKEND to BROKER_URL) is an alternative
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+
+# Log the celerybeat lock actions
+LOGGING['loggers']['icekit.tasks'] = {
+    'handlers': ['logfile'],
+    'level': 'DEBUG',
+}
 
 INSTALLED_APPS += (
     'djcelery',
@@ -377,13 +401,13 @@ COMPRESS_OFFLINE_CONTEXT = 'ixc_compressor.get_compress_offline_context'
 COMPRESS_PRECOMPILERS = (
     (
         'text/less',
-        '%s {infile} {outfile} --autoprefix' % (
+        '"%s" {infile} {outfile} --autoprefix' % (
             os.path.join(PROJECT_DIR, 'node_modules', '.bin', 'lessc'),
         ),
     ),
     (
         'text/x-scss',
-        '%s {infile} {outfile} --autoprefix --include-path %s' % (
+        '"%s" {infile} {outfile} --autoprefix --include-path %s' % (
             os.path.join(PROJECT_DIR, 'node_modules', '.bin', 'node-sass'),
             STATIC_ROOT,
         ),
@@ -433,7 +457,10 @@ THUMBNAIL_ALIASES = {
         },
         'image_gallery_thumb': {
             'size': (200, 0),
-        }
+        },
+        'list_image': {
+            'size': (150, 0),
+        },
     }
 }
 
@@ -453,26 +480,27 @@ INSTALLED_APPS += ('flat', )
 DJANGO_WYSIWYG_FLAVOR = 'alloyeditor'
 DJANGO_WYSIWYG_MEDIA_URL = STATIC_URL + 'alloyeditor/dist/alloy-editor/'
 
-_BASIC_PLUGINS = [
+BASIC_PLUGINS = [
     'RawHtmlPlugin',
     'TextPlugin',
     'HorizontalRulePlugin',
 ]
 
-_TEXT_PLUGINS = [
+TEXT_PLUGINS = [
     'FAQPlugin',
     'QuotePlugin',
 ]
 
-_ASSETS_PLUGINS = [
+ASSETS_PLUGINS = [
     'SlideShowPlugin',
     'ImagePlugin',
     'ImageGalleryPlugin',
     'FilePlugin',
     'SharedContentPlugin',
+    'ContactPersonPlugin',
 ]
 
-_EMBED_PLUGINS = [
+EMBED_PLUGINS = [
     'IframePlugin',
     'MapPlugin',
     'MapWithTextPlugin',
@@ -483,26 +511,33 @@ _EMBED_PLUGINS = [
     'TwitterEmbedPlugin',
 ]
 
-_NAVIGATION_PLUGINS = [
+NAVIGATION_PLUGINS = [
     'PageAnchorPlugin',
     'PageAnchorListPlugin',
     'ChildPagesPlugin',
 ]
 
+LINK_PLUGINS = [
+    'ArticleLinkPlugin',
+    'PageLinkPlugin',
+    'AuthorLinkPlugin',
+]
+
 DEFAULT_PLUGINS = \
-    _BASIC_PLUGINS + \
-    _TEXT_PLUGINS + \
-    _ASSETS_PLUGINS + \
-    _EMBED_PLUGINS + \
-    _NAVIGATION_PLUGINS
+    BASIC_PLUGINS + \
+    TEXT_PLUGINS + \
+    ASSETS_PLUGINS + \
+    EMBED_PLUGINS + \
+    NAVIGATION_PLUGINS + \
+    LINK_PLUGINS
 
 FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     'main': {
         'plugins': DEFAULT_PLUGINS,
     },
-    # 'sidebar': {
-    #     'plugins': ('...', ),
-    # },
+    'related': {
+        'plugins': LINK_PLUGINS,
+    }
 }
 
 FLUENT_DASHBOARD_DEFAULT_MODULE = 'ModelList'
@@ -511,7 +546,7 @@ FLUENT_MARKUP_LANGUAGES = ('restructuredtext', 'markdown', 'textile')
 FLUENT_MARKUP_MARKDOWN_EXTRAS = ()
 
 FLUENT_PAGES_PARENT_ADMIN_MIXIN = \
-    'icekit.publishing.admin.ICEKitFluentPagesParentAdminMixin'
+    'icekit.admin_mixins.ICEkitFluentPagesParentAdmin'
 
 # Avoid an exception because fluent-pages wants `TEMPLATE_DIRS[0]` to be
 # defined, even though that setting is going away. This might not be necessary
@@ -555,11 +590,11 @@ INSTALLED_APPS += (
     # 'fluent_contents.plugins.picture',
     'fluent_contents.plugins.rawhtml',
     'fluent_contents.plugins.sharedcontent',
-    'fluent_contents.plugins.text',
+    # 'fluent_contents.plugins.text',
     # 'fluent_contents.plugins.twitterfeed',
 
     # Page type and content plugin dependencies.
-    # 'any_urlfield',
+    'any_urlfield',
     'django_wysiwyg',
     'micawber',
 )
@@ -617,7 +652,7 @@ ICEKIT = {
         ),
     ),
 
-    'DASHBOARD_FEATURED_APPS': (
+    'DASHBOARD_FEATURED_APPS': [
         {
             'verbose_name': 'Content',
             'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
@@ -640,7 +675,7 @@ ICEKIT = {
                 # 'sharedcontent.SharedContent': {},
             },
         },
-    ),
+    ],
 }
 
 INSTALLED_APPS += (
@@ -648,6 +683,7 @@ INSTALLED_APPS += (
     'icekit.dashboard',  # Must come before `django.contrib.admin` and `flat`
     'icekit.integration.reversion',
     'icekit.layouts',
+    'icekit.workflow',
     'icekit.publishing',
     'icekit.response_pages',
     'icekit.content_collections',
@@ -660,11 +696,13 @@ INSTALLED_APPS += (
 
     # 'icekit.plugins.brightcove',
     'icekit.plugins.child_pages',
+    'icekit.plugins.contact_person',
     'icekit.plugins.faq',
     'icekit.plugins.file',
     'icekit.plugins.horizontal_rule',
     'icekit.plugins.image',
     'icekit.plugins.instagram_embed',
+    'icekit.plugins.links',
     'icekit.plugins.map',
     'icekit.plugins.map_with_text',
     'icekit.plugins.oembed_with_caption',
@@ -675,6 +713,7 @@ INSTALLED_APPS += (
     'icekit.plugins.slideshow',
     'icekit.plugins.image_gallery',
     'icekit.plugins.twitter_embed',
+    'icekit.plugins.text',
 )
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )

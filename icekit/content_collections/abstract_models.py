@@ -1,4 +1,9 @@
-from urlparse import urljoin
+from icekit.mixins import ListableMixin
+
+try:
+	from urlparse import urljoin
+except ImportError:
+	from urllib.parse import urljoin
 
 from django.core.exceptions import ValidationError
 from django.template.response import TemplateResponse
@@ -19,6 +24,9 @@ class TitleSlugMixin(models.Model):
 
     class Meta:
         abstract = True
+
+    def get_title(self):
+        return self.title
 
     def validate_unique_slug(self):
         """
@@ -47,6 +55,20 @@ class TitleSlugMixin(models.Model):
 
     def __unicode__(self):
         return self.title
+
+class PluralTitleSlugMixin(TitleSlugMixin):
+    title_plural = models.CharField(max_length=255, blank=True, help_text="Optional plural version of title (if appending 's' isn't correct)")
+
+    class Meta:
+        abstract = True
+
+    def get_plural(self):
+        if self.title_plural:
+            return self.title_plural
+        return u"{0}s".format(self.title)
+
+    def get_title(self):
+        return self.get_plural()
 
 
 class AbstractListingPage(AbstractLayoutPage):
@@ -92,7 +114,8 @@ class AbstractListingPage(AbstractLayoutPage):
             "Please implement `get_items_to_mount(request)` on %r" % type(self)
         )
 
-class AbstractCollectedContent(models.Model):
+
+class AbstractCollectedContent(ListableMixin):
     """
     Content collections can be mounted into a publishable listing page,
     which has the URL returned by `get_parent_url()`.

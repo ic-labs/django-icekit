@@ -4,7 +4,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItem, PlaceholderField
 
-from icekit.publishing.models import PublishingModel
+from icekit.models import ICEkitContentsMixin
 
 from . import appsettings
 
@@ -36,7 +36,7 @@ class AbstractUnpublishableSlideShow(models.Model):
 
 
 @python_2_unicode_compatible
-class AbstractSlideShow(AbstractUnpublishableSlideShow, PublishingModel):
+class AbstractSlideShow(AbstractUnpublishableSlideShow, ICEkitContentsMixin):
 
     class Meta:
         abstract = True
@@ -54,7 +54,8 @@ class AbstractSlideShowItem(ContentItem):
     """
     slide_show = models.ForeignKey(
         'SlideShow',
-        help_text=_('An image gallery.')
+        help_text=_('An image gallery.'),
+        on_delete=models.CASCADE,
     )
 
     class Meta:

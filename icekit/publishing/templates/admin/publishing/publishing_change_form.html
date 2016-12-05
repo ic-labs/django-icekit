@@ -42,7 +42,6 @@
 			{{ block.super }}
 		</div>
 	</div>
-	{% if has_publish_permission or preview_draft_btn %}
 		<div class="row">
 			<div class="col-md-12">
 				<div class="submit-row">
@@ -58,12 +57,23 @@
 				</div>
 			</div>
 		</div>
-	{% endif %}
 {% endblock %}
 
 
 {% block object-tools-items %}
-{#  Overriding view on site behaviour  #}
+{# Overriding view on site behaviour to remove 'view on site' for unpublished items #}
+	{# copied from django_object_actions/change_form.html #}
+	  {% for tool in objectactions %}
+		<li class="objectaction-item" data-tool-name="{{ tool.name }}">
+		  <a href='{% url tools_view_name pk=object_id tool=tool.name %}' title="{{ tool.standard_attrs.title }}"
+			 {% for k, v in tool.custom_attrs.items %}
+			   {{ k }}="{{ v }}"
+			 {% endfor %}
+			 class="{{ tool.standard_attrs.class }}">
+		  {{ tool.label|capfirst }}
+		  </a>
+		</li>
+	  {% endfor %}
 
     <li>
         {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
@@ -71,10 +81,10 @@
     </li>
 
     {% with original.get_absolute_url as preview_url %}
-        {% if preview_draft_btn and preview_url %}
+        {% if preview_url and has_preview_permission %}
             <li><a href="{{ preview_url|get_draft_url }}" target="_blank">Preview draft <i class="fa fa-circle-o"></i></a></li>
         {% endif %}
-        {% if has_absolute_url and has_been_published %}<li><a href="{{ absolute_url }}" target="_blank">{% trans "View published" %} <i class="fa fa-circle"></i></a></li>{% endif %}
     {% endwith %}
+    {% if has_absolute_url and has_been_published %}<li><a href="{{ absolute_url }}" target="_blank">{% trans "View published" %} <i class="fa fa-circle"></i></a></li>{% endif %}
 
 {% endblock %}

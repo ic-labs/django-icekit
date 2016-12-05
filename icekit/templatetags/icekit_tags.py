@@ -1,9 +1,16 @@
+import urlparse
+
 import re
 
 from django import template
+from django.conf import settings
 from django.http import QueryDict
 from django.template import Library
 from django.utils.encoding import force_text
+from django.utils.safestring import mark_safe
+from fluent_contents.plugins.oembeditem.backend import get_oembed_data
+from icekit.utils.admin.urls import admin_link as admin_link_fn, admin_url as admin_url_fn
+from micawber import ProviderException
 
 register = Library()
 
@@ -184,3 +191,32 @@ class UpdateGetNode(template.Node):
                         GET.setlist(actual_attr, li)
 
         return fix_ampersands(GET.urlencode())
+
+
+@register.filter
+def oembed(url, params=""):
+    kwargs = dict(urlparse.parse_qsl(params))
+
+    try:
+        return mark_safe(get_oembed_data(
+            url,
+            **kwargs
+        )['html'])
+    except (KeyError, ProviderException):
+        if settings.DEBUG:
+            return "No OEmbed data returned"
+        return ""
+
+
+@register.filter
+def admin_link(obj):
+    return admin_link_fn(obj)
+
+
+@register.filter
+def admin_url(obj):
+    return admin_url_fn(obj)
+
+@register.filter
+def link(obj):
+    return mark_safe(u"<a href='{0}'>{1}</a>".format(obj.get_absolute_url(), unicode(obj)))
