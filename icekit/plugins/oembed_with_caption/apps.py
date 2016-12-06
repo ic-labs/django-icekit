@@ -23,13 +23,6 @@ def handle_soundcloud_malformed_widths_for_oembeds(sender, instance, **kwargs):
     if instance.width == '100%':
         instance.width = -100
 
-
-class OEmbedWithCaptionAppConfig(AppConfig):
-    name = 'icekit.plugins.oembed_with_caption'
-    label = "icekit_plugins_oembed_with_caption"
-
-    def ready(self):
-        from icekit.plugins.oembed_with_caption.models import OEmbedWithCaptionItem
 pre_save.connect(handle_soundcloud_malformed_widths_for_oembeds, sender=OEmbedWithCaptionItem)
 
 
