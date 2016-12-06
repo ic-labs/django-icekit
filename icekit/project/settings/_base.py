@@ -586,7 +586,7 @@ INSTALLED_APPS += (
     # Registering it without installing/migratig the model results in
     # `ProgrammingError: relation "contentitem_fluent_contents_oembeditem" does not exist`
     # errors. For now, exclude it in the available content plugins.
-    # 'fluent_contents.plugins.oembeditem',
+    'icekit.apps.OEmbedAppConfig',
     # 'fluent_contents.plugins.picture',
     'fluent_contents.plugins.rawhtml',
     'fluent_contents.plugins.sharedcontent',
@@ -705,7 +705,10 @@ INSTALLED_APPS += (
     'icekit.plugins.links',
     'icekit.plugins.map',
     'icekit.plugins.map_with_text',
-    'icekit.apps.ICEKitOEmbedAppConfig',
+    'icekit.apps.ICEKitOEmbedWithCaptionAppConfig',
+    # Replaces 'fluent_contents.plugins.oembeditem',
+    # Includes fix for https://github.com/django-fluent/django-fluent-contents/issues/65
+
     'icekit.plugins.page_anchor',
     'icekit.plugins.page_anchor_list',
     'icekit.plugins.quote',

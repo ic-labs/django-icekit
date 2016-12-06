@@ -12,6 +12,7 @@ from django.db import connection
 from django.db.models.signals import post_migrate, pre_save
 from django.utils.module_loading import autodiscover_modules
 from fluent_contents.plugins.oembeditem.models import OEmbedItem
+from icekit.plugins.oembed_with_caption.models import OEmbedWithCaptionItem
 
 
 def update_site(sender, **kwargs):
@@ -75,9 +76,18 @@ def handle_soundcloud_malformed_widths_for_oembeds(sender, instance, **kwargs):
         instance.width = -100
 
 
-class ICEKitOEmbedAppConfig(AppConfig):
+class OEmbedWithCaptionAppConfig(AppConfig):
+    name = 'icekit.plugins.oembed_with_caption'
+
+    def ready(self):
+        from icekit.plugins.oembed_with_caption.models import OEmbedWithCaptionItem
+pre_save.connect(handle_soundcloud_malformed_widths_for_oembeds, sender=OEmbedWithCaptionItem)
+
+
+class OEmbedAppConfig(AppConfig):
     name = 'fluent_contents.plugins.oembeditem'
 
     def ready(self):
         from fluent_contents.plugins.oembeditem.models import OEmbedItem
+        # from icekit.plugins.oembed_with_caption.models import OEmbedWithCaptionItem
 pre_save.connect(handle_soundcloud_malformed_widths_for_oembeds, sender=OEmbedItem)
