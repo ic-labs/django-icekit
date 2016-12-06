@@ -28,6 +28,7 @@ pre_save.connect(handle_soundcloud_malformed_widths_for_oembeds, sender=OEmbedWi
 
 class OEmbedAppConfig(AppConfig):
     name = 'fluent_contents.plugins.oembeditem'
+    label = 'oembeditem'
 
     def ready(self):
         from fluent_contents.plugins.oembeditem.models import OEmbedItem
