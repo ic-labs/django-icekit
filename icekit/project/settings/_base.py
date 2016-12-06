@@ -586,7 +586,8 @@ INSTALLED_APPS += (
     # Registering it without installing/migratig the model results in
     # `ProgrammingError: relation "contentitem_fluent_contents_oembeditem" does not exist`
     # errors. For now, exclude it in the available content plugins.
-    'icekit.plugins.oembed_with_caption.apps.OEmbedAppConfig',
+    'fluent_contents.plugins.oembeditem',
+    # 'icekit.plugins.oembed_with_caption.apps.OEmbedAppConfig',
     # 'fluent_contents.plugins.picture',
     'fluent_contents.plugins.rawhtml',
     'fluent_contents.plugins.sharedcontent',
