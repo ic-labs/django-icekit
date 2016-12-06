@@ -9,10 +9,8 @@ from django.apps import AppConfig, apps
 from django.conf import settings
 from django.core.management.color import no_style
 from django.db import connection
-from django.db.models.signals import post_migrate, pre_save
+from django.db.models.signals import post_migrate
 from django.utils.module_loading import autodiscover_modules
-from fluent_contents.plugins.oembeditem.models import OEmbedItem
-from icekit.plugins.oembed_with_caption.models import OEmbedWithCaptionItem
 
 
 def update_site(sender, **kwargs):
@@ -60,34 +58,3 @@ class AppConfig(AppConfig):
 
         # Import plugins from installed apps.
         autodiscover_modules('plugins')
-
-
-def handle_soundcloud_malformed_widths_for_oembeds(sender, instance, **kwargs):
-    """
-    A signal receiver that prevents soundcloud from triggering ValueErrors
-    when we save an OEmbedItem.
-    Soundcloud returns "100%", instead of an integer for an OEmbed's width property.
-    This is against the OEmbed spec, but actually makes sense in the context of
-    responsive design. Unfortunately, the OEmbedItems can only store integers in
-    the `width` field, so this becomes a 500 throwing issue.
-    The issue is tracked https://github.com/edoburu/django-fluent-contents/issues/65
-    """
-    if instance.width == '100%':
-        instance.width = -100
-
-
-class OEmbedWithCaptionAppConfig(AppConfig):
-    name = 'icekit.plugins.oembed_with_caption'
-
-    def ready(self):
-        from icekit.plugins.oembed_with_caption.models import OEmbedWithCaptionItem
-pre_save.connect(handle_soundcloud_malformed_widths_for_oembeds, sender=OEmbedWithCaptionItem)
-
-
-class OEmbedAppConfig(AppConfig):
-    name = 'fluent_contents.plugins.oembeditem'
-
-    def ready(self):
-        from fluent_contents.plugins.oembeditem.models import OEmbedItem
-        # from icekit.plugins.oembed_with_caption.models import OEmbedWithCaptionItem
-pre_save.connect(handle_soundcloud_malformed_widths_for_oembeds, sender=OEmbedItem)
