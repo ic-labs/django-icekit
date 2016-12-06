@@ -240,8 +240,7 @@ class PublishingModel(models.Model):
         :param self: The object to tbe published.
         :return: The published object.
         """
-        # Make sure that this object is dirty and a draft.
-        if self.is_draft and self.is_dirty:
+        if self.is_draft:
             # If the object has previously been linked then patch the
             # placeholder data and remove the previously linked object.
             # Otherwise set the published date.
