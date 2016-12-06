@@ -3,9 +3,9 @@ from ._test import *
 # DJANGO ######################################################################
 
 CACHES['default'].update({
-    'LOCATION': 'redis://localhost:6379/1',
+    'LOCATION': 'redis://%s/1' % REDIS_ADDRESS,
 })
 
 # CELERY ######################################################################
 
-BROKER_URL = 'redis://localhost:6379/0'
+BROKER_URL = 'redis://%s/0' % REDIS_ADDRESS
