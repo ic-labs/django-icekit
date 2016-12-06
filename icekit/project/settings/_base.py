@@ -25,6 +25,10 @@ import icekit
 
 BASE_SETTINGS_MODULE = os.environ.get('BASE_SETTINGS_MODULE', '')
 
+# Get ElasticSearch host and port.
+ELASTICSEARCH_ADDRESS = os.environ.get(
+    'ELASTICSEARCH_ADDRESS', 'localhost:9200')
+
 # Get Redis host and port.
 REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
 
@@ -611,7 +615,7 @@ HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'INDEX_NAME': 'haystack-%s' % SETTINGS_MODULE_HASH,
-        'URL': 'http://localhost:9200/',
+        'URL': 'http://%s/' % ELASTICSEARCH_ADDRESS,
     },
 }
 
