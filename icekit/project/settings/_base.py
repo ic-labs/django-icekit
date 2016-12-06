@@ -586,7 +586,7 @@ INSTALLED_APPS += (
     # Registering it without installing/migratig the model results in
     # `ProgrammingError: relation "contentitem_fluent_contents_oembeditem" does not exist`
     # errors. For now, exclude it in the available content plugins.
-    'fluent_contents.plugins.oembeditem',
+    # 'fluent_contents.plugins.oembeditem',
     # 'fluent_contents.plugins.picture',
     'fluent_contents.plugins.rawhtml',
     'fluent_contents.plugins.sharedcontent',
