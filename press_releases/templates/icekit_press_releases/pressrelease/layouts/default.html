@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load placeholder_tags fluent_contents_tags %}
+{% load fluent_contents_tags %}
 
 {% block title %}{{ page.title }}{% endblock %}
 
@@ -26,14 +26,6 @@
 		</a>
 	{% endif %}
 
-
 	{% page_placeholder "pressrelease_main" title='Main' role="m" %}
 
-	{% page_placeholder "pressrelease_contacts" title='Contacts' role="related" %}
-
-{% endblock %}
-
-{% block base_js %}
-	{{ block.super }}
-	{% render_content_items_media %}
 {% endblock %}

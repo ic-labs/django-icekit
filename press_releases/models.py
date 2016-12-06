@@ -17,7 +17,7 @@ class PressReleaseListing(AbstractListingPage):
     class Meta:
         verbose_name = "Press release listing"
 
-    def get_items_to_list(self, request): # items that are shown in the listing
+    def get_items_to_list(self, request=None): # items that are shown in the listing
         return PressRelease.objects.published()
 
     def get_items_to_mount(self, request): # items that can be previewed
