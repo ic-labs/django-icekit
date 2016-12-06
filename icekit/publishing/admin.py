@@ -20,8 +20,6 @@ from fluent_pages.models.db import UrlNode
 from fluent_pages.adminui.pageadmin import _select_template_name
 from fluent_pages.adminui.urlnodeparentadmin import UrlNodeParentAdmin
 
-from icekit.admin_mixins import FluentLayoutsMixin
-
 from .models import PublishingModel
 
 
@@ -722,6 +720,9 @@ class ICEKitFluentPagesParentAdminMixin(
     """ Add publishing features for FluentPage parent admin (listing) pages """
     list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
 
+
+# this import must go here to avoid import errors
+from icekit.admin_mixins import FluentLayoutsMixin
 
 class PublishableFluentContentsAdmin(PublishingAdmin, FluentLayoutsMixin):
     """

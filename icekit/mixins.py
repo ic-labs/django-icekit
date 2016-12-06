@@ -200,6 +200,23 @@ class ListableMixin(models.Model):
     def get_oneliner(self):
         return getattr(self, 'oneliner', "")
 
+    def get_og_title(self):
+        """
+        return meta_title if exists otherwise fall back to title
+        """
+        if hasattr(self, 'meta_title') and self.meta_title:
+            return self.meta_title
+        return self.get_title()
+
+    def get_og_image(self):
+        return self.get_list_image()
+
+    def get_og_desciption(self):
+        if hasattr(self, 'meta_description') and self.meta_description:
+            return self.meta_description
+        return self.get_oneliner()
+
+
 
 class HeroMixin(models.Model):
     """
