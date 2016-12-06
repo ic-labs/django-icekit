@@ -25,6 +25,10 @@ import icekit
 
 BASE_SETTINGS_MODULE = os.environ.get('BASE_SETTINGS_MODULE', '')
 
+# Get ElasticSearch host and port.
+ELASTICSEARCH_ADDRESS = os.environ.get(
+    'ELASTICSEARCH_ADDRESS', 'localhost:9200')
+
 # Get Redis host and port.
 REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
 
@@ -587,6 +591,7 @@ INSTALLED_APPS += (
     # `ProgrammingError: relation "contentitem_fluent_contents_oembeditem" does not exist`
     # errors. For now, exclude it in the available content plugins.
     'fluent_contents.plugins.oembeditem',
+    # 'icekit.plugins.oembed_with_caption.apps.OEmbedAppConfig',
     # 'fluent_contents.plugins.picture',
     'fluent_contents.plugins.rawhtml',
     'fluent_contents.plugins.sharedcontent',
@@ -610,7 +615,7 @@ HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'INDEX_NAME': 'haystack-%s' % SETTINGS_MODULE_HASH,
-        'URL': 'http://localhost:9200/',
+        'URL': 'http://%s/' % ELASTICSEARCH_ADDRESS,
     },
 }
 
@@ -706,6 +711,9 @@ INSTALLED_APPS += (
     'icekit.plugins.map',
     'icekit.plugins.map_with_text',
     'icekit.plugins.oembed_with_caption',
+    # Replaces 'icekit.plugins.oembed_with_caption',
+    # Includes fix for https://github.com/django-fluent/django-fluent-contents/issues/65
+
     'icekit.plugins.page_anchor',
     'icekit.plugins.page_anchor_list',
     'icekit.plugins.quote',

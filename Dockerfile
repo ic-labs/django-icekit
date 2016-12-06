@@ -74,6 +74,7 @@ ENV LC_ALL=en_US.UTF-8
 
 ENV CRONLOCK_HOST=redis
 ENV DOCKER=1
+ENV ELASTICSEARCH_ADDRESS=elasticsearch:9200
 ENV ICEKIT_DIR=/opt/django-icekit/icekit
 ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/project_template
 ENV PATH=/opt/django-icekit/icekit/bin:$PATH
