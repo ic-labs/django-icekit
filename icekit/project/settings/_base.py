@@ -705,7 +705,7 @@ INSTALLED_APPS += (
     'icekit.plugins.links',
     'icekit.plugins.map',
     'icekit.plugins.map_with_text',
-    'icekit.apps.OEmbedAppConfig',
+    'icekit.apps.ICEKitOEmbedAppConfig',
     'icekit.plugins.page_anchor',
     'icekit.plugins.page_anchor_list',
     'icekit.plugins.quote',
