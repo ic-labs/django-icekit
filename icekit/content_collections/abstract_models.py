@@ -79,7 +79,7 @@ class AbstractListingPage(AbstractLayoutPage):
     class Meta:
         abstract = True
 
-    def get_items_to_list(self, request):
+    def get_items_to_list(self, request=None):
         """
         Get the items that will be show in this page's listing.
 

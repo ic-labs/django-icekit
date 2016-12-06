@@ -635,6 +635,15 @@ class PublishableFluentContentsPage(FluentContentsPage, PublishingModel):
     def is_published(self):
         return not self.publishing_is_draft
 
+    # borrowed from FluentFieldsMixin. TODO: send upstream
+    def placeholders(self):
+        # return a dict of placeholders, organised by slot, for access in
+        # templates use `page.placeholders.<slot_name>.get_content_items` to
+        # test if a placeholder has any items.
+        return dict([(p.slot, p)
+                     for p in self.placeholder_set.all().select_related()])
+
+
     class Meta:
         abstract = True
 

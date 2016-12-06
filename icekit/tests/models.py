@@ -46,7 +46,7 @@ class ImageTest(models.Model):
 class ArticleListing(AbstractListingPage):
     """A page that lists articles that link to it as parent"""
 
-    def get_items_to_list(self, request):
+    def get_items_to_list(self, request=None):
         unpublished_pk = self.get_draft().pk
         return Article.objects.published().filter(parent_id=unpublished_pk)
 
