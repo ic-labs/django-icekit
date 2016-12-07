@@ -250,6 +250,12 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     def __str__(self):
         return self.title
 
+    def __getattr__(self, attr):
+        # if no sub/sister class defines this, just return own URL.
+        if attr == "get_occurrence_url":
+            return lambda occ: self.get_absolute_url()
+        return self.__getattribute__(attr)
+
     def get_cloneable_fieldnames(self):
         return ['title']
 
@@ -456,9 +462,6 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     def get_absolute_url(self):
         return reverse('icekit_events_eventbase_detail', args=(self.slug,))
 
-    def get_occurrence_url(self):
-        return self.get_absolute_url()
-
     def get_contained_events(self):
         events = EventBase.objects.filter(
             id__in=self.get_draft().contained_events.values_list('id', flat=True)
@@ -483,6 +486,8 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
 
     def is_members(self):
         return self.get_all_types().filter(slug='members')
+
+
 
 
 class AbstractEventWithLayouts(EventBase, FluentFieldsMixin):
@@ -809,7 +814,7 @@ class Occurrence(AbstractBaseModel):
         return self.end < djtz.now()
 
     def get_absolute_url(self):
-        return self.event.get_occurence_url(self)
+        return self.event.get_occurrence_url(self)
 
 
 def get_occurrence_times_for_event(event):
