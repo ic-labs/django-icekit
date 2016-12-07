@@ -81,9 +81,11 @@ DEBUG = False  # Don't show detailed error pages when exceptions are raised
 # Allow connections only on the site domain.
 ALLOWED_HOSTS = ('.%s' % SITE_DOMAIN, )
 
+# Use dummy caching, so we can build Docker images (with offline compression)
+# without a running Redis services.
 CACHES = {
     'default': {
-        'BACKEND': 'redis_lock.django_cache.RedisCache',
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
         'KEY_PREFIX': 'default-%s' % SETTINGS_MODULE_HASH,
         'LOCATION': 'redis://%s/1' % REDIS_ADDRESS,
     }
