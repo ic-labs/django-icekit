@@ -15,6 +15,7 @@ from django.db.models.query import QuerySet
 from django.db.models import Q
 from icekit.publishing.middleware import is_draft_request_context
 from icekit_events.utils.timeutils import zero_datetime, coerce_dt_awareness
+from timezone import timezone as djtz  # django-timezone
 
 
 class EventQueryset(PublishingPolymorphicQuerySet):
@@ -212,7 +213,7 @@ class OccurrenceQueryset(QuerySet):
         return self.exclude(id__in=self._same_day_ids())
 
     def upcoming(self):
-        return self.available_within(start=datetime.now(), end=None)
+        return self.available_within(start=djtz.now(), end=None)
 
 
 OccurrenceManager = models.Manager.from_queryset(OccurrenceQueryset)

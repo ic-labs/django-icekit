@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import Q
 from fluent_contents.models import ContentItem
 from icekit_events.models import EventType, Occurrence
+from timezone import timezone as djtz  # django-timezone
 
 
 class TodaysOccurrences(ContentItem):
@@ -22,7 +23,7 @@ class TodaysOccurrences(ContentItem):
         return "Today's Events"
 
     def _calculate(self):
-        today = date.today()
+        today = djtz.now().date()
         self.day = today
         self.qs = Occurrence.objects.none()
 
