@@ -145,6 +145,30 @@ class ListableMixin(models.Model):
     class Meta:
         abstract = True
 
+    def __getattr__(self, item):
+        """Only called if no class in the MRO defines the function"""
+        if item == 'get_list_image':
+            return self.__get_list_image
+        return self.__getattribute__(item)
+
+    def __get_list_image(self):
+        """
+        :return: the ImageField to use for thumbnails in lists
+        NB note that the Image Field is returned, not the ICEkit Image model as
+        with get_hero_image (since the override is just a field and we don't
+        need alt text), not Image record.
+        """
+        list_image = first_of(
+            self,
+            'list_image',
+            'get_hero_image',
+            'image',
+        )
+
+        # return the `image` attribute (being the ImageField of the Image
+        # model) if there is one.
+        return getattr(list_image, "image", list_image)
+
     def get_type(self):
         """
         :return: a string OR object (with a get_absolute_url) indicating the public type of this object
@@ -165,34 +189,8 @@ class ListableMixin(models.Model):
 
         return unicode(type(self)._meta.verbose_name_plural)
 
-
-
     def get_title(self):
         return self.title
-
-    def __get_list_image(self):
-        """
-        :return: the ImageField to use for thumbnails in lists
-        NB note that the Image Field is returned, not the ICEkit Image model as
-        with get_hero_image (since the override is just a field and we don't
-        need alt text), not Image record.
-        """
-        list_image = first_of(
-            self,
-            'list_image',
-            'get_hero_image',
-            'image',
-        )
-
-        # return the `image` attribute (being the ImageField of the Image
-        # model) if there is one.
-        return getattr(list_image, "image", list_image)
-
-    def __getattr__(self, item):
-        """Only called if no class in the MRO defines the function"""
-        if item == 'get_list_image':
-            return self.__get_list_image
-        return self.__getattribute__(item)
 
     def get_boosted_search_terms(self):
         return self.boosted_search_terms
