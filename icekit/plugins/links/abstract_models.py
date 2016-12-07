@@ -3,7 +3,7 @@ from fluent_contents.models import ContentItem
 from django.db import models
 import appsettings
 from icekit.fields import ICEkitURLField
-from icekit.utils.admin.urls import admin_link
+from icekit.utils.admin.urls import admin_link, admin_url
 from icekit.utils.attributes import resolve
 
 
@@ -17,6 +17,9 @@ class AbstractLinkItem(ContentItem):
 
     Assuming the 'to' model implements `ListableMixin` then the Item renders as
     a list item.
+
+    This class acts as a wrapper on the item - all the item's attributes are
+    attributes of the AbstractLinkItem too, with some values overridden.
     """
     style = models.CharField("Link style", max_length=255, choices=appsettings.RELATION_STYLE_CHOICES, blank=True)
     type_override = models.CharField(max_length=255, blank=True)
@@ -68,8 +71,14 @@ class AbstractLinkItem(ContentItem):
     def get_oneliner(self):
         return self.oneliner_override or self._resolve('get_oneliner')
 
-    def admin_link(self):
-        return admin_link(self.item)
+    def get_admin_link(self): # specifying only so admin can look it up
+        return self._resolve('get_admin_link')
+
+    def __getattr__(self, item):
+        if item not in ['get_draft', '_item_cache']:
+            return getattr(self.get_item(), item)
+        return self.__getattribute__(item)
+
 
 class LinkPlugin(ContentPlugin):
     category = 'Links'
@@ -78,7 +87,7 @@ class LinkPlugin(ContentPlugin):
     fieldsets = (
         (None, {
            'fields': (
-               ('item', 'admin_link',),
+               ('item', 'get_admin_link',),
                'style',
            )
         }),
@@ -93,7 +102,7 @@ class LinkPlugin(ContentPlugin):
            'classes': ('collapse', )
         }),
     )
-    readonly_fields = ('admin_link',)
+    readonly_fields = ('get_admin_link',)
 
     def render(self, request, instance, **kwargs):
         """

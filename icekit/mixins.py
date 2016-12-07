@@ -1,3 +1,4 @@
+from icekit.utils.admin.urls import admin_url
 from icekit.utils.attributes import first_of
 from unidecode import unidecode
 
@@ -213,6 +214,12 @@ class ListableMixin(models.Model):
         if hasattr(self, 'meta_description') and self.meta_description:
             return self.meta_description
         return self.get_oneliner()
+
+    def get_admin_url(self):
+        return admin_url(self)
+
+    def get_admin_link(self):
+        return u"<a href='{0}'>{1}</a>".format(self.get_admin_url(), self.get_title())
 
 
 

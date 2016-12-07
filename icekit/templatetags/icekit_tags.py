@@ -210,11 +210,15 @@ def oembed(url, params=""):
 
 @register.filter
 def admin_link(obj):
+    if hasattr(obj, 'get_admin_link'):
+        return obj.get_admin_link()
     return admin_link_fn(obj)
 
 
 @register.filter
 def admin_url(obj):
+    if hasattr(obj, 'get_admin_url'):
+        return obj.get_admin_url()
     return admin_url_fn(obj)
 
 @register.filter
