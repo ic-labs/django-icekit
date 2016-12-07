@@ -100,7 +100,9 @@ class OccurrenceQueryset(QuerySet):
         return self.filter(generator__isnull=False)
 
     def regeneratable(self):
-        return self.unmodified_by_user().filter(generator__isnull=False)
+        return self.unmodified_by_user()
+        # the following is better, but suspect it breaks tests - https://travis-ci.org/ic-labs/icekit-events/builds/181945861
+        # return self.unmodified_by_user().filter(generator__isnull=False)
 
     def overlapping(self, start=None, end=None):
         """
