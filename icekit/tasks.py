@@ -17,8 +17,10 @@ from django.db.models.loading import get_model
 
 logger = logging.getLogger(__name__)
 
+
 # Resources for `one_instance` task execution management decorator.
-REDIS_HOST, REDIS_PORT = settings.REDIS_ADDRESS.split(':')
+REDIS_ADDRESS = getattr(settings, "REDIS_ADDRESS", "localhost:6379")
+REDIS_HOST, REDIS_PORT = REDIS_ADDRESS.split(':')
 REDIS_CLIENT = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=1)
 DEFAULT_ONE_INSTANCE_TIMEOUT = getattr(settings, 'CELERY_TIMEOUT', 7200) * 1.1
 
