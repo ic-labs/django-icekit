@@ -27,7 +27,7 @@ class TodaysOccurrences(ContentItem):
         self.day = today
         self.qs = Occurrence.objects.none()
 
-        stop_days = 0 if self.fall_back_to_next_day else 365
+        stop_day = self.day+timedelta(days=7) if self.fall_back_to_next_day else self.day
 
         initial_qs = Occurrence.objects.visible().distinct()
         if self.types_to_show.count():
@@ -36,7 +36,7 @@ class TodaysOccurrences(ContentItem):
 
         # starting from today, see if there are any occurrences.
         # Stop when we find some, or stop_days later.
-        while self.day <= self.day + timedelta(days=stop_days):
+        while self.day < stop_day:
             qs = initial_qs.available_on_day(self.day)
             if self.day == today and not self.include_finished:
                 qs = qs.upcoming()
@@ -44,8 +44,7 @@ class TodaysOccurrences(ContentItem):
             if qs.count(): # found some!
                 self.qs = qs
                 break
-            else:
-                self.day += timedelta(days=1)
+            self.day += timedelta(days=1)
 
 
     def get_occurrences(self):
