@@ -38,6 +38,36 @@ class EventQueryset(PublishingPolymorphicQuerySet):
         ids = list(self.with_upcoming_occurrences().values_list('id', flat=True)) + list(self.with_no_occurrences().values_list('id', flat=True))
         return self.model.objects.filter(id__in=ids)
 
+    def with_occurrence_qs(self, occ_qs):
+        return self.filter(occurrences__in=occ_qs)
+
+    def overlapping(self, start, end):
+        from icekit_events.models import Occurrence
+        return self.with_occurrence_qs(Occurrence.objects.overlapping(start, end))
+
+    def starts_within(self, start, end):
+        from icekit_events.models import Occurrence
+        return self.with_occurrence_qs(Occurrence.objects.starts_within(start, end))
+
+    def available_within(self, start, end):
+        from icekit_events.models import Occurrence
+        return self.with_occurrence_qs(Occurrence.objects.available_within(start, end))
+
+    def upcoming(self):
+        from icekit_events.models import Occurrence
+        return self.with_occurrence_qs(Occurrence.objects.upcoming())
+
+    def order_by_first_occurrence(self):
+        """
+        :return: The event in order of minimum occurrence. Use with the
+        functions above to restrict the occurrences, to get e.g. first
+        _upcoming_ occurrence, like this:
+
+            EventBase.objects.upcoming().order_by_first_occurrence()
+        """
+        return self.annotate(first_occurrence=models.Min('occurrences__start')).order_by(
+            'first_occurrence')
+
 EventManager = PublishingPolymorphicManager.from_queryset(EventQueryset)
 EventManager.use_for_related_fields = True
 
@@ -70,9 +100,9 @@ class OccurrenceQueryset(QuerySet):
         return self.filter(generator__isnull=False)
 
     def regeneratable(self):
-        return self.unmodified_by_user()
+        return self.unmodified_by_user().filter(generator__isnull=False)
 
-    def overlapping(self, start, end):
+    def overlapping(self, start=None, end=None):
         """
         :return: occurrences overlapping the given start and end datetimes,
         inclusive.
@@ -80,37 +110,50 @@ class OccurrenceQueryset(QuerySet):
         and end times are zeroed to find all occurrences that occur on a DATE
         as opposed to within DATETIMEs.
         """
-        dt_start=coerce_dt_awareness(start)
-        dt_end=coerce_dt_awareness(end, t=time.max)
+        qs = self
 
-        return self.filter(
-            Q(is_all_day=False, start__lt=dt_end) |
-            Q(is_all_day=True, start__lt=zero_datetime(dt_end))
-            ).filter(
+        if start:
+            dt_start=coerce_dt_awareness(start)
+            qs = qs.filter(
                 # Exclusive for datetime, inclusive for date.
                 Q(is_all_day=False, end__gt=dt_start) |
                 Q(is_all_day=True, end__gte=zero_datetime(dt_start))
             )
+        if end:
+            dt_end=coerce_dt_awareness(end, t=time.max)
+            qs = qs.filter(
+                Q(is_all_day=False, start__lt=dt_end) |
+                Q(is_all_day=True, start__lt=zero_datetime(dt_end))
+            )
+
+        return qs
 
 
-    def starts_within(self, start, end):
+    def starts_within(self, start=None, end=None):
         """
         :return:  normal occurrences that start within the given start and end
         datetimes, inclusive, and drop-in occurrences that 
         """
-        dt_start=coerce_dt_awareness(start)
-        dt_end=coerce_dt_awareness(end, t=time.max)
 
-        return self.filter(
-            Q(is_all_day=False, start__gte=dt_start) |
-            Q(is_all_day=True, start__gte=zero_datetime(dt_start))
-        ).filter(
-            # Exclusive for datetime, inclusive for date.
-            Q(is_all_day=False, start__lt=dt_end) |
-            Q(is_all_day=True, start__lte=zero_datetime(dt_end))
-        )
+        qs = self
+
+        if start:
+            dt_start=coerce_dt_awareness(start)
+            qs = qs.filter(
+                Q(is_all_day=False, start__gte=dt_start) |
+                Q(is_all_day=True, start__gte=zero_datetime(dt_start))
+            )
+        if end:
+            dt_end=coerce_dt_awareness(end, t=time.max)
+            qs = qs.filter(
+                # Exclusive for datetime, inclusive for date.
+                Q(is_all_day=False, start__lt=dt_end) |
+                Q(is_all_day=True, start__lte=zero_datetime(dt_end))
+            )
+
+        return qs
     
-    def available_within(self, start, end):
+    def available_within(self, start=None, end=None):
         """
         :return: Normal events that start within the range, and
          drop-in events that overlap the range.
@@ -169,14 +212,7 @@ class OccurrenceQueryset(QuerySet):
         return self.exclude(id__in=self._same_day_ids())
 
     def upcoming(self):
-        """
-        :return: Occurrences that start in the future, or, if the event
-         is_drop_in, that end in the future.
-        """
-        return self.filter(
-            Q(event__is_drop_in=False, start__gte=datetime.now) |
-            Q(event__is_drop_in=True, end__gt=datetime.now)
-        )
+        return self.available_within(start=datetime.now(), end=None)
 
 
 OccurrenceManager = models.Manager.from_queryset(OccurrenceQueryset)
