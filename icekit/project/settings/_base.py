@@ -81,12 +81,11 @@ DEBUG = False  # Don't show detailed error pages when exceptions are raised
 # Allow connections only on the site domain.
 ALLOWED_HOSTS = ('.%s' % SITE_DOMAIN, )
 
-# Use dummy caching, so we don't get confused because a change is not taking
-# effect when we expect it to.
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'redis_lock.django_cache.RedisCache',
         'KEY_PREFIX': 'default-%s' % SETTINGS_MODULE_HASH,
+        'LOCATION': 'redis://%s/1' % REDIS_ADDRESS,
     }
 }
 
