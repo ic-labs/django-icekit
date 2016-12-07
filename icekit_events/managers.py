@@ -88,21 +88,19 @@ class OccurrenceQueryset(QuerySet):
         return self.filter(event__publishing_is_draft=True)
 
     def added_by_user(self):
-        return self.filter(generator__isnull=True, is_user_modified=True)
+        return self.filter(generator__isnull=True, is_protected_from_regeneration=True)
 
-    def modified_by_user(self):
-        return self.filter(is_user_modified=True)
+    def protected_from_regeneration(self):
+        return self.filter(is_protected_from_regeneration=True)
 
-    def unmodified_by_user(self):
-        return self.filter(is_user_modified=False)
+    def unprotected_from_regeneration(self):
+        return self.filter(is_protected_from_regeneration=False)
 
     def generated(self):
         return self.filter(generator__isnull=False)
 
     def regeneratable(self):
-        return self.unmodified_by_user()
-        # the following is better, but suspect it breaks tests - https://travis-ci.org/ic-labs/icekit-events/builds/181945861
-        # return self.unmodified_by_user().filter(generator__isnull=False)
+        return self.unprotected_from_regeneration()
 
     def overlapping(self, start=None, end=None):
         """

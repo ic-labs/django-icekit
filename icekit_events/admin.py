@@ -58,7 +58,7 @@ class EventRepeatGeneratorsInline(admin.TabularInline):
 class OccurrencesInline(admin.TabularInline):
     model = models.Occurrence
     form = admin_forms.BaseOccurrenceForm
-    fields = ('is_all_day', 'start', 'end', 'is_user_modified', 'external_ref', 'status')
+    fields = ('is_all_day', 'start', 'end', 'is_protected_from_regeneration', 'external_ref', 'status')
     exclude = (
         'generator', 'is_generated',
         # is_hidden and is_cancelled aren't implemented yet,
@@ -66,7 +66,7 @@ class OccurrencesInline(admin.TabularInline):
         'is_hidden', 'is_cancelled', 'cancel_reason'
     )
     extra = 1
-    readonly_fields = ('is_user_modified', 'external_ref')  # 'is_cancelled',)
+    readonly_fields = ('is_protected_from_regeneration', 'external_ref')  # 'is_cancelled',)
 
 
 class EventChildAdmin(
@@ -255,7 +255,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         # Add a class name for the type of event.
         if occurrence.is_all_day:
             classes.append('is-all-day')
-        if occurrence.is_user_modified:
+        if occurrence.is_protected_from_regeneration:
             classes.append('is-user-modified')
         if occurrence.is_cancelled:
             classes.append('is-cancelled')

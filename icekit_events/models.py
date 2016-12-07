@@ -267,7 +267,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
             start=start,
             end=end,
             generator=None,
-            is_user_modified=True,
+            is_protected_from_regeneration=True,
         )
 
     def cancel_occurrence(self, occurrence, hide_cancelled_occurrence=False,
@@ -281,7 +281,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         """
         if occurrence not in self.occurrences.all():
             return  # No-op
-        occurrence.is_user_modified = True
+        occurrence.is_protected_from_regeneration = True
         occurrence.is_cancelled = True
         occurrence.is_hidden = hide_cancelled_occurrence
         occurrence.cancel_reason = reason
@@ -392,7 +392,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         # generation by cloned generators are aware of user-modifications.
 
         # include occurrences that weren't generated OR were user-modified.
-        for occurrence in self.occurrences.filter(Q(generator__isnull=True) | Q(is_user_modified=True)):
+        for occurrence in self.occurrences.filter(Q(generator__isnull=True) | Q(is_protected_from_regeneration=True)):
             occurrence.pk = None
             occurrence.event = dst_obj
             occurrence.save()
@@ -712,8 +712,11 @@ class Occurrence(AbstractBaseModel):
     is_all_day = models.BooleanField(
         default=False, db_index=True)
 
-    is_user_modified = models.BooleanField(
-        default=False, db_index=True)
+    is_protected_from_regeneration = models.BooleanField(
+        "is protected",
+        default=False, db_index=True,
+        help_text="if this is true, the occurrence won't be deleted when occurrences are regenerated"
+    )
 
     is_cancelled = models.BooleanField(
         default=False)
@@ -784,7 +787,7 @@ class Occurrence(AbstractBaseModel):
     @transaction.atomic
     def save(self, *args, **kwargs):
         if getattr(self, '_flag_user_modification', False):
-            self.is_user_modified = True
+            self.is_protected_from_regeneration = True
             # If and only if a Cancel reason is given, flag the Occurrence as
             # cancelled
             if self.cancel_reason:

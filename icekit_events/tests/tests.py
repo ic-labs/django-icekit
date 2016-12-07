@@ -184,7 +184,7 @@ class TestAdmin(WebTest):
         self.assertEqual(1, event.repeat_generators.count())
         self.assertEqual(daily_wend_occurrences.count(), event.occurrences.count())
 
-    def test_event_with_user_modified_occurrences(self):
+    def test_event_with_protected_occurrences(self):
         event = G(
             SimpleEvent,
             title='Test Event',
@@ -210,7 +210,7 @@ class TestAdmin(WebTest):
         response = form.submit('_continue')
         self.assertEqual(1, event.occurrences.count())
         timed_occurrence = event.occurrences.all()[0]
-        self.assertTrue(timed_occurrence.is_user_modified)
+        self.assertTrue(timed_occurrence.is_protected_from_regeneration)
         self.assertEqual(
             self.start, timed_occurrence.start)
         self.assertEqual(
@@ -231,7 +231,7 @@ class TestAdmin(WebTest):
         event = SimpleEvent.objects.get(pk=event.pk)
         self.assertEqual(2, event.occurrences.count())
         all_day_occurrence = event.occurrences.all()[1]
-        self.assertTrue(timed_occurrence.is_user_modified)
+        self.assertTrue(timed_occurrence.is_protected_from_regeneration)
         # Start and end dates of all-day occurrences are zeroed
         self.assertEqual(
             time(0, 0),
@@ -261,7 +261,7 @@ class TestAdmin(WebTest):
         response = form.submit('_continue')
         self.assertEqual(1, event.occurrences.count())
 
-    def test_event_with_repeatsgenerators_and_user_modified_occurrences(self):
+    def test_event_with_repeatsgenerators_and_protected_occurrences(self):
         event = G(
             SimpleEvent,
             title='Test Event',
@@ -301,7 +301,7 @@ class TestAdmin(WebTest):
         response = form.submit('_continue')
         self.assertEqual(10 + 1, event.occurrences.count())
         extra_occurrence = event.occurrences.all()[0]
-        self.assertTrue(extra_occurrence.is_user_modified)
+        self.assertTrue(extra_occurrence.is_protected_from_regeneration)
         self.assertFalse(extra_occurrence.is_generated)
         self.assertEqual(
             extra_occurrence_start, extra_occurrence.start)
@@ -312,7 +312,7 @@ class TestAdmin(WebTest):
         #######################################################################
         form = response.follow().forms[0]
         shifted_occurrence = event.occurrences.all()[6]
-        self.assertFalse(shifted_occurrence.is_user_modified)
+        self.assertFalse(shifted_occurrence.is_protected_from_regeneration)
         shifted_occurrence_start = \
             (shifted_occurrence.start + timedelta(minutes=30)) \
             .astimezone(djtz.get_current_timezone())
@@ -325,7 +325,7 @@ class TestAdmin(WebTest):
         self.assertEqual(10 + 1, event.occurrences.count())
         shifted_occurrence = models.Occurrence.objects.get(
             pk=shifted_occurrence.pk)
-        self.assertTrue(shifted_occurrence.is_user_modified)
+        self.assertTrue(shifted_occurrence.is_protected_from_regeneration)
         self.assertTrue(shifted_occurrence.is_generated)
         self.assertEqual(
             shifted_occurrence_start, shifted_occurrence.start)
@@ -337,14 +337,14 @@ class TestAdmin(WebTest):
         #######################################################################
         form = response.follow().forms[0]
         converted_occurrence = event.occurrences.all()[2]
-        self.assertFalse(converted_occurrence.is_user_modified)
+        self.assertFalse(converted_occurrence.is_protected_from_regeneration)
         form['occurrences-2-is_all_day'].value = True
         response = form.submit('_continue')
         event = SimpleEvent.objects.get(pk=event.pk)
         self.assertEqual(10 + 1, event.occurrences.count())
         converted_occurrence = models.Occurrence.objects.get(
             pk=converted_occurrence.pk)
-        self.assertTrue(converted_occurrence.is_user_modified)
+        self.assertTrue(converted_occurrence.is_protected_from_regeneration)
         self.assertTrue(converted_occurrence.is_generated)
         self.assertTrue(converted_occurrence.is_all_day)
         # This test is commented as cancellation controls are currently excluded
@@ -355,14 +355,14 @@ class TestAdmin(WebTest):
         # #######################################################################
         # form = response.follow().forms[0]
         # cancelled_occurrence = event.occurrences.all()[3]
-        # self.assertFalse(cancelled_occurrence.is_user_modified)
+        # self.assertFalse(cancelled_occurrence.is_protected_from_regeneration)
         # form['occurrences-3-cancel_reason'].value = 'Sold out'
         # response = form.submit('_continue')
         # event = SimpleEvent.objects.get(pk=event.pk)
         # self.assertEqual(10 + 1, event.occurrences.count())
         # cancelled_occurrence = models.Occurrence.objects.get(
         #     pk=cancelled_occurrence.pk)
-        # self.assertTrue(cancelled_occurrence.is_user_modified)
+        # self.assertTrue(cancelled_occurrence.is_protected_from_regeneration)
         # self.assertTrue(cancelled_occurrence.is_generated)
         # self.assertTrue(cancelled_occurrence.is_cancelled)
         # self.assertEqual('Sold out', cancelled_occurrence.cancel_reason)
@@ -381,8 +381,8 @@ class TestAdmin(WebTest):
         self.assertEqual(
             9,  # Down one, since we deleted a generated occurrence above
             event.occurrences.generated().count())
-        self.assertEqual(3, event.occurrences.modified_by_user().count()) # was 4
-        self.assertEqual(7, event.occurrences.unmodified_by_user().count()) # was 6
+        self.assertEqual(3, event.occurrences.protected_from_regeneration().count()) # was 4
+        self.assertEqual(7, event.occurrences.unprotected_from_regeneration().count()) # was 6
         self.assertEqual(7, event.occurrences.regeneratable().count()) # was 6
         # Regenerate!
         event.regenerate_occurrences()
@@ -391,8 +391,8 @@ class TestAdmin(WebTest):
         self.assertEqual(
             10,  # Deleted generated occurrence is recreated
             event.occurrences.generated().count())
-        self.assertEqual(3, event.occurrences.modified_by_user().count()) # was 4
-        self.assertEqual(8, event.occurrences.unmodified_by_user().count()) # was 7
+        self.assertEqual(3, event.occurrences.protected_from_regeneration().count()) # was 4
+        self.assertEqual(8, event.occurrences.unprotected_from_regeneration().count()) # was 7
         self.assertEqual(8, event.occurrences.regeneratable().count()) # was 7
 
     def test_event_publishing(self):
@@ -482,7 +482,7 @@ class TestAdmin(WebTest):
         # Convert a generated occurrence to all-day
         form = response.follow().forms[0]
         converted_occurrence = event.occurrences.all()[3]
-        self.assertFalse(converted_occurrence.is_user_modified)
+        self.assertFalse(converted_occurrence.is_protected_from_regeneration)
         form['occurrences-3-is_all_day'].value = True
         response = form.submit('_continue')
         self.assertEqual(302, response.status_code)
@@ -536,8 +536,8 @@ class TestAdmin(WebTest):
             self.assertEqual(
                 draft_occurrence.is_all_day, published_occurrence.is_all_day)
             self.assertEqual(
-                draft_occurrence.is_user_modified,
-                published_occurrence.is_user_modified)
+                draft_occurrence.is_protected_from_regeneration,
+                published_occurrence.is_protected_from_regeneration)
             self.assertEqual(
                 draft_occurrence.is_cancelled,
                 published_occurrence.is_cancelled)
@@ -1194,7 +1194,7 @@ class TestEventOccurrences(TestCase):
             arbitrary_dt1, added_occurrence.end)
         self.assertEqual(timedelta(), added_occurrence.duration)
         self.assertFalse(added_occurrence.is_generated)
-        self.assertTrue(added_occurrence.is_user_modified)
+        self.assertTrue(added_occurrence.is_protected_from_regeneration)
 
     def test_add_arbitrary_occurrences_to_repeating_event(self):
         arbitrary_dt1 = coerce_naive(
@@ -1225,7 +1225,7 @@ class TestEventOccurrences(TestCase):
             end=arbitrary_dt2 + timedelta(minutes=1))
         # Confirm arbitrary occurrences are associated with event
         self.assertEqual(6, event.occurrences.count())
-        self.assertEqual(2, event.occurrences.filter(is_user_modified=True).count())
+        self.assertEqual(2, event.occurrences.filter(is_protected_from_regeneration=True).count())
         # Confirm arbitrary occurrences have expected values
         self.assertEqual(added_occurrence_1, event.occurrences.all()[1])
         self.assertEqual(arbitrary_dt1, added_occurrence_1.start)
@@ -1233,7 +1233,7 @@ class TestEventOccurrences(TestCase):
             arbitrary_dt1, added_occurrence_1.end)
         self.assertEqual(timedelta(), added_occurrence_1.duration)
         self.assertFalse(added_occurrence_1.is_generated)
-        self.assertTrue(added_occurrence_1.is_user_modified)
+        self.assertTrue(added_occurrence_1.is_protected_from_regeneration)
 
         self.assertEqual(added_occurrence_2, event.occurrences.all()[3])
         self.assertEqual(arbitrary_dt2, added_occurrence_2.start)
@@ -1241,7 +1241,7 @@ class TestEventOccurrences(TestCase):
             arbitrary_dt2 + timedelta(minutes=1), added_occurrence_2.end)
         self.assertEqual(timedelta(minutes=1), added_occurrence_2.duration)
         self.assertFalse(added_occurrence_2.is_generated)
-        self.assertTrue(added_occurrence_2.is_user_modified)
+        self.assertTrue(added_occurrence_2.is_protected_from_regeneration)
         # Check regenerating occurrences leaves added ones in place...
         event.regenerate_occurrences()
         self.assertTrue(added_occurrence_1 in event.occurrences.all())
@@ -1275,12 +1275,12 @@ class TestEventOccurrences(TestCase):
             hide_cancelled_occurrence=True)
         # Check field values change as expected when an occurrence is deleted
         occurrence_to_cancel_1 = models.Occurrence.objects.get(pk=occurrence_to_cancel_1.pk)
-        self.assertTrue(occurrence_to_cancel_1.is_user_modified)
+        self.assertTrue(occurrence_to_cancel_1.is_protected_from_regeneration)
         self.assertTrue(occurrence_to_cancel_1.is_cancelled)
         self.assertFalse(occurrence_to_cancel_1.is_hidden)
         self.assertEqual('Cancelled', occurrence_to_cancel_1.cancel_reason)
         occurrence_to_cancel_2 = models.Occurrence.objects.get(pk=occurrence_to_cancel_2.pk)
-        self.assertTrue(occurrence_to_cancel_2.is_user_modified)
+        self.assertTrue(occurrence_to_cancel_2.is_protected_from_regeneration)
         self.assertTrue(occurrence_to_cancel_2.is_cancelled)
         self.assertTrue(occurrence_to_cancel_2.is_hidden)
         self.assertEqual('Just because...', occurrence_to_cancel_2.cancel_reason)
