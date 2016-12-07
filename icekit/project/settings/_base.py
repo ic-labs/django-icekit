@@ -465,6 +465,10 @@ THUMBNAIL_ALIASES = {
         'list_image': {
             'size': (150, 0),
         },
+        'og_image': {
+            'size': (1200, 630), #facebook recommends
+            'crop': True,
+        },
     }
 }
 
