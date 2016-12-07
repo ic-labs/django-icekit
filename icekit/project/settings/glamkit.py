@@ -9,6 +9,7 @@ INSTALLED_APPS += (
     'icekit_events',
     'icekit_events.event_types.simple',
     'icekit_events.plugins.links',
+    'icekit_events.plugins.todays_occurrences',
     'icekit_events.page_types.eventlistingfordate',
 )
 
@@ -50,6 +51,7 @@ SPONSOR_PLUGINS = [
 
 LINK_PLUGINS += [
     'EventLinkPlugin',
+    'TodaysOccurrencesPlugin',
 ]
 
 DEFAULT_PLUGINS += SPONSOR_PLUGINS + LINK_PLUGINS
