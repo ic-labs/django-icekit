@@ -6,12 +6,6 @@ SITE_PORT = 8000
 
 ALLOWED_HOSTS = ('*', )
 
-# Disabling develop cache backend as short-term workaround until #149 is resolved
-# CACHES['default'].update({
-#     'BACKEND': 'redis_lock.django_cache.RedisCache',
-#     'LOCATION': 'redis://%s/1' % REDIS_ADDRESS,
-# })
-
 CSRF_COOKIE_SECURE = False  # Don't require HTTPS for CSRF cookie
 SESSION_COOKIE_SECURE = False  # Don't require HTTPS for session cookie
 
