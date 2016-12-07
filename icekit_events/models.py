@@ -423,14 +423,14 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         last = self.get_occurrences().order_by('-end').first()
         return (first, last)
 
-    def get_occurrences_by_day(self):
+    def get_upcoming_occurrences_by_day(self):
         """
         :return: an iterable of (day, occurrences)
         """
         result = OrderedDict()
 
-        for occ in self.get_occurrences().order_by('start'):
-            result.setdefault(occ.local_start.date, []).append(occ)
+        for occ in self.get_occurrences().upcoming().order_by('start'):
+            result.setdefault(occ.local_start.date(), []).append(occ)
 
         return result.items()
 

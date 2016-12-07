@@ -19,13 +19,15 @@ def timesf(times_list, format=None):
 @register.filter
 def times_range(event, format=None):
     if event.human_times:
-        return event.human_times
+        return event.human_times.strip()
 
     sts = timesf(event.start_times_set(), format=format)
     all_days = event.get_occurrences().filter(is_all_day=True)
     if all_days:
         sts = ["all day"] + sts
 
+    if len(sts) > 3:
+        return "Various times"
     times = grammatical_join(sts, final_join=", ")
     return times
 
@@ -52,7 +54,7 @@ def dates_range(event, format=""):
             pass
 
     if event.human_dates:
-        return event.human_dates
+        return event.human_dates.strip()
     else:
         first, last = event.get_occurrences_range()
         if first:
