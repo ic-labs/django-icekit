@@ -1,13 +1,5 @@
 from django.apps import AppConfig
 from django.db.models.signals import pre_save
-from fluent_contents.plugins.oembeditem.models import OEmbedItem
-from icekit.plugins.oembed_with_caption.models import OEmbedWithCaptionItem
-
-
-class AppConfig(AppConfig):
-    name = '.'.join(__name__.split('.')[:-1])
-    label = "icekit_plugins_oembed_with_caption"
-    verbose_name = "Media embed with caption"
 
 
 def handle_soundcloud_malformed_widths_for_oembeds(sender, instance, **kwargs):
@@ -23,4 +15,13 @@ def handle_soundcloud_malformed_widths_for_oembeds(sender, instance, **kwargs):
     if instance.width == '100%':
         instance.width = -100
 
-pre_save.connect(handle_soundcloud_malformed_widths_for_oembeds, sender=OEmbedWithCaptionItem)
+
+class AppConfig(AppConfig):
+    name = '.'.join(__name__.split('.')[:-1])
+    label = "icekit_plugins_oembed_with_caption"
+    verbose_name = "Media embed with caption"
+
+    def ready(self):
+        from icekit.plugins.oembed_with_caption.models import OEmbedWithCaptionItem
+        pre_save.connect(handle_soundcloud_malformed_widths_for_oembeds,
+                         sender=OEmbedWithCaptionItem)
