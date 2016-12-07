@@ -14,7 +14,7 @@ def handle_soundcloud_malformed_widths_for_oembeds(sender, instance, **kwargs):
     if instance.width == '100%':
         instance.width = -100
 
-class OEmbedAppConfig(AppConfig):
+class AppConfig(AppConfig):
     name = 'fluent_contents.plugins.oembeditem'
 
     def ready(self):
