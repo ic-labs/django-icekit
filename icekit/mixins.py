@@ -220,7 +220,7 @@ class ListableMixin(models.Model):
             thumb_url = get_thumbnailer(li)['og_image'].url
             return urljoin(settings.SITE_DOMAIN, thumb_url)
 
-    def get_og_desciption(self):
+    def get_og_description(self):
         if hasattr(self, 'meta_description') and self.meta_description:
             return self.meta_description
         return self.get_oneliner()

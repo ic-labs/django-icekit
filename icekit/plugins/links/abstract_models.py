@@ -73,6 +73,7 @@ class AbstractLinkItem(ContentItem):
 
     def get_admin_link(self): # specifying only so admin can look it up
         return self._resolve('get_admin_link')
+    get_admin_link.allow_tags = True
 
     def __getattr__(self, item):
         if item not in ['get_draft', '_item_cache']:
