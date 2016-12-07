@@ -4,17 +4,17 @@ Models for ``icekit_events`` app.
 
 # Compose concrete models from abstract models and mixins, to facilitate reuse.
 from collections import OrderedDict
-from datetime import datetime, timedelta, time as datetime_time, time
+from datetime import datetime, timedelta, time
 
 from django.db.models import F
 from icekit.publishing.managers import PublishingPolymorphicManager, \
     PublishingPolymorphicQuerySet
 
-from django.db import models, transaction
+from django.db import models
 from django.db.models.query import QuerySet
 from django.db.models import Q
 from icekit.publishing.middleware import is_draft_request_context
-from icekit_events.utils.timeutils import zero_datetime
+from icekit_events.utils.timeutils import zero_datetime, coerce_dt_awareness
 
 
 class EventQueryset(PublishingPolymorphicQuerySet):
@@ -80,32 +80,53 @@ class OccurrenceQueryset(QuerySet):
         and end times are zeroed to find all occurrences that occur on a DATE
         as opposed to within DATETIMEs.
         """
+        dt_start=coerce_dt_awareness(start)
+        dt_end=coerce_dt_awareness(end, t=time.max)
+
         return self.filter(
-                models.Q(is_all_day=False, start__lt=end) |
-                models.Q(is_all_day=True,
-                         start__lt=zero_datetime(end))
+            Q(is_all_day=False, start__lt=dt_end) |
+            Q(is_all_day=True, start__lt=zero_datetime(dt_end))
             ).filter(
                 # Exclusive for datetime, inclusive for date.
-                models.Q(is_all_day=False, end__gt=start) |
-                models.Q(is_all_day=True,
-                         end__gte=zero_datetime(start))
+                Q(is_all_day=False, end__gt=dt_start) |
+                Q(is_all_day=True, end__gte=zero_datetime(dt_start))
             )
 
-    def start_within(self, start, end):
+
+    def starts_within(self, start, end):
         """
-        :return:  occurrences that start within the given start and end
-        datetimes, inclusive.
+        :return:  normal occurrences that start within the given start and end
+        datetimes, inclusive, and drop-in occurrences that 
         """
+        dt_start=coerce_dt_awareness(start)
+        dt_end=coerce_dt_awareness(end, t=time.max)
+
         return self.filter(
-            models.Q(is_all_day=False, start__gte=start) |
-            models.Q(is_all_day=True,
-                     start__gte=zero_datetime(start))
+            Q(is_all_day=False, start__gte=dt_start) |
+            Q(is_all_day=True, start__gte=zero_datetime(dt_start))
         ).filter(
             # Exclusive for datetime, inclusive for date.
-            models.Q(is_all_day=False, start__lt=end) |
-            models.Q(is_all_day=True,
-                     start__lte=zero_datetime(end))
+            Q(is_all_day=False, start__lt=dt_end) |
+            Q(is_all_day=True, start__lte=zero_datetime(dt_end))
         )
+    
+    def available_within(self, start, end):
+        """
+        :return: Normal events that start within the range, and
+         drop-in events that overlap the range.
+        """
+        return self.filter(event__is_drop_in=False).starts_within(start, end) | \
+               self.filter(event__is_drop_in=True).overlapping(start, end)
+
+    def available_on_day(self, day):
+        """
+        Return events that are available on a given day.
+        """
+        if isinstance(day, datetime):
+            d = day.date()
+        else:
+            d = day
+        return self.starts_within(d, d)
 
     def _same_day_ids(self):
         """
@@ -150,11 +171,11 @@ class OccurrenceQueryset(QuerySet):
     def upcoming(self):
         """
         :return: Occurrences that start in the future, or, if the event
-         is_drop_in or is_all_day, that end in the future.
+         is_drop_in, that end in the future.
         """
         return self.filter(
             Q(event__is_drop_in=False, start__gte=datetime.now) |
-            Q(Q(event__is_drop_in=True) | Q(is_all_day=True), end__gt=datetime.now)
+            Q(event__is_drop_in=True, end__gt=datetime.now)
         )
 
 

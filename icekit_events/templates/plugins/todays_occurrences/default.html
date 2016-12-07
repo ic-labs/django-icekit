@@ -1,0 +1,17 @@
+{% load humanize %}
+
+<h3 class="primary-divider">
+    <span class="content-max-width">
+        {% if instance.title %}
+            {{ instance.title }} {{ instance.get_date|naturalday }}
+        {% else %}
+            {{ instance.get_date|naturalday|title }}
+        {% endif %}
+    </span>
+</h3>
+
+
+
+{% for occ in instance.get_occurrences %}
+    {% include "plugins/link/_whatson_link.html" with event=occ.event %}
+{% endfor %}

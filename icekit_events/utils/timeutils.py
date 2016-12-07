@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, time as datetime_time
+from datetime import datetime, timedelta, time
 from timezone import timezone as djtz  # django-timezone
 from django.conf import settings
 from django.utils.timezone import is_aware, is_naive, make_naive, make_aware, \
@@ -77,7 +77,7 @@ def zero_datetime(dt, tz=None):
     return coerce_naive(dt).replace(hour=0, minute=0, second=0, microsecond=0)
 
 
-def coerce_dt_awareness(date_or_datetime, tz=None):
+def coerce_dt_awareness(date_or_datetime, tz=None, t=None):
     """
     Coerce the given `datetime` or `date` object into a timezone-aware or
     timezone-naive `datetime` result, depending on which is appropriate for
@@ -86,7 +86,7 @@ def coerce_dt_awareness(date_or_datetime, tz=None):
     if isinstance(date_or_datetime, datetime):
         dt = date_or_datetime
     else:
-        dt = datetime.combine(date_or_datetime, datetime_time())
+        dt = datetime.combine(date_or_datetime, t or time.min)
     is_project_tz_aware = settings.USE_TZ
     if is_project_tz_aware:
         return coerce_aware(dt, tz)
