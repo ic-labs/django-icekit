@@ -142,10 +142,13 @@ class AbstractCollectedContent(ListableMixin):
         The majority of the time, the URL is the parent's URL plus the slug.
         If not, override this function.
         """
-        # Get the appropriate visible/draft/published parent object for the
-        # current request context, otherwise we risk mixing the draft parent
-        # URL with a published item's URL etc.
-        visible_parent = self.parent.get_visible()
+        # Get the appropriate draft or published parent object for the current
+        # item, otherwise we risk mixing the draft parent URL with a published
+        # item's URL etc.
+        if self.is_draft:
+            visible_parent = self.parent.get_draft()
+        else:
+            visible_parent = self.parent.get_published()
 
         # Appending "/" to avoid a) django redirect and b) incorrect edit slug
         # for the admin.

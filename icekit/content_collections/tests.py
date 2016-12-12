@@ -168,6 +168,9 @@ class TestContentCollections(WebTest):
         self.article_2.publish()
         self.listing.publish()
 
+        # Refresh article instance
+        self.article = Article.objects.get(pk=self.article.pk)
+
         self.listing_url = self.listing.get_published().get_absolute_url()
         self.article_url = self.article.get_published().get_absolute_url()
 
