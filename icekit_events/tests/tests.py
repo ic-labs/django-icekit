@@ -779,18 +779,18 @@ class TestEventManager(TestCase):
         ])
 
     def test_contained(self):
-        self.assertEqual(list(self.parent_event.get_contained_events()), [
+        self.assertEqual(list(self.parent_event.get_children()), [
             self.child_event_1,
             self.child_event_2,
             self.child_event_3,
         ])
-        self.assertEqual(list(self.parent_event.get_contained_events().with_upcoming_occurrences()), [
+        self.assertEqual(list(self.parent_event.get_children().with_upcoming_occurrences()), [
             self.child_event_2,
         ])
-        self.assertEqual(list(self.parent_event.get_contained_events().with_no_occurrences()), [
+        self.assertEqual(list(self.parent_event.get_children().with_no_occurrences()), [
             self.child_event_3,
         ])
-        self.assertEqual(list(self.parent_event.get_contained_events().with_upcoming_or_no_occurrences()), [
+        self.assertEqual(list(self.parent_event.get_children().with_upcoming_or_no_occurrences()), [
             self.child_event_2,
             self.child_event_3,
         ])

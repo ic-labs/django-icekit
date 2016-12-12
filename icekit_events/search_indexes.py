@@ -12,5 +12,6 @@ class EventBaseIndex(AbstractLayoutIndex, indexes.Indexable):
 
     def prepare(self, obj):
         data = super(EventBaseIndex, self).prepare(obj)
-        data['boost'] = 1.2
+        if obj.is_upcoming():
+            data['boost'] *= 1.25
         return data

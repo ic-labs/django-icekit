@@ -186,7 +186,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         null=True,
         help_text="If this event is part of another event, select it here.",
         on_delete=models.SET_NULL
-    ) # access visible contained_events via get_contained_events()
+    ) # access visible contained_events via get_children()
     derived_from = models.ForeignKey(
         'self',
         blank=True,
@@ -462,7 +462,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     def get_absolute_url(self):
         return reverse('icekit_events_eventbase_detail', args=(self.slug,))
 
-    def get_contained_events(self):
+    def get_children(self):
         events = EventBase.objects.filter(
             id__in=self.get_draft().contained_events.values_list('id', flat=True)
         )
@@ -487,7 +487,8 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     def is_members(self):
         return self.get_all_types().filter(slug='members')
 
-
+    def is_upcoming(self):
+        return self.get_occurrences().upcoming()
 
 
 class AbstractEventWithLayouts(EventBase, FluentFieldsMixin):

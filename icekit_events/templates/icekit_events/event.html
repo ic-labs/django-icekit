@@ -22,7 +22,7 @@
 		<p><a href="{{ event.cta_url }}">{{  event.cta_text }}</a></p>
 	{% endif %}
 
-    {% with event.get_contained_events.visible as contained_events %}
+    {% with event.get_children.visible as contained_events %}
         {% if contained_events %}
         <h2>Contains</h2>
         <ul>
