@@ -94,3 +94,10 @@ class AbstractLayoutIndex(indexes.SearchIndex):
         if hasattr(obj, 'is_educational') and obj.is_educational():
             r.append('Education')
         return r
+
+    def prepare(self, obj):
+        data = super(AbstractLayoutIndex, self).prepare(obj)
+        # ensure default boost amount for field_value_factor calculations.
+        if not data.has_key('boost'):
+            data['boost'] = 1.0
+        return data

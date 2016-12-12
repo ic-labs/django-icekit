@@ -22,6 +22,10 @@
             {{ object.meta_keywords }}
             {{ object.meta_description }}
             {{ object.meta_title }}
+
+            {% for child in object.get_children %}
+                {{ child }}
+            {% endfor %}
         {% endblock %}
      {% endfilter %}
 {% endfilter %}

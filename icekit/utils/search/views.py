@@ -47,8 +47,8 @@ class ICEkitSearchView(SearchView):
         if self.query:
             sqs = sqs.filter(
                 SQ(content=AutoQuery(self.query)) |  # Search `text` document
-                SQ(title=AutoQuery(self.query)) |
-                SQ(boosted_search_terms=AutoQuery(self.query))
+                SQ(get_title=AutoQuery(self.query)) | # boosted field
+                SQ(boosted_search_terms=AutoQuery(self.query)) # boosted field
             )
 
         return sqs

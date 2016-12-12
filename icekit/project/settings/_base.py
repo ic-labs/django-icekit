@@ -618,7 +618,7 @@ INSTALLED_APPS += (
 
 HAYSTACK_CONNECTIONS = {
     'default': {
-        'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
+        'ENGINE': 'icekit.utils.search.backends.ICEkitConfigurableElasticSearchEngine',
         'INDEX_NAME': 'haystack-%s' % SETTINGS_MODULE_HASH,
         'URL': 'http://%s/' % ELASTICSEARCH_ADDRESS,
     },
