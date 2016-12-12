@@ -100,6 +100,11 @@ class LinkPlugin(ContentPlugin):
     )
     readonly_fields = ('get_admin_link',)
 
+    # Do not cache output for linked items otherwise we get situations where
+    # URL changes to ancestor pages don't get applied until a Django restart
+    # because the old URL is cached in the original content.
+    cache_output = False
+
     def render(self, request, instance, **kwargs):
         """
         Only render the plugin if the item can be shown to the user
