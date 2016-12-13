@@ -75,11 +75,6 @@ class AbstractLinkItem(ContentItem):
         return self._resolve('get_admin_link')
     get_admin_link.allow_tags = True
 
-    def __getattr__(self, item):
-        if item not in ['get_draft', '_item_cache']:
-            return getattr(self.get_item(), item)
-        return self.__getattribute__(item)
-
 
 class LinkPlugin(ContentPlugin):
     category = 'Links'
@@ -104,6 +99,11 @@ class LinkPlugin(ContentPlugin):
         }),
     )
     readonly_fields = ('get_admin_link',)
+
+    # Do not cache output for linked items otherwise we get situations where
+    # URL changes to ancestor pages don't get applied until a Django restart
+    # because the old URL is cached in the original content.
+    cache_output = False
 
     def render(self, request, instance, **kwargs):
         """
