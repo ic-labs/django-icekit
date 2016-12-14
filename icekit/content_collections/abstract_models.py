@@ -148,7 +148,9 @@ class AbstractCollectedContent(ListableMixin):
         if self.is_draft:
             visible_parent = self.parent.get_draft()
         else:
-            visible_parent = self.parent.get_published()
+            # Fallback to draft URL for unpublished parent.
+            visible_parent = self.parent.get_published() or \
+                self.parent.get_draft()
 
         # Appending "/" to avoid a) django redirect and b) incorrect edit slug
         # for the admin.
