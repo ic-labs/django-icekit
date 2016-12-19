@@ -82,7 +82,7 @@ commands.
     $ supervisorctl.sh start all
 
     # Dump a database, encrypt it, and upload to the transfer.sh service, then delete the local copy
-    $ pg_dump -O -x -f ~/dump.sql && cat ~/dump.sql|gpg -ac -o-|curl -X PUT --upload-file "-" https://transfer.sh/dump.x && rm ~/dump.sql
+    $ pg_dump -O -x -f ~/dump.sql && cat ~/dump.sql|gpg -ac -o-|curl -X PUT --upload-file "-" https://transfer.sh/dump.sql.gpg && rm ~/dump.sql
 
     # then on the destination machine, to download and decrypt:
     $ curl [transfer.sh url] | gpg -o- > dump.sql
