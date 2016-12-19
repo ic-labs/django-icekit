@@ -849,7 +849,7 @@ class AbstractEventListingPage(AbstractListingPage):
 
     def get_public_items(self, request):
         return Occurrence.objects.published()\
-            .filter(event__show_in_calendar=True)
+            .filter(event__show_in_calendar=True, is_hidden=False)
 
     def get_visible_items(self, request):
         return Occurrence.objects.visible()
@@ -882,7 +882,7 @@ class AbstractEventListingForDatePage(AbstractListingPage):
 
     def get_items_to_list(self, request):
         return self._occurrences_on_date(request).published()\
-            .filter(event__show_in_calendar=True)
+            .filter(event__show_in_calendar=True, is_hidden=False)
 
     def get_items_to_mount(self, request):
         return self._occurrences_on_date(request).visible()
