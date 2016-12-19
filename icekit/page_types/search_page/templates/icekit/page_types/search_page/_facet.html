@@ -8,13 +8,13 @@
             {% if facet.select_many %}
                 {% for value in facet.get_values %}
                     {% if value.is_active %}
-                        <a class="filter__link has-count active" href="?{% update_GET 'page' = None facet.field_name -= value.get_value %}">
+                        <a class="filter__link has-count active" href="?{% update_GET 'page' = None facet.field_name -= value.get_value %}" rel="nofollow">
                             <button class="filter__btn">{{ value.get_value }}&nbsp;<span class="filter__count">({{ value.count|intcomma }})</span>
                             </button>
                             <i class="fa fa-times" aria-hidden="true"></i>
                         </a>
                     {% else %}
-                        <a class="filter__link has-count" href="?{% update_GET 'page' = None facet.field_name += value.get_value %}">
+                        <a class="filter__link has-count" href="?{% update_GET 'page' = None facet.field_name += value.get_value %}" rel="nofollow">
                             <button class="filter__btn">{{ value.get_value }}&nbsp;<span class="filter__count">({{ value.count|intcomma }})</span>
                             </button>
                         </a>
@@ -22,7 +22,7 @@
                 {% endfor %}
             {% else %}{# select one at a time #}
                 {% for value in facet.get_values %}
-                    <a class="filter__link has-count {% if value.is_active %}active{% endif %}" href="?{% update_GET 'page' = None facet.field_name = value.get_value %}">
+                    <a class="filter__link has-count {% if value.is_active %}active{% endif %}" href="?{% update_GET 'page' = None facet.field_name = value.get_value %}" rel="nofollow">
                         <button class="filter__btn">{{ value.label }}{% if value.count != None %}&nbsp;<span class="filter__count">({{ value.count|intcomma }}){% endif %}</span>
                         </button>
                     </a>
