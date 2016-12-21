@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Flexible Layouts &#8212; ICEkit 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="flexible-layouts">
+<span id="flexible-layouts"></span><h1>Flexible Layouts<a class="headerlink" href="#flexible-layouts" title="Permalink to this headline">¶</a></h1>
+<p>The <code class="docutils literal"><span class="pre">Layout</span></code> model links a template to all the models that can use it.</p>
+<p>The template for a layout should define placeholders for modular content:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span><span class="c1"># layouts/default.html #}</span>
+
+<span class="p">{</span><span class="o">%</span> <span class="n">load</span> <span class="n">fluent_contents_tags</span> <span class="o">%</span><span class="p">}</span>
+
+<span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;main&quot;</span><span class="o">&gt;</span>
+    <span class="p">{</span><span class="o">%</span> <span class="n">page_placeholder</span> <span class="n">obj</span> <span class="s2">&quot;main&quot;</span> <span class="o">%</span><span class="p">}</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;sidebar&quot;</span><span class="o">&gt;</span>
+    <span class="p">{</span><span class="o">%</span> <span class="n">page_placeholder</span> <span class="n">obj</span> <span class="s2">&quot;sidebar&quot;</span> <span class="o">%</span><span class="p">}</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Models that have modular content will have a <code class="docutils literal"><span class="pre">layout</span></code> field in the admin change
+form, allowing the selection of a layout that is compatible with that model.</p>
+<p>See &#8216;plugins.md&#8217; to add Layouts-driven content to your model.</p>
+<div class="section" id="templatenamefield">
+<span id="templatenamefield"></span><h2>TemplateNameField<a class="headerlink" href="#templatenamefield" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">TemplateNameField</span></code> behaves like a choice field and populates its list of
+available template names by plugins, if the <code class="docutils literal"><span class="pre">plugin_class</span></code> kwarg is given.</p>
+<p>The <code class="docutils literal"><span class="pre">Layout.template_name</span></code> field uses the <code class="docutils literal"><span class="pre">TemplateNameFieldChoicesPlugin</span></code>
+mount point, and ICEkit ships with several plugins.</p>
+<div class="section" id="appmodeldefaultlayoutsplugin">
+<span id="appmodeldefaultlayoutsplugin"></span><h3>AppModelDefaultLayoutsPlugin<a class="headerlink" href="#appmodeldefaultlayoutsplugin" title="Permalink to this headline">¶</a></h3>
+<p>Adds default app and model templates for related models.</p>
+<p>For example, if a <code class="docutils literal"><span class="pre">foo.Bar</span></code> model had a <code class="docutils literal"><span class="pre">ForeignKey('icekit.Layout')</span></code> field,
+this plugin would return the following choices:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">(</span><span class="s1">&#39;foo/layouts/default.html&#39;</span><span class="p">,</span> <span class="s1">&#39;Foo: Default&#39;</span><span class="p">),</span>
+<span class="p">(</span><span class="s1">&#39;foo/bar/layouts/default.html&#39;</span><span class="p">,</span> <span class="s1">&#39;Foo: Bar&#39;</span><span class="p">),</span>
+<span class="p">(</span><span class="s1">&#39;foo/bar/layouts/baz.html&#39;</span><span class="p">,</span> <span class="s1">&#39;Foo: Baz&#39;</span><span class="p">),</span>  <span class="c1"># Polymorphic child model</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="filesystemlayoutsplugin">
+<span id="filesystemlayoutsplugin"></span><h3>FileSystemLayoutsPlugin<a class="headerlink" href="#filesystemlayoutsplugin" title="Permalink to this headline">¶</a></h3>
+<p>Adds templates from one or more directories on the file system.</p>
+<p>Directories can be specified in the <code class="docutils literal"><span class="pre">ICEKIT['LAYOUT_TEMPLATES']</span></code> setting,
+which should be a list of 3-tuples, each containing a label prefix, a
+templates directory that will be searched by the installed template
+loaders, and a template name prefix.</p>
+<p>The templates directory and template name prefix are combined to get the
+source directory. All files in this directory will be included.</p>
+<p>The template name prefix and the source file path, relative to the source
+directory, are combined to get the template name.</p>
+<p>The label prefix and source file path are combined to get the label.</p>
+<p>Given the following directory structure:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">myproject</span><span class="o">/</span><span class="n">templates</span><span class="o">/</span><span class="n">myproject</span><span class="o">/</span><span class="n">layouts</span><span class="o">/</span><span class="n">foo</span><span class="o">.</span><span class="n">html</span>
+<span class="o">/</span><span class="n">myproject</span><span class="o">/</span><span class="n">templates</span><span class="o">/</span><span class="n">myproject</span><span class="o">/</span><span class="n">layouts</span><span class="o">/</span><span class="n">bar</span><span class="o">/</span><span class="n">baz</span><span class="o">.</span><span class="n">html</span>
+</pre></div>
+</div>
+<p>These settings:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ICEKIT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;LAYOUT_TEMPLATES&#39;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s1">&#39;My Project&#39;</span><span class="p">,</span> <span class="s1">&#39;/myproject/templates, &#39;</span><span class="n">myproject</span><span class="o">/</span><span class="n">layouts</span><span class="s1">&#39;),</span>
+    <span class="p">),</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Would result in these choices::</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">(</span><span class="s1">&#39;myproject/layouts/foo.html&#39;</span><span class="p">,</span> <span class="s1">&#39;My Project: foo.html&#39;</span><span class="p">)</span>
+<span class="p">(</span><span class="s1">&#39;myproject/layouts/bar/baz.html&#39;</span><span class="p">,</span> <span class="s1">&#39;My Project: bar/baz.html&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-a-custom-templatenamefieldchoicesplugin">
+<span id="creating-a-custom-templatenamefieldchoicesplugin"></span><h3>Creating a Custom TemplateNameFieldChoicesPlugin<a class="headerlink" href="#creating-a-custom-templatenamefieldchoicesplugin" title="Permalink to this headline">¶</a></h3>
+<p>Subclass <code class="docutils literal"><span class="pre">TemplateNameFieldChoicesPlugin</span></code> and define a <code class="docutils literal"><span class="pre">get_choices()</span></code> method
+that returns a list of 2-tuples, each containing a template name and a label.</p>
+<p>The <code class="docutils literal"><span class="pre">field</span></code> attribute will be the <code class="docutils literal"><span class="pre">TemplateNameField</span></code> to which the plugin mount
+point is attached.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Flexible Layouts</a><ul>
+<li><a class="reference internal" href="#templatenamefield">TemplateNameField</a><ul>
+<li><a class="reference internal" href="#appmodeldefaultlayoutsplugin">AppModelDefaultLayoutsPlugin</a></li>
+<li><a class="reference internal" href="#filesystemlayoutsplugin">FileSystemLayoutsPlugin</a></li>
+<li><a class="reference internal" href="#creating-a-custom-templatenamefieldchoicesplugin">Creating a Custom TemplateNameFieldChoicesPlugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/architecture/content/_layouts.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, the Interaction Consortium.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../../_sources/architecture/content/_layouts.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

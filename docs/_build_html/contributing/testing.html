@@ -1,0 +1,244 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Testing &#8212; ICEkit 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ICEkit architecture" href="../architecture/index.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="documentation.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="testing">
+<span id="testing"></span><h1>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h1>
+<p>ICEkit uses a custom script <code class="docutils literal"><span class="pre">runtests.sh</span></code> to run tests, which configures the
+test database and restores from <code class="docutils literal"><span class="pre">test_initial_data.sql</span></code> if available,
+to speed up migrations.</p>
+<div class="section" id="recipes">
+<span id="recipes"></span><h2>Recipes<a class="headerlink" href="#recipes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="to-run-icekit-tests">
+<span id="to-run-icekit-tests"></span><h3>To run icekit tests<a class="headerlink" href="#to-run-icekit-tests" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">runtests</span><span class="o">.</span><span class="n">sh</span> <span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">icekit</span><span class="o">/</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="to-run-specific-tests">
+<span id="to-run-specific-tests"></span><h3>To run specific tests<a class="headerlink" href="#to-run-specific-tests" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">runtests</span><span class="o">.</span><span class="n">sh</span> <span class="n">foo</span><span class="o">.</span><span class="n">bar</span><span class="p">:</span><span class="n">Baz</span><span class="o">.</span><span class="n">test_foo</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="to-discover-tests-in-the-current-folder-and-run-without-migrations">
+<span id="to-discover-tests-in-the-current-folder-and-run-without-migrations"></span><h3>To discover tests in the current folder and run without migrations:<a class="headerlink" href="#to-discover-tests-in-the-current-folder-and-run-without-migrations" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">runtests</span><span class="o">.</span><span class="n">sh</span> <span class="o">-</span><span class="n">n</span> <span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="to-create-migrations-for-a-test-model">
+<span id="to-create-migrations-for-a-test-model"></span><h3>To create migrations for a test model<a class="headerlink" href="#to-create-migrations-for-a-test-model" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">BASE_SETTINGS_MODULE</span><span class="o">=</span><span class="n">test</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">makemigrations</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="to-get-an-interactive-shell-to-inspect-the-test-database">
+<span id="to-get-an-interactive-shell-to-inspect-the-test-database"></span><h3>To get an interactive shell to inspect the test database<a class="headerlink" href="#to-get-an-interactive-shell-to-inspect-the-test-database" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">BASE_SETTINGS_MODULE</span><span class="o">=</span><span class="n">icekit</span><span class="o">.</span><span class="n">tests</span><span class="o">.</span><span class="n">settings</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">shell_plus</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="to-speed-up-test-running">
+<span id="to-speed-up-test-running"></span><h3>To speed up test running<a class="headerlink" href="#to-speed-up-test-running" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">QUICK</span><span class="o">=</span><span class="mi">1</span> <span class="n">runtests</span><span class="o">.</span><span class="n">sh</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>This reuses the test databases, and skips collectstatic and compress steps.</p>
+</div>
+<div class="section" id="to-create-a-data-dump-with-migrations-applied">
+<span id="to-create-a-data-dump-with-migrations-applied"></span><h3>To create a data dump with migrations applied<a class="headerlink" href="#to-create-a-data-dump-with-migrations-applied" title="Permalink to this headline">¶</a></h3>
+<p>The slowest part of running tests from scratch is usually the &#8220;Rendering Model
+States...&#8221; stage of migrations. This can be speeded up by loading a pre-
+migrated database dump. ICEkit&#8217;s <code class="docutils literal"><span class="pre">runtests.sh</span></code> automatically uses a file called
+<code class="docutils literal"><span class="pre">test_initial_data.sql</span></code>.</p>
+<p>To create a data dump called <code class="docutils literal"><span class="pre">test_initial_data.sql</span></code>
+with migrations applied:</p>
+<ol>
+<li><p class="first">Drop/recreate your test database</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span> <span class="n">dropdb</span> <span class="n">FOO_test_develop</span>
+ <span class="n">createdb</span> <span class="n">FOO_test_develop</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Run migrations:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span> <span class="n">BASE_SETTINGS_MODULE</span><span class="o">=</span><span class="n">test</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">migrate</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Dump the database to <code class="docutils literal"><span class="pre">test_initial_data.sql</span></code></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span> <span class="n">pg_dump</span> <span class="o">-</span><span class="n">O</span> <span class="o">-</span><span class="n">x</span> <span class="o">-</span><span class="n">f</span> <span class="n">test_initial_data</span><span class="o">.</span><span class="n">sql</span> <span class="o">-</span><span class="n">d</span> <span class="n">FOO_test_develop</span>
+ <span class="n">git</span> <span class="n">add</span> <span class="n">test_initial_data</span><span class="o">.</span><span class="n">sql</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="section" id="to-create-fluent-pages-in-tests">
+<span id="to-create-fluent-pages-in-tests"></span><h1>To create fluent pages in tests.<a class="headerlink" href="#to-create-fluent-pages-in-tests" title="Permalink to this headline">¶</a></h1>
+<p>We do this by using dynamic fixture:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="k">import</span> <span class="n">get_user_model</span>
+<span class="kn">from</span> <span class="nn">django_webtest</span> <span class="k">import</span> <span class="n">WebTest</span>
+<span class="kn">from</span> <span class="nn">django_dynamic_fixture</span> <span class="k">import</span> <span class="n">G</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes.models</span> <span class="k">import</span> <span class="n">ContentType</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sites.models</span> <span class="k">import</span> <span class="n">Site</span>
+<span class="kn">from</span> <span class="nn">icekit.models</span> <span class="k">import</span> <span class="n">Layout</span>
+<span class="kn">from</span> <span class="nn">icekit.page_types.layout_page.models</span> <span class="k">import</span> <span class="n">LayoutPage</span>
+
+
+<span class="n">User</span> <span class="o">=</span> <span class="n">get_user_model</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">FluentPageTestCase</span><span class="p">(</span><span class="n">WebTest</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout_1</span> <span class="o">=</span> <span class="n">G</span><span class="p">(</span>
+            <span class="n">Layout</span><span class="p">,</span>
+            <span class="n">template_name</span><span class="o">=</span><span class="s1">&#39;layout_page/layoutpage/layouts/default.html&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout_1</span><span class="o">.</span><span class="n">content_types</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span><span class="n">LayoutPage</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout_1</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staff_1</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">email</span><span class="o">=</span><span class="s1">&#39;test@test.com&#39;</span><span class="p">,</span>
+            <span class="n">is_staff</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">is_active</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">is_superuser</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">page_1</span> <span class="o">=</span> <span class="n">LayoutPage</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Test Page&#39;</span><span class="p">,</span>
+            <span class="n">slug</span><span class="o">=</span><span class="s1">&#39;test-page&#39;</span><span class="p">,</span>
+            <span class="n">parent_site</span><span class="o">=</span><span class="n">Site</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">first</span><span class="p">(),</span>
+            <span class="n">layout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layout_1</span><span class="p">,</span>
+            <span class="n">author</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">staff_1</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="s1">&#39;p&#39;</span><span class="p">,</span>  <span class="c1"># Publish the page</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+<p>There is also a helper function to add content items:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">icekit.utils.fluent_contents</span> <span class="k">import</span> <span class="n">create_content_instance</span>
+
+    <span class="o">...</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">child_page_1</span> <span class="o">=</span> <span class="n">create_content_instance</span><span class="p">(</span>
+        <span class="n">models</span><span class="o">.</span><span class="n">ContentItem</span><span class="p">,</span>
+        <span class="n">page</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">page_1</span><span class="p">,</span>
+        <span class="n">placeholder_name</span><span class="o">=</span><span class="s2">&quot;main&quot;</span><span class="p">,</span> <span class="c1"># default</span>
+        <span class="o">**</span><span class="n">kwargs</span> <span class="c1"># arguments for initialising the ContentItem model</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Testing</a><ul>
+<li><a class="reference internal" href="#recipes">Recipes</a><ul>
+<li><a class="reference internal" href="#to-run-icekit-tests">To run icekit tests</a></li>
+<li><a class="reference internal" href="#to-run-specific-tests">To run specific tests</a></li>
+<li><a class="reference internal" href="#to-discover-tests-in-the-current-folder-and-run-without-migrations">To discover tests in the current folder and run without migrations:</a></li>
+<li><a class="reference internal" href="#to-create-migrations-for-a-test-model">To create migrations for a test model</a></li>
+<li><a class="reference internal" href="#to-get-an-interactive-shell-to-inspect-the-test-database">To get an interactive shell to inspect the test database</a></li>
+<li><a class="reference internal" href="#to-speed-up-test-running">To speed up test running</a></li>
+<li><a class="reference internal" href="#to-create-a-data-dump-with-migrations-applied">To create a data dump with migrations applied</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#to-create-fluent-pages-in-tests">To create fluent pages in tests.</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Contributing to ICEkit</a><ul>
+      <li>Previous: <a href="documentation.html" title="previous chapter">&lt;no title&gt;</a></li>
+      <li>Next: <a href="../architecture/index.html" title="next chapter">ICEkit architecture</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/contributing/testing.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, the Interaction Consortium.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/contributing/testing.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

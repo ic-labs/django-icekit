@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ICEkit architectural overview &#8212; ICEkit 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="icekit-architectural-overview">
+<span id="icekit-architectural-overview"></span><h1>ICEkit architectural overview<a class="headerlink" href="#icekit-architectural-overview" title="Permalink to this headline">¶</a></h1>
+<p>ICEkit is a next-generation CMS by <a class="reference external" href="https://interaction.net.au">the Interaction Consortium</a>,
+built on top of <a class="reference external" href="https://github.com/edoburu/django-fluent-pages">django-fluent-pages</a> and <a class="reference external" href="https://github.com/edoburu/django-fluent-contents">django-fluent-contents</a>, in
+<a class="reference external" href="https://www.djangoproject.com">Django</a>, running on <a class="reference external" href="https://www.python.org">Python</a>.</p>
+<div class="section" id="rich-content">
+<span id="rich-content"></span><h2>Rich Content<a class="headerlink" href="#rich-content" title="Permalink to this headline">¶</a></h2>
+<p>ICEkit&#8217;s rich content models allow a human editor to add and arrange many
+<strong>Content Items</strong> in any order into one or more <strong>Content Placeholder</strong> slots.
+This is accomplished using the <a class="reference external" href="https://github.com/edoburu/django-fluent-contents">django-fluent-contents</a> system.</p>
+<p>An example of a rich content model could be a Press Release, which could have a
+&#8220;Main&#8221; placeholder and a &#8220;More information&#8221; placeholder. The &#8220;Main&#8221; placeholder
+could contain &#8216;text&#8217;, &#8216;images&#8217;, &#8216;videos&#8217;, and so on. The &#8220;More information&#8221;
+placeholder may only allow &#8216;press contacts&#8217; and &#8216;files&#8217; to be added.</p>
+<p>Placeholders are specified in the HTML template that is associated with the
+rich content model. At render time, each <code class="docutils literal"><span class="pre">render_placeholder</span></code> template tag
+renders all of the content items as they were added by the editor.</p>
+<p>A <strong>Content Item</strong> is (usually) a small django model for representing a unit
+of content on a page and can have any fields that a normal Django model
+has. Each Content Item has at least one associated <strong>Content Plugin</strong> which
+specifies how it is to be rendered in a given context and how it is edited in
+the admin.</p>
+<p><a class="reference external" href="../howto/plugins.md">More on Content Items and Plugins</a></p>
+<div class="section" id="database-representation">
+<span id="database-representation"></span><h3>Database representation<a class="headerlink" href="#database-representation" title="Permalink to this headline">¶</a></h3>
+<p>Content Items and the rich content models which contain them are related with
+Generic Foreign Keys, which means that there is only one database table for
+each Content Item.</p>
+</div>
+<div class="section" id="examples">
+<span id="examples"></span><h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">icekit.plugins</span></code> package contains reference implementations for many types
+of content that you might need in a project.</p>
+</div>
+</div>
+<div class="section" id="page-types">
+<span id="page-types"></span><h2>Page Types<a class="headerlink" href="#page-types" title="Permalink to this headline">¶</a></h2>
+<p>ICEkit uses <a class="reference external" href="https://github.com/edoburu/django-fluent-pages">django-fluent-pages</a> to provide a tree of pages for your site.
+Each page is an instance of a Page Type.</p>
+<p>Pages can be arranged in any tree shape. The URL of a page is made up of its
+slug plus that of its parents.</p>
+<p>Pages are meant for &#8216;permanent&#8217; parts of your site, ie that represent a section
+of your site, and which may appear in permanent site navigation.</p>
+<p>Collections of things don&#8217;t normally work well as pages, because usually it is
+not desirable to put each item in the collection in a different place in the
+tree, and the tree can get cluttered. For those, consider using a more
+traditional Django model, and maybe define a Page Type and/or Content Plugin
+for listing/navigating through the collection.</p>
+<p>Examples of content that works well as Pages are Homepage, About Us, Press
+Room, Terms &amp; Conditions, Search.</p>
+<p>Examples of content that would not work well as Pages (because they are more
+conveniently modelled as large collections of similar things) are Blog Post,
+Press Release, User, Image, etc.</p>
+<p>Most pages can be created by the editor using ICEkit&#8217;s standard Page, which
+allows standard Content Items to be added. For more special-purpose pages, such
+as Search, you would define a new model that subclasses PageType, and register
+it to the page type pool. See <a class="reference external" href="howto/page-types.md">Creating page types</a>.</p>
+<p>Page Types usually, but don&#8217;t have to, implement Rich Content. An example of a
+Page Type that doesn&#8217;t implement rich content is a RedirectPage, which doesn&#8217;t
+render content, but instead redirects to another URL.</p>
+<div class="section" id="database-representation">
+<span id="id1"></span><h3>Database representation<a class="headerlink" href="#database-representation" title="Permalink to this headline">¶</a></h3>
+<p>Page Types are <a class="reference external" href="https://django-polymorphic.readthedocs.io/">django-polymorphic</a> models.</p>
+</div>
+<div class="section" id="examples">
+<span id="id2"></span><h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">icekit.page_types</span></code> package contains reference implementations for many
+types of page types that you might need in a project.</p>
+</div>
+</div>
+<div class="section" id="publishing">
+<span id="publishing"></span><h2>Publishing<a class="headerlink" href="#publishing" title="Permalink to this headline">¶</a></h2>
+<p>See the <a class="reference external" href="../topics/publishing.md">Publishing</a> docs for an overview.</p>
+</div>
+<div class="section" id="dashboard">
+<span id="dashboard"></span><h2>Dashboard<a class="headerlink" href="#dashboard" title="Permalink to this headline">¶</a></h2>
+<p>ICEkit comes with an admin dashboard that allows you to prioritise major
+content types.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ICEkit architectural overview</a><ul>
+<li><a class="reference internal" href="#rich-content">Rich Content</a><ul>
+<li><a class="reference internal" href="#database-representation">Database representation</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#page-types">Page Types</a><ul>
+<li><a class="reference internal" href="#database-representation">Database representation</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#publishing">Publishing</a></li>
+<li><a class="reference internal" href="#dashboard">Dashboard</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/intro/architecture.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, the Interaction Consortium.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/intro/architecture.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -52,8 +52,7 @@ When you're done, exit the container and stop all of its dependencies:
     # exit
     $ docker-compose stop
 
-# Next steps
+# Start building your site
 
-  * [Start building your site](../howto/start.md)
-  * [Features at a glance](features.md)
-  * [Architectural overview](architecture.md)
+After ICEkit is installed and running, it's time to
+create the features of your site.

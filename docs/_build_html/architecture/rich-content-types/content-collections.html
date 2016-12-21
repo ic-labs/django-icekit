@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>AbstractCollectedContent and AbstractListingPage &#8212; ICEkit 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="abstractcollectedcontent-and-abstractlistingpage">
+<span id="abstractcollectedcontent-and-abstractlistingpage"></span><h1><code class="docutils literal"><span class="pre">AbstractCollectedContent</span></code> and <code class="docutils literal"><span class="pre">AbstractListingPage</span></code><a class="headerlink" href="#abstractcollectedcontent-and-abstractlistingpage" title="Permalink to this headline">¶</a></h1>
+<p>A Content Collection is a polymorphic collection of publishable content.
+Normally each <code class="docutils literal"><span class="pre">AbstractCollectedContent</span></code> instance is mounted under its <code class="docutils literal"><span class="pre">collection</span></code>
+URL. The <code class="docutils literal"><span class="pre">AbstractListingPage</span></code> model is designed to act as such a URLs.</p>
+<p>An example of Collected Content is a Press Release, which would be mounted
+under a Press Releases Collection Page. The Collection Page might have the URL
+<code class="docutils literal"><span class="pre">/press/</span></code> and thus all the Press Releases have the URL <code class="docutils literal"><span class="pre">/press/&lt;slug&gt;/</span></code>.</p>
+<p>Use Collected Content when both of the following are true:</p>
+<ul class="simple">
+<li>You have a flat collection of publishable content</li>
+<li>... that should have a URL mounted under a Page</li>
+</ul>
+<div class="section" id="examples">
+<span id="examples"></span><h2>Examples:<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Articles (at /articles/, or shared amongst /read/, /watch/, /listen/)</li>
+<li>Press Releases</li>
+<li>Authors</li>
+<li>Productions</li>
+<li>Case studies and research projects</li>
+<li>Portfolio items (at /portfolio/, or organised by theme)</li>
+<li>Films (at /films/)</li>
+<li>People (at /people/, or organised by department)</li>
+</ul>
+</div>
+<div class="section" id="counter-examples">
+<span id="counter-examples"></span><h2>Counter-examples:<a class="headerlink" href="#counter-examples" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Pages in a tree (use fluent-pages)</li>
+<li>Events (use icekit-events)</li>
+<li>Assets like images (which don&#8217;t need to be mounted at a URL)</li>
+</ul>
+</div>
+<div class="section" id="possibly-useful-for">
+<span id="possibly-useful-for"></span><h2>Possibly useful for:<a class="headerlink" href="#possibly-useful-for" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Museum collections, works, objects, creators, exhibitions (the CollectionPage
+needs a great deal of extension)</li>
+<li>Blog posts (by default, date is not used in the URL)</li>
+</ul>
+</div>
+<div class="section" id="abstractcollectedcontent">
+<span id="abstractcollectedcontent"></span><h2><code class="docutils literal"><span class="pre">AbstractCollectedContent</span></code><a class="headerlink" href="#abstractcollectedcontent" title="Permalink to this headline">¶</a></h2>
+<p>Each <code class="docutils literal"><span class="pre">AbstractCollectedContent</span></code> subclass implements some key
+functionality:</p>
+<ol class="simple">
+<li><strong>A <code class="docutils literal"><span class="pre">parent</span></code> attribute.</strong>
+In order for an instance of Collected Content to know its URL (which is based
+on a collection&#8217;s URL), it should define a <code class="docutils literal"><span class="pre">parent</span></code> attribute, which is
+normally a <code class="docutils literal"><span class="pre">AbstractListingPage</span></code> instance, either hardcoded (if all content
+should live under a single specific parent page) or a foreign key (if
+editors should choose which parent page the content should live under).</li>
+<li><strong>A view.</strong>
+When a URL is requested that matches a child URL of <code class="docutils literal"><span class="pre">AbstractListingPage</span></code>,
+<code class="docutils literal"><span class="pre">ListingPagePlugin.collected_content_view()</span></code> is called, which resolves the
+Collected Content item to show, and calls <code class="docutils literal"><span class="pre">get_response(request,</span> <span class="pre">parent)</span></code>
+on that item, where <code class="docutils literal"><span class="pre">parent</span></code> is the relevant <code class="docutils literal"><span class="pre">AbstractListingPage</span></code>. If the
+Collected Content item is a <code class="docutils literal"><span class="pre">fluent_contents</span></code> model, the default
+<code class="docutils literal"><span class="pre">AbstractCollectedContent.get_response(request,</span> <span class="pre">page)</span></code> may be sufficient.
+Otherwise you&#8217;ll need to implement the method yourself.</li>
+</ol>
+</div>
+<div class="section" id="abstractlistingpage">
+<span id="abstractlistingpage"></span><h2><code class="docutils literal"><span class="pre">AbstractListingPage</span></code><a class="headerlink" href="#abstractlistingpage" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">AbstractListingPage</span></code> model is a page type that requires
+<code class="docutils literal"><span class="pre">get_items_to_list()</span></code> and <code class="docutils literal"><span class="pre">get_items_to_mount()</span></code> to be defined in subclasses.
+When viewed, ListingPage lists the items returned by <code class="docutils literal"><span class="pre">get_items_to_list()</span></code>.
+<code class="docutils literal"><span class="pre">get_items_to_mount()</span></code> is necessary because an editor may wish to preview
+urls for items that aren&#8217;t returned by <code class="docutils literal"><span class="pre">get_items_to_list()</span></code>, such as draft
+items.</p>
+</div>
+<div class="section" id="admins">
+<span id="admins"></span><h2>Admins<a class="headerlink" href="#admins" title="Permalink to this headline">¶</a></h2>
+<p>Because CollectedContent is polymorphic, you may need to define admins that
+inherit from <code class="docutils literal"><span class="pre">CollectedContentParentAdmin</span></code> (for the list view) and
+<code class="docutils literal"><span class="pre">CollectedContentChildAdmin</span></code> (for each type of CollectedContent).</p>
+<p>These both inherit from <code class="docutils literal"><span class="pre">ContentCollectionAdminBase</span></code>, which may suffice if
+you only have one type of Collected Content.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">AbstractCollectedContent</span></code> and <code class="docutils literal"><span class="pre">AbstractListingPage</span></code></a><ul>
+<li><a class="reference internal" href="#examples">Examples:</a></li>
+<li><a class="reference internal" href="#counter-examples">Counter-examples:</a></li>
+<li><a class="reference internal" href="#possibly-useful-for">Possibly useful for:</a></li>
+<li><a class="reference internal" href="#abstractcollectedcontent"><code class="docutils literal"><span class="pre">AbstractCollectedContent</span></code></a></li>
+<li><a class="reference internal" href="#abstractlistingpage"><code class="docutils literal"><span class="pre">AbstractListingPage</span></code></a></li>
+<li><a class="reference internal" href="#admins">Admins</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/architecture/rich-content-types/content-collections.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, the Interaction Consortium.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../../_sources/architecture/rich-content-types/content-collections.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

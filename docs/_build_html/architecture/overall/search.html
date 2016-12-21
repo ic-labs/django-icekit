@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Search in ICEkit &#8212; ICEkit 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="search-in-icekit">
+<span id="search-in-icekit"></span><h1>Search in ICEkit<a class="headerlink" href="#search-in-icekit" title="Permalink to this headline">¶</a></h1>
+<p>ICEkit uses Haystack with an Elastic Search backend for its onsite search.</p>
+<p>It comes with a simple SearchIndex, <code class="docutils literal"><span class="pre">icekit.utils.search.AbstractLayoutIndex</span></code>
+which works well on content that:</p>
+<ul class="simple">
+<li>Implements the <code class="docutils literal"><span class="pre">ListableMixin</span></code> for getting list content</li>
+<li>Uses fluent contents (having a number of rich content placeholders)</li>
+<li>Is publishable (the index queryset defaults to <code class="docutils literal"><span class="pre">objects.published()</span></code>)</li>
+<li>Is polymorphic (the <code class="docutils literal"><span class="pre">django_ct</span></code> value always matches <code class="docutils literal"><span class="pre">get_model()</span></code>, rather
+than varying by the object being indexed.</li>
+</ul>
+<p>ICEkit and GLAMkit&#8217;s default content types use this index:</p>
+<ul class="simple">
+<li>Page (including LayoutPage, ArticleListingPage, etc.)</li>
+<li>Article</li>
+<li>Author</li>
+</ul>
+<p>And in optional libraries:</p>
+<ul class="simple">
+<li>icekit_events.EventBase</li>
+<li>icekit_press_releases.PressRelease</li>
+<li>glamkit_collections.WorkBase</li>
+<li>glamkit_collections.CreatorBase</li>
+<li>etc.</li>
+</ul>
+<p><code class="docutils literal"><span class="pre">AbstractLayoutIndex</span></code> renders the <code class="docutils literal"><span class="pre">search/indexes/icekit/default.txt</span></code> template
+which indexes ListableMixin content, all Fluent placeholders, and some common
+content fields. You can render a different template in your search index by
+redeclaring the <code class="docutils literal"><span class="pre">title</span></code> field. HTML tags are stripped and HTML entities are
+converted to unicode.</p>
+<div class="section" id="using-abstractlayoutindex">
+<span id="using-abstractlayoutindex"></span><h2>Using <code class="docutils literal"><span class="pre">AbstractLayoutIndex</span></code><a class="headerlink" href="#using-abstractlayoutindex" title="Permalink to this headline">¶</a></h2>
+<p>As minimal example, create <code class="docutils literal"><span class="pre">search_indexes.py</span></code> on a publishable, <code class="docutils literal"><span class="pre">ListableMixin</span></code>
+model:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">haystack</span> <span class="k">import</span> <span class="n">indexes</span>
+<span class="kn">from</span> <span class="nn">icekit.utils.search</span> <span class="k">import</span> <span class="n">AbstractLayoutIndex</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">MyModelIndex</span><span class="p">(</span><span class="n">AbstractLayoutIndex</span><span class="p">,</span> <span class="n">indexes</span><span class="o">.</span><span class="n">Indexable</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">models</span><span class="o">.</span><span class="n">MyModel</span>
+</pre></div>
+</div>
+<p>Publish the content you want to be indexed, then run <code class="docutils literal"><span class="pre">manage.py</span> <span class="pre">update_index</span></code>.</p>
+</div>
+<div class="section" id="search-page">
+<span id="search-page"></span><h2>Search Page<a class="headerlink" href="#search-page" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">icekit.page_types.search_page</span></code> page plugin implements a search page.
+To use it for your site, create a search page, and preview/publish it.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Search in ICEkit</a><ul>
+<li><a class="reference internal" href="#using-abstractlayoutindex">Using <code class="docutils literal"><span class="pre">AbstractLayoutIndex</span></code></a></li>
+<li><a class="reference internal" href="#search-page">Search Page</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/architecture/overall/search.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, the Interaction Consortium.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../../_sources/architecture/overall/search.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

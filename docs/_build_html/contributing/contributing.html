@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Contributing &#8212; ICEkit 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="contributing">
+<span id="contributing"></span><h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
+<p>Please follow these guidelines when making contributions.</p>
+</div>
+<div class="section" id="run-from-source-with-docker">
+<span id="run-from-source-with-docker"></span><h1>Run from source, with Docker<a class="headerlink" href="#run-from-source-with-docker" title="Permalink to this headline">¶</a></h1>
+<p>You can run the ICEkit project template as-is, without first creating a project
+from the template.</p>
+<p>Get the code:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ git clone https://github.com/ic-labs/django-icekit.git
+$ cd django-icekit
+</pre></div>
+</div>
+<p>Run a <code class="docutils literal"><span class="pre">django</span></code> container and all of its dependancies:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ docker-compose run --rm --service-ports django
+</pre></div>
+</div>
+<p>Run the tests:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># runtests.sh</span>
+</pre></div>
+</div>
+<p>Create a superuser account:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># manage.py createsuperuser</span>
+</pre></div>
+</div>
+<p>Run the Django dev server:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># runserver.sh</span>
+</pre></div>
+</div>
+<p>Open the site in a browser:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">8000</span>
+</pre></div>
+</div>
+<p>When you&#8217;re done, exit the container and stop all of its dependencies:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span># exit
+$ docker-compose stop
+</pre></div>
+</div>
+<div class="section" id="running-multiple-containers">
+<span id="running-multiple-containers"></span><h2>Running multiple containers<a class="headerlink" href="#running-multiple-containers" title="Permalink to this headline">¶</a></h2>
+<p>Only one container can bind a fixed service port on the host at a time.</p>
+<p>If you want to run a second container, for example to run tests in while
+running the Django dev server, you will need to run it with a different fixed
+port or a dynamic port:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ docker-compose run --rm -p 8001:8000 django  # fixed: 8001-&gt;8000
+$ docker-compose run --rm -p 8000 django  # dynamic, check with docker-compose ps
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="run-without-docker">
+<span id="run-without-docker"></span><h1>Run without Docker<a class="headerlink" href="#run-without-docker" title="Permalink to this headline">¶</a></h1>
+<p>Read <a class="reference external" href="../intro/manual-setup.md">Manual Setup</a> for more info on running an
+ICEkit project without Docker.</p>
+</div>
+<div class="section" id="installing-the-icekit-dev-version-on-an-existing-project">
+<span id="installing-the-icekit-dev-version-on-an-existing-project"></span><h1>Installing the ICEkit dev version on an existing project<a class="headerlink" href="#installing-the-icekit-dev-version-on-an-existing-project" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ docker-compose exec django entrypoint.sh
+$ pip install -e git+https://github.com/ic-labs/django-icekit.git#egg=django-icekit
+</pre></div>
+</div>
+</div>
+<div class="section" id="git-branching">
+<span id="git-branching"></span><h1>Git branching<a class="headerlink" href="#git-branching" title="Permalink to this headline">¶</a></h1>
+<p>We are using the <a class="reference external" href="http://nvie.com/posts/a-successful-git-branching-model/">Gitflow</a> branching model. Basically:</p>
+<ul class="simple">
+<li>The <code class="docutils literal"><span class="pre">master</span></code> branch contains stable code, and each commit represents a
+tagged release.</li>
+<li>The <code class="docutils literal"><span class="pre">develop</span></code> branch is an integration branch for new features, and is
+merged into <code class="docutils literal"><span class="pre">master</span></code> when we are ready to tag a new release.</li>
+<li>New features are developed in <code class="docutils literal"><span class="pre">feature/*</span></code> branches. Create a pull request
+when you are ready to merge a feature branch back into <code class="docutils literal"><span class="pre">develop</span></code>.</li>
+</ul>
+<p>The <a class="reference external" href="http://sourcetreeapp.com/">SourceTree</a> app (OS X and Windows) has built-in support for Gitflow, and
+there is also a collection of <a class="reference external" href="https://github.com/nvie/gitflow/">git-extensions</a>
+for command line users.</p>
+</div>
+<div class="section" id="code-style">
+<span id="code-style"></span><h1>Code style<a class="headerlink" href="#code-style" title="Permalink to this headline">¶</a></h1>
+<p>It&#8217;s important that we adopt a consistent code style to minimise code churn and
+make collaboration easier.</p>
+<ul class="simple">
+<li>Follow <a class="reference external" href="http://legacy.python.org/dev/peps/pep-0008/">PEP8</a> for Python code, unless there is a good reason not to.</li>
+<li>Install the <a class="reference external" href="http://editorconfig.org/">EditorConfig</a> plugin for your
+preferred code editor.</li>
+</ul>
+</div>
+<div class="section" id="tests">
+<span id="tests"></span><h1>Tests<a class="headerlink" href="#tests" title="Permalink to this headline">¶</a></h1>
+<p>We don&#8217;t strictly need 100% test coverage, but we aim to have:</p>
+<ul class="simple">
+<li>Unit tests for all regression bugs.</li>
+<li>Unit or integration tests for complex, fragile, or important functionality.</li>
+</ul>
+</div>
+<div class="section" id="documentation">
+<span id="documentation"></span><h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<p>Docs are just as important as tests.</p>
+<ul class="simple">
+<li>Write <a class="reference external" href="http://daringfireball.net/projects/markdown/">Markdown</a> docs for all notable changes and additions.</li>
+<li>Include examples so new contributors can get started quickly.</li>
+<li>Keep the <a class="reference external" href="../changelog.md">changelog</a> up to date. Describe features, not implementation
+details, except for backwards incompatible changes.</li>
+</ul>
+</div>
+<div class="section" id="releases">
+<span id="releases"></span><h1>Releases<a class="headerlink" href="#releases" title="Permalink to this headline">¶</a></h1>
+<p>When the <a class="reference external" href="../changelog.md">changelog</a> for a release gets sufficiently long or major features or
+fixes are implemented, we will tag and upload a release to PyPI.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Contributing</a></li>
+<li><a class="reference internal" href="#run-from-source-with-docker">Run from source, with Docker</a><ul>
+<li><a class="reference internal" href="#running-multiple-containers">Running multiple containers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#run-without-docker">Run without Docker</a></li>
+<li><a class="reference internal" href="#installing-the-icekit-dev-version-on-an-existing-project">Installing the ICEkit dev version on an existing project</a></li>
+<li><a class="reference internal" href="#git-branching">Git branching</a></li>
+<li><a class="reference internal" href="#code-style">Code style</a></li>
+<li><a class="reference internal" href="#tests">Tests</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+<li><a class="reference internal" href="#releases">Releases</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/contributing/contributing.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, the Interaction Consortium.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/contributing/contributing.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

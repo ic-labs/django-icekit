@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Install ICEkit without Docker &#8212; ICEkit 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="install-icekit-without-docker">
+<span id="install-icekit-without-docker"></span><h1>Install ICEkit without Docker<a class="headerlink" href="#install-icekit-without-docker" title="Permalink to this headline">¶</a></h1>
+<p>If you are not yet ready for Docker, you can run the ICEkit project template
+(or an ICEkit project) directly. You will need to install and configure all of
+its dependencies manually.</p>
+<div class="section" id="install-development-tools-on-a-new-development-machine">
+<span id="install-development-tools-on-a-new-development-machine"></span><h2>Install development tools (on a new development machine)<a class="headerlink" href="#install-development-tools-on-a-new-development-machine" title="Permalink to this headline">¶</a></h2>
+<p>Install development tools. On OS X, install the XCode command line tools:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">xcode</span><span class="o">-</span><span class="n">select</span> <span class="o">--</span><span class="n">install</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="install-icekit-system-dependencies-only-necessary-the-first-time-you-install">
+<span id="install-icekit-system-dependencies-only-necessary-the-first-time-you-install"></span><h2>Install ICEkit system dependencies (only necessary the first time you install<a class="headerlink" href="#install-icekit-system-dependencies-only-necessary-the-first-time-you-install" title="Permalink to this headline">¶</a></h2>
+<p>an ICEkit project)</p>
+<p>Install required system packages:</p>
+<ul class="simple">
+<li>PostgreSQL</li>
+<li>Elasticsearch</li>
+<li>git-secret</li>
+<li>md5sum</li>
+<li>Nginx</li>
+<li>NPM</li>
+<li>Pipe Viewer</li>
+<li>Python 2.7</li>
+<li>Redis</li>
+<li>zlib</li>
+</ul>
+<div class="section" id="database">
+<span id="database"></span><h3>Database<a class="headerlink" href="#database" title="Permalink to this headline">¶</a></h3>
+<p>ICEkit requires a PostgreSQL database. On OS X, we recommend
+<a class="reference external" href="http://postgresapp.com/">Postgres.app</a>. It is easy to install, start,
+stop, and upgrade.</p>
+<p>We recommend that you configure Postgres to start automatically, using
+Postgres.app&#8217;s preferences pane.</p>
+<p>Alternatively, you can install Postgres using <a class="reference external" href="http://brew.sh/">Homebrew</a> with
+<code class="docutils literal"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">postgres</span></code>. Follow the instructions to configure Postgres to start
+automatically.</p>
+</div>
+<div class="section" id="homebrew">
+<span id="homebrew"></span><h3>Homebrew<a class="headerlink" href="#homebrew" title="Permalink to this headline">¶</a></h3>
+<p>The rest can be installed with <a class="reference external" href="http://brew.sh/">Homebrew</a>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ brew install elasticsearch git-secret md5sha1sum nginx npm pv python redis
+</pre></div>
+</div>
+<p>zlib needs to be installed from the <code class="docutils literal"><span class="pre">dupes</span></code> repository and force linked:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ brew tap homebrew/dupes
+$ brew install zlib
+$ brew link zlib --force
+</pre></div>
+</div>
+<p>You need to configure Elasticsearch and Redis to start
+automatically, or start them manually before you start the project.</p>
+</div>
+<div class="section" id="install-bower">
+<span id="install-bower"></span><h3>Install Bower<a class="headerlink" href="#install-bower" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="n">install</span> <span class="o">-</span><span class="n">g</span> <span class="n">bower</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="repairing-installation-after-an-os-x-upgrade">
+<span id="repairing-installation-after-an-os-x-upgrade"></span><h3>Repairing installation after an OS X upgrade<a class="headerlink" href="#repairing-installation-after-an-os-x-upgrade" title="Permalink to this headline">¶</a></h3>
+<p>If you experience errors running <code class="docutils literal"><span class="pre">./go.sh</span></code> after an upgrade to OS X try
+installing Xcode command-line tools:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">xcode</span><span class="o">-</span><span class="n">select</span> <span class="o">--</span><span class="n">install</span>
+</pre></div>
+</div>
+<p>You may also need to re-install system packages.</p>
+</div>
+</div>
+<div class="section" id="run-without-docker">
+<span id="run-without-docker"></span><h2>Run without Docker<a class="headerlink" href="#run-without-docker" title="Permalink to this headline">¶</a></h2>
+<p>Change to the ICEkit project template (or an ICEkit project) directory:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ cd project_template
+</pre></div>
+</div>
+<p>Open a shell with the environment appropriately configured (dependencies
+updated, database set up):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ ./go.sh
+</pre></div>
+</div>
+<p>(After installing, you can skip installing dependencies and migrations and head
+directly to a shell with <code class="docutils literal"><span class="pre">./go.sh</span> <span class="pre">bash</span></code>)</p>
+<p>Create a superuser account:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ manage.py createsuperuser
+</pre></div>
+</div>
+<p>Run the Django dev server:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ runserver.sh
+</pre></div>
+</div>
+<p>Now you can open the site in a browser:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">8000</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Install ICEkit without Docker</a><ul>
+<li><a class="reference internal" href="#install-development-tools-on-a-new-development-machine">Install development tools (on a new development machine)</a></li>
+<li><a class="reference internal" href="#install-icekit-system-dependencies-only-necessary-the-first-time-you-install">Install ICEkit system dependencies (only necessary the first time you install</a><ul>
+<li><a class="reference internal" href="#database">Database</a></li>
+<li><a class="reference internal" href="#homebrew">Homebrew</a></li>
+<li><a class="reference internal" href="#install-bower">Install Bower</a></li>
+<li><a class="reference internal" href="#repairing-installation-after-an-os-x-upgrade">Repairing installation after an OS X upgrade</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#run-without-docker">Run without Docker</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/intro/_manual-setup.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, the Interaction Consortium.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/intro/_manual-setup.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

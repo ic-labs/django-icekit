@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Useful shell commands &#8212; ICEkit 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="useful-shell-commands">
+<span id="useful-shell-commands"></span><h1>Useful shell commands<a class="headerlink" href="#useful-shell-commands" title="Permalink to this headline">¶</a></h1>
+<p>This document describes a few useful shell commands. For Docker commands, see
+our <a class="reference external" href="../intro/docker.md">Docker intro</a>.</p>
+<div class="section" id="opening-a-shell">
+<span id="opening-a-shell"></span><h2>Opening a shell<a class="headerlink" href="#opening-a-shell" title="Permalink to this headline">¶</a></h2>
+<p>Open a shell on an already running container (e.g. via <code class="docutils literal"><span class="pre">docker-compose</span> <span class="pre">up</span></code>):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ docker-compose exec django entrypoint.sh
+</pre></div>
+</div>
+<p>Or open a shell on a new container, and remove it on exit:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ docker-compose run --rm django
+</pre></div>
+</div>
+<p>Or open a shell without Docker from the ICEkit project template (or an ICEkit
+project) directory:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ cd project_template
+$ ./go.sh
+</pre></div>
+</div>
+</div>
+<div class="section" id="once-in-a-shell">
+<span id="once-in-a-shell"></span><h2>Once in a shell<a class="headerlink" href="#once-in-a-shell" title="Permalink to this headline">¶</a></h2>
+<p>Run Django management commands:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ manage.py migrate --list
+$ manage.py shell_plus
+</pre></div>
+</div>
+<p>Install a Python package:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ pip install -U django-icekit
+$ pip install -e git+https://github.com/ic-labs/django-icekit.git
+</pre></div>
+</div>
+<p>Open a PostgreSQL shell:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ psql
+</pre></div>
+</div>
+<p>Dump the database:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ pg_dump -O -x -f dump.sql
+</pre></div>
+</div>
+<p>Run the tests:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ runtests.sh
+</pre></div>
+</div>
+<p>Run a single test:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ runtests.sh path.to:TestCase.test_method
+</pre></div>
+</div>
+<p>Manage Supervisord programs (Gunicorn, Nginx, etc.):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ supervisorctl.sh status
+$ supervisorctl.sh restart gunicorn
+</pre></div>
+</div>
+<p>Display a list of other frequently used shell commands:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ help.sh
+</pre></div>
+</div>
+</div>
+<div class="section" id="uninstalling-an-icekit-project">
+<span id="uninstalling-an-icekit-project"></span><h2>Uninstalling an ICEkit project<a class="headerlink" href="#uninstalling-an-icekit-project" title="Permalink to this headline">¶</a></h2>
+<p>Delete all containers with a name matching <code class="docutils literal"><span class="pre">{project_name}</span></code>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ docker rm $(docker ps -a -f &quot;name={project_name}&quot; -q)
+</pre></div>
+</div>
+<p>To delete the associated images, run:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ docker images #list all images
+</pre></div>
+</div>
+<p>and for each image you want to delete:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ docker rmi {image id}
+</pre></div>
+</div>
+<p>If you are running other ICEkit projects, then you only need to delete the
+image that starts with <code class="docutils literal"><span class="pre">[project_name]</span></code> - the other images will be used by
+other projects. To remove all &#8220;dangling&#8221; images (untagged and not referenced by
+a container):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ docker rmi $(docker images -f &quot;dangling=true&quot; -q)
+</pre></div>
+</div>
+<p>Finally, remove the project folder.</p>
+</div>
+<div class="section" id="suggestions">
+<span id="suggestions"></span><h2>Suggestions?<a class="headerlink" href="#suggestions" title="Permalink to this headline">¶</a></h2>
+<p>If you&#8217;d like to add a useful command, please
+<a class="reference external" href="https://github.com/ic-labs/django-icekit/issues/new">create a ticket</a> and/or
+submit a pull request.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Useful shell commands</a><ul>
+<li><a class="reference internal" href="#opening-a-shell">Opening a shell</a></li>
+<li><a class="reference internal" href="#once-in-a-shell">Once in a shell</a></li>
+<li><a class="reference internal" href="#uninstalling-an-icekit-project">Uninstalling an ICEkit project</a></li>
+<li><a class="reference internal" href="#suggestions">Suggestions?</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/reference/shell-commands.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, the Interaction Consortium.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/reference/shell-commands.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

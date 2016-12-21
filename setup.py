@@ -157,6 +157,12 @@ setuptools.setup(
             'psycopg2',
             'WebTest',
         ],
+        'docs': [
+            'sphinx',
+            'sphinx-autobuild',
+            'recommonmark',
+            'pypandoc',
+        ],
     },
     **kwargs
 )
