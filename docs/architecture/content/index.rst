@@ -1,4 +1,4 @@
-Working with ICEkit contents
+Working with ICEkit contents *
 ============================
 
 
@@ -6,9 +6,14 @@ Working with ICEkit contents
    :maxdepth: 2
    :caption: Contents:
 
-   rich-content-types
+   rich-content-models
    content-plugins
    content-collections
    publishing
    workflow
    page-trees-and-mptt
+
+
+.. autoclass:: icekit.mixins.ListableMixin
+   :members:
+

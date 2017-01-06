@@ -9,8 +9,8 @@ This isn’t an exhaustive list of things that you can’t do. Rather, take
 it in the spirit in which it’s intended - a guide to make it easier to
 enrich all of us and the technical communities in which we participate.
 
-This code of conduct applies to all public spaces managed by the
-Interaction Consortium (IC). This includes chat rooms, the mailing
+This code of conduct applies to all public spaces managed by |the IC|_.
+This includes chat rooms, the mailing
 lists, the issue tracker, IC events, and any other forums created by the
 project team which the community uses for communication. In addition,
 violations of this code outside these spaces may affect a person’s
@@ -77,7 +77,7 @@ Original text courtesy of the `Django Code of Conduct`_, which in turn
 credits the `Speak Up! project`_.
 
 Questions?
-==========
+----------
 
 If you have any questions, please `contact us`_.
 

@@ -19,6 +19,6 @@ def admin_link(inst):
     :return: a complete admin link for the instance. Permissions aren't checked.
     """
     if inst:
-        t = Template("""{% load admin_urls %}<a href="{% url opts|admin_urlname:'change' inst.pk %}">{{ inst }}</a>""")
+        t = Template("""{% load admin_urls %}<a href="{% url opts|admin_urlname:'change' inst.pk %}">Edit <em>{{ inst }}</em></a>""")
         return mark_safe(t.render(Context({ 'inst': inst, 'opts': inst._meta})))
     return ""

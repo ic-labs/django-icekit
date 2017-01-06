@@ -15,12 +15,14 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-from recommonmark.parser import CommonMarkParser
 
+import sys
+from os.path import abspath, dirname, join
+from recommonmark.parser import CommonMarkParser
+from django.conf import settings
+
+sys.path.append(abspath(join(dirname(__file__), "_ext")))
+settings.configure()
 
 # -- General configuration ------------------------------------------------
 
@@ -31,13 +33,16 @@ from recommonmark.parser import CommonMarkParser
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc',
+extensions = [
+    'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode']
+    'sphinx.ext.viewcode',
+    'autodoc_raw',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -75,7 +80,11 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = [
+    '_build*',
+    'Thumbs.db',
+    '.DS_Store',
+]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -172,8 +181,18 @@ rst_epilog = """
 .. _issues: https://github.com/ic-labs/django-icekit/issues
 .. |IC| replace:: Interaction Consortium
 .. _IC: https://interaction.net.au
-.. |the IC| replace:: the Interaction Consortium
+.. |the IC| replace:: the Interaction Consortium (IC)
 .. _`the IC`: https://interaction.net.au
 .. _GLAMkit: http://glamkit.com
+.. _django-fluent: https://django-fluent.org/
 .. _`Docker Cloud`: https://cloud.docker.com
+.. _`Elastic Search`: https://www.elastic.co/
+.. _django-reversion: https://django-reversion.readthedocs.io/en/stable/
+.. _`Travis CI`: https://travis-ci.org/
+.. _Travis: https://travis-ci.org/
+.. _icekit-events: https://github.com/ic-labs/icekit-events/
+.. _icekit-press-releases: https://github.com/ic-labs/icekit-press-releases/
+.. _glamkit-sponsors: https://github.com/ic-labs/glamkit-sponsors/
+.. _glamkit-collections: https://github.com/ic-labs/glamkit-collections/
+.. _django-dynamic-fixture: http://paulocheque.github.io/django-dynamic-fixture/
 """

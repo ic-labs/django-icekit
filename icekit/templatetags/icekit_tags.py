@@ -14,7 +14,6 @@ from micawber import ProviderException
 
 register = Library()
 
-
 def get_item(obj, key):
     """
     Obtain an item in a dictionary style object.
@@ -58,13 +57,21 @@ def link_share(context, text):
 
 def grammatical_join(l, initial_joins=", ", final_join=" and "):
     """
-    http://stackoverflow.com/questions/19838976/grammatical-list-join-in-python
+    Display a list of items nicely, with a different string before the final
+    item. Useful for using lists in sentences.
+
+    >>> grammatical_join(['apples', 'pears', 'bananas'])
+    'apples, pears and bananas'
+
+    >>> grammatical_join(['apples', 'pears', 'bananas'], initial_joins=";", final_join="; or ")
+    'apples; pears; or bananas'
 
     :param l: List of strings to join
     :param initial_joins: the string to join the non-ultimate items with
     :param final_join: the string to join the final item with
     :return: items joined with commas except " and " before the final one.
     """
+    # http://stackoverflow.com/questions/19838976/grammatical-list-join-in-python
     return initial_joins.join(l[:-2] + [final_join.join(l[-2:])])
 
 def _grammatical_join_filter(l, arg=None):
@@ -85,32 +92,46 @@ def _grammatical_join_filter(l, arg=None):
 register.filter("grammatical_join", _grammatical_join_filter)
 
 
-"""
-update_GET allows you to substitute parameters into the current request's
-GET parameters. This is useful for updating search filters without losing
-the current set.
-
-<a href="?{% update_GET 'attr1' += value1 'attr2' -= value2 'attr3' = value3 %}">foo</a>
-This adds value1 to (the list of values in) 'attr1',
-removes value2 from (the list of values in) 'attr2',
-sets 'attr3' to value3.
-
-And returns a urlencoded GET string.
-
-Allowed values are:
-    strings, in quotes
-    vars that resolve to strings
-    lists of strings
-    None (without quotes)
-
-If a attribute is set to None or an empty list, the GET parameter is removed.
-If an attribute's value is an empty string, or [""] or None, the value remains, but has a "" value.
-If you try to =- a value from a list that doesn't contain that value, nothing happens.
-If you try to =- a value from a list where the value appears more than once, only the first value is removed.
-"""
-
 @register.tag(name='update_GET')
-def do_update_GET(parser, token):
+def update_GET(parser, token):
+    """
+    ``update_GET`` allows you to substitute parameters into the current request's
+    GET parameters. This is useful for updating search filters, page numbers,
+    without losing the current set.
+
+    For example, the template fragment::
+
+        <a href="?{% update_GET 'attr1' += value1 'attr2' -= value2
+        'attr3' = value3 %}">foo</a>
+
+    -  adds ``value1`` to (the list of values in) ``'attr1'``,
+    -  removes ``value2`` from (the list of values in) ``'attr2'``,
+    -  sets ``attr3`` to ``value3``.
+    and returns a urlencoded GET string.
+
+    Allowed attributes are:
+
+    -  strings, in quotes
+    -  vars that resolve to strings
+
+    Allowed values are:
+
+    -  strings, in quotes
+    -  vars that resolve to strings
+    -  lists of strings
+    -  None (without quotes)
+
+    Note:
+
+    -  If a attribute is set to ``None`` or an empty list, the GET parameter is
+       removed.
+    -  If an attribute's value is an empty string, or ``[""]`` or ``None``, the value
+       remains, but has a ``""`` value.
+    -  If you try to ``=-`` a value from a list that doesn't contain that value,
+       nothing happens.
+    -  If you try to ``=-`` a value from a list where the value appears more
+       than once, only the first value is removed.
+    """
     try:
         args = token.split_contents()[1:]
         triples = list(_chunks(args, 3))
@@ -195,6 +216,15 @@ class UpdateGetNode(template.Node):
 
 @register.filter
 def oembed(url, params=""):
+    """
+    Render an OEmbed-compatible link as an embedded item.
+
+
+    :param url: A URL of an OEmbed provider.
+    :return: The OEMbed ``<embed>`` code.
+    """
+    # Note: this method isn't currently very efficient - the data isn't
+    # cached or stored.
     kwargs = dict(urlparse.parse_qsl(params))
 
     try:
@@ -210,6 +240,24 @@ def oembed(url, params=""):
 
 @register.filter
 def admin_link(obj):
+    """
+    Returns a link to the admin URL of an object.
+
+    No permissions checking is involved, so use with caution to avoid exposing
+    the link to unauthorised users.
+
+    Example::
+
+        {{ foo_obj|admin_link }}
+
+    renders as::
+
+        <a href='/admin/foo/123'>Foo</a>
+
+    :param obj: A Django model instance.
+    :return: A safe string expressing an HTML link to the admin page for an
+    object.
+    """
     if hasattr(obj, 'get_admin_link'):
         return obj.get_admin_link()
     return admin_link_fn(obj)
@@ -217,10 +265,42 @@ def admin_link(obj):
 
 @register.filter
 def admin_url(obj):
+    """
+    Returns the admin URL of the object.
+
+    No permissions checking is involved, so use with caution to avoid exposing
+    the link to unauthorised users.
+
+    Example::
+
+        {{ foo_obj|admin_url }}
+
+    renders as::
+
+        /admin/foo/123
+
+    :param obj: A Django model instance.
+    :return: the admin URL of the object
+    """
     if hasattr(obj, 'get_admin_url'):
         return obj.get_admin_url()
     return admin_url_fn(obj)
 
 @register.filter
 def link(obj):
+    """
+    Returns a link to the object. The URL of the link is
+    ``obj.get_absolute_url()``, and the text of the link is ``unicode(obj)``.
+
+    Example::
+
+        {{ foo_obj|link }}
+
+    renders as::
+
+        <a href='/foo/'>Foo</a>
+
+    :param obj: A Django model instance.
+    :return: A safe string expressing an HTML link to the object.
+    """
     return mark_safe(u"<a href='{0}'>{1}</a>".format(obj.get_absolute_url(), unicode(obj)))

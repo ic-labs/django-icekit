@@ -1,14 +1,13 @@
-Customising your site
-=====================
+Customising your ICEkit site *
+============================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    concepts
-   rich-content-types
+   rich-content-models
    content-plugins
-   portable-apps
 
 ## Where to put files
 
@@ -30,25 +29,20 @@ default Django/ICEkit settings or configure apps installed via `requirements
 ## How do I add project-specific URLs?
 
 Create a `urls.py` file in a project folder of your choice, such as `myproject`.
-It can contain something like
+It can contain something like::
 
-```python
-from django.conf.urls import include, patterns, url
+   from django.conf.urls import include, patterns, url
 
-urlpatterns = patterns(
-    'myproject.views',
-    ... your URLs here ...
-    # finally, fall back to ICEkit/GLAMkit URLs.
-    url('', include('icekit.project.urls')), # use `glamkit_urls` if this is a GLAMkit project
-]
-```
+   urlpatterns = patterns(
+       'myproject.views',
+       ... your URLs here ...
+       # finally, fall back to ICEkit/GLAMkit URLs.
+       url('', include('icekit.project.urls')), # use `glamkit_urls` if this is a GLAMkit project
+   ]
 
-Lastly, in `project_settings.py`, override the default URL path:
+Lastly, in `project_settings.py`, override the default URL path::
 
-```python
-ROOT_URLCONF = 'myproject.urls'
-```
-
+   ROOT_URLCONF = 'myproject.urls'
 
 ## Where's my virtualenv? How do I modify a source package?
 
