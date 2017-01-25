@@ -16,6 +16,8 @@
   * Add workflow features to all publishable models in ICEkit using the new
     abstract model mixins and admin base classes mentioned above.
 
+  * Add email notifications for workflow state changes.
+
   * Preview pages are now visually highlighted, and have a different HTML title.
 
   * "Preview draft" button is now near "View published" button.
