@@ -284,7 +284,16 @@ class _PublishingHelpersMixin(object):
             return False
         if user_obj.is_superuser:
             return True
-        return user_obj.has_perm('%s.can_publish' % self.opts.app_label)
+        # Normal user with `can_publish` permission can always publish
+        if user_obj.has_perm('%s.can_publish' % self.opts.app_label):
+            return True
+        # Normal user with `can_republish` permission can only publish if the
+        # item is already published.
+        if user_obj.has_perm('%s.can_republish' % self.opts.app_label) and \
+                obj and getattr(obj, 'has_been_published', False):
+            return True
+        # User does not meet any publishing permisison requirements; reject!
+        return False
 
     def has_preview_permission(self, request, obj=None):
         """
@@ -677,7 +686,8 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         except AttributeError:
             pass
         for q in qs:
-            q.publish()
+            if self.has_publish_permission(request, q):
+                q.publish()
 
     def unpublish(self, request, qs):
         # Convert polymorphic queryset instances to real ones if/when necessary
