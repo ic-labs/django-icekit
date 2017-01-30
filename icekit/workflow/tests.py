@@ -163,7 +163,7 @@ class TestWorkflowMixinAdmin(WebTest):
                     args=(self.article.pk, )),
             user=self.superuser)
         self.assertEqual(200, response.status_code)
-        wfstate_prefix = 'workflow-workflowstate-content_type-object_id-0-'
+        wfstate_prefix = 'icekit_workflow-workflowstate-content_type-object_id-0-'
         # Check existing workflow status relationship with article
         form = response.forms[0]
         self.assertEqual(
@@ -266,7 +266,7 @@ class TestWorkflowAdminForPagesThatDoNotExtendOurAdminMixin(WebTest):
                     args=(self.layoutpage.pk, )),
             user=self.superuser)
         self.assertEqual(200, response.status_code)
-        wfstate_prefix = 'workflow-workflowstate-content_type-object_id-0-'
+        wfstate_prefix = 'icekit_workflow-workflowstate-content_type-object_id-0-'
         # Check existing workflow status relationship with layoutpage
         form = response.forms[0]
         self.assertEqual(
