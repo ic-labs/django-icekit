@@ -62,6 +62,7 @@ class PublishingModel(models.Model):
         abstract = True
         permissions = (
             ('can_publish', 'Can publish'),
+            ('can_republish', 'Can republish'),
         )
 
     @property
@@ -840,9 +841,10 @@ def delete_published_copy_when_draft_deleted(sender, **kwargs):
 
 
 @receiver(models.signals.post_migrate)
-def create_can_publish_permission(sender, **kwargs):
+def create_can_publish_and_can_republish_permissions(sender, **kwargs):
     """
-    Add `can_publish` permission for each of the publishable model.
+    Add `can_publish` and `ca_nrepublish` permissions for each publishable
+    model in the system.
     """
     for model in sender.get_models():
         if not issubclass(model, PublishingModel):
@@ -851,3 +853,6 @@ def create_can_publish_permission(sender, **kwargs):
         permission, created = Permission.objects.get_or_create(
             content_type=content_type, codename='can_publish',
             defaults=dict(name='Can Publish %s' % model.__name__))
+        permission, created = Permission.objects.get_or_create(
+            content_type=content_type, codename='can_republish',
+            defaults=dict(name='Can Republish %s' % model.__name__))
