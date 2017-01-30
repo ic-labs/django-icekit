@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflow', '0002_auto_20161128_1105'),
+        ('icekit_workflow', '0002_auto_20161128_1105'),
     ]
 
     operations = [

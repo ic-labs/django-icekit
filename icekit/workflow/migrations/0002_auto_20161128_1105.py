@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workflow', '0001_initial'),
+        ('icekit_workflow', '0001_initial'),
     ]
 
     operations = [

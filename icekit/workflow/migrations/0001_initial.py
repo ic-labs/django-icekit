@@ -22,5 +22,8 @@ class Migration(migrations.Migration):
                 ('assigned_to', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True, help_text=b'User responsible for item at this stage in the workflow')),
                 ('content_type', models.ForeignKey(to='contenttypes.ContentType')),
             ],
+            options={
+                'db_table': 'workflow_workflowstate',
+            },
         ),
     ]
