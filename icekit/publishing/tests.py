@@ -4,7 +4,7 @@ import urlparse
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser, Group
+from django.contrib.auth.models import AnonymousUser, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
@@ -1120,22 +1120,39 @@ class TestPublishingAdmin(BaseAdminTest):
             title='Test Slideshow',
         )
 
+        # Fetch permissions to test
+        slideshow_ct = ContentType.objects.get_for_model(self.slide_show_1)
+        self.change_slideshow_permission = Permission.objects.get(
+            content_type=slideshow_ct, codename='change_slideshow')
+        self.can_publish_permission = Permission.objects.get(
+            content_type=slideshow_ct, codename='can_publish')
+        self.can_republish_permission = Permission.objects.get(
+            content_type=slideshow_ct, codename='can_republish')
+
+        # Generate URL paths/links to test
+        self.admin_list_page_url = reverse(
+            'admin:icekit_plugins_slideshow_slideshow_changelist')
+        self.admin_change_page_url = reverse(
+            'admin:icekit_plugins_slideshow_slideshow_change',
+            args=(self.slide_show_1.pk, ))
+        self.publish_link = reverse(
+            'admin:icekit_plugins_slideshow_slideshow_publish',
+            args=(self.slide_show_1.pk, ))
+        self.unpublish_link = reverse(
+            'admin:icekit_plugins_slideshow_slideshow_unpublish',
+            args=(self.slide_show_1.pk, ))
+
     def test_publish_slideshow(self):
         # Confirm slideshow is unpublished and versioned as such
         self.assertIsNone(self.slide_show_1.publishing_linked)
 
         # Check admin change page includes publish links, not unpublish ones
         response = self.app.get(
-            reverse('admin:icekit_plugins_slideshow_slideshow_change',
-                    args=(self.slide_show_1.pk, )),
+            self.admin_change_page_url,
             user=self.staff_1)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(
-            reverse('admin:icekit_plugins_slideshow_slideshow_publish',
-                    args=(self.slide_show_1.pk, )) in response.text)
-        self.assertFalse(
-            reverse('admin:icekit_plugins_slideshow_slideshow_unpublish',
-                    args=(self.slide_show_1.pk, )) in response.text)
+        self.assertTrue(self.publish_link in response.text)
+        self.assertFalse(self.unpublish_link in response.text)
 
         # Publish via admin
         self.admin_publish_item(self.slide_show_1, user=self.staff_1)
@@ -1146,16 +1163,11 @@ class TestPublishingAdmin(BaseAdminTest):
 
         # Check admin change page includes unpublish link (published item)
         response = self.app.get(
-            reverse('admin:icekit_plugins_slideshow_slideshow_change',
-                    args=(self.slide_show_1.pk, )),
+            self.admin_change_page_url,
             user=self.staff_1)
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(
-            reverse('admin:icekit_plugins_slideshow_slideshow_publish',
-                    args=(self.slide_show_1.pk, )) in response.text)
-        self.assertTrue(
-            reverse('admin:icekit_plugins_slideshow_slideshow_unpublish',
-                    args=(self.slide_show_1.pk, )) in response.text)
+        self.assertFalse(self.publish_link in response.text)
+        self.assertTrue(self.unpublish_link in response.text)
 
         # Publish again
         self.slide_show_1.title += ' - changed'
@@ -1173,16 +1185,135 @@ class TestPublishingAdmin(BaseAdminTest):
 
         # Check admin change page includes publish links, not unpublish ones
         response = self.app.get(
-            reverse('admin:icekit_plugins_slideshow_slideshow_change',
-                    args=(self.slide_show_1.pk, )),
+            self.admin_change_page_url,
             user=self.staff_1)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(
-            reverse('admin:icekit_plugins_slideshow_slideshow_publish',
-                    args=(self.slide_show_1.pk, )) in response.text)
-        self.assertFalse(
-            reverse('admin:icekit_plugins_slideshow_slideshow_unpublish',
-                    args=(self.slide_show_1.pk, )) in response.text)
+        self.assertTrue(self.publish_link in response.text)
+        self.assertFalse(self.unpublish_link in response.text)
+
+    def test_bulk_publishing_action_respects_permissions(self):
+        # Normal user with change permission but without publishing permissions
+        user = G(
+            User,
+            is_staff=True,
+            is_active=True,
+            is_superuser=False,
+        )
+        user.user_permissions = [self.change_slideshow_permission]
+
+        # Set up one already-published but dirty slideshow, one unpublished
+        self.slide_show_1.publish()
+        self.slide_show_1.title += ' (updated)'
+        self.slide_show_1.save()
+        self.slide_show_1 = self.refresh(self.slide_show_1)
+        self.assertTrue(self.slide_show_1.is_dirty)
+
+        slide_show_2 = SlideShow.objects.create(
+            title='Test Slideshow',
+        )
+
+        # User without publishing permissions performs 'publish' action
+        response = self.app.get(self.admin_list_page_url, user=user)
+        form = response.forms['changelist-form']
+        form['action'].value = 'publish'
+        for item_to_action_checkbox in form.fields['_selected_action']:
+            item_to_action_checkbox.checked = True
+        response = form.submit('index', user=user).follow()
+        self.assertEqual(response.status_code, 200)
+
+        # Confirm nothing has actually been (re)published
+        self.assertTrue(self.slide_show_1.is_dirty)
+        self.assertFalse(slide_show_2.has_been_published)
+
+        # User with only `can_republish` permission performs 'publish' action
+        user.user_permissions = \
+            [self.change_slideshow_permission, self.can_republish_permission]
+        response = form.submit('index', user=user).follow()
+        self.assertEqual(response.status_code, 200)
+
+        # Confirm already published item is republished, unpublished item isn't
+        self.slide_show_1 = self.refresh(self.slide_show_1)
+        slide_show_2 = self.refresh(slide_show_2)
+        self.assertFalse(self.slide_show_1.is_dirty)
+        self.assertFalse(slide_show_2.has_been_published)
+
+        # Re-dirty slideshow 1
+        self.slide_show_1.title += ' (updated again)'
+        self.slide_show_1.save()
+        self.slide_show_1 = self.refresh(self.slide_show_1)
+        self.assertTrue(self.slide_show_1.is_dirty)
+
+        # User with `can_publish` permission performs 'publish' action
+        user.user_permissions = \
+            [self.change_slideshow_permission, self.can_publish_permission]
+        response = form.submit('index', user=user).follow()
+        self.assertEqual(response.status_code, 200)
+
+        # Confirm already published and unpublished items are both published
+        self.slide_show_1 = self.refresh(self.slide_show_1)
+        slide_show_2 = self.refresh(slide_show_2)
+        self.assertFalse(self.slide_show_1.is_dirty)
+        self.assertTrue(self.slide_show_1.has_been_published)
+        self.assertTrue(slide_show_2.has_been_published)
+
+    def test_user_publishing_permissions(self):
+        # Normal user with change permission but without publishing permissions
+        user = G(
+            User,
+            is_staff=True,
+            is_active=True,
+            is_superuser=False,
+        )
+        user.user_permissions = [self.change_slideshow_permission]
+
+        # Publish slideshow, to make unpublish link available for testing
+        self.slide_show_1.publish()
+        # Update draft slideshow, to make publish link available for testing
+        self.slide_show_1.title += ' (updated)'
+        self.slide_show_1.save()
+
+        # Check admin change page does not include publish or unpublish links
+        # for user with no publishing permissions
+        response = self.app.get(self.admin_change_page_url, user=user)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(self.publish_link in response.text)
+        self.assertFalse(self.unpublish_link in response.text)
+        # Confirm user cannot perform publish/unpublish actions
+        self.app.get(self.publish_link, user=user, status=403)
+        self.app.get(self.unpublish_link, user=user, status=403)
+
+        # Check admin change page does include publish and unpublish links for
+        # user with `can_publish` permission
+        user.user_permissions = \
+            [self.change_slideshow_permission, self.can_publish_permission]
+        response = self.app.get(self.admin_change_page_url, user=user)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(self.publish_link in response.text)
+        self.assertTrue(self.unpublish_link in response.text)
+
+        # Check admin change page does include publish and unpublish links
+        # for user with only `can_republish` publishing permissions when item
+        # is already published
+        user.user_permissions = \
+            [self.change_slideshow_permission, self.can_republish_permission]
+        response = self.app.get(self.admin_change_page_url, user=user)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(self.publish_link in response.text)
+        self.assertTrue(self.unpublish_link in response.text)
+
+        # Check admin change page does not include publish or unpublish links
+        # for user with only `can_republish` publishing permissions if item
+        # is not already published
+        self.slide_show_1.unpublish()
+        user.user_permissions = \
+            [self.change_slideshow_permission, self.can_republish_permission]
+        response = self.app.get(self.admin_change_page_url, user=user)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(self.publish_link in response.text)
+        self.assertFalse(self.unpublish_link in response.text)
+        # Confirm user cannot perform publish/unpublish actions
+        self.app.get(self.publish_link, user=user, status=403)
+        self.app.get(self.unpublish_link, user=user, status=403)
 
 
 @modify_settings(MIDDLEWARE_CLASSES={
