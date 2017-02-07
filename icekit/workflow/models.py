@@ -47,9 +47,12 @@ class WorkflowState(models.Model):
         settings.AUTH_USER_MODEL,
         blank=True,
         null=True,
-        help_text='User responsible for item at this stage in the workflow',
+        help_text='User who is responsible for this content at this stage in the workflow',
         on_delete=models.SET_NULL,
     )
+
+    class Meta:
+        db_table = "icekit_workflow_workflowstate"
 
     def __str__(self):
         if self.assigned_to:
