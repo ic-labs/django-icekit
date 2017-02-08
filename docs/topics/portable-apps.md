@@ -55,7 +55,12 @@ In the app whose label is being updated, make the following changes:
   * Update the `AppConfig.label` attribute or rename the app package.
 
   * Update the `Meta.app_label` attribute on existing models, if they already
-    have a value set.
+    have a value set.  
+    NOTE: You may need to add and set this attribute to `{new app label}`
+    in some cases even if it was not already set, see for example
+    https://github.com/ic-labs/django-icekit/issues/190 where this was
+    necessary to avoid a downstream project from getting confused about
+    which app provided a model.
 
   * Replace any absolute imports within the app with relative imports.
 
