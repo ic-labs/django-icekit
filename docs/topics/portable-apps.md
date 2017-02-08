@@ -96,6 +96,13 @@ following changes:
 
   * Update foreign key and many to many fields in all apps.
 
+  * Ensure that any DB migrations that define foreign key or many to many
+    relationships to a renamed app include in their `dependencies` list a
+    migration from the renamed app at or after the rename, that is when
+    the `AlterTableModel` migration occurs in the renamed app. Without this,
+    the project migrations won't always know new name of the renamed app and
+    might fail to create or change relationships.
+
   * Execute the following SQL directly on the database for your renamed apps:
 
         UPDATE django_migrations SET app='{new app label}' WHERE app='{old app label}';
