@@ -52,7 +52,7 @@ class WorkflowState(models.Model):
     )
 
     class Meta:
-        db_table = "icekit_workflow_workflowstate"
+        app_label = 'icekit_workflow'
 
     def __str__(self):
         if self.assigned_to:
