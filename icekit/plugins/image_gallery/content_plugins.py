@@ -13,8 +13,3 @@ class ImageGalleryPlugin(ContentPlugin):
     category = _('Assets')
     render_template = 'icekit/plugins/image_gallery/default.html'
     raw_id_fields = ['slide_show', ]
-
-    class FrontendMedia:
-        js = (
-            'plugins/image_gallery/init.js',
-        )
