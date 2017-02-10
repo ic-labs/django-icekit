@@ -39,13 +39,20 @@ class AbstractFile(models.Model):
     def __str__(self):
         return self.title or os.path.basename(self.file.name).split('.')[0]
 
+    def exists(self):
+        return os.path.isfile(self.file.path)
+
     def file_size(self):
         """
         Obtain the file size for the file in human readable format.
 
         :return: String of file size with unit.
         """
-        return filesizeformat(self.file.size)
+        if self.exists():
+            return filesizeformat(self.file.size)
+
+        return None
+
 
     def extension(self):
         """
