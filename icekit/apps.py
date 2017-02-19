@@ -43,7 +43,7 @@ class AppConfig(AppConfig):
     def ready(self):
         # Monkey-patch `RedirectNodeAdmin` to replace `fieldsets` attribute
         # with `base_fieldsets` to avoid infinitie recursion bug when using
-        # django-polymorphic>=0.8, see:
+        # django-polymorphic versions >= 0.8 and < 1.1, see:
         # https://github.com/django-fluent/django-fluent-pages/issues/110
         from django.conf import settings
         if 'fluent_pages.pagetypes.redirectnode' in settings.INSTALLED_APPS:
