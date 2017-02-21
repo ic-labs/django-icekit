@@ -17,6 +17,11 @@ class AbstractContentListingItem(ContentItem):
         ContentType,
         help_text="Content type of items to show in a listing",
     )
+    limit = models.IntegerField(
+        blank=True, null=True,
+        help_text="How many items to show? No limit is applied if this"
+                  " field is not set"
+    )
 
     class Meta:
         abstract = True
@@ -26,13 +31,17 @@ class AbstractContentListingItem(ContentItem):
         return 'Content Listing of %s' % self.content_type
 
     def get_items(self):
-        ModelClass = self.content_type.model_class()
-        items_qs = ModelClass.objects.all()
+        model_class = self.content_type.model_class()
+        if not model_class:
+            return []
+        items_qs = model_class.objects.all()
         # Filter by published status
         if hasattr(items_qs, 'draft'):
             if is_draft_request_context():
                 items_qs = items_qs.draft()
             else:
                 items_qs = items_qs.published()
+        if self.limit:
+            items_qs = items_qs[:self.limit]
         # TODO Implement generally useful filters
         return items_qs
