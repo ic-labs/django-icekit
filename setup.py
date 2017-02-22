@@ -49,7 +49,6 @@ setuptools.setup(
     include_package_data=True,
     install_requires=[
         'Django<1.9',
-        'django-dynamic-fixture',
         # TODO Specific version of django-dynamic-fixture is necessary to avoid
         # AttributeError: can't set attribute` failures on polymorphic models.
         # See https://github.com/paulocheque/django-dynamic-fixture/pull/59
