@@ -30,7 +30,18 @@ class AbstractContentListingItem(ContentItem):
     def __str__(self):
         return 'Content Listing of %s' % self.content_type
 
-    def get_items(self):
+    def get_items(self, apply_limit=True):
+        """
+        Return the items to show in the listing.
+
+        If you override this method in a subclass but still call this method
+        via `super` be sure to pass ``apply_limit=False`` when calling the
+        method to avoid applying the count limit too early, then apply it
+        yourself at the end of the override method like this:
+
+            if self.limit:
+                qs = qs[:self.limit]
+        """
         model_class = self.content_type.model_class()
         if not model_class:
             return []
@@ -41,7 +52,7 @@ class AbstractContentListingItem(ContentItem):
                 items_qs = items_qs.draft()
             else:
                 items_qs = items_qs.published()
-        if self.limit:
+        if apply_limit and self.limit:
             items_qs = items_qs[:self.limit]
         # TODO Implement generally useful filters
         return items_qs
