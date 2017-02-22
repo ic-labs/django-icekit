@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from timezone import timezone as djtz  # django-timezone
 
-from icekit_events.models import EventType
+from icekit_events.models import EventType, Occurrence
 from icekit.plugins.content_listing.abstract_models import \
     AbstractContentListingItem
 
@@ -54,13 +54,12 @@ class AbstractEventContentListingItem(AbstractContentListingItem):
         return 'Event Content Listing of %s' % self.content_type
 
     def get_items(self):
-        qs = super(AbstractEventContentListingItem, self).get_items(
-            apply_limit=False)
+        qs = Occurrence.objects.visible().distinct()
         if self.limit_to_types.count():
             types = self.limit_to_types.all()
             qs = qs.filter(
-                Q(primary_type__in=types) |
-                Q(secondary_types__in=types)
+                Q(event__primary_type__in=types) |
+                Q(event__secondary_types__in=types)
             )
         # Apply `from_date` and `to_date` limits
         qs = qs.overlapping(self.from_date, self.to_date)
@@ -72,8 +71,6 @@ class AbstractEventContentListingItem(AbstractContentListingItem):
         if self.to_days_ahead is not None:
             to_date = today + timedelta(days=self.to_days_ahead)
         qs = qs.overlapping(from_date, to_date)
-        # Apply a sensible default ordering
-        qs = qs.order_by_first_occurrence()
         if self.limit:
             qs = qs[:self.limit]
         return qs
