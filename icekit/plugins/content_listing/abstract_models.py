@@ -22,6 +22,11 @@ class AbstractContentListingItem(ContentItem):
         help_text="How many items to show? No limit is applied if this"
                   " field is not set"
     )
+    no_items_message = models.CharField(
+        max_length=255,
+        blank=True, null=True,
+        help_text="Message to show if there are not items in listing.",
+    )
 
     class Meta:
         abstract = True

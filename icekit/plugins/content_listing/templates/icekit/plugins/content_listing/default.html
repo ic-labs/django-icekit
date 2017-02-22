@@ -2,8 +2,7 @@
 	{% for item in instance.get_items %}
 		{% include "icekit/plugins/content_listing/_item.html" %}
 	{% empty %}
-			<li>There are no items to show on this page</li>
-		{{ instance.get_default_embed }}
+		<li>{{ instance.no_items_message|default:"There are no items to show" }}</li>
 	{% endfor %}
 </div>
 
