@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 from django.conf import settings
 
+from icekit.utils.migrations import RenameAppInMigrationsTable
+
 
 class Migration(migrations.Migration):
 
@@ -13,6 +15,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        RenameAppInMigrationsTable('workflow', 'icekit_workflow'),
         migrations.CreateModel(
             name='WorkflowState',
             fields=[

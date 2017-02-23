@@ -79,6 +79,22 @@ In the app whose label is being updated, make the following changes:
 
         migrations.RunSQL("UPDATE django_content_type SET app_label='{new app label}' WHERE app_label='{old app label}';"),
 
+  * Add the following `RenameAppInMigrationsTable` operation as the **first**
+    operation in the initial migration for the app, like this:
+
+        # Import from ICEkit utilities
+        from icekit.utils.migrations import RenameAppInMigrationsTable
+
+        operations = [
+            RenameAppInMigrationsTable({ old app label}, {app label}),
+            # Existing operations below here
+
+    This migration operation will check whether the app's has already been
+    renamed in Django's migrations table (e.g. with the `UPDATE
+    django_migrations` SQL command below) and, if not, it will do this job then
+    fail with a clear error message asking you to re-run the migrations now
+    that the migration table is corrected.
+
 ## Applying the app rename in an existing project
 
 In a project that uses a portable app with an updated app label, make the
