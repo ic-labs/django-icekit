@@ -505,6 +505,7 @@ ASSETS_PLUGINS = [
     'FilePlugin',
     'SharedContentPlugin',
     'ContactPersonPlugin',
+    'ContentListingPlugin',
 ]
 
 EMBED_PLUGINS = [
@@ -705,6 +706,7 @@ INSTALLED_APPS += (
     # 'icekit.plugins.brightcove',
     'icekit.plugins.child_pages',
     'icekit.plugins.contact_person',
+    'icekit.plugins.content_listing',
     'icekit.plugins.faq',
     'icekit.plugins.file',
     'icekit.plugins.horizontal_rule',
