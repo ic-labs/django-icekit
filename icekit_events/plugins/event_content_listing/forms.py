@@ -6,6 +6,10 @@ from .models import EventContentListingItem
 
 
 class EventContentListingAdminForm(ContentListingAdminForm):
+    # TODO Improve admin experience:
+    # - horizontal filter for `limit_to_types` choice
+    # - verbose_name for Content Type
+    # - default (required) value for No Items Message.
 
     class Meta:
         model = EventContentListingItem
