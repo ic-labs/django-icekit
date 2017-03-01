@@ -17,11 +17,17 @@
 				<link rel="author" href="/humans.txt" />
 
 				{% block open_graph %}
-					<meta property="og:title" content="{% block og_title %}{% if page.get_title %}{{ page.get_title|striptags }} - {% endif %}{{ SITE_NAME }}{% endblock %}">
+					<meta property="og:title" content="{% block og_title %}{{ page.get_og_title }}{% endblock %}">
 					<meta property="og:type" content="{% block og_type %}website{% endblock %}">
-					<meta property="og:image" content="{% block og_image %}{% endblock %}">
+					<meta property="og:image" content="{% block og_image %}{% with page.get_og_image_url as og_image %}{% if og_image %}{{ og_image|safe }}{% endif %}{% endwith %}{% endblock %}">
 					<meta property="og:site_name" content="{% block og_site_name %}{{ SITE_NAME }}{% endblock %}">
-					<meta property="og:description" content="{% block og_description %}{% endblock %}">
+					<meta property="og:description" content="{% block og_description %}{{ page.get_og_description }}{% endblock %}">
+					<meta name="twitter:card" content="{% block twitter_card %}summary_large_card{% endblock %}" />
+					<meta name="twitter:site" content="{% block twitter_site %}{{ SITE_TWITTER_USERNAME }}{% endblock %}" />
+					<meta name="twitter:creator" content="{% block twitter_creator %}{{ SITE_TWITTER_USERNAME }}{% endblock %}" />
+					<meta name="twitter:title" content="{% block twitter_title %}{{ page.get_og_title }}{% endblock %}" />
+					<meta name="twitter:description" content="{% block twitter_description %}{{ page.get_og_description }}{% endblock %}" />
+					<meta name="twitter:image" content="{% block twitter_image %}{% with page.get_og_image_url as og_image %}{% if og_image %}{{ og_image|safe }}{% endif %}{% endwith %}{% endblock %}" />
 				{% endblock %}
 
 				{% if debug %}
