@@ -185,8 +185,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',  # Default
 )
 
-CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
-
 # # Enable cross-subdomain cookies, only if `SITE_DOMAIN` is not a TLD.
 # if '.' in SITE_DOMAIN:
 #     CSRF_COOKIE_DOMAIN = LANGUAGE_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = \
@@ -507,6 +505,7 @@ ASSETS_PLUGINS = [
     'FilePlugin',
     'SharedContentPlugin',
     'ContactPersonPlugin',
+    'ContentListingPlugin',
 ]
 
 EMBED_PLUGINS = [
@@ -707,6 +706,7 @@ INSTALLED_APPS += (
     # 'icekit.plugins.brightcove',
     'icekit.plugins.child_pages',
     'icekit.plugins.contact_person',
+    'icekit.plugins.content_listing',
     'icekit.plugins.faq',
     'icekit.plugins.file',
     'icekit.plugins.horizontal_rule',
@@ -851,3 +851,15 @@ WSGI_ADDRESS = '127.0.0.1'
 WSGI_PORT = 8080
 WSGI_TIMEOUT = 60
 WSGI_WORKERS = multiprocessing.cpu_count() * 2 + 1
+
+# DEBUG TOOLBAR (not enabled by default) ######################################
+
+try:
+    from debug_toolbar.settings import PANELS_DEFAULTS
+except ImportError:
+    PANELS_DEFAULTS = []
+
+DEBUG_TOOLBAR_PANELS = [
+    'fluent_contents.panels.ContentPluginPanel',
+] + PANELS_DEFAULTS
+

@@ -18,6 +18,7 @@ To get started with ICEKit Workflow:
      workflow information in admin listing pages
    * add some or all of `WorkflowMixinAdmin.list_filter` items to permit
      filtering by workflow properties in admin listing pages
+ * Configure email notification settings.
 
 
 ## Workflow State
@@ -78,6 +79,64 @@ Admin filter classes you can add to `list_filter`:
 
 The `icekit.workflow.admin.WorkflowStateTabularInline` provides an inline for
 assigning and managing workflow state relationships with items in the Django admin.
+
+
+## Email Notifications
+
+ICEkit Workflow can be configured to send email notifications when the workflow
+state associated with an item is added or changed.
+
+Configure one or more target email destinations in your project settings with
+`WORKFLOW_EMAIL_NOTIFICATION_TARGETS`. These target settings are very configurable,
+so examples are the best way to explain:
+
+    WORKFLOW_EMAIL_NOTIFICATION_TARGETS = [
+        # Simplest configuration is an empty dict to send email to assignee (if any)
+        {},
+
+        # All components of the email are configurable in a target
+        {
+            'to': 'notification-list@example.com',
+            'from': 'custom-from-address@example.com',
+            'subject_template': 'Custom email subject. State is now {{state}}',
+            'message_template': 'Custom email body. Assigned to {{assigned_to}}',
+        },
+
+        # Send email notifications to a Slack channel that is already set up to
+        # accept incoming emails. Also maps usernames to Slack @-mention syntax.
+        {
+            'to': 'abc123abc123@yourteamname.slack.com',
+            'map_assigned_to_fn': lambda user: '@' + user.username if user else ''
+        },
+    ]
+
+In addition to the per-target configuration options you can configure the default
+values used.
+
+ * `WORKFLOW_EMAIL_NOTIFICATION_DEFAULT_FROM`: Address from which workflow
+   notification emails are sent. Defaults to `settings.DEFAULT_FROM_EMAIL`
+
+ * `WORKFLOW_EMAIL_NOTIFICATION_SUBJECT_TEMPLATE`: Template for email subject line.
+   See `icekit.workflow.appsettings` for the default subject template.
+
+ * `WORKFLOW_EMAIL_NOTIFICATION_MESSAGE_TEMPLATE`: Template for email body.
+   See `icekit.workflow.appsettings` for the default message template.
+
+The email subject and message templates above use standard Django template syntax to
+interpolate values. The following data items are provided to these templates:
+
+ * `state`: the `WorkflowState` instance that has been added or changed
+
+ * `object`: the item whose state has changed (the instance to which the workflow
+   state is related)
+
+ * `admin_url`: a full URL to the CMS admin page for the item whose state has changed
+
+ * `assigned_to`: the `User` to which the workflow state is assigned (may be `None`)
+   or, if a mapping function is applied via the `map_assigned_to_fn` target setting,
+   the result of that mapping function.  
+   In the Slack notification email example above, the value of `assigned_to` will be
+   "@username" if a user is assigned.
 
 
 [publishing]: publishing.md

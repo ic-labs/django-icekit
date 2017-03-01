@@ -62,6 +62,7 @@ class PublishingModel(models.Model):
         abstract = True
         permissions = (
             ('can_publish', 'Can publish'),
+            ('can_republish', 'Can republish'),
         )
 
     @property
@@ -736,7 +737,8 @@ def sync_mptt_tree_fields_from_draft_to_published_post_save(
         sync_mptt_tree_fields_from_draft_to_published(instance)
 
 
-def sync_mptt_tree_fields_from_draft_to_published(draft_copy, dry_run=False):
+def sync_mptt_tree_fields_from_draft_to_published(
+        draft_copy, dry_run=False, force_update_cached_urls=False):
     """
     Sync tree structure changes from a draft publishable object to its
     published copy, and updates the published copy's Fluent cached URLs when
@@ -748,7 +750,7 @@ def sync_mptt_tree_fields_from_draft_to_published(draft_copy, dry_run=False):
     mptt_opts = getattr(draft_copy, '_mptt_meta', None)
     published_copy = getattr(draft_copy, 'publishing_linked', None)
     if not mptt_opts or not published_copy:
-        return
+        return {}
     # Identify changed values and prepare dict of changes to apply to DB
     parent_changed = draft_copy.parent != published_copy.parent
     update_kwargs = {
@@ -765,22 +767,26 @@ def sync_mptt_tree_fields_from_draft_to_published(draft_copy, dry_run=False):
         # Only parent may be None, never set tree_id/left/right/level to None
         and not (field != 'parent' and value is None)
     )
+
+    change_report = []
+    for field, new_value in update_kwargs.items():
+        old_value = getattr(published_copy, field)
+        change_report.append((draft_copy, field, old_value, new_value))
+
     # Forcibly update MPTT field values via UPDATE commands instead of normal
     # model attr changes, which MPTT ignores when you `save`
     if update_kwargs and not dry_run:
         type(published_copy).objects.filter(pk=published_copy.pk).update(
             **update_kwargs)
 
-    change_report = update_kwargs
-
     # If real tree structure (not just MPTT fields) has changed we must
     # regenerate the cached URLs for published copy translations.
-    if parent_changed:
+    if parent_changed or force_update_cached_urls:
         # Make our local published obj aware of DB change made by `update`
         published_copy.parent = draft_copy.parent
         # Regenerate the cached URLs for published copy translations.
-        change_report.update(
-            update_fluent_cached_urls(published_copy, dry_run=dry_run))
+        change_report += \
+            update_fluent_cached_urls(published_copy, dry_run=dry_run)
 
     return change_report
 
@@ -792,11 +798,13 @@ def update_fluent_cached_urls(item, dry_run=False):
     unnecessary and unwanted slug changes to ensure uniqueness, the logic for
     which doesn't work with our publishing.
     """
-    change_report = {}
+    change_report = []
     if hasattr(item, 'translations'):
         for translation in item.translations.all():
+            old_url = translation._cached_url
             item._update_cached_url(translation)
-            change_report['_cached_url'] = translation._cached_url
+            change_report.append(
+                (translation, '_cached_url', old_url, translation._cached_url))
             if not dry_run:
                 translation.save()
         if not dry_run:
@@ -812,8 +820,6 @@ def update_fluent_cached_urls(item, dry_run=False):
                         if child.is_published]
         for child in children:
             update_fluent_cached_urls(child, dry_run=dry_run)
-            change_report[u' child %s : _cached_url' % child] = \
-                child._cached_url
 
     return change_report
 
@@ -835,9 +841,10 @@ def delete_published_copy_when_draft_deleted(sender, **kwargs):
 
 
 @receiver(models.signals.post_migrate)
-def create_can_publish_permission(sender, **kwargs):
+def create_can_publish_and_can_republish_permissions(sender, **kwargs):
     """
-    Add `can_publish` permission for each of the publishable model.
+    Add `can_publish` and `ca_nrepublish` permissions for each publishable
+    model in the system.
     """
     for model in sender.get_models():
         if not issubclass(model, PublishingModel):
@@ -846,3 +853,6 @@ def create_can_publish_permission(sender, **kwargs):
         permission, created = Permission.objects.get_or_create(
             content_type=content_type, codename='can_publish',
             defaults=dict(name='Can Publish %s' % model.__name__))
+        permission, created = Permission.objects.get_or_create(
+            content_type=content_type, codename='can_republish',
+            defaults=dict(name='Can Republish %s' % model.__name__))

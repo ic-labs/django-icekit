@@ -59,8 +59,8 @@ setuptools.setup(
         'django-bootstrap3',
         'django-compressor',
         'django-el-pagination',
-        'django-fluent-contents>=1.1.8',  # For JS compatibility, see #138
-        'django-fluent-pages',
+        'django-fluent-contents>=1.1.9',  # For JS compatibility, see #138
+        'django-fluent-pages!=1.1',  # Avoid 1.1 with missing import: https://github.com/django-fluent/django-fluent-pages/issues/125
         'django-model-settings',
         'django-mptt',
         'django-multiurl',

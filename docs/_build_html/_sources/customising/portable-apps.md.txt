@@ -55,7 +55,12 @@ In the app whose label is being updated, make the following changes:
   * Update the `AppConfig.label` attribute or rename the app package.
 
   * Update the `Meta.app_label` attribute on existing models, if they already
-    have a value set.
+    have a value set.  
+    NOTE: You may need to add and set this attribute to `{new app label}`
+    in some cases even if it was not already set, see for example
+    https://github.com/ic-labs/django-icekit/issues/190 where this was
+    necessary to avoid a downstream project from getting confused about
+    which app provided a model.
 
   * Replace any absolute imports within the app with relative imports.
 
@@ -74,6 +79,22 @@ In the app whose label is being updated, make the following changes:
 
         migrations.RunSQL("UPDATE django_content_type SET app_label='{new app label}' WHERE app_label='{old app label}';"),
 
+  * Add the following `RenameAppInMigrationsTable` operation as the **first**
+    operation in the initial migration for the app, like this:
+
+        # Import from ICEkit utilities
+        from icekit.utils.migrations import RenameAppInMigrationsTable
+
+        operations = [
+            RenameAppInMigrationsTable({ old app label}, {app label}),
+            # Existing operations below here
+
+    This migration operation will check whether the app's has already been
+    renamed in Django's migrations table (e.g. with the `UPDATE
+    django_migrations` SQL command below) and, if not, it will do this job then
+    fail with a clear error message asking you to re-run the migrations now
+    that the migration table is corrected.
+
 ## Applying the app rename in an existing project
 
 In a project that uses a portable app with an updated app label, make the
@@ -90,6 +111,13 @@ following changes:
     existing migrations.
 
   * Update foreign key and many to many fields in all apps.
+
+  * Ensure that any DB migrations that define foreign key or many to many
+    relationships to a renamed app include in their `dependencies` list a
+    migration from the renamed app at or after the rename, that is when
+    the `AlterTableModel` migration occurs in the renamed app. Without this,
+    the project migrations won't always know new name of the renamed app and
+    might fail to create or change relationships.
 
   * Execute the following SQL directly on the database for your renamed apps:
 

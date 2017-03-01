@@ -16,9 +16,15 @@
   * Add workflow features to all publishable models in ICEkit using the new
     abstract model mixins and admin base classes mentioned above.
 
+  * Add email notifications for workflow state changes.
+
   * Preview pages are now visually highlighted, and have a different HTML title.
 
   * "Preview draft" button is now near "View published" button.
+
+  * Add new "Can Republish" (`can_republish`) permission for all publishable
+    items that permits users to publish items only if they have already been
+    published, not if they are being published for the first time.
 
   * "Slideshow" is now renamed "Image Gallery" and there is a new Image Gallery
     content plugin available (which renders a grid of thumbnails into a
@@ -49,6 +55,12 @@
     rich/publishable/polymorphic models.
 
 ### Breaking changes:
+
+  * The Workflow app available in earlier "develop" builds has been renamed.
+    You will need to run an SQL statement manually to fix Django's migration
+    history when upgrading a project that uses the 'icekit.workflow' app.
+
+        UPDATE django_migrations SET app='icekit_workflow' WHERE app='workflow';
 
   * `AbstractLayoutPage` now includes ListableMixin and HeroMixin. All models
     which inherit from this will need a new migration.

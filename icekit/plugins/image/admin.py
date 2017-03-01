@@ -12,7 +12,7 @@ except (AttributeError, KeyError):
 
 class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
     list_display = ['thumbnail', 'title', 'alt_text',]
-    list_display_links = ['alt_text', 'thumbnail']
+    list_display_links = ['alt_text', 'title', 'thumbnail']
     filter_horizontal = ['categories', ]
     list_filter = ['categories',]
     search_fields = ['title', 'alt_text', 'caption', 'admin_notes', 'image']
