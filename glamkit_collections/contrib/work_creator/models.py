@@ -107,7 +107,7 @@ class CreatorBase(
 
     def get_roles(self):
         """Return the m2m relations connecting me to works"""
-        work_ids = WorkBase.objects.visible().filter(creators=self).values_list('id', flat=True)
+        work_ids = self.get_works().values_list('id', flat=True)
         return self.works.through.objects.filter(
             creator=self.get_draft(),
             work_id__in=work_ids,
@@ -253,9 +253,9 @@ class WorkBase(
 
     def get_creators(self):
         """
-        :return: The works that should be presented as visible on the front
-        end. If self is draft, show visible related items. If self is
-        published, show published related items.
+        :return: The creaors that should be presented as visible on the front
+        end. If self is draft, show visible related items (ie drafts). If self is
+        published, show published related items (ie not drafts).
 
         """
         qs = self.get_draft().creators
@@ -266,8 +266,16 @@ class WorkBase(
 
 
     def get_roles(self):
-        """Return the m2m relations connecting me to creators"""
-        creator_ids = self.creators.visible().values_list('id', flat=True)
+        """
+        Return the m2m relations connecting me to creators.
+
+        There's some publishing-related complexity here. The role relations
+        (self.creators.through) connect to draft objects, which then need to
+        be modified to point to visible() objects.
+        """
+
+        creator_ids = self.get_creators().values_list('id', flat=True)
+
         return self.creators.through.objects.filter(
             work=self.get_draft(),
             creator_id__in=creator_ids,
