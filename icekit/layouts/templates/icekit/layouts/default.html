@@ -3,15 +3,27 @@
 {% load fluent_contents_tags %}
 
 {% block content %}
-    {% with page.parent.get_published as parent %}
-        {% if parent %}<p class="breadcrumbs"><a href="{{ parent.get_absolute_url }}">&laquo;&nbsp;{{ parent }}</a></p>{% endif %}
-    {% endwith %}
-	<h1>{{ page.title }}</h1>
-
-	{% page_placeholder "main" role="m" %}
+	{% block page_breadcrumb %}
+    	{% with page.parent.get_published as parent %}
+			{% if parent %}
+				<div class="page-breadcrumb">
+					<i class="fa fa-caret-left page-breadcrumb-icon" aria-hidden="true"></i>
+					<a class="page-breadcrumb-link" href="{{ page.get_parent.get_absolute_url }}">
+						{{ page.get_parent.get_title }}
+					</a>
+				</div>
+			{% endif %}
+		{% endwith %}
+	{% endblock %}
+	{% block page_title %}
+		<h1>{{ page.title }}</h1>
+	{% endblock %}
+	{% block page_content %}
+		{% page_placeholder "main" role="m" %}
+	{% endblock %}
 {% endblock %}
 
-{% block body_js %}
+{% block js %}
 	{{ block.super }}
 	{% render_content_items_media %}
 {% endblock %}
