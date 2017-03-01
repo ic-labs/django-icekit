@@ -1,5 +1,5 @@
-$preview_ribbon_background_colour: dodgerblue;
-$preview_ribbon_text_colour: white;
+$preview_ribbon_background_colour: dodgerblue !default;
+$preview_ribbon_text_colour: white !default;
 
 .preview-ribbon {
     position: absolute;
