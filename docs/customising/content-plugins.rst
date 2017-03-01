@@ -1,4 +1,4 @@
-Creating a new content plugin *
+Creating a new content plugin
 =============================
 
 Most ICEkit content uses the Fluent Contents system for adding an

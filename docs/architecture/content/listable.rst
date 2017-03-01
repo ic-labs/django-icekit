@@ -1,4 +1,4 @@
-ListableMixin *
+ListableMixin
 =============
 
 .. autoclass:: icekit.mixins.ListableMixin

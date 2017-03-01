@@ -1,9 +1,9 @@
-Running tasks in the background using Celery *
+Running tasks in the background using Celery
 ============================================
 
 .. TODO: more from SFMOMA docs
 
-In ICEkit background tasks are queued using Celery, and scheduled in
+Background tasks are queued using Celery, and scheduled in
 ``crontab``-like fashion using CeleryBeat.
 
 To check Celery tasks are running

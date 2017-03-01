@@ -1,7 +1,7 @@
 :orphan:
 
-Installing and running ICEkit without Docker
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Installing and running without Docker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you are not yet ready for Docker, you can run the ICEkit project
 template (or an ICEkit project) directly. You will need to install and

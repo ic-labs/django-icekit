@@ -1,4 +1,4 @@
-Creating a new rich content model *
+Creating a new rich content model
 =================================
 
 You may at points need to create new :term:``rich content model``\ s.

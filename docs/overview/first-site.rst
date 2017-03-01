@@ -1,17 +1,12 @@
-Creating your first ICEkit site
-===============================
+Creating your first site
+========================
 
 .. TODO: how to install glamkit packages?
 
-Installing ICEkit
------------------
+Installation
+------------
 
-.. include:: _install-docker.rst
-
-Installing and running ICEkit without Docker
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-See :doc:`install-manual`.
+.. include:: ../install/docker.rst
 
 
 Enabling GLAMkit features

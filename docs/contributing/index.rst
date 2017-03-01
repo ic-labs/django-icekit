@@ -1,5 +1,5 @@
-Contributing to ICEkit
-======================
+Contributing to the project
+===========================
 
 Please follow these guidelines when making contributions to ICEkit.
 
@@ -14,8 +14,8 @@ Please follow these guidelines when making contributions to ICEkit.
    releases
    conduct
 
-Installing the ICEkit dev version on an existing project
---------------------------------------------------------
+Installing the development version of ICEkit on an existing project
+-------------------------------------------------------------------
 
 ::
 

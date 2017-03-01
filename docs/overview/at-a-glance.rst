@@ -1,47 +1,20 @@
-ICEkit at a glance
+GLAMkit at a glance
 ==================
 
-ICEkit is a next-generation Python CMS by |the IC|_. It has publishing and
-workflow tools for small teams of content professionals, and a powerful content
-framework, based on django-fluent_. ICEkit is written in Python, using the
-Django framework.
+.. include:: ../includes/intro.rst
 
-ICEkit is delivered as a Docker-compatible package, which means that it's easy
-to share a consistent development environment across your team, or to deploy on
-any Docker-compatible web host, including top-tier cloud hosting services like
-AWS.
+What is ICEkit?
+---------------
 
-Key features
-------------
+The engine that runs GLAMkit is called ICEkit. ICEkit is a toolkit for building
+CMSes, designed for any small team of content professionals. For an overview,
+see :doc:`overview/at-a-glance`. One day there will be other flavours of ICEkit
+for other markets - this anticipated future is why the repository and some
+classes are called 'ICEkit'. For now, ICEkit and GLAMkit are much the same
+thing, and we prefer using 'GLAMkit'.
 
--  Patterns for hierarchical pages and collections of rich content models.
--  Advanced publishing / preview / unpublishing controls
--  Simple workflow controls
--  Content plugins for working with rich text, images, embedded media, etc.
--  Customisable site search using `Elastic Search`_
--  `django-reversion`_ compatible, allowing versioning of content
--  Customisable admin dashboard
--  Docker-compatible project template supplied
--  Batteries included: bower, LessCSS, Bootstrap
--  Easily extensible with models, templates, plugins, etc.
-
-What is GLAMkit?
-----------------
-
-GLAMkit_ is an extension of ICEkit designed especially for
-Galleries, Libraries, Archives and Museums (the GLAM sector) and pretty much
-any cultural or collecting institution.
-
-GLAMkit extends ICEkit with:
-
--  complex repeating calendared events
--  collection patterns: art, moving image, etc.
--  a story-telling engine (e.g. rich 'watch', 'read', 'listen' articles)
--  press releases
--  sponsors
-
-Why did we create ICEkit?
--------------------------
+Why did we create GLAMkit and ICEkit?
+-------------------------------------
 
 Every day, we at IC_ create and host sites for clients with demanding digital
 needs. Our clients have large amounts of content to work through and publish.
@@ -50,16 +23,15 @@ They usually have databases and other systems throughout their organisation
 that need to integrate with the site. And of course the result needs to look
 great and not break the bank.
 
-ICEkit represents the distillation of our knowledge and experience in working
-on technically challenging projects with these clients. Out of the box, it has
-everything that small teams of content professionals need to get started
-creating and publishing pages of content. ICEkit includes a distillation of
-patterns and hooks to allow easy and future-proofed customisation, extension
-and integration.
+GLAMkit and ICEkit represent the distillation of our knowledge and experience
+in working on technically challenging projects with these clients, and with
+museum clients in particular. Out of the box, it has everything that small teams
+of content professionals need to get started creating and publishing pages of
+content.
 
-We love building sites in Python/Django, and it's a perfect framework to solve
-demanding digital challenges. But no Python CMS has the enterprise-level
-workflow and publishing features that our clients need.
+We love building sites in Python/Django, and it's a great framework to solve
+demanding digital challenges. But we couldn't find a Python CMS with the
+enterprise-level workflow and publishing features that our clients need.
 
 So we made one -- and here it is.
 
@@ -70,8 +42,7 @@ which can be installed on any top-tier cloud host.
 For more, take a look at our blog series on the
 `future of content management <https://interaction.net.au/blog/2015/future-content-management-part-1/>`_.
 
-
-Who uses ICEkit and GLAMkit?
+Who uses GLAMkit and ICEkit?
 ----------------------------
 ICEkit and GLAMkit are used by:
 

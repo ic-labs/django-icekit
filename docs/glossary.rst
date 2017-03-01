@@ -27,19 +27,15 @@ Glossary of terms *
       key, using the ``fluent-contents`` approach.
 
    Content plugin
-      A class that registers a content item in ICEkit which specifies how
-      it is
-       to be rendered in a given context and
+      A class that registers a content item in GLAMkit which specifies how
+      it is to be rendered in a given context and
 how it is edited in the admin.
 
 
-   GLAMkit
-      GLAMkit_ is an extension of ICEkit designed especially for
-      Galleries, Libraries, Archives and Museums (the GLAM sector) and pretty much
-      any cultural or collecting institution.
-
-      Concretely, GLAMkit uses an extended set of Python requirements, and a
-      different settings file. It's otherwise the same codebase as ICEkit.
+   ICEkit
+      ICEkit_ is the engine that runs GLAMkit (actually GLAMkit is just an
+      extended set of settings and requirements on top of ICEkit). ICEkit is a
+      basic CMS toolkit, designed for small teams of content professionals.
 
    .. Placeholder
 
@@ -50,7 +46,7 @@ how it is edited in the admin.
    .. Collected Content
 
    Editor
-      A person who uses the ICEkit admin system to edit content.
+      A person who uses the CMS admin system to edit content.
 
    Publisher
       A person who publishes content once it has been edited.

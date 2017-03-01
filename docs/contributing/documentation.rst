@@ -1,5 +1,5 @@
-Writing ICEkit documentation
-============================
+Writing documentation
+=====================
 
 Good documentation is just as important as tests. ICEkit pull requests should
 endeavour to include and/or update documentation where appropriate.

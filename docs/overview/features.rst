@@ -1,5 +1,5 @@
-ICEkit features
-===============
+Features
+========
 
 .. TODO: link to where the features are covered
 

@@ -1,5 +1,5 @@
-Using ICEkit with Docker
-========================
+More about Docker
+=================
 
 ICEkit is Docker-compatible, and we recommend using Docker for development and
 deployment. Docker has many advantages over a simple Python virtualenv
@@ -108,8 +108,8 @@ Data dumps
     $ psql < dump.sql
     $ rm dump.sql
 
-Uninstalling an ICEkit project from Docker
-------------------------------------------
+Uninstalling a GLAMkit/ICEkit project from Docker
+-----------------------------=======-------------
 
 Delete all containers with a name matching ``{project_name}``::
 

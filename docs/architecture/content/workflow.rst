@@ -1,4 +1,4 @@
-Workflow in ICEkit *
+Workflow in ICEkit
 ==================
 
 ICEKit includes a very simple workflow system to help manage content

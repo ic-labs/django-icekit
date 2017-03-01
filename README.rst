@@ -3,15 +3,47 @@
 
 |Deploy to Docker Cloud|
 
-ICEkit is a next-generation CMS by `the Interaction
-Consortium <http://interaction.net.au>`__, built on top of
-`django-fluent-pages <https://github.com/edoburu/django-fluent-pages>`__
-and
-`django-fluent-contents <https://github.com/edoburu/django-fluent-contents>`__.
-See `ICEkit features at a glance <docs/intro/features.md>`__.
+.. The following is taken from docs/includes/intro.rst. Keep synchronised.
 
-ICEkit underpins `GLAMkit <http://glamkit.org>`__ and many individual
-sites.
+GLAMkit is a next-generation Python CMS by `the Interaction
+Consortium <http://interaction.net.au>`__, designed especially for
+the cultural sector.
+
+ICEkit sits one layer below GLAMkit, and is a framework for building CMSes.
+It has publishing and workflow tools for small teams of content professionals,
+and a powerful content framework, based on django-fluent_. Everything is written
+in Python, using the Django framework.
+
+Key features
+------------
+
+ICEkit has:
+
+-  Patterns for hierarchical pages and collections of rich content models.
+-  Advanced publishing / preview / unpublishing controls
+-  Simple workflow controls
+-  Content plugins for working with rich text, images, embedded media, etc.
+-  Customisable site search using `Elastic Search`_
+-  `django-reversion`_ compatible, allowing versioning of content
+-  Customisable admin dashboard
+-  Docker-compatible project template supplied
+-  Batteries included: bower, LessCSS, Bootstrap
+-  Easily extensible with models, templates, plugins, etc.
+
+GLAMkit extends ICEkit with:
+
+-  complex repeating calendared events
+-  collection patterns: art, moving image, etc.
+-  a story-telling engine (e.g. rich 'watch', 'read', 'listen' articles)
+-  press releases
+-  sponsors
+
+GLAMkit is delivered as a Docker-compatible package, which means that it's easy
+to share a consistent development environment across your team, or to deploy on
+any Docker-compatible web host, including top-tier cloud hosting services like
+AWS.
+
+.. The following is taken from install/docker.rst. Keep synchronised.
 
 Quickstart, with Docker
 =======================

@@ -1,6 +1,6 @@
 .. _content-collections:
 
-``AbstractCollectedContent`` and ``AbstractListingPage`` *
+``AbstractCollectedContent`` and ``AbstractListingPage``
 ========================================================
 
 A Content Collection is a polymorphic collection of publishable content.

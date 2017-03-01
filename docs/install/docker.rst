@@ -1,5 +1,11 @@
-Installing and running ICEkit using Docker (recommended)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. The following also appears in README. Keep synchronised.
+
+Installing and running
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. TODO: make the default install GLAMkit, with a variation for ICEkit.
+
+The recommended technique uses Docker. For a manual installation, see :doc:`manual-install`.
 
 If you haven't already, install Docker (see :doc:`../topics/docker`):
 

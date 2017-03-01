@@ -54,7 +54,8 @@ In development
 
 -  Documentation is refactored into ReStructuredText. This means much
    more coherence, and the ability to generate documentation from within
-   code.
+   code. Also documentation focuses on GLAMkit rather than ICEkit to align
+   with current development focus.
 
 Breaking changes
 ~~~~~~~~~~~~~~~~

@@ -1,5 +1,5 @@
-The ICEkit Roadmap *
-==================
+The GLAMkit Roadmap *
+=====================
 
 To follow. For enquiries, please contact |the IC|_.
 

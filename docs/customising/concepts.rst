@@ -1,5 +1,5 @@
-ICEkit concepts
-===============
+Important concepts
+==================
 
 .. TODO: cross-ref from glossary
 

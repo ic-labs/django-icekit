@@ -1,4 +1,4 @@
-Content Plugins *
+Content Plugins
 ===============
 
 Most ICEkit content uses the Fluent Contents system for adding an ordered

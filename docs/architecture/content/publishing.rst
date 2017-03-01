@@ -1,6 +1,6 @@
 .. _publishing:
 
-Publishing in ICEkit *
+Publishing in ICEkit
 ====================
 
 The publishing system used in ICEKit is a re-implementation of concepts

@@ -7,14 +7,14 @@ reusability, without being so prescriptive as to prevent innovation and
 easy extension.
 
 This section gives an overview of conventions to follow when using and extending
-ICEkit.
+the CMS.
 
 
 Template contexts
 -----------------
 
-In ICEkit contents that render templates, there is a convention of naming the
-primary content object ``page`` in the template context. Thus, in an Article
+In ICEkit contents models  that render templates, there is a convention of
+naming the primary content object ``page`` in the template context. Thus, in an Article
 view, the template context is populated with the context ``{'page': article}``.
 Similarly in Event models, the context variable ``page`` is the event to be
 rendered.
@@ -22,7 +22,7 @@ rendered.
 ``ListableMixin``
 -----------------
 
-Major ICEkit content types (for example, ``Page``, ``Article``,
+Major content types (for example, ``Page``, ``Article``,
 ``PressRelease``, ``Event``) implement :doc:`content/listable`, which describes
 several common methods for retrieving attributes of an item of content.
 
@@ -42,7 +42,7 @@ example, the title of an 'article' may be the value of the ``title`` field, but
 the title of an 'artwork' may include the artist and year.
 
 In order to avoid reimplementing templates for every variation of content,
-ICEkit uses ``get_FOO()`` methods to access attributes, even if the attribute
+we use ``get_FOO()`` methods to access attributes, even if the attribute
 is trivial, like a field.
 
 .. note::
@@ -56,7 +56,7 @@ Portable apps
 ICEkit models and content plugins are portable, which means the code can be
 moved without affecting table names or migration history.
 
-This is useful to cleanly extend ICEkit functionality beyond what can be
+This is useful to cleanly extend functionality beyond what can be
 accomplished by subclassing.
 
 For more, see :doc:`../topics/portable-apps`
@@ -64,7 +64,8 @@ For more, see :doc:`../topics/portable-apps`
 Naming Conventions
 ------------------
 
-ICEkit is spelled as one word with an uppercase ICE and lowercase 'kit'.
+GLAMkit is spelled as one word with an uppercase GLAM and lowercase 'kit'.
+Same with ICEkit.
 
 Model Classes
 ~~~~~~~~~~~~~

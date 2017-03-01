@@ -1,5 +1,5 @@
-Customising your ICEkit site
-============================
+Customising your site
+=====================
 
 .. toctree::
    :maxdepth: 2

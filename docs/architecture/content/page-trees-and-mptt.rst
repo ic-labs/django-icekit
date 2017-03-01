@@ -1,4 +1,4 @@
-Page Trees and Django MPTT *
+Page Trees and Django MPTT
 ==========================
 
 This document describes how Fluent's page hierarchy tree structure

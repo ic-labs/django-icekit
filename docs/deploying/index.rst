@@ -1,5 +1,5 @@
-Deploying your ICEkit site
-==========================
+Deploying your site
+===================
 
 ICEkit is designed to be easily deployed and scaled using Docker. Use the
 Deploy to Docker Cloud button to create a new default ICEkit stack on

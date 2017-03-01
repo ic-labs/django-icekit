@@ -1,4 +1,4 @@
-Default configuration, content models and plugins *
+Default configuration, content models and plugins
 =================================================
 
 Default configuration

@@ -1,7 +1,7 @@
 :orphan:
 
-Flexible Layouts *
-==================
+Flexible Layouts
+================
 
 The ``Layout`` model links a template to all the models that can use it.
 

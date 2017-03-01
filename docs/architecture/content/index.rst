@@ -1,5 +1,5 @@
-Working with rich content in ICEkit
-===================================
+Working with rich content
+=========================
 
 This section contains an in-depth discussion of the architecture and design
 decisions behind ICEkit's enterprise-level tools for working with content.
