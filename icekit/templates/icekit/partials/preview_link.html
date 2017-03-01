@@ -1,0 +1,26 @@
+{% load icekit_tags %}
+
+{% if request.IS_DRAFT or request.user.is_staff %}
+    <div class="preview-ribbon" {{ attrs }}>
+		{% if request.user.is_staff %}
+			<a
+				class="preview-ribbon-link"
+				{% if obj.is_draft %}
+					href="{{ obj|admin_url }}"
+				{% else %}
+					href="{{ obj.get_draft|admin_url }}"
+				{% endif %}
+			>
+		{% endif %}
+		<div class="preview-ribbon-content">
+			{% if obj.is_draft and not obj.has_been_published %}
+				<span class="preview-ribbon-text">Preview</span>
+			{% else %}
+				<i class="fa fa-pencil preview-ribbon-icon"></i>
+			{% endif %}
+		</div>
+		{% if request.user.is_staff %}
+			</a>
+		{% endif %}
+    </div>
+{% endif %}

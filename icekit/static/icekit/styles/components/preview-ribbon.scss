@@ -1,0 +1,34 @@
+$preview_ribbon_background_colour: dodgerblue;
+$preview_ribbon_text_colour: white;
+
+.preview-ribbon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 9999;
+}
+.preview-ribbon-link {
+	text-decoration: none;
+}
+.preview-ribbon-content {
+	padding: 2px 5px;
+	background: $preview_ribbon_background_colour;
+    color: $preview_ribbon_text_colour;
+	border: 3px solid transparent;
+}
+.preview-ribbon-content:hover {
+    background: $preview_ribbon_text_colour;
+    color: $preview_ribbon_background_colour;
+    z-index: 9999;
+	border-color: $preview_ribbon_background_colour;
+}
+.preview-ribbon-text {
+	text-transform: uppercase;
+	text-decoration: underline;
+}
+.preview-ribbon-icon {
+	color: $preview_ribbon_text_colour;
+}
+.preview-ribbon:hover .preview-ribbon-icon {
+	color: $preview_ribbon_background_colour;
+}
