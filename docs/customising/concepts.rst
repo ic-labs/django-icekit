@@ -1,8 +1,18 @@
-ICEkit concepts *
+ICEkit concepts
 ===============
 
-Rich Content
-------------
+.. TODO: cross-ref from glossary
+
+In a nutshell, ICEkit allows easy creation of Rich content models. Rich
+content models contain one or more placeholders. Placeholders represent
+areas in a template that contain zero or more rich content items.
+
+.. TODO: screenshot of placeholder editing.
+
+.. _rich-content-models:
+
+Rich content models
+-------------------
 
 ICEkit's rich content models allow a human editor to add and arrange
 many **Content Items** in any order into one or more **Content
@@ -16,84 +26,85 @@ have a "Main" placeholder and a "More information" placeholder. The
 The "More information" placeholder may only allow 'press contacts' and
 'files' to be added.
 
+.. TODO: screenshot
+
 Placeholders are specified in the HTML template that is associated with
-the rich content model. At render time, each ``render_placeholder``
+the rich content model. At render time, each ``{% render_placeholder %}``
 template tag renders all of the content items as they were added by the
 editor.
 
-A **Content Item** is (usually) a small django model for representing a
+.. _rich-content-plugins:
+
+Rich content items
+------------------
+
+A **Content item** is (usually) a small Django model for representing a
 unit of content on a page and can have any fields that a normal Django
-model has. Each Content Item has at least one associated **Content
-Plugin** which specifies how it is to be rendered in a given context and
-how it is edited in the admin.
+model has. Each
+Content Item has at least one associated **Content Plugin** which specifies
+how it is to be rendered in a given context and how it is edited in the admin.
 
-`More on Content Items and Plugins <../howto/plugins.md>`__
+The ``icekit.plugins`` package contains reference implementations for many
+types of content that you might need in a project.
 
-Database representation
-~~~~~~~~~~~~~~~~~~~~~~~
 
-Content Items and the rich content models which contain them are related
-with Generic Foreign Keys, which means that there is only one database
-table for each Content Item.
+.. admonition:: Database structure
 
-Examples
-~~~~~~~~
+   Content plugins and the rich content models which contain them are related
+   with Django Generic Foreign Keys, which means that there is only one database
+   table for each content plugin. This is unlike CMSes like FeinCMS, which
+   create separate tables for every pair of content plugin and content model.
 
-The ``icekit.plugins`` package contains reference implementations for
-many types of content that you might need in a project.
 
-Rich content models
--------------------
+Pages vs Collections
+--------------------
 
 ICEkit uses
 `django-fluent-pages <https://github.com/edoburu/django-fluent-pages>`__
-to provide a tree of pages for your site. Each page is an instance of a
-Page Type.
-
-Pages can be arranged in any tree shape. The URL of a page is made up of
-its slug plus that of its parents.
+to provide a **tree of pages** for your site. Pages can be arranged in any tree
+shape. The slug of a page is made up of its slug plus that of its parent.
 
 Pages are meant for 'permanent' parts of your site, ie that represent a
 section of your site, and which may appear in permanent site navigation.
 
-Collections of things don't normally work well as pages, because usually
-it is not desirable to put each item in the collection in a different
-place in the tree, and the tree can get cluttered. For those, consider
-using a more traditional Django model, and maybe define a Page Type
-and/or Content Plugin for listing/navigating through the collection.
-
 Examples of content that works well as Pages are Homepage, About Us,
 Press Room, Terms & Conditions, Search.
 
+.. note:
+
+   Page Types usually, but don't have to, implement rich content placeholders.
+   An example of a Page Type that doesn't implement rich content is a
+   RedirectPage, which doesn't render content, but instead redirects to
+   another URL.
+
+On the other hand, **collections of content** don't normally work well in the
+page tree, because usually collections need browsing and sorting differently
+from how they would appear in a tree structure, and besides, a single tree
+would get cluttered with thousands of individual collection items.
+
 Examples of content that would not work well as Pages (because they are
 more conveniently modelled as large collections of similar things) are
-Blog Post, Press Release, User, Image, etc.
+Blog Post, Press Release, User, Artwork, etc.
 
-Most pages can be created by the editor using ICEkit's standard Page,
-which allows standard Content Items to be added. For more
-special-purpose pages, such as Search, you would define a new model that
-subclasses PageType, and register it to the page type pool. See
-`Creating page types <howto/page-types.md>`__.
+For collections of content, consider using a more traditional Django model,
+and maybe define a Page Type and/or Content Plugin for listing/navigating
+through the collection. ICEkit provides some
+:ref:`collection helpers <content-collections>` to aid this process.
 
-Page Types usually, but don't have to, implement Rich Content. An
-example of a Page Type that doesn't implement rich content is a
-RedirectPage, which doesn't render content, but instead redirects to
-another URL.
+.. TODO: link to creating content models/content plugins
 
-Database representation
-~~~~~~~~~~~~~~~~~~~~~~~
+.. admonition::Database representation
 
-Page Types are
-`django-polymorphic <https://django-polymorphic.readthedocs.io/>`__
-models.
-
-Examples
-~~~~~~~~
+   Page Types are
+   `django-polymorphic <https://django-polymorphic.readthedocs.io/>`_
+   models.
 
 The ``icekit.page_types`` package contains reference implementations for
 many types of page types that you might need in a project.
 
 Publishing
 ----------
+.. TODO: proper description here?
 
-See the `Publishing <../topics/publishing.md>`__ docs for an overview.
+See the :ref:`Publishing <publishing>` docs for an overview.
+

@@ -1,4 +1,6 @@
-# ListableMixin
+ListableMixin *
+=============
 
-.. autoclass::icekit.mixins.ListableMixin
+.. autoclass:: icekit.mixins.ListableMixin
    :members:
+

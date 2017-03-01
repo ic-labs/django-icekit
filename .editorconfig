@@ -21,10 +21,11 @@ indent_style = space
 [*.sh]
 indent_style = tab
 
+[*.yml]
+indent_size = 2
+indent_style = space
+
 [*.rst]
 indent_style = space
 indent_size = 3
 
-[*.yml]
-indent_size = 2
-indent_style = space

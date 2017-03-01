@@ -1,3 +1,5 @@
+.. _content-collections:
+
 ``AbstractCollectedContent`` and ``AbstractListingPage`` *
 ========================================================
 

@@ -4,6 +4,8 @@ Useful shell commands
 This document describes a few useful shell commands. For Docker
 commands, see :doc:`../topics/docker`.
 
+.. _shell:
+
 Opening a shell
 ---------------
 

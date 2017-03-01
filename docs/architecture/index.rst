@@ -18,7 +18,6 @@ This section documents some of the architectural principles underpinning ICEkit.
 
    conventions
    content/index
-   assets
    search
    celery
 

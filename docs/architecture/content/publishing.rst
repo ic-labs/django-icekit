@@ -1,3 +1,5 @@
+.. _publishing:
+
 Publishing in ICEkit *
 ====================
 
