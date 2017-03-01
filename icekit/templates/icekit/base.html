@@ -82,7 +82,7 @@
 				{% block js %}{% endblock %}
 			{% endcompress %}
 			{% if ICEKIT_SHARE_USERNAME and ICEKIT_SHARE_KEY %}
-				<script language="javascript">
+				<script>
 					window.ICEKIT_SHARE_USERNAME = '{{ ICEKIT_SHARE_USERNAME }}';
 					window.ICEKIT_SHARE_KEY = '{{ ICEKIT_SHARE_KEY }}';
 				</script>
