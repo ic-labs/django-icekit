@@ -36,6 +36,11 @@ named `{project_name}` in the current working directory.
 NOTE: Windows users should run this command in Git Bash, which comes with
 [Git for Windows](https://git-for-windows.github.io/).
 
+If you want to create a new project from the ICEkit `develop` branch, do this
+instead:
+
+    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/bin/startproject.sh) {project_name} develop
+
 ## 2. Run the project
 
 Build a Docker image:
