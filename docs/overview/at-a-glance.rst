@@ -36,9 +36,10 @@ enterprise-level workflow and publishing features that our clients need.
 
 So we made one -- and here it is.
 
-More than that, ICEkit also includes our knowledge about how to deploy and
-scale. That's why it can be installed and deployed as a scalable Docker image,
-which can be installed on any top-tier cloud host.
+More than just the software, ICEkit also includes our knowledge about how to
+deploy and scale. That's why it can be installed and deployed as a scalable
+Docker image, which can be installed on any Docker-compatible host, including
+the top-tier ones.
 
 For more, take a look at our blog series on the
 `future of content management <https://interaction.net.au/blog/2015/future-content-management-part-1/>`_.
