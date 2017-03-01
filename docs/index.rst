@@ -6,7 +6,7 @@ Galleries, Libraries, Archives and Museums (the GLAM sector) and pretty much
 any cultural institution. For a more extensive overview, see
 http://glamkit.com.
 
-This documentation covers the technical usage and API of GLAMkit.
+This documentation covers the technical usage and API of GLAMkit and ICEkit.
 
 .. TODO: for an end-user guide, see x
 
@@ -30,7 +30,6 @@ This documentation covers the technical usage and API of GLAMkit.
    architecture/index
    topics/*
    reference/*
-   roadmap
    contributing/index
    changelog
 

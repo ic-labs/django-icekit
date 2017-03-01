@@ -1,4 +1,4 @@
-Glossary of terms *
+Glossary of terms
 =================
 
 .. TODO: merge with concepts, turn off ordering.
@@ -28,9 +28,7 @@ Glossary of terms *
 
    Content plugin
       A class that registers a content item in GLAMkit which specifies how
-      it is to be rendered in a given context and
-how it is edited in the admin.
-
+      it is to be rendered in a given context and how it is edited in the admin.
 
    ICEkit
       ICEkit_ is the engine that runs GLAMkit (actually GLAMkit is just an

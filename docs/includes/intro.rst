@@ -9,8 +9,7 @@ It has publishing and workflow tools for small teams of content professionals,
 and a powerful content framework, based on django-fluent_. Everything is written
 in Python, using the Django framework.
 
-Key features
-------------
+.. rubric:: Key features
 
 ICEkit has:
 

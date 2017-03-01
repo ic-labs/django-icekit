@@ -1,5 +1,5 @@
-Features
-========
+Features in depth
+=================
 
 .. TODO: link to where the features are covered
 
@@ -96,8 +96,7 @@ Made for developers to love
    - works with `Travis CI`_ and `Docker Cloud`_ to only deploy when tests pass
    - `Docker Cloud` makes scaling services as easy as dragging a slider
 
-More information
-~~~~~~~~~~~~~~~~
+.. rubric:: More information
 
 For more detail on how ICEkit works, see :doc:`/architecture/index`.
 
