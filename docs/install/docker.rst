@@ -5,9 +5,11 @@ Installing and running
 
 .. TODO: make the default install GLAMkit, with a variation for ICEkit.
 
-The recommended technique uses Docker. For a manual installation, see :doc:`manual-install`.
+The recommended technique uses Docker. For a manual installation, if you're not
+ready to use Docker, see :doc:`/install/manual-install`.
 
-If you haven't already, install Docker (see :doc:`../topics/docker`):
+If you haven't already, install Docker (see :doc:`../topics/docker` for
+background information about why we use Docker, and some useful recipes):
 
 -  `OS X <https://download.docker.com/mac/stable/Docker.dmg>`__
 -  `Linux <https://docs.docker.com/engine/installation/linux/>`__
@@ -17,28 +19,7 @@ Docker works on OS X, Linux, and Windows, takes care of all the project
 dependencies (e.g. database, search engine, web server, etc.), and makes
 :doc:`../deploying/index` easy.
 
-If you're not ready for Docker, see :doc:`install-manual`.
-
-1. Create a new project
-^^^^^^^^^^^^^^^^^^^^^^^
-
-::
-
-    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) {project_name}
-
-This will create a new project from the ICEkit project template, in a
-directory named ``{project_name}`` in the current working directory.
-
-NOTE: Windows users should run this command in Git Bash, which comes
-with `Git for Windows <https://git-for-windows.github.io/>`__.
-
-.. admonition:: Installing the `develop` branch
-
-   The `curl` command installs the latest release (from the `master` branch). If you prefer to install the development release (the `develop` branch), use this::
-
-      $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/bin/startproject.sh) {project_name} develop
-
-The above command differs from the one in the README in two ways. First, it downloads (via curl) the develop version of the script, and second it passes a second argument ("develop") to the script, which tells it to download the develop versions of all the files it needs when it runs.
+.. include:: /install/_new_project.rst
 
 2. Run the project
 ^^^^^^^^^^^^^^^^^^

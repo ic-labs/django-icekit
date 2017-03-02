@@ -1,8 +1,8 @@
 Setting up a new project from source, with Docker
 =================================================
 
-You can run the ICEkit project template as-is, without first creating a
-project from the template.
+You can run the included project template inside the repo, without first
+creating a project from the template.
 
 Get the code::
 
@@ -49,4 +49,4 @@ fixed port or a dynamic port::
 Run without Docker
 ------------------
 
-If you don't want to use Docker, read :doc:`../overview/install-manual`.
+If you don't want to use Docker, read :doc:`../install/manual-install`.

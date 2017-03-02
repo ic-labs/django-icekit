@@ -17,7 +17,7 @@ Conventions
   ICEkit. The easiest way to do this is in the docstrings of the class, with
   an ``automodule`` call out from this document structure.
 * Titles should be sentence case.
-* File extensions are ``.rst``
+* File extensions are ``.rst`` and hard-wrapped at 80 columns.
 
 Installing requirements
 -----------------------
@@ -42,7 +42,8 @@ Run::
    cd $ICEKIT_DIR/../docs
    sphinx-autobuild . _build_html
 
-or, to build manually::
+And open http://localhost:8000 in a browser to preview the docs. Or, to build
+manually::
 
    make html
 

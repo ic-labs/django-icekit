@@ -44,72 +44,92 @@ The typical Docker workflow is:
 Useful Docker commands
 ----------------------
 
-Here are some of the most commonly used Docker commands when getting
-started::
+Here are some of the most commonly used Docker commands when getting started.
 
-    # Rebuild images for all services in your compose file
-    $ docker-compose build --pull
+Rebuild images for all services in your compose file::
 
-    # Start all services in your compose file
-    $ docker-compose up
+   $ docker-compose build --pull
 
-    # Stop all services in your compose file
-    $ docker-compose stop
+Start all services in your compose file::
 
-    # List all containers for services in your compose file
-    $ docker-compose ps
+   $ docker-compose up
 
-    # Open a new shell (`entrypoint.sh`) inside an already running container
-    # for the `django` service
-    $ docker-compose exec django entrypoint.sh
+Stop all services in your compose file::
 
-    # Remove all exited containers and their volumes
-    docker rm -v $(docker ps -a -f status=exited -q)
+   $ docker-compose stop
 
-    # Remove all dangling images (not tagged or used by any container)
-    docker rmi $(docker images -f dangling=true -q)
+List all containers for services in your compose file::
 
-    # Remove all dangling volumes (not used by any container)
-    docker volume rm $(docker volume list -f dangling=true -q)
+   $ docker-compose ps
 
-    # Remove ALL containers, images and volumes, to start from scratch
-    docker rm -f $(docker ps -a -q)
-    docker rmi $(docker images -q)
-    docker volume rm $(docker volume ls -q)
+Open a new shell (`entrypoint.sh`) inside an already running container for the
+``django`` service::
 
-Docker-cloud commands
+   $ docker-compose exec django entrypoint.sh
+
+Remove all exited containers and their volumes::
+
+   docker rm -v $(docker ps -a -f status=exited -q)
+
+Remove all dangling images (not tagged or used by any container)::
+
+   docker rmi $(docker images -f dangling=true -q)
+
+Remove all dangling volumes (not used by any container)::
+
+   docker volume rm $(docker volume list -f dangling=true -q)
+
+Remove ALL containers, images and volumes, to start from scratch::
+
+   docker rm -f $(docker ps -a -q)
+   docker rmi $(docker images -q)
+   docker volume rm $(docker volume ls -q)
+
+Docker Cloud commands
 ---------------------
 
 The following commands can be run on a terminal in ICEkit's Django
 `docker cloud`_ container. First run ``entrypoint.sh bash`` to set up the
-environment:
+environment.
 
 Debug server
 ~~~~~~~~~~~~
 
-::
 
-    # Run Django's debug server on a cloud container, for debugging
+Run Django's debug server on a cloud container, for debugging::
+
     $ supervisorctl.sh stop all
     $ runserver.sh
-    # then when you've finished and Ctrl-C exited runserver
+
+Then when you've finished and Ctrl-C exited runserver::
+
     $ supervisorctl.sh start all
+
+.. _data-dumps:
 
 Data dumps
 ~~~~~~~~~~
 
-::
+Dump a database, encrypt it, and upload to the transfer.sh service, then delete
+the local copy::
 
-    # Dump a database, encrypt it, and upload to the transfer.sh service, then delete the local copy
-    $ pg_dump -O -x -f ~/dump.sql && cat ~/dump.sql|gpg -ac -o-|curl -X PUT --upload-file "-" https://transfer.sh/dump.sql.gpg && rm ~/dump.sql
+   $ pg_dump -O -x -f ~/dump.sql && cat ~/dump.sql|gpg -ac -o-|curl -X PUT --upload-file "-" https://transfer.sh/dump.sql.gpg && rm ~/dump.sql
 
-    # then on the destination machine, to download and decrypt:
-    $ curl [transfer.sh url] | gpg -o- > dump.sql
-    $ psql < dump.sql
-    $ rm dump.sql
+Then on the destination machine, to download and decrypt::
+
+   $ curl [transfer.sh url] | gpg -o- > dump.sql
+
+Erase the current database if necessary::
+
+   $ dropdb $MYPROJECT_develop && createdb $MYPROJECT_develop
+
+Finally, load the data::
+
+   $ psql < dump.sql
+   $ rm dump.sql
 
 Uninstalling a GLAMkit/ICEkit project from Docker
------------------------------=======-------------
+-------------------------------------------------
 
 Delete all containers with a name matching ``{project_name}``::
 

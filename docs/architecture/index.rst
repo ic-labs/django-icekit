@@ -11,8 +11,6 @@ GLAMkit.
 
    conventions
    content/index
-   search
-   celery
 
 
 .. TODO: add assets, navigation, dashboard

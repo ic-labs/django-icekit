@@ -30,10 +30,17 @@ Glossary of terms
       A class that registers a content item in GLAMkit which specifies how
       it is to be rendered in a given context and how it is edited in the admin.
 
+   GLAM
+      Short for Galleries, Libraries, Archives and Museums, used by some members
+      of those institutions to refer to public cultural/collecting institutions
+      as a whole.
+
    ICEkit
       ICEkit_ is the engine that runs GLAMkit (actually GLAMkit is just an
       extended set of settings and requirements on top of ICEkit). ICEkit is a
-      basic CMS toolkit, designed for small teams of content professionals.
+      basic CMS toolkit, designed for small teams of content professionals. ICE
+      isn't officially short for anything, but if it was, it would be
+      "Interaction Consortium Editorial".
 
    .. Placeholder
 

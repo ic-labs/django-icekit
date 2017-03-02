@@ -92,3 +92,6 @@ Or list just the additional packages that you have already installed::
 You can also create a ``requirements-local.txt`` file (ignored by Git) that will
 be installed automatically when the project is started.
 
+.. TODO: are there still shared directories mounted by docker-compose into the
+container?
+

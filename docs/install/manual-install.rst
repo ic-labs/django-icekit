@@ -1,23 +1,24 @@
 :orphan:
 
 Installing and running without Docker
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=====================================
 
-If you are not yet ready for Docker, you can run the ICEkit project
-template (or an ICEkit project) directly. You will need to install and
-configure all of its dependencies manually.
+If you are not yet ready for Docker, you can run an ICEkit project directly.
+You will need to install and configure all of its dependencies manually.
 
-Install development tools (on a new development machine)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+0. Install prerequisites (once per machine)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Install development tools
+-------------------------
 Install development tools. On OS X, install the XCode command line
 tools::
 
     xcode-select --install
 
-Install ICEkit system dependencies (only necessary the first time you install an ICEkit project)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Install ICEkit system dependencies
+----------------------------------
 This section describes how to install the required system packages:
 
 -  PostgreSQL
@@ -83,8 +84,11 @@ Install Bower
 
     You may also need to re-install system packages.
 
-Running ICEkit without Docker
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. include:: _new_project.rst
+
+2. Run the project
+^^^^^^^^^^^^^^^^^^
 
 Change to the ICEkit project template (or an ICEkit project) directory::
 
@@ -106,6 +110,11 @@ Run the Django dev server::
 
     $ runserver.sh
 
-Now you can open the site in a browser::
+3. That's it!
+^^^^^^^^^^^^^
 
-    http://localhost:8000
+Open the site in a browser::
+
+    http://{ my_project }.lvh.me:8000
+
+When you're done, exit ``runserver.sh``.

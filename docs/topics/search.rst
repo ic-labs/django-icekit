@@ -32,6 +32,23 @@ fields. You can render a different template in your search index by
 redeclaring the ``title`` field. HTML tags are stripped and HTML
 entities are converted to unicode.
 
+Rebuilding the search index
+---------------------------
+
+The management command (provided by Haystack) ``manage.py rebuild_index`` will
+repopulate the ElasticSearch index with all documents.
+
+Similarly, ``manage.py update_index`` will repopulate the ElasticSearch index
+with only documents that need to be re-indexed.
+
+Automatically updating the search index
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The task ``icekit.tasks.UpdateSearchIndexTask`` updates the search index, and is
+configured to run every 15 minutes in ``settings.CELERYBEAT_SCHEDULE``.
+
+For more information, see :doc:`/topics/celery`
+
 Using ``AbstractLayoutIndex``
 -----------------------------
 

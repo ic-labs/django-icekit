@@ -1,8 +1,8 @@
 Useful shell commands
 =====================
 
-This document describes a few useful shell commands. For Docker
-commands, see :doc:`../topics/docker`.
+This document describes a few useful shell commands. For more Docker commands,
+see :doc:`../topics/docker`.
 
 .. _shell:
 
@@ -24,8 +24,8 @@ Or open a shell on a new container, and remove it on exit::
 Without Docker
 ~~~~~~~~~~~~~~
 
-Or open a shell without Docker from the ICEkit project template (or an
-ICEkit project) directory::
+Or open a shell without Docker from the ICEkit project template (or an ICEkit
+project) directory::
 
     $ cd project_template
     $ ./go.sh

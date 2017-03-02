@@ -1,8 +1,9 @@
 Testing
 =======
 
-We don't strictly require 100% test coverage, but we aim to have:
+We don't strictly require 100% test coverage (yet), but we aim to have:
 
+-  >70% coverage.
 -  Unit tests for all regression bugs.
 -  Unit or integration tests for complex, fragile, or important
    functionality.
@@ -50,23 +51,23 @@ steps.
 Working with the database for tests
 -----------------------------------
 
-Create migrations for a test model
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Creating migrations for a test model
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
     BASE_SETTINGS_MODULE=test manage.py makemigrations
 
-Get an interactive shell to inspect the test database
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Opening an interactive shell to inspect the test database
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
     BASE_SETTINGS_MODULE=icekit.tests.settings manage.py shell_plus
 
 
-Create a data dump with migrations applied
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Creating a data dump with migrations applied
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The slowest part of running tests from scratch is usually the "Rendering
 Model States..." stage of migrations. This can be speeded up by loading
@@ -90,8 +91,8 @@ applied:
        pg_dump -O -x -f test_initial_data.sql -d FOO_test_develop
        git add test_initial_data.sql
 
-Create fluent pages in tests.
------------------------------
+Creating fluent pages in tests
+------------------------------
 
 You can create fluent pages efficiently using django-dynamic-fixture_::
 
