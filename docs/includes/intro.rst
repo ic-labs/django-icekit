@@ -5,7 +5,7 @@ the cultural sector. It has tools for dealing with complex events, collections,
 press releases, sponsors, and a institutional storytelling engine.
 
 ICEkit sits one layer below GLAMkit, and is a framework for building CMSes.
-It has publishing and workflow tools for small teams of content professionals,
+It has publishing and workflow tools for teams of content professionals,
 and a powerful content framework, based on django-fluent_. Everything is written
 in Python, using the Django framework.
 

@@ -8,7 +8,7 @@ What is ICEkit?
 ---------------
 
 The engine that runs GLAMkit is called ICEkit. ICEkit is a toolkit for building
-CMSes, designed for small teams of content professionals. One day there will
+CMSes, designed for teams of content professionals. One day there will
 be other flavours of ICEkit for other markets - this anticipated future is why
 the repository and some classes are named `ICEkit`. For now, you can treat
 ICEkit and GLAMkit as more-or-less interchangeable.
@@ -25,7 +25,7 @@ great and not break the bank.
 
 GLAMkit and ICEkit represent the distillation of our knowledge and experience
 in working on technically challenging projects with these clients, and with
-museum clients in particular. Out of the box, it has everything that small teams
+museum clients in particular. Out of the box, it has everything that teams
 of content professionals need to get started creating and publishing pages of
 content.
 

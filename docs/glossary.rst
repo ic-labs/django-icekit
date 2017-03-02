@@ -38,7 +38,7 @@ Glossary of terms
    ICEkit
       ICEkit_ is the engine that runs GLAMkit (actually GLAMkit is just an
       extended set of settings and requirements on top of ICEkit). ICEkit is a
-      basic CMS toolkit, designed for small teams of content professionals. ICE
+      basic CMS toolkit, designed for teams of content professionals. ICE
       isn't officially short for anything, but if it was, it would be
       "Interaction Consortium Editorial".
 
