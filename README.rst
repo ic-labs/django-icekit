@@ -15,7 +15,7 @@ and a powerful content framework, based on django-fluent_. Everything is written
 in Python, using the Django framework.
 
 Key features
-------------
+============
 
 ICEkit has:
 
