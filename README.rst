@@ -11,10 +11,10 @@ the cultural sector.
 
 ICEkit sits one layer below GLAMkit, and is a framework for building CMSes.
 It has publishing and workflow tools for teams of content professionals,
-and a powerful content framework, based on django-fluent_. Everything is written
+and a powerful content framework, based on django-fluent. Everything is written
 in Python, using the Django framework.
 
-`Read the full Documentation <http://icekit.readthedocs.io>`_
+`Read the documentation for the latest release <http://icekit.readthedocs.io>`_
 
 Key features
 ============
@@ -50,18 +50,14 @@ AWS.
 Quickstart, with Docker
 =======================
 
-The recommended technique uses Docker. For a manual installation, if you're not
-ready to use Docker, see `Manual Installation <docs/install/manual-install.rst>`_.
-
-If you haven't already, install Docker:
-
--  `OS X <https://download.docker.com/mac/stable/Docker.dmg>`__
--  `Linux <https://docs.docker.com/engine/installation/linux/>`__
--  `Windows <https://download.docker.com/win/stable/InstallDocker.msi>`__
-
+The recommended installation method uses Docker.
 Docker works on OS X, Linux, and Windows, takes care of all the project
 dependencies (e.g. database, search engine, web server, etc.), and makes
 `deployment <docs/howto/deployment.md>`__ easy.
+
+If you're not ready to use Docker, see `Manual Installation <docs/install/manual-install.rst>`_.
+
+Otherwise, if you haven't already, `install Docker <https://docs.docker.com/engine/installation/>`_.
 
 1. Create a new project
 -----------------------

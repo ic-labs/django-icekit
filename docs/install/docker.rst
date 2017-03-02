@@ -5,19 +5,14 @@ Installing and running
 
 .. TODO: make the default install GLAMkit, with a variation for ICEkit.
 
-The recommended technique uses Docker. For a manual installation, if you're not
-ready to use Docker, see :doc:`/install/manual-install`.
-
-If you haven't already, install Docker (see :doc:`../topics/docker` for
-background information about why we use Docker, and some useful recipes):
-
--  `OS X <https://download.docker.com/mac/stable/Docker.dmg>`__
--  `Linux <https://docs.docker.com/engine/installation/linux/>`__
--  `Windows <https://download.docker.com/win/stable/InstallDocker.msi>`__
-
+The recommended installation method uses Docker.
 Docker works on OS X, Linux, and Windows, takes care of all the project
 dependencies (e.g. database, search engine, web server, etc.), and makes
 :doc:`../deploying/index` easy.
+
+If you're not ready to use Docker, see `Manual Installation </install/manual-install>`_.
+
+Otherwise, if you haven't already, `install Docker <https://docs.docker.com/engine/installation/>`_.
 
 .. include:: /install/_new_project.rst
 
