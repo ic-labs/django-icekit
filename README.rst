@@ -66,10 +66,15 @@ Setup <docs/intro/manual-setup.md>`__.
 
 ::
 
-    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) {project_name}
+$ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) {project_name}
 
 This will create a new project from the ICEkit project template, in a
 directory named ``{project_name}`` in the current working directory.
+
+If you want to create a new project from the ICEkit `develop` branch, do this
+instead::
+
+   $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/bin/startproject.sh) {project_name} develop
 
 NOTE: Windows users should run this command in Git Bash, which comes
 with `Git for Windows <https://git-for-windows.github.io/>`__.
