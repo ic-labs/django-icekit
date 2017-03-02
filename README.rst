@@ -14,6 +14,8 @@ It has publishing and workflow tools for teams of content professionals,
 and a powerful content framework, based on django-fluent_. Everything is written
 in Python, using the Django framework.
 
+`Read the full Documentation <http://icekit.readthedocs.io>`_
+
 Key features
 ============
 
@@ -23,8 +25,8 @@ ICEkit has:
 -  Advanced publishing / preview / unpublishing controls
 -  Simple workflow controls
 -  Content plugins for working with rich text, images, embedded media, etc.
--  Customisable site search using `Elastic Search`_
--  `django-reversion`_ compatible, allowing versioning of content
+-  Customisable site search using Elastic Search
+-  ``django-reversion`` compatible, allowing versioning of content
 -  Customisable admin dashboard
 -  Docker-compatible project template supplied
 -  Batteries included: bower, LessCSS, Bootstrap
@@ -48,7 +50,10 @@ AWS.
 Quickstart, with Docker
 =======================
 
-If you haven't already, install `Docker <docs/intro/docker.md>`__:
+The recommended technique uses Docker. For a manual installation, if you're not
+ready to use Docker, see `Manual Installation <docs/install/manual-install.rst>`_.
+
+If you haven't already, install Docker:
 
 -  `OS X <https://download.docker.com/mac/stable/Docker.dmg>`__
 -  `Linux <https://docs.docker.com/engine/installation/linux/>`__
@@ -58,15 +63,12 @@ Docker works on OS X, Linux, and Windows, takes care of all the project
 dependencies (e.g. database, search engine, web server, etc.), and makes
 `deployment <docs/howto/deployment.md>`__ easy.
 
-If you're not ready for Docker, see `Manual
-Setup <docs/intro/manual-setup.md>`__.
-
 1. Create a new project
 -----------------------
 
 ::
 
-$ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) {project_name}
+   $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) {project_name}
 
 This will create a new project from the ICEkit project template, in a
 directory named ``{project_name}`` in the current working directory.
