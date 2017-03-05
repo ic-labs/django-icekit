@@ -1,5 +1,5 @@
 from django.contrib import admin
-from icekit.admin_tools.mixins import ICEkitFluentContentsAdmin
+from icekit.admin import ICEkitFluentContentsAdmin
 
 from .models import Article
 
