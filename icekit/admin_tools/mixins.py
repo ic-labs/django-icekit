@@ -20,10 +20,10 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin):
     Mixin class for models that have a ``layout`` field and fluent content.
     """
 
-    change_form_template = 'icekit/admin/fluent_layouts_change_form.html'
+    change_form_template = 'admin/fluent_layouts_change_form.html'
 
     class Media:
-        js = ('icekit/admin/js/fluent_layouts.js', )
+        js = ('admin/js/fluent_layouts.js', )
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         """
