@@ -2,7 +2,7 @@ from fluent_pages.integration.fluent_contents.admin import FluentContentsPageAdm
 
 from icekit.admin_tools.mixins import FluentLayoutsMixin, HeroMixinAdmin, \
     ListableMixinAdmin
-from icekit.admin_tools.mixins import ICEkitContentsAdmin
+from icekit.admin import ICEkitContentsAdmin
 
 
 class UnpublishableLayoutPageAdmin(FluentLayoutsMixin, FluentContentsPageAdmin):

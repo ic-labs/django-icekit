@@ -1,6 +1,6 @@
 from django.contrib import admin
 from fluent_contents.admin import PlaceholderFieldAdmin
-from icekit.admin_tools.mixins import ICEkitContentsAdmin
+from icekit.admin import ICEkitContentsAdmin
 
 from . import models
 

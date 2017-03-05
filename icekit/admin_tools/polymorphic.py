@@ -6,6 +6,12 @@ from fluent_contents.admin.contentitems import (BaseContentItemInline,
 
 # working around name clash
 import importlib
+
+from icekit.admin_tools.widgets import PolymorphicForeignKeyRawIdWidget, \
+    PolymorphicManyToManyRawIdWidget
+from icekit.workflow.admin import WorkflowMixinAdmin, WorkflowStateTabularInline
+
+
 _pa = importlib.import_module("polymorphic.admin")
 PolymorphicParentModelAdmin = _pa.PolymorphicParentModelAdmin
 
@@ -166,3 +172,27 @@ class PolymorphicFluentAdminRawIdFix(PolymorphicAdminRawIdFix):
 
 class PolymorphicReferringItemInline(PolymorphicAdminRawIdFix, BaseContentItemInline):
     pass
+
+
+# This import must go here to avoid class loading errors
+from icekit.publishing.admin import ICEKitFluentPagesParentAdminMixin
+
+
+# WARNING: Beware of very closely named classes here
+class ICEkitFluentPagesParentAdmin(
+        ICEKitFluentPagesParentAdminMixin, WorkflowMixinAdmin):
+    """
+    A base for Fluent Pages parent admins that will include ICEkit features:
+
+     - publishing
+     - workflow
+    """
+    # Go through contortions here to make sure the 'actions_column' is last
+    list_display = [
+        display_column for display_column in (
+            ICEKitFluentPagesParentAdminMixin.list_display +
+            WorkflowMixinAdmin.list_display)
+        if display_column != 'actions_column'] + ['actions_column']
+    list_filter = ICEKitFluentPagesParentAdminMixin.list_filter + \
+        WorkflowMixinAdmin.list_filter
+    inlines = [WorkflowStateTabularInline]
