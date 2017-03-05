@@ -548,8 +548,6 @@ FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     }
 }
 
-FLUENT_DASHBOARD_DEFAULT_MODULE = 'ModelList'
-
 FLUENT_MARKUP_LANGUAGES = ('restructuredtext', 'markdown', 'textile')
 FLUENT_MARKUP_MARKDOWN_EXTRAS = ()
 
@@ -689,7 +687,7 @@ ICEKIT = {
 
 INSTALLED_APPS += (
     'icekit',
-    'icekit.dashboard',  # Must come before `django.contrib.admin` and `flat`
+    'icekit.admin_tools',  # Must come before `django.contrib.admin` and `flat`
     'icekit.integration.reversion',
     'icekit.layouts',
     'icekit.workflow',
