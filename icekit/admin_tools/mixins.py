@@ -1,21 +1,178 @@
 from fluent_contents.admin import PlaceholderEditorAdmin
 from fluent_contents.models import PlaceholderData
 
-from django.contrib import admin
-
 from icekit.workflow.admin import WorkflowMixinAdmin, \
     WorkflowStateTabularInline
 
 import logging
 
-from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
 from icekit.utils.attributes import resolve
+
+from django.utils.translation import ugettext_lazy as _
+from django import http
+from django.conf import settings
+from django.conf.urls import patterns, url
+from django.contrib import admin
+from django.core.exceptions import ImproperlyConfigured
+try:
+    import json
+except ImportError:
+    from django.utils import simplejson as json
 
 logger = logging.getLogger(__name__)
 
 
-class FluentLayoutsMixin(PlaceholderEditorAdmin):
+class PreviewFieldAdminMixin(admin.ModelAdmin):
+    """
+    Dynamically display preview rendering of FK/M2M fields in admin forms,
+    which is most useful for fields flagged as `raw_id_fields`. Relationship
+    fields with single or multiple ID values are supported.
+
+    To render a preview for related FK/M2M target widgets, extend your admin
+    from this class and set the `preview_fields` attribute to the appropriate
+    field names.
+
+    By default a <UL> list of `unicode` target object values is rendered.
+
+    To override the preview, implement a `preview_<fieldname>` method that
+    returns the HTML to represent a single target object, like so:
+
+        def preview_image(self, obj, request):
+            return u'<img src="{0}" alt="{1}"><p>{1}</p>'.format(
+                obj.image.url, unicode(obj))
+    """
+
+    # Override this attribute with field names for which to show preview
+    preview_fields = []
+
+    class Media:
+        # TODO: include these in main/global files
+        js = ('admin/js/preview-field-admin.js',)
+        css = {
+            'all': ('admin/css/preview-field-admin.css',),
+        }
+
+    def render_field_default(self, obj, request):
+        """
+        Default rendering for fields without a custom `field_<fieldname>`
+        """
+        return u'<p>{0}</p>'.format(unicode(obj))
+
+    def render_field_error(self, obj_id, obj, exception, request):
+        """
+        Default rendering for items in field where the the usual rendering
+        method raised an exception.
+        """
+        if obj is None:
+            msg = 'No match for ID={0}'.format(obj_id)
+        else:
+            msg = unicode(exception)
+        return u'<p class="error">{0}</p>'.format(msg)
+
+    def render_field_previews(self, id_and_obj_list, request, field_name):
+        """
+        Override this to customise the preview representation of all objects.
+        """
+        try:
+            preview_fn = getattr(self, 'preview_{0}'.format(field_name))
+        except AttributeError:
+            # Fall back to default field rendering
+            preview_fn = self.render_field_default
+
+        obj_preview_list = []
+        for obj_id, obj in id_and_obj_list:
+            try:
+                # Handle invalid IDs
+                if obj is None:
+                    obj_preview = self.render_field_error(
+                        obj_id, obj, None, request)
+                else:
+                    obj_preview = preview_fn(obj, request)
+            except Exception as ex:
+                obj_preview = self.render_field_error(obj_id, obj, ex, request)
+            obj_preview_list.append(obj_preview)
+        li_html_list = [u'<li>{0}</li>'.format(preview)
+                        for preview in obj_preview_list]
+        if li_html_list:
+            return u'<ul>{0}</ul>'.format(u''.join(li_html_list))
+        else:
+            return ''
+
+    def fetch_field_previews(self, request, pk, field_name, raw_ids):
+        if field_name not in self.preview_fields:
+            raise http.Http404
+        try:
+            ids = map(int, raw_ids.split(','))
+        except ValueError:
+            if raw_ids == '':
+                ids = []
+            else:
+                raise http.Http404
+        target_model_admin = self.admin_site._registry.get(
+            self.model._meta.get_field(field_name).rel.to)
+        if (
+                target_model_admin and
+                target_model_admin.has_change_permission(request)
+        ):
+            try:
+                # Django >= 1.8
+                qs = target_model_admin.get_queryset(request).filter(id__in=ids)
+            except AttributeError:
+                qs = target_model_admin.queryset(request).filter(id__in=ids)
+            # Keep ordering of IDs provided
+            obj_dict = dict([(obj.pk, obj) for obj in qs.all()])
+            ids_and_objs_list = map(lambda id: (id, obj_dict.get(id)), ids)
+            # Generate preview HTML list
+            response_data = self.render_field_previews(
+                ids_and_objs_list, request=request, field_name=field_name)
+        else:
+            response_data = ''  # graceful-ish.
+        return http.HttpResponse(
+            json.dumps(response_data), content_type='application/json')
+
+    def get_urls(self):
+        urlpatterns = patterns(
+            '',
+            url(r'^(?P<pk>.+)/preview-field/(?P<field_name>\w+)/(?P<raw_ids>[\d,]+)/$',
+                self.admin_site.admin_view(self.fetch_field_previews))
+        )
+        # TODO inlines, see CookedIdAdmin
+        return urlpatterns + super(PreviewFieldAdminMixin, self).get_urls()
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        formfield = super(PreviewFieldAdminMixin, self) \
+            .formfield_for_foreignkey(db_field, request=request, **kwargs)
+        if db_field.name in self.preview_fields:
+            if self.assert_target_admin_in_site_registry(db_field):
+                formfield.widget.attrs['data-is-preview-field'] = 'true'
+        return formfield
+
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        formfield = super(PreviewFieldAdminMixin, self) \
+            .formfield_for_manytomany(db_field, request=request, **kwargs)
+        if db_field.name in self.preview_fields:
+            if self.assert_target_admin_in_site_registry(db_field):
+                formfield.widget.attrs['data-is-preview-field'] = 'true'
+        return formfield
+
+    def assert_target_admin_in_site_registry(self, db_field):
+        if db_field.rel.to in self.admin_site._registry:
+            return True
+        else:
+            if settings.DEBUG:
+                raise ImproperlyConfigured(
+                    "%s.preview_fields contains '%r', but %r "
+                    "is not registed in the same admin site." % (
+                        self.__class__.__name__,
+                        db_field.name,
+                        db_field.rel.to,
+                    )
+                )
+            else:
+                pass  # fail silently
+
+
+class FluentLayoutsMixin(PlaceholderEditorAdmin, PreviewFieldAdminMixin):
     """
     Mixin class for models that have a ``layout`` field and fluent content.
     """
@@ -78,7 +235,10 @@ from icekit.publishing.admin import ICEKitFluentPagesParentAdminMixin
 
 # WARNING: Beware of very closely named classes here
 class ICEkitFluentPagesParentAdmin(
-        ICEKitFluentPagesParentAdminMixin, WorkflowMixinAdmin):
+    ICEKitFluentPagesParentAdminMixin,
+    WorkflowMixinAdmin,
+    PreviewFieldAdminMixin,
+):
     """
     A base for Fluent Pages parent admins that will include ICEkit features:
 
@@ -101,7 +261,11 @@ from icekit.publishing.admin import PublishingAdmin, \
     PublishableFluentContentsAdmin
 
 
-class ICEkitContentsAdmin(PublishingAdmin, WorkflowMixinAdmin):
+class ICEkitContentsAdmin(
+    PublishingAdmin,
+    WorkflowMixinAdmin,
+    PreviewFieldAdminMixin,
+):
     """
     A base for generic admins that will include ICEkit features:
 
@@ -116,7 +280,10 @@ class ICEkitContentsAdmin(PublishingAdmin, WorkflowMixinAdmin):
 
 
 class ICEkitFluentContentsAdmin(
-        PublishableFluentContentsAdmin, WorkflowMixinAdmin):
+    PublishableFluentContentsAdmin,
+    WorkflowMixinAdmin,
+    PreviewFieldAdminMixin,
+):
     """
     A base for Fluent Contents admins that will include ICEkit features:
 

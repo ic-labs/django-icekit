@@ -1,4 +1,3 @@
-from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.template import Template, Context
 from django.utils.safestring import mark_safe
 

@@ -1,0 +1,22 @@
+form .preview-field .error {
+    color: red;
+    font-weight: bold;
+}
+
+form .preview-field .warning {
+    color: orange;
+    font-weight: bold;
+}
+
+form .preview-field ul {
+    padding-left: 0;
+}
+
+form .preview-field ul li {
+    float: left;
+}
+
+form .preview-field img {
+    max-width: 150px;
+    max-height: 150px;
+}
