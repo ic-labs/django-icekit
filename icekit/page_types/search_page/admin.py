@@ -1,6 +1,6 @@
 from fluent_pages.integration.fluent_contents.admin import FluentContentsPageAdmin
 
-from icekit.admin_tools.mixins import ICEkitContentsAdmin
+from icekit.admin import ICEkitContentsAdmin
 
 
 class UnpublishableSearchPageAdmin(FluentContentsPageAdmin):

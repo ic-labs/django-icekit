@@ -92,6 +92,39 @@ class MediaCategoryAdmin(admin.ModelAdmin):
     pass
 
 
+# import has to happen here to avoid circular import errors
+from icekit.publishing.admin import PublishingAdmin, \
+    PublishableFluentContentsAdmin
+from icekit.workflow.admin import WorkflowMixinAdmin, WorkflowStateTabularInline
+
+
+class ICEkitContentsAdmin(PublishingAdmin, WorkflowMixinAdmin):
+    """
+    A base for generic admins that will include ICEkit features:
+
+     - publishing
+     - workflow
+    """
+    list_display = PublishingAdmin.list_display + \
+        WorkflowMixinAdmin.list_display
+    list_filter = PublishingAdmin.list_filter + \
+        WorkflowMixinAdmin.list_filter
+    inlines = [WorkflowStateTabularInline]
+
+
+class ICEkitFluentContentsAdmin(
+        PublishableFluentContentsAdmin, WorkflowMixinAdmin):
+    """
+    A base for Fluent Contents admins that will include ICEkit features:
+
+     - publishing
+     - workflow
+    """
+    list_display = ICEkitContentsAdmin.list_display
+    list_filter = ICEkitContentsAdmin.list_filter
+    inlines = ICEkitContentsAdmin.inlines
+
+
 admin.site.register(models.Layout, LayoutAdmin)
 admin.site.register(models.MediaCategory, MediaCategoryAdmin)
 
@@ -99,9 +132,6 @@ admin.site.register(models.MediaCategory, MediaCategoryAdmin)
 
 from icekit.admin_tools.filters import \
     ChildModelFilter as new_ChildModelFilter
-from icekit.admin_tools.mixins import \
-    ICEkitContentsAdmin as new_ICEkitContentsAdmin, \
-    ICEkitFluentContentsAdmin as new_ICEkitFluentContentsAdmin
 
 from icekit.admin_tools.polymorphic import \
     PolymorphicAdminUtilsMixin as new_PolymorphicAdminUtilsMixin, \
@@ -117,21 +147,6 @@ class ChildModelFilter(new_ChildModelFilter):
     """
     pass
 
-@deprecated
-class ICEkitContentsAdmin(new_ICEkitContentsAdmin):
-    """
-    .. deprecated::
-    Use :class:`icekit.admin_tools.mixins.ICEkitContentsAdmin` instead.
-    """
-    pass
-
-@deprecated
-class ICEkitFluentContentsAdmin(new_ICEkitFluentContentsAdmin):
-    """
-    .. deprecated::
-    Use :class:`icekit.admin_tools.mixins.ICEkitFluentContentsAdmin` instead.
-    """
-    pass
 
 @deprecated
 class PolymorphicAdminUtilsMixin(new_PolymorphicAdminUtilsMixin):
@@ -140,6 +155,7 @@ class PolymorphicAdminUtilsMixin(new_PolymorphicAdminUtilsMixin):
     Use :class:`icekit.admin_tools.polymorphic.PolymorphicAdminUtilsMixin` instead.
     """
     pass
+
 
 @deprecated
 class ChildModelPluginPolymorphicParentModelAdmin(new_ChildModelPluginPolymorphicParentModelAdmin):
