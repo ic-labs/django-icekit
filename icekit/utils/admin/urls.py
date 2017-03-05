@@ -1,24 +1,22 @@
-from django.contrib.admin.templatetags.admin_urls import admin_urlname
-from django.template import Template, Context
-from django.utils.safestring import mark_safe
+import warnings
 
+
+warnings.warn(
+    "the icekit.utils.admin.urls module is deprecated. Use icekit.admin_tools.utils instead.",
+    DeprecationWarning,
+    stacklevel=2)
+
+from icekit.admin_tools.utils import \
+    admin_url as new_admin_url, \
+    admin_link as new_admin_link
 
 def admin_url(inst):
-    """
-    :param inst: An Model Instance
-    :return: the admin URL for the instance. Permissions aren't checked.
-    """
-    if inst:
-        t = Template("""{% load admin_urls %}{% url opts|admin_urlname:'change' inst.pk %}""")
-        return t.render(Context({ 'inst': inst, 'opts': inst._meta}))
-    return ""
+    warnings.warn("'icekit.utils.admin.urls.admin_url' is renamed 'icekit.admin_tools.utils.admin_url'",
+                  DeprecationWarning, stacklevel=2)
+    return new_admin_url(inst)
+
 
 def admin_link(inst):
-    """
-    :param inst: An Model Instance
-    :return: a complete admin link for the instance. Permissions aren't checked.
-    """
-    if inst:
-        t = Template("""{% load admin_urls %}<a href="{% url opts|admin_urlname:'change' inst.pk %}">Edit <em>{{ inst }}</em></a>""")
-        return mark_safe(t.render(Context({ 'inst': inst, 'opts': inst._meta})))
-    return ""
+    warnings.warn("'icekit.utils.admin.urls.admin_link' is renamed 'icekit.admin_tools.utils.admin_link'",
+                  DeprecationWarning, stacklevel=2)
+    return new_admin_link(inst)

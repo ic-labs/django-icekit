@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.views.generic import RedirectView, TemplateView
 from fluent_pages.sitemaps import PageSitemap
 
-from icekit.admin_forms import PasswordResetForm
+from icekit.admin_tools.forms import PasswordResetForm
 from icekit.views import index
 
 admin.autodiscover()
