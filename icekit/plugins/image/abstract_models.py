@@ -1,5 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.template import Context
+from django.template import RequestContext
+from django.template import Template
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.db import models
@@ -53,6 +55,16 @@ class AbstractImage(models.Model):
 
     def __str__(self):
         return self.title or self.alt_text
+
+    def admin_preview(self, request):
+        t = Template(
+            """{% load icekit_tags thumbnail %}
+<a href="{{ obj|admin_url }}" target="_blank"><img src="{{ obj.image|thumbnail_url:'admin' }}"><br>Edit <em>{{ obj }}</em></a>"""
+        )
+        c = RequestContext(request, {
+            'obj': self,
+        })
+        return t.render(c)
 
 
 @python_2_unicode_compatible

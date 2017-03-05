@@ -1,5 +1,6 @@
 from fluent_contents.admin import PlaceholderEditorAdmin
 from fluent_contents.models import PlaceholderData
+from icekit.admin_tools.utils import admin_link
 
 from icekit.workflow.admin import WorkflowMixinAdmin, \
     WorkflowStateTabularInline
@@ -34,8 +35,15 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
 
     By default a <UL> list of `unicode` target object values is rendered.
 
+    The rendered HTML is the result of calling `obj.admin_preview(request)` on the
+    linked object(s)::
+        def admin_preview(self, request):
+            return u'<img src="{0}" alt="{1}"><p>{1}</p>'.format(
+                self.url, unicode(self))
+
+
     To override the preview, implement a `preview_<fieldname>` method that
-    returns the HTML to represent a single target object, like so:
+    returns the HTML to represent a single target object, like so::
 
         def preview_image(self, obj, request):
             return u'<img src="{0}" alt="{1}"><p>{1}</p>'.format(
@@ -54,9 +62,9 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
 
     def render_field_default(self, obj, request):
         """
-        Default rendering for fields without a custom `field_<fieldname>`
+        Default rendering for fields without a custom `preview_<fieldname>`
         """
-        return u'<p>{0}</p>'.format(unicode(obj))
+        return admin_link(obj, 'target="_blank"')
 
     def render_field_error(self, obj_id, obj, exception, request):
         """
@@ -73,21 +81,25 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
         """
         Override this to customise the preview representation of all objects.
         """
-        try:
-            preview_fn = getattr(self, 'preview_{0}'.format(field_name))
-        except AttributeError:
-            # Fall back to default field rendering
-            preview_fn = self.render_field_default
-
         obj_preview_list = []
         for obj_id, obj in id_and_obj_list:
             try:
                 # Handle invalid IDs
                 if obj is None:
                     obj_preview = self.render_field_error(
-                        obj_id, obj, None, request)
+                        obj_id, obj, None, request
+                    )
                 else:
-                    obj_preview = preview_fn(obj, request)
+                    try:
+                        obj_preview = obj.admin_preview(request)
+                    except AttributeError:
+                        try:
+                            obj_preview = getattr(self, 'preview_{0}'.format(
+                                field_name))(obj, request)
+                        except AttributeError:
+                            # Fall back to default field rendering
+                            obj_preview = self.render_field_default(obj, request)
+
             except Exception as ex:
                 obj_preview = self.render_field_error(obj_id, obj, ex, request)
             obj_preview_list.append(obj_preview)
@@ -99,7 +111,7 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
             return ''
 
     def fetch_field_previews(self, request, pk, field_name, raw_ids):
-        if field_name not in self.preview_fields:
+        if field_name not in self.raw_id_fields:
             raise http.Http404
         try:
             ids = map(int, raw_ids.split(','))
@@ -142,34 +154,16 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         formfield = super(PreviewFieldAdminMixin, self) \
             .formfield_for_foreignkey(db_field, request=request, **kwargs)
-        if db_field.name in self.preview_fields:
-            if self.assert_target_admin_in_site_registry(db_field):
-                formfield.widget.attrs['data-is-preview-field'] = 'true'
+        if db_field.name in self.raw_id_fields:
+            formfield.widget.attrs['data-is-preview-field'] = 'true'
         return formfield
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         formfield = super(PreviewFieldAdminMixin, self) \
             .formfield_for_manytomany(db_field, request=request, **kwargs)
-        if db_field.name in self.preview_fields:
-            if self.assert_target_admin_in_site_registry(db_field):
-                formfield.widget.attrs['data-is-preview-field'] = 'true'
+        if db_field.name in self.raw_id_fields:
+            formfield.widget.attrs['data-is-preview-field'] = 'true'
         return formfield
-
-    def assert_target_admin_in_site_registry(self, db_field):
-        if db_field.rel.to in self.admin_site._registry:
-            return True
-        else:
-            if settings.DEBUG:
-                raise ImproperlyConfigured(
-                    "%s.preview_fields contains '%r', but %r "
-                    "is not registed in the same admin site." % (
-                        self.__class__.__name__,
-                        db_field.name,
-                        db_field.rel.to,
-                    )
-                )
-            else:
-                pass  # fail silently
 
 
 class FluentLayoutsMixin(PlaceholderEditorAdmin, PreviewFieldAdminMixin):
@@ -203,8 +197,9 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin, PreviewFieldAdminMixin):
         return data
 
 
-class HeroMixinAdmin(admin.ModelAdmin):
+class HeroMixinAdmin(PreviewFieldAdminMixin):
     raw_id_fields = ('hero_image',)
+    preview_fields = ('hero_image',)
 
     # Alas, we cannot use 'fieldsets' as it causes a recursionerror on
     # (polymorphic?) admins that use base_fieldsets.
@@ -222,7 +217,7 @@ class ListableMixinAdmin(admin.ModelAdmin):
         ('Advanced listing options', {
             'classes': ('collapse',),
             'fields': (
-                'list_image',
+                'list_image', # a filefield
                 'boosted_search_terms',
             )
         }),

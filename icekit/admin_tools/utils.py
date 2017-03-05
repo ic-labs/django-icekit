@@ -12,12 +12,15 @@ def admin_url(inst):
         return t.render(Context({ 'inst': inst, 'opts': inst._meta}))
     return ""
 
-def admin_link(inst):
+def admin_link(inst, attr_string=""):
     """
     :param inst: An Model Instance
+    :param attr_string: A string of attributes to be added to the <a> Tag.
     :return: a complete admin link for the instance. Permissions aren't checked.
     """
+
+    # TODO: call with new window command, that adds new window icon and attr
     if inst:
-        t = Template("""{% load admin_urls %}<a href="{% url opts|admin_urlname:'change' inst.pk %}">Edit <em>{{ inst }}</em></a>""")
-        return mark_safe(t.render(Context({ 'inst': inst, 'opts': inst._meta})))
+        t = Template("""{% load admin_urls %}<a href="{% url opts|admin_urlname:'change' inst.pk %}" {{ attrs }}>Edit <em>{{ inst }}</em></a>""")
+        return mark_safe(t.render(Context({ 'inst': inst, 'opts': inst._meta, 'attrs': attr_string})))
     return ""
