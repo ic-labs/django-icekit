@@ -99,10 +99,14 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
     def fetch_field_previews(self, request, pk, field_name, raw_ids):
 
         # polymorphic models need to resolve to the child model
-        instance = self.get_queryset(request).get(pk=pk)
-        if hasattr(instance, "get_real_instance"):
-            instance = instance.get_real_instance()
-        model = type(instance)
+        # TODO: use ctype_id?
+        try:
+            instance = self.get_queryset(request).get(pk=pk)
+            if hasattr(instance, "get_real_instance"):
+                instance = instance.get_real_instance()
+            model = type(instance)
+        except ValueError: # pk = "add"
+            model = self.model
 
         try:
             ids = map(int, raw_ids.split(','))

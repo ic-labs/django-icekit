@@ -5,7 +5,7 @@
 (function($) {
 	$(document).ready(function() {
 
-		var input_selector = "input.vForeignKeyRawIdAdminField";
+		var input_selector = "input.vForeignKeyRawIdAdminField, input.vManyToManyRawIdAdminField";
 
 		function insertPreview(field, html) {
 			var preview_container = field.parent().find("span.preview-field");

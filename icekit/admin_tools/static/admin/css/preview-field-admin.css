@@ -1,22 +1,28 @@
 form .preview-field .error {
-    color: red;
-    font-weight: bold;
+	color: red;
+	font-weight: bold;
 }
 
 form .preview-field .warning {
-    color: orange;
-    font-weight: bold;
+	color: orange;
+	font-weight: bold;
 }
 
 form .preview-field ul {
-    padding-left: 0;
+	padding-left: 0;
 }
 
-form .preview-field ul li {
-    float: left;
+form .preview-field ul li a {
+	float: left;
+	padding: 3px;
+	margin-right: 3px;
+	width: 156px;
+	background-color: #fdfdfd;
+	display: inline-block;
+	text-align: center;
 }
 
 form .preview-field img {
-    max-width: 150px;
-    max-height: 150px;
+	max-width: 150px;
+	max-height: 150px;
 }

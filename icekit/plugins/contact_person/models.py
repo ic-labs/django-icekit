@@ -13,7 +13,9 @@ class ContactPerson(models.Model):
     email = models.EmailField(max_length=255, blank=True)
 
     def __str__(self):
-        return u"{} ({})".format(self.name, self.title)
+        if self.title:
+            return u"{} ({})".format(self.name, self.title)
+        return self.name
 
     class Meta:
         verbose_name_plural = "Contact people"
