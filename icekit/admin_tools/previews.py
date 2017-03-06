@@ -106,7 +106,11 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
                 instance = instance.get_real_instance()
             model = type(instance)
         except ValueError: # pk = "add"
-            model = self.model
+            # if this is a polymorphic add, get the child model
+            if request.GET['ct_id']:
+                model = ContentType.objects.get(id=request.GET['ct_id']).model_class()
+            else:
+                model = self.model
 
         try:
             ids = map(int, raw_ids.split(','))
