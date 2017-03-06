@@ -155,8 +155,6 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
                 model._meta.get_field(field_name).rel.to
             )
 
-        print "TMA:", target_model_admin
-
         if (
             target_model_admin and
             target_model_admin.has_change_permission(request)
