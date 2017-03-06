@@ -21,9 +21,6 @@
 	.fcc-color-6 { background-color: #a6cee3; }
 	.fcc-color-7 { background-color: #b2df8a; }
 	.fcc-color-8 { background-color: #fb9a99; }
-	.fcc-color-9 { background-color: #fdbf6f; }
-	.fcc-color-10 { background-color: #cab2d6; }
-	.fcc-color-11 { background-color: #ffff99; }
 
 	.fcc-do-not-show-in-calendar {
 		background-image: url({% static 'icekit_events/img/stripe.png' %});
@@ -53,14 +50,24 @@
 </style>
 <script src='{% static "icekit_events/bower_components/jquery/dist/jquery.js" %}'></script>
 <script src='{% static "icekit_events/bower_components/moment/moment.js" %}'></script>
-<script src='{% static "icekit_events/bower_components/fullcalendar/dist/fullcalendar.js" %}'></script>
+<script src='{% static "icekit_events/bower_components/fullcalendar/dist/fullcalendar.min.js" %}'></script>
 <script src='{% static "icekit_events/bower_components/iframe-resizer/src/iframeResizer.contentWindow.js" %}'></script>
+<script src='{% static "icekit_events/bower_components/js-cookie/src/js.cookie.js" %}'></script>
+
 <script>
 	var icekit_events = icekit_events || {};
 	icekit_events.jQuery = jQuery.noConflict(true);
 	(function($) {
 		$(document).ready(function() {
 			var eid;
+
+			// get an object with the get parameters
+			var search = location.search.substring(1);
+			var get = search?JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g,'":"') + '"}',
+                 function(key, value) { return key===""?value:decodeURIComponent(value) }):{}
+
+			console.log(search);
+
 			$('#calendar').fullCalendar({
 				{% if is_popup %}
 					eventClick: function(calEvent, jsEvent, view) {
@@ -68,25 +75,32 @@
 						return false;
 					},
 				{% endif %}
-				events: '{% url "admin:icekit_events_eventbase_calendar_data" %}',
+				events: {
+				    url: '{% url "admin:icekit_events_eventbase_calendar_data" %}',
+					cache: true,
+					data: get
+				},
 				header: {
 					left: 'prevYear,prev,next,nextYear today',
 					center: 'title',
 					right: 'month,basicWeek,agendaWeek,agendaDay'
 				},
 				height: 'auto',
+				defaultView: Cookies.get("calendar-defaultView") || 'agendaWeek',
 				viewRender: function(view, element) {
-					$('.fc-agendaWeek-button').text('week (by time)');
-					$('.fc-agendaDay-button').text('day (by time)');
-				},
-				eventMouseover: function(event, jsEvent, view) {
-					eid = event.id;
-					over();
-				},
-				eventMouseout: function(event, jsEvent, view) {
-				    clearTimeout(timeout);
-					$('.fc-event').css('opacity', '');
+					$('.fc-basicWeek-button').text('week (list)');
+					$('.fc-agendaDay-button').text('day');
+
+					Cookies.set('calendar-defaultView', view.type);
 				}
+//				eventMouseover: function(event, jsEvent, view) {
+//					eid = event.id;
+//					over();
+//				},
+//				eventMouseout: function(event, jsEvent, view) {
+//				    clearTimeout(timeout);
+//					$('.fc-event').css('opacity', '');
+//				}
 			}).on('click', 'a.fc-event', function(e) {
 				// Open links in the top frame.
 				if (self != top) {
@@ -95,27 +109,27 @@
 				}
 			});
 
-			var over = debounce(function() {
-				// make the rolledover event more visible
-				$('.fcc-'+eid).css('opacity', '1.0');
-				$('.fc-event:not(.fcc-'+eid+')').css('opacity', '0.30');
-			}, 250);
-
-			function debounce(func, wait, immediate) {
-
-				timeout = null;
-				return function() {
-					var context = this, args = arguments;
-					var later = function() {
-						timeout = null;
-						if (!immediate) func.apply(context, args);
-					};
-					var callNow = immediate && !timeout;
-					clearTimeout(timeout);
-					timeout = setTimeout(later, wait);
-					if (callNow) func.apply(context, args);
-				};
-			};
+//			var over = debounce(function() {
+//				// make the rolledover event more visible
+//				$('.fcc-'+eid).css('opacity', '1.0');
+//				$('.fc-event:not(.fcc-'+eid+')').css('opacity', '0.30');
+//			}, 250);
+//
+//			function debounce(func, wait, immediate) {
+//
+//				timeout = null;
+//				return function() {
+//					var context = this, args = arguments;
+//					var later = function() {
+//						timeout = null;
+//						if (!immediate) func.apply(context, args);
+//					};
+//					var callNow = immediate && !timeout;
+//					clearTimeout(timeout);
+//					timeout = setTimeout(later, wait);
+//					if (callNow) func.apply(context, args);
+//				};
+//			};
 
 		});
 	})(icekit_events.jQuery);

@@ -13,6 +13,7 @@ import logging
 import six
 
 from django.contrib import admin
+from django.contrib.admin.views.main import ChangeList
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Min, Max
@@ -194,16 +195,35 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         Return event data in JSON format for AJAX requests, or a calendar page
         to be loaded in an iframe.
         """
+
+        # mutable copy
+        request.GET = request.GET.copy()
+
         if 'timezone' in request.GET:
-            tz = djtz.get(request.GET.get('timezone'))
+            tz = djtz.get(request.GET.pop('timezone'))
         else:
             tz = get_current_timezone()
-        start = djtz.localize(
-            datetime.datetime.strptime(request.GET['start'], '%Y-%m-%d'), tz)
-        end = djtz.localize(
-            datetime.datetime.strptime(request.GET['end'], '%Y-%m-%d'), tz)
 
-        all_occurrences = models.Occurrence.objects.draft().overlapping(start, end)
+        if 'start' in request.GET:
+            start = djtz.localize(
+                datetime.datetime.strptime(request.GET.pop('start')[0], '%Y-%m-%d'), tz)
+        else:
+            start = None
+        if 'end' in request.GET:
+            end = djtz.localize(
+                datetime.datetime.strptime(request.GET.pop('end')[0], '%Y-%m-%d'), tz)
+        else:
+            end = None
+
+        # filter the qs like the changelist filters
+        cl = ChangeList(request, self.model, self.list_display,
+                        self.list_display_links, self.list_filter,
+                        self.date_hierarchy, self.search_fields,
+                        self.list_select_related, self.list_per_page,
+                        self.list_max_show_all, self.list_editable, self)
+
+        filtered_event_ids = cl.get_queryset(request).values_list('id', flat=True)
+        all_occurrences = models.Occurrence.objects.filter(event__id__in=filtered_event_ids).overlapping(start, end)
 
         data = []
         for occurrence in all_occurrences.all():
@@ -233,7 +253,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             title = occurrence.event.title
         return {
             'title': title,
-            'allDay': occurrence.is_all_day,
+            'allDay': occurrence.is_all_day or occurrence.event.contained_events.exists(),
             'start': start,
             'end': end,
             'url': reverse('admin:icekit_events_eventbase_change',
@@ -248,9 +268,9 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         classes = [slugify(occurrence.event.polymorphic_ctype.name)]
 
         # quick-and-dirty way to get a color for the EventBase type.
-        # There are 12 colors defined in the css file
+        # There are 9 colors defined in the css file
         classes.append("color-%s" % (
-            occurrence.event.polymorphic_ctype_id % 12))
+            occurrence.event.primary_type.id % 9))
 
         # Add a class name for the type of event.
         if occurrence.is_all_day:
