@@ -9,7 +9,7 @@ try:
 except ImportError:
     from django.utils import simplejson as json
 
-class PreviewFieldAdminMixin(admin.ModelAdmin):
+class RawIdPreviewAdminMixin(admin.ModelAdmin):
     """
     Dynamically display preview rendering of FK/M2M fields in admin forms,
     which is most useful for fields flagged as `raw_id_fields`. Relationship
@@ -21,9 +21,17 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
 
     By default a <UL> list of `unicode` target object values is rendered.
 
-    The rendered HTML is the result of calling `obj.admin_preview(request)` on the
-    linked object(s)::
-        def admin_preview(self, request):
+    The rendered HTML is the result of calling `admin.preview(obj, request)` on
+    the related admin::
+
+        def preview(self, obj, request):
+            return u'<img src="{0}" alt="{1}"><p>{1}</p>'.format(
+                obj.url, unicode(obj))
+
+
+    or `obj.preview(request)` on the linked object(s)::
+
+        def preview(self, request):
             return u'<img src="{0}" alt="{1}"><p>{1}</p>'.format(
                 self.url, unicode(self))
 
@@ -34,6 +42,8 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
         def preview_image(self, obj, request):
             return u'<img src="{0}" alt="{1}"><p>{1}</p>'.format(
                 obj.image.url, unicode(obj))
+
+    For InlineAdmins, call the function preview_<modelname>_<fieldname>.
     """
 
     # Override this attribute with field names for which to show preview
@@ -47,10 +57,10 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
 
     def render_field_default(self, obj, request):
         """
-        Default rendering for fields without `obj.admin_preview()` or a custom
+        Default rendering for fields without `obj.preview()` or a custom
         `preview_<fieldname>`.
         """
-        return admin_link(obj, 'target="_blank"')
+        return unicode(obj)
 
     def render_field_error(self, obj_id, obj, exception, request):
         """
@@ -63,7 +73,7 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
             msg = unicode(exception)
         return u'<p class="error">{0}</p>'.format(msg)
 
-    def render_field_previews(self, id_and_obj_list, request, field_name):
+    def render_field_previews(self, id_and_obj_list, admin, request, field_name):
         """
         Override this to customise the preview representation of all objects.
         """
@@ -77,18 +87,22 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
                     )
                 else:
                     try:
-                        obj_preview = obj.admin_preview(request)
+                        obj_preview = admin.preview(obj, request)
                     except AttributeError:
                         try:
-                            obj_preview = getattr(self, 'preview_{0}'.format(
-                                field_name))(obj, request)
+                            obj_preview = obj.preview(request)
                         except AttributeError:
-                            # Fall back to default field rendering
-                            obj_preview = self.render_field_default(obj, request)
+                            try:
+                                obj_preview = getattr(self, 'preview_{0}'.format(
+                                    field_name))(obj, request)
+                            except AttributeError:
+                                # Fall back to default field rendering
+                                obj_preview = self.render_field_default(obj, request)
 
+                obj_link = admin_link(obj, attr_string="target='_blank'", inner_html=obj_preview)
             except Exception as ex:
-                obj_preview = self.render_field_error(obj_id, obj, ex, request)
-            obj_preview_list.append(obj_preview)
+                obj_link = self.render_field_error(obj_id, obj, ex, request)
+            obj_preview_list.append(obj_link)
         li_html_list = [u'<li>{0}</li>'.format(preview)
                         for preview in obj_preview_list]
         if li_html_list:
@@ -147,6 +161,8 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
                         )
                         break
 
+            # make a simplified field name for preview_FOO override
+            field_name = "%s_%s" % (inline_model_name, sub_field_name)
 
             if target_model_admin is None:
                 raise http.Http404
@@ -166,7 +182,7 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
             ids_and_objs_list = map(lambda id: (id, obj_dict.get(id)), ids)
             # Generate preview HTML list
             response_data = self.render_field_previews(
-                ids_and_objs_list, request=request, field_name=field_name)
+                ids_and_objs_list, admin=target_model_admin, request=request, field_name=field_name)
         else:
             response_data = ''  # graceful-ish.
         return http.HttpResponse(
@@ -181,7 +197,7 @@ class PreviewFieldAdminMixin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.fetch_field_previews))
         )
 
-        return urlpatterns + super(PreviewFieldAdminMixin, self).get_urls()
+        return urlpatterns + super(RawIdPreviewAdminMixin, self).get_urls()
 
 
 # TODO: Holdover from CookedIdAdmin. Not sure whether this is still needed.

@@ -361,6 +361,7 @@ class _PublishingHelpersMixin(object):
 class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
     form = PublishingAdminForm
     list_display = ('publishing_object_title', 'publishing_column', 'publishing_modified_at')
+    list_display_links = ('publishing_object_title', ) # default, but makes it easier to extend
     list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
 
     actions = ['publish', 'unpublish']

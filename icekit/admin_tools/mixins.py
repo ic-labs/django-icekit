@@ -1,8 +1,11 @@
+import warnings
+
 from fluent_contents.admin import PlaceholderEditorAdmin
 from fluent_contents.models import PlaceholderData
 import logging
 
-from icekit.admin_tools.previews import PreviewFieldAdminMixin
+from icekit.admin_tools.previews import RawIdPreviewAdminMixin
+from icekit.admin_tools.utils import admin_link
 from icekit.utils.attributes import resolve
 
 from django.utils.translation import ugettext_lazy as _
@@ -16,7 +19,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class FluentLayoutsMixin(PlaceholderEditorAdmin, PreviewFieldAdminMixin):
+class FluentLayoutsMixin(PlaceholderEditorAdmin, RawIdPreviewAdminMixin):
     """
     Mixin class for models that have a ``layout`` field and fluent content.
     """
@@ -47,7 +50,7 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin, PreviewFieldAdminMixin):
         return data
 
 
-class HeroMixinAdmin(PreviewFieldAdminMixin):
+class HeroMixinAdmin(RawIdPreviewAdminMixin):
     raw_id_fields = ('hero_image',)
     preview_fields = ('hero_image',)
 
@@ -74,7 +77,38 @@ class ListableMixinAdmin(admin.ModelAdmin):
     )
 
 
-class ThumbnailAdminMixin(object):
+class PreviewAdminMixin(object):
+    """
+    Shortcut for displaying a preview in a changelist (or inline).
+
+    Override `preview` to control how the preview shows.
+
+    Plays nicely with list_display_links and admin_link if you want a click-able
+    preview.
+
+    Add `'preview'` to `list_display` or `readonly_fields`, etc to
+    display.
+    """
+
+    def preview(self, obj, request=None):
+        if hasattr(obj, 'preview'):
+            return obj.preview(request)
+        else:
+            return unicode(obj)
+        admin_preview.allow_tags = True
+
+    def admin_preview_link(self, obj, request=None):
+        return admin_link(obj, attr_string="target='_blank'", inner_html=self.preview(obj, request))
+
+    # TODO: this doesn't seem to run (maybe needs to extend modeladmin?)
+    # def get_list_display_links(self):
+    #     # avoid needing to add 'preview' to list_display_links
+    #     default = set( super(PreviewAdminMixin, self).get_list_display_links() )
+    #     default.add('preview')
+    #     return list(default)
+
+
+class ThumbnailAdminMixin(PreviewAdminMixin):
     """
     Shortcut for displaying a thumbnail in a changelist (or inline).
 
@@ -84,12 +118,6 @@ class ThumbnailAdminMixin(object):
     override `thumbnail_options` for customisation such as sizing,
     cropping, etc. If `thumbnail_show_exceptions` is truthy, exception
     messages are returned in place of a thumbnail on failure.
-
-    Plays nicely with list_display_links if you want a click-able
-    thumbnail.
-
-    Add 'thumbnail' to `list_display` or `readonly_fields`, etc to
-    display.
     """
 
     thumbnail_field = None # an attribute or callable on the object
@@ -116,7 +144,7 @@ class ThumbnailAdminMixin(object):
         logger.warning('ThumbnailAdminMixin.thumbnail_field unspecified')
         return None
 
-    def thumbnail(self, obj):
+    def preview(self, obj, request=None):
         """
         Generate the HTML to display for the image.
 
@@ -147,4 +175,15 @@ class ThumbnailAdminMixin(object):
                 if self.thumbnail_show_exceptions:
                     return 'Thumbnail exception: {0}'.format(ex)
         return ''
+    preview.allow_tags = True
+
+    def thumbnail(self, *args, **kwargs):
+        warnings.warn(
+            "Use of 'thumbnail' for showing previews in ThumbnailAdminMixin is "
+            "deprecated. Use `preview` instead",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        return self.preview(*args, **kwargs)
     thumbnail.allow_tags = True
+

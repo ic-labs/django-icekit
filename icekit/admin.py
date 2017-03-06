@@ -8,7 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
 
 from icekit import models
-from icekit.admin_tools.mixins import PreviewFieldAdminMixin
+from icekit.admin_tools.mixins import RawIdPreviewAdminMixin
 
 
 class LayoutAdmin(admin.ModelAdmin):
@@ -102,7 +102,7 @@ from icekit.workflow.admin import WorkflowMixinAdmin, WorkflowStateTabularInline
 class ICEkitContentsAdmin(
     PublishingAdmin,
     WorkflowMixinAdmin,
-    PreviewFieldAdminMixin,
+    RawIdPreviewAdminMixin,
 ):
     """
     A base for generic admins that will include ICEkit features:
@@ -120,7 +120,7 @@ class ICEkitContentsAdmin(
 class ICEkitFluentContentsAdmin(
     PublishableFluentContentsAdmin,
     WorkflowMixinAdmin,
-    PreviewFieldAdminMixin,
+    RawIdPreviewAdminMixin,
 ):
     """
     A base for Fluent Contents admins that will include ICEkit features:
