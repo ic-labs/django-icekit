@@ -83,11 +83,11 @@ if [[ -n $(which git) ]]; then
 	fi
 fi
 
-cd ${DEST_DIR}
-
 cat <<EOF
 
-All done! What now?
+All done! What now? First, change to the project directory:
+
+	$ cd ${DEST_DIR}
 
 # Run with Docker
 
@@ -126,12 +126,12 @@ When you're done, exit the container and stop all of its dependencies:
 	# exit
 	$ docker-compose stop
 
-Read our [Docker guide](http://icekit.readthedocs.io/en/latest/install/docker.html)
-for more info on running an ICEkit project with Docker.
+Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/${BRANCH}/docs/docker-quick-start.md)
+guide for more info on running an ICEkit project with Docker.
 
 # Run without Docker
 
-Read our [Manual Setup](http://icekit.readthedocs.io/en/latest/install/manual-install.html)
+Read our [Manual Setup](https://github.com/ic-labs/django-icekit/blob/develop/docs/manual-setup.md)
 guide for more info on running an ICEkit project without Docker.
 
 EOF

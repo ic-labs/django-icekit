@@ -80,10 +80,11 @@ with `Git for Windows <https://git-for-windows.github.io/>`__.
 2. Run the project
 ------------------
 
-In the project folder, build a Docker image:
+Build a Docker image:
 
 ::
 
+    $ cd {project_name}
     $ docker-compose build --pull
 
 Run a ``django`` container and all of its dependancies:

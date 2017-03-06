@@ -21,6 +21,7 @@ Otherwise, if you haven't already, `install Docker <https://docs.docker.com/engi
 
 Build a Docker image::
 
+    $ cd {project_name}
     $ docker-compose build --pull
 
 Run a ``django`` container and all of its dependencies::
