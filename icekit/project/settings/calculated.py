@@ -45,7 +45,7 @@ INSTALLED_APPS = dedupe_and_sort(
     INSTALLED_APPS,
     [
         # First our apps.
-        'icekit.dashboard',  # Must be before `icekit`
+        'icekit.admin_tools',  # Must be before `icekit`
         'icekit',
         'icekit.integration.reversion',
         'polymorphic_auth',
