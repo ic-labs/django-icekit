@@ -90,12 +90,8 @@ Install Bower
 2. Run the project
 ^^^^^^^^^^^^^^^^^^
 
-Change to the ICEkit project template (or an ICEkit project) directory::
-
-    $ cd project_template
-
-Open a shell with the environment appropriately configured (dependencies
-updated, database set up)::
+In the project directory, open a shell with the environment appropriately
+configured (dependencies updated, database set up)::
 
     $ ./go.sh
 
