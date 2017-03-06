@@ -29,7 +29,7 @@ read -p 'Press CTRL-C to abort or any other key to continue...'
 echo
 
 if [[ -z $(which wget) ]]; then
-	echo "'wget' is not available. Please install it try again."
+	echo "'wget' is not available. Please install it and try again."
 	exit 1
 fi
 
