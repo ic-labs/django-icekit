@@ -114,7 +114,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         EventTypeFilter, 'primary_type', 'secondary_types', 'modified', 'show_in_calendar', 'is_drop_in', 'has_tickets_available',
     ) + icekit_admin.ICEkitContentsAdmin.list_filter
     list_display = (
-        '__str__', 'child_type_name', 'primary_type', 'modified',
+        'publishing_object_title', 'child_type_name', 'primary_type', 'modified',
         'publishing_column',
         'part_of_display', 'show_in_calendar', 'has_tickets_available', 'is_drop_in',
         'occurrence_count',
