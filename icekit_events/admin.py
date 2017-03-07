@@ -281,6 +281,11 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
                 occurrence.event.title, occurrence.cancel_reason)
         else:
             title = occurrence.event.title
+
+        if occurrence.event.primary_type:
+            color = occurrence.event.primary_type.color
+        else:
+            color = "#cccccc"
         return {
             'title': title,
             'allDay': occurrence.is_all_day or occurrence.event.contained_events.exists(),
@@ -289,7 +294,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             'url': reverse('admin:icekit_events_eventbase_change',
                            args=[occurrence.event.pk]),
             'className': self._calendar_classes_for_occurrence(occurrence),
-            'backgroundColor': occurrence.event.primary_type.color,
+            'backgroundColor': color,
         }
 
     def _calendar_classes_for_occurrence(self, occurrence):
