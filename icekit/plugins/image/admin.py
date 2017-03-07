@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.conf import settings
 
-from icekit.utils.admin.mixins import ThumbnailAdminMixin
+from icekit.admin_tools.mixins import ThumbnailAdminMixin
 
 from . import models
 

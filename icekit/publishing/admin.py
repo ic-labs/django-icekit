@@ -5,7 +5,6 @@ import django
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
-from django.conf import settings
 from django.conf.urls import patterns, url
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -729,7 +728,7 @@ class ICEKitFluentPagesParentAdminMixin(
 
 
 # this import must go here to avoid import errors
-from icekit.admin_mixins import FluentLayoutsMixin
+from icekit.admin_tools.mixins import FluentLayoutsMixin
 
 class PublishableFluentContentsAdmin(PublishingAdmin, FluentLayoutsMixin):
     """
