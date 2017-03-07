@@ -370,9 +370,6 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         js = (
             'publishing/publishing.js',
         )
-        css = {
-            'all': ('publishing/publishing.css', ),
-        }
 
     def __init__(self, model, admin_site):
         super(PublishingAdmin, self).__init__(model, admin_site)
