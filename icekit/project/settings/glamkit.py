@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from .icekit import *
 
 # DJANGO ######################################################################
@@ -33,10 +35,9 @@ ICEKIT['DASHBOARD_FEATURED_APPS'] = [
     {
         'verbose_name': 'Events',
         'icon_html': '<i class="content-type-icon fa fa-calendar-o"></i>',
-        'models': {
-            'icekit_events.EventBase': {
-            },
-        },
+        'models': OrderedDict([
+            ('icekit_events.EventBase', {})
+        ]),
     },
 
 

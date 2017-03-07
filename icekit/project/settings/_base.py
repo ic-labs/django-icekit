@@ -14,6 +14,7 @@ import hashlib
 import multiprocessing
 import os
 import re
+from collections import OrderedDict
 
 from celery.schedules import crontab
 
@@ -663,24 +664,23 @@ ICEKIT = {
         {
             'verbose_name': 'Content',
             'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
-            'models': {
-                'icekit_article.Article': {
+            'models': OrderedDict([
+                ('icekit_article.Article', {
                     'verbose_name_plural': 'Articles',
-                },
-                'fluent_pages.Page': {
+                }),
+                ('fluent_pages.Page', {
                     'verbose_name_plural': 'Pages',
-                },
-            },
+                }),
+            ]),
         },
         {
             'verbose_name': 'Assets',
             'icon_html': '<i class="content-type-icon fa fa-file-image-o"></i>',
-            'models': {
-                'icekit_plugins_image.Image': {},
-                'icekit_plugins_file.File': {},
-                'icekit_plugins_slideshow.SlideShow': {},
-                # 'sharedcontent.SharedContent': {},
-            },
+            'models': OrderedDict([
+                ('icekit_plugins_image.Image', {}),
+                ('icekit_plugins_file.File', {}),
+                ('icekit_plugins_slideshow.SlideShow', {}),
+            ]),
         },
     ],
 }

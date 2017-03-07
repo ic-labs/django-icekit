@@ -42,7 +42,7 @@ def models_key(model):
 @register.filter
 def filter_featured_apps(admin_apps, request):
     """
-    Given a list of apps return a set of sudo apps considered featured.
+    Given a list of apps return a set of pseudo-apps considered featured.
 
     Apps are considered featured if the are defined in the settings
     property called `DASHBOARD_FEATURED_APPS` which contains a list of the apps
@@ -57,19 +57,20 @@ def filter_featured_apps(admin_apps, request):
 
     # Build the featured apps list based upon settings.
     for featured_app in appsettings.DASHBOARD_FEATURED_APPS:
-        # Create a new sudo app like object we can add attributes to.
+        # Create a new pseudo-app-like object we can add attributes to.
         new_app = AppObject()
 
         # Assign the verbose name to use for the app.
         setattr(new_app, 'verbose_name', featured_app['verbose_name'])
         # Assign the icon to use for the app.
         setattr(new_app, 'icon_html', featured_app['icon_html'])
+
         # Initial set the models to be empty.
         new_app.models = []
 
-        # Search through each app for the models and change the verbose name adding it to the models
-        # list for a sudo app instance.
-        for app_and_model in featured_app['models']:
+        # Search through each app for the models and change the verbose name,
+        # adding it to the models list for a pseudo-app instance.
+        for app_and_model, config in featured_app['models'].items():
             app_label, model_name = app_and_model.split('.')
 
             for app in admin_apps:
@@ -78,12 +79,12 @@ def filter_featured_apps(admin_apps, request):
                         if model['object_name'] == model_name:
                             try:
                                 model['verbose_name'] = \
-                                    featured_app['models'][app_and_model]['verbose_name']
+                                    config['verbose_name']
                             except KeyError:
                                 pass
                             try:
                                 model['verbose_name_plural'] = \
-                                    featured_app['models'][app_and_model]['verbose_name_plural']
+                                    config['verbose_name_plural']
                             except KeyError:
                                 pass
                             # Get each of the polymorphic types to allow addition.
@@ -96,11 +97,9 @@ def filter_featured_apps(admin_apps, request):
                                     'add'
                                 )
 
-                            if 'default_poly_child' in featured_app['models'][app_and_model].keys():
+                            if 'default_poly_child' in config.keys():
                                 ct = ContentType.objects.get_by_natural_key(
-                                    *featured_app['models'][app_and_model][
-                                        'default_poly_child'
-                                    ].lower().split('.')
+                                    *config['default_poly_child'].lower().split('.')
                                 )
 
                                 new_app.default_poly_child = ct.id
@@ -109,9 +108,8 @@ def filter_featured_apps(admin_apps, request):
 
                     break
 
-        # Only add the panel if more than one model listed.
-        if len(new_app.models) > 0:
-            new_app.models.sort(key=models_key)
+        # Only add the panel if at least one model is listed.
+        if new_app.models:
             featured_apps.append(new_app)
 
     return featured_apps
