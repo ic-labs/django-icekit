@@ -21,7 +21,7 @@ RUN apt-get update \
 RUN echo 'deb https://dl.bintray.com/sobolevn/deb git-secret main' | tee -a /etc/apt/sources.list
 RUN wget -nv -O - https://api.bintray.com/users/sobolevn/keys/gpg/public.key | apt-key add -
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+    && apt-get install --yes --force-yes --no-install-recommends \
         git-secret \
     && rm -rf /var/lib/apt/lists/*
 
