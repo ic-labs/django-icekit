@@ -317,7 +317,9 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         return classes
 
     def primary_type_swatch(self, obj):
-        return obj.primary_type.swatch(color_only=True)
+        if obj.primary_type:
+            return obj.primary_type.swatch(color_only=True)
+        return None
     primary_type_swatch.short_description = u'⬤'
     primary_type_swatch.admin_order_field = 'primary_type'
 
