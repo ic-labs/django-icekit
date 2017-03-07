@@ -4,18 +4,41 @@ from django.conf import settings
 
 ICEKIT_EVENTS = getattr(settings, 'ICEKIT_EVENTS', {})
 
-# # Background and text colors for calendar view. Defaults are based on the
-# # Base16 `ashes` color scheme. See: https://github.com/chriskempson/base16
-# CALENDAR_COLORS = ICEKIT_EVENTS.get('CALENDAR_COLOURS', [
-#     ('#aec795', '#f3f4f5'),
-#     ('#95c7ae', '#f3f4f5'),
-#     ('#95aec7', '#f3f4f5'),
-#     ('#ae95c7', '#f3f4f5'),
-#     ('#c795ae', '#f3f4f5'),
-#     ('#c79595', '#f3f4f5'),
-#     ('#c7ae95', '#f3f4f5'),
-#     ('#c7c795', '#f3f4f5'),
-# ])
+# Colors to show in admin drop-down. Users can choose other colors.
+# These are fairly randomly chosen - intention is to have a bright shade
+# and a dark shade, around the colour wheel, that is legible behind white text
+# even at 50% opacity.
+# If anyone wants to put some more thought into it, feel free to do so,
+# modify the list, and remove this sentence.
+EVENT_TYPE_COLOR_CHOICES = ICEKIT_EVENTS.get('EVENT_TYPE_COLOR_CHOICES', [
+    # H185 S 100 V 80
+    "#00BBCC", # 185
+    "#0055CC", # 215
+    "#1100CC", # 245
+    "#7600CC", # 275
+    "#CC00BB", # 305
+    "#CC0054", # 335
+    "#CC1100", # 5
+    "#CC7700", # 35
+    "#BBCC00", # 65
+    # "#54CC00", # 95 # too similar
+    # "#00CC10", # 125
+    "#00CC77", # 155
+
+    # H 185 S 100 V 60
+    "#008C99", #185
+    "#003F99", #215
+    "#0C0099", #245
+    "#590099", #275
+    "#99008C", #305
+    "#99003F", #335
+    "#990C00", #5
+    "#995900", #35
+    "#8C9900", #65
+    # "#3F9900", #95 #too similar
+    # "#00990C", #125
+    "#009959", #155
+])
 
 # New events will have a default `starts` value that is rounded up to a time
 # matching this precision.

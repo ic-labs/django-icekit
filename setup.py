@@ -58,6 +58,7 @@ setuptools.setup(
         'pytz',
         'six',
         'sqlparse',  # Required for SQL migrations, apparently
+        'django-colorful',
     ],
     extras_require={
         'dev': ['ipdb', 'ipython'],

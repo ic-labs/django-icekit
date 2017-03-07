@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Admin configuration for ``icekit_events`` app.
 """
@@ -13,6 +15,7 @@ import logging
 import six
 
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.views.main import ChangeList
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
@@ -20,6 +23,7 @@ from django.db.models import Count, Min, Max
 from django.http import HttpResponse, JsonResponse
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
+from django.utils.safestring import mark_safe
 from django.utils.timezone import get_current_timezone
 from django.views.decorators.csrf import csrf_exempt
 
@@ -105,6 +109,31 @@ class EventTypeFilter(ChildModelFilter):
     child_model_plugin_class = EventChildModelPlugin
 
 
+class PrimaryTypeFilter(SimpleListFilter):
+    title = "primary type"
+    parameter_name = "primary_type"
+
+    def lookups(self, request, model_admin):
+        """
+        Returns a list of tuples. The first element in each
+        tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        """
+
+        types = models.EventType.objects.filter(is_public=True).order_by('slug')
+
+        types = [(t.id, t.swatch()) for t in types]
+
+        return types
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(primary_type=self.value())
+        return queryset
+
+
 class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
                  icekit_admin.ICEkitContentsAdmin):
     """
@@ -112,10 +141,10 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
     """
     base_model = models.EventBase
     list_filter = (
-        EventTypeFilter, 'primary_type', 'secondary_types', 'modified', 'show_in_calendar', 'is_drop_in', 'has_tickets_available',
+        EventTypeFilter, PrimaryTypeFilter, 'secondary_types', 'modified', 'show_in_calendar', 'is_drop_in', 'has_tickets_available',
     ) + icekit_admin.ICEkitContentsAdmin.list_filter
     list_display = (
-        'publishing_object_title', 'child_type_name', 'primary_type', 'modified',
+        'primary_type_swatch', 'publishing_object_title', 'child_type_name', 'modified',
         'publishing_column',
         'part_of_display', 'show_in_calendar', 'has_tickets_available', 'is_drop_in',
         'occurrence_count',
@@ -123,6 +152,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         # ICEkit Workflow columns
         'last_edited_by_column', 'workflow_states_column',
     )
+    list_display_links = ('primary_type_swatch', 'publishing_object_title', )
     search_fields = ('title', 'part_of__title', )
 
     child_model_plugin_class = EventChildModelPlugin
@@ -259,6 +289,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             'url': reverse('admin:icekit_events_eventbase_change',
                            args=[occurrence.event.pk]),
             'className': self._calendar_classes_for_occurrence(occurrence),
+            'backgroundColor': occurrence.event.primary_type.color,
         }
 
     def _calendar_classes_for_occurrence(self, occurrence):
@@ -266,11 +297,6 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         Return css classes to be used in admin calendar JSON
         """
         classes = [slugify(occurrence.event.polymorphic_ctype.name)]
-
-        # quick-and-dirty way to get a color for the EventBase type.
-        # There are 9 colors defined in the css file
-        classes.append("color-%s" % (
-            occurrence.event.primary_type.id % 9))
 
         # Add a class name for the type of event.
         if occurrence.is_all_day:
@@ -289,6 +315,11 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         classes = ['fcc-%s' % class_ for class_ in classes]
 
         return classes
+
+    def primary_type_swatch(self, obj):
+        return obj.primary_type.swatch(color_only=True)
+    primary_type_swatch.short_description = u'⬤'
+    primary_type_swatch.admin_order_field = 'primary_type'
 
 class EventWithLayoutsAdmin(EventChildAdmin, FluentLayoutsMixin):
     pass
@@ -338,8 +369,9 @@ class RecurrenceRuleAdmin(admin.ModelAdmin):
 
 
 class EventTypeAdmin(TitleSlugAdmin):
-    list_display = TitleSlugAdmin.list_display + ('is_public',)
+    list_display = TitleSlugAdmin.list_display + ('color', 'is_public')
     list_filter = ('is_public',)
+    list_editable = ('color', )
 
 
 admin.site.register(models.EventBase, EventAdmin)

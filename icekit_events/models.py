@@ -6,9 +6,14 @@ Models for ``icekit_events`` app.
 from collections import OrderedDict
 from datetime import timedelta
 
+from colorful.fields import RGBColorField
 from dateutil import rrule
 import six
 from django.db.models import Q
+from django.template import Context
+from django.template import Template
+from django.utils.safestring import mark_safe
+
 from icekit_events.managers import EventManager, OccurrenceManager
 from icekit_events.utils.timeutils import coerce_naive, format_naive_ical_dt, \
     zero_datetime
@@ -142,8 +147,14 @@ class EventType(PluralTitleSlugMixin):
                   "such as education or members events."
     )
 
+    color = RGBColorField(default="#cccccc", colors=appsettings.EVENT_TYPE_COLOR_CHOICES)
     def get_absolute_url(self):
         return reverse("icekit_events_eventtype_detail", args=(self.slug, ))
+
+    def swatch(self, color_only=False):
+        return Template("""<i title="{{ o }}" style="background-color:{{ o.color }};width:1em;height:1em;display:inline-block;border-radius:50%;margin-bottom:-0.15em;"></i>{% if not color_only %}&nbsp;{{ o }}{% endif %}
+        """).render(Context({'o': self, 'color_only': color_only}))
+
 
 
 @encoding.python_2_unicode_compatible
