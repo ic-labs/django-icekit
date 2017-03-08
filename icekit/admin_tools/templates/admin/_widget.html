@@ -1,0 +1,15 @@
+<div class="widget widget-multi-content">
+	<header>
+		<h2>{% block title %}{{ title }}{% endblock %}</h2>
+		{# drag and drop handles, one day #}
+		{% comment %}
+			<ul class="widget-controls">
+				<li class="widget-control widget-control-close">×</li>
+				<li class="widget-control widget-control-drag">⣿</li>
+			</ul>
+		{% endcomment %}
+	</header>
+
+	{% block content %}
+	{% endblock %}
+</div>

@@ -1,21 +1,15 @@
-<div class="widget widget-multi-content">
-	<header>
-		<h2>{{ app.verbose_name }}</h2>
-		{# drag and drop handles, one day #}
-		{% comment %}
-		<ul class="widget-controls">
-			<li class="widget-control widget-control-close">×</li>
-			<li class="widget-control widget-control-drag">⣿</li>
-		</ul>
-		{% endcomment %}
-	</header>
+{% extends "admin/_widget.html" %}
+
+{% block title %}{{ app.name }}{% endblock %}
+
+{% block content %}
 	{{ app.icon_html|safe }}
 	{% for model in app.models %}
 		<div class="multi-content-group">
 			{% if model.perms.change %}
 				<a href="{{ model.admin_url }}">
 			{% endif %}
-			<h3>{% firstof model.verbose_name_plural model.verbose_name|pluralize model.name %}</h3>
+			<h3>{{ model.name }}</h3>
 			{% if model.perms.change %}
 				</a>
 			{% endif %}
@@ -45,4 +39,4 @@
 			</ul>
 		</div>
 	{% endfor %}
-</div>
+{% endblock %}

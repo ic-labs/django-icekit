@@ -4,6 +4,9 @@ Changelog
 In development
 --------------
 
+-  Add ``DASHBOARD_SORTED_APPS`` setting to specify models that should appear
+   first.
+
 -  Refactor icekit.admin* and icekit.utils.admin.* to icekit.admin_tools.*
    in preparation for admin consolidation and extension. Previous classes and
    functions are deprecated.
@@ -63,6 +66,11 @@ In development
 
 Breaking changes
 ~~~~~~~~~~~~~~~~
+
+-  ``DASHBOARD_FEATURED_APPS[]['models']`` should now be a list of tuples, not
+   a dict, so that ordering is preserved. Dict-based definitions still work, but
+   operations that rely on the value being a dict (such as ``update()``)
+   will fail.
 
 -  ``AbstractLayoutPage`` now includes ListableMixin and HeroMixin. All
    models which inherit from this will need a new migration.
