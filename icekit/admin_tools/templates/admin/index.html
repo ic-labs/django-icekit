@@ -40,12 +40,16 @@
 		<div class="row">
 			{% for app in app_list|filter_featured_apps:request %}
 				<div class="col-md-4">
-					{% include "admin/app_widget.html" with app=app %}
+					{% include "admin/dashboard_widgets/featured_app.html" with app=app %}
 				</div>
 			{% endfor %}
 
 			<div class="col-md-4">
-				{% include "admin/content_list_widget.html" %}
+				{% include "admin/dashboard_widgets/recent_actions.html" %}
+			</div>
+
+			<div class="col-md-4">
+				{% include "admin/dashboard_widgets/assigned_to_me.html" %}
 			</div>
 
 			{% with app_list|filter_sorted_apps:request as sorted_app_list %}

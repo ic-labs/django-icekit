@@ -12,18 +12,6 @@ from icekit import appsettings
 register = template.Library()
 
 
-@register.filter
-@stringfilter
-def obtain_content_type_id(model_name, app_label):
-    """
-    Obtains the content type id from the name of a content type.
-    :param model_name: The name of the model to look for.
-    :param app_label: The name off the app to look for.
-    :return: Positive integer id
-    """
-    return ContentType.objects.get_for_model(get_model(app_label, model_name)).id
-
-
 def _build_app_models(request, admin_apps, models_tuples, ensure_all_models=False):
     """
     :param request: Request object

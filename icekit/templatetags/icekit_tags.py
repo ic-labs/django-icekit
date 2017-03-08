@@ -9,7 +9,7 @@ from django.template import Library
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from fluent_contents.plugins.oembeditem.backend import get_oembed_data
-from icekit.utils.admin.urls import admin_link as admin_link_fn, admin_url as admin_url_fn
+from icekit.admin_tools.utils import admin_link as admin_link_fn, admin_url as admin_url_fn
 from micawber import ProviderException
 
 register = Library()
@@ -304,3 +304,4 @@ def link(obj):
     :return: A safe string expressing an HTML link to the object.
     """
     return mark_safe(u"<a href='{0}'>{1}</a>".format(obj.get_absolute_url(), unicode(obj)))
+

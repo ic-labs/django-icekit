@@ -50,9 +50,11 @@ class WorkflowState(models.Model):
         help_text='User who is responsible for this content at this stage in the workflow',
         on_delete=models.SET_NULL,
     )
+    datetime_modified = models.DateTimeField(auto_now=True)
 
     class Meta:
         app_label = 'icekit_workflow'
+        ordering = ("-datetime_modified", )
 
     def __str__(self):
         if self.assigned_to:
