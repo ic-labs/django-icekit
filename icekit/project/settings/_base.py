@@ -14,6 +14,7 @@ import hashlib
 import multiprocessing
 import os
 import re
+from collections import OrderedDict
 
 from celery.schedules import crontab
 
@@ -548,13 +549,11 @@ FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     }
 }
 
-FLUENT_DASHBOARD_DEFAULT_MODULE = 'ModelList'
-
 FLUENT_MARKUP_LANGUAGES = ('restructuredtext', 'markdown', 'textile')
 FLUENT_MARKUP_MARKDOWN_EXTRAS = ()
 
 FLUENT_PAGES_PARENT_ADMIN_MIXIN = \
-    'icekit.admin_mixins.ICEkitFluentPagesParentAdmin'
+    'icekit.admin_tools.polymorphic.ICEkitFluentPagesParentAdmin'
 
 # Avoid an exception because fluent-pages wants `TEMPLATE_DIRS[0]` to be
 # defined, even though that setting is going away. This might not be necessary
@@ -663,33 +662,94 @@ ICEKIT = {
 
     'DASHBOARD_FEATURED_APPS': [
         {
-            'verbose_name': 'Content',
+            'name': 'Content',
             'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
-            'models': {
-                'icekit_article.Article': {
+            'models': [
+                ('icekit_article.Article', {
                     'verbose_name_plural': 'Articles',
-                },
-                'fluent_pages.Page': {
+                }),
+                ('fluent_pages.Page', {
                     'verbose_name_plural': 'Pages',
-                },
-            },
+                }),
+            ],
         },
         {
-            'verbose_name': 'Assets',
+            'name': 'Assets',
             'icon_html': '<i class="content-type-icon fa fa-file-image-o"></i>',
-            'models': {
-                'icekit_plugins_image.Image': {},
-                'icekit_plugins_file.File': {},
-                'icekit_plugins_slideshow.SlideShow': {},
-                # 'sharedcontent.SharedContent': {},
-            },
+            'models': [
+                ('icekit_plugins_image.Image', {}),
+                ('icekit_plugins_file.File', {}),
+                ('icekit_plugins_slideshow.SlideShow', {}),
+            ],
         },
     ],
+
+    # a hand-arranged list of models to appear first in the app list
+    'DASHBOARD_SORTED_APPS': [
+        {
+            'name': 'Events',
+            'models': (
+                ('icekit_events.EventBase', {}),
+                ('icekit_events.EventType', {}),
+                ('icekit_events.RecurrenceRule', {}),
+            )
+        },
+        {
+            'name': 'Collection',
+            'models': (
+                ('gk_collections_work_creator.CreatorBase', {}),
+                ('gk_collections_work_creator.WorkBase', {}),
+                ('gk_collections_work_creator.Role', {}),
+                ('gk_collections_work_creator.WorkImageType', {}),
+            )
+        },
+        {
+            'name': 'Content',
+            'models': (
+                ('icekit_article.Article', {}),
+                ('fluent_pages.Page', {}),
+                ('icekit_authors.Author', {}),
+                ('icekit_press_releases.PressRelease', {}),
+                ('icekit_press_releases.PressReleaseCategory', {}),
+            )
+        },
+        {
+            'name': 'Assets',
+            'models': (
+                ('icekit_plugins_image.Image', {}),
+                ('icekit_plugins_file.File', {}),
+                ('icekit_plugins_slideshow.SlideShow', {}),
+                ('glamkit_sponsors.Sponsor', {}),
+                ('icekit_plugins_contact_person.ContactPerson', {}),
+                ('forms.Form', {}),
+                ('sharedcontent.SharedContent', {}),
+                ('icekit.MediaCategory', {}),
+            )
+        },
+        {
+            'name': 'Users and groups',
+            'models': (
+                ('polymorphic_auth.User', {}),
+                ('auth.Group', {}),
+            )
+        },
+        {
+            'name': 'Settings',
+            'models': (
+                ('model_settings.Setting', {'name': "General settings"}),
+                ('icekit.Layout', {}),
+                ('redirects.Redirect', {}),
+                ('response_pages.ResponsePage', {}),
+                ('sites.Site', {}),
+                ('fluent_pages.PageLayout', {'name': 'Fluent Layouts'}),
+            )
+        },
+    ]
 }
 
 INSTALLED_APPS += (
     'icekit',
-    'icekit.dashboard',  # Must come before `django.contrib.admin` and `flat`
+    'icekit.admin_tools',  # Must come before `django.contrib.admin` and `flat`
     'icekit.integration.reversion',
     'icekit.layouts',
     'icekit.workflow',

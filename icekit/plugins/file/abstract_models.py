@@ -45,7 +45,10 @@ class AbstractFile(models.Model):
 
         :return: String of file size with unit.
         """
-        return filesizeformat(self.file.size)
+        try:
+            return filesizeformat(self.file.size)
+        except OSError:
+            return filesizeformat(0)
 
     def extension(self):
         """

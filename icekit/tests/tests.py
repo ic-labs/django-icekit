@@ -38,8 +38,7 @@ from icekit.response_pages.models import ResponsePage
 from mock import patch, Mock
 
 from icekit.utils import fluent_contents, implementation
-from icekit.utils.admin import mixins
-from icekit.utils.pagination import describe_page_numbers
+from icekit.admin_tools import mixins
 
 from icekit import admin_forms, models, validators
 from icekit.tests import models as test_models

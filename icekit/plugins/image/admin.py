@@ -4,7 +4,7 @@ from django.template import Context
 from django.template import Template
 from django.utils.safestring import mark_safe
 
-from icekit.utils.admin.mixins import ThumbnailAdminMixin
+from icekit.admin_tools.mixins import ThumbnailAdminMixin
 
 from . import models
 

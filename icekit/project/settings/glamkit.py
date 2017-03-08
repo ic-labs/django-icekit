@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from .icekit import *
 
 # DJANGO ######################################################################
@@ -21,27 +23,32 @@ if not 'test' in ROOT_URLCONF:
 
 # ICEKIT PRESS RELEASES #######################################################
 
-ICEKIT['DASHBOARD_FEATURED_APPS'][0]['models'].update({
-    'icekit_press_releases.PressRelease': {
-        'verbose_name_plural': 'Press releases',
-    },
-})
+ICEKIT['DASHBOARD_FEATURED_APPS'][0]['models'] += [
+    ('icekit_press_releases.PressRelease', {})
+]
 
 # ICEKIT EVENTS ###############################################################
 
 ICEKIT['DASHBOARD_FEATURED_APPS'] = [
     {
-        'verbose_name': 'Events',
+        'name': 'Events',
         'icon_html': '<i class="content-type-icon fa fa-calendar-o"></i>',
-        'models': {
-            'icekit_events.EventBase': {
-            },
-        },
+        'models': [
+            ('icekit_events.EventBase', {})
+        ],
     },
-
-
+    {
+        'name': 'Collection',
+        'icon_html': '<i class="content-type-icon fa fa-diamond"></i>',
+        'models': [
+            # empty because we let projects implement their own collection types
+            # (although we could just list them all here as uninstalled models
+            # are just ignored)
+        ],
+    },
 ] + ICEKIT['DASHBOARD_FEATURED_APPS']
 
+ICEKIT['DASHBOARD_FEATURED_APPS'][3]['models'] += [('glamkit_sponsors.Sponsor', {})]
 
 # GLAMKIT SPONSORS ############################################################
 SPONSOR_PLUGINS = [

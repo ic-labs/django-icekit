@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.views.generic import RedirectView, TemplateView
 from fluent_pages.sitemaps import PageSitemap
 
-from icekit.admin_forms import PasswordResetForm
+from icekit.admin_tools.forms import PasswordResetForm
 from icekit.views import index
 
 admin.autodiscover()
@@ -54,7 +54,7 @@ urlpatterns = patterns(
             'django.contrib.auth.views.password_reset',
             {
                 'post_reset_redirect': 'admin_password_reset_done',
-                'email_template_name': 'icekit/admin/password_reset_email.html',
+                'email_template_name': 'admin/password_reset_email.html',
                 'password_reset_form': PasswordResetForm,  # Staff use only
             },
             name='admin_password_reset'
