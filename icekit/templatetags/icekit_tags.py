@@ -259,8 +259,8 @@ def admin_link(obj):
     object.
     """
     if hasattr(obj, 'get_admin_link'):
-        return obj.get_admin_link()
-    return admin_link_fn(obj)
+        return mark_safe(obj.get_admin_link())
+    return mark_safe(admin_link_fn(obj))
 
 
 @register.filter
@@ -283,8 +283,8 @@ def admin_url(obj):
     :return: the admin URL of the object
     """
     if hasattr(obj, 'get_admin_url'):
-        return obj.get_admin_url()
-    return admin_url_fn(obj)
+        return mark_safe(obj.get_admin_url())
+    return mark_safe(admin_url_fn(obj))
 
 @register.filter
 def link(obj):

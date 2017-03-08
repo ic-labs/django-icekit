@@ -11,12 +11,12 @@
 	{% else %}
 		<ul class="actionlist col-xs-6" style="padding:0;">
 			{% for entry in content_list|slice:":5" %}
-				{% include "admin/dashboard_widgets/_widget_content_link.html" %}
+				{% include "admin/dashboard_widgets/_widget_assigned_to_link.html" %}
 			{% endfor %}
 		</ul>
 		<ul class="actionlist col-xs-6" style="padding:0;">
 			{% for entry in content_list|slice:"5:10" %}
-				{% include "admin/dashboard_widgets/_widget_content_link.html" %}
+				{% include "admin/dashboard_widgets/_widget_assigned_to_link.html" %}
 			{% endfor %}
 		</ul>
 	{% endif %}
