@@ -14,8 +14,8 @@ except (AttributeError, KeyError):
     ADMIN_THUMB_ALIAS = {'size': (150, 150)}
 
 class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
-    list_display = ['thumbnail', 'title', 'alt_text', 'is_ok_for_web', 'date_created', 'date_modified']
-    list_display_links = ['alt_text', 'title', 'thumbnail']
+    list_display = ['preview', 'title', 'alt_text', 'is_ok_for_web', 'date_created', 'date_modified']
+    list_display_links = ['alt_text', 'title', 'preview']
     date_hierarchy = 'date_modified'
     filter_horizontal = ['categories', ]
     list_filter = ['categories',]
