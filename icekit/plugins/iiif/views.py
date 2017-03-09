@@ -30,17 +30,42 @@ def _get_image_or_404(identifier):
 
 @permission_required('can_use_iiif_image_api')
 def iiif_image_api_info(request, identifier_param):
-    """ Image Information endpoint for IIIF Image API 2.1 """
+    """
+    Image Information endpoint for IIIF Image API 2.1, see
+    http://iiif.io/api/image/2.1/#image-information
+    """
+    # TODO Add support for 'application/ld+json' response when requested
+    accept_header = request.environ.get('HTTP_ACCEPT')
+    if accept_header == 'application/ld+json':
+        return HttpResponseNotImplemented(
+            "JSON-LD response is not yet supported")
+
     image = _get_image_or_404(identifier_param)
-    # TODO Return 'application/ld+json' response when requested
-    return JsonResponse({
+    info = {
         "@context": "http://iiif.io/api/image/2/context.json",
         "@id": request.get_full_path(),
+        "@type": "iiif:Image",
         "protocol": "http://iiif.io/api/image",
         "width": image.width,
         "height": image.height,
-        # TODO Return more complete info.json response per spec
-    })
+    }
+    # TODO Return more complete info.json response per spec
+
+    if image.license:
+        info['license'] = [image.license]
+
+    attribution_value = u' '.join([
+        u"Credit: %s." % image.credit if image.credit else '',
+        u"Provided by: %s." % image.source if image.source else '',
+    ]).strip()
+    if attribution_value:
+        info['attribution'] = [{
+            "@value": attribution_value,
+            "@language": "en",
+        }]
+
+    # TODO Send header "Access-Control-Allow-Origin: *" per spec?
+    return JsonResponse(info)
 
 
 @permission_required('can_use_iiif_image_api')
@@ -59,7 +84,7 @@ def iiif_image_api(request, identifier_param, region_param, size_param,
         s_width, s_height = parse_size(size_param, r_width, r_height)
 
         # TODO Apply rotation
-        rotation = parse_rotation(rotation_param, s_width, s_height)
+        parse_rotation(rotation_param, s_width, s_height)
 
         # Apply quality
         quality = parse_quality(quality_param)
@@ -68,7 +93,8 @@ def iiif_image_api(request, identifier_param, region_param, size_param,
         elif quality == 'gray':
             thumbnail_options['bw'] = True
 
-        # TODO Redirect to canonical URL
+        # TODO Redirect to canonical URL per
+        # http://iiif.io/api/image/2.1/#canonical-uri-syntax
 
         # Generate image
         # NOTE: Generates and saves a thumbnail to make subsequent lookups

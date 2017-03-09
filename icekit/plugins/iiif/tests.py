@@ -137,6 +137,9 @@ class TestImageAPIViews(WebTest):
             Image,
             width=200,
             height=300,
+            credit="IC Arts Collection",
+            source="Interaction Consortium",
+            license="CC",
         )
         # Set up mocks used by default
         patcher = patch(
@@ -160,43 +163,74 @@ class TestImageAPIViews(WebTest):
         self.FileResponse.return_value = HttpResponse('mocked')
 
     def test_iff_image_api_info(self):
+        self.maxDiff = None  # Show whole diff on mismatch
         path = reverse('iiif_image_api_info', args=[self.image.pk])
+        # Not a privileged user
+        user = G(User)
+        response = self.app.get(path, user=user, expect_errors=True)
+        self.assertEqual(302, response.status_code)
+        self.assertEqual(
+            'http://localhost:80/login/?next=/iiif/%d/info.json'
+            % self.image.pk,
+            response.headers['Location'])
+        # Valid response including basic data, attribution, & license
         response = self.app.get(path, user=self.superuser)
         expected = {
             "@context": "http://iiif.io/api/image/2/context.json",
             "@id": path,
+            "@type": "iiif:Image",
             "protocol": "http://iiif.io/api/image",
             "width": self.image.width,
             "height": self.image.height,
+            "license": ["CC"],
+            "attribution": [{
+                "@value": "Credit: IC Arts Collection."
+                          " Provided by: Interaction Consortium.",
+                "@language": "en",
+            }],
         }
         self.assertEqual(expected, response.json)
+        # JSON-LD response not yet supported
+        response = self.app.get(
+            path,
+            user=self.superuser,
+            headers={'accept': 'application/ld+json'},
+            expect_errors=True,
+        )
+        self.assertEqual(501, response.status_code)
+        self.assertEqual(
+            "JSON-LD response is not yet supported", response.content)
 
     def test_iiif_image_api_basics(self):
         # Not a privileged user
         user = G(User)
         response = self.app.get(
-            reverse('iiif_image_api',
-                    args=[0, 'full', 'max', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'max', '0', 'default', 'jpg']),
             user=user,
             expect_errors=True,
         )
         self.assertEqual(302, response.status_code)
         self.assertEqual(
-            'http://localhost:80/login/?next=/iiif/0/full/max/0/default.jpg',
+            'http://localhost:80/login/?next=/iiif/%d/full/max/0/default.jpg'
+            % self.image.pk,
             response.headers['Location'])
         # Now is a privileged user
         user.user_permissions.add(
             Permission.objects.get(codename='can_use_iiif_image_api'))
         response = self.app.get(
-            reverse('iiif_image_api',
-                    args=[0, 'full', 'max', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'max', '0', 'default', 'jpg']),
             user=user,
         )
 
         # Invalid image identifier
         response = self.app.get(
-            reverse('iiif_image_api',
-                    args=[0, 'full', 'max', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[0, 'full', 'max', '0', 'default', 'jpg']),
             user=self.superuser,
             expect_errors=True,
         )
@@ -204,8 +238,9 @@ class TestImageAPIViews(WebTest):
 
         # Correct use
         response = self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', 'max', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'max', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -218,8 +253,9 @@ class TestImageAPIViews(WebTest):
     def test_iiif_image_api_region(self):
         # Region: full
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', 'max', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'max', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -228,18 +264,22 @@ class TestImageAPIViews(WebTest):
         })
         # Region: square, 200 x 300 image
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'square', 'max', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'square', 'max', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
             'crop': (0, 50),  # NOTE: Auto-cropped to center square in image
-            'size': (self.image.width, self.image.width),  # NOTE: width is smallest edge
+            # NOTE: width is smallest edge
+            'size': (self.image.width, self.image.width),
         })
         # Region: x,y,w,h
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, '20,30,50,90', 'max', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, '20,30,50,90',
+                      'max', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -248,8 +288,10 @@ class TestImageAPIViews(WebTest):
         })
         # Region: x,y,w,h (crop isn't permitted to exceed original image)
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, '100,50,150,300', 'max', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, '100,50,150,300',
+                      'max', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -258,8 +300,10 @@ class TestImageAPIViews(WebTest):
         })
         # Region: pct:x,y,w,h
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'pct:10,50,75,50', 'max', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'pct:10,50,75,50',
+                      'max', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -270,8 +314,9 @@ class TestImageAPIViews(WebTest):
     def test_iiif_image_api_size(self):
         # Size: max
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', 'max', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'max', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -280,8 +325,9 @@ class TestImageAPIViews(WebTest):
         })
         # Size: full
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', 'full', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'full', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -290,8 +336,9 @@ class TestImageAPIViews(WebTest):
         })
         # Size: pct
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', 'pct:50', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'pct:50', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -300,8 +347,10 @@ class TestImageAPIViews(WebTest):
         })
         # Size: w,h
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', '100,150', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', '100,150',
+                      '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -310,8 +359,9 @@ class TestImageAPIViews(WebTest):
         })
         # Size: w, (maintain aspect ratio)
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', '150,', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', '150,', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -320,8 +370,9 @@ class TestImageAPIViews(WebTest):
         })
         # Size: ,h (maintain aspect ratio, scale beyond original image size)
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', ',600', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', ',600', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -330,8 +381,10 @@ class TestImageAPIViews(WebTest):
         })
         # Size: !w,h (best-fit)
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', '!150,250', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', '!150,250',
+                      '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -339,8 +392,10 @@ class TestImageAPIViews(WebTest):
             'size': (150, 225),  # Width is best fit
         })
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', '!300,240', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', '!300,240',
+                      '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -351,8 +406,9 @@ class TestImageAPIViews(WebTest):
     def test_iiif_image_api_rotation(self):
         # Rotation: 0
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', 'max', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'max', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -361,8 +417,9 @@ class TestImageAPIViews(WebTest):
         })
         # Rotation: 360 (converted to 0 since % 360)
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', 'max', '360', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'max', '360', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -371,16 +428,18 @@ class TestImageAPIViews(WebTest):
         })
         # Rotation: invalid value
         response = self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', 'max', 'x', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'max', 'x', 'default', 'jpg']),
             user=self.superuser,
             expect_errors=True,
         )
         self.assertEqual(400, response.status_code)
         # Rotation other than 0 or 360 not yet supported
         response = self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', 'max', '90', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'max', '90', 'default', 'jpg']),
             user=self.superuser,
             expect_errors=True,
         )
@@ -393,8 +452,9 @@ class TestImageAPIViews(WebTest):
     def test_iiif_image_api_quality(self):
         # Quality: default
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', 'max', '0', 'default', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'max', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -403,8 +463,9 @@ class TestImageAPIViews(WebTest):
         })
         # Quality: color
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', 'max', '0', 'color', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'max', '0', 'color', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -413,8 +474,9 @@ class TestImageAPIViews(WebTest):
         })
         # Quality: gray
         self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', 'max', '0', 'gray', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'max', '0', 'gray', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
@@ -424,8 +486,9 @@ class TestImageAPIViews(WebTest):
         })
         # Quality: bitonal (not yet supported)
         response = self.app.get(
-            reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', 'max', '0', 'bitonal', 'jpg']),
+            reverse(
+                'iiif_image_api',
+                args=[self.image.pk, 'full', 'max', '0', 'bitonal', 'jpg']),
             user=self.superuser,
             expect_errors=True,
         )
