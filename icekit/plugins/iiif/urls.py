@@ -10,8 +10,8 @@ urlpatterns = patterns(
         name='iiif_image_api_info',
     ),
     url(
-        r'(?P<identifier>.+)/(?P<region>.+)/(?P<size>.+)/(?P<rotation>.+)'
-        r'(?P<quality>.+)/(?P<format>.+)',
+        r'(?P<identifier>[^/]+)/(?P<region>[^/]+)/(?P<size>[^/]+)'
+        r'/(?P<rotation>[^/]+)/(?P<quality>[^.]+).(?P<output_format>.+)',
         iiif_image_api,
         name='iiif_image_api',
     ),
