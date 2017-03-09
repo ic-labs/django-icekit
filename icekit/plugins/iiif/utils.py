@@ -106,6 +106,7 @@ def parse_region(region, image_width, image_height):
 
 
 def parse_size(size, image_width, image_height):
+    aspect_ratio = float(image_width) / image_height
     if size in ('full', 'max'):
         width, height = image_width, image_height
     elif size.startswith('pct:'):
@@ -116,18 +117,14 @@ def parse_size(size, image_width, image_height):
     elif size.startswith('!'):
         # Best fit
         width, height = parse_width_height_string(size[1:])
-        # TODO This best-fit test algorithm is probably too naive
-        if abs(image_width - width) <= abs(image_height - height):
-            scale = float(width) / image_width
+        if width / aspect_ratio <= height:
             # Requested width is best-fit
-            height = image_height * scale
+            height = int(width / aspect_ratio)
         else:
             # Requested height is best-fit
-            scale = float(height) / image_height
-            width = image_width * scale
+            width = int(height * aspect_ratio)
     else:
         width, height = parse_width_height_string(size)
-        aspect_ratio = float(image_width) / image_height
         # Handle "w,"
         if height is None:
             height = width / aspect_ratio

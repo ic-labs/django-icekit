@@ -113,16 +113,16 @@ class TestImageApiUtils(TestCase):
         # Size: !w,h (best-fit)
         self.assertEqual(
             # Width is best fit
-            (80, 160), parse_size('!80,100', 100, 200))
+            (80, 160), parse_size('!80,200', 100, 200))
         self.assertEqual(
             # Width is best fit
             (80, 160), parse_size('!80,160', 100, 200))
         self.assertEqual(
             # Height is best fit
-            (75, 150), parse_size('!25,150', 100, 200))
+            (75, 150), parse_size('!80,150', 100, 200))
         self.assertEqual(
             # Height is best fit, can scale beyond original image size
-            (250, 250), parse_size('!100,250', 200, 200))
+            (250, 250), parse_size('!400,250', 200, 200))
 
 
 class TestImageAPIViews(WebTest):
@@ -331,7 +331,7 @@ class TestImageAPIViews(WebTest):
         # Size: !w,h (best-fit)
         self.app.get(
             reverse('iiif_image_api',
-                    args=[self.image.pk, 'full', '!150,200', '0', 'default', 'jpg']),
+                    args=[self.image.pk, 'full', '!150,250', '0', 'default', 'jpg']),
             user=self.superuser,
         )
         self.thumbnailer.get_thumbnail.assert_called_with({
