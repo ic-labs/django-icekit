@@ -1,4 +1,15 @@
 class IIIFImageApiException(Exception):
+    """ Base class for IIIF Image API Exceptions """
+    pass
+
+
+class ClientError(IIIFImageApiException):
+    """ Invalid IIIF Image API operation requested by client """
+    pass
+
+
+class UnsupportedError(IIIFImageApiException):
+    """ Unsupported IIIF Image API operation requested by client """
     pass
 
 
@@ -7,7 +18,7 @@ def parse_dimensions_string(dimension_string, permit_floats=False):
     try:
         x, y, width, height = dimension_string.split(',')
     except ValueError, ex:
-        raise IIIFImageApiException(
+        raise ClientError(
             "Cannot split dimensions string %s: %s" % (dimension_string, ex))
     # Parse dimensions string sections into numerical values
     try:
@@ -22,18 +33,18 @@ def parse_dimensions_string(dimension_string, permit_floats=False):
             width = int(width)
             height = int(height)
     except ValueError, ex:
-        raise IIIFImageApiException(
+        raise ClientError(
             "Cannot parse numbers from dimensions string %s: %s"
             % (dimension_string, ex))
     # Sanity-checks for numerical values
     # Negatives not permitted
     if x < 0 or y < 0 or width < 0 or height < 0:
-        raise IIIFImageApiException(
+        raise ClientError(
             "Negative numbers illegal in dimensions string %s"
             % dimension_string)
     # Zero width or height not permitted
     if width <= 0 or height <= 0:
-        raise IIIFImageApiException(
+        raise ClientError(
             "Zero numbers illegal in dimensions string %s"
             % dimension_string)
     return (x, y, width, height)
@@ -44,26 +55,26 @@ def parse_width_height_string(wh_string):
     try:
         width, height = wh_string.split(',')
     except ValueError, ex:
-        raise IIIFImageApiException(
+        raise ClientError(
             "Cannot split width-height string %s: %s" % (wh_string, ex))
     # Parse width-height string sections into numerical values
     try:
         width = int(width) if width else None
         height = int(height) if height else None
     except ValueError, ex:
-        raise IIIFImageApiException(
+        raise ClientError(
             "Cannot parse numbers from width-height string %s: %s"
             % (wh_string, ex))
     # Sanity-checks for numerical values
     # At least one of width or height must be set
     if width is None and height is None:
-        raise IIIFImageApiException(
+        raise ClientError(
             "There must be a value in width-height string %s"
             % wh_string)
     # Negatives not permitted
     if (width is not None and width <= 0) or \
             (height is not None and height <= 0):
-        raise IIIFImageApiException(
+        raise ClientError(
             "Zero or negative numbers illegal in width-height string %s"
             % wh_string)
     return (width, height)
@@ -136,32 +147,32 @@ def parse_size(size, image_width, image_height):
 
 def parse_rotation(rotation_str, image_width, image_height):
     try:
-        rotation = int(rotation_str)
+        rotation = int(rotation_str) % 360
     except ValueError, ex:
-        raise IIIFImageApiException(
+        raise ClientError(
             "Cannot parse number from rotation string %s: %s"
             % (rotation_str, ex))
-    valid = (0, 360)
+    valid = (0,)
     if rotation not in valid:
-        raise IIIFImageApiException(
-            "Image API rotation parameters other than %r"
-            " are not yet supported %s" % (valid, rotation))
+        raise UnsupportedError(
+            "Image API rotation parameters other than %r degrees"
+            " are not yet supported: %s" % (valid, rotation))
     return rotation
 
 
 def parse_quality(quality):
     valid = ('default', 'color', 'gray',)
     if quality not in valid:
-        raise IIIFImageApiException(
+        raise UnsupportedError(
             "Image API quality parameters other than %r"
-            " are not yet supported %s" % (valid, quality))
+            " are not yet supported: %s" % (valid, quality))
     return quality
 
 
 def parse_format(output_format):
     valid = ('jpg',)
     if output_format not in valid:
-        raise IIIFImageApiException(
+        raise UnsupportedError(
             "Image API format parameters other than %r"
-            " are not yet supported %s" % (valid, output_format))
+            " are not yet supported: %s" % (valid, output_format))
     return output_format

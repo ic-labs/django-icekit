@@ -1,17 +1,21 @@
 from easy_thumbnails.files import get_thumbnailer
 
 from django.db.models.loading import get_model
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponseBadRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import permission_required
 
 from fluent_utils.ajax import JsonResponse
 
 from .utils import parse_region, parse_size, parse_rotation, parse_quality, \
-    parse_format
+    parse_format, ClientError, UnsupportedError
 
 
 Image = get_model('icekit_plugins_image', 'Image')
+
+
+class HttpResponseNotImplemented(HttpResponse):
+    status_code = 501
 
 
 def _get_image_or_404(identifier):
@@ -25,9 +29,9 @@ def _get_image_or_404(identifier):
 
 
 @permission_required('can_use_iiif_image_api')
-def iiif_image_api_info(request, identifier):
+def iiif_image_api_info(request, identifier_param):
     """ Image Information endpoint for IIIF Image API 2.1 """
-    image = _get_image_or_404(identifier)
+    image = _get_image_or_404(identifier_param)
     # TODO Return 'application/ld+json' response when requested
     return JsonResponse({
         "@context": "http://iiif.io/api/image/2/context.json",
@@ -40,43 +44,52 @@ def iiif_image_api_info(request, identifier):
 
 
 @permission_required('can_use_iiif_image_api')
-def iiif_image_api(request,
-                   identifier, region, size, rotation, quality, output_format):
+def iiif_image_api(request, identifier_param, region_param, size_param,
+                   rotation_param, quality_param, format_param):
     """ Image repurposing endpoint for IIIF Image API 2.1 """
-    # TODO Redirect to canonical URL
-    image = _get_image_or_404(identifier)
+    image = _get_image_or_404(identifier_param)
     thumbnail_options = {}
 
-    # Apply region (actual work done in thumbnail generation below)
-    x, y, r_width, r_height = parse_region(region, image.width, image.height)
+    try:
+        # Apply region (actual work done in thumbnail generation below)
+        x, y, r_width, r_height = parse_region(
+            region_param, image.width, image.height)
 
-    # Apply size (actual work done in thumbnail generation below)
-    s_width, s_height = parse_size(size, r_width, r_height)
+        # Apply size (actual work done in thumbnail generation below)
+        s_width, s_height = parse_size(size_param, r_width, r_height)
 
-    # TODO Apply rotation
-    rotation = parse_rotation(rotation, s_width, s_height)
+        # TODO Apply rotation
+        rotation = parse_rotation(rotation_param, s_width, s_height)
 
-    # Apply quality
-    quality = parse_quality(quality)
-    if quality in ('default', 'color'):
-        pass  # Nothing to do
-    elif quality == 'gray':
-        thumbnail_options['bw'] = True
+        # Apply quality
+        quality = parse_quality(quality_param)
+        if quality in ('default', 'color'):
+            pass  # Nothing to do
+        elif quality == 'gray':
+            thumbnail_options['bw'] = True
 
-    # Generate image
-    # NOTE: Generates and saves a thumbnail to make subsequent lookups faster
-    thumbnail_options.update({
-        'crop': (x, y),
-        'size': (s_width, s_height),
-    })
-    thumbnailer = get_thumbnailer(image.image)
-    thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
+        # TODO Redirect to canonical URL
 
-    # TODO Apply format
-    output_format = parse_format(output_format)
+        # Generate image
+        # NOTE: Generates and saves a thumbnail to make subsequent lookups
+        # faster
+        thumbnail_options.update({
+            'crop': (x, y),
+            'size': (s_width, s_height),
+        })
+        thumbnailer = get_thumbnailer(image.image)
+        thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
 
-    # Set response content type
-    return FileResponse(
-        open(thumbnail.path, 'rb'),
-        content_type='image/%s' % output_format,
-    )
+        # TODO Apply format
+        output_format = parse_format(format_param)
+
+        # Set response content type
+        return FileResponse(
+            open(thumbnail.path, 'rb'),
+            content_type='image/%s' % output_format,
+        )
+    # Handle error conditions per iiif.io/api/image/2.1/#server-responses
+    except ClientError, ex:
+        return HttpResponseBadRequest(ex.message)  # 400 response
+    except UnsupportedError, ex:
+        return HttpResponseNotImplemented(ex.message)  # 501 response

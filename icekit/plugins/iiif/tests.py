@@ -10,7 +10,7 @@ from django.test import TestCase
 from django_webtest import WebTest
 from django_dynamic_fixture import G
 
-from .utils import IIIFImageApiException, parse_dimensions_string, \
+from .utils import ClientError, parse_dimensions_string, \
     parse_region, parse_size
 
 
@@ -28,26 +28,26 @@ class TestImageApiUtils(TestCase):
             parse_dimensions_string('0.1,0.1,0.1,0.1', permit_floats=True))
         # Must use `permit_floats=True` for float values
         self.assertRaises(
-            IIIFImageApiException,
+            ClientError,
             parse_dimensions_string,
             '0.1,0,1,1')
         # Wrong number of elements
         self.assertRaises(
-            IIIFImageApiException,
+            ClientError,
             parse_dimensions_string,
             '0,1,1')
         self.assertRaises(
-            IIIFImageApiException,
+            ClientError,
             parse_dimensions_string,
             '0,0,0,1,1')
         # Negative numbers not permitted
         self.assertRaises(
-            IIIFImageApiException,
+            ClientError,
             parse_dimensions_string,
             '-1,0,1,1')
         # Elements must be numerical
         self.assertRaises(
-            IIIFImageApiException,
+            ClientError,
             parse_dimensions_string,
             'a,0,1,1')
 
@@ -348,6 +348,48 @@ class TestImageAPIViews(WebTest):
             'size': (160, 240),  # Height is best fit
         })
 
+    def test_iiif_image_api_rotation(self):
+        # Rotation: 0
+        self.app.get(
+            reverse('iiif_image_api',
+                    args=[self.image.pk, 'full', 'max', '0', 'default', 'jpg']),
+            user=self.superuser,
+        )
+        self.thumbnailer.get_thumbnail.assert_called_with({
+            'crop': (0, 0),
+            'size': (self.image.width, self.image.height),
+        })
+        # Rotation: 360 (converted to 0 since % 360)
+        self.app.get(
+            reverse('iiif_image_api',
+                    args=[self.image.pk, 'full', 'max', '360', 'default', 'jpg']),
+            user=self.superuser,
+        )
+        self.thumbnailer.get_thumbnail.assert_called_with({
+            'crop': (0, 0),
+            'size': (self.image.width, self.image.height),
+        })
+        # Rotation: invalid value
+        response = self.app.get(
+            reverse('iiif_image_api',
+                    args=[self.image.pk, 'full', 'max', 'x', 'default', 'jpg']),
+            user=self.superuser,
+            expect_errors=True,
+        )
+        self.assertEqual(400, response.status_code)
+        # Rotation other than 0 or 360 not yet supported
+        response = self.app.get(
+            reverse('iiif_image_api',
+                    args=[self.image.pk, 'full', 'max', '90', 'default', 'jpg']),
+            user=self.superuser,
+            expect_errors=True,
+        )
+        self.assertEqual(501, response.status_code)
+        self.assertEqual(
+            "Image API rotation parameters other than (0,) degrees are not"
+            " yet supported: 90",
+            response.content)
+
     def test_iiif_image_api_quality(self):
         # Quality: default
         self.app.get(
@@ -380,3 +422,15 @@ class TestImageAPIViews(WebTest):
             'size': (self.image.width, self.image.height),
             'bw': True,  # NOTE: Black-and-white filter added
         })
+        # Quality: bitonal (not yet supported)
+        response = self.app.get(
+            reverse('iiif_image_api',
+                    args=[self.image.pk, 'full', 'max', '0', 'bitonal', 'jpg']),
+            user=self.superuser,
+            expect_errors=True,
+        )
+        self.assertEqual(501, response.status_code)
+        self.assertEqual(
+            "Image API quality parameters other than ('default', 'color',"
+            " 'gray') are not yet supported: bitonal",
+            response.content)
