@@ -3,6 +3,7 @@ from easy_thumbnails.files import get_thumbnailer
 from django.db.models.loading import get_model
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import permission_required
 
 from fluent_utils.ajax import JsonResponse
 
@@ -23,7 +24,7 @@ def _get_image_or_404(identifier):
     return get_object_or_404(Image, id=identifier)
 
 
-# TODO Require privileged user
+@permission_required('can_use_iiif_image_api')
 def iiif_image_api_info(request, identifier):
     """ Image Information endpoint for IIIF Image API 2.1 """
     image = _get_image_or_404(identifier)
@@ -38,7 +39,7 @@ def iiif_image_api_info(request, identifier):
     })
 
 
-# TODO Require privileged user
+@permission_required('can_use_iiif_image_api')
 def iiif_image_api(request,
                    identifier, region, size, rotation, quality, output_format):
     """ Image repurposing endpoint for IIIF Image API 2.1 """
