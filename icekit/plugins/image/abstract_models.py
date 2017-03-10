@@ -205,13 +205,9 @@ class ImageLinkMixin(models.Model):
     @property
     def credit(self):
         """
-        Obtains the credit override or the actual image title.
-
-        :return: Title text (safe).
+        :return: Image credit (safe).
         """
-        if self.show_title:
-            return mark_safe(self.image.credit)
-        return None
+        return mark_safe(self.image.credit)
 
     def displayed_caption(self):
         c = Context({'instance': self})
