@@ -1,3 +1,5 @@
+import os
+
 from easy_thumbnails.files import get_thumbnailer
 
 from django.db.models.loading import get_model
@@ -93,6 +95,11 @@ def iiif_image_api(request, identifier_param, region_param, size_param,
         elif quality == 'gray':
             thumbnail_options['bw'] = True
 
+        # Apply format
+        # TODO Add support for unsupported formats (see `parse_format`)
+        image_format = os.path.splitext(image.image.name)[1][1:]
+        output_format = parse_format(format_param, image_format)
+
         # TODO Redirect to canonical URL per
         # http://iiif.io/api/image/2.1/#canonical-uri-syntax
 
@@ -104,14 +111,21 @@ def iiif_image_api(request, identifier_param, region_param, size_param,
             'size': (s_width, s_height),
         })
         thumbnailer = get_thumbnailer(image.image)
+        # Preserve image quality
+        thumbnailer.thumbnail_quality = 100
+        # Generate output image in requested format
+        thumbnailer.thumbnail_extensions = output_format
+        thumbnailer.thumbnail_transparency_extensions = output_format
+        # Get or generate thumbnail
         thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
-
-        # TODO Apply format
-        output_format = parse_format(format_param)
+        # Hack to reset file pointer for newly-generated thumbnails written to
+        # a local file, so the `read()` call below will actually read data.
+        if thumbnail.tell():
+            thumbnail.seek(0)
 
         # Set response content type
         return FileResponse(
-            open(thumbnail.path, 'rb'),
+            thumbnail.read(),
             content_type='image/%s' % output_format,
         )
     # Handle error conditions per iiif.io/api/image/2.1/#server-responses

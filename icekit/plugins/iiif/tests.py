@@ -152,11 +152,6 @@ class TestImageAPIViews(WebTest):
         self.get_thumbnailer = patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch(
-            'icekit.plugins.iiif.views.open', return_value='open_mocked')
-        self.open = patcher.start()
-        self.addCleanup(patcher.stop)
-
         self.thumbnailer = Mock()
         self.get_thumbnailer.return_value = self.thumbnailer
 
@@ -237,6 +232,9 @@ class TestImageAPIViews(WebTest):
         self.assertEqual(404, response.status_code)
 
         # Correct use
+        thumbnail = Mock()
+        self.thumbnailer.get_thumbnail.return_value = thumbnail
+        thumbnail.read.return_value = 'read_mocked'
         response = self.app.get(
             reverse(
                 'iiif_image_api',
@@ -248,7 +246,7 @@ class TestImageAPIViews(WebTest):
             'size': (self.image.width, self.image.height),
         })
         self.FileResponse.assert_called_with(
-                'open_mocked', content_type='image/jpg')
+            'read_mocked', content_type='image/jpg')
 
     def test_iiif_image_api_region(self):
         # Region: full

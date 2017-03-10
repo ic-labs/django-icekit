@@ -169,10 +169,16 @@ def parse_quality(quality):
     return quality
 
 
-def parse_format(output_format):
-    valid = ('jpg',)
-    if output_format not in valid:
+def parse_format(output_format, image_format):
+    # TODO Do we need to limit output format based on image's existing format?
+    supported = ('jpg', 'tif', 'png', 'gif')
+    unsupported = ('jp2', 'pdf', 'webp')
+    if output_format in unsupported:
         raise UnsupportedError(
-            "Image API format parameters other than %r"
-            " are not yet supported: %s" % (valid, output_format))
+            "Image API format parameters %r are not yet supported: %s"
+            % (unsupported, output_format))
+    if output_format not in supported:
+        raise ClientError(
+            "Invalid Image API format parameter not in %r: %s"
+            % (supported + unsupported, output_format))
     return output_format
