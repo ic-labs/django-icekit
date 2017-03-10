@@ -164,10 +164,9 @@ class TestImageAPIViews(WebTest):
         user = G(User)
         response = self.app.get(path, user=user, expect_errors=True)
         self.assertEqual(302, response.status_code)
-        self.assertEqual(
-            'http://localhost:80/login/?next=/iiif/%d/info.json'
-            % self.image.pk,
-            response.headers['Location'])
+        self.assertTrue(
+            response.headers.get('Location', '').endswith(
+                '/login/?next=/iiif/%d/info.json' % self.image.pk))
         # Valid response including basic data, attribution, & license
         response = self.app.get(path, user=self.superuser)
         expected = {
@@ -207,10 +206,10 @@ class TestImageAPIViews(WebTest):
             expect_errors=True,
         )
         self.assertEqual(302, response.status_code)
-        self.assertEqual(
-            'http://localhost:80/login/?next=/iiif/%d/full/max/0/default.jpg'
-            % self.image.pk,
-            response.headers['Location'])
+        self.assertTrue(
+            response.headers.get('Location', '').endswith(
+                '/login/?next=/iiif/%d/full/max/0/default.jpg'
+                % self.image.pk))
         # Now is a privileged user
         user.user_permissions.add(
             Permission.objects.get(codename='can_use_iiif_image_api'))
