@@ -14,9 +14,18 @@ class AppConfig(AppConfig):
         # model to hang it off for now...
         # TODO This is a hack, find a better way
         User = get_user_model()
-        content_type = ContentType.objects.get_for_model(User)
-        Permission.objects.get_or_create(
-            codename='can_use_iiif_image_api',
-            name='Can Use IIIF Image API',
-            content_type=content_type,
-        )
+
+        try:
+            # this doesn't work if migrations haven't been updated, resulting
+            # in "RuntimeError: Error creating new content types. Please make
+            # sure contenttypes is migrated before trying to migrate apps
+            # individually."
+
+            content_type = ContentType.objects.get_for_model(User)
+            Permission.objects.get_or_create(
+                codename='can_use_iiif_image_api',
+                name='Can Use IIIF Image API',
+                content_type=content_type,
+            )
+        except RuntimeError:
+            pass
