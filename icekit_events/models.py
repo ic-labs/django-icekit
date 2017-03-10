@@ -155,6 +155,12 @@ class EventType(PluralTitleSlugMixin):
         return Template("""<i title="{{ o }}" style="background-color:{{ o.color }};width:1em;height:1em;display:inline-block;border-radius:50%;margin-bottom:-0.15em;"></i>{% if not color_only %}&nbsp;{{ o }}{% endif %}
         """).render(Context({'o': self, 'color_only': color_only}))
 
+    class Meta:
+        # changing the verbose name rather than renaming because model rename
+        # migrations are sloooooow
+        verbose_name = "Event category"
+        verbose_name_plural = "Event categories"
+
 
 
 @encoding.python_2_unicode_compatible
@@ -176,6 +182,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
 
     primary_type = models.ForeignKey(
         EventType, blank=True, null=True,
+        verbose_name="Primary category",
         help_text="The primary type of this event: Talk, workshop, etc. Only "
                   "public Event Types can be primary.",
         limit_choices_to={'is_public': True},
@@ -184,6 +191,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     )
     secondary_types = models.ManyToManyField(
         EventType, blank=True,
+        verbose_name="Secondary categories",
         help_text="Additional/internal types: Education or members events, "
                   "for example.",
         related_name="secondary_events"

@@ -64,6 +64,7 @@ def event(request, slug):
     template = getattr(event, 'template',  'icekit_events/event.html')
     return TemplateResponse(request, template, context)
 
+
 def event_type(request, slug):
     type = get_object_or_404(models.EventType.objects.all(), slug=slug)
     occurrences = models.Occurrence.objects.filter(Q(event__primary_type=type) | Q(event__secondary_types=type)).upcoming().visible()

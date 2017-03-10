@@ -135,7 +135,7 @@ class PrimaryTypeFilter(SimpleListFilter):
 
 
 class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
-                 icekit_admin.ICEkitContentsAdmin):
+                 icekit_admin.ICEkitFluentContentsAdmin):
     """
     Polymorphic parent admin for Events.
     """
@@ -327,6 +327,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
         return None
     primary_type_swatch.short_description = u'⬤'
     primary_type_swatch.admin_order_field = 'primary_type'
+
 
 class EventWithLayoutsAdmin(EventChildAdmin, FluentLayoutsMixin):
     pass
