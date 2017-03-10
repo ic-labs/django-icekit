@@ -32,7 +32,10 @@ class AbstractImage(models.Model):
     )
     alt_text = models.CharField(
         max_length=255,
-        help_text=_("A description of the image for users who don't see images. Leave blank if the image has no informational value."),
+        help_text=_(
+            "A description of the image for users who don't see images "
+            "visually. Leave blank if the image has no informational value."
+        ),
         blank=True,
     )
     caption = models.TextField(
@@ -47,6 +50,11 @@ class AbstractImage(models.Model):
         max_length=255,
         blank=True,
         help_text=_("Where this image came from."),
+    )
+    external_ref = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text=_("The reference for this image in a 3rd-party system"),
     )
     categories = models.ManyToManyField(
         'icekit.MediaCategory',
@@ -81,9 +89,16 @@ class AbstractImage(models.Model):
     )
 
     # Unused for now
-    maximum_dimension = models.PositiveIntegerField(
+    maximum_dimension_pixels = models.PositiveIntegerField(
         blank=True, null=True,
-        help_text=_("If the size of this image is to be limited to a particular size for distribution, note it here."),
+        help_text=_(
+            "If this image is to be limited to a particular pixel size for "
+            "distribution, note it here."
+        ),
+    )
+    is_cropping_allowed = models.BooleanField(
+        help_text="Can this image be cropped?",
+        default=False
     )
 
     def clean(self):

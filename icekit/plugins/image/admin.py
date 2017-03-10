@@ -3,6 +3,8 @@ from django.conf import settings
 from django.template import Context
 from django.template import Template
 from django.utils.safestring import mark_safe
+from icekit.content_collections.admin import TitleSlugAdmin
+from icekit.plugins.image.models import ImageRepurposeConfig
 
 from icekit.utils.admin.mixins import ThumbnailAdminMixin
 
@@ -34,7 +36,7 @@ class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
         (None, {
             'fields': (
                 'image_tag',
-                'image',
+                ('image', 'derivatives',),
                 'title',
                 'alt_text',
                 'caption',
@@ -46,16 +48,16 @@ class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
         }),
         ('Usage', {
             'fields': (
-                ('is_ok_for_web', 'maximum_dimension'),
+                ('source', 'external_ref'),
+                ('is_ok_for_web', 'maximum_dimension_pixels', 'is_cropping_allowed'),
                 'credit',
                 'license',
-                'source',
                 'notes',
             ),
         }),
     )
 
-    readonly_fields = ('image_tag', 'file_size', 'dimensions', 'date_created', 'date_modified')
+    readonly_fields = ('image_tag', 'file_size', 'dimensions', 'date_created', 'date_modified', 'derivatives')
 
     change_form_template = 'image/admin/change_form.html'
 
@@ -70,5 +72,11 @@ class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
 
     image_tag.short_description = 'Image'
 
+    def derivatives(self, obj):
+        return mark_safe("<br>".join([
+            "<a href='%s'>%s</a>" % (i.url_for_image(obj), i.title) for i in ImageRepurposeConfig.objects.all()
+        ])) or "None yet"
 
+
+admin.site.register(models.ImageRepurposeConfig, TitleSlugAdmin)
 admin.site.register(models.Image, ImageAdmin)

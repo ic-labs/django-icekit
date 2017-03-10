@@ -1,3 +1,8 @@
+SUPPORTED_EXTENSIONS = ('jpg', 'tif', 'png', 'gif')
+UNSUPPORTED_EXTENSIONS = ('jp2', 'pdf', 'webp')
+SUPPORTED_QUALITY = ('default', 'color', 'gray',)
+
+
 class IIIFImageApiException(Exception):
     """ Base class for IIIF Image API Exceptions """
     pass
@@ -161,24 +166,21 @@ def parse_rotation(rotation_str, image_width, image_height):
 
 
 def parse_quality(quality):
-    valid = ('default', 'color', 'gray',)
-    if quality not in valid:
+    if quality not in SUPPORTED_QUALITY:
         raise UnsupportedError(
             "Image API quality parameters other than %r"
-            " are not yet supported: %s" % (valid, quality))
+            " are not yet supported: %s" % (SUPPORTED_QUALITY, quality))
     return quality
 
 
 def parse_format(output_format, image_format):
     # TODO Do we need to limit output format based on image's existing format?
-    supported = ('jpg', 'tif', 'png', 'gif')
-    unsupported = ('jp2', 'pdf', 'webp')
-    if output_format in unsupported:
+    if output_format in UNSUPPORTED_EXTENSIONS:
         raise UnsupportedError(
             "Image API format parameters %r are not yet supported: %s"
-            % (unsupported, output_format))
-    if output_format not in supported:
+            % (UNSUPPORTED_EXTENSIONS, output_format))
+    if output_format not in SUPPORTED_EXTENSIONS:
         raise ClientError(
             "Invalid Image API format parameter not in %r: %s"
-            % (supported + unsupported, output_format))
+            % (SUPPORTED_EXTENSIONS + UNSUPPORTED_EXTENSIONS, output_format))
     return output_format

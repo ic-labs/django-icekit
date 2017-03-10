@@ -48,6 +48,9 @@ GLAMkit contains a basic implementation key parts of the
    # crop from 100,150 a region of 900x600 px, and resize to 300px wide.
    /iiif/{ID}/100,150,900,600/300,/0/default.png
 
+   # original size as grayscale jpg file
+   /iiif/{ID}/full/max/0/gray.jpg
+
    # metadata
    /iiif/{ID}/info.json
 
@@ -55,6 +58,14 @@ where ``{ID}`` is the ID of an image in the ``Image`` model.
 
 The resulting image is created and stored permanently the first time it is
 requested.
+
+``ImageRepurposeConfig``
+------------------------
+
+The ``iiif.models.ImageRepurposeConfig`` model allows a user to define IIIF
+parameters to apply to the images. For now, only resize, format and grayscale
+options are implemented. The repurpose links are shown for each Image in the
+admin.
 
 Notes
 -----
