@@ -1,5 +1,10 @@
 <h1>{{ page }}</h1>
 
-{% for creator in page.get_creators.visible %}
+{% for creator in page.get_creators %}
+	{# show unpublished creators without links #}
+	{% if creator.is_visible %}
     <li><a href="{{ creator.get_absolute_url }}">{{ creator }}</a></li>
+	{% else %}
+    <li>{{ creator.get_draft_payload }}</li>
+	{% endif %}
 {% endfor %}
