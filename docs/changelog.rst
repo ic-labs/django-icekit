@@ -4,6 +4,8 @@ Changelog
 In development
 --------------
 
+-  Added implementation of key parts of IIIF 2.1 spec for privileged users.
+
 -  Fleshed out Image model with more metadata and fields for rights/usage.
 
 -  Add ``icekit.workflow`` application to associate, manage, and filter
