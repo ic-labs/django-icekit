@@ -1,5 +1,10 @@
 <h1>{{ page }}</h1>
 
-{% for work in page.get_works.visible %}
+{% for work in page.get_works %}
+	{# show unpublished works without links #}
+	{% if work.is_visible %}
     <li><a href="{{ work.get_absolute_url }}">{{ work }}</a></li>
+	{% else %}
+    <li>{{ work.get_draft_payload }}</li>
+	{% endif %}
 {% endfor %}

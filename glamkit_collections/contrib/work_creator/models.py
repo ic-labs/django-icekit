@@ -75,17 +75,14 @@ class CreatorBase(
         end. If self is draft, show visible related items. If self is
         published, show published related items.
 
+        Normal behaviour is to return published works if possible
+        AND draft works if they haven't been published. Draft works are
+        to be shown without links.
         """
-
-        # need to query the long way round as reverse relations don't get
-        # the publishing attributes.
-        qs = WorkBase.objects.filter(
-                id__in=[x.pk for x in self.get_draft().works.all()])
-
-        if self.is_draft:
-            return qs.visible()
-        else:
-            return qs.published()
+        qs = self.get_draft().works
+        # only return works that don't have an equivalent published version
+        # (ie items that are themselves published, and unpublished drafts)
+        return qs.filter(publishing_linked=None)
 
     def get_works_count(self):
         """To be used in Admin listings"""
@@ -254,16 +251,16 @@ class WorkBase(
     def get_creators(self):
         """
         :return: The creaors that should be presented as visible on the front
-        end. If self is draft, show visible related items (ie drafts). If self is
-        published, show published related items (ie not drafts).
+        end.
 
+        Normal behaviour is to return published creators if possible
+        AND draft creators if they haven't been published. Draft creators are
+        to be shown without links.
         """
         qs = self.get_draft().creators
-        if self.is_draft:
-            return qs.visible()
-        else:
-            return qs.published()
-
+        # only return creators that don't have an equivalent published version
+        # (ie items that are themselves published, and unpublished drafts)
+        return qs.filter(publishing_linked=None)
 
     def get_roles(self):
         """
@@ -272,6 +269,7 @@ class WorkBase(
         There's some publishing-related complexity here. The role relations
         (self.creators.through) connect to draft objects, which then need to
         be modified to point to visible() objects.
+
         """
 
         creator_ids = self.get_creators().values_list('id', flat=True)
