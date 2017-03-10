@@ -606,8 +606,8 @@ class TestAdmin(WebTest):
         # Fetch calendar JSON data
         #######################################################################
         response = self.app.get(
-            reverse('admin:icekit_events_eventbase_calendar_data'),
-            {
+            url=reverse('admin:icekit_events_eventbase_calendar_data'),
+            params={
                 'start': self.start.date(),
                 'end': repeat_end.date() + timedelta(days=1),
             },
