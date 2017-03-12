@@ -5,6 +5,7 @@ from .icekit import *
 INSTALLED_APPS += (
     'sponsors',
     'press_releases',
+    'icekit.plugins.iiif',
 
     'icekit_events',
     'icekit_events.event_types.simple',
