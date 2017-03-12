@@ -3,6 +3,19 @@
 {% load fluent_contents_tags %}
 
 {% block content %}
+    {% block page_hero %}
+        {% with page.get_hero_image as hero_image %}
+            {% if hero_image %}
+                <div class="page-hero">
+                    <img
+                        class="page-hero__image"
+                        src="{{ hero_image.image|thumbnail_url:"hero_image" }}"
+                        alt="{{ hero_image.alt_text }}"
+                    />
+                </div>
+            {% endif %}
+        {% endwith %}
+    {% endblock %}
 	{% block page_breadcrumb %}
     	{% with page.parent.get_published as parent %}
 			{% if parent %}
