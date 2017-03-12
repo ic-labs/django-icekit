@@ -49,6 +49,25 @@
 	{% block page_main_content %}
 		{% page_placeholder "main" role="m" %}
 	{% endblock %}
+    {% block page_related_content %}
+        {% if page.has_any_related_items %}
+            <section class="page-related">
+                <h3 class="page-related__title">Related content</h3>
+                <div class="page-related__content">
+                    <div class="page-related__content__container">
+                        {% page_placeholder "related" role="main" %}
+                    </div>
+                    <div class="page-related__content__links">
+                        {% for instance in page.get_auto_related_items %}
+                            <div class="page-related__content__link">
+                                {% include "plugins/link/default.html" %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+    {% endblock %}
 {% endblock %}
 
 {% block js %}
