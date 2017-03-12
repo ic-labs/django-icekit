@@ -7,28 +7,28 @@ $preview_ribbon_text_colour: white !default;
     right: 0;
     z-index: 9999;
 }
-.preview-ribbon-link {
+.preview-ribbon__link {
 	text-decoration: none;
 }
-.preview-ribbon-content {
+.preview-ribbon__content {
 	padding: 2px 5px;
 	background: $preview_ribbon_background_colour;
     color: $preview_ribbon_text_colour;
 	border: 3px solid transparent;
 }
-.preview-ribbon-content:hover {
+.preview-ribbon__content:hover {
     background: $preview_ribbon_text_colour;
     color: $preview_ribbon_background_colour;
     z-index: 9999;
 	border-color: $preview_ribbon_background_colour;
 }
-.preview-ribbon-text {
+.preview-ribbon__text {
 	text-transform: uppercase;
 	text-decoration: underline;
 }
-.preview-ribbon-icon {
+.preview-ribbon__icon {
 	color: $preview_ribbon_text_colour;
 }
-.preview-ribbon:hover .preview-ribbon-icon {
+.preview-ribbon:hover .preview-ribbon__icon {
 	color: $preview_ribbon_background_colour;
 }

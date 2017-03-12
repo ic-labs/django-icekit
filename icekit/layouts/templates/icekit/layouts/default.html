@@ -20,8 +20,8 @@
     	{% with page.parent.get_published as parent %}
 			{% if parent %}
 				<div class="page-breadcrumb">
-					<i class="fa fa-caret-left page-breadcrumb-icon" aria-hidden="true"></i>
-					<a class="page-breadcrumb-link" href="{{ page.get_parent.get_absolute_url }}">
+					<i class="fa fa-caret-left page-breadcrumb__icon" aria-hidden="true"></i>
+					<a class="page-breadcrumb__link" href="{{ page.get_parent.get_absolute_url }}">
 						{{ page.get_parent.get_title }}
 					</a>
 				</div>
@@ -32,9 +32,9 @@
 		{% if page.get_type %}
 			<div class="page-type">
 				{% if page.get_type.get_absolute_url and page.get_type.is_public %}
-					<a class="page-type-link" href="{{ page.get_type.get_absolute_url }}">
+					<a class="page-type__link" href="{{ page.get_type.get_absolute_url }}">
 				{% endif %}
-				<span class="page-type-text">
+				<span class="page-type__text">
 					{{ page.get_type }}
 				</span>
 				{% if page.get_type.get_absolute_url and page.get_type.is_public %}

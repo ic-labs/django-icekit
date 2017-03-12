@@ -4,7 +4,7 @@
     <div class="preview-ribbon" {{ attrs }}>
 		{% if request.user.is_staff %}
 			<a
-				class="preview-ribbon-link"
+				class="preview-ribbon__link"
 				{% if obj.is_draft %}
 					href="{{ obj|admin_url }}"
 				{% else %}
@@ -12,11 +12,11 @@
 				{% endif %}
 			>
 		{% endif %}
-		<div class="preview-ribbon-content">
+		<div class="preview-ribbon__content">
 			{% if obj.is_draft and not obj.has_been_published %}
-				<span class="preview-ribbon-text">Preview</span>
+				<span class="preview-ribbon__text">Preview</span>
 			{% else %}
-				<i class="fa fa-pencil preview-ribbon-icon"></i>
+				<i class="fa fa-pencil preview-ribbon__icon"></i>
 			{% endif %}
 		</div>
 		{% if request.user.is_staff %}
