@@ -54,12 +54,12 @@
             <section class="page-related">
                 <h3 class="page-related__title">Related content</h3>
                 <div class="page-related__content">
-                    <div class="page-related__content__container">
+                    <div class="page-related__content-container">
                         {% page_placeholder "related" role="main" %}
                     </div>
-                    <div class="page-related__content__links">
+                    <div class="page-related__links">
                         {% for instance in page.get_auto_related_items %}
-                            <div class="page-related__content__link">
+                            <div class="page-related__link">
                                 {% include "plugins/link/default.html" %}
                             </div>
                         {% endfor %}
