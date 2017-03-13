@@ -468,6 +468,9 @@ THUMBNAIL_ALIASES = {
             'size': (1200, 630), #facebook recommends
             'crop': True,
         },
+        'hero_image': {
+            'size': (800, 0),
+        }
     }
 }
 
