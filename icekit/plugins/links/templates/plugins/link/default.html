@@ -1,9 +1,29 @@
-{% load thumbnail %}
-<div style="{{ instance.style }}">
-    <a href="{{ instance.get_absolute_url }}">
-        {% if instance.get_list_image %}<img src="{{ instance.get_list_image|thumbnail_url:"list_image" }}">{% endif %}
-        <p>{{ instance.get_type }}</p>
-        <h4>{{ instance.get_title }}</h4>
-        <p>{{ instance.get_oneliner }}</p>
-    </a>
+{% load thumbnail icekit_tags %}
+
+<div class="item-preview">
+    {% include "icekit/partials/preview_link.html" with obj=instance %}
+    {% if instance.get_list_image or instance.get_list_image_url %}{# get_list_image_url is from search results #}
+        <div class="item-preview__thumb">
+            <img
+                src="{% firstof instance.get_list_image_url instance.get_list_image|thumbnail_url:"list_image" %}"
+                {% if instance.get_list_image_alt_text %}
+                    alt="{{ instance.get_list_image_alt_text }}"
+                {% endif %}
+            >
+        </div>
+    {% endif %}
+    <div class="item-preview__info">
+        <div class="item-preview__content">
+            <span class="item-preview__category">{{ instance.get_type }}</span>
+            <h4 class="item-preview__title">{{ instance.get_title|safe }}</h4>
+            {% if instance.get_oneliner %}
+                <p class="item-preview__byline">
+                    {{ instance.get_oneliner|safe }}
+                </p>
+            {% endif %}
+        </div>
+    </div>
+    {% if instance.get_absolute_url %}
+        <a class="item-preview__link" href="{{ instance.get_absolute_url }}">More info</a>
+    {% endif %}
 </div>

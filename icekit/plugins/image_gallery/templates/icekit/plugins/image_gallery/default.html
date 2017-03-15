@@ -2,7 +2,7 @@
 
 {% with gallery=instance.slide_show.get_visible %}
 	{% if gallery %}
-		<div>
+		<div class="image-gallery">
 			{% if gallery.show_title %}
 				<h3 class="carousel-title">{{ gallery.title }}</h3>
 			{% endif %}

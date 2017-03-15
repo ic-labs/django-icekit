@@ -5,7 +5,7 @@
 	<head {% block head_attributes %}prefix="og: http://ogp.me/ns#"{% endblock %}>
 		{% block head %}
 			{% block credits %}
-			<!-- Hello. We're the Interaction Consortium (http://interaction.net.au) -->
+			<!-- Hello. We're the Interaction Consortium (https://interaction.net.au) -->
 			<!-- We made this. -->
 			{% endblock %}
 
@@ -17,11 +17,17 @@
 				<link rel="author" href="/humans.txt" />
 
 				{% block open_graph %}
-					<meta property="og:title" content="{% block og_title %}{% if page.get_title %}{{ page.get_title|striptags }} - {% endif %}{{ SITE_NAME }}{% endblock %}">
+					<meta property="og:title" content="{% block og_title %}{{ page.get_og_title }}{% endblock %}">
 					<meta property="og:type" content="{% block og_type %}website{% endblock %}">
-					<meta property="og:image" content="{% block og_image %}{% endblock %}">
+					<meta property="og:image" content="{% block og_image %}{% with page.get_og_image_url as og_image %}{% if og_image %}{{ og_image|safe }}{% endif %}{% endwith %}{% endblock %}">
 					<meta property="og:site_name" content="{% block og_site_name %}{{ SITE_NAME }}{% endblock %}">
-					<meta property="og:description" content="{% block og_description %}{% endblock %}">
+					<meta property="og:description" content="{% block og_description %}{{ page.get_og_description }}{% endblock %}">
+					<meta name="twitter:card" content="{% block twitter_card %}summary_large_card{% endblock %}" />
+					<meta name="twitter:site" content="{% block twitter_site %}{{ SITE_TWITTER_USERNAME }}{% endblock %}" />
+					<meta name="twitter:creator" content="{% block twitter_creator %}{{ SITE_TWITTER_USERNAME }}{% endblock %}" />
+					<meta name="twitter:title" content="{% block twitter_title %}{{ page.get_og_title }}{% endblock %}" />
+					<meta name="twitter:description" content="{% block twitter_description %}{{ page.get_og_description }}{% endblock %}" />
+					<meta name="twitter:image" content="{% block twitter_image %}{% with page.get_og_image_url as og_image %}{% if og_image %}{{ og_image|safe }}{% endif %}{% endwith %}{% endblock %}" />
 				{% endblock %}
 
 				{% if debug %}
@@ -36,7 +42,9 @@
 				{% block external_css %}{% endblock %}
 				{# Base CSS files #}
 				{% compress css file %}
-					<link rel="stylesheet" type="text/x-scss" href="{% static 'icekit/scss/icekit.scss' %}">
+                    {% block icekit_css %}
+					    <link rel="stylesheet" type="text/x-scss" href="{% static 'icekit/styles/components/preview-ribbon.scss' %}">
+                    {% endblock %}
 					{% block base_css %}{% endblock %}
 				{% endcompress %}
 				{# Extra CSS files - section/page specific, etc #}
@@ -58,14 +66,12 @@
 			{% block messages %}
 				{% include 'icekit/messages.html' %}
 			{% endblock %}
-			{% block content %}{% endblock content %}
+			{% block content %}{% endblock %}
 		{% endblock %}
 
 		{% if request.IS_DRAFT %}
 		{% block preview_ribbon %}
-			<div class="preview-ribbon">
-				<span>PREVIEW</span>
-			</div>
+			{% include 'icekit/partials/preview_link.html' %}
 		{% endblock preview_ribbon %}
 		{% endif %}
 
@@ -84,7 +90,7 @@
 				{% block js %}{% endblock %}
 			{% endcompress %}
 			{% if ICEKIT_SHARE_USERNAME and ICEKIT_SHARE_KEY %}
-				<script language="javascript">
+				<script>
 					window.ICEKIT_SHARE_USERNAME = '{{ ICEKIT_SHARE_USERNAME }}';
 					window.ICEKIT_SHARE_KEY = '{{ ICEKIT_SHARE_KEY }}';
 				</script>

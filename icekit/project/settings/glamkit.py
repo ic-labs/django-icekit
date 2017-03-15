@@ -5,9 +5,11 @@ from .icekit import *
 INSTALLED_APPS += (
     'sponsors',
     'press_releases',
+    'icekit.plugins.iiif',
 
     'icekit_events',
     'icekit_events.event_types.simple',
+    'icekit_events.plugins.event_content_listing',
     'icekit_events.plugins.links',
     'icekit_events.plugins.todays_occurrences',
     'icekit_events.page_types.eventlistingfordate',
@@ -54,7 +56,8 @@ LINK_PLUGINS += [
     'TodaysOccurrencesPlugin',
 ]
 
-DEFAULT_PLUGINS += SPONSOR_PLUGINS + LINK_PLUGINS
+DEFAULT_PLUGINS += \
+    SPONSOR_PLUGINS + LINK_PLUGINS + ['EventContentListingPlugin']
 
 
 # CONFIGURE PLACEHOLDERS ######################################################
