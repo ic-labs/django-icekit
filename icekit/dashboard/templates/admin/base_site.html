@@ -32,6 +32,12 @@
 	{% endcompress %}
 {% endblock %}
 
+{% block bodyclass %}{{ block.super }}
+    {% if "(staging)" in SITE_NAME.lower %}
+        staging
+    {% endif %}
+{% endblock %}
+
 {% block branding %}
 	<a href="{% url 'admin:index' %}">
 		<img id="site-logo" src="{% block header-image %}{% static 'admin/img/header-brand.png' %}{% endblock header-image %}" title="{{ SITE_NAME }}">
