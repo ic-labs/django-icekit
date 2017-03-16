@@ -1,11 +1,14 @@
 import urlparse
 
 import re
+import warnings
 
 from django import template
 from django.conf import settings
 from django.http import QueryDict
 from django.template import Library
+from django.template.base import Token, Variable
+from django.template.loader_tags import do_include
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from fluent_contents.plugins.oembeditem.backend import get_oembed_data
@@ -304,3 +307,26 @@ def link(obj):
     :return: A safe string expressing an HTML link to the object.
     """
     return mark_safe(u"<a href='{0}'>{1}</a>".format(obj.get_absolute_url(), unicode(obj)))
+
+
+@register.tag
+def deprecate_and_include(parser, token):
+    """
+    Raises a deprecation warning about using the first argument. The
+    remaining arguments are passed to an ``{% include %}`` tag. Usage::
+
+        {% deprecate_and_include "old_template.html" "new_template.html" %}
+
+    In order to avoid re-implementing {% include %} so as to resolve variables,
+    this tag currently only works with literal template path strings.
+    """
+    split_contents = token.split_contents()
+    current_template = split_contents[1]
+    new_template = split_contents[2]
+    if settings.DEBUG:
+        warnings.simplefilter('always', DeprecationWarning)
+    warnings.warn("The %s template is deprecated; Use %s instead." % (current_template, new_template), DeprecationWarning, stacklevel=2)
+    new_contents = [split_contents[0]] + split_contents[2:]
+    include_token = Token(token.token_type, " ".join(new_contents))
+
+    return do_include(parser, include_token)

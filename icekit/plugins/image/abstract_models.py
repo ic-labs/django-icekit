@@ -125,7 +125,10 @@ class AbstractImage(models.Model):
 
         :return: String of file size with unit.
         """
-        return filesizeformat(self.image.size)
+        try:
+            return filesizeformat(self.image.size)
+        except (OSError, IOError):
+            return filesizeformat(0)
 
 
 
