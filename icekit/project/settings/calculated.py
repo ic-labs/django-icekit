@@ -126,6 +126,10 @@ if RAVEN_CONFIG.get('dsn'):
 
 # STORAGES ####################################################################
 
+# Override media and thumbnail storage if S3 media is enabled
 if ENABLE_S3_MEDIA:
-    DEFAULT_FILE_STORAGE = 'icekit.utils.storage.S3DefaultStorage'
-    THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
+    # "Private" S3 storage by default for most media assets
+    DEFAULT_FILE_STORAGE = 'icekit.utils.storage.S3DefaultPrivateStorage'
+
+    # "Public" S3 storage by default for thumbnails
+    THUMBNAIL_DEFAULT_STORAGE = 'icekit.utils.storage.S3DefaultPublicStorage'
