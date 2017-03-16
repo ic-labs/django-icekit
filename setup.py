@@ -31,19 +31,6 @@ if os.path.exists('.git'):
 else:
     kwargs = dict(version='0+d' + datetime.date.today().strftime('%Y%m%d'))
 
-# Convert README.md to reStructuredText.
-if {'bdist_wheel', 'sdist'}.intersection(sys.argv):
-    try:
-        import pypandoc
-    except ImportError:
-        print('WARNING: You should install `pypandoc` to convert `README.md` '
-              'to reStructuredText to use as long description.',
-              file=sys.stderr)
-    else:
-        print('Converting `README.md` to reStructuredText to use as long '
-              'description.')
-        kwargs['long_description'] = pypandoc.convert('README.md', 'rst')
-
 setuptools.setup(
     name='django-icekit',
     author='Interaction Consortium',
