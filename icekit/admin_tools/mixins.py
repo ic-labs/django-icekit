@@ -98,7 +98,7 @@ class PreviewAdminMixin(object):
         admin_preview.allow_tags = True
 
     def admin_preview_link(self, obj, request=None):
-        return admin_link(obj, attr_string="target='_blank'", inner_html=self.preview(obj, request))
+        return admin_link(obj, inner_html=self.preview(obj, request))
 
     # TODO: this doesn't seem to run (maybe needs to extend modeladmin?)
     # def get_list_display_links(self):

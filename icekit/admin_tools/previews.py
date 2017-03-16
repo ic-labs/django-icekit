@@ -99,7 +99,7 @@ class RawIdPreviewAdminMixin(admin.ModelAdmin):
                                 # Fall back to default field rendering
                                 obj_preview = self.render_field_default(obj, request)
 
-                obj_link = admin_link(obj, attr_string="target='_blank'", inner_html=obj_preview)
+                obj_link = admin_link(obj, inner_html=obj_preview)
             except Exception as ex:
                 obj_link = self.render_field_error(obj_id, obj, ex, request)
             obj_preview_list.append(obj_link)
