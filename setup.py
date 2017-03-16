@@ -3,7 +3,6 @@ from __future__ import print_function
 import datetime
 import os
 import setuptools
-import sys
 
 
 # Make `pip install -e .` much faster.
@@ -148,7 +147,6 @@ setuptools.setup(
             'sphinx',
             'sphinx-autobuild',
             'recommonmark',
-            'pypandoc',
         ],
     },
     **kwargs
