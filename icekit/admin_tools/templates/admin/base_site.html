@@ -34,10 +34,18 @@
 	{% endcompress %}
 {% endblock %}
 
+
 {% block branding %}
 	<a href="{% url 'admin:index' %}">
 		<img id="site-logo" src="{% block header-image %}{% static 'admin/img/header-brand.png' %}{% endblock header-image %}" title="{{ SITE_NAME }}">
 		<h1 id="site-name">Site Admin</h1>
+		{% if "staging" in SITE_NAME.lower %}
+			<p class="pill">staging</p>
+		{% elif "test" in SITE_NAME.lower %}
+			<p class="pill">test</p>
+		{% else %}
+			<p class="pill">staging</p>
+		{% endif %}
 	</a>
 {% endblock %}
 
