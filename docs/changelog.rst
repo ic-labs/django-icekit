@@ -18,7 +18,8 @@ In development
       manually grouped are grouped by their apps as normal.
 
    -  New dashboard panels for Recent Actions (the Django admin changelist) and
-      Assigned To Me (a workflow list).
+      Assigned To Me (a workflow list). ``WorkflowState`` gets a
+      ``datetime_modified`` field to support this.
 
    -  ``raw_id``s have previews and edit links if the admin subclasses
       ``RawIdPreviewAdminMixin`` (which ICEkit's default admins do; note
