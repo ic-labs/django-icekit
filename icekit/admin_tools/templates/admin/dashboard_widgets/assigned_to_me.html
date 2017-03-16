@@ -7,7 +7,7 @@
 	{% load log %}
 	{% get_assigned_to_user 10 as content_list for_user user %}
 	{% if not content_list %}
-		<p>{% trans 'None available' %}</p>
+		<p>{% trans 'Nothing is assigned to you!' %}</p>
 	{% else %}
 		<ul class="actionlist col-xs-6" style="padding:0;">
 			{% for entry in content_list|slice:":5" %}
