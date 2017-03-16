@@ -1,139 +1,14 @@
-"""
-Admin configuration for ``icekit`` app.
-"""
+# Admin for top-level ICEKit models
+import warnings
 
-# Define `list_display`, `list_filter` and `search_fields` for each model.
-# These go a long way to making the admin more usable.
 from django.conf import settings
 from django.conf.urls import url, patterns
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
-from django.utils.text import capfirst
-from django.utils.translation import ugettext_lazy as _
-from polymorphic.admin import PolymorphicParentModelAdmin
-
-from icekit.publishing.admin import PublishingAdmin, \
-    PublishableFluentContentsAdmin, ICEKitFluentPagesParentAdminMixin
-from icekit.workflow.admin import WorkflowMixinAdmin, \
-    WorkflowStateTabularInline
 
 from icekit import models
-
-
-# FILTERS #####################################################################
-
-
-class ChildModelFilter(admin.SimpleListFilter):
-    title = _('type')
-    parameter_name = 'type'
-
-    child_model_plugin_class = None
-
-    def lookups(self, request, model_admin):
-        lookups = [
-            (p.content_type.pk, p.verbose_name.capitalize())
-            for p in self.child_model_plugin_class.get_plugins()
-        ]
-        return lookups
-
-    def queryset(self, request, queryset):
-        value = self.value()
-        if value:
-            content_type = ContentType.objects.get_for_id(value)
-            return queryset.filter(polymorphic_ctype=content_type)
-
-
-# MIXINS ######################################################################
-
-
-class ICEkitContentsAdmin(PublishingAdmin, WorkflowMixinAdmin):
-    """
-    A base for generic admins that will include ICEkit features:
-
-     - publishing
-     - workflow
-    """
-    list_display = PublishingAdmin.list_display + \
-        WorkflowMixinAdmin.list_display
-    list_filter = PublishingAdmin.list_filter + \
-        WorkflowMixinAdmin.list_filter
-    inlines = [WorkflowStateTabularInline]
-
-
-class ICEkitFluentContentsAdmin(
-        PublishableFluentContentsAdmin, WorkflowMixinAdmin):
-    """
-    A base for Fluent Contents admins that will include ICEkit features:
-
-     - publishing
-     - workflow
-    """
-    list_display = ICEkitContentsAdmin.list_display
-    list_filter = ICEkitContentsAdmin.list_filter
-    inlines = ICEkitContentsAdmin.inlines
-
-
-class PolymorphicAdminUtilsMixin(admin.ModelAdmin):
-    """
-    Utility methods for working with Polymorphic admins.
-    """
-    def child_type_name(self, inst):
-        """
-        e.g. for use in list_display
-        :param inst: a polymorphic parent instance
-        :return: The name of the polymorphic model
-        """
-        return capfirst(inst.polymorphic_ctype.name)
-    child_type_name.short_description = "Type"
-
-
-class ChildModelPluginPolymorphicParentModelAdmin(
-    PolymorphicParentModelAdmin,
-    PolymorphicAdminUtilsMixin
-):
-    """
-    Get child models and choice labels from registered plugins.
-    """
-
-    child_model_plugin_class = None
-    child_model_admin = None
-
-    def get_child_type_choices(self, request, action):
-        """
-        Override choice labels with ``verbose_name`` from plugins and sort.
-        """
-        # Get choices from the super class to check permissions.
-        choices = super(ChildModelPluginPolymorphicParentModelAdmin, self) \
-            .get_child_type_choices(request, action)
-        # Update label with verbose name from plugins.
-        plugins = self.child_model_plugin_class.get_plugins()
-        if plugins:
-            labels = {
-                plugin.content_type.pk: capfirst(plugin.verbose_name) for plugin in plugins
-            }
-            choices = [(ctype, labels[ctype]) for ctype, _ in choices]
-            return sorted(choices, lambda a, b: cmp(a[1], b[1]))
-        return choices
-
-    def get_child_models(self):
-        """
-        Get child models from registered plugins. Fallback to the child model
-        admin and its base model if no plugins are registered.
-        """
-        child_models = []
-        for plugin in self.child_model_plugin_class.get_plugins():
-            child_models.append((plugin.model, plugin.model_admin))
-        if not child_models:
-            child_models.append((
-                self.child_model_admin.base_model,
-                self.child_model_admin,
-            ))
-        return child_models
-
-
-
-# MODELS ######################################################################
+from icekit.admin_tools.mixins import RawIdPreviewAdminMixin
 
 
 class LayoutAdmin(admin.ModelAdmin):
@@ -218,5 +93,83 @@ class MediaCategoryAdmin(admin.ModelAdmin):
     pass
 
 
+# import has to happen here to avoid circular import errors
+from icekit.publishing.admin import PublishingAdmin, \
+    PublishableFluentContentsAdmin
+from icekit.workflow.admin import WorkflowMixinAdmin, WorkflowStateTabularInline
+
+
+class ICEkitContentsAdmin(
+    PublishingAdmin,
+    WorkflowMixinAdmin,
+    RawIdPreviewAdminMixin,
+):
+    """
+    A base for generic admins that will include ICEkit features:
+
+     - publishing
+     - workflow
+    """
+    list_display = PublishingAdmin.list_display + \
+        WorkflowMixinAdmin.list_display
+    list_filter = PublishingAdmin.list_filter + \
+        WorkflowMixinAdmin.list_filter
+    inlines = [WorkflowStateTabularInline]
+
+
+class ICEkitFluentContentsAdmin(
+    PublishableFluentContentsAdmin,
+    WorkflowMixinAdmin,
+    RawIdPreviewAdminMixin,
+):
+    """
+    A base for Fluent Contents admins that will include ICEkit features:
+
+     - publishing
+     - workflow
+    """
+    list_display = ICEkitContentsAdmin.list_display
+    list_filter = ICEkitContentsAdmin.list_filter
+    inlines = ICEkitContentsAdmin.inlines
+
+
 admin.site.register(models.Layout, LayoutAdmin)
 admin.site.register(models.MediaCategory, MediaCategoryAdmin)
+
+# Classes that used to be here
+
+from icekit.admin_tools.filters import \
+    ChildModelFilter as new_ChildModelFilter
+
+from icekit.admin_tools.polymorphic import \
+    PolymorphicAdminUtilsMixin as new_PolymorphicAdminUtilsMixin, \
+    ChildModelPluginPolymorphicParentModelAdmin as new_ChildModelPluginPolymorphicParentModelAdmin
+
+from icekit.utils.deprecation import deprecated
+
+@deprecated
+class ChildModelFilter(new_ChildModelFilter):
+    """
+    .. deprecated::
+    Use :class:`icekit.admin_tools.filters.ChildModelFilter` instead.
+    """
+    pass
+
+
+@deprecated
+class PolymorphicAdminUtilsMixin(new_PolymorphicAdminUtilsMixin):
+    """
+    .. deprecated::
+    Use :class:`icekit.admin_tools.polymorphic.PolymorphicAdminUtilsMixin` instead.
+    """
+    pass
+
+
+@deprecated
+class ChildModelPluginPolymorphicParentModelAdmin(new_ChildModelPluginPolymorphicParentModelAdmin):
+    """
+    .. deprecated::
+    Use :class:`icekit.admin_tools.polymorphic.ChildModelPluginPolymorphicParentModelAdmin` instead.
+    """
+    pass
+

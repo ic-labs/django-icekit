@@ -45,13 +45,15 @@ class AbstractFile(models.Model):
     def file_size(self):
         """
         Obtain the file size for the file in human readable format.
+        If the file isn't fount, return "0 bytes" rather than crash
 
         :return: String of file size with unit.
-        """
-        if self.exists():
-            return filesizeformat(self.file.size)
 
-        return None
+        """
+        try:
+            return filesizeformat(self.file.size)
+        except OSError:
+            return filesizeformat(0)
 
 
     def extension(self):

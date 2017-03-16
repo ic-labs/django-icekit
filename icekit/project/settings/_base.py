@@ -551,13 +551,11 @@ FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     }
 }
 
-FLUENT_DASHBOARD_DEFAULT_MODULE = 'ModelList'
-
 FLUENT_MARKUP_LANGUAGES = ('restructuredtext', 'markdown', 'textile')
 FLUENT_MARKUP_MARKDOWN_EXTRAS = ()
 
 FLUENT_PAGES_PARENT_ADMIN_MIXIN = \
-    'icekit.admin_mixins.ICEkitFluentPagesParentAdmin'
+    'icekit.admin_tools.polymorphic.ICEkitFluentPagesParentAdmin'
 
 # Avoid an exception because fluent-pages wants `TEMPLATE_DIRS[0]` to be
 # defined, even though that setting is going away. This might not be necessary
@@ -692,7 +690,7 @@ ICEKIT = {
 
 INSTALLED_APPS += (
     'icekit',
-    'icekit.dashboard',  # Must come before `django.contrib.admin` and `flat`
+    'icekit.admin_tools',  # Must come before `django.contrib.admin` and `flat`
     'icekit.integration.reversion',
     'icekit.layouts',
     'icekit.workflow',

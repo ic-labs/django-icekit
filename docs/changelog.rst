@@ -8,6 +8,10 @@ In development
 
 -  Fleshed out Image model with more metadata and fields for rights/usage.
 
+-  Refactor icekit.admin* and icekit.utils.admin.* to icekit.admin_tools.*
+   in preparation for admin consolidation and extension. Previous classes and
+   functions are deprecated.
+
 -  Add ``icekit.workflow`` application to associate, manage, and filter
    workflow state information like status and user-assigment for
    arbitrary models.
@@ -123,7 +127,7 @@ Breaking changes
    ``icekit.abstract_models``.
 
 -  Import admin mixin ``FluentLayoutsMixin`` from
-   ``icekit.admin_mixins`` module instead of ``icekit.admin``.
+   ``icekit.admin_tools.mixins`` module instead of ``icekit.admin``.
 
 0.14.1 (2016-09-26)
 -------------------

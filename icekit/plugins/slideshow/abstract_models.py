@@ -1,4 +1,7 @@
 from django.db import models
+from django.template import Context
+from django.template import RequestContext
+from django.template import Template
 from django.utils import six
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -33,6 +36,21 @@ class AbstractUnpublishableSlideShow(models.Model):
 
     def __str__(self):
         return self.title
+
+    def preview(self, request):
+        t = Template(
+            """{% load icekit_tags thumbnail %}
+                {% for item in obj.content.get_content_items %}
+                    <img src="{% thumbnail item.image.image 30x30 %}" alt="">
+                {% empty %}
+                    <cite>No items</cite>
+                {% endfor %}
+            """
+        )
+        c = Context({
+            'obj': self,
+        })
+        return t.render(c)
 
 
 @python_2_unicode_compatible

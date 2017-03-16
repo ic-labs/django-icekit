@@ -5,7 +5,6 @@ import django
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
-from django.conf import settings
 from django.conf.urls import patterns, url
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -362,6 +361,7 @@ class _PublishingHelpersMixin(object):
 class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
     form = PublishingAdminForm
     list_display = ('publishing_object_title', 'publishing_column', 'publishing_modified_at')
+    list_display_links = ('publishing_object_title', ) # default, but makes it easier to extend
     list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
 
     actions = ['publish', 'unpublish']
@@ -729,7 +729,7 @@ class ICEKitFluentPagesParentAdminMixin(
 
 
 # this import must go here to avoid import errors
-from icekit.admin_mixins import FluentLayoutsMixin
+from icekit.admin_tools.mixins import FluentLayoutsMixin
 
 class PublishableFluentContentsAdmin(PublishingAdmin, FluentLayoutsMixin):
     """
