@@ -12,7 +12,7 @@ from django.template.loader_tags import do_include
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from fluent_contents.plugins.oembeditem.backend import get_oembed_data
-from icekit.utils.admin.urls import admin_link as admin_link_fn, admin_url as admin_url_fn
+from icekit.admin_tools.utils import admin_link as admin_link_fn, admin_url as admin_url_fn
 from micawber import ProviderException
 
 register = Library()
@@ -58,6 +58,7 @@ def link_share(context, text):
         'ICEKIT_SHARE_KEY': context.get('ICEKIT_SHARE_KEY', ''),
     }
 
+
 def grammatical_join(l, initial_joins=", ", final_join=" and "):
     """
     Display a list of items nicely, with a different string before the final
@@ -76,6 +77,7 @@ def grammatical_join(l, initial_joins=", ", final_join=" and "):
     """
     # http://stackoverflow.com/questions/19838976/grammatical-list-join-in-python
     return initial_joins.join(l[:-2] + [final_join.join(l[-2:])])
+
 
 def _grammatical_join_filter(l, arg=None):
     """
@@ -148,6 +150,7 @@ def update_GET(parser, token):
         return UpdateGetNode()
 
     return UpdateGetNode(triples)
+
 
 def _chunks(l, n):
     """ Yield successive n-sized chunks from l.
@@ -262,8 +265,8 @@ def admin_link(obj):
     object.
     """
     if hasattr(obj, 'get_admin_link'):
-        return obj.get_admin_link()
-    return admin_link_fn(obj)
+        return mark_safe(obj.get_admin_link())
+    return mark_safe(admin_link_fn(obj))
 
 
 @register.filter
@@ -286,8 +289,9 @@ def admin_url(obj):
     :return: the admin URL of the object
     """
     if hasattr(obj, 'get_admin_url'):
-        return obj.get_admin_url()
-    return admin_url_fn(obj)
+        return mark_safe(obj.get_admin_url())
+    return mark_safe(admin_url_fn(obj))
+
 
 @register.filter
 def link(obj):

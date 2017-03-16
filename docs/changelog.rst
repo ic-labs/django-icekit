@@ -87,6 +87,11 @@ In development
 Breaking changes
 ~~~~~~~~~~~~~~~~
 
+-  ``DASHBOARD_FEATURED_APPS[]['models']`` should now be a list of tuples, not
+   a dict, so that ordering is preserved. Dict-based definitions still work, but
+   operations that rely on the value being a dict (such as ``update()``)
+   will fail.
+
 -  ``AbstractLayoutPage`` now includes ListableMixin and HeroMixin. All
    models which inherit from this will need a new migration.
 
