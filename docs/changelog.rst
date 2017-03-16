@@ -8,9 +8,28 @@ In development
 
 -  Fleshed out Image model with more metadata and fields for rights/usage.
 
--  Refactor icekit.admin* and icekit.utils.admin.* to icekit.admin_tools.*
-   in preparation for admin consolidation and extension. Previous classes and
-   functions are deprecated.
+-  Refactor ``icekit.admin*``, ``icekit.dashboard`` and
+   ``icekit.utils.admin`` to ``icekit.admin_tools``
+   in preparation for admin consolidation and extension. Previous classes,
+   templates and functions are deprecated.
+
+   -  A new setting ``ICEKIT['DASHBOARD_SORTED_APPS']`` to manually group
+      models in the list below the dashboard panels. Models that aren't
+      manually grouped are grouped by their apps as normal.
+
+   -  New dashboard panels for Recent Actions (the Django admin changelist) and
+      Assigned To Me (a workflow list).
+
+   -  ``raw_id``s have previews and edit links if the admin subclasses
+      ``RawIdPreviewAdminMixin`` (which ICEkit's default admins do; note
+      ``InlineAdmin``s do not need this subclass). If the linked object has a
+      ``preview()`` method, it is used for the preview, wrapped in an 'edit'
+      link.
+
+   -  New ``PreviewAdminMixin`` which calls an object's ``preview()`` method.
+      The existing ``ThumbnailAdminMixin`` now inherits from this class and
+      consequently, models which use ``ThumbnailAdminMixin`` have a visual
+      preview in ``raw_id`` fields, including ``icekit.plugins.image.Image``.
 
 -  Add ``icekit.workflow`` application to associate, manage, and filter
    workflow state information like status and user-assigment for
@@ -88,9 +107,13 @@ Breaking changes
 -  ``icekit.articles`` is no more. Functionality is moved to
    ``icekit.content_collections``.
 
+-  ``icekit.dashboard`` has moved to ``icekit.admin_tools``.
+
 -  The ``FEATURED_APPS`` setting has moved to
-   ``ICEKIT['DASHBOARD_FEATURED_APPS']``, and is now a list, not a
-   tuple, so as to support item assignment.
+   ``ICEKIT['DASHBOARD_FEATURED_APPS']``, and the ``['models']`` values are now
+   tuples of 2-tuples, not dicts, so as to support item ordering.
+   ``update()``ing the default settings no longer works, use tuple operations
+   instead.
 
 -  Added HeroMixin and ListableMixin to LayoutPage and Article. This
    will break ported/subclass models that define similarly-named fields.
