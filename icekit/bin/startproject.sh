@@ -126,12 +126,12 @@ When you're done, exit the container and stop all of its dependencies:
 	# exit
 	$ docker-compose stop
 
-Read our [Docker guide](http://icekit.readthedocs.io/en/latest/install/docker.html)
+Read our [Docker guide](http://docs.glamkit.com/en/latest/install/docker.html)
 guide for more info on running an ICEkit project with Docker.
 
 # Run without Docker
 
-Read our [Manual Setup](http://icekit.readthedocs.io/en/latest/install/manual-install.html)
+Read our [Manual Setup](http://docs.glamkit.com/en/latest/install/manual-install.html)
 guide for more info on running an ICEkit project without Docker.
 
 EOF
