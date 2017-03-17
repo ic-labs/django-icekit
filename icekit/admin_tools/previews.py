@@ -121,7 +121,7 @@ class RawIdPreviewAdminMixin(admin.ModelAdmin):
             model = type(instance)
         except ValueError: # pk = "add"
             # if this is a polymorphic add, get the child model
-            if request.GET['ct_id']:
+            if request.GET.get('ct_id', None):
                 model = ContentType.objects.get(id=request.GET['ct_id']).model_class()
             else:
                 model = self.model
