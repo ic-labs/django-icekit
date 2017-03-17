@@ -34,10 +34,18 @@
 	{% endcompress %}
 {% endblock %}
 
+
 {% block branding %}
 	<a href="{% url 'admin:index' %}">
 		<img id="site-logo" src="{% block header-image %}{% static 'admin/img/header-brand.png' %}{% endblock header-image %}" title="{{ SITE_NAME }}">
 		<h1 id="site-name">Site Admin</h1>
+		{% if "staging" in SITE_NAME.lower %}
+			<p class="pill">staging</p>
+		{% elif "test" in SITE_NAME.lower %}
+			<p class="pill">test</p>
+		{% elif "demo" in SITE_NAME.lower %}
+			<p class="pill">demo</p>
+		{% endif %}
 	</a>
 {% endblock %}
 
@@ -47,8 +55,8 @@
 			{% block footer-name %}{{ SITE_NAME }}{% endblock %}
 		</section>
 		<section class="footer-section footer-right">
-			<a href="/">{% block site-name %}{% if SITE_NAME == "ICEkit" %}This site{% else %}{{ SITE_NAME }}{% endif %}{% endblock %}</a>
-			is built with <a href="http://glamkit.com">GLAMkit</a>
+			<a href="/">{% block site-name %}{% if SITE_NAME == "ICEkit" or not SITE_NAME %}This site{% else %}{{ SITE_NAME }}{% endif %}{% endblock %}</a>
+			is made with <a href="http://glamkit.com">GLAMkit</a> by
 			<a href="http://interaction.net.au" id="ic-logo">
 				<div class="ic-logo-dot"></div>
 				<div class="ic-logo-dot"></div>

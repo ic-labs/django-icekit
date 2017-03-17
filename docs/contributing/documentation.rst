@@ -32,7 +32,7 @@ Install pandoc::
 
 Install the python requirements::
 
-   pip install sphinx sphinx-autobuild recommonmark pypandoc
+   pip install sphinx sphinx-autobuild recommonmark
 
 Making HTML documentation
 -------------------------

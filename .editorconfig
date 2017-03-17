@@ -11,7 +11,7 @@ trim_trailing_whitespace = true
 [*.{bat,iss}]
 end_of_line = crlf
 
-[*.{css,html,js,json}]
+[*.{css,html,js,json,less,scss,sass}]
 indent_size = 2
 indent_style = tab
 

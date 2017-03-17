@@ -43,7 +43,7 @@ addresses for convenient access.
 To install devpi::
 
     mkvirtualenv devpi
-    pip install devpi-client django pypandoc
+    pip install devpi-client django
 
 Version numbers
 ---------------

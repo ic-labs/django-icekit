@@ -69,4 +69,4 @@ class ImageRepurposeConfig(TitleSlugMixin):
         }
 
     class Meta:
-        verbose_name = "Image derivative configuration"
+        verbose_name = "Image derivative"
