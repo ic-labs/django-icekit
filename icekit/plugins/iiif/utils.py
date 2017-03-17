@@ -125,24 +125,45 @@ def parse_size(size, image_width, image_height):
     aspect_ratio = float(image_width) / image_height
     if size in ('full', 'max'):
         width, height = image_width, image_height
+
     elif size.startswith('pct:'):
         # Percentage applied to width and height
         pct = float(size[4:])
         width = pct / 100 * image_width
         height = pct / 100 * image_height
+
     elif size.startswith('!'):
         # Best fit
         width, height = parse_width_height_string(size[1:])
+
+        # spec assumes both width and height are given. If not, let's just use
+        # the image aspect ratio to fill in the blanks.
+
+        if width is None and height is None:
+            # no-op
+            width = image_width
+            height = image_height
+        elif width is None:
+            width = height * aspect_ratio
+        elif height is None:
+            height = width / aspect_ratio
+
+        # now we're sure we have both width and height
+
         if width / aspect_ratio <= height:
             # Requested width is best-fit
             height = int(width / aspect_ratio)
         else:
             # Requested height is best-fit
             width = int(height * aspect_ratio)
+
     else:
         width, height = parse_width_height_string(size)
+        if width is height is None:
+            width = image_width
+            height = image_height
         # Handle "w,"
-        if height is None:
+        elif height is None:
             height = width / aspect_ratio
         # Handle ",h"
         elif width is None:
