@@ -71,7 +71,7 @@ The process of deploying a site for the first time is:
       docker push "$DOCKER_ID_USER/$PROJECT_NAME:master"
 
 
-   It should now appear in the `Repositories` section on Docker Cloud.
+   It should now appear in the ``Repositories`` section on Docker Cloud.
 
 3. Set up a new stack in Docker Cloud. This needs more documentation (see the
    `Docker Cloud docs <https://docs.docker.com/docker-cloud/>`__ for more).
@@ -200,9 +200,9 @@ If migrations have been applied, it's probably still going to be quicker and
 less messyto fix the deployment or restore a database backup than to roll back
 migrations.
 
-Further, if any migrations don't have a `reverse()` operation specified, then
+Further, if any migrations don't have a ``reverse()`` operation specified, then
 they can't be rolled back, and you'll either have to restore from a database
-backup, improvise a `reverse()` operation, or do nothing and hope the target
+backup, improvise a ``reverse()`` operation, or do nothing and hope the target
 revision is compatible enough to work.
 
 If you're still determined to roll back the migrations, compare the breaking
@@ -214,7 +214,7 @@ then you must manually apply those migrations in reverse using::
 Rolling back code
 `````````````````
 After you've rolled back migrations, update the Docker Cloud stack file and
-change `master` tag to a full commit hash of the target release (you can get it
+change ``master`` tag to a full commit hash of the target release (you can get it
 from Travis build history) and click redeploy.
 
 That was fun
