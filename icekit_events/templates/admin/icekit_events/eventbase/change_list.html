@@ -23,7 +23,11 @@
 		<script>
 			(function($) {
 			    // load the stored cookie state, default true
-				$("#calendar").toggle(Cookies.get("calendar-toggle") === 'true' || true);
+				var c = Cookies.get("calendar-toggle");
+				if (c===undefined)
+				    c = "true";
+
+				$("#calendar").toggle(c === 'true');
 
 				$('#toggle-calendar').on('click', function(e) {
 					e.preventDefault();
