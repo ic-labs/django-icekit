@@ -192,8 +192,8 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     secondary_types = models.ManyToManyField(
         EventType, blank=True,
         verbose_name="Secondary categories",
-        help_text="Additional/internal types: Education or members events, "
-                  "for example.",
+        help_text="Additional or internal types: Education or members events, "
+                  "for example. Events show in listings for <em>every</em> type they're associated with.",
         related_name="secondary_events"
     ) # use all_types to get the union of primary and secondary types
 
