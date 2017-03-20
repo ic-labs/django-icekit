@@ -49,7 +49,8 @@ logger = logging.getLogger(__name__)
 class EventRepeatGeneratorsInline(admin.TabularInline):
     model = models.EventRepeatsGenerator
     form = admin_forms.BaseEventRepeatsGeneratorForm
-    extra = 1
+    extra = 0
+    min_num = 1
     fields = ('is_all_day', 'start', 'end', 'recurrence_rule', 'repeat_end',)
     formfield_overrides = {
         models.RecurrenceRuleField: {
@@ -70,7 +71,8 @@ class OccurrencesInline(admin.TabularInline):
         # so hiding relevant fields
         'is_hidden', 'is_cancelled', 'cancel_reason'
     )
-    extra = 1
+    extra = 0
+    min_num = 1
     readonly_fields = ('is_protected_from_regeneration', 'external_ref')  # 'is_cancelled',)
 
 
@@ -88,13 +90,42 @@ class EventChildAdmin(
         EventRepeatGeneratorsInline,
         OccurrencesInline,
     ] + icekit_admin.ICEkitContentsAdmin.inlines
-    exclude = (
-        # Legacy fields, will be removed soon
-        'all_day', 'starts', 'ends', 'date_starts', 'date_ends',
-        'recurrence_rule', 'end_repeat', 'date_end_repeat', 'is_repeat',
-    )
     raw_id_fields = ('part_of', )
     save_on_top = True
+    filter_horizontal = ('secondary_types', )
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                'title',
+                'slug',
+                'primary_type',
+                'secondary_types',
+                'part_of',
+                'external_ref',
+            ),
+        }),
+        ('Dates, times & tickets', {
+            'description': "Use human dates and times if the automatically generated ones don't suit your needs.",
+            'fields': (
+                'show_in_calendar',
+                'human_dates',
+                'human_times',
+                'is_drop_in',
+                'has_tickets_available',
+                'price_line',
+            ),
+        }),
+        ('Content', {
+            'fields': {
+                'layout',
+                'special_instructions',
+                'cta_text',
+                'cta_url',
+            },
+        }),
+    )
+
 
 
 class EventChildModelPlugin(six.with_metaclass(
