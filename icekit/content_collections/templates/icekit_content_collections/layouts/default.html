@@ -5,14 +5,18 @@
 {% block content %}
 	{{ block.super }}
 
-	<ul>
-		{% for item in items_to_list %}
-			<li><a href="{{ item.get_absolute_url }}">
-				{{ item.title|safe }}
-			</a></li>
-        {% empty %}
-            <li>There are no items to show on this page</li>
-		{% endfor %}
-	</ul>
+    <div class="container">
+        <ul>
+            {% for item in items_to_list %}
+                <li>
+                    <a href="{{ item.get_absolute_url }}">
+                        {{ item.title|safe }}
+                    </a>
+                </li>
+            {% empty %}
+                <li>There are no items to show on this page</li>
+            {% endfor %}
+        </ul>
+    </div>
 
 {% endblock %}
