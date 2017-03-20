@@ -55,9 +55,11 @@
                 <section class="page-related">
                     <h3 class="page-related__title">Related content</h3>
                     <div class="page-related__content">
-                        <div class="page-related__content-container">
-                            {% page_placeholder "related" role="main" %}
-                        </div>
+                        {% if page.slots.related.count %}
+                            <div class="page-related__content-container">
+                                {% page_placeholder "related" role="main" %}
+                            </div>
+                        {% endif %}
                         {% with auto_related_items=page.get_auto_related_items %}
                             {% if auto_related_items %}
                                 <div class="page-related__links">
