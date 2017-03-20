@@ -11,12 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from fluent_contents.analyzer import get_template_placeholder_data
 from icekit.admin_tools.filters import ChildModelFilter
 
-
-
 from . import fields, plugins
-
-ChildModelFilter
-
 
 
 class AbstractBaseModel(models.Model):
