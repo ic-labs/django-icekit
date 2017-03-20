@@ -25,3 +25,15 @@ class AbstractLayoutPage(ICEkitFluentContentsPageMixin, LayoutFieldMixin,
         if self.parent:
             return self.parent.get_visible()
         return None
+
+    def get_related_items(self):
+        items = []
+
+        related_placeholder = self.placeholder_set.filter(title='Related').first()
+        if related_placeholder:
+            items += list(related_placeholder.contentitems.all())
+
+        if hasattr(self, 'get_auto_related_items'):
+            items += list(self.get_auto_related_items())
+
+        return items
