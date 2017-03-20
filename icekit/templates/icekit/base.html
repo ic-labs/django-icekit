@@ -42,10 +42,15 @@
 				{% block external_css %}{% endblock %}
 				{# Base CSS files #}
 				{% compress css file %}
-					{% block icekit_css %}
-						<link rel="stylesheet" type="text/x-scss" href="{% static 'icekit/styles/components/preview-ribbon.scss' %}">
+                    {% block icekit_css %}
+						<link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.css' %}">
+						<link rel="stylesheet" href="{% static 'font-awesome/css/font-awesome.css' %}">
+						<link rel="stylesheet" type="text/x-scss" href="{% static 'icekit/styles/icekit.scss' %}">
 					{% endblock %}
-					{% block base_css %}{% endblock %}
+                    {# Default styling for a project, designed to be overridden once a build is underway #}
+					{% block base_css %}
+                        <link rel="stylesheet" type="text/x-scss" href="{% static 'icekit/styles/site.scss' %}">
+					{% endblock %}
 				{% endcompress %}
 				{# Extra CSS files - section/page specific, etc #}
 				{% compress css file %}
