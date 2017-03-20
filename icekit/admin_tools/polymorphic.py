@@ -7,6 +7,7 @@ from fluent_contents.admin.contentitems import (BaseContentItemInline,
 # working around name clash
 import importlib
 
+from fluent_pages.adminui.urlnodeparentadmin import UrlNodeParentAdmin
 from icekit.admin_tools.widgets import PolymorphicForeignKeyRawIdWidget, \
     PolymorphicManyToManyRawIdWidget
 from icekit.workflow.admin import WorkflowMixinAdmin, WorkflowStateTabularInline
@@ -196,3 +197,19 @@ class ICEkitFluentPagesParentAdmin(
     list_filter = ICEKitFluentPagesParentAdminMixin.list_filter + \
         WorkflowMixinAdmin.list_filter
     inlines = [WorkflowStateTabularInline]
+
+    def get_search_results(self, request, queryset, search_term):
+        # HACK: Bypass UrlNodeParentAdmin's get_search_results, which limits
+        # results to top-level pages so as to avoid breaking the mptt code in
+        # the list view. Our list view is much simpler, so we don't need to
+        # skip it.
+        if isinstance(self, UrlNodeParentAdmin):
+            return super(UrlNodeParentAdmin, self).get_search_results(
+                request, queryset, search_term)
+            # return admin.ModelAdmin.get_search_results(
+            #     self, request, queryset, search_term)
+        else:
+            return super(ICEkitFluentPagesParentAdmin, self).get_search_results(
+                request, queryset, search_term)
+
+
