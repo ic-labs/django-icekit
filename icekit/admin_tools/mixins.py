@@ -43,7 +43,7 @@ class FluentLayoutsMixin(PlaceholderEditorAdmin, RawIdPreviewAdminMixin):
         """
         Get placeholder data from layout.
         """
-        if not obj or not obj.layout:
+        if not obj or not getattr(obj, 'layout', None):
             data = [PlaceholderData(slot='main', role='m', title='Main')]
         else:
             data = obj.layout.get_placeholder_data()
