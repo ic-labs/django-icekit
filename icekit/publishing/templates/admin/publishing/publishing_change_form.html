@@ -1,4 +1,7 @@
 {% extends non_publishing_change_form_template %}
+{# You normally don't want to extend this template - it's injected, and #}
+{# you'll get a recursion error. Usually you want #}
+{# "admin/polymorphic/change_form.html" or "admin/change_form.html" #}
 
 {% load i18n admin_modify admin_static admin_urls polymorphic_admin_tags compress publishing_tags %}
 
