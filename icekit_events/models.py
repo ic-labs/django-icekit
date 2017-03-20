@@ -183,8 +183,8 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     primary_type = models.ForeignKey(
         EventType, blank=True, null=True,
         verbose_name="Primary category",
-        help_text="The primary type of this event: Talk, workshop, etc. Only "
-                  "public Event Types can be primary.",
+        help_text="The primary category of this event: Talk, workshop, etc. Only "
+                  "'public' event categories can be primary.",
         limit_choices_to={'is_public': True},
         related_name="events",
         on_delete=models.SET_NULL,
@@ -192,8 +192,8 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     secondary_types = models.ManyToManyField(
         EventType, blank=True,
         verbose_name="Secondary categories",
-        help_text="Additional or internal types: Education or members events, "
-                  "for example. Events show in listings for <em>every</em> type they're associated with.",
+        help_text="Additional or internal categories: Education or members events, "
+                  "for example. Events show in listings for <em>every</em> category they're associated with.",
         related_name="secondary_events"
     ) # use all_types to get the union of primary and secondary types
 
