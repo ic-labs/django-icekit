@@ -14,7 +14,7 @@ It has publishing and workflow tools for teams of content professionals,
 and a powerful content framework, based on django-fluent. Everything is written
 in Python, using the Django framework.
 
-`Read the documentation for the latest release <http://icekit.readthedocs.io>`_
+`Read the documentation for the latest release <http://docs.glamkit.com>`_
 
 Key features
 ============
@@ -128,14 +128,14 @@ Next steps
 
 -  `Start building your site <docs/howto/start.md>`__
 -  `Architectural overview <docs/intro/architecture.md>`__
--  `Read the Documentation <http://icekit.readthedocs.io>`__
+-  `Read the Documentation <http://docs.glamkit.com>`__
 
 .. |Build Status| image:: https://img.shields.io/travis/ic-labs/django-icekit.svg
    :target: https://travis-ci.org/ic-labs/django-icekit
 .. |Coverage Status| image:: https://img.shields.io/coveralls/ic-labs/django-icekit.svg
    :target: https://coveralls.io/github/ic-labs/django-icekit
 .. |Documentation| image:: https://readthedocs.org/projects/icekit/badge/
-   :target: https://icekit.readthedocs.io/
+   :target: http://docs.glamkit.com/
 .. |Requirements Status| image:: https://img.shields.io/requires/github/ic-labs/django-icekit.svg
    :target: https://requires.io/github/ic-labs/django-icekit/requirements/
 .. |Version| image:: https://img.shields.io/pypi/v/django-icekit.svg
