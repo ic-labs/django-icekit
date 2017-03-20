@@ -2,6 +2,9 @@
 Model declaration for the `author` app.
 """
 import re
+
+from icekit.mixins import HeroMixin
+
 try:
     from urlparse import urljoin
 except ImportError:
@@ -42,7 +45,11 @@ class AuthorListing(AbstractListingPage):
 
 
 @python_2_unicode_compatible
-class Author(AbstractCollectedContent, ICEkitContentsMixin):
+class Author(
+    AbstractCollectedContent,
+    ICEkitContentsMixin,
+    HeroMixin,
+):
     """
     An author model for use with article pages and assigning attribution.
     """
@@ -57,14 +64,8 @@ class Author(AbstractCollectedContent, ICEkitContentsMixin):
 
     slug = models.SlugField(max_length=255)
 
-    portrait = models.ForeignKey(
-        'icekit_plugins_image.Image',
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-    )
-
     url = models.CharField(
+        "URL",
         max_length=255,
         blank=True,
         help_text=_('The URL for the authors website.'),
@@ -120,10 +121,6 @@ class Author(AbstractCollectedContent, ICEkitContentsMixin):
 
     def get_layout_template_name(self):
         return "icekit_authors/detail.html"
-
-    def get_list_image(self):
-        if self.portrait:
-            return self.portrait.image
 
     class Meta:
         ordering = ('family_name', 'given_names', )

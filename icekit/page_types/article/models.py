@@ -1,6 +1,7 @@
 from icekit.content_collections.abstract_models import AbstractListingPage
 from .abstract_models import  AbstractArticle
 
+
 class Article(AbstractArticle):
     pass
 

@@ -42,9 +42,8 @@ ICEKIT['DASHBOARD_FEATURED_APPS'] = [
         'name': 'Collection',
         'icon_html': '<i class="content-type-icon fa fa-diamond"></i>',
         'models': [
-            # empty because we let projects implement their own collection types
-            # (although we could just list them all here as uninstalled models
-            # are just ignored)
+            ('gk_collections_work_creator.WorkBase', {}),
+            ('gk_collections_work_creator.CreatorBase', {}),
         ],
     },
 ] + ICEKIT['DASHBOARD_FEATURED_APPS']
