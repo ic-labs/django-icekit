@@ -7,7 +7,7 @@ import icekit.fields
 import django.db.models.deletion
 import timezone.timezone
 import icekit_events.models
-
+from datetime import datetime
 
 class Migration(migrations.Migration):
 
@@ -48,8 +48,8 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(editable=False, db_index=True, default=timezone.timezone.now)),
                 ('modified', models.DateTimeField(editable=False, db_index=True, default=timezone.timezone.now)),
                 ('recurrence_rule', icekit_events.models.RecurrenceRuleField(blank=True, null=True, help_text='An iCalendar (RFC2445) recurrence rule that defines when this event repeats.')),
-                ('start', models.DateTimeField(verbose_name=b'first start', db_index=True, default=icekit_events.models.default_starts)),
-                ('end', models.DateTimeField(verbose_name=b'first end', db_index=True, default=icekit_events.models.default_ends)),
+                ('start', models.DateTimeField(verbose_name=b'first start', db_index=True, default=datetime.now)),
+                ('end', models.DateTimeField(verbose_name=b'first end', db_index=True, default=datetime.now)),
                 ('is_all_day', models.BooleanField(db_index=True, default=False)),
                 ('repeat_end', models.DateTimeField(blank=True, null=True, help_text='If empty, this event will repeat indefinitely.')),
                 ('event', models.ForeignKey(related_name='repeat_generators', to='icekit_events.EventBase', editable=False)),

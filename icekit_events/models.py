@@ -46,23 +46,6 @@ DATE_FORMAT = settings.DATE_FORMAT
 DATETIME_FORMAT = settings.DATE_FORMAT + " " + settings.TIME_FORMAT
 
 
-def default_starts():
-    when = timeutils.round_datetime(
-        when=djtz.now(),
-        precision=appsettings.DEFAULT_STARTS_PRECISION,
-        rounding=timeutils.ROUND_UP,
-    )
-    return when
-
-
-def default_ends():
-    return default_starts() + appsettings.DEFAULT_ENDS_DELTA
-
-
-def default_date_starts():
-    return djtz.date()
-
-
 # FIELDS ######################################################################
 
 
@@ -247,6 +230,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
                     'e.g. "Enter via the Jones St entrance".'),
     )
     external_ref = models.CharField(
+        'External reference',
         max_length=255,
         blank=True, null=True,
         help_text="The reference identifier used by an external events/tickets management system."
@@ -559,11 +543,9 @@ class EventRepeatsGenerator(AbstractBaseModel):
     )
     start = models.DateTimeField(
         'first start',
-        default=default_starts,
         db_index=True)
     end = models.DateTimeField(
         'first end',
-        default=default_ends,
         db_index=True)
     is_all_day = models.BooleanField(
         default=False, db_index=True)
