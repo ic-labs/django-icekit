@@ -5,25 +5,26 @@
 {% block title %}{{ page.get_title }} {{ start|date }}{% endblock %}
 
 {% block content %}
-    <h1>{{ page.get_title }}</h1>
-    <h2>{{ start|date }}</h2>
+    <div class="container">
+        <h1>{{ page.get_title }}</h1>
+        <h2>{{ start|date }}</h2>
 
-    <ul>
-		{% for item in items_to_list %}
-			<li><a href="{{ item.get_absolute_url }}">
-				{{ item.event|safe }}: {{ item.time_range_string }}
-			</a></li>
-        {% empty %}
-            <li>There are no events happening today</li>
-		{% endfor %}
-	</ul>
+        <ul>
+            {% for item in items_to_list %}
+                <li><a href="{{ item.get_absolute_url }}">
+                    {{ item.event|safe }}: {{ item.time_range_string }}
+                </a></li>
+            {% empty %}
+                <li>There are no events happening today</li>
+            {% endfor %}
+        </ul>
 
 
-    {% with tomorrow=start.date|add_days:1 yesterday=start.date|add_days:-1 %}
-        <p><a href="?{% update_GET 'date' = yesterday %}">{{ yesterday }}</a></p>
-        <p><a href="?{% update_GET 'date' = tomorrow %}">{{ tomorrow }}</a></p>
-    {% endwith %}
+        {% with tomorrow=start.date|add_days:1 yesterday=start.date|add_days:-1 %}
+            <p><a href="?{% update_GET 'date' = yesterday %}">{{ yesterday }}</a></p>
+            <p><a href="?{% update_GET 'date' = tomorrow %}">{{ tomorrow }}</a></p>
+        {% endwith %}
 
-    <div class="events-datepicker" id="datepicker" data-period="{{ days }}" data-start="{{ start|date:'Y-m-d' }}"></div>
-
+        <div class="events-datepicker" id="datepicker" data-period="{{ days }}" data-start="{{ start|date:'Y-m-d' }}"></div>
+    </div>
 {% endblock %}
