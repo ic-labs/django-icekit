@@ -76,7 +76,7 @@
 
 		{% if request.IS_DRAFT %}
 		{% block preview_ribbon %}
-			{% include 'icekit/partials/preview_link.html' %}
+            {% include 'icekit/partials/preview_link.html' with obj=page %}
 		{% endblock preview_ribbon %}
 		{% endif %}
 
