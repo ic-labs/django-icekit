@@ -42,9 +42,9 @@
 				{% block external_css %}{% endblock %}
 				{# Base CSS files #}
 				{% compress css file %}
-                    {% block icekit_css %}
-					    <link rel="stylesheet" type="text/x-scss" href="{% static 'icekit/styles/components/preview-ribbon.scss' %}">
-                    {% endblock %}
+					{% block icekit_css %}
+						<link rel="stylesheet" type="text/x-scss" href="{% static 'icekit/styles/components/preview-ribbon.scss' %}">
+					{% endblock %}
 					{% block base_css %}{% endblock %}
 				{% endcompress %}
 				{# Extra CSS files - section/page specific, etc #}
