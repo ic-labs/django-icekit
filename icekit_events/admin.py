@@ -140,9 +140,9 @@ class EventTypeFilter(ChildModelFilter):
     child_model_plugin_class = EventChildModelPlugin
 
 
-class PrimaryTypeFilter(SimpleListFilter):
-    title = "primary type"
-    parameter_name = "primary_type"
+class PrimaryCategoryFilter(SimpleListFilter):
+    title = "primary category"
+    parameter_name = "primary_category"
 
     def lookups(self, request, model_admin):
         """
@@ -172,7 +172,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
     """
     base_model = models.EventBase
     list_filter = (
-        EventTypeFilter, PrimaryTypeFilter, 'secondary_types', 'modified', 'show_in_calendar', 'is_drop_in', 'has_tickets_available',
+        EventTypeFilter, PrimaryCategoryFilter, 'secondary_types', 'modified', 'show_in_calendar', 'is_drop_in', 'has_tickets_available',
     ) + icekit_admin.ICEkitContentsAdmin.list_filter
     list_display = (
         'primary_type_swatch', 'publishing_object_title', 'child_type_name', 'modified',
