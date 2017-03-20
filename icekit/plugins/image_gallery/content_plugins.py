@@ -16,5 +16,5 @@ class ImageGalleryPlugin(ContentPlugin):
 
     class FrontendMedia:
         js = (
-            'plugins/image_gallery/init.js',
+            'icekit/plugins/image_gallery/init.js',
         )
