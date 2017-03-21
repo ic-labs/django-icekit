@@ -4,6 +4,19 @@ Changelog
 In development
 --------------
 
+-
+
+-  Page Admin no longer replaces the change_list table with a tree.
+
+-  Provide default Localization formats.
+
+-  Improvements to Events admin and calendar. Calendar shows for single event.
+
+-  Better Date/Time/Datetime widgets in Admin forms
+
+-  Front-end improvements: updated preview links in templates, included
+   Bootstrap in backend and front-end by default.
+
 -  Added implementation of key parts of IIIF 2.1 spec for privileged users.
 
 -  Fleshed out Image model with more metadata and fields for rights/usage.

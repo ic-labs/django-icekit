@@ -83,7 +83,7 @@ class LinkPlugin(ContentPlugin):
     fieldsets = (
         (None, {
            'fields': (
-               ('item', 'get_admin_link',),
+               ('item', ),
                'style',
            )
         }),
@@ -98,7 +98,6 @@ class LinkPlugin(ContentPlugin):
            'classes': ('collapse', )
         }),
     )
-    readonly_fields = ('get_admin_link',)
 
     # Do not cache output for linked items otherwise we get situations where
     # URL changes to ancestor pages don't get applied until a Django restart
