@@ -922,6 +922,14 @@ WSGI_WORKERS = multiprocessing.cpu_count() * 2 + 1
 
 # DEBUG TOOLBAR (not enabled by default) ######################################
 
+# To enable the toolbar, add
+#
+#    INSTALLED_APPS += ('debug_toolbar',)
+#    DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda request: DEBUG}
+#    MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE_CLASSES
+#
+#  to `project_settings_local.py`
+
 try:
     from debug_toolbar.settings import PANELS_DEFAULTS
 except ImportError:
