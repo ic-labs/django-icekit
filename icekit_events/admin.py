@@ -8,6 +8,7 @@ Admin configuration for ``icekit_events`` app.
 # These go a long way to making the admin more usable.
 
 from datetime import timedelta
+
 from dateutil import rrule
 import datetime
 import json
@@ -19,7 +20,7 @@ from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.views.main import ChangeList
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
-from django.db.models import Count, Min, Max
+from django.db.models import Count, Min, Max, DateTimeField
 from django.http import HttpResponse, JsonResponse
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
@@ -34,7 +35,8 @@ from icekit.plugins.base import BaseChildModelPlugin
 from icekit.plugins.base import PluginMount
 
 from icekit.admin import (
-    ChildModelFilter, ChildModelPluginPolymorphicParentModelAdmin)
+    ChildModelFilter, ChildModelPluginPolymorphicParentModelAdmin,
+    ICEkitInlineAdmin)
 from icekit.utils.admin.urls import admin_link
 from polymorphic.admin import PolymorphicChildModelAdmin
 from timezone import timezone as djtz  # django-timezone
@@ -46,7 +48,7 @@ from . import admin_forms, forms, models
 logger = logging.getLogger(__name__)
 
 
-class EventRepeatGeneratorsInline(admin.TabularInline):
+class EventRepeatGeneratorsInline(ICEkitInlineAdmin, admin.TabularInline):
     model = models.EventRepeatsGenerator
     form = admin_forms.BaseEventRepeatsGeneratorForm
     extra = 0
@@ -60,7 +62,7 @@ class EventRepeatGeneratorsInline(admin.TabularInline):
     }
 
 
-class OccurrencesInline(admin.TabularInline):
+class OccurrencesInline(ICEkitInlineAdmin, admin.TabularInline):
     model = models.Occurrence
     form = admin_forms.BaseOccurrenceForm
     fields = ('is_all_day', 'start', 'end', 'is_protected_from_regeneration', 'external_ref', 'status')
@@ -71,7 +73,7 @@ class OccurrencesInline(admin.TabularInline):
         'is_hidden', 'is_cancelled', 'cancel_reason'
     )
     extra = 1
-    readonly_fields = ('is_protected_from_regeneration', 'external_ref')  # 'is_cancelled',)
+    readonly_fields = ('is_protected_from_regeneration', 'external_ref')
 
 
 class EventChildAdmin(
