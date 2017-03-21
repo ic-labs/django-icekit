@@ -580,6 +580,7 @@ INSTALLED_APPS += (
     'parler',
     'polymorphic',
     'polymorphic_tree',
+    'slug_preview',
 
     # Page types.
     # 'fluent_pages.pagetypes.flatpage',

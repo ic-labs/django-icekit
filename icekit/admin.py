@@ -1,6 +1,7 @@
 # Admin for top-level ICEKit models
 import warnings
 
+from datetimewidget.widgets import DateTimeWidget, TimeWidget, DateWidget
 from django.conf import settings
 from django.conf.urls import url, patterns
 from django.contrib import admin
@@ -8,7 +9,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
 
 from icekit import models
-from icekit.admin_tools.mixins import RawIdPreviewAdminMixin
+from icekit.admin_tools.mixins import RawIdPreviewAdminMixin, \
+    BetterDateTimeAdmin
+from django.db.models import DateTimeField, DateField, TimeField
 
 
 class LayoutAdmin(admin.ModelAdmin):
@@ -100,6 +103,7 @@ from icekit.workflow.admin import WorkflowMixinAdmin, WorkflowStateTabularInline
 
 
 class ICEkitContentsAdmin(
+    BetterDateTimeAdmin,
     PublishingAdmin,
     WorkflowMixinAdmin,
     RawIdPreviewAdminMixin,
@@ -109,6 +113,8 @@ class ICEkitContentsAdmin(
 
      - publishing
      - workflow
+     - Better date controls
+
     """
     list_display = PublishingAdmin.list_display + \
         WorkflowMixinAdmin.list_display
@@ -118,6 +124,7 @@ class ICEkitContentsAdmin(
 
 
 class ICEkitFluentContentsAdmin(
+    BetterDateTimeAdmin,
     PublishableFluentContentsAdmin,
     WorkflowMixinAdmin,
     RawIdPreviewAdminMixin,
@@ -127,11 +134,24 @@ class ICEkitFluentContentsAdmin(
 
      - publishing
      - workflow
+     - Better date controls
+
     """
     list_display = ICEkitContentsAdmin.list_display
     list_filter = ICEkitContentsAdmin.list_filter
     inlines = ICEkitContentsAdmin.inlines
 
+
+class ICEkitInlineAdmin(BetterDateTimeAdmin):
+    """
+    A base for Inlines that will include ICEkit features:
+
+    - Better date controls
+
+    (we don't need RawIdPreview as the behaviour is injected into Inlines from
+    the parent)
+    """
+    pass
 
 admin.site.register(models.Layout, LayoutAdmin)
 admin.site.register(models.MediaCategory, MediaCategoryAdmin)

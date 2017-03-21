@@ -1,5 +1,9 @@
 import warnings
 
+import widgets
+from django.db.models import DateField
+from django.db.models import DateTimeField
+from django.db.models import TimeField
 from fluent_contents.admin import PlaceholderEditorAdmin
 from fluent_contents.models import PlaceholderData
 import logging
@@ -187,3 +191,10 @@ class ThumbnailAdminMixin(PreviewAdminMixin):
         return self.preview(*args, **kwargs)
     thumbnail.allow_tags = True
 
+
+class BetterDateTimeAdmin(object):
+    formfield_overrides = {
+        DateTimeField: {'widget': widgets.DateTimeWidget},
+        DateField: {'widget': widgets.DateWidget},
+        TimeField: {'widget': widgets.TimeWidget},
+    }
