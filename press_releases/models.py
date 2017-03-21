@@ -35,7 +35,12 @@ class PressReleaseCategory(models.Model):
         verbose_name_plural = "press release categories"
 
 python_2_unicode_compatible
-class PressRelease(PublishingModel, AbstractCollectedContent, TitleSlugMixin, FluentFieldsMixin):
+class PressRelease(
+    PublishingModel,
+    AbstractCollectedContent,
+    TitleSlugMixin,
+    FluentFieldsMixin
+):
 
     category = models.ForeignKey(
         PressReleaseCategory, null=True, blank=True)
