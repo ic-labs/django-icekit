@@ -1,7 +1,4 @@
 # Admin for top-level ICEKit models
-import warnings
-
-from datetimewidget.widgets import DateTimeWidget, TimeWidget, DateWidget
 from django.conf import settings
 from django.conf.urls import url, patterns
 from django.contrib import admin
