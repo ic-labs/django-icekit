@@ -330,6 +330,10 @@ USE_ETAGS = True  # Default: False
 USE_L10N = True  # Default: False
 USE_TZ = True  # Default: False
 
+FORMAT_MODULE_PATH = [
+    'icekit.formats',
+]
+
 WSGI_APPLICATION = 'icekit.project.wsgi.application'
 
 # DJANGO REDIRECTS ############################################################
@@ -925,4 +929,3 @@ except ImportError:
 DEBUG_TOOLBAR_PANELS = [
     'fluent_contents.panels.ContentPluginPanel',
 ] + PANELS_DEFAULTS
-
