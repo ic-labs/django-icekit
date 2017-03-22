@@ -4,7 +4,11 @@ Changelog
 In development
 --------------
 
--
+-  Changed the way that we specify the homepage: create a page with url
+   override `/`. This is the way fluent does it. As a fallback, we look for a
+   page with slug `home`. If you mount pages under a page with override URL and
+   slug, the child pages inherit the override URL, making the page tree more
+   natural.
 
 -  Page Admin no longer replaces the change_list table with a tree.
 
