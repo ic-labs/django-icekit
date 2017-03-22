@@ -20,24 +20,24 @@ from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.views.main import ChangeList
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
-from django.db.models import Count, Min, Max, DateTimeField
+from django.db.models import Count, Min, Max
 from django.http import HttpResponse, JsonResponse
 from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
-from django.utils.safestring import mark_safe
 from django.utils.timezone import get_current_timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from icekit.admin_mixins import FluentLayoutsMixin
+from icekit.admin_tools.polymorphic import \
+    ChildModelPluginPolymorphicParentModelAdmin
 from icekit.content_collections.admin import TitleSlugAdmin
 from icekit.plugins.base import BaseChildModelPlugin
 
 from icekit.plugins.base import PluginMount
 
-from icekit.admin import (
-    ChildModelFilter, ChildModelPluginPolymorphicParentModelAdmin,
-    ICEkitInlineAdmin)
-from icekit.utils.admin.urls import admin_link
+from icekit.admin import ChildModelFilter, ICEkitInlineAdmin
+
+from icekit.admin_tools.utils import admin_link
 from polymorphic.admin import PolymorphicChildModelAdmin
 from timezone import timezone as djtz  # django-timezone
 
