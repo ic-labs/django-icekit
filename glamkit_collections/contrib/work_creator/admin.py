@@ -2,15 +2,15 @@ import six
 from adminsortable2.admin import SortableInlineAdminMixin
 from django.contrib import admin
 from django.db.models import Count
-from icekit.admin import ChildModelPluginPolymorphicParentModelAdmin
-from icekit.admin_mixins import FluentLayoutsMixin
+from icekit.admin_tools.polymorphic import \
+    ChildModelPluginPolymorphicParentModelAdmin
 import models
 from icekit.content_collections.admin import TitleSlugAdmin
 from icekit.plugins.base import BaseChildModelPlugin, PluginMount
 from icekit.admin import ICEkitContentsAdmin
 from icekit.templatetags.icekit_tags import grammatical_join
-from icekit.utils.admin.mixins import ThumbnailAdminMixin
-from icekit.utils.admin.urls import admin_link, admin_url
+from icekit.admin_tools.mixins import ThumbnailAdminMixin, FluentLayoutsMixin
+from icekit.admin_tools.utils import admin_link, admin_url
 from polymorphic.admin import PolymorphicChildModelAdmin, PolymorphicChildModelFilter
 
 
