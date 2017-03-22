@@ -3,7 +3,6 @@ from fluent_contents.models import ContentItem
 from django.db import models
 import appsettings
 from icekit.fields import ICEkitURLField
-from icekit.utils.admin.urls import admin_link, admin_url
 from icekit.utils.attributes import resolve
 
 
