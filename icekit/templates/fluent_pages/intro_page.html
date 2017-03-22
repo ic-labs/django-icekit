@@ -29,7 +29,7 @@
 
     <div id="instructions">
       {% if has_pages %}
-        <h2> <a href="{% url 'admin:fluent_pages_page_add' %}">Create a page with slug 'home'</a> to become the homepage.</h2>
+        <h2> <a href="{% url 'admin:fluent_pages_page_add' %}">Create a page with override URL '/'</a> to become the homepage.</h2>
       {% else %}
         <h2>The website on <span>{{ site.domain|default:request.get_host }}</span> is empty.</h2>
         <p>You can start by <a href="{% url 'admin:fluent_pages_page_add' %}">adding your first page</a> in the <a href="{% url 'admin:index' %}">admin interface</a>. Give it the slug 'home' to become the homepage.</p>
