@@ -1,6 +1,14 @@
 import os
+try:
+    from cStringIO import cStringIO as BytesIO
+except ImportError:
+    from django.utils.six import BytesIO
+try:
+    from PIL import Image
+except ImportError:
+    import Image
 
-from easy_thumbnails.files import get_thumbnailer
+from easy_thumbnails import utils as et_utils
 
 from django.db.models.loading import get_model
 from django.http import FileResponse, HttpResponseBadRequest, HttpResponse
@@ -13,21 +21,41 @@ from .utils import parse_region, parse_size, parse_rotation, parse_quality, \
     parse_format, ClientError, UnsupportedError
 
 
-Image = get_model('icekit_plugins_image', 'Image')
+ICEkitImage = get_model('icekit_plugins_image', 'Image')
 
 
 class HttpResponseNotImplemented(HttpResponse):
     status_code = 501
 
 
-def _get_image_or_404(identifier):
+def _get_image_or_404(identifier, load_image=False):
     """
     Return image matching `identifier`.
 
     The `identifier` is expected to be a raw image ID for now, but may be
     more complex later.
     """
-    return get_object_or_404(Image, id=identifier)
+    ik_image = get_object_or_404(ICEkitImage, id=identifier)
+    if not load_image:
+        return ik_image, None
+
+    ####################################################################
+    # Image-loading incantation cribbed from easythumbnail's `pil_image`
+    image = Image.open(BytesIO(ik_image.image.read()))
+    # Fully load the image now to catch any problems with the image contents.
+    try:
+        # An "Image file truncated" exception can occur for some images that
+        # are still mostly valid -- we'll swallow the exception.
+        image.load()
+    except IOError:
+        pass
+    # Try a second time to catch any other potential exceptions.
+    image.load()
+    if True:  # Support EXIF orientation data
+        image = et_utils.exif_orientation(image)
+    ####################################################################
+
+    return ik_image, image
 
 
 @permission_required('can_use_iiif_image_api')
@@ -42,23 +70,23 @@ def iiif_image_api_info(request, identifier_param):
         return HttpResponseNotImplemented(
             "JSON-LD response is not yet supported")
 
-    image = _get_image_or_404(identifier_param)
+    ik_image, __ = _get_image_or_404(identifier_param)
     info = {
         "@context": "http://iiif.io/api/image/2/context.json",
         "@id": request.get_full_path(),
         "@type": "iiif:Image",
         "protocol": "http://iiif.io/api/image",
-        "width": image.width,
-        "height": image.height,
+        "width": ik_image.width,
+        "height": ik_image.height,
     }
     # TODO Return more complete info.json response per spec
 
-    if image.license:
-        info['license'] = [image.license]
+    if ik_image.license:
+        info['license'] = [ik_image.license]
 
     attribution_value = u' '.join([
-        u"Credit: %s." % image.credit if image.credit else '',
-        u"Provided by: %s." % image.source if image.source else '',
+        u"Credit: %s." % ik_image.credit if ik_image.credit else '',
+        u"Provided by: %s." % ik_image.source if ik_image.source else '',
     ]).strip()
     if attribution_value:
         info['attribution'] = [{
@@ -74,58 +102,80 @@ def iiif_image_api_info(request, identifier_param):
 def iiif_image_api(request, identifier_param, region_param, size_param,
                    rotation_param, quality_param, format_param):
     """ Image repurposing endpoint for IIIF Image API 2.1 """
-    image = _get_image_or_404(identifier_param)
-    thumbnail_options = {}
+    ik_image, image = _get_image_or_404(identifier_param, load_image=True)
+
+    is_transparent = et_utils.is_transparent(image)
+    is_grayscale = image.mode in ('L', 'LA')
 
     try:
-        # Apply region (actual work done in thumbnail generation below)
+        # Parse region
         x, y, r_width, r_height = parse_region(
             region_param, image.width, image.height)
 
-        # Apply size (actual work done in thumbnail generation below)
+        # Parse size
         s_width, s_height = parse_size(size_param, r_width, r_height)
 
-        # TODO Apply rotation
+        # Parse rotation
         parse_rotation(rotation_param, s_width, s_height)
 
-        # Apply quality
+        # Parse quality
         quality = parse_quality(quality_param)
-        if quality in ('default', 'color'):
-            pass  # Nothing to do
-        elif quality == 'gray':
-            thumbnail_options['bw'] = True
 
-        # Apply format
+        # Parse format
         # TODO Add support for unsupported formats (see `parse_format`)
-        image_format = os.path.splitext(image.image.name)[1][1:]
+        image_format = os.path.splitext(ik_image.image.name)[1][1:].lower()
         output_format = parse_format(format_param, image_format)
 
         # TODO Redirect to canonical URL per
         # http://iiif.io/api/image/2.1/#canonical-uri-syntax
 
-        # Generate image
-        # NOTE: Generates and saves a thumbnail to make subsequent lookups
-        # faster
-        thumbnail_options.update({
-            'crop': (x, y),
-            'size': (s_width, s_height),
-        })
-        thumbnailer = get_thumbnailer(image.image)
-        # Preserve image quality
-        thumbnailer.thumbnail_quality = 100
-        # Generate output image in requested format
-        thumbnailer.thumbnail_extensions = output_format
-        thumbnailer.thumbnail_transparency_extensions = output_format
-        # Get or generate thumbnail
-        thumbnail = thumbnailer.get_thumbnail(thumbnail_options)
-        # Hack to reset file pointer for newly-generated thumbnails written to
-        # a local file, so the `read()` call below will actually read data.
-        if thumbnail.tell():
-            thumbnail.seek(0)
+        ##################
+        # Generate image #
+        ##################
+
+        # Apply region
+        if x or y or r_width != image.width or r_height != image.height:
+            box = (x, y, x + r_width, y + r_height)
+            image = image.crop(box)
+
+        # Apply size
+        if s_width != r_width or s_height != r_height:
+            size = (s_width, s_height)
+            image = image.resize(size)
+
+        # TODO Apply rotation
+
+        # Apply quality
+        # Much of this is cribbed from easythumbnails' `colorspace` processor
+        # TODO Replace with glamkit-imagetools' sRGB colour space converter?
+        if quality in ('default', 'color') and not is_grayscale:
+            if is_transparent:
+                new_mode = 'RGBA'
+            else:
+                new_mode = 'RGB'
+        elif is_grayscale or quality == 'gray':
+            if is_transparent:
+                new_mode = 'LA'
+            else:
+                new_mode = 'L'
+        if new_mode != image.mode:
+            image = image.convert(new_mode)
+
+        # Apply format and "save"
+        format_mapping = {
+            'jpg': 'jpeg',
+            'tif': 'tiff',
+        }
+        result_image = BytesIO()
+        image.save(
+            result_image,
+            format=format_mapping.get(output_format, output_format)
+        )
+        result_image.seek(0)  # Reset to start of image data
 
         # Set response content type
         return FileResponse(
-            thumbnail.read(),
+            result_image.read(),
             content_type='image/%s' % output_format,
         )
     # Handle error conditions per iiif.io/api/image/2.1/#server-responses

@@ -168,7 +168,7 @@ def parse_size(size, image_width, image_height):
         # Handle ",h"
         elif width is None:
             width = height * aspect_ratio
-    return width, height
+    return int(width), int(height)
 
 
 def parse_rotation(rotation_str, image_width, image_height):
