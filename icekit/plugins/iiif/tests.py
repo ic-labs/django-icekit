@@ -4,14 +4,14 @@ from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse
 from django.test import TestCase
 
 from django_webtest import WebTest
 from django_dynamic_fixture import G
 
 from .utils import ClientError, parse_dimensions_string, \
-    parse_region, parse_size
+    parse_region, parse_size, make_canonical_path
 
 
 User = get_user_model()
@@ -123,6 +123,167 @@ class TestImageApiUtils(TestCase):
         self.assertEqual(
             # Height is best fit, can scale beyond original image size
             (250, 250), parse_size('!400,250', 200, 200))
+
+    def test_make_canonical_url(self):
+        # No image transformation
+        self.assertEqual(
+            '/iiif/1/full/full/0/default.jpg',
+            make_canonical_path(
+                1, 800, 600,  # Image identifier and dimensions
+                (0, 0, 800, 600),  # Region
+                (800, 600),  # Size
+                (False, 0),  # Rotation
+                'default',  # Quality
+                'jpg',  # Format
+            ))
+
+        # No-op region change for square image
+        self.assertEqual(
+            '/iiif/1/full/full/0/default.jpg',
+            make_canonical_path(
+                1, 800, 800,  # Image identifier and dimensions
+                (0, 0, 800, 800),  # Region
+                (800, 800),  # Size
+                (False, 0),  # Rotation
+                'default',  # Quality
+                'jpg',  # Format
+            ))
+        # Region changed top-left
+        self.assertEqual(
+            '/iiif/1/0,1,800,599/800,/0/default.jpg',
+            make_canonical_path(
+                1, 800, 600,  # Image identifier and dimensions
+                (0, 1, 800, 599),  # Region
+                (800, 600),  # Size
+                (False, 0),  # Rotation
+                'default',  # Quality
+                'jpg',  # Format
+            ))
+        # Region changed bottom-right
+        self.assertEqual(
+            '/iiif/1/0,0,799,600/800,/0/default.jpg',
+            make_canonical_path(
+                1, 800, 600,  # Image identifier and dimensions
+                (0, 0, 799, 600),  # Region
+                (800, 600),  # Size
+                (False, 0),  # Rotation
+                'default',  # Quality
+                'jpg',  # Format
+            ))
+
+        # Size changed: same aspect ratio so w, only
+        self.assertEqual(
+            '/iiif/1/full/400,/0/default.jpg',
+            make_canonical_path(
+                1, 800, 600,  # Image identifier and dimensions
+                (0, 0, 800, 600),  # Region
+                (400, 300),  # Size
+                (False, 0),  # Rotation
+                'default',  # Quality
+                'jpg',  # Format
+            ))
+        # Size changed: width, aspect ratio changed
+        self.assertEqual(
+            '/iiif/1/full/750,600/0/default.jpg',
+            make_canonical_path(
+                1, 800, 600,  # Image identifier and dimensions
+                (0, 0, 800, 600),  # Region
+                (750, 600),  # Size
+                (False, 0),  # Rotation
+                'default',  # Quality
+                'jpg',  # Format
+            ))
+        # Size changed: height, aspect ratio changed
+        self.assertEqual(
+            '/iiif/1/full/800,900/0/default.jpg',
+            make_canonical_path(
+                1, 800, 600,  # Image identifier and dimensions
+                (0, 0, 800, 600),  # Region
+                (800, 900),  # Size
+                (False, 0),  # Rotation
+                'default',  # Quality
+                'jpg',  # Format
+            ))
+
+        # Rotation changed: mirrored
+        self.assertEqual(
+            '/iiif/1/full/full/!0/default.jpg',
+            make_canonical_path(
+                1, 800, 600,  # Image identifier and dimensions
+                (0, 0, 800, 600),  # Region
+                (800, 600),  # Size
+                (True, 0),  # Rotation
+                'default',  # Quality
+                'jpg',  # Format
+            ))
+        # Rotation changed: rotated
+        self.assertEqual(
+            '/iiif/1/full/full/120/default.jpg',
+            make_canonical_path(
+                1, 800, 600,  # Image identifier and dimensions
+                (0, 0, 800, 600),  # Region
+                (800, 600),  # Size
+                (False, 120),  # Rotation
+                'default',  # Quality
+                'jpg',  # Format
+            ))
+        # Rotation changed: negative rotation
+        self.assertEqual(
+            '/iiif/1/full/full/-90/default.jpg',
+            make_canonical_path(
+                1, 800, 600,  # Image identifier and dimensions
+                (0, 0, 800, 600),  # Region
+                (800, 600),  # Size
+                (False, -90),  # Rotation
+                'default',  # Quality
+                'jpg',  # Format
+            ))
+        # Rotation changed: rotated and mirrored
+        self.assertEqual(
+            '/iiif/1/full/full/!180/default.jpg',
+            make_canonical_path(
+                1, 800, 600,  # Image identifier and dimensions
+                (0, 0, 800, 600),  # Region
+                (800, 600),  # Size
+                (True, 180),  # Rotation
+                'default',  # Quality
+                'jpg',  # Format
+            ))
+
+        # Quality change: color
+        self.assertEqual(
+            '/iiif/1/full/full/0/color.jpg',
+            make_canonical_path(
+                1, 800, 600,  # Image identifier and dimensions
+                (0, 0, 800, 600),  # Region
+                (800, 600),  # Size
+                (False, 0),  # Rotation
+                'color',  # Quality
+                'jpg',  # Format
+            ))
+        # Quality changed: gray
+        self.assertEqual(
+            '/iiif/1/full/full/0/gray.jpg',
+            make_canonical_path(
+                1, 800, 600,  # Image identifier and dimensions
+                (0, 0, 800, 600),  # Region
+                (800, 600),  # Size
+                (False, 0),  # Rotation
+                'gray',  # Quality
+                'jpg',  # Format
+            ))
+
+        # Format change: tif
+        self.assertEqual(
+            '/iiif/1/full/full/0/default.tif',
+            make_canonical_path(
+                1, 800, 600,  # Image identifier and dimensions
+                (0, 0, 800, 600),  # Region
+                (800, 600),  # Size
+                (False, 0),  # Rotation
+                'default',  # Quality
+                'tif',  # Format
+            ))
 
 
 class TestImageAPIViews(WebTest):
@@ -250,7 +411,7 @@ class TestImageAPIViews(WebTest):
                     args=[self.ik_image.pk,
                           'full', 'max', '0', 'default', 'jpg']),
                 user=self.superuser,
-            )
+            ).follow()
             # No image transform operations necessary or called
             image.crop.assert_not_called()
             image.resize.assert_not_called()
@@ -269,7 +430,7 @@ class TestImageAPIViews(WebTest):
                 'iiif_image_api',
                 args=[self.ik_image.pk, 'full', 'max', '0', 'default', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [call.save(ANY, format='jpeg')])
         # Region: square, 200 x 300 image
         image = self.mock_image(return_from=_getter)
@@ -278,7 +439,7 @@ class TestImageAPIViews(WebTest):
                 'iiif_image_api',
                 args=[self.ik_image.pk, 'square', 'max', '0', 'default', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             # Auto-cropped to center square in image
             call.crop((0, 50, 200, 250)),
@@ -293,7 +454,7 @@ class TestImageAPIViews(WebTest):
                 args=[self.ik_image.pk, '20,30,50,90',
                       'max', '0', 'default', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             call.crop((20, 30, 70, 120)),
             call.crop().convert('RGB'),
@@ -307,7 +468,7 @@ class TestImageAPIViews(WebTest):
                 args=[self.ik_image.pk, '100,50,150,300',
                       'max', '0', 'default', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             # Width & height reduced to fit bounds
             call.crop((100, 50, 200, 300)),
@@ -322,7 +483,7 @@ class TestImageAPIViews(WebTest):
                 args=[self.ik_image.pk, 'pct:10,50,75,50',
                       'max', '0', 'default', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             # Width & height reduced to fit bounds
             call.crop((20, 150, 170, 300)),
@@ -339,7 +500,7 @@ class TestImageAPIViews(WebTest):
                 'iiif_image_api',
                 args=[self.ik_image.pk, 'full', 'max', '0', 'default', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             call.save(ANY, format='jpeg')
         ])
@@ -361,7 +522,7 @@ class TestImageAPIViews(WebTest):
                 'iiif_image_api',
                 args=[self.ik_image.pk, 'full', 'pct:50', '0', 'default', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             call.resize((image.width / 2, image.height / 2)),
             call.resize().convert('RGB'),
@@ -375,7 +536,7 @@ class TestImageAPIViews(WebTest):
                 args=[self.ik_image.pk, 'full', '100,150',
                       '0', 'default', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             call.resize((100, 150)),
             call.resize().convert('RGB'),
@@ -401,7 +562,7 @@ class TestImageAPIViews(WebTest):
                 'iiif_image_api',
                 args=[self.ik_image.pk, 'full', ',600', '0', 'default', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             call.resize((400, 600)),
             call.resize().convert('RGB'),
@@ -415,7 +576,7 @@ class TestImageAPIViews(WebTest):
                 args=[self.ik_image.pk, 'full', '!150,250',
                       '0', 'default', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             # Width is best fit
             call.resize((150, 225)),
@@ -429,7 +590,7 @@ class TestImageAPIViews(WebTest):
                 args=[self.ik_image.pk, 'full', '!300,240',
                       '0', 'default', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             # Height is best fit
             call.resize((160, 240)),
@@ -446,7 +607,7 @@ class TestImageAPIViews(WebTest):
                 'iiif_image_api',
                 args=[self.ik_image.pk, 'full', 'max', '0', 'default', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             call.save(ANY, format='jpeg')
         ])
@@ -457,7 +618,7 @@ class TestImageAPIViews(WebTest):
                 self.ik_image.pk, 'full', 'max', '360', 'default', 'jpg'
             ]),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             call.save(ANY, format='jpeg')
         ])
@@ -493,7 +654,7 @@ class TestImageAPIViews(WebTest):
                 'iiif_image_api',
                 args=[self.ik_image.pk, 'full', 'max', '0', 'default', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             call.save(ANY, format='jpeg')
         ])
@@ -504,7 +665,7 @@ class TestImageAPIViews(WebTest):
                 'iiif_image_api',
                 args=[self.ik_image.pk, 'full', 'max', '0', 'color', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             call.save(ANY, format='jpeg')
         ])
@@ -515,7 +676,7 @@ class TestImageAPIViews(WebTest):
                 'iiif_image_api',
                 args=[self.ik_image.pk, 'full', 'max', '0', 'gray', 'jpg']),
             user=self.superuser,
-        )
+        ).follow()
         self.assertEqual(image.mock_calls, [
             # Convert image to black-and-white (L) mode
             call.convert('L'),

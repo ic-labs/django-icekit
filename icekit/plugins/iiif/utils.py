@@ -1,3 +1,6 @@
+from django.core.urlresolvers import reverse
+
+
 SUPPORTED_EXTENSIONS = ('jpg', 'tif', 'png', 'gif')
 UNSUPPORTED_EXTENSIONS = ('jp2', 'pdf', 'webp')
 SUPPORTED_QUALITY = ('default', 'color', 'gray',)
@@ -172,6 +175,14 @@ def parse_size(size, image_width, image_height):
 
 
 def parse_rotation(rotation_str, image_width, image_height):
+    if rotation_str.startswith('!'):
+        is_mirrored = True
+        rotation_str = rotation_str[1:]
+        raise UnsupportedError(
+            "Image API rotation mirroring is not yet supported: %s"
+            % rotation)
+    else:
+        is_mirrored = False
     try:
         rotation = int(rotation_str) % 360
     except ValueError, ex:
@@ -183,7 +194,7 @@ def parse_rotation(rotation_str, image_width, image_height):
         raise UnsupportedError(
             "Image API rotation parameters other than %r degrees"
             " are not yet supported: %s" % (valid, rotation))
-    return rotation
+    return is_mirrored, rotation
 
 
 def parse_quality(quality):
@@ -205,3 +216,57 @@ def parse_format(output_format, image_format):
             "Invalid Image API format parameter not in %r: %s"
             % (SUPPORTED_EXTENSIONS + UNSUPPORTED_EXTENSIONS, output_format))
     return output_format
+
+
+def make_canonical_path(
+        image_identifier, image_width, image_height,
+        region, size, rotation, quality, format_str
+):
+    """
+    Return the canonical URL path for an image for the given region/size/
+    rotation/quality/format API tranformation settings.
+
+    See http://iiif.io/api/image/2.1/#canonical-uri-syntax
+    """
+    original_aspect_ratio = float(image_width) / image_height
+
+    if (
+        region == 'full' or
+        # Use 'full' if 'square' is requested for an already square image
+        (region == 'square' and image_width == image_height) or
+        # Use 'full' if region exactly matches image dimensions
+        (region == (0, 0, image_width, image_height))
+    ):
+        canonical_region = 'full'
+    else:
+        # Use explicit x,y,width,height region settings
+        canonical_region = ','.join(map(str, region))
+
+    if size in ['full', 'max']:
+        canonical_size = 'full'
+    elif (region[2:] == size and (image_width, image_height) == size):
+        # Use 'full' if result image dimensions are unchanged from original
+        # and are also unchanged from the region operation's output
+        canonical_size = 'full'
+    elif float(size[0]) / size[1] == original_aspect_ratio:
+        # w, syntax for images scaled to maintain the aspect ratio
+        canonical_size = '%d,' % size[0]
+    else:
+        # Full with,height size if aspect ratio is changed
+        canonical_size = ','.join(map(str, size))
+
+    canonical_rotation = ''
+    if rotation[0]:
+        # Image is mirrored
+        canonical_rotation += '!'
+    canonical_rotation += '%d' % rotation[1]
+
+    canonical_quality = quality
+
+    canonical_format = format_str
+
+    return reverse(
+        'iiif_image_api',
+        args=[image_identifier, canonical_region, canonical_size,
+              canonical_rotation, canonical_quality, canonical_format]
+    )

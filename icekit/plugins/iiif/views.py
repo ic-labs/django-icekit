@@ -11,14 +11,15 @@ except ImportError:
 from easy_thumbnails import utils as et_utils
 
 from django.db.models.loading import get_model
-from django.http import FileResponse, HttpResponseBadRequest, HttpResponse
+from django.http import FileResponse, HttpResponseBadRequest, HttpResponse, \
+    HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import permission_required
 
 from fluent_utils.ajax import JsonResponse
 
 from .utils import parse_region, parse_size, parse_rotation, parse_quality, \
-    parse_format, ClientError, UnsupportedError
+    parse_format, make_canonical_path, ClientError, UnsupportedError
 
 
 ICEkitImage = get_model('icekit_plugins_image', 'Image')
@@ -116,7 +117,8 @@ def iiif_image_api(request, identifier_param, region_param, size_param,
         s_width, s_height = parse_size(size_param, r_width, r_height)
 
         # Parse rotation
-        parse_rotation(rotation_param, s_width, s_height)
+        is_mirrored, rotation_degrees = \
+            parse_rotation(rotation_param, s_width, s_height)
 
         # Parse quality
         quality = parse_quality(quality_param)
@@ -126,8 +128,18 @@ def iiif_image_api(request, identifier_param, region_param, size_param,
         image_format = os.path.splitext(ik_image.image.name)[1][1:].lower()
         output_format = parse_format(format_param, image_format)
 
-        # TODO Redirect to canonical URL per
+        # Redirect to canonical URL if appropriate, per
         # http://iiif.io/api/image/2.1/#canonical-uri-syntax
+        canonical_path = make_canonical_path(
+            identifier_param, image.width, image.height,
+            (x, y, r_width, r_height),  # Region
+            (s_width, s_height),  # Size
+            (is_mirrored, rotation_degrees),  # Rotation
+            quality,
+            output_format
+        )
+        if request.path != canonical_path:
+            return HttpResponseRedirect(canonical_path)
 
         ##################
         # Generate image #
