@@ -10,19 +10,27 @@ except ImportError:
 
 from easy_thumbnails import utils as et_utils
 
+from django.contrib.auth.decorators import permission_required
+from django.core.files.storage import get_storage_class
 from django.db.models.loading import get_model
 from django.http import FileResponse, HttpResponseBadRequest, HttpResponse, \
     HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.decorators import permission_required
+from django.utils.timezone import make_naive
 
 from fluent_utils.ajax import JsonResponse
 
+from . import appsettings
 from .utils import parse_region, parse_size, parse_rotation, parse_quality, \
     parse_format, make_canonical_path, ClientError, UnsupportedError
 
 
 ICEkitImage = get_model('icekit_plugins_image', 'Image')
+
+if appsettings.IIIF_STORAGE:
+    iiif_storage = get_storage_class(appsettings.IIIF_STORAGE)()
+else:
+    iiif_storage = None
 
 
 class HttpResponseNotImplemented(HttpResponse):
@@ -108,6 +116,12 @@ def iiif_image_api(request, identifier_param, region_param, size_param,
     is_transparent = et_utils.is_transparent(image)
     is_grayscale = image.mode in ('L', 'LA')
 
+    # Map format names used for IIIF URL path extension to proper name
+    format_mapping = {
+        'jpg': 'jpeg',
+        'tif': 'tiff',
+    }
+
     try:
         # Parse region
         x, y, r_width, r_height = parse_region(
@@ -127,6 +141,7 @@ def iiif_image_api(request, identifier_param, region_param, size_param,
         # TODO Add support for unsupported formats (see `parse_format`)
         image_format = os.path.splitext(ik_image.image.name)[1][1:].lower()
         output_format = parse_format(format_param, image_format)
+        corrected_format = format_mapping.get(output_format, output_format)
 
         # Redirect to canonical URL if appropriate, per
         # http://iiif.io/api/image/2.1/#canonical-uri-syntax
@@ -140,6 +155,40 @@ def iiif_image_api(request, identifier_param, region_param, size_param,
         )
         if request.path != canonical_path:
             return HttpResponseRedirect(canonical_path)
+
+        # Determine storage file name for item
+        if iiif_storage:
+            # Replace '/' & ',' with '-' to keep separators of some kind in
+            # storage file name, otherwise the characters get purged and
+            # produce storage names with potentially ambiguous and clashing
+            # values e.g. /3/100,100,200,200/... => iiif3100100200200
+            storage_path = canonical_path[1:]  # Stip leading slash
+            storage_path = storage_path.replace('/', '-').replace(',', '-')
+            storage_path = iiif_storage.get_valid_name(storage_path)
+            # Add path prefix to storage path to avoid dumping image files
+            # into the root location of a storage location that might be
+            # used for many purposes.
+            if storage_path.startswith('iiif-'):
+                # Strip redundant 'iiif-' prefix
+                storage_path = storage_path[5:]
+            storage_path = 'iiif/' + storage_path
+        else:
+            storage_path = None
+
+        # Load pre-generated image from storage if one exists and it is
+        # up-to-date with the original image
+        # TODO I'm not confident this up-to-date check will work 100%
+        # TODO Detect when original image would be unchanged & use it directly?
+        if (
+            storage_path and
+            iiif_storage.exists(storage_path) and
+            iiif_storage.created_time(storage_path) >=
+                make_naive(ik_image.date_modified)
+        ):
+            return FileResponse(
+                iiif_storage.open(storage_path),
+                content_type='image/%s' % corrected_format,
+            )
 
         ##################
         # Generate image #
@@ -174,21 +223,18 @@ def iiif_image_api(request, identifier_param, region_param, size_param,
             image = image.convert(new_mode)
 
         # Apply format and "save"
-        format_mapping = {
-            'jpg': 'jpeg',
-            'tif': 'tiff',
-        }
         result_image = BytesIO()
-        image.save(
-            result_image,
-            format=format_mapping.get(output_format, output_format)
-        )
-        result_image.seek(0)  # Reset to start of image data
+        image.save(result_image, format=corrected_format)
+
+        # Save generated image to storage if possible
+        if storage_path:
+            iiif_storage.save(storage_path, result_image)
 
         # Set response content type
+        result_image.seek(0)  # Reset to start of image data
         return FileResponse(
             result_image.read(),
-            content_type='image/%s' % output_format,
+            content_type='image/%s' % corrected_format,
         )
     # Handle error conditions per iiif.io/api/image/2.1/#server-responses
     except ClientError, ex:

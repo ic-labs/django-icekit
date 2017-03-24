@@ -1,3 +1,4 @@
+import time
 from mock import patch, Mock, call, ANY
 
 from django.apps import apps
@@ -409,17 +410,15 @@ class TestImageAPIViews(WebTest):
                 reverse(
                     'iiif_image_api',
                     args=[self.ik_image.pk,
-                          'full', 'max', '0', 'default', 'jpg']),
+                          'full', 'full', '0', 'default', 'jpg']),
                 user=self.superuser,
-            ).follow()
-            # No image transform operations necessary or called
-            image.crop.assert_not_called()
-            image.resize.assert_not_called()
-            image.convert.assert_not_called()
-            # Image was saved
-            image.save.assert_called_with(ANY, format='jpeg')
+            )
+            # No image transform operations necessary or called, just save
+            self.assertEqual(image.mock_calls, [
+                call.save(ANY, format='jpeg')
+            ])
             self.FileResponse.assert_called_with(
-                ANY, content_type='image/jpg')
+                ANY, content_type='image/jpeg')
 
     @patch('icekit.plugins.iiif.views._get_image_or_404')
     def test_iiif_image_api_region(self, _getter):
@@ -436,8 +435,8 @@ class TestImageAPIViews(WebTest):
         image = self.mock_image(return_from=_getter)
         self.app.get(
             reverse(
-                'iiif_image_api',
-                args=[self.ik_image.pk, 'square', 'max', '0', 'default', 'jpg']),
+                'iiif_image_api', args=[
+                    self.ik_image.pk, 'square', 'max', '0', 'default', 'jpg']),
             user=self.superuser,
         ).follow()
         self.assertEqual(image.mock_calls, [
@@ -520,11 +519,11 @@ class TestImageAPIViews(WebTest):
         self.app.get(
             reverse(
                 'iiif_image_api',
-                args=[self.ik_image.pk, 'full', 'pct:50', '0', 'default', 'jpg']),
+                args=[self.ik_image.pk, 'full', 'pct:25', '0', 'default', 'jpg']),
             user=self.superuser,
         ).follow()
         self.assertEqual(image.mock_calls, [
-            call.resize((image.width / 2, image.height / 2)),
+            call.resize((image.width / 4, image.height / 4)),
             call.resize().convert('RGB'),
             call.resize().convert().save(ANY, format='jpeg')
         ])
@@ -573,13 +572,13 @@ class TestImageAPIViews(WebTest):
         self.app.get(
             reverse(
                 'iiif_image_api',
-                args=[self.ik_image.pk, 'full', '!150,250',
+                args=[self.ik_image.pk, 'full', '!75,125',
                       '0', 'default', 'jpg']),
             user=self.superuser,
         ).follow()
         self.assertEqual(image.mock_calls, [
             # Width is best fit
-            call.resize((150, 225)),
+            call.resize((75, 112)),
             call.resize().convert('RGB'),
             call.resize().convert().save(ANY, format='jpeg')
         ])
@@ -696,3 +695,44 @@ class TestImageAPIViews(WebTest):
             "Image API quality parameters other than ('default', 'color',"
             " 'gray') are not yet supported: bitonal",
             response.content)
+
+    @patch('icekit.plugins.iiif.views._get_image_or_404')
+    def test_iiif_image_api_storage(self, _getter):
+        # Generate image at 10% size, manually specified
+        canonical_url = reverse(
+            'iiif_image_api',
+            args=[self.ik_image.pk,
+                  'full', '20,', '0', 'default', 'jpg'])
+        image = self.mock_image(return_from=_getter)
+        response = self.app.get(canonical_url, user=self.superuser)
+        self.assertEqual(image.mock_calls, [
+            call.resize((20, 30)),
+            call.resize().convert('RGB'),
+            call.resize().convert().save(ANY, format='jpeg')
+        ])
+        self.assertEqual(200, response.status_code)
+        self.FileResponse.assert_called_with(
+            ANY, content_type='image/jpeg')
+        # Pause for a moment to avoid intermittent failures caused by time
+        # comparisons between file time stamps without millisecond precision,
+        # and ICEkit `Image.date_modified` which does have ms precision.
+        time.sleep(1)
+        # Generate image at 10% size using pct:10, confirm we get redirected
+        # to the expected canonical URL path and that image loaded from storage
+        # instead of generated
+        image = self.mock_image(return_from=_getter)
+        response = self.app.get(
+            reverse(
+                'iiif_image_api',
+                args=[self.ik_image.pk,
+                      'full', 'pct:10', '0', 'default', 'jpg']),
+            user=self.superuser,
+        )
+        # Redirected to canonical URL?
+        self.assertEqual(302, response.status_code)
+        self.assertTrue(response['location'].endswith(canonical_url))
+        response = response.follow()
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(image.mock_calls, [])  # No calls on image
+        self.FileResponse.assert_called_with(
+            ANY, content_type='image/jpeg')
