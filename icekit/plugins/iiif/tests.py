@@ -1,9 +1,11 @@
 import time
 from mock import patch, Mock, call, ANY
+import tempfile
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
+from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.test import TestCase
@@ -290,6 +292,10 @@ class TestImageApiUtils(TestCase):
 class TestImageAPIViews(WebTest):
 
     def setUp(self):
+        # Disable file storage engine for tests
+        from icekit.plugins.iiif import views
+        views.iiif_storage = None
+
         self.superuser = G(
             User,
             is_active=True,
@@ -698,6 +704,10 @@ class TestImageAPIViews(WebTest):
 
     @patch('icekit.plugins.iiif.views._get_image_or_404')
     def test_iiif_image_api_storage(self, _getter):
+        # Enable file storage engine for this test
+        from icekit.plugins.iiif import views
+        views.iiif_storage = FileSystemStorage(location=tempfile.gettempdir())
+
         # Generate image at 10% size, manually specified
         canonical_url = reverse(
             'iiif_image_api',
@@ -713,10 +723,6 @@ class TestImageAPIViews(WebTest):
         self.assertEqual(200, response.status_code)
         self.FileResponse.assert_called_with(
             ANY, content_type='image/jpeg')
-        # Pause for a moment to avoid intermittent failures caused by time
-        # comparisons between file time stamps without millisecond precision,
-        # and ICEkit `Image.date_modified` which does have ms precision.
-        time.sleep(1)
         # Generate image at 10% size using pct:10, confirm we get redirected
         # to the expected canonical URL path and that image loaded from storage
         # instead of generated

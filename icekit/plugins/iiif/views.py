@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 try:
     from cStringIO import cStringIO as BytesIO
 except ImportError:
@@ -176,14 +177,16 @@ def iiif_image_api(request, identifier_param, region_param, size_param,
             storage_path = None
 
         # Load pre-generated image from storage if one exists and it is
-        # up-to-date with the original image
+        # up-to-date with the original image (with 1 second grace time, mainly
+        # so unit tests can pass when `Image.date_modified` has a ms component
+        # but the storage `created_time` doesn't.
         # TODO I'm not confident this up-to-date check will work 100%
         # TODO Detect when original image would be unchanged & use it directly?
         if (
             storage_path and
             iiif_storage.exists(storage_path) and
-            iiif_storage.created_time(storage_path) >=
-                make_naive(ik_image.date_modified)
+            iiif_storage.created_time(storage_path) -
+                make_naive(ik_image.date_modified) <= timedelta(seconds=1)
         ):
             return FileResponse(
                 iiif_storage.open(storage_path),
