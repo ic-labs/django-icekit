@@ -50,12 +50,23 @@ class ChildModelPluginPolymorphicParentModelAdmin(
             .get_child_type_choices(request, action)
         # Update label with verbose name from plugins.
         plugins = self.child_model_plugin_class.get_plugins()
+        labels = {}
+        sort_priorities = {}
+
         if plugins:
-            labels = {
-                plugin.content_type.pk: capfirst(plugin.verbose_name) for plugin in plugins
-            }
+            for plugin in plugins:
+                pk = plugin.content_type.pk
+                labels[pk] = capfirst(plugin.verbose_name)
+                sort_priorities[pk] = getattr(plugin, 'sort_priority', labels[pk])
+
             choices = [(ctype, labels[ctype]) for ctype, _ in choices]
-            return sorted(choices, lambda a, b: cmp(a[1], b[1]))
+            return sorted(choices,
+                cmp=lambda a, b: cmp(
+                    sort_priorities[a[0]],
+                    sort_priorities[b[0]]
+                )
+            )
+
         return choices
 
     def get_child_models(self):
