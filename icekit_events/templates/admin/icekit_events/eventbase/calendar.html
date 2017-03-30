@@ -84,12 +84,15 @@
 						slotDuration: '01:00:00',
 						slotLabelInterval: '02:00:00',
 						snapDuration: '00:30:00',
+						firstDay: 1, //monday
 						defaultView: Cookies.get("calendar-defaultView") || 'agendaWeek',
+						defaultDate: Cookies.get("calendar-defaultDate") || null,
 						viewRender: function(view, element) {
 							$('.fc-basicWeek-button').text('week (list)');
 							$('.fc-agendaDay-button').text('day');
 
 							Cookies.set('calendar-defaultView', view.type);
+							Cookies.set('calendar-defaultDate', view.intervalStart);
 						}
 					}).on('click', 'a.fc-event', function(e) {
 						// Open links in the top frame.
