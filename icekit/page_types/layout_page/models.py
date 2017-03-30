@@ -3,7 +3,7 @@ from . import abstract_models
 class LayoutPage(abstract_models.AbstractLayoutPage):
 
     class Meta:
-        verbose_name = "Layout page"
+        verbose_name = "Page"
         # Fluent prepends `pagetype_` to the db table. This seems to break
         # Django's inference of m2m table names during migrations, when the
         # m2m is defined on an abstract model that's mixed in. Instead we
