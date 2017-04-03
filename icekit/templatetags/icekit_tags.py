@@ -334,3 +334,28 @@ def deprecate_and_include(parser, token):
     include_token = Token(token.token_type, " ".join(new_contents))
 
     return do_include(parser, include_token)
+
+
+@register.filter
+def sharedcontent_exists(slug):
+    """
+    Return `True` if shared content with the given slug name exists.
+
+    This filter makes it possible to conditionally include shared content with
+    surrounding markup only when the shared content item actually exits, and
+    avoid outputting the surrounding markup when it doesn't.
+
+    Example usage:
+
+        {% load icekit_tags sharedcontent_tags %}
+
+        {% if "shared-content-slug"|sharedcontent_exists %}
+        <div class="surrounding-html">
+            {% sharedcontent "shared-content-slug" %}
+        </div>
+        {% endif %}
+    """
+    from django.contrib.sites.models import Site
+    from fluent_contents.plugins.sharedcontent.models import SharedContent
+    site = Site.objects.get_current()
+    return SharedContent.objects.parent_site(site).filter(slug=slug).exists()

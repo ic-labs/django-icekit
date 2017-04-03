@@ -330,6 +330,10 @@ USE_ETAGS = True  # Default: False
 USE_L10N = True  # Default: False
 USE_TZ = True  # Default: False
 
+FORMAT_MODULE_PATH = [
+    'icekit.formats',
+]
+
 WSGI_APPLICATION = 'icekit.project.wsgi.application'
 
 # DJANGO REDIRECTS ############################################################
@@ -576,6 +580,7 @@ INSTALLED_APPS += (
     'parler',
     'polymorphic',
     'polymorphic_tree',
+    'slug_preview',
 
     # Page types.
     # 'fluent_pages.pagetypes.flatpage',
@@ -917,6 +922,14 @@ WSGI_WORKERS = multiprocessing.cpu_count() * 2 + 1
 
 # DEBUG TOOLBAR (not enabled by default) ######################################
 
+# To enable the toolbar, add
+#
+#    INSTALLED_APPS += ('debug_toolbar',)
+#    DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda request: DEBUG}
+#    MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE_CLASSES
+#
+#  to `project_settings_local.py`
+
 try:
     from debug_toolbar.settings import PANELS_DEFAULTS
 except ImportError:
@@ -925,4 +938,3 @@ except ImportError:
 DEBUG_TOOLBAR_PANELS = [
     'fluent_contents.panels.ContentPluginPanel',
 ] + PANELS_DEFAULTS
-

@@ -220,9 +220,9 @@ class TestWorkflowAdminForPagesThatDoNotExtendOurAdminMixin(WebTest):
             user=self.superuser)
         self.assertEqual(200, response.status_code)
         # Expected column names are present
-        self.assertContains(response, '<div>Title</div>')
-        self.assertContains(response, '<div>Last edited by</div>')
-        self.assertContains(response, '<div>Workflow States</div>')
+        self.assertContains(response, '<span>Title</span>')
+        self.assertContains(response, '<span>Last edited by</span>')
+        self.assertContains(response, '<span>Workflow States</span>')
         # Expected column values are present
         #self.assertContains(response, 'Test LayoutPage')
         self.assertContains(response, 'updater@email.com')

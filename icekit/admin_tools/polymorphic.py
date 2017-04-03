@@ -7,6 +7,7 @@ from fluent_contents.admin.contentitems import (BaseContentItemInline,
 # working around name clash
 import importlib
 
+from fluent_pages.adminui.urlnodeparentadmin import UrlNodeParentAdmin
 from icekit.admin_tools.widgets import PolymorphicForeignKeyRawIdWidget, \
     PolymorphicManyToManyRawIdWidget
 from icekit.workflow.admin import WorkflowMixinAdmin, WorkflowStateTabularInline
@@ -49,12 +50,23 @@ class ChildModelPluginPolymorphicParentModelAdmin(
             .get_child_type_choices(request, action)
         # Update label with verbose name from plugins.
         plugins = self.child_model_plugin_class.get_plugins()
+        labels = {}
+        sort_priorities = {}
+
         if plugins:
-            labels = {
-                plugin.content_type.pk: capfirst(plugin.verbose_name) for plugin in plugins
-            }
+            for plugin in plugins:
+                pk = plugin.content_type.pk
+                labels[pk] = capfirst(plugin.verbose_name)
+                sort_priorities[pk] = getattr(plugin, 'sort_priority', labels[pk])
+
             choices = [(ctype, labels[ctype]) for ctype, _ in choices]
-            return sorted(choices, lambda a, b: cmp(a[1], b[1]))
+            return sorted(choices,
+                cmp=lambda a, b: cmp(
+                    sort_priorities[a[0]],
+                    sort_priorities[b[0]]
+                )
+            )
+
         return choices
 
     def get_child_models(self):
@@ -196,3 +208,19 @@ class ICEkitFluentPagesParentAdmin(
     list_filter = ICEKitFluentPagesParentAdminMixin.list_filter + \
         WorkflowMixinAdmin.list_filter
     inlines = [WorkflowStateTabularInline]
+
+    def get_search_results(self, request, queryset, search_term):
+        # HACK: Bypass UrlNodeParentAdmin's get_search_results, which limits
+        # results to top-level pages so as to avoid breaking the mptt code in
+        # the list view. Our list view is much simpler, so we don't need to
+        # skip it.
+        if isinstance(self, UrlNodeParentAdmin):
+            return super(UrlNodeParentAdmin, self).get_search_results(
+                request, queryset, search_term)
+            # return admin.ModelAdmin.get_search_results(
+            #     self, request, queryset, search_term)
+        else:
+            return super(ICEkitFluentPagesParentAdmin, self).get_search_results(
+                request, queryset, search_term)
+
+

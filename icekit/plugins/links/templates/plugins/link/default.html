@@ -28,5 +28,10 @@
     {% if instance.get_absolute_url %}
         </a>
     {% endif %}
-    {% include "icekit/partials/preview_link.html" with obj=instance %}
+    {% if instance.get_item %}
+        {# Handle relation objects where we want to point to the target, rather than the relation #}
+        {% include "icekit/partials/preview_link.html" with obj=instance.get_item %}
+    {% else %}
+        {% include "icekit/partials/preview_link.html" with obj=instance %}
+    {% endif %}
 </div>

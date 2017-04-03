@@ -119,7 +119,6 @@ class AbstractMediaCategory(AbstractBaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = 'Media categories'
 
     def __str__(self):
         return self.name

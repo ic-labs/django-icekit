@@ -1,7 +1,7 @@
 from urlparse import urljoin
 
 from django.conf import settings
-from icekit.utils.admin.urls import admin_url
+from icekit.admin_tools.utils import admin_url
 from icekit.utils.attributes import first_of
 from unidecode import unidecode
 

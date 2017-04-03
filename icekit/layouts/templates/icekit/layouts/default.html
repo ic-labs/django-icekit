@@ -51,20 +51,26 @@
             {% page_placeholder "main" role="m" %}
         {% endblock %}
         {% block page_related_content %}
-            {% if page.has_any_related_items %}
+            {% if page.get_related_items %}
                 <section class="page-related">
                     <h3 class="page-related__title">Related content</h3>
                     <div class="page-related__content">
-                        <div class="page-related__content-container">
-                            {% page_placeholder "related" role="main" %}
-                        </div>
-                        <div class="page-related__links">
-                            {% for instance in page.get_auto_related_items %}
-                                <div class="page-related__link">
-                                    {% include "plugins/link/default.html" %}
+                        {% if page.slots.related.count %}
+                            <div class="page-related__content-container">
+                                {% page_placeholder "related" role="main" %}
+                            </div>
+                        {% endif %}
+                        {% with auto_related_items=page.get_auto_related_items %}
+                            {% if auto_related_items %}
+                                <div class="page-related__links">
+                                    {% for instance in auto_related_items %}
+                                        <div class="page-related__link">
+                                            {% include "plugins/link/default.html" %}
+                                        </div>
+                                    {% endfor %}
                                 </div>
-                            {% endfor %}
-                        </div>
+                            {% endif %}
+                        {% endwith %}
                     </div>
                 </section>
             {% endif %}
@@ -72,7 +78,7 @@
     </div>
 {% endblock %}
 
-{% block js %}
+{% block body_js %}
     {{ block.super }}
     {% render_content_items_media %}
 {% endblock %}
