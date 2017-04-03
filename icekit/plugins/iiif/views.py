@@ -1,5 +1,4 @@
 import os
-from datetime import timedelta
 try:
     from cStringIO import cStringIO as BytesIO
 except ImportError:
@@ -17,13 +16,13 @@ from django.db.models.loading import get_model
 from django.http import FileResponse, HttpResponseBadRequest, HttpResponse, \
     HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.utils.timezone import make_naive
 
 from fluent_utils.ajax import JsonResponse
 
 from . import appsettings
 from .utils import parse_region, parse_size, parse_rotation, parse_quality, \
-    parse_format, make_canonical_path, ClientError, UnsupportedError
+    parse_format, make_canonical_path, build_iiif_file_storage_path, \
+    is_remote_storage, ClientError, UnsupportedError
 
 
 ICEkitImage = get_model('icekit_plugins_image', 'Image')
@@ -159,39 +158,27 @@ def iiif_image_api(request, identifier_param, region_param, size_param,
 
         # Determine storage file name for item
         if iiif_storage:
-            # Replace '/' & ',' with '-' to keep separators of some kind in
-            # storage file name, otherwise the characters get purged and
-            # produce storage names with potentially ambiguous and clashing
-            # values e.g. /3/100,100,200,200/... => iiif3100100200200
-            storage_path = canonical_path[1:]  # Stip leading slash
-            storage_path = storage_path.replace('/', '-').replace(',', '-')
-            storage_path = iiif_storage.get_valid_name(storage_path)
-            # Add path prefix to storage path to avoid dumping image files
-            # into the root location of a storage location that might be
-            # used for many purposes.
-            if storage_path.startswith('iiif-'):
-                # Strip redundant 'iiif-' prefix
-                storage_path = storage_path[5:]
-            storage_path = 'iiif/' + storage_path
+            storage_path = build_iiif_file_storage_path(
+                canonical_path, ik_image, iiif_storage)
         else:
             storage_path = None
 
-        # Load pre-generated image from storage if one exists and it is
-        # up-to-date with the original image (with 1 second grace time, mainly
-        # so unit tests can pass when `Image.date_modified` has a ms component
-        # but the storage `created_time` doesn't.
-        # TODO I'm not confident this up-to-date check will work 100%
+        # Load pre-generated image from storage if one exists and is up-to-date
+        # with the original image (per timestampt info embedded in the storage
+        # path)
+        # TODO The exists lookup is slow for S3 storage, cache metadata?
         # TODO Detect when original image would be unchanged & use it directly?
         if (
             storage_path and
-            iiif_storage.exists(storage_path) and
-            iiif_storage.created_time(storage_path) -
-                make_naive(ik_image.date_modified) <= timedelta(seconds=1)
+            iiif_storage.exists(storage_path)
         ):
-            return FileResponse(
-                iiif_storage.open(storage_path),
-                content_type='image/%s' % corrected_format,
-            )
+            if is_remote_storage(iiif_storage, storage_path):
+                return HttpResponseRedirect(iiif_storage.url(storage_path))
+            else:
+                return FileResponse(
+                    iiif_storage.open(storage_path),
+                    content_type='image/%s' % corrected_format,
+                )
 
         ##################
         # Generate image #
@@ -233,12 +220,14 @@ def iiif_image_api(request, identifier_param, region_param, size_param,
         if storage_path:
             iiif_storage.save(storage_path, result_image)
 
-        # Set response content type
-        result_image.seek(0)  # Reset to start of image data
-        return FileResponse(
-            result_image.read(),
-            content_type='image/%s' % corrected_format,
-        )
+        if iiif_storage and is_remote_storage(iiif_storage, storage_path):
+            return HttpResponseRedirect(iiif_storage.url(storage_path))
+        else:
+            result_image.seek(0)  # Reset image file in case it's just created
+            return FileResponse(
+                result_image.read(),
+                content_type='image/%s' % corrected_format,
+            )
     # Handle error conditions per iiif.io/api/image/2.1/#server-responses
     except ClientError, ex:
         return HttpResponseBadRequest(ex.message)  # 400 response

@@ -1,4 +1,3 @@
-import time
 from mock import patch, Mock, call, ANY
 import tempfile
 

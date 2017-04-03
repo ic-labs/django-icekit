@@ -1,3 +1,5 @@
+import calendar
+
 from django.core.urlresolvers import reverse
 
 
@@ -270,3 +272,64 @@ def make_canonical_path(
         args=[image_identifier, canonical_region, canonical_size,
               canonical_rotation, canonical_quality, canonical_format]
     )
+
+
+def build_iiif_file_storage_path(url_path, ik_image, iiif_storage):
+    """
+    Return the file storage path for a given IIIF Image API URL path.
+
+    NOTE: The returned file storage path includes the given ``Image``
+    instance's ID to ensure the path is unique and identifiable, and its
+    modified timestamp to act as a primitive cache-busting mechanism for
+    when the image is changed but there are pre-existing image conversions.
+
+    TODO: Ideally we should use a hash or timestamp for Image's actual
+    image data changes, not the whole instance which could change but
+    have same image.
+    """
+    storage_path = url_path[1:]  # Stip leading slash
+
+    # Strip redundant 'iiif-' prefix if present (re-added below)
+    if storage_path.startswith('iiif/'):
+        storage_path = storage_path[5:]
+
+    # Add Image's modified timestamp to storage path as a primitive
+    # cache-busting mechanism.
+    ik_image_ts = str(calendar.timegm(ik_image.date_modified.timetuple()))
+    splits = storage_path.split('/')
+    storage_path = '/'.join(
+        [splits[0]] +  # Image ID
+        [ik_image_ts] +  # Image instance modified timestamp
+        splits[1:]  # Remainder of storage path
+    )
+
+    # Replace '/' & ',' with '-' to keep separators of some kind in
+    # storage file name, otherwise the characters get purged and
+    # produce storage names with potentially ambiguous and clashing
+    # values e.g. /3/100,100,200,200/... => iiif3100100200200
+    storage_path = storage_path.replace('/', '-').replace(',', '-')
+
+    # Convert URL path format to a valid file name for a given storage engine
+    storage_path = iiif_storage.get_valid_name(storage_path)
+
+    # Add path prefix to storage path to avoid dumping image files
+    # into the location of a storage location that might be used for many
+    # purposes.
+    if iiif_storage.location != 'iiif':
+        storage_path = 'iiif/' + storage_path
+
+    return storage_path
+
+
+def is_remote_storage(iiif_storage, storage_path):
+    """
+    Return ``True`` if given storage class uses remote (not local) storage.
+
+    See https://docs.djangoproject.com/en/1.10/ref/files/storage/#django.core.files.storage.Storage.path
+    """
+    # TODO Surely Django's storage mechanism has a better way to test this?
+    try:
+        iiif_storage.path(storage_path)
+        return False
+    except NotImplementedError:
+        return True
