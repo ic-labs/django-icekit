@@ -57,7 +57,10 @@ GLAMkit contains a basic implementation key parts of the
 where ``{ID}`` is the ID of an image in the ``Image`` model.
 
 The resulting image is created and stored permanently the first time it is
-requested.
+requested into the storage engine defined by the ``IIIF_STORAGE`` setting,
+which is the same as ``DEFAULT_FILE_STORAGE`` by default.
+
+To avoid storing generated images, set ``settings.IIIF_STORAGE = None``.
 
 ``ImageRepurposeConfig``
 ------------------------
