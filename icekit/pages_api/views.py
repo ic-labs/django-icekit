@@ -1,10 +1,14 @@
 from fluent_pages.models import Page
+
 from rest_framework import viewsets
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import permission_classes
 
 from . import serializers
 from icekit.utils.pagination import ICEKitAPIPagination
 
 
+@permission_classes((AllowAny, ))
 class PageViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Read only viewset for published page objects.
