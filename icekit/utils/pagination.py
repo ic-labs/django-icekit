@@ -1,7 +1,10 @@
 import math
+
 from django.utils import six
 from django.http import Http404
+
 from el_pagination.utils import get_page_numbers
+from rest_framework.pagination import PageNumberPagination
 
 
 # We use a subclass of Http404 so that unexpected page numbers
@@ -49,3 +52,10 @@ def describe_page_numbers(current_page, total_count, per_page, page_numbers_at_e
         'page_count': page_count,
         'per_page': per_page,
     }
+
+
+class ICEKitAPIPagination(PageNumberPagination):
+    """
+    Default API pagination configuration for ICEKit.
+    """
+    page_size = 5

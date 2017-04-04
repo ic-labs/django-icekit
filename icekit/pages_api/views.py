@@ -2,14 +2,14 @@ from fluent_pages.models import Page
 from rest_framework import viewsets
 
 from . import serializers
-from .pagination import ICEKitPagination
+from icekit.utils.pagination import ICEKitAPIPagination
 
 
 class PageViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Read only viewset for published page objects.
     """
-    pagination_class = ICEKitPagination
+    pagination_class = ICEKitAPIPagination
     serializer_class = serializers.PageSerializer
     # NOTE: `get_queryset` method is used instead of this `queryset` class
     # attribute to return results, but we still need this defined here so
