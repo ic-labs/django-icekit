@@ -10,7 +10,7 @@ from . import serializers
 Image = apps.get_model('icekit_plugins_image.Image')
 
 
-class ImageViewSet(viewsets.ReadOnlyModelViewSet):
+class ImageViewSet(viewsets.ModelViewSet):
     """
     Read only viewset for image objects.
     """
@@ -18,8 +18,9 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.ImageSerializer
     # NOTE: `get_queryset` method is used instead of this `queryset` class
     # attribute to return results, but we still need this defined here so
-    # the API router can auto-generate the right endpoint URL.
-    queryset = Image.objects.all()
+    # the API router can auto-generate the right endpoint URL and apply
+    # `DjangoModelPermissions`.
+    queryset = Image.objects.none()
 
     def get_queryset(self):
         return Image.objects.all()
