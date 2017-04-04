@@ -40,8 +40,11 @@ urlpatterns = patterns(
         {'sitemaps': sitemaps}),
 
     # Installed apps.
-    url(r'^api/pages/', include('icekit.pages_api.urls')),
     url(r'^forms/', include('forms_builder.forms.urls')),
+    # APIs
+    # TODO This URL routing technique doesn't show all endpoints in root /api/
+    url(r'^api/', include('icekit.pages_api.urls')),
+    url(r'^api/', include('icekit.images_api.urls')),
 
     # Get admin URLs prefix from settings.
     # Handle admin and front-end authentication separately.
