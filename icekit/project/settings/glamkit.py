@@ -9,6 +9,8 @@ INSTALLED_APPS += (
     'press_releases',
     'icekit.plugins.iiif',
 
+    'rest_framework',
+
     'icekit_events',
     'icekit_events.event_types.simple',
     'icekit_events.plugins.event_content_listing',
