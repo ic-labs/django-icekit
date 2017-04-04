@@ -96,8 +96,10 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        # Apply Django's standard model permissions for API operations, see
+        # Apply Django's standard model permissions for API operations, with
+        # customisation to prevent any API access for GET listings, HEAD etc
+        # to those users permitted to view model listings in the admin. See
         # http://www.django-rest-framework.org/api-guide/permissions/#djangomodelpermissions
-        'rest_framework.permissions.DjangoModelPermissions',
+        'icekit.utils.api.DjangoModelPermissionsRestrictedListing',
     )
 }
