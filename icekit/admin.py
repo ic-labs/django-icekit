@@ -153,6 +153,13 @@ class ICEkitInlineAdmin(BetterDateTimeAdmin):
 admin.site.register(models.Layout, LayoutAdmin)
 admin.site.register(models.MediaCategory, MediaCategoryAdmin)
 
+
+# Token admin for Django REST framework's `TokenAuthentication`, see
+# http://www.django-rest-framework.org/api-guide/authentication/#with-django-admin
+from rest_framework.authtoken.admin import TokenAdmin
+TokenAdmin.raw_id_fields = ('user',)
+
+
 # Classes that used to be here
 
 from icekit.admin_tools.filters import \
