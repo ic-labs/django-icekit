@@ -1,10 +1,6 @@
-from django.apps import apps
-from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 
 from django_dynamic_fixture import G
-
-from rest_framework.test import APITestCase
 
 from fluent_contents.plugins.rawhtml.models import RawHtmlItem
 
@@ -13,25 +9,21 @@ from icekit.page_types.layout_page.models import LayoutPage
 from icekit.utils import fluent_contents
 
 
-User = get_user_model()
-Image = apps.get_model('icekit_plugins_image.Image')
+from ..base_tests import BaseAPITestCase
 
 
-class ImageAPITests(APITestCase):
+class PagesAPITests(BaseAPITestCase):
+    API_NAME = 'page'
 
     def setUp(self):
-        self.super_user_1 = G(
-            User,
-            is_staff=True,
-            is_active=True,
-            is_superuser=True,
-        )
+        super(PagesAPITests, self).setUp()
+
         self.layout_1 = G(
             models.Layout,
             template_name='icekit/layouts/default.html',
         )
         self.layoutpage_1 = LayoutPage.objects.create(
-            author=self.super_user_1,
+            author=self.superuser,
             title='Test LayoutPage',
             layout=self.layout_1,
         )
@@ -55,28 +47,26 @@ class ImageAPITests(APITestCase):
         self.layoutpage_1.publish()
         for j in range(20):
             published_layoutpage = LayoutPage.objects.create(
-                author=self.super_user_1,
+                author=self.superuser,
                 title='Test LayoutPage %s' % j,
                 layout=self.layout_1,
             )
             published_layoutpage.publish()
 
             LayoutPage.objects.create(
-                author=self.super_user_1,
+                author=self.superuser,
                 title='Draft LayoutPage %s' % j,
                 layout=self.layout_1,
             )
 
-        response = self.client.get(reverse('page-list'))
+        response = self.client.get(self.listing_url())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 5)
         self.assertEqual(response.data['count'], 21)
-        response = self.client.get(
-            reverse('page-detail', args=(self.layoutpage_1.id,)))
+        response = self.client.get(self.detail_url(self.layoutpage_1.id))
         self.assertEqual(response.status_code, 404)
         response = self.client.get(
-            reverse('page-detail',
-                    args=(self.layoutpage_1.get_published().id,)))
+            self.detail_url(self.layoutpage_1.get_published().id))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 6)
         for key in response.data.keys():
@@ -89,3 +79,25 @@ class ImageAPITests(APITestCase):
             self.assertEqual(
                 item['content'],
                 getattr(self, 'content_instance_%s' % number).html)
+
+    def test_api_user_permissions_are_correct(self):
+        self.layoutpage_1.publish()
+        page_published_id = self.layoutpage_1.get_published().pk
+
+        # Anonymous user can peform all read operations, no write operations
+        self.client.credentials()  # Clear any user credentials
+        self.assert_user_has_get_list_permission(True)
+        self.assert_user_has_get_detail_permission(True, page_published_id)
+        self.assert_user_has_post_permission(False)
+        self.assert_user_has_put_permission(False, page_published_id)
+        self.assert_user_has_patch_permission(False, page_published_id)
+        self.assert_user_has_delete_permission(False, page_published_id)
+
+        # Even superuser cannot peform write operations
+        self.client_apply_token(self.superuser_token)
+        self.assert_user_has_get_list_permission(True)
+        self.assert_user_has_get_detail_permission(True, page_published_id)
+        self.assert_user_has_post_permission(False)
+        self.assert_user_has_put_permission(False, page_published_id)
+        self.assert_user_has_patch_permission(False, page_published_id)
+        self.assert_user_has_delete_permission(False, page_published_id)
