@@ -9,7 +9,7 @@ from ..base_tests import BaseAPITestCase, Image
 
 
 class ImageAPITests(BaseAPITestCase):
-    API_NAME = 'images'
+    API_NAME = 'images-api'
 
     def setUp(self):
         super(ImageAPITests, self).setUp()

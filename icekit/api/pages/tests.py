@@ -13,7 +13,7 @@ from ..base_tests import BaseAPITestCase
 
 
 class PagesAPITests(BaseAPITestCase):
-    API_NAME = 'page'
+    API_NAME = 'pages-api'
 
     def setUp(self):
         super(PagesAPITests, self).setUp()

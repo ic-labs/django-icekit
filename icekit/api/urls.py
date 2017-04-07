@@ -7,8 +7,8 @@ from .pages import views as pages_views
 
 # Obtain the default router and register the ImageViewSet
 router = routers.DefaultRouter()
-router.register(r'images', images_views.ImageViewSet, 'images')
-router.register(r'pages', pages_views.PageViewSet, 'page')
+router.register(r'images', images_views.ImageViewSet, 'images-api')
+router.register(r'pages', pages_views.PageViewSet, 'pages-api')
 
 # Define the URL patterns based upon the default router config.
 urlpatterns = [
