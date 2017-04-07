@@ -7,6 +7,7 @@ from .icekit import *
 INSTALLED_APPS += (
     'sponsors',
     'press_releases',
+    'icekit.api',
     'icekit.plugins.iiif',
 
     # Django REST framework
