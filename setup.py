@@ -66,6 +66,7 @@ setuptools.setup(
     extras_require={
         'api': [
             'djangorestframework',
+            'djangorestframework-filters',
         ],
         'brightcove': [
             'django-brightcove',

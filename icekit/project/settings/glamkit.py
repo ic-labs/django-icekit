@@ -102,5 +102,14 @@ REST_FRAMEWORK = {
         # to those users permitted to view model listings in the admin. See
         # http://www.django-rest-framework.org/api-guide/permissions/#djangomodelpermissions
         'icekit.utils.api.DjangoModelPermissionsRestrictedListing',
-    )
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework_filters.backends.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ),
+    # Pagination settings
+    'DEFAULT_PAGINATION_CLASS':
+        'icekit.api.pagination.DefaultPageNumberPagination',
+    'PAGE_SIZE': 20,
+}
 }
