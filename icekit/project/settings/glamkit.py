@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from .icekit import *
 
 # DJANGO ######################################################################
@@ -10,17 +8,29 @@ INSTALLED_APPS += (
     'icekit.api',
     'icekit.plugins.iiif',
 
-    # Django REST framework
-    'rest_framework',
-    'rest_framework.authtoken',  # Required for `TokenAuthentication`
-    'rest_framework_swagger',  # Required for automatic API documentation
-
     'icekit_events',
     'icekit_events.event_types.simple',
     'icekit_events.plugins.event_content_listing',
     'icekit_events.plugins.links',
     'icekit_events.plugins.todays_occurrences',
     'icekit_events.page_types.eventlistingfordate',
+
+    'adminsortable2',  # required by glamkit-collections
+
+    # GLAMkit Collection base implementation plugins
+    'glamkit_collections.contrib.work_creator',
+    'glamkit_collections.contrib.work_creator.plugins.artwork',
+    'glamkit_collections.contrib.work_creator.plugins.film',
+    'glamkit_collections.contrib.work_creator.plugins.game',
+    'glamkit_collections.contrib.work_creator.plugins.links',
+    'glamkit_collections.contrib.work_creator.plugins.moving_image',
+    'glamkit_collections.contrib.work_creator.plugins.organization',
+    'glamkit_collections.contrib.work_creator.plugins.person',
+
+    # Django REST framework for APIs
+    'rest_framework',
+    'rest_framework.authtoken',  # Required for `TokenAuthentication`
+    'rest_framework_swagger',  # Required for automatic API documentation
 )
 
 # This settings file is loaded after calculated.py, so we don't want to
