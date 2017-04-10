@@ -13,6 +13,7 @@ INSTALLED_APPS += (
     # Django REST framework
     'rest_framework',
     'rest_framework.authtoken',  # Required for `TokenAuthentication`
+    'rest_framework_swagger',  # Required for automatic API documentation
 
     'icekit_events',
     'icekit_events.event_types.simple',
@@ -112,4 +113,21 @@ REST_FRAMEWORK = {
         'icekit.api.pagination.DefaultPageNumberPagination',
     'PAGE_SIZE': 20,
 }
+
+
+# REST Swagger/OpenAPI Documentation via Django REST Swagger
+
+SWAGGER_SETTINGS = {
+    # 'doc_expansion': 'full',
+    'version': '0.1',
+    'api_path': "/api/",
+    'enabled_methods': ['get'],
+    'info': {
+        "title": "GLAMkit API",
+        "description": "GLAMkit API for Pages, Images, Artists, and Artworks",
+        # "termsOfServiceUrl": "http://helloreverb.com/terms/",
+        # "contact": "apiteam@wordnik.com",
+        # "license": "Apache 2.0",
+        # "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
 }

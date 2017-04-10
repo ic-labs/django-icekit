@@ -12,7 +12,7 @@ Image = apps.get_model('icekit_plugins_image.Image')
 
 class ImageViewSet(viewsets.ModelViewSet):
     """
-    Read only viewset for image objects.
+    Read and write viewset for image objects.
     """
     pagination_class = ICEKitAPIPagination
     serializer_class = serializers.ImageSerializer
