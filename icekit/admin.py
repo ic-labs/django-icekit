@@ -153,6 +153,7 @@ class ICEkitInlineAdmin(BetterDateTimeAdmin):
 admin.site.register(models.Layout, LayoutAdmin)
 admin.site.register(models.MediaCategory, MediaCategoryAdmin)
 
+
 # Classes that used to be here
 
 from icekit.admin_tools.filters import \
