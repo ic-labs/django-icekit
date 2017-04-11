@@ -13,9 +13,9 @@ class CaseInsensitiveBooleanFilter(filters.Filter):
         return qs
 
 
-class ArtworkHasImagesFilter(filters.Filter):
+class WorkHasImagesFilter(filters.Filter):
     """
-    Filter for choosing only artworks with images.
+    Filter for choosing only works with images.
     """
     def filter(self, qs, value):
         # the __isnull filter inverts meaning of true/false

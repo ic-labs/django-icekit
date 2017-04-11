@@ -39,7 +39,7 @@ INSTALLED_APPS += (
 # a router object.
 EXTRA_API_ROUTERS = (
     # Include API routes for all installed GLAMkit Collection plugins.
-    ('collection/', 'glamkit_collections.contrib.work_creator.api.router'),
+    ('', 'glamkit_collections.contrib.work_creator.api.router'),
     # To expose only some GLAMkit Collection plugins instead of all, define
     # more specific router entries such as:
     #     ('', 'glamkit_collections.contrib.work_creator.plugins.artwork.api.router'
