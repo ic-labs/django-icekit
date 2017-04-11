@@ -6,7 +6,8 @@ from rest_framework.settings import api_settings
 from icekit.api.base_serializers import ModelSubSerializer
 
 from .models import WorkBase, CreatorBase, WorkCreator as WorkCreatorModel, \
-    WorkImage as WorkImageModel, WorkImageType as WorkImageTypeModel
+    WorkImage as WorkImageModel, WorkImageType as WorkImageTypeModel, \
+    Role as RoleModel
 
 
 ImageModel = apps.get_model('icekit_plugins_image.Image')
@@ -74,10 +75,22 @@ class WorkSummary(serializers.HyperlinkedModelSerializer):
         }
 
 
+class Role(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = RoleModel
+        fields = (
+            'slug',
+            'title',
+            'title_plural',
+            'past_tense',
+        )
+
+
 class WorkCreator(serializers.HyperlinkedModelSerializer):
     """ Relationship between a work and a creator """
     work = WorkSummary()
     creator = CreatorSummary()
+    role = Role()
 
     class Meta:
         model = WorkCreatorModel
