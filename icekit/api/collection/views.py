@@ -9,7 +9,6 @@ from sfmoma.getty.models import GettyArtistData, GettyRelationships
 from ..base_views import RedirectViewset
 
 from . import artists
-from . import artworks
 from . import exhibitions
 from . import networks
 from . import relationships
@@ -43,21 +42,6 @@ class ArtistViewSet(RedirectViewset):
     )
 
 
-class ArtworkViewSet(RedirectViewset):
-    """
-    Artwork resource
-    """
-    queryset = ArtworkModel.objects.all() \
-        .prefetch_related(
-            Prefetch(
-                'artworkartist_set',
-                queryset=ArtworkArtistModel.objects.select_related('artist')
-            ),
-        )
-
-    serializer_class = artworks.serializers.Artwork
-    redirect_view_name = 'artwork-detail'
-    filter_class = artworks.filters.ArtworkFilter
 
 
 class ExhibitionViewSet(RedirectViewset):
