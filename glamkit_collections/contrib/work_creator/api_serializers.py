@@ -1,8 +1,11 @@
 from django.apps import apps
 
 from rest_framework import serializers
+from rest_framework.settings import api_settings
 
-from .models import CreatorBase, WorkCreator as WorkCreatorModel, \
+from icekit.api.base_serializers import ModelSubSerializer
+
+from .models import WorkBase, CreatorBase, WorkCreator as WorkCreatorModel, \
     WorkImage as WorkImageModel, WorkImageType as WorkImageTypeModel
 
 
@@ -24,9 +27,49 @@ class Creator(serializers.HyperlinkedModelSerializer):
         }
 
 
+class WorkDate(ModelSubSerializer):
+    class Meta:
+        model = WorkBase
+        source_prefix = 'date_'
+        fields = (
+            'date_display',
+            'date_edtf',
+        )
+
+
+class WorkOrigin(ModelSubSerializer):
+    class Meta:
+        model = WorkBase
+        source_prefix = 'origin_'
+        fields = (
+            'origin_continent',
+            'origin_country',
+            'origin_state_province',
+            'origin_city',
+            'origin_neighborhood',
+            'origin_colloquial',
+        )
+
+
+class CreatorSummary(serializers.HyperlinkedModelSerializer):
+    """ Minimal information about a creator """
+    class Meta:
+        model = CreatorBase
+        fields = (
+            'url',
+            'name_display',
+        )
+        extra_kwargs = {
+            'url': {
+                'lookup_field': 'slug',
+                'view_name': 'gk_collections_creator',
+            }
+        }
+
+
 class WorkCreator(serializers.HyperlinkedModelSerializer):
     """ Relationship between a work and a creator """
-    creator = Creator()
+    creator = CreatorSummary()
 
     class Meta:
         model = WorkCreatorModel
@@ -82,3 +125,44 @@ class WorkImage(serializers.ModelSerializer):
             'order',
             'image_type',
         )
+
+
+class Work(serializers.HyperlinkedModelSerializer):
+    creators = WorkCreator(
+        source='workcreator_set',
+        many=True,
+        read_only=True,
+    )
+    images = WorkImage(
+        source="workimage_set",
+        many=True,
+        read_only=True,
+    )
+    date = WorkDate()
+    origin = WorkOrigin()
+
+    class Meta:
+        model = WorkBase
+        fields = (
+            # Relationships
+            'creators',
+            'images',
+            # Sub-resources
+            'date',
+            'origin',
+            # Fields
+            api_settings.URL_FIELD_NAME,
+            'slug',
+            'title',
+            'subtitle',
+            'oneliner',
+            'department',
+            'credit_line',
+            'accession_number',
+        )
+        extra_kwargs = {
+            'url': {
+                'lookup_field': 'slug',
+                'view_name': 'gk_collections_work',
+            }
+        }
