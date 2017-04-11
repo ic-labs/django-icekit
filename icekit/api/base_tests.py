@@ -48,13 +48,13 @@ class BaseAPITestCase(APITestCase):
 
     def listing_url(self):
         """ Return the listing URL endpoint for this class's API """
-        return reverse('%s-list' % self.API_NAME)
+        return reverse('api:%s-list' % self.API_NAME)
 
     def detail_url(self, id):
         """
         Return the detail URL endpoint for a given ID in this class's API
         """
-        return reverse('%s-detail' % self.API_NAME, args=[id])
+        return reverse('api:%s-detail' % self.API_NAME, args=[id])
 
     def client_apply_token(self, token):
         """
