@@ -12,11 +12,29 @@ from .models import WorkBase, CreatorBase, WorkCreator as WorkCreatorModel, \
 ImageModel = apps.get_model('icekit_plugins_image.Image')
 
 
-class Creator(serializers.HyperlinkedModelSerializer):
+class Image(serializers.ModelSerializer):
+    class Meta:
+        model = ImageModel
+        fields = (
+            'image',
+            'width',
+            'height',
+            'title',
+            'caption',
+            'credit',
+            'source',
+            'license',
+            'notes',
+            'is_ok_for_web',
+        )
+
+
+class CreatorSummary(serializers.HyperlinkedModelSerializer):
+    """ Minimal information about a creator """
     class Meta:
         model = CreatorBase
         fields = (
-            'url',
+            api_settings.URL_FIELD_NAME,
             'name_display',
         )
         extra_kwargs = {
@@ -37,6 +55,74 @@ class WorkDate(ModelSubSerializer):
         )
 
 
+class WorkSummary(serializers.HyperlinkedModelSerializer):
+    """ Minimal information about a work """
+    date = WorkDate()
+
+    class Meta:
+        model = WorkBase
+        fields = (
+            api_settings.URL_FIELD_NAME,
+            'title',
+            'date',
+        )
+        extra_kwargs = {
+            'url': {
+                'lookup_field': 'slug',
+                'view_name': 'gk_collections_work',
+            }
+        }
+
+
+class WorkCreator(serializers.HyperlinkedModelSerializer):
+    """ Relationship between a work and a creator """
+    work = WorkSummary()
+    creator = CreatorSummary()
+
+    class Meta:
+        model = WorkCreatorModel
+        fields = (
+            'work',
+            'creator',
+            'role',
+            'is_primary',
+            'order',
+        )
+
+
+class Creator(serializers.HyperlinkedModelSerializer):
+    works = WorkCreator(
+        source='workcreator_set',
+        many=True,
+        read_only=True,
+    )
+    portrait = Image()
+
+    class Meta:
+        model = CreatorBase
+        fields = (
+            # Relationships
+            'works',
+            'portrait',
+            # Sub-resources
+            # Fields
+            api_settings.URL_FIELD_NAME,
+            'slug',
+            'alt_slug',
+            'name_display',
+            'name_sort',
+            'website',
+            'wikipedia_link',
+            'admin_notes',
+        )
+        extra_kwargs = {
+            'url': {
+                'lookup_field': 'slug',
+                'view_name': 'gk_collections_creator',
+            }
+        }
+
+
 class WorkOrigin(ModelSubSerializer):
     class Meta:
         model = WorkBase
@@ -48,53 +134,6 @@ class WorkOrigin(ModelSubSerializer):
             'origin_city',
             'origin_neighborhood',
             'origin_colloquial',
-        )
-
-
-class CreatorSummary(serializers.HyperlinkedModelSerializer):
-    """ Minimal information about a creator """
-    class Meta:
-        model = CreatorBase
-        fields = (
-            'url',
-            'name_display',
-        )
-        extra_kwargs = {
-            'url': {
-                'lookup_field': 'slug',
-                'view_name': 'gk_collections_creator',
-            }
-        }
-
-
-class WorkCreator(serializers.HyperlinkedModelSerializer):
-    """ Relationship between a work and a creator """
-    creator = CreatorSummary()
-
-    class Meta:
-        model = WorkCreatorModel
-        fields = (
-            'creator',
-            'role',
-            'is_primary',
-            'order',
-        )
-
-
-class Image(serializers.ModelSerializer):
-    class Meta:
-        model = ImageModel
-        fields = (
-            'image',
-            'width',
-            'height',
-            'title',
-            'caption',
-            'credit',
-            'source',
-            'license',
-            'notes',
-            'is_ok_for_web',
         )
 
 
