@@ -1,5 +1,7 @@
+import logging
+
 from django.conf import settings
-from django.conf.urls import url, include, patterns
+from django.conf.urls import url, include
 from django.utils.module_loading import import_string
 
 from rest_framework import routers
@@ -7,6 +9,8 @@ from rest_framework_swagger.views import get_swagger_view
 
 from .images import views as images_views
 from .pages import views as pages_views
+
+logger = logging.getLogger(__name__)
 
 
 schema_doc_view = get_swagger_view(title='GLAMkit API')
@@ -20,7 +24,13 @@ router.register(r'pages', pages_views.PageViewSet, 'pages-api')
 for api_section_name, pluggable_router \
         in getattr(settings, 'EXTRA_API_ROUTERS', []):
     if isinstance(pluggable_router, basestring):
-        pluggable_router = import_string(pluggable_router)
+        try:
+            pluggable_router = import_string(pluggable_router)
+        except ImportError, ex:
+            logger.warn(
+                "Failed to load API router '%s' from EXTRA_API_ROUTERS: %s"
+                % (pluggable_router, ex))
+            continue
     for prefix, viewset, basename in pluggable_router.registry:
         if api_section_name:
             prefix = api_section_name + prefix
