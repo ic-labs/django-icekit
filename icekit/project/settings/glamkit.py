@@ -33,6 +33,18 @@ INSTALLED_APPS += (
     'rest_framework_swagger',  # Required for automatic API documentation
 )
 
+# Paths to Django REST framework router objects to include in the base
+# API provided by `icekit.api.urls`.
+# Defined as tuples of (optional) apisection name prefixes and dotted-path to
+# a router object.
+EXTRA_API_ROUTERS = (
+    # Include API routes for all installed GLAMkit Collection plugins.
+    ('collection/', 'glamkit_collections.contrib.work_creator.api.router'),
+    # To expose only some GLAMkit Collection plugins instead of all, define
+    # more specific router entries such as:
+    #     ('', 'glamkit_collections.contrib.work_creator.plugins.artwork.api.router'
+)
+
 # This settings file is loaded after calculated.py, so we don't want to
 # overwrite the urlconf if it is set to the test urls.
 if not 'test' in ROOT_URLCONF:
