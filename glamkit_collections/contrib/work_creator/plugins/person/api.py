@@ -1,9 +1,7 @@
-import rest_framework_filters as filters
 from rest_framework import routers
 
 from icekit.api.base_serializers import ModelSubSerializer
 from icekit.api.base_views import RedirectViewset
-from icekit.api.base_filters import CaseInsensitiveBooleanFilter
 
 from ...api_serializers import Creator
 from .models import PersonCreator as PersonCreatorModel
@@ -84,4 +82,4 @@ class APIViewSet(RedirectViewset):
 
 
 router = routers.DefaultRouter()
-router.register('person', APIViewSet, 'person')
+router.register('person', APIViewSet, 'person-api')
