@@ -1,5 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import pluralize
+from django.utils.datastructures import OrderedSet
 from django_countries.fields import CountryField
 from glamkit_collections.contrib.work_creator.managers import \
     WorkCreatorQuerySet, WorkImageQuerySet
@@ -10,6 +11,8 @@ from icekit.plugins.image.abstract_models import ImageLinkMixin
 from icekit.models import ICEkitContentsMixin
 from polymorphic.models import PolymorphicModel
 from django.db import models
+
+from glamkit_collections.models import GeographicLocation
 
 
 class CreatorBase(
@@ -115,6 +118,18 @@ class CreatorBase(
         return self.get_roles().filter(is_primary=True)
 
 
+class WorkOrigin(models.Model):
+    work = models.ForeignKey('WorkBase')
+    geographic_location = models.ForeignKey(GeographicLocation)
+    order = models.PositiveIntegerField(default=0)
+
+    def __unicode__(self):
+        return "{0} originates from {1}".format(self.work, self.geographic_location)
+
+    class Meta:
+        ordering = ('order',)
+
+
 class WorkBase(
     PolymorphicModel,
     FluentFieldsMixin,
@@ -162,25 +177,8 @@ class WorkBase(
     )
 
     # where was it made
-    origin_continent = models.CharField(
-        blank=True,
-        max_length=255)
-    origin_country = CountryField(blank=True)
-    origin_state_province = models.CharField(
-        blank=True,
-        max_length=255)
-    origin_city = models.CharField(
-        blank=True,
-        max_length=255)
-    origin_neighborhood = models.CharField(
-        blank=True,
-        max_length=255)
-    origin_colloquial = models.CharField(
-        blank=True,
-        max_length=255,
-        help_text='The colloquial or historical name of the place at the time '
-                  'of the object\'s creation, e.g., "East Bay"'
-    )
+    origin_locations = models.ManyToManyField(GeographicLocation, through=WorkOrigin)
+
     credit_line = models.TextField(
         blank=True,
         help_text="A formal public credit statement about a transfer of "
@@ -282,6 +280,19 @@ class WorkBase(
     def get_primary_roles(self):
         """Return the m2m relations connecting me to creators as primary creator"""
         return self.get_roles().filter(is_primary=True)
+
+    def get_title(self):
+        if self.date_display:
+            return "{0} ({1})".format(self.title, self.date_display)
+        return self.title
+
+    def get_origin_countries(self):
+        countries = OrderedSet()
+        for o in WorkOrigin.objects.filter(work=self):
+            if o.geographic_location.country:
+                countries.add(o.geographic_location.country)
+        return countries
+
 
 
 class Role(PluralTitleSlugMixin):

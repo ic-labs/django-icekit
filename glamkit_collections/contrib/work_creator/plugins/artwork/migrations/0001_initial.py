@@ -23,7 +23,6 @@ class Migration(migrations.Migration):
                 ('dimensions_height_cm', models.FloatField(blank=True, null=True, help_text=b'ditto height')),
                 ('dimensions_depth_cm', models.FloatField(blank=True, null=True, help_text=b'ditto depth')),
                 ('dimensions_weight_kg', models.FloatField(blank=True, null=True, help_text=b"The measurement of the object's width, in kilograms")),
-                ('department', models.CharField(max_length=255, blank=True, help_text=b'The managerial unit responsible for the object, e.g., "Western Painting."')),
             ],
             options={
                 'abstract': False,

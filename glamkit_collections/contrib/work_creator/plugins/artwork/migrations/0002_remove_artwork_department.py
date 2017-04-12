@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -11,8 +10,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='artwork',
-            name='department',
-        ),
+        # The add has been removed from initial migrations.
+        # migrations.RemoveField(
+        #     model_name='artwork',
+        #     name='department',
+        # ),
     ]

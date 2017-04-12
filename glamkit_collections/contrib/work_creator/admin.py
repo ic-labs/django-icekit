@@ -2,6 +2,7 @@ import six
 from adminsortable2.admin import SortableInlineAdminMixin
 from django.contrib import admin
 from django.db.models import Count
+from django.utils.safestring import mark_safe
 from icekit.admin_tools.polymorphic import \
     ChildModelPluginPolymorphicParentModelAdmin
 import models
@@ -13,13 +14,14 @@ from icekit.admin_tools.mixins import ThumbnailAdminMixin, FluentLayoutsMixin
 from icekit.admin_tools.utils import admin_link, admin_url
 from polymorphic.admin import PolymorphicChildModelAdmin, PolymorphicChildModelFilter
 
+from glamkit_collections.models import Country
 
 
 class WorkCreatorsInlineForCreators(admin.TabularInline, ThumbnailAdminMixin):
     model = models.WorkCreator
     raw_id_fields = ('work',)
     extra = 1
-    exclude = ('order',)
+    exclude = ('order',) # doing this prevents sorting from being edited in this context.
     readonly_fields = (
         'link',
     )
@@ -43,7 +45,7 @@ class WorkCreatorsInlineForCreators(admin.TabularInline, ThumbnailAdminMixin):
 
 
 class WorkCreatorsInlineForWorks(SortableInlineAdminMixin, WorkCreatorsInlineForCreators):
-    exclude = None
+    exclude = None # re-enable sorting
     raw_id_fields = ('creator',)
 
     def link(self, inst):
@@ -63,6 +65,12 @@ class WorkCreatorsInlineForWorks(SortableInlineAdminMixin, WorkCreatorsInlineFor
             .get_queryset(request) \
             .filter(work__publishing_is_draft=True,
                     creator__publishing_is_draft=True)
+
+
+class WorkOriginsInline(SortableInlineAdminMixin, admin.TabularInline):
+    model = models.WorkOrigin
+    raw_id_fields = ('geographic_location', )
+    extra = 0
 
 
 class WorkImageInline(
@@ -143,23 +151,13 @@ class WorkChildAdmin(
     exclude = ('layout', 'alt_slug',)
     prepopulated_fields = {"slug": ("accession_number", "title",)}
 
-    inlines = [WorkCreatorsInlineForWorks, WorkImageInline] + \
+    inlines = [WorkOriginsInline, WorkCreatorsInlineForWorks, WorkImageInline] + \
         ICEkitContentsAdmin.inlines
 
-    DATE_FIELDSET = ("Date", {
+    DATE_FIELDSET = ("Place and date", {
         'fields': (
             'date_display',
             'date_edtf',
-        ),
-    })
-    ORIGIN_FIELDSET = ("Origin", {
-        'fields': (
-            'origin_continent',
-            'origin_country',
-            'origin_state_province',
-            'origin_city',
-            'origin_neighborhood',
-            'origin_colloquial',
         ),
     })
     LINKS_FIELDSET = ('Links', {
@@ -179,7 +177,6 @@ class WorkChildAdmin(
             ),
         }),
         DATE_FIELDSET,
-        ORIGIN_FIELDSET,
         ("Details", {
             'fields': (
                 'credit_line',
@@ -244,6 +241,24 @@ class CreatorBaseAdmin(
     works_count.admin_order_field = 'works_count'
 
 
+class CountryFilter(admin.SimpleListFilter):
+    title = 'Country'
+    parameter_name = 'country'
+
+    def lookups(self, request, model_admin):
+        return ((c.id, c) for c in Country.objects.filter(
+            id__in=model_admin.get_queryset(request).values_list(
+                'origin_locations__country_id', flat=True
+            ).distinct()
+        ))
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(origin_locations__geographic_location__country_id=self.value())
+        else:
+            return queryset
+
+
 class WorkBaseAdmin(
     ChildModelPluginPolymorphicParentModelAdmin,
     ICEkitContentsAdmin,
@@ -257,7 +272,7 @@ class WorkBaseAdmin(
     list_display = ('thumbnail',) + ICEkitContentsAdmin.list_display + (
         'child_type_name',
         'creators_admin_links',
-        'country_flag',
+        'country_flags',
     )
     list_display_links = list_display[:2]
     search_fields = (
@@ -271,14 +286,21 @@ class WorkBaseAdmin(
     list_filter = ICEkitContentsAdmin.list_filter + (
         PolymorphicChildModelFilter,
         'department',
-        'origin_continent',
-        'origin_country',
+        CountryFilter,
     )
 
-    def country_flag(self, inst):
-        return inst.origin_country.unicode_flag
-    country_flag.short_description = 'Country'
-    country_flag.admin_order_field = 'origin_country'
+    def get_queryset(self, request):
+        return super(WorkBaseAdmin, self).get_queryset(request).prefetch_related('origin_locations__country')
+
+    def country_flags(self, inst):
+        result = []
+        for loc in inst.origin_locations.all():
+            f = loc.flag()
+            if f:
+                result.append(f)
+        return mark_safe("&nbsp;".join(result))
+    country_flags.short_description = 'Countries'
+    country_flags.admin_order_field = 'origin_locations'
 
     def creators_admin_links(self, inst):
         r = []
