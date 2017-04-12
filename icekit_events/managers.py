@@ -7,6 +7,7 @@ from collections import OrderedDict
 from datetime import datetime, timedelta, time
 
 from django.db.models import F
+from django.utils.timezone import make_aware
 from icekit.publishing.managers import PublishingPolymorphicManager, \
     PublishingPolymorphicQuerySet
 
@@ -33,10 +34,9 @@ class EventQueryset(PublishingPolymorphicQuerySet):
 
     def with_upcoming_or_no_occurrences(self):
         """
-
         :return:
         """
-        ids = list(self.with_upcoming_occurrences().values_list('id', flat=True)) + list(self.with_no_occurrences().values_list('id', flat=True))
+        ids = set(self.with_upcoming_occurrences().values_list('id', flat=True)) | set(self.with_no_occurrences().values_list('id', flat=True))
         return self.model.objects.filter(id__in=ids)
 
     def with_occurrence_qs(self, occ_qs):
@@ -56,18 +56,46 @@ class EventQueryset(PublishingPolymorphicQuerySet):
 
     def upcoming(self):
         from icekit_events.models import Occurrence
-        return self.with_occurrence_qs(Occurrence.objects.upcoming())
+        return self.with_occurrence_qs(Occurrence.objects.upcoming()).distinct()
 
     def order_by_first_occurrence(self):
         """
-        :return: The event in order of minimum occurrence. Use with the
-        functions above to restrict the occurrences, to get e.g. first
-        _upcoming_ occurrence, like this:
-
-            EventBase.objects.upcoming().order_by_first_occurrence()
+        :return: The event in order of minimum occurrence. 
         """
         return self.annotate(first_occurrence=models.Min('occurrences__start')).order_by(
             'first_occurrence')
+
+    def order_by_next_occurrence(self):
+        """
+        
+        :return: A list of events in order of minimum occurrence greater than 
+        now (or overlapping now in the case of drop-in events). 
+        
+        This is an expensive operation - use with as small a source 
+        queryset as possible.
+        
+        Events with no upcoming occurrence appear last (in order of their first 
+        occurrence). Events with no occurrences at all appear right at the end 
+        (in no order). To remove these, use "with_upcoming_occurrences" or 
+        "with_upcoming_or_no_occurrences".
+        """
+
+        qs = self.prefetch_related('occurrences')
+        def _sort(x):
+            try:
+                # If there's an upcoming occurrence, use it.
+                return x.get_next_occurrence().start
+            except AttributeError:
+                try:
+                    # If there's any occurrence, use the first one, plus 1000 years.
+                    return x.get_first_occurrence().start + timedelta(days=1000*365)
+                except AttributeError:
+                    # If no occurence, use a localised datetime.max (minus a
+                    # few days to avoid overflow)
+                    return make_aware(datetime.max-timedelta(2))
+
+        return sorted(qs, key=_sort)
+
 
 EventManager = PublishingPolymorphicManager.from_queryset(EventQueryset)
 EventManager.use_for_related_fields = True
@@ -153,7 +181,7 @@ class OccurrenceQueryset(QuerySet):
             )
 
         return qs
-    
+
     def available_within(self, start=None, end=None):
         """
         :return: Normal events that start within the range, and
@@ -213,8 +241,24 @@ class OccurrenceQueryset(QuerySet):
         return self.exclude(id__in=self._same_day_ids())
 
     def upcoming(self):
+        """
+        :return: If the event is drop-in, return occurrences that overlap now
+        until any time in the future. If the event is not drop-in, return
+        occurrences that start in the future.
+        
+        Occurrences are ordered by their `start` by default.
+        """
         return self.available_within(start=djtz.now(), end=None)
 
+    def next_occurrence(self):
+        """
+        :return: The next occurrence of the event, or current occurrence if
+        the event is a drop-in.
+        """
+        try:
+            return self.upcoming()[0]
+        except IndexError:
+            return None
 
 OccurrenceManager = models.Manager.from_queryset(OccurrenceQueryset)
 OccurrenceManager.use_for_related_fields = True

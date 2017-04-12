@@ -493,6 +493,9 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     def is_upcoming(self):
         return self.get_occurrences().upcoming()
 
+    def get_next_occurrence(self):
+        return self.occurrences.next_occurrence()
+
 
 class AbstractEventWithLayouts(EventBase, FluentFieldsMixin):
 
