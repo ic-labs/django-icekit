@@ -49,6 +49,16 @@ In development
       consequently, models which use ``ThumbnailAdminMixin`` have a visual
       preview in ``raw_id`` fields, including ``icekit.plugins.image.Image``.
 
+-  Add ``icekit.api`` application to provide APIs to read data from, and
+   sometimes write data to, items in the site from program clients.
+
+   - Relocate public-access and read-only API for published pages to the new
+      app location.
+
+   - Add new authenticated-access and permissions-based API for images.
+
+   - See documentation in *docs/topics/apis.rst*.
+
 -  Add ``icekit.workflow`` application to associate, manage, and filter
    workflow state information like status and user-assigment for
    arbitrary models.

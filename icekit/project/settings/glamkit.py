@@ -7,7 +7,12 @@ from .icekit import *
 INSTALLED_APPS += (
     'sponsors',
     'press_releases',
+    'icekit.api',
     'icekit.plugins.iiif',
+
+    # Django REST framework
+    'rest_framework',
+    'rest_framework.authtoken',  # Required for `TokenAuthentication`
 
     'icekit_events',
     'icekit_events.event_types.simple',
@@ -78,3 +83,24 @@ FLUENT_CONTENTS_PLACEHOLDER_CONFIG.update({
     },
     'related': {'plugins': LINK_PLUGINS },
 })
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # Enable session authentication for simple access via web browser and
+        # for AJAX requests, see
+        # http://www.django-rest-framework.org/api-guide/authentication/#sessionauthentication
+        'rest_framework.authentication.SessionAuthentication',
+        # Enable token authentication for access by clients such as bots
+        # outside a web browser context, see
+        # http://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        # Apply Django's standard model permissions for API operations, with
+        # customisation to prevent any API access for GET listings, HEAD etc
+        # to those users permitted to view model listings in the admin. See
+        # http://www.django-rest-framework.org/api-guide/permissions/#djangomodelpermissions
+        'icekit.utils.api.DjangoModelPermissionsRestrictedListing',
+    )
+}
