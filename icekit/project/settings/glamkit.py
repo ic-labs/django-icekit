@@ -20,6 +20,8 @@ INSTALLED_APPS += (
     'icekit_events.plugins.links',
     'icekit_events.plugins.todays_occurrences',
     'icekit_events.page_types.eventlistingfordate',
+
+    'glamkit_collections',
 )
 
 # This settings file is loaded after calculated.py, so we don't want to
