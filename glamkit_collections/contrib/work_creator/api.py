@@ -13,12 +13,9 @@ COLLECTION_PLUGINS_WITH_API = (
     'artwork',
     'film',
     'game',
-    'moving_image',
     # Creators
     'organization',
     'person',
-    # Other
-    'links',
 )
 
 
