@@ -8,6 +8,9 @@ from icekit.api.base_serializers import ModelSubSerializer
 from .models import WorkBase, CreatorBase, WorkCreator as WorkCreatorModel, \
     WorkImage as WorkImageModel, WorkImageType as WorkImageTypeModel, \
     Role as RoleModel
+from .plugins.moving_image.models import Rating as RatingModel, \
+    Genre as GenreModel, MediaType as MediaTypeModel, \
+    MovingImageWork as MovingImageWorkModel
 
 
 ImageModel = apps.get_model('icekit_plugins_image.Image')
@@ -205,4 +208,52 @@ class Work(serializers.HyperlinkedModelSerializer):
             'department',
             'credit_line',
             'accession_number',
+        )
+
+
+class Rating(serializers.ModelSerializer):
+    class Meta:
+        model = RatingModel
+        fields = (
+            'title',
+            'slug',
+            'image',
+        )
+
+
+class Genre(serializers.ModelSerializer):
+    class Meta:
+        model = GenreModel
+        fields = (
+            'title',
+            'slug',
+        )
+
+
+class MediaType(serializers.ModelSerializer):
+    class Meta:
+        model = MediaTypeModel
+        fields = (
+            'title',
+            'slug',
+        )
+
+
+class MovingImageWork(Work):
+    rating = Rating()
+    genres = Genre()
+    media_type = MediaType()
+
+    class Meta:
+        model = MovingImageWorkModel
+        fields = Work.Meta.fields + (
+            # Relationships
+            'rating',
+            'genres',
+            'media_type',
+            # Fields
+            'rating_annotation',
+            'duration_minutes',
+            'trailer',
+            'imdb_link',
         )
