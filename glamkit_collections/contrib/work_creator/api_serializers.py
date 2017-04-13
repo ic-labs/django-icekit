@@ -75,7 +75,7 @@ class WorkSummary(serializers.HyperlinkedModelSerializer):
         }
 
 
-class Role(serializers.HyperlinkedModelSerializer):
+class Role(serializers.ModelSerializer):
     class Meta:
         model = RoleModel
         fields = (
@@ -128,12 +128,6 @@ class Creator(serializers.HyperlinkedModelSerializer):
             'wikipedia_link',
             'admin_notes',
         )
-        extra_kwargs = {
-            'url': {
-                'lookup_field': 'slug',
-                'view_name': 'gk_collections_creator',
-            }
-        }
 
 
 class WorkOrigin(ModelSubSerializer):
@@ -212,9 +206,3 @@ class Work(serializers.HyperlinkedModelSerializer):
             'credit_line',
             'accession_number',
         )
-        extra_kwargs = {
-            'url': {
-                'lookup_field': 'slug',
-                'view_name': 'gk_collections_work',
-            }
-        }

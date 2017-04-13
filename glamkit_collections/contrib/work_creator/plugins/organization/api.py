@@ -7,6 +7,9 @@ from ...api_serializers import Creator
 from .models import OrganizationCreator as OrganizationCreatorModel
 
 
+VIEWNAME = 'organization-api'
+
+
 class Organization(Creator):
     type = serializers.SerializerMethodField()
     type_plural = serializers.SerializerMethodField()
@@ -17,7 +20,12 @@ class Organization(Creator):
             'type',
             'type_plural',
         )
-        extra_kwargs = Creator.Meta.extra_kwargs
+        extra_kwargs = {
+            'url': {
+                'lookup_field': 'pk',
+                'view_name': 'api:%s-detail' % VIEWNAME,
+            }
+        }
 
     def get_type(self, obj):
         return obj.get_type()
@@ -35,4 +43,4 @@ class APIViewSet(ModelViewSet):
 
 
 router = routers.DefaultRouter()
-router.register('organization', APIViewSet, 'organization-api')
+router.register('organization', APIViewSet, VIEWNAME)

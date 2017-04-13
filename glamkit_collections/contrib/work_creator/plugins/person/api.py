@@ -7,6 +7,9 @@ from ...api_serializers import Creator
 from .models import PersonCreator as PersonCreatorModel
 
 
+VIEWNAME = 'person-api'
+
+
 class PersonName(ModelSubSerializer):
     class Meta:
         model = PersonCreatorModel
@@ -62,7 +65,12 @@ class Person(Creator):
             'life_info',
             'background',
         )
-        extra_kwargs = Creator.Meta.extra_kwargs
+        extra_kwargs = {
+            'url': {
+                'lookup_field': 'pk',
+                'view_name': 'api:%s-detail' % VIEWNAME,
+            }
+        }
 
 
 class APIViewSet(ModelViewSet):
@@ -82,4 +90,4 @@ class APIViewSet(ModelViewSet):
 
 
 router = routers.DefaultRouter()
-router.register('person', APIViewSet, 'person-api')
+router.register('person', APIViewSet, VIEWNAME)

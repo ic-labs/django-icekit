@@ -10,6 +10,9 @@ from ...api_serializers import Work
 from .models import Artwork as ArtworkModel
 
 
+VIEWNAME = 'artwork-api'
+
+
 class ArtworkDimensions(ModelSubSerializer):
     class Meta:
         model = ArtworkModel
@@ -36,7 +39,12 @@ class Artwork(Work):
             # Fields
             'medium_display',
         )
-        extra_kwargs = Work.Meta.extra_kwargs
+        extra_kwargs = {
+            'url': {
+                'lookup_field': 'pk',
+                'view_name': 'api:%s-detail' % VIEWNAME,
+            }
+        }
 
 
 class ArtworkFilter(filters.FilterSet):
@@ -60,4 +68,4 @@ class APIViewSet(ModelViewSet):
 
 
 router = routers.DefaultRouter()
-router.register('artwork', APIViewSet, 'artwork-api')
+router.register('artwork', APIViewSet, VIEWNAME)
