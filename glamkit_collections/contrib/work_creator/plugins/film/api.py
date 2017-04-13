@@ -20,7 +20,10 @@ class Format(serializers.ModelSerializer):
 
 
 class Film(MovingImageWork):
-    formats = Format()
+    formats = Format(
+        many=True,
+        read_only=True,
+    )
 
     class Meta:
         model = FilmModel

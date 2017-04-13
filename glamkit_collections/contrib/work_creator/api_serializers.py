@@ -134,6 +134,11 @@ class Creator(serializers.HyperlinkedModelSerializer):
 
 
 class WorkOrigin(ModelSubSerializer):
+    origin_country = serializers.SerializerMethodField()
+
+    def get_origin_country(self, obj):
+        return obj.origin_country.name
+
     class Meta:
         model = WorkBase
         source_prefix = 'origin_'
@@ -241,7 +246,10 @@ class MediaType(serializers.ModelSerializer):
 
 class MovingImageWork(Work):
     rating = Rating()
-    genres = Genre()
+    genres = Genre(
+        many=True,
+        read_only=True,
+    )
     media_type = MediaType()
 
     class Meta:

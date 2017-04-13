@@ -30,8 +30,14 @@ class GamePlatform(serializers.ModelSerializer):
 
 
 class Game(MovingImageWork):
-    input_types = GameInputType()
-    platforms = GamePlatform()
+    input_types = GameInputType(
+        many=True,
+        read_only=True,
+    )
+    platforms = GamePlatform(
+        many=True,
+        read_only=True,
+    )
 
     class Meta:
         model = GameModel
