@@ -1,10 +1,8 @@
-from rest_framework import serializers
-
 import rest_framework_filters as filters
 from rest_framework import routers
 
 from icekit.api.base_serializers import ModelSubSerializer
-from icekit.api.base_views import RedirectViewset
+from icekit.api.base_views import ModelViewSet
 from icekit.api.base_filters import CaseInsensitiveBooleanFilter, \
     WorkHasImagesFilter
 
@@ -50,7 +48,7 @@ class ArtworkFilter(filters.FilterSet):
         model = ArtworkModel
 
 
-class APIViewSet(RedirectViewset):
+class APIViewSet(ModelViewSet):
     """
     Artwork resource
     """

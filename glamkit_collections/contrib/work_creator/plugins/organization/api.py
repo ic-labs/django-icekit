@@ -1,7 +1,7 @@
 from rest_framework import routers
 from rest_framework import serializers
 
-from icekit.api.base_views import RedirectViewset
+from icekit.api.base_views import ModelViewSet
 
 from ...api_serializers import Creator
 from .models import OrganizationCreator as OrganizationCreatorModel
@@ -26,7 +26,7 @@ class Organization(Creator):
         return obj.get_type_plural()
 
 
-class APIViewSet(RedirectViewset):
+class APIViewSet(ModelViewSet):
     """
     Organization resource.
     """

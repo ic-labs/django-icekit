@@ -1,7 +1,7 @@
 from rest_framework import routers
 
 from icekit.api.base_serializers import ModelSubSerializer
-from icekit.api.base_views import RedirectViewset
+from icekit.api.base_views import ModelViewSet
 
 from ...api_serializers import Creator
 from .models import PersonCreator as PersonCreatorModel
@@ -65,7 +65,7 @@ class Person(Creator):
         extra_kwargs = Creator.Meta.extra_kwargs
 
 
-class APIViewSet(RedirectViewset):
+class APIViewSet(ModelViewSet):
     """
     Artist resource.
     """
