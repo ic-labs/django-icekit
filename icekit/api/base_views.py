@@ -9,6 +9,13 @@ from rest_framework.reverse import reverse
 from glamkit_collections.utils import alt_slugify
 
 
+class ModelViewSet(viewsets.ModelViewSet):
+    """
+    ICEkit default API model viewset, ready for any customisation required.
+    """
+    lookup_field = 'pk'
+
+
 class RedirectViewset(viewsets.ReadOnlyModelViewSet):
     lookup_field = 'slug'
     lookup_value_regex = ".+"
