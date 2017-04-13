@@ -9,7 +9,6 @@ class MovingImageWorkAdmin(WorkChildAdmin):
         ('Moving image', {
             'fields': (
                 'genres',
-                'language',
                 'media_type',
                 'duration_minutes',
                 'rating',
