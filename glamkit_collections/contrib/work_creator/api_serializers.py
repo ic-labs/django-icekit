@@ -106,8 +106,30 @@ class WorkCreator(serializers.HyperlinkedModelSerializer):
         )
 
 
+class WorkCreatorFromWork(WorkCreator):
+    """ Relationship from a work to its creators """
+    class Meta:
+        model = WorkCreatorModel
+        # All fields from base WorkCreator except 'work' which is redundant
+        fields = [
+            f for f in WorkCreator.Meta.fields
+            if f != 'work'
+        ]
+
+
+class WorkCreatorFromCreator(WorkCreator):
+    """ Relationship from a creator to their works """
+    class Meta:
+        model = WorkCreatorModel
+        # All fields from base WorkCreator except 'creator' which is redundant
+        fields = [
+            f for f in WorkCreator.Meta.fields
+            if f != 'creator'
+        ]
+
+
 class Creator(serializers.HyperlinkedModelSerializer):
-    works = WorkCreator(
+    works = WorkCreatorFromCreator(
         source='workcreator_set',
         many=True,
         read_only=True,
@@ -182,7 +204,7 @@ class WorkImage(serializers.ModelSerializer):
 
 
 class Work(serializers.HyperlinkedModelSerializer):
-    creators = WorkCreator(
+    creators = WorkCreatorFromWork(
         source='workcreator_set',
         many=True,
         read_only=True,
