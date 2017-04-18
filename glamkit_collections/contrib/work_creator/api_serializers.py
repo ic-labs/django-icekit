@@ -3,7 +3,8 @@ from django.apps import apps
 from rest_framework import serializers
 from rest_framework.settings import api_settings
 
-from icekit.api.base_serializers import ModelSubSerializer
+from icekit.api.base_serializers import ModelSubSerializer, \
+    PolymorphicHyperlinkedModelSerializer, PolymorphicHyperlinkedRelatedField
 
 from .models import WorkBase, CreatorBase, WorkCreator as WorkCreatorModel, \
     WorkImage as WorkImageModel, WorkImageType as WorkImageTypeModel, \
@@ -33,20 +34,24 @@ class Image(serializers.ModelSerializer):
         )
 
 
-class CreatorSummary(serializers.HyperlinkedModelSerializer):
+class CreatorSummary(PolymorphicHyperlinkedModelSerializer):
     """ Minimal information about a creator """
+
+    def get_child_view_name_data(self):
+        from .plugins.organization import api as organization_api
+        from .plugins.person import api as person_api
+        return {
+            person_api.PersonCreatorModel: person_api.VIEWNAME,
+            organization_api.OrganizationCreatorModel:
+                organization_api.VIEWNAME,
+        }
+
     class Meta:
         model = CreatorBase
         fields = (
             api_settings.URL_FIELD_NAME,
             'name_display',
         )
-        extra_kwargs = {
-            'url': {
-                'lookup_field': 'slug',
-                'view_name': 'gk_collections_creator',
-            }
-        }
 
 
 class WorkDate(ModelSubSerializer):
@@ -59,9 +64,19 @@ class WorkDate(ModelSubSerializer):
         )
 
 
-class WorkSummary(serializers.HyperlinkedModelSerializer):
+class WorkSummary(PolymorphicHyperlinkedModelSerializer):
     """ Minimal information about a work """
     date = WorkDate()
+
+    def get_child_view_name_data(self):
+        from .plugins.game import api as game_api
+        from .plugins.film import api as film_api
+        from .plugins.artwork import api as artwork_api
+        return {
+            game_api.GameModel: game_api.VIEWNAME,
+            film_api.FilmModel: film_api.VIEWNAME,
+            artwork_api.ArtworkModel: artwork_api.VIEWNAME,
+        }
 
     class Meta:
         model = WorkBase
@@ -70,12 +85,6 @@ class WorkSummary(serializers.HyperlinkedModelSerializer):
             'title',
             'date',
         )
-        extra_kwargs = {
-            'url': {
-                'lookup_field': 'slug',
-                'view_name': 'gk_collections_work',
-            }
-        }
 
 
 class Role(serializers.ModelSerializer):
