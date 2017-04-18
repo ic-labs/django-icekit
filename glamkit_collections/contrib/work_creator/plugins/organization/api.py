@@ -7,7 +7,7 @@ from ...api_serializers import Creator
 from .models import OrganizationCreator as OrganizationCreatorModel
 
 
-VIEWNAME = 'organization-api'
+VIEWNAME = 'api:organization-api'
 
 
 class Organization(Creator):
@@ -23,7 +23,7 @@ class Organization(Creator):
         extra_kwargs = {
             'url': {
                 'lookup_field': 'pk',
-                'view_name': 'api:%s-detail' % VIEWNAME,
+                'view_name': '%s-detail' % VIEWNAME,
             }
         }
 

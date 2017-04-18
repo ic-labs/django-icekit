@@ -8,7 +8,7 @@ from .models import Game as GameModel, GameInputType as GameInputTypeModel, \
     GamePlatform as GamePlatformModel
 
 
-VIEWNAME = 'game-api'
+VIEWNAME = 'api:game-api'
 
 
 class GameInputType(serializers.ModelSerializer):
@@ -52,7 +52,7 @@ class Game(MovingImageWork):
         extra_kwargs = {
             'url': {
                 'lookup_field': 'pk',
-                'view_name': 'api:%s-detail' % VIEWNAME,
+                'view_name': '%s-detail' % VIEWNAME,
             }
         }
 

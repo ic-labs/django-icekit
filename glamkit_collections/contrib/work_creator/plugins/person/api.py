@@ -7,7 +7,7 @@ from ...api_serializers import Creator
 from .models import PersonCreator as PersonCreatorModel
 
 
-VIEWNAME = 'person-api'
+VIEWNAME = 'api:person-api'
 
 
 class PersonName(ModelSubSerializer):
@@ -68,7 +68,7 @@ class Person(Creator):
         extra_kwargs = {
             'url': {
                 'lookup_field': 'pk',
-                'view_name': 'api:%s-detail' % VIEWNAME,
+                'view_name': '%s-detail' % VIEWNAME,
             }
         }
 

@@ -7,7 +7,7 @@ from ...api_serializers import MovingImageWork
 from .models import Film as FilmModel, Format as FormatModel
 
 
-VIEWNAME = 'film-api'
+VIEWNAME = 'api:film-api'
 
 
 class Format(serializers.ModelSerializer):
@@ -34,7 +34,7 @@ class Film(MovingImageWork):
         extra_kwargs = {
             'url': {
                 'lookup_field': 'pk',
-                'view_name': 'api:%s-detail' % VIEWNAME,
+                'view_name': '%s-detail' % VIEWNAME,
             }
         }
 

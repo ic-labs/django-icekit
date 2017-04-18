@@ -10,7 +10,7 @@ from ...api_serializers import Work
 from .models import Artwork as ArtworkModel
 
 
-VIEWNAME = 'artwork-api'
+VIEWNAME = 'api:artwork-api'
 
 
 class ArtworkDimensions(ModelSubSerializer):
@@ -42,7 +42,7 @@ class Artwork(Work):
         extra_kwargs = {
             'url': {
                 'lookup_field': 'pk',
-                'view_name': 'api:%s-detail' % VIEWNAME,
+                'view_name': '%s-detail' % VIEWNAME,
             }
         }
 
