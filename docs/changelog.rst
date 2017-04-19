@@ -4,6 +4,23 @@ Changelog
 In development
 --------------
 
+-  Changed the way that we specify the homepage: create a page with url
+   override `/`. This is the way fluent does it. As a fallback, we look for a
+   page with slug `home`. If you mount pages under a page with override URL and
+   slug, the child pages inherit the override URL, making the page tree more
+   natural.
+
+-  Page Admin no longer replaces the change_list table with a tree.
+
+-  Provide default Localization formats.
+
+-  Improvements to Events admin and calendar. Calendar shows for single event.
+
+-  Better Date/Time/Datetime widgets in Admin forms
+
+-  Front-end improvements: updated preview links in templates, included
+   Bootstrap in backend and front-end by default.
+
 -  Added implementation of key parts of IIIF 2.1 spec for privileged users.
 
 -  Fleshed out Image model with more metadata and fields for rights/usage.
@@ -31,6 +48,16 @@ In development
       The existing ``ThumbnailAdminMixin`` now inherits from this class and
       consequently, models which use ``ThumbnailAdminMixin`` have a visual
       preview in ``raw_id`` fields, including ``icekit.plugins.image.Image``.
+
+-  Add ``icekit.api`` application to provide APIs to read data from, and
+   sometimes write data to, items in the site from program clients.
+
+   - Relocate public-access and read-only API for published pages to the new
+      app location.
+
+   - Add new authenticated-access and permissions-based API for images.
+
+   - See documentation in *docs/topics/apis.rst*.
 
 -  Add ``icekit.workflow`` application to associate, manage, and filter
    workflow state information like status and user-assigment for

@@ -1,7 +1,7 @@
 from urlparse import urljoin
 
 from django.conf import settings
-from icekit.utils.admin.urls import admin_url
+from icekit.admin_tools.utils import admin_url
 from icekit.utils.attributes import first_of
 from unidecode import unidecode
 
@@ -218,6 +218,7 @@ class ListableMixin(models.Model):
         if li:
             from easy_thumbnails.files import get_thumbnailer
             thumb_url = get_thumbnailer(li)['og_image'].url
+            # TODO: looks like this may fail if SITE_DOMAIN = "acmi.lvh.me"
             return urljoin(settings.SITE_DOMAIN, thumb_url)
 
     def get_og_description(self):

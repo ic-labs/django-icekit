@@ -18,7 +18,11 @@ class MediaCategory(abstract_models.AbstractMediaCategory):
     """
     A categorisation model for Media assets.
     """
-    pass
+    class Meta:
+        # Resetting verbose name because model rename migrations are slooooow
+        verbose_name = 'Asset category'
+        verbose_name_plural = 'Asset categories'
+
 
 
 class ICEkitContentsMixin(PublishingModel, WorkflowStateMixin):

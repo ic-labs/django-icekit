@@ -14,11 +14,15 @@ from fluent_pages.views import CmsPageDispatcher
 
 def index(request):
     try:
-        # If there is a page with slug 'home', render it, otherwise render a getting started page
-        return CmsPageDispatcher.as_view()(request, path='home/')
+        # If there is a page at the path /, render it
+        return CmsPageDispatcher.as_view()(request, path='')
     except Http404:
-        # render the welcome page
-        context = {
-            'has_pages': Page.objects.count(),
-        }
-        return TemplateResponse(request, 'fluent_pages/intro_page.html', context)
+        try:
+            # If there is a page with slug 'home', render it,
+            return CmsPageDispatcher.as_view()(request, path='home/')
+        except Http404:
+            # otherwise render a getting started page
+            context = {
+                'has_pages': Page.objects.count(),
+            }
+            return TemplateResponse(request, 'fluent_pages/intro_page.html', context)

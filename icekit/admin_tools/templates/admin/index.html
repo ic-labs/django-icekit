@@ -12,20 +12,9 @@
 
 {% block stylesheet %}{% endblock %}
 
-{% block extrastyle %}
-	{% compress css %}
-		{# Bootstrap, then default admin styles, then our styles. #}
-		{# This avoids overriding the admin with Bootstrap, and allows us to override anything. #}
-		<link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.css' %}" />
-		<link rel="stylesheet" href="{% static 'admin/css/base.css' %}" />
-	{% endcompress %}
-	{{ block.super }}
-{% endblock %}
-
 {% block extrahead %}
 	{{ block.super }}
 	{% compress js %}
-		<script src="{% static 'bootstrap/dist/js/bootstrap.js' %}"></script>
 		<script src="{% static 'admin/js/jquery.matchHeight.js' %}"></script>
 	{% endcompress %}
 	<script type="text/javascript">

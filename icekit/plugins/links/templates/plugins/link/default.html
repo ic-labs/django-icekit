@@ -1,7 +1,9 @@
 {% load thumbnail icekit_tags %}
 
 <div class="item-preview">
-    {% include "icekit/partials/preview_link.html" with obj=instance %}
+    {% if instance.get_absolute_url %}
+            <a class="item-preview__link" href="{{ instance.get_absolute_url }}">
+    {% endif %}
     {% if instance.get_list_image or instance.get_list_image_url %}{# get_list_image_url is from search results #}
         <div class="item-preview__thumb">
             <img
@@ -24,6 +26,12 @@
         </div>
     </div>
     {% if instance.get_absolute_url %}
-        <a class="item-preview__link" href="{{ instance.get_absolute_url }}">More info</a>
+        </a>
+    {% endif %}
+    {% if instance.get_item %}
+        {# Handle relation objects where we want to point to the target, rather than the relation #}
+        {% include "icekit/partials/preview_link.html" with obj=instance.get_item %}
+    {% else %}
+        {% include "icekit/partials/preview_link.html" with obj=instance %}
     {% endif %}
 </div>

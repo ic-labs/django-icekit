@@ -3,74 +3,82 @@
 {% load fluent_contents_tags thumbnail %}
 
 {% block content %}
-    {% block page_hero %}
-        {% with page.get_hero_image as hero_image %}
-            {% if hero_image %}
-                <div class="page-hero">
-                    <img
-                        class="page-hero__image"
-                        src="{{ hero_image.image|thumbnail_url:"hero_image" }}"
-                        alt="{{ hero_image.alt_text }}"
-                    />
-                </div>
-            {% endif %}
-        {% endwith %}
-    {% endblock %}
-	{% block page_breadcrumb %}
-    	{% with page.parent.get_published as parent %}
-			{% if parent %}
-				<div class="page-breadcrumb">
-					<i class="fa fa-caret-left page-breadcrumb__icon" aria-hidden="true"></i>
-					<a class="page-breadcrumb__link" href="{{ page.get_parent.get_absolute_url }}">
-						{{ page.get_parent.get_title }}
-					</a>
-				</div>
-			{% endif %}
-		{% endwith %}
-	{% endblock %}
-	{% block page_type %}
-		{% if page.get_type %}
-			<div class="page-type">
-				{% if page.get_type.get_absolute_url and page.get_type.is_public %}
-					<a class="page-type__link" href="{{ page.get_type.get_absolute_url }}">
-				{% endif %}
-				<span class="page-type__text">
+    <div class="container">
+        {% block page_hero %}
+            {% with page.get_hero_image as hero_image %}
+                {% if hero_image %}
+                    <div class="page-hero">
+                        <img
+                            class="page-hero__image"
+                            src="{{ hero_image.image|thumbnail_url:"hero_image" }}"
+                            alt="{{ hero_image.alt_text }}"
+                        />
+                    </div>
+                {% endif %}
+            {% endwith %}
+        {% endblock %}
+        {% block page_breadcrumb %}
+            {% with page.parent.get_published as parent %}
+                {% if parent %}
+                    <div class="page-breadcrumb">
+                        <i class="fa fa-caret-left page-breadcrumb__icon" aria-hidden="true"></i>
+                        <a class="page-breadcrumb__link" href="{{ page.get_parent.get_absolute_url }}">
+                            {{ page.get_parent.get_title }}
+                        </a>
+                    </div>
+                {% endif %}
+            {% endwith %}
+        {% endblock %}
+        {% block page_type %}
+            {% if page.get_type %}
+                <div class="page-type">
+                    {% if page.get_type.get_absolute_url and page.get_type.is_public %}
+                        <a class="page-type__link" href="{{ page.get_type.get_absolute_url }}">
+                    {% endif %}
+                    <span class="page-type__text">
 					{{ page.get_type }}
 				</span>
-				{% if page.get_type.get_absolute_url and page.get_type.is_public %}
-					</a>
-				{% endif %}
-			</div>
-		{% endif %}
-	{% endblock %}
-	{% block page_title %}
-		<h1>{{ page.title }}</h1>
-	{% endblock %}
-	{% block page_main_content %}
-		{% page_placeholder "main" role="m" %}
-	{% endblock %}
-    {% block page_related_content %}
-        {% if page.has_any_related_items %}
-            <section class="page-related">
-                <h3 class="page-related__title">Related content</h3>
-                <div class="page-related__content">
-                    <div class="page-related__content-container">
-                        {% page_placeholder "related" role="main" %}
-                    </div>
-                    <div class="page-related__links">
-                        {% for instance in page.get_auto_related_items %}
-                            <div class="page-related__link">
-                                {% include "plugins/link/default.html" %}
-                            </div>
-                        {% endfor %}
-                    </div>
+                    {% if page.get_type.get_absolute_url and page.get_type.is_public %}
+                        </a>
+                    {% endif %}
                 </div>
-            </section>
-        {% endif %}
-    {% endblock %}
+            {% endif %}
+        {% endblock %}
+        {% block page_title %}
+            <h1>{{ page.title }}</h1>
+        {% endblock %}
+        {% block page_main_content %}
+            {% page_placeholder "main" role="m" %}
+        {% endblock %}
+        {% block page_related_content %}
+            {% if page.get_related_items %}
+                <section class="page-related">
+                    <h3 class="page-related__title">Related content</h3>
+                    <div class="page-related__content">
+                        {% if page.slots.related.count %}
+                            <div class="page-related__content-container">
+                                {% page_placeholder "related" role="main" %}
+                            </div>
+                        {% endif %}
+                        {% with auto_related_items=page.get_auto_related_items %}
+                            {% if auto_related_items %}
+                                <div class="page-related__links">
+                                    {% for instance in auto_related_items %}
+                                        <div class="page-related__link">
+                                            {% include "plugins/link/default.html" %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </section>
+            {% endif %}
+        {% endblock %}
+    </div>
 {% endblock %}
 
-{% block js %}
-	{{ block.super }}
-	{% render_content_items_media %}
+{% block body_js %}
+    {{ block.super }}
+    {% render_content_items_media %}
 {% endblock %}

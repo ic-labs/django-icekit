@@ -67,6 +67,9 @@ class PlaceholderDescriptor(object):
 
                 If a slot name is used that does not exist an
                 `AttributeError` will be raised.
+
+                If you get this error for a slot that should exist, you may
+                need to run `manage.py add_missing_placeholders`.
                 """
                 try:
                     return get_related_model_objects(name)

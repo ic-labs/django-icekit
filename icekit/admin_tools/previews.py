@@ -113,7 +113,6 @@ class RawIdPreviewAdminMixin(admin.ModelAdmin):
     def fetch_field_previews(self, request, pk, field_name, raw_ids):
 
         # polymorphic models need to resolve to the child model
-        # TODO: use ctype_id?
         try:
             instance = self.get_queryset(request).get(pk=pk)
             if hasattr(instance, "get_real_instance"):
@@ -121,7 +120,7 @@ class RawIdPreviewAdminMixin(admin.ModelAdmin):
             model = type(instance)
         except ValueError: # pk = "add"
             # if this is a polymorphic add, get the child model
-            if request.GET['ct_id']:
+            if request.GET.get('ct_id', None):
                 model = ContentType.objects.get(id=request.GET['ct_id']).model_class()
             else:
                 model = self.model
