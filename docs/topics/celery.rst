@@ -96,9 +96,25 @@ If Celery tasks fail, they will show up as failures. However, if celery tasks
 'succeed' but with a very quick runtime (0.02 secs), the task
 is possibly prevented from running by a ``one_instance`` lock.
 
+Logging
+~~~~~~~
+
 Using Docker Cloud, you can also check the log (stdout) of the Celery Docker
 container for actual tasks being executed. Check the logs (stdout) of the
 Celery Beat container to ensure the scheduled tasks process is running.
+
+See the `Celery Logging docs <http://docs.celeryproject.org/en/latest/userguide/tasks.html#logging>`__
+for how to log, e.g.::
+
+   from celery.utils.log import get_task_logger
+
+   logger = get_task_logger(__name__)
+
+   @app.task
+   def add(x, y):
+       logger.info('Adding {0} + {1}'.format(x, y))
+       return x + y
+
 
 Freeing task locks
 ~~~~~~~~~~~~~~~~~~
