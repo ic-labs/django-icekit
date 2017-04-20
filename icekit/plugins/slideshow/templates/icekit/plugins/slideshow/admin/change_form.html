@@ -8,6 +8,22 @@
 
 	{% wysiwyg_setup %}
 
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(document).on('click', '.related-lookup', function(e) {
+                e.preventDefault();
+                showRelatedObjectLookupPopup(this);
+            }).on('click', 'fieldset.collapse a.collapse-toggle', function(ev) {
+                if ($(this).closest("fieldset").hasClass("collapsed")) {
+                    $(this).text(gettext("Hide")).closest("fieldset").removeClass("collapsed").trigger("show.fieldset", [$(this).attr("id")]);
+                } else {
+                    $(this).text(gettext("Show")).closest("fieldset").addClass("collapsed").trigger("hide.fieldset", [$(this).attr("id")]);
+                }
+                return false;
+            });
+        });
+    </script>
+
 {% endblock %}
 
 {% block extrastyle %}
