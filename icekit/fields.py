@@ -67,10 +67,23 @@ class QuietImageField(ImageField):
     """An imagefield that doesn't lose the plot when trying to find the
     dimensions of an image that doesn't exist"""
 
-    def update_dimension_fields(self, *args, **kwargs):
+    def update_dimension_fields(self, instance, *args, **kwargs):
         try:
+            # Remember original dimension values stored on the model instance
+            width, height = instance.width, instance.height
+
             super(QuietImageField, self).update_dimension_fields(
-                *args, **kwargs)
+                instance, *args, **kwargs)
+
+            # If dimension values have been updated, forcibly save the instance
+            # to make sure these values are persisted to the DB. Otherwise, if
+            # the instance is only loaded for reading the work to look up and
+            # set the image dimensions will be lost.
+            # NOTE: In theory this should not be necessary because any time
+            # this image field is set or updated the surrounding code will also
+            # save the model instance to persist the dimensions there.
+            if width != instance.width or height != instance.height:
+                instance.save()
         except IOError:
             pass
 
