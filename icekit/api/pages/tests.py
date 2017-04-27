@@ -1,5 +1,3 @@
-from django.core.urlresolvers import reverse
-
 from django_dynamic_fixture import G
 
 from fluent_contents.plugins.rawhtml.models import RawHtmlItem

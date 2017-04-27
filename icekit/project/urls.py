@@ -41,7 +41,8 @@ urlpatterns = patterns(
 
     # Installed apps.
     url(r'^forms/', include('forms_builder.forms.urls')),
-    url(r'^api/', include('icekit.api.urls')),
+    # API is made available at api.HOSTNAME domain by `icekit.project.hosts`
+    # url(r'^api/', include('icekit.api.urls')),
 
     # Get admin URLs prefix from settings.
     # Handle admin and front-end authentication separately.

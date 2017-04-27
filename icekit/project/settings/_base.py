@@ -633,14 +633,6 @@ HAYSTACK_CONNECTIONS = {
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.BaseSignalProcessor'
 INSTALLED_APPS += ('haystack', )
 
-# HOSTS #######################################################################
-
-# INSTALLED_APPS += ('django_hosts', )
-# MIDDLEWARE_CLASSES += ('django_hosts.middleware.HostsMiddleware', )
-
-# DEFAULT_HOST = 'www'
-# ROOT_HOSTCONF = 'icekit.hosts'
-
 # ICEKIT ######################################################################
 
 ICEKIT_CONTEXT_PROCESSOR_SETTINGS = ()
@@ -938,3 +930,14 @@ except ImportError:
 DEBUG_TOOLBAR_PANELS = [
     'fluent_contents.panels.ContentPluginPanel',
 ] + PANELS_DEFAULTS
+
+# HOSTS #######################################################################
+
+INSTALLED_APPS += ('django_hosts', )
+MIDDLEWARE_CLASSES = \
+    ('django_hosts.middleware.HostsRequestMiddleware', ) + \
+    MIDDLEWARE_CLASSES + \
+    ('django_hosts.middleware.HostsResponseMiddleware', )
+
+DEFAULT_HOST = 'www'
+ROOT_HOSTCONF = 'icekit.project.hosts'

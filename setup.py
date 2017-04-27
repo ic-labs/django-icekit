@@ -103,6 +103,7 @@ setuptools.setup(
             'django-flat-theme<1.1.3',  # See: https://github.com/elky/django-flat-theme/issues/30
             'django-fluent-contents[markupoembeditemtext]',
             'django-fluent-pages[redirectnodereversion]',
+            'django-hosts',
             'django-master-password',
             'django-polymorphic-auth',
             'django-post-office',
