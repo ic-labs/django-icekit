@@ -14,6 +14,84 @@ sitemaps = {
     'pages': PageSitemap,
 }
 
+# Build Authentication URL patterns separately for re-use in standard web site
+# and API web frontend.
+auth_urlpatterns = patterns(
+    '',
+
+    # Authentication.
+    url(
+        r'^login/$',
+        'django.contrib.auth.views.login',
+        {
+            'template_name': 'icekit/auth/login.html',
+        },
+        name='login'
+    ),
+    url(
+        r'^logout/$',
+        'django.contrib.auth.views.logout',
+        {
+            'template_name': 'icekit/auth/logged_out.html',
+        },
+        name='logout'
+    ),
+
+    # Password change.
+    url(
+        r'^password/change/$',
+        'django.contrib.auth.views.password_change',
+        {
+            'template_name': 'icekit/auth/password_change_form.html',
+        },
+        name='password_change'
+    ),
+    url(
+        r'^password/change/done/$',
+        'django.contrib.auth.views.password_change_done',
+        {
+            'template_name': 'icekit/auth/password_change_done.html',
+        },
+        name='password_change_done'
+    ),
+
+    # Password reset.
+    url(
+        r'^password/reset/$',
+        'django.contrib.auth.views.password_reset',
+        {
+            'template_name': 'icekit/auth/password_reset.html',
+            'email_template_name': 'icekit/auth/password_reset_email.html',
+            'subject_template_name': 'icekit/auth/password_reset_subject.txt',
+        },
+        name='password_reset'
+    ),
+    url(
+        r'^password/reset/done/$',
+        'django.contrib.auth.views.password_reset_done',
+        {
+            'template_name': 'icekit/auth/password_reset_done.html',
+        },
+        name='password_reset_done'
+    ),
+    url(
+        r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+        'django.contrib.auth.views.password_reset_confirm',
+        {
+            'template_name': 'icekit/auth/password_reset_confirm.html',
+        },
+        name='password_reset_confirm'
+    ),
+    url(
+        r'^password/done/$',
+        'django.contrib.auth.views.password_reset_complete',
+        {
+            'template_name': 'icekit/auth/password_reset_complete.html',
+        },
+        name='password_reset_complete'
+    ),
+)
+
 urlpatterns = patterns(
     '',
 
@@ -85,74 +163,7 @@ urlpatterns = patterns(
         url(r'^', include(admin.site.urls)),
     ))),
 
-    # Get front-end authentication URLs prefix from settings.
-    url(getattr(settings, 'ICEKIT_LOGIN_URL_PREFIX', r''), include(patterns(
-        '',
-
-        # Authentication.
-        url(r'^login/$',
-            'django.contrib.auth.views.login',
-            {
-                'template_name': 'icekit/auth/login.html',
-            },
-            name='login'
-        ),
-        url(r'^logout/$',
-            'django.contrib.auth.views.logout',
-            {
-                'template_name': 'icekit/auth/logged_out.html',
-            },
-            name='logout'
-        ),
-
-        # Password change.
-        url(r'^password/change/$',
-            'django.contrib.auth.views.password_change',
-            {
-                'template_name': 'icekit/auth/password_change_form.html',
-            },
-            name='password_change'
-        ),
-        url(r'^password/change/done/$',
-            'django.contrib.auth.views.password_change_done',
-            {
-                'template_name': 'icekit/auth/password_change_done.html',
-            },
-            name='password_change_done'
-        ),
-
-        # Password reset.
-        url(r'^password/reset/$',
-            'django.contrib.auth.views.password_reset',
-            {
-                'template_name': 'icekit/auth/password_reset.html',
-                'email_template_name': 'icekit/auth/password_reset_email.html',
-                'subject_template_name': 'icekit/auth/password_reset_subject.txt',
-            },
-            name='password_reset'
-        ),
-        url(r'^password/reset/done/$',
-            'django.contrib.auth.views.password_reset_done',
-            {
-                'template_name': 'icekit/auth/password_reset_done.html',
-            },
-            name='password_reset_done'
-        ),
-        url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
-            'django.contrib.auth.views.password_reset_confirm',
-            {
-                'template_name': 'icekit/auth/password_reset_confirm.html',
-            },
-            name='password_reset_confirm'
-        ),
-        url(r'^password/done/$',
-            'django.contrib.auth.views.password_reset_complete',
-            {
-                'template_name': 'icekit/auth/password_reset_complete.html',
-            },
-            name='password_reset_complete'
-        ),
-    ))),
+    url(getattr(settings, 'ICEKIT_LOGIN_URL_PREFIX', r''), include(auth_urlpatterns)),
 
     # Catch all, fluent page dispatcher.
     url(r'^', include('fluent_pages.urls')),
