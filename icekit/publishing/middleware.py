@@ -33,10 +33,19 @@ class PublishingMiddleware(object):
 
     @staticmethod
     def is_api_request(request):
+        # Match API requests via a URL path like /api/
         try:
-            return resolve(request.path).app_name == 'icekit-api'
+            if resolve(request.path).app_name == 'icekit-api':
+                return True
         except Resolver404:
-            return False
+            pass
+        # Match API requests via a django-hosts subdomain like api.HOSTNAME
+        try:
+            if request.host.urlconf == 'icekit.api.urls':
+                return True
+        except AttributeError:
+            pass
+        return False
 
     @staticmethod
     def is_draft_only_view(request):
