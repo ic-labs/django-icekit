@@ -28,4 +28,3 @@ indent_style = space
 [*.rst]
 indent_style = space
 indent_size = 3
-
