@@ -34,7 +34,6 @@ services:
     build: .
     command: setup-django.sh bash.sh
     extends: base
-    image: interaction/icekit:local
     links:
       - celery
       - celerybeat
