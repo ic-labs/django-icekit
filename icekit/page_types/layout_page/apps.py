@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 
 
-class LayoutConfig(AppConfig):
-    name = 'icekit.page_types.layout_page'
+class AppConfig(AppConfig):
+    name = '.'.join(__name__.split('.')[:-1])
+    label = "layout_page"
     verbose_name = 'Page'

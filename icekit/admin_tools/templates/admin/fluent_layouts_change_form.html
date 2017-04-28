@@ -1,0 +1,9 @@
+{% extends "admin/polymorphic/change_form.html" %}
+
+{% block extrahead %}
+	{{ block.super }}
+	<script type="text/javascript">
+		fluent_layouts.ct_id = {{ content_type_id }};
+		fluent_layouts.layout_url = '{% url "admin:icekit_layout_changelist" %}';
+	</script>
+{% endblock %}

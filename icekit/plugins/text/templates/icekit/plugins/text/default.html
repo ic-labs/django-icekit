@@ -1,1 +1,7 @@
-{{ instance.text|safe }}
+<div class="text-plugin">
+    {% if instance.text.style %}
+        <div class="{{ instance.text.style }}">{{ instance.text|safe }}</div>
+    {% else %}
+        {{ instance.text|safe }}
+    {% endif %}
+</div>

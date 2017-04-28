@@ -1,17 +1,14 @@
+import warnings
 from django.apps import AppConfig, apps
 from django.core.exceptions import MultipleObjectsReturned
+from django.utils.datastructures import OrderedSet
 from django.utils.translation import get_language
 
 from fluent_pages import appsettings
 from fluent_pages.models import UrlNode
 from fluent_pages.models.managers import UrlNodeQuerySet
 
-try:
-    # Polymorphic >= 0.8
-    from polymorphic.models import PolymorphicModel
-except ImportError:
-    # Polymorphic < 0.8
-    from polymorphic.polymorphic_model import PolymorphicModel
+from polymorphic.models import PolymorphicModel
 
 from mptt.models import MPTTModel
 
@@ -20,7 +17,8 @@ from .managers import PublishingQuerySet, PublishingPolymorphicManager, \
     PublishingUrlNodeManager, UrlNodeQuerySetWithPublishingFeatures, \
     _queryset_iterator
 from .models import PublishingModel
-from .middleware import is_draft_request_context
+from .middleware import is_draft_request_context, \
+    override_draft_request_context
 
 
 def monkey_patch_override_method(klass):
@@ -37,6 +35,24 @@ def monkey_patch_override_method(klass):
             original_fn = getattr(klass, fn_name)
             setattr(klass, original_fn_name, original_fn)
             setattr(klass, fn_name, override_fn)
+    return perform_override
+
+
+def monkey_patch_override_instance_method(instance):
+    """
+    Override an instance method with a new version of the same name. The
+    original method implementation is made available within the override method
+    as `_original_<METHOD_NAME>`.
+    """
+    def perform_override(override_fn):
+        fn_name = override_fn.__name__
+        original_fn_name = '_original_' + fn_name
+        # Override instance method, if it hasn't already been done
+        if not hasattr(instance, original_fn_name):
+            original_fn = getattr(instance, fn_name)
+            setattr(instance, original_fn_name, original_fn)
+            bound_override_fn = override_fn.__get__(instance)
+            setattr(instance, fn_name, bound_override_fn)
     return perform_override
 
 
@@ -94,11 +110,10 @@ class AppConfig(AppConfig):
                 translations__language_code=language_code,
             )
 
-            obj = _filter_candidates_by_published_status(qs, self.model, path)
-
-            # Explicitly set language to the state the object was fetched in.
-            obj.set_current_language(language_code)
-            return obj
+            matches = _filter_candidates_by_published_status(qs)
+            return _get_first_routable(
+                matches, self.model, path, language_code,
+                enforce_single_result=True)
 
         # Monkey-patch `UrlNodeQuerySet.best_match_for_path` to add filtering
         # by publishing status.
@@ -111,21 +126,21 @@ class AppConfig(AppConfig):
             paths = self._split_path_levels(path)
 
             qs = self._single_site() \
-                    .filter(translations___cached_url__in=paths,
-                            translations__language_code=language_code) \
-                    .extra(select={'_url_length': 'LENGTH(_cached_url)'}) \
-                    .order_by('-level', '-_url_length')
+                .filter(translations___cached_url__in=paths,
+                        translations__language_code=language_code) \
+                .extra(select={'_url_length': 'LENGTH(_cached_url)'}) \
+                .order_by('-level', '-_url_length')  # / and /news/ is both level 0
 
-            obj = _filter_candidates_by_published_status(qs, self.model, path)
+            matches = _filter_candidates_by_published_status(qs)
+            return _get_first_routable(
+                matches, self.model, path, language_code,
+                enforce_single_result=False)
 
-            obj.set_current_language(language_code)
-            return obj
-
-        def _filter_candidates_by_published_status(candidates, model, path):
+        def _filter_candidates_by_published_status(candidates):
             # Filter candidate results by published status, using
             # instance attributes instead of queryset filtering to
             # handle unpublishable and ICEKit publishing-enabled items.
-            objs = set()  # Set to avoid duplicates
+            objs = OrderedSet()  # preserve order & remove dupes
             if is_draft_request_context():
                 for candidate in candidates:
                     # Keep candidates that are publishable draft copies, or
@@ -134,9 +149,12 @@ class AppConfig(AppConfig):
                     if getattr(candidate, 'is_draft', True):
                         objs.add(candidate)
                     # Also keep candidates where we have the published copy and
-                    # can exchange to get the draft copy
+                    # can exchange to get the draft copy with an identical URL
                     elif hasattr(candidate, 'get_draft'):
-                        objs.add(candidate.get_draft())
+                        draft_copy = candidate.get_draft()
+                        if draft_copy.get_absolute_url() == \
+                                candidate.get_absolute_url():
+                            objs.add(draft_copy)
             else:
                 for candidate in candidates:
                     # Keep candidates that are published, or that are not
@@ -151,22 +169,37 @@ class AppConfig(AppConfig):
                             pass
                         else:
                             objs.add(candidate)
+            # Convert `OrderedSet` to a list which supports `len`, see
+            # https://code.djangoproject.com/ticket/25093
+            return list(objs)
 
-            if not objs:
-                raise model.DoesNotExist(
-                    u"No published {0} found for the path '{1}'"
-                    .format(model.__name__, path))
+        def _get_first_routable(item_list, model, path, language_code,
+                                enforce_single_result=False):
+            """
+            Return the first item in the given list of routable items.
 
-            if len(objs) > 1:
-                # TODO May need special handling for SFMOMA StoryPage slugs
-                # which can overlap. E.g. return the first one with no
-                # category, or the last one if they all have categories.
+            Raise `DoesNotExist` if the list is empty.
 
+            Raise `MultipleObjectsReturned` if the list contains multiple
+            objects and the `enforce_single_result` argument is set.
+            """
+            request_context_desc = \
+                'published' if is_draft_request_context() else 'draft'
+            # Check for invalid multiple results if requested
+            if enforce_single_result and len(item_list) > 1:
                 raise model.MultipleObjectsReturned(
-                    u"Multiple published {0} found for the path '{1}'"
-                    .format(model.__name__, path))
-
-            return objs.pop()
+                    u"Multiple {0} {1} found for the path '{2}'"
+                    .format(request_context_desc, model.__name__, path))
+            # Get first result; error if none are available
+            try:
+                obj = item_list[0]
+                # Explicitly set language for object.
+                obj.set_current_language(language_code)
+                return obj
+            except IndexError:
+                raise model.DoesNotExist(
+                    u"No {0} {1} found for the path '{2}'"
+                    .format(request_context_desc, model.__name__, path))
 
         # Monkey-patch method overrides for classes where we must do so to
         # avoid our custom versions from getting clobbered by versions higher
@@ -223,20 +256,47 @@ class AppConfig(AppConfig):
             if not issubclass(model, PublishingModel):
                 continue
 
+            ##############################################################
+            # Override `publishing_draft` 1-to-1 queryset traversal to avoid
+            # wrapping the draft copy result in `DraftItemBoobyTrap`
+            # TODO Get this to actually work...
+
+            # @monkey_patch_override_instance_method(model.publishing_draft)
+            # def get_queryset(self, **kwargs):
+            #     with override_draft_request_context(True):
+            #         return self._original_get_queryset(**kwargs)
+
+            ##############################################################
+
+            def _contribute_if_not_subclass(attr, cls):
+                if hasattr(model, attr):
+                    val = getattr(model, attr)
+                    if isinstance(val, cls):
+                        # the attribute is already an instance of the class
+                        # we want.
+                        return
+                    else:
+                        warnings.warn(
+                            u"`{0}` manager {1} on model {2} does not "
+                            u"subclass `{3}`. Monkey-patching.".format(
+                                attr,
+                                type(val),
+                                model,
+                                cls
+                            )
+                        )
+                cls().contribute_to_class(model, attr)
+
+
             if issubclass(model, PolymorphicModel) \
                     and not issubclass(model, UrlNode):
 
-                PublishingPolymorphicManager().contribute_to_class(
-                    model, 'objects')
-                PublishingPolymorphicManager().contribute_to_class(
-                    model, '_default_manager')
+                _contribute_if_not_subclass('objects', PublishingPolymorphicManager)
+                _contribute_if_not_subclass('_default_manager', PublishingPolymorphicManager)
 
             if issubclass(model, UrlNode):
-
-                PublishingUrlNodeManager().contribute_to_class(
-                    model, 'objects')
-                PublishingUrlNodeManager().contribute_to_class(
-                    model, '_default_manager')
+                _contribute_if_not_subclass('objects', PublishingUrlNodeManager)
+                _contribute_if_not_subclass('_default_manager', PublishingUrlNodeManager)
 
                 @monkey_patch_override_method(model)
                 def _make_slug_unique(self, translation):

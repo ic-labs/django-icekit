@@ -2,10 +2,8 @@ from ._test import *
 
 # DJANGO ######################################################################
 
-CACHES['default'].update({
-    'LOCATION': 'redis://localhost:6379/1',
-})
+CACHES['default'].update({'BACKEND': 'redis_lock.django_cache.RedisCache'})
 
 # CELERY ######################################################################
 
-BROKER_URL = 'redis://localhost:6379/0'
+BROKER_URL = 'redis://%s/0' % REDIS_ADDRESS

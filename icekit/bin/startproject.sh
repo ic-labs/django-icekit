@@ -7,14 +7,14 @@ BRANCH="${2:-master}"
 
 if [[ -z "$DEST_DIR" ]];
 then
-    >&2 echo 'You must specify a destination directory.'
-    exit 1
+	>&2 echo 'You must specify a destination directory.'
+	exit 1
 fi
 
 if [[ -d "$DEST_DIR" ]];
 then
-    >&2 echo "Destination directory '$DEST_DIR' already exists."
-    exit 1
+	>&2 echo "Destination directory '$DEST_DIR' already exists."
+	exit 1
 fi
 
 DEST_DIR_BASENAME="$(basename $DEST_DIR)"
@@ -29,27 +29,35 @@ read -p 'Press CTRL-C to abort or any other key to continue...'
 echo
 
 if [[ -z $(which wget) ]]; then
-    echo "'wget' is not available. Please install it try again."
-    exit 1
+	echo "'wget' is not available. Please install it and try again."
+	exit 1
 fi
 
 mkdir -p "$DEST_DIR"
 cd "$DEST_DIR"
 
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.coveragerc"
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.dockerignore"
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.editorconfig"
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.gitignore"
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/bower.json"
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/docker-compose.override.yml"
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/docker-compose.yml"
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/Dockerfile"
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/go.sh"
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/icekit_settings.py"
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/package.json"
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements-icekit.txt"
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements.txt"
-curl -#LO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/test_initial_data.sql"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.coveragerc"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.dockerignore"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.editorconfig"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.env.local.sample"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.env.production"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.env.staging"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.gitignore"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.travis.yml"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/bower.json"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/docker-cloud.yml"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/docker-compose.override.sample.yml"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/docker-compose.travis.yml"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/docker-compose.yml"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/Dockerfile"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/go.sh"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/package.json"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/project_settings.py"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/project_settings_local.sample.py"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements-icekit.txt"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements.in"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements.txt"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/test_initial_data.sql"
 
 chmod +x go.sh
 touch requirements.txt
@@ -58,26 +66,28 @@ touch requirements.txt
 find . -type f -exec sed -e "s/project_template/$DEST_DIR_BASENAME/g" -i.deleteme {} \;
 find . -type f -iname "*.deleteme" -delete
 
-# Replace editable with package requirement.
-sed -e "s/-e ../django-icekit/" requirements-icekit.txt > requirements-icekit.txt.replaced
+# Use release versions of ICEkit.
+sed -e "s|\.\.|git+https://github.com/ic-labs/django-icekit@master#egg=django-icekit|" requirements-icekit.txt > requirements-icekit.txt.replaced
+sed -e "s|:local|:master|" Dockerfile > Dockerfile.replaced
 mv requirements-icekit.txt.replaced requirements-icekit.txt
+mv Dockerfile.replaced Dockerfile
 
 if [[ -n $(which git) ]]; then
-    echo
-    read -p 'Would you like to initialize a Git repository for your new project and create an initial commit? (Y/n) ' -n 1 -r
-    echo
-    if [[ "${REPLY:-y}" =~ ^[Yy]$ ]]; then
-        git init
-        git add -A
-        git commit -m 'Initial commit.'
-    fi
+	echo
+	read -p 'Would you like to initialize a Git repository for your new project and create an initial commit? (Y/n) ' -n 1 -r
+	echo
+	if [[ "${REPLY:-y}" =~ ^[Yy]$ ]]; then
+		git init
+		git add -A
+		git commit -m 'Initial commit.'
+	fi
 fi
 
 cat <<EOF
 
 All done! What now? First, change to the project directory:
 
-    $ cd ${DEST_DIR}
+	$ cd ${DEST_DIR}
 
 # Run with Docker
 
@@ -93,35 +103,35 @@ If you haven't already, go install Docker:
 
 Build a Docker image:
 
-    $ docker-compose build --pull
+	$ docker-compose build --pull
 
 Run a 'django' container and all of its dependancies:
 
-    $ docker-compose run --rm --service-ports django
+	$ docker-compose run --rm --service-ports django
 
 Create a superuser account:
 
-    # manage.py createsuperuser
+	# manage.py createsuperuser
 
 Run the Django dev server:
 
-    # runserver.sh
+	# runserver.sh
 
 Open the site in a browser:
 
-    http://localhost:8000
+	http://localhost:8000
 
 When you're done, exit the container and stop all of its dependencies:
 
-    # exit
-    $ docker-compose stop
+	# exit
+	$ docker-compose stop
 
-Read our [Docker Quick Start](https://github.com/ic-labs/django-icekit/blob/${BRANCH}/docs/docker-quick-start.md)
+Read our [Docker guide](http://docs.glamkit.com/en/latest/install/docker.html)
 guide for more info on running an ICEkit project with Docker.
 
 # Run without Docker
 
-Read our [Manual Setup](https://github.com/ic-labs/django-icekit/blob/develop/docs/manual-setup.md)
+Read our [Manual Setup](http://docs.glamkit.com/en/latest/install/manual-install.html)
 guide for more info on running an ICEkit project without Docker.
 
 EOF

@@ -1,0 +1,24 @@
+{% extends "admin/dashboard_widgets/_widget.html" %}
+{% load i18n workflow_tags %}
+
+{% block title %}Assigned to me{% endblock %}}
+
+{% block content %}
+	{% load log %}
+	{% get_assigned_to_user 10 as content_list for_user user %}
+	{% if not content_list %}
+		<p>{% trans 'Nothing is assigned to you!' %}</p>
+	{% else %}
+		<ul class="actionlist col-xs-6" style="padding:0;">
+			{% for entry in content_list|slice:":5" %}
+				{% include "admin/dashboard_widgets/_widget_assigned_to_link.html" %}
+			{% endfor %}
+		</ul>
+		<ul class="actionlist col-xs-6" style="padding:0;">
+			{% for entry in content_list|slice:"5:10" %}
+				{% include "admin/dashboard_widgets/_widget_assigned_to_link.html" %}
+			{% endfor %}
+		</ul>
+	{% endif %}
+{% endblock %}
+

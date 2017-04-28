@@ -1,0 +1,119 @@
+celery:
+  image: 'interaction/project_template:master'
+  # autoredeploy: true
+  command: 'setup-django.sh celery.sh'
+  deployment_strategy: high_availability
+  environment:
+    - DOTENV=production
+    - GPG_PASSPHRASE=
+  links:
+    - elasticsearch
+    # - postgres
+    - redis
+  restart: always
+  tags:
+    - project_template
+  volumes:
+    - /opt/project_template/var
+celerybeat:
+  image: 'interaction/project_template:master'
+  # autoredeploy: true
+  command: 'setup-django.sh celerybeat.sh'
+  deployment_strategy: high_availability
+  environment:
+    - DOTENV=production
+    - GPG_PASSPHRASE=
+  links:
+    - redis
+  restart: always
+  tags:
+    - project_template
+  volumes:
+    - /opt/project_template/var
+celeryflower:
+  image: 'interaction/project_template:master'
+  # autoredeploy: true
+  command: 'setup-django.sh celeryflower.sh'
+  deployment_strategy: high_availability
+  environment:
+    - DOTENV=production
+    - GPG_PASSPHRASE=
+    - VIRTUAL_HOST=https://flower.example.com
+  expose:
+    - '5555'
+  links:
+    - redis
+  restart: always
+  tags:
+    - project_template
+  volumes:
+    - /opt/project_template/var
+django:
+  image: 'interaction/project_template:master'
+  # autoredeploy: true
+  command: 'setup-django.sh supervisord.sh'
+  deployment_strategy: high_availability
+  environment:
+    - DOTENV=production
+    - FORCE_SSL=yes
+    - GPG_PASSPHRASE=
+    - VIRTUAL_HOST=https://www.example.com
+  expose:
+    - '8000'
+  links:
+    - celery
+    - celerybeat
+    - celeryflower
+    - elasticsearch
+    # - postgres
+    - redis
+  restart: always
+  tags:
+    - project_template
+  volumes:
+    - /opt/project_template/var
+elasticsearch:
+  image: 'interaction/elasticsearch-icu:1'
+  # autoredeploy: true
+  restart: always
+  tags:
+    - project_template
+haproxy:
+  image: 'interaction/haproxy:master'
+  # autoredeploy: true
+  environment:
+    - 'EXTRA_SETTINGS=http-request add-header X-Forwarded-Proto https if { ssl_fc }'
+  links:
+    - celeryflower
+    - django
+  ports:
+    - '443:443'
+  restart: always
+  roles:
+    - global
+  tags:
+    - project_template
+  volumes_from:
+    - letsencrypt
+letsencrypt:
+  image: 'interaction/letsencrypt:master'
+  environment:
+    - DOMAINS=www.example.com,flower.example.com
+    - EMAIL=admins@interaction.net.au
+  ports:
+    - '80'
+  tags:
+    - project_template
+# postgres:
+#   image: 'onjin/alpine-postgres:9.4'
+#   # autoredeploy: true
+#   restart: always
+#   tags:
+#     - project_template
+redis:
+  image: 'redis:3-alpine'
+  # autoredeploy: true
+  command: 'redis-server --appendonly yes'
+  restart: always
+  tags:
+    - project_template

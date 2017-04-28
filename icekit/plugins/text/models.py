@@ -6,6 +6,7 @@ from fluent_contents.extensions import PluginHtmlField
 from fluent_contents.models import ContentItem
 from icekit.plugins.text import appsettings
 from django_wysiwyg.utils import clean_html, sanitize_html
+from django.db import models
 
 
 @python_2_unicode_compatible
@@ -14,6 +15,9 @@ class TextItem(ContentItem):
     A snippet of HTML text to display on a page.
     """
     text = PluginHtmlField(_('text'), blank=True)
+    # annoyingly, Django will create useless migrations every time choices
+    # changes. These shouldn't be committed to ICEKit
+    style = models.CharField(max_length=255, choices=appsettings.TEXT_STYLE_CHOICES, blank=True)
 
     class Meta:
         verbose_name = _('Text')

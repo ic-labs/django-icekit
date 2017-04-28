@@ -5,7 +5,8 @@
     "font-awesome": "^4.6.3",
     "jquery": "^3.1.0",
     "lodash": "^4.14.2",
-    "alloyeditor": "^1.2.3"
+    "alloyeditor": "^1.2.3",
+    "eonasdan-bootstrap-datetimepicker": "^4.17.47"
   },
   "private": true
 }

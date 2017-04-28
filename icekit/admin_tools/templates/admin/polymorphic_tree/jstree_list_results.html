@@ -1,0 +1,130 @@
+{% load static i18n polymorphic_tree_admin_tags %}
+
+<style>
+	.no_children::before, .has_children .disclosure {
+		margin-right: 0.2em;
+	}
+	.no_children::before {
+		/* em space */
+		content: " ";
+	}
+	.has_children .disclosure {
+		cursor: pointer;
+	}
+	.has_children .disclosure.collapsed::before {
+		content: "▶";
+	}
+	.has_children .disclosure::before {
+		content: "▼";
+	}
+</style>
+
+{% if result_hidden_fields %}
+	<div class="hiddenfields">{# DIV for HTML validation #}
+		{% for item in result_hidden_fields %}{{ item }}{% endfor %}
+	</div>
+{% endif %}
+
+{% if results %}
+	<div class="results">
+		<table id="result_list">
+			<thead>
+			<tr>
+				{% for header in result_headers %}
+				<th scope="col" {{ header.class_attrib }}>
+					{% if header.sortable %}
+					{% if header.sort_priority > 0 %}
+					<div class="sortoptions">
+						<a class="sortremove" href="{{ header.url_remove }}" title="{% trans "Remove from sorting" %}"></a>
+						{% if num_sorted_fields > 1 %}<span class="sortpriority" title="{% blocktrans with priority_number=header.sort_priority %}Sorting priority: {{ priority_number }}{% endblocktrans %}">{{ header.sort_priority }}</span>{% endif %}
+						<a href="{{ header.url_toggle }}" class="toggle {% if header.ascending %}ascending{% else %}descending{% endif %}" title="{% trans "Toggle sorting" %}"></a>
+					</div>
+					{% endif %}
+					{% endif %}
+					<div class="text">{% if header.sortable %}<a href="{{ header.url_primary }}">{{ header.text|capfirst }}</a>{% else %}<span>{{ header.text|capfirst }}</span>{% endif %}</div>
+					<div class="clear"></div>
+				</th>{% endfor %}
+			</tr>
+			</thead>
+			<tbody>
+			{% for result in results %}
+			{% if result.form.non_field_errors %}
+			<tr><td colspan="{{ result|length }}">{{ result.form.non_field_errors }}</td></tr>
+			{% endif %}
+			<tr class="{% cycle 'row1' 'row2' %}">{% for item in result %}{{ item }}{% endfor %}</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endif %}
+
+
+<script type="text/javascript">
+  var level_data = {
+		{% for result in results %}
+			{{ result.object.id }}: {
+				level: {{ result.object.level }},
+				parent_id: {% firstof result.object.parent_id "null" %},
+				ancestor_ids: [], {# populate later #}
+				has_children: {% if result.object.is_leaf_node %}false{% else %}true{% endif %}
+			},
+		{% endfor %}
+	};
+
+  // recursively populate parents
+	function add_ancestor_ids(node) {
+	    if (!node) return [];
+	    if (!node.ancestor_ids.length) {
+	        if (node.level > 0) {
+						node.ancestor_ids = [node.parent_id].concat(add_ancestor_ids(level_data[node.parent_id]));
+					}
+			}
+			return node.ancestor_ids;
+	}
+
+	var rows = [];
+
+	for (id in level_data) {
+		var node = level_data[id];
+
+		add_ancestor_ids(node);
+
+		var input = $('input[value='+id+']');
+		var row = input.parent().parent();
+		rows.push(row);
+		var title = row.find("th");
+
+		row.data('ancestor_ids', node.ancestor_ids);
+
+		// Indent the th values
+		// First 2 constants define distance from checkbox to disclosure arrow
+		// Last constant is width of disclosure arrow plus its right margin
+		title.css({'padding-left': (0.8 + (0.8 * node.level)) + "em", 'text-indent': "-1.2em"});
+		if (node.has_children) {
+			title.addClass("has_children");
+			title.prepend("<span class='disclosure' data-toggle='"+id+"'></span>")
+		} else {
+			title.addClass("no_children");
+		}
+	};
+
+  function toggle_tree(id, state) {
+      for (i in rows) {
+          var row = rows[i];
+          if ($.inArray(id, row.data('ancestor_ids')) >= 0) {
+              row.toggle(state);
+              row.find('.disclosure').toggleClass('collapsed', !state);
+					}
+			}
+	}
+
+  $('.has_children .disclosure').click(function() {
+      var $this = $(this);
+			$this.toggleClass('collapsed');
+
+      toggle_tree(parseInt($(this).attr('data-toggle')), !$this.hasClass('collapsed'));
+
+	})
+
+
+</script>

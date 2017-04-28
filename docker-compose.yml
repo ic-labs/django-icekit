@@ -1,29 +1,59 @@
 version: "2"
 services:
-  celery:
-    command: setup-django.sh celery.sh
-    extends: django
-  celerybeat:
-    command: setup-django.sh celerybeat.sh
-    extends: django
-  celeryflower:
-    command: setup-django.sh celeryflower.sh
-    extends: django
-  django:
-    command: setup-django.sh bash.sh
+  base:
     environment:
       BASE_SETTINGS_MODULE: develop
+      GPG_PASSPHRASE: # Get from environment
       MASTER_PASSWORD: # Get from environment
       TERM: # Get from environment
-    image: interaction/icekit:latest
+    image: interaction/icekit:local
     tmpfs:
       - /tmp
     volumes:
       - ./:/opt/django-icekit
+  celery:
+    command: setup-django.sh celery.sh
+    extends: base
+    links:
+      - elasticsearch
+      - postgres
+      - redis
+  celerybeat:
+    command: setup-django.sh celerybeat.sh
+    extends: base
+    links:
+      - redis
+  celeryflower:
+    command: setup-django.sh celeryflower.sh
+    extends: base
+    links:
+      - redis
+    ports:
+      - 5555
+  django:
+    build: .
+    command: setup-django.sh bash.sh
+    extends: base
+    image: interaction/icekit:local
+    links:
+      - celery
+      - celerybeat
+      - celeryflower
+      - elasticsearch
+      - postgres
+      - redis
+    ports:
+      - 8000:8000
   elasticsearch:
     image: interaction/elasticsearch-icu:1
+    ports:
+      - 9200
   postgres:
     image: onjin/alpine-postgres:9.4
+    ports:
+      - 5432
   redis:
     command: redis-server --appendonly yes
     image: redis:3-alpine
+    ports:
+      - 6379

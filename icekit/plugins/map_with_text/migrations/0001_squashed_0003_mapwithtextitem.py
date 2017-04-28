@@ -7,7 +7,7 @@ import fluent_contents.extensions
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'icekit_plugins_map_with_text', '0001_initial'), (b'icekit_plugins_map_with_text', '0002_auto_20150906_2301'), (b'icekit_plugins_map_with_text', '0003_mapwithtextitem')]
+    replaces = [('icekit_plugins_map_with_text', '0001_initial'), ('icekit_plugins_map_with_text', '0002_auto_20150906_2301'), ('icekit_plugins_map_with_text', '0003_mapwithtextitem')]
 
     dependencies = [
         ('icekit_plugins_map', '0001_initial'),

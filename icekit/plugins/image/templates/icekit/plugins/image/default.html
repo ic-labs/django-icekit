@@ -1,8 +1,10 @@
-{% load thumbnail %}
-{% thumbnail instance.image.image "content_image" as thumb %}
-<figure class="image" style="max-width: {{ thumb.width }}px;">
-	<div class="image-container">
-		<img src="{{ thumb.url }}" alt="{{ instance.image.alt_text }}" />
-	</div>
-	{% include instance.caption_template %}
-</figure>
+{% block image %}
+    {% load thumbnail %}
+    {% thumbnail instance.image.image "content_image" as thumb %}
+    <figure class="image" style="max-width: {{ thumb.width }}px;">
+        <div class="image-container">
+            <img src="{{ thumb.url }}" alt="{{ instance.image.alt_text }}"/>
+        </div>
+        {% include instance.caption_template %}
+    </figure>
+{% endblock %}

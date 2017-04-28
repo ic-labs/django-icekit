@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('show_title', models.BooleanField(default=False, help_text='Should the title of the slide show be displayed?')),
             ],
             options={
-                'db_table': 'icekit_plugins_slideshow_slideshow'
+                'db_table': 'slideshow_slideshow'
             },
             bases=(models.Model,),
         ),

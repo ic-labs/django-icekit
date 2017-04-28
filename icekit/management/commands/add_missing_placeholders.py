@@ -11,7 +11,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, *args, **options):
         verbosity = int(options.get('verbosity'))
         for model in apps.get_models():
-            if issubclass(model, FluentFieldsMixin):
+            if hasattr(model, 'add_missing_placeholders'):
                 if verbosity:
                     self.stdout.write('Adding placeholders for %s "%s"...' % (
                         model.objects.count(),

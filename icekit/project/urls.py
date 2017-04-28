@@ -5,7 +5,8 @@ from django.core.urlresolvers import reverse_lazy
 from django.views.generic import RedirectView, TemplateView
 from fluent_pages.sitemaps import PageSitemap
 
-from icekit.admin_forms import PasswordResetForm
+from icekit.admin_tools.forms import PasswordResetForm
+from icekit.views import index
 
 admin.autodiscover()
 
@@ -15,6 +16,8 @@ sitemaps = {
 
 urlpatterns = patterns(
     '',
+
+    url(r'^$', index, name="home"),
 
     # Test error templates.
     url(r'^404/$', TemplateView.as_view(template_name='404.html')),
@@ -37,9 +40,8 @@ urlpatterns = patterns(
         {'sitemaps': sitemaps}),
 
     # Installed apps.
-    url(r'^api/pages/', include('icekit.pages_api.urls')),
     url(r'^forms/', include('forms_builder.forms.urls')),
-    url(r'^search/', include('haystack.urls')),
+    url(r'^api/', include('icekit.api.urls')),
 
     # Get admin URLs prefix from settings.
     # Handle admin and front-end authentication separately.
@@ -52,7 +54,7 @@ urlpatterns = patterns(
             'django.contrib.auth.views.password_reset',
             {
                 'post_reset_redirect': 'admin_password_reset_done',
-                'email_template_name': 'icekit/admin/password_reset_email.html',
+                'email_template_name': 'admin/password_reset_email.html',
                 'password_reset_form': PasswordResetForm,  # Staff use only
             },
             name='admin_password_reset'
@@ -154,3 +156,12 @@ urlpatterns = patterns(
     # Catch all, fluent page dispatcher.
     url(r'^', include('fluent_pages.urls')),
 )
+
+if settings.DEBUG:
+    try:
+        import debug_toolbar
+        urlpatterns = [
+            url(r'^__debug__/', include(debug_toolbar.urls)),
+        ] + urlpatterns
+    except ImportError:
+        pass

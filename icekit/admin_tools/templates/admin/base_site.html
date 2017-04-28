@@ -1,0 +1,77 @@
+{% extends "admin:admin/base_site.html" %}
+
+{% load static compress %}
+
+{% comment %}
+	* Set verbose site name as title.
+	* Load Bootstrap and ICEkit dashboard CSS and JS.
+	* Load jQuery into global namespace, because Django removes it and some
+	  code expects it.
+	* Add branding.
+{% endcomment %}
+
+{% load static compress %}
+
+{% block title %}{{ title }} | {{ SITE_NAME }}{% endblock %}
+
+{% block extrastyle %}
+	{% compress css %}
+		{# Bootstrap, then default admin styles, then our styles. #}
+		{# This avoids overriding the admin with Bootstrap, and allows us to override anything. #}
+		<link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.css' %}" />
+		<link rel="stylesheet" href="{% static 'admin/css/base.css' %}" />
+		<link type="text/less" rel="stylesheet" href="{% static 'admin/css/icekit_dashboard.less' %}" />
+		<link type="text/less" rel="stylesheet" href="{% static 'admin/css/override.less' %}" />
+	{% endcompress %}
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+{% endblock %}
+
+{% block extrahead %}
+	{% compress js %}
+		<script src="{% static 'jquery/dist/jquery.js' %}"></script>
+		<script src="{% static 'bootstrap/dist/js/bootstrap.js' %}"></script>
+	{% endcompress %}
+{% endblock %}
+
+{% block blockbots %}{# hackily ensuring our js loads last, so we can monkey-patch fluent's JS #}
+	{% compress js %}
+	    <script src="{% static 'admin/js/icekit_dashboard.js' %}"></script>
+	{% endcompress %}
+{% endblock %}
+
+
+{% block branding %}
+	<a href="{% url 'admin:index' %}">
+		<img id="site-logo" src="{% block header-image %}{% static 'admin/img/header-brand.png' %}{% endblock header-image %}" title="{{ SITE_NAME }}">
+		<h1 id="site-name">Site Admin</h1>
+		{% if "staging" in SITE_NAME.lower %}
+			<p class="pill">staging</p>
+		{% elif "test" in SITE_NAME.lower %}
+			<p class="pill">test</p>
+		{% elif "demo" in SITE_NAME.lower %}
+			<p class="pill">demo</p>
+		{% endif %}
+	</a>
+{% endblock %}
+
+{% block footer %}
+	<footer class="footer">
+		<section class="footer-section footer-left">
+			{% block footer-name %}{{ SITE_NAME }}{% endblock %}
+		</section>
+		<section class="footer-section footer-right">
+			<a href="/">{% block site-name %}{% if SITE_NAME == "ICEkit" or not SITE_NAME %}This site{% else %}{{ SITE_NAME }}{% endif %}{% endblock %}</a>
+			is made with <a href="http://glamkit.com">GLAMkit</a> by
+			<a href="http://interaction.net.au" id="ic-logo">
+				<div class="ic-logo-dot"></div>
+				<div class="ic-logo-dot"></div>
+				<div class="ic-logo-dot"></div>
+			</a>
+		</section>
+	</footer>
+	<script>
+		$(function() {
+			$('footer.footer').appendTo('body');
+		});
+	</script>
+{% endblock %}

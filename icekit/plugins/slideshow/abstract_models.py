@@ -1,10 +1,13 @@
 from django.db import models
+from django.template import Context
+from django.template import RequestContext
+from django.template import Template
 from django.utils import six
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItem, PlaceholderField
 
-from icekit.publishing.models import PublishingModel
+from icekit.models import ICEkitContentsMixin
 
 from . import appsettings
 
@@ -28,16 +31,35 @@ class AbstractUnpublishableSlideShow(models.Model):
 
     class Meta:
         abstract = True
+        verbose_name = "Image gallery"
+        verbose_name_plural = "Image galleries"
 
     def __str__(self):
         return self.title
 
+    def preview(self, request):
+        t = Template(
+            """{% load icekit_tags thumbnail %}
+                {% for item in obj.content.get_content_items %}
+                    <img src="{% thumbnail item.image.image 30x30 %}" alt="">
+                {% empty %}
+                    <cite>No items</cite>
+                {% endfor %}
+            """
+        )
+        c = Context({
+            'obj': self,
+        })
+        return t.render(c)
+
 
 @python_2_unicode_compatible
-class AbstractSlideShow(AbstractUnpublishableSlideShow, PublishingModel):
+class AbstractSlideShow(AbstractUnpublishableSlideShow, ICEkitContentsMixin):
 
     class Meta:
         abstract = True
+        verbose_name = "Image gallery"
+        verbose_name_plural = "Image galleries"
 
     def __str__(self):
         return self.title
@@ -46,11 +68,12 @@ class AbstractSlideShow(AbstractUnpublishableSlideShow, PublishingModel):
 @python_2_unicode_compatible
 class AbstractSlideShowItem(ContentItem):
     """
-    An slide show from the SlideShow model.
+    A content item that renders an image gallery from the SlideShow model.
     """
     slide_show = models.ForeignKey(
         'SlideShow',
-        help_text=_('A slide show from the slide show library.')
+        help_text=_('An image gallery.'),
+        on_delete=models.CASCADE,
     )
 
     class Meta:

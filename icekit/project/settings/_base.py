@@ -8,37 +8,47 @@ Load environment specific settings via `BASE_SETTINGS_MODULE` environment
 variable, and override settings in `local.py`.
 """
 
+from __future__ import absolute_import
+
 import hashlib
 import multiprocessing
 import os
 import re
+from collections import OrderedDict
+
+from celery.schedules import crontab
 
 from django.core.urlresolvers import reverse_lazy
 from django.utils.text import slugify
 from kombu import Exchange, Queue
 
+import icekit
+
 BASE_SETTINGS_MODULE = os.environ.get('BASE_SETTINGS_MODULE', '')
+
+# Get ElasticSearch host and port.
+ELASTICSEARCH_ADDRESS = os.environ.get(
+    'ELASTICSEARCH_ADDRESS', 'localhost:9200')
 
 # Get Redis host and port.
 REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
 
 # Uniquely identify the base settings module, so we can avoid conflicts with
 # other projects running on the same system.
-SETTINGS_MODULE_HASH = hashlib.md5(__file__ + BASE_SETTINGS_MODULE).hexdigest()
+SETTINGS_MODULE_HASH = hashlib.md5(
+    u''.join((__file__, BASE_SETTINGS_MODULE)).encode('utf-8')).hexdigest()
 
-SITE_NAME = os.environ.get('SITE_NAME', 'ICEkit')
-SITE_SLUG = slugify(unicode(SITE_NAME))
+PROJECT_NAME = os.environ.get('ICEKIT_PROJECT_NAME', 'ICEkit')
+PROJECT_SLUG = re.sub(r'[^0-9A-Za-z]+', '-', slugify(PROJECT_NAME))
 
-SITE_DOMAIN = re.sub(
-    r'[^-.0-9A-Za-z]',
-    '-',
-    os.environ.get('SITE_DOMAIN', '%s.lvh.me' % SITE_SLUG))
-SITE_PORT = 8000
+SITE_DOMAIN = os.environ.get('SITE_DOMAIN', '%s.lvh.me' % PROJECT_SLUG)
+SITE_NAME = os.environ.get('SITE_NAME', PROJECT_NAME)
+
+SITE_PORT = None
 
 # FILE SYSTEM PATHS ###########################################################
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
-ICEKIT_DIR = os.path.join(BASE_DIR, 'icekit')
+ICEKIT_DIR = os.path.abspath(os.path.dirname(icekit.__file__))
 PROJECT_DIR = os.path.abspath(os.environ['ICEKIT_PROJECT_DIR'])
 VAR_DIR = os.path.join(PROJECT_DIR, 'var')
 
@@ -72,12 +82,13 @@ DEBUG = False  # Don't show detailed error pages when exceptions are raised
 # Allow connections only on the site domain.
 ALLOWED_HOSTS = ('.%s' % SITE_DOMAIN, )
 
-# Use dummy caching, so we don't get confused because a change is not taking
-# effect when we expect it to.
+# Use dummy caching, so we can build Docker images (with offline compression)
+# without a running Redis services.
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
         'KEY_PREFIX': 'default-%s' % SETTINGS_MODULE_HASH,
+        'LOCATION': 'redis://%s/1' % REDIS_ADDRESS,
     }
 }
 
@@ -85,7 +96,7 @@ DATABASES = {
     'default': {
         'ATOMIC_REQUESTS': True,
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('PGDATABASE', SITE_SLUG),
+        'NAME': os.environ.get('PGDATABASE', PROJECT_SLUG),
         'HOST': os.environ.get('PGHOST'),
         'PORT': os.environ.get('PGPORT'),
         'USER': os.environ.get('PGUSER'),
@@ -151,7 +162,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'cloghandler.ConcurrentRotatingFileHandler',
             'filename': os.path.join(
-                VAR_DIR, 'logs', '%s.log' % SITE_SLUG),
+                VAR_DIR, 'logs', '%s.log' % PROJECT_SLUG),
             'maxBytes': 10 * 1024 * 1024,  # 10 MiB
             'backupCount': 10,
             'formatter': 'logfile',
@@ -175,8 +186,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',  # Default
 )
 
-CACHE_MIDDLEWARE_ANONYMOUS_ONLY = True
-
 # # Enable cross-subdomain cookies, only if `SITE_DOMAIN` is not a TLD.
 # if '.' in SITE_DOMAIN:
 #     CSRF_COOKIE_DOMAIN = LANGUAGE_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = \
@@ -193,10 +202,12 @@ EMAIL_SUBJECT_PREFIX = '[%s] ' % SITE_NAME
 INSTALLED_APPS = (
     # 3rd party.
     'bootstrap3',
+    'django_countries',
     'django_extensions',
     'forms_builder.forms',
     # 'ixc_redactor',
     'reversion',
+    'django_object_actions',
 
     # Default.
     'django.contrib.admin',
@@ -209,6 +220,7 @@ INSTALLED_APPS = (
     # Extra.
     'django.contrib.admindocs',
     'django.contrib.sitemaps',
+    'django.contrib.humanize',
 )
 
 LANGUAGE_CODE = 'en-au'  # Default: en-us
@@ -230,8 +242,6 @@ MIDDLEWARE_CLASSES = (
 
     # Extra.
     'django.contrib.admindocs.middleware.XViewMiddleware',
-
-    'icekit.publishing.middleware.PublishingMiddleware',
 )
 
 ROOT_URLCONF = 'icekit.project.urls'
@@ -320,6 +330,10 @@ USE_ETAGS = True  # Default: False
 USE_L10N = True  # Default: False
 USE_TZ = True  # Default: False
 
+FORMAT_MODULE_PATH = [
+    'icekit.formats',
+]
+
 WSGI_APPLICATION = 'icekit.project.wsgi.application'
 
 # DJANGO REDIRECTS ############################################################
@@ -339,9 +353,12 @@ SITE_ID = 1
 
 # CELERY ######################################################################
 
-BROKER_URL = CELERY_RESULT_BACKEND = 'redis://%s/0' % REDIS_ADDRESS
+BROKER_URL = 'redis://%s/0' % REDIS_ADDRESS
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack', 'yaml']  # 'pickle'
-CELERY_DEFAULT_QUEUE = SITE_SLUG
+CELERY_DEFAULT_QUEUE = PROJECT_SLUG
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+CELERYD_MAX_TASKS_PER_CHILD = 20
 
 CELERY_QUEUES = (
     Queue(
@@ -351,7 +368,23 @@ CELERY_QUEUES = (
     ),
 )
 
+# crontab(minute='*/15') = every 15 minutes
+# crontab(minute=0, hour=0) = daily at midnight
+CELERYBEAT_SCHEDULE = {
+    'UpdateSearchIndexTask': {
+        'task': 'icekit.tasks.UpdateSearchIndexTask',
+        'schedule': crontab(minute='*/15'),  # Every 15 minutes.
+    },
+}
+
+# Redis (by setting CELERY_RESULT_BACKEND to BROKER_URL) is an alternative
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+
+# Log the celerybeat lock actions
+LOGGING['loggers']['icekit.tasks'] = {
+    'handlers': ['logfile'],
+    'level': 'DEBUG',
+}
 
 INSTALLED_APPS += (
     'djcelery',
@@ -376,13 +409,13 @@ COMPRESS_OFFLINE_CONTEXT = 'ixc_compressor.get_compress_offline_context'
 COMPRESS_PRECOMPILERS = (
     (
         'text/less',
-        '%s {infile} {outfile} --autoprefix' % (
+        '"%s" {infile} {outfile} --autoprefix' % (
             os.path.join(PROJECT_DIR, 'node_modules', '.bin', 'lessc'),
         ),
     ),
     (
         'text/x-scss',
-        '%s {infile} {outfile} --autoprefix --include-path %s' % (
+        '"%s" {infile} {outfile} --autoprefix --include-path %s' % (
             os.path.join(PROJECT_DIR, 'node_modules', '.bin', 'node-sass'),
             STATIC_ROOT,
         ),
@@ -411,21 +444,37 @@ DDF_FILL_NULLABLE_FIELDS = False
 INSTALLED_APPS += ('easy_thumbnails', )
 
 # Scoped aliases allows us to pre-generate all the necessary thumbnails for a
-# given model/field, without generating additional unecessary thumbnails. This
+# given model/field, without generating additional unnecessary thumbnails. This
 # is essential when using a remote storage backend.
 THUMBNAIL_ALIASES = {
-#     'app[.model][.field]': {
-#         'name-WxH': {
-#             'size': (W, H),
-#             ...,
-#         },
-#     },
+    # 'app[.model][.field]': {
+    #   'name': { 'size': (W, H), },
+    # },
     '': {
+        'icekit_authors_portrait_large': {
+            'size': (360, 640),
+        },
         'admin': {
             'size': (150, 150),
         },
         'content_image': {
-            'size': (1138, 0), # maximum width of a content column
+            'size': (1138, 0), # maximum width of a bootstrap content column
+        },
+        'slideshow_slide': {
+            'size': (1138, 0),
+        },
+        'image_gallery_thumb': {
+            'size': (200, 0),
+        },
+        'list_image': {
+            'size': (150, 0),
+        },
+        'og_image': {
+            'size': (1200, 630), #facebook recommends
+            'crop': True,
+        },
+        'hero_image': {
+            'size': (800, 0),
         }
     }
 }
@@ -446,25 +495,72 @@ INSTALLED_APPS += ('flat', )
 DJANGO_WYSIWYG_FLAVOR = 'alloyeditor'
 DJANGO_WYSIWYG_MEDIA_URL = STATIC_URL + 'alloyeditor/dist/alloy-editor/'
 
-FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
-    # 'home': {
-    #     'plugins': ('...', ),
-    # },
-    # 'main': {
-    #     'plugins': ('...', ),
-    # },
-    # 'sidebar': {
-    #     'plugins': ('...', ),
-    # },
-}
+BASIC_PLUGINS = [
+    'RawHtmlPlugin',
+    'TextPlugin',
+    'HorizontalRulePlugin',
+]
 
-FLUENT_DASHBOARD_DEFAULT_MODULE = 'ModelList'
+TEXT_PLUGINS = [
+    'FAQPlugin',
+    'QuotePlugin',
+]
+
+ASSETS_PLUGINS = [
+    'SlideShowPlugin',
+    'ImagePlugin',
+    'ImageGalleryPlugin',
+    'FilePlugin',
+    'SharedContentPlugin',
+    'ContactPersonPlugin',
+    'ContentListingPlugin',
+]
+
+EMBED_PLUGINS = [
+    'IframePlugin',
+    'MapPlugin',
+    'MapWithTextPlugin',
+
+    # Oembeds
+    'InstagramEmbedPlugin',
+    'OEmbedWithCaptionPlugin',
+    'TwitterEmbedPlugin',
+]
+
+NAVIGATION_PLUGINS = [
+    'PageAnchorPlugin',
+    'PageAnchorListPlugin',
+    'ChildPagesPlugin',
+]
+
+LINK_PLUGINS = [
+    'ArticleLinkPlugin',
+    'PageLinkPlugin',
+    'AuthorLinkPlugin',
+]
+
+DEFAULT_PLUGINS = \
+    BASIC_PLUGINS + \
+    TEXT_PLUGINS + \
+    ASSETS_PLUGINS + \
+    EMBED_PLUGINS + \
+    NAVIGATION_PLUGINS + \
+    LINK_PLUGINS
+
+FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
+    'main': {
+        'plugins': DEFAULT_PLUGINS,
+    },
+    'related': {
+        'plugins': LINK_PLUGINS,
+    }
+}
 
 FLUENT_MARKUP_LANGUAGES = ('restructuredtext', 'markdown', 'textile')
 FLUENT_MARKUP_MARKDOWN_EXTRAS = ()
 
 FLUENT_PAGES_PARENT_ADMIN_MIXIN = \
-    'icekit.publishing.admin.ICEKitFluentPagesParentAdminMixin'
+    'icekit.admin_tools.polymorphic.ICEkitFluentPagesParentAdmin'
 
 # Avoid an exception because fluent-pages wants `TEMPLATE_DIRS[0]` to be
 # defined, even though that setting is going away. This might not be necessary
@@ -484,6 +580,7 @@ INSTALLED_APPS += (
     'parler',
     'polymorphic',
     'polymorphic_tree',
+    'slug_preview',
 
     # Page types.
     # 'fluent_pages.pagetypes.flatpage',
@@ -499,15 +596,21 @@ INSTALLED_APPS += (
     # 'fluent_contents.plugins.googledocsviewer',
     'fluent_contents.plugins.iframe',
     # 'fluent_contents.plugins.markup',
+    # oembeditem isn't needed, but commenting it out means it gets
+    # erroneously registered, possibly by being imported by oembed_with_caption.
+    # Registering it without installing/migratig the model results in
+    # `ProgrammingError: relation "contentitem_fluent_contents_oembeditem" does not exist`
+    # errors. For now, exclude it in the available content plugins.
     'fluent_contents.plugins.oembeditem',
-    'fluent_contents.plugins.picture',
+    # 'icekit.plugins.oembed_with_caption.apps.OEmbedAppConfig',
+    # 'fluent_contents.plugins.picture',
     'fluent_contents.plugins.rawhtml',
     'fluent_contents.plugins.sharedcontent',
-    'fluent_contents.plugins.text',
+    # 'fluent_contents.plugins.text',
     # 'fluent_contents.plugins.twitterfeed',
 
     # Page type and content plugin dependencies.
-    # 'any_urlfield',
+    'any_urlfield',
     'django_wysiwyg',
     'micawber',
 )
@@ -521,9 +624,9 @@ INSTALLED_APPS += (
 
 HAYSTACK_CONNECTIONS = {
     'default': {
-        'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
+        'ENGINE': 'icekit.utils.search.backends.ICEkitConfigurableElasticSearchEngine',
         'INDEX_NAME': 'haystack-%s' % SETTINGS_MODULE_HASH,
-        'URL': 'http://localhost:9200/',
+        'URL': 'http://%s/' % ELASTICSEARCH_ADDRESS,
     },
 }
 
@@ -540,66 +643,161 @@ INSTALLED_APPS += ('haystack', )
 
 # ICEKIT ######################################################################
 
-FEATURED_APPS = (
-    {
-        'verbose_name': 'Content',
-        'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
-        'models': {
-            'fluent_pages.Page': {
-                'verbose_name_plural': 'Pages',
-            },
-        },
-    },
-    {
-        'verbose_name': 'Media',
-        'icon_html': '<i class="content-type-icon fa fa-file-image-o"></i>',
-        'models': {
-            'image.Image': {},
-            'slideshow.Slideshow': {},
-            'sharedcontent.SharedContent': {},
-        },
-    },
-)
+ICEKIT_CONTEXT_PROCESSOR_SETTINGS = ()
 
 ICEKIT = {
     'LAYOUT_TEMPLATES': (
+        # A list of 3-tuples, each containing a label prefix, a path to a
+        # templates directory that will be searched by the installed template
+        # loaders, and a template name prefix.
         (
             'ICEkit',
-            os.path.join(BASE_DIR, 'icekit/layouts/templates'),
+            os.path.join(ICEKIT_DIR,
+                         'layouts/templates'),
             'icekit/layouts',
         ),
+        (
+            'Content Collections',
+            os.path.join(ICEKIT_DIR, 'content_collections/templates'),
+            'icekit_content_collections/layouts',
+        ),
+        (
+            SITE_NAME,
+            os.path.join(PROJECT_DIR, 'templates'),
+            'layouts',
+        ),
     ),
+
+    'DASHBOARD_FEATURED_APPS': [
+        {
+            'name': 'Content',
+            'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
+            'models': [
+                ('icekit_article.Article', {
+                    'verbose_name_plural': 'Articles',
+                }),
+                ('fluent_pages.Page', {
+                    'verbose_name_plural': 'Pages',
+                }),
+            ],
+        },
+        {
+            'name': 'Assets',
+            'icon_html': '<i class="content-type-icon fa fa-file-image-o"></i>',
+            'models': [
+                ('icekit_plugins_image.Image', {}),
+                ('icekit_plugins_file.File', {}),
+                ('icekit_plugins_slideshow.SlideShow', {}),
+            ],
+        },
+    ],
+
+    # a hand-arranged list of models to appear first in the app list
+    'DASHBOARD_SORTED_APPS': [
+        {
+            'name': 'Events',
+            'models': (
+                ('icekit_events.EventBase', {}),
+                ('icekit_events.EventType', {}),
+                ('icekit_events.RecurrenceRule', {}),
+            )
+        },
+        {
+            'name': 'Collection',
+            'models': (
+                ('gk_collections_work_creator.CreatorBase', {}),
+                ('gk_collections_work_creator.WorkBase', {}),
+                ('gk_collections_work_creator.Role', {}),
+                ('gk_collections_work_creator.WorkImageType', {}),
+            )
+        },
+        {
+            'name': 'Content',
+            'models': (
+                ('icekit_article.Article', {}),
+                ('fluent_pages.Page', {}),
+                ('icekit_authors.Author', {}),
+                ('icekit_press_releases.PressRelease', {}),
+                ('icekit_press_releases.PressReleaseCategory', {}),
+            )
+        },
+        {
+            'name': 'Assets',
+            'models': (
+                ('icekit_plugins_image.Image', {}),
+                ('icekit_plugins_file.File', {}),
+                ('icekit_plugins_slideshow.SlideShow', {}),
+                ('glamkit_sponsors.Sponsor', {}),
+                ('icekit_plugins_contact_person.ContactPerson', {}),
+                ('forms.Form', {}),
+                ('sharedcontent.SharedContent', {}),
+                ('icekit.MediaCategory', {}),
+            )
+        },
+        {
+            'name': 'Users and groups',
+            'models': (
+                ('polymorphic_auth.User', {}),
+                ('auth.Group', {}),
+            )
+        },
+        {
+            'name': 'Settings',
+            'models': (
+                ('model_settings.Setting', {'name': "General settings"}),
+                ('icekit.Layout', {}),
+                ('redirects.Redirect', {}),
+                ('response_pages.ResponsePage', {}),
+                ('sites.Site', {}),
+                ('fluent_pages.PageLayout', {'name': 'Fluent Layouts'}),
+            )
+        },
+    ]
 }
 
 INSTALLED_APPS += (
     'icekit',
-    'icekit.dashboard',  # Must come before `django.contrib.admin` and `flat`
+    'icekit.admin_tools',  # Must come before `django.contrib.admin` and `flat`
     'icekit.integration.reversion',
     'icekit.layouts',
+    'icekit.workflow',
     'icekit.publishing',
     'icekit.response_pages',
+    'icekit.content_collections',
     'notifications',
 
+    'icekit.page_types.article',
+    'icekit.page_types.author',
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
 
     # 'icekit.plugins.brightcove',
     'icekit.plugins.child_pages',
+    'icekit.plugins.contact_person',
+    'icekit.plugins.content_listing',
     'icekit.plugins.faq',
     'icekit.plugins.file',
     'icekit.plugins.horizontal_rule',
     'icekit.plugins.image',
     'icekit.plugins.instagram_embed',
+    'icekit.plugins.links',
     'icekit.plugins.map',
     'icekit.plugins.map_with_text',
     'icekit.plugins.oembed_with_caption',
+    # Replaces 'icekit.plugins.oembed_with_caption',
+    # Includes fix for https://github.com/django-fluent/django-fluent-contents/issues/65
+
     'icekit.plugins.page_anchor',
     'icekit.plugins.page_anchor_list',
     'icekit.plugins.quote',
     'icekit.plugins.reusable_form',
     'icekit.plugins.slideshow',
+    'icekit.plugins.image_gallery',
     'icekit.plugins.twitter_embed',
+    'icekit.plugins.text',
 )
+
+MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
 
 # MASTER PASSWORD #############################################################
 
@@ -681,7 +879,7 @@ AWS_HEADERS = {
 AWS_SECRET_ACCESS_KEY = os.environ.get('MEDIA_AWS_SECRET_ACCESS_KEY')
 
 AWS_STORAGE_BUCKET_NAME = os.environ.get(
-    'MEDIA_AWS_STORAGE_BUCKET_NAME', '%s-stg' % SITE_SLUG)
+    'MEDIA_AWS_STORAGE_BUCKET_NAME', '%s-stg' % PROJECT_SLUG)
 
 ENABLE_S3_MEDIA = False
 INSTALLED_APPS += ('storages', )
@@ -721,3 +919,22 @@ WSGI_ADDRESS = '127.0.0.1'
 WSGI_PORT = 8080
 WSGI_TIMEOUT = 60
 WSGI_WORKERS = multiprocessing.cpu_count() * 2 + 1
+
+# DEBUG TOOLBAR (not enabled by default) ######################################
+
+# To enable the toolbar, add
+#
+#    INSTALLED_APPS += ('debug_toolbar',)
+#    DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda request: DEBUG}
+#    MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) + MIDDLEWARE_CLASSES
+#
+#  to `project_settings_local.py`
+
+try:
+    from debug_toolbar.settings import PANELS_DEFAULTS
+except ImportError:
+    PANELS_DEFAULTS = []
+
+DEBUG_TOOLBAR_PANELS = [
+    'fluent_contents.panels.ContentPluginPanel',
+] + PANELS_DEFAULTS

@@ -1,0 +1,4 @@
+# Top level project requirements only.
+# Unpinned, except to exclude known incompatible versions.
+
+# django-icekit  # Already installed in Docker image or via `go.sh`

@@ -1,0 +1,33 @@
+{% load fluent_contents_tags search_tags %}
+{# search index for ListableMixin models #}
+
+{% filter striptags %}
+    {% filter unescape %}
+        {% block text %}
+            {{ object.get_type }}
+            {{ object.slug }}
+            {{ object.get_title }}
+            {{ object.get_subtitle }}
+            {{ object.get_oneliner }}
+
+            {{ object.get_absolute_url }}
+            {{ object.slug }} {{ object.pk }}
+
+            {% fake_request %}{# render_placeholder requires a request #}
+
+            {% for placeholder in object.placeholder_set.all %}
+                {% render_placeholder placeholder %}
+            {% endfor %}
+
+            {{ object.meta_keywords }}
+            {{ object.meta_description }}
+            {{ object.meta_title }}
+
+            {% for child in object.get_children %}
+                {{ child }}
+            {% endfor %}
+        {% endblock %}
+     {% endfilter %}
+{% endfilter %}
+
+{% block unfiltered_text %}{% endblock %}

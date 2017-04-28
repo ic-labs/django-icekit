@@ -5,7 +5,7 @@
 	<head {% block head_attributes %}prefix="og: http://ogp.me/ns#"{% endblock %}>
 		{% block head %}
 			{% block credits %}
-			<!-- Hello. We're the Interaction Consortium (http://interaction.net.au) -->
+			<!-- Hello. We're the Interaction Consortium (https://interaction.net.au) -->
 			<!-- We made this. -->
 			{% endblock %}
 
@@ -17,11 +17,17 @@
 				<link rel="author" href="/humans.txt" />
 
 				{% block open_graph %}
-					<meta property="og:title" content="{% block og_title %}{% if title %}{{ title }} - {% endif %}{{ SITE_NAME }}{% endblock %}">
+					<meta property="og:title" content="{% block og_title %}{{ page.get_og_title }}{% endblock %}">
 					<meta property="og:type" content="{% block og_type %}website{% endblock %}">
-					<meta property="og:image" content="{% block og_image %}{% endblock %}">
+					<meta property="og:image" content="{% block og_image %}{% with page.get_og_image_url as og_image %}{% if og_image %}{{ og_image|safe }}{% endif %}{% endwith %}{% endblock %}">
 					<meta property="og:site_name" content="{% block og_site_name %}{{ SITE_NAME }}{% endblock %}">
-					<meta property="og:description" content="{% block og_description %}{% endblock %}">
+					<meta property="og:description" content="{% block og_description %}{{ page.get_og_description }}{% endblock %}">
+					<meta name="twitter:card" content="{% block twitter_card %}summary_large_card{% endblock %}" />
+					<meta name="twitter:site" content="{% block twitter_site %}{{ SITE_TWITTER_USERNAME }}{% endblock %}" />
+					<meta name="twitter:creator" content="{% block twitter_creator %}{{ SITE_TWITTER_USERNAME }}{% endblock %}" />
+					<meta name="twitter:title" content="{% block twitter_title %}{{ page.get_og_title }}{% endblock %}" />
+					<meta name="twitter:description" content="{% block twitter_description %}{{ page.get_og_description }}{% endblock %}" />
+					<meta name="twitter:image" content="{% block twitter_image %}{% with page.get_og_image_url as og_image %}{% if og_image %}{{ og_image|safe }}{% endif %}{% endwith %}{% endblock %}" />
 				{% endblock %}
 
 				{% if debug %}
@@ -29,14 +35,22 @@
 				{% endif %}
 			{% endblock %}
 
-			<title>{% block title %}{% if title %}{{ title|safe }} - {% endif %}{{ SITE_NAME|safe }}{% endblock %}</title>
+			<title>{% if request.IS_DRAFT %}PREVIEW: {% endif %}{% block title %}{% if page.get_title %}{{ page.get_title|safe }} - {% endif %}{{ SITE_NAME|safe }}{% endblock %}</title>
 
 			{% block head_css %}
 				{# CSS files hosted externally #}
 				{% block external_css %}{% endblock %}
 				{# Base CSS files #}
 				{% compress css file %}
-					{% block base_css %}{% endblock %}
+                    {% block icekit_css %}
+						<link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.css' %}">
+						<link rel="stylesheet" href="{% static 'font-awesome/css/font-awesome.css' %}">
+						<link rel="stylesheet" type="text/x-scss" href="{% static 'icekit/styles/icekit.scss' %}">
+					{% endblock %}
+                    {# Default styling for a project, designed to be overridden once a build is underway #}
+					{% block base_css %}
+                        <link rel="stylesheet" type="text/x-scss" href="{% static 'icekit/styles/site.scss' %}">
+					{% endblock %}
 				{% endcompress %}
 				{# Extra CSS files - section/page specific, etc #}
 				{% compress css file %}
@@ -52,32 +66,40 @@
 			{% endblock %}
 		{% endblock %}
 	</head>
-	<body class="{% block body_class %}{% endblock %}" {% block body_attributes %}{% endblock %}>
+	<body class="{% block body_class %}{% endblock %} {% if request.IS_DRAFT %}preview{% endif %}" {% block body_attributes %}{% endblock %}>
 		{% block body %}
 			{% block messages %}
 				{% include 'icekit/messages.html' %}
 			{% endblock %}
-			{% block content %}{% endblock content %}
+			{% block content %}{% endblock %}
 		{% endblock %}
+
+		{% if request.IS_DRAFT %}
+		{% block preview_ribbon %}
+            {% include 'icekit/partials/preview_link.html' with obj=page %}
+		{% endblock preview_ribbon %}
+		{% endif %}
 
 		{% block body_js %}
 			{# JS files hosted externally #}
 			{% block external_js %}{% endblock %}
 			{# Base JS files #}
 			{% compress js file %}
-				{% block base_js %}{% endblock %}
-				{% if ICEKIT_SHARE_USERNAME and ICEKIT_SHARE_KEY %}
-					<script language="javascript">
-						window.ICEKIT_SHARE_USERNAME = '{{ ICEKIT_SHARE_USERNAME }}';
-						window.ICEKIT_SHARE_KEY = '{{ ICEKIT_SHARE_KEY }}';
-					</script>
-					<script src="{% static "icekit/js/link_share.js" %}"></script>
-				{% endif %}
+				{% block base_js %}
+					<script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+					<script src="{% static 'icekit/js/link_share.js' %}"></script>
+				{% endblock %}
 			{% endcompress %}
 			{# Extra JS files - section/page specific, etc #}
 			{% compress js file %}
 				{% block js %}{% endblock %}
 			{% endcompress %}
+			{% if ICEKIT_SHARE_USERNAME and ICEKIT_SHARE_KEY %}
+				<script>
+					window.ICEKIT_SHARE_USERNAME = '{{ ICEKIT_SHARE_USERNAME }}';
+					window.ICEKIT_SHARE_KEY = '{{ ICEKIT_SHARE_KEY }}';
+				</script>
+			{% endif %}
 		{% endblock %}
 	</body>
 </html>

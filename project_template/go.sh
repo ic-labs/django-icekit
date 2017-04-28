@@ -15,6 +15,9 @@ export ICEKIT_PROJECT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}"); pwd -P)
 # Set location of virtualenv.
 export ICEKIT_VENV="$ICEKIT_PROJECT_DIR/var/go.sh-venv"
 
+# Don't write `*.pyc` files.
+export PYTHONDONTWRITEBYTECODE=1
+
 # Create local (non-Docker) virtualenv.
 if [[ ! -d "$ICEKIT_VENV" ]]; then
     virtualenv "$ICEKIT_VENV"

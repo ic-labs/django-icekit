@@ -9,6 +9,7 @@ from django.template.loader import get_template
 from django.utils import encoding, timezone
 from django.utils.translation import ugettext_lazy as _
 from fluent_contents.analyzer import get_template_placeholder_data
+from icekit.admin_tools.filters import ChildModelFilter
 
 from . import fields, plugins
 
@@ -118,7 +119,6 @@ class AbstractMediaCategory(AbstractBaseModel):
 
     class Meta:
         abstract = True
-        verbose_name_plural = 'Media categories'
 
     def __str__(self):
         return self.name

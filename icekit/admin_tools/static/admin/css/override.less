@@ -1,0 +1,47 @@
+// alloy editor
+.aligned .form-row .ae-editable {
+
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 5px 6px;
+	outline: none;
+
+	// Overide unordered list styling alloy editor
+	ul {
+		margin-left: 1.5em;
+
+		li {
+			list-style-type: disc;
+			}
+	}
+
+}
+
+
+// prevent inline descriptor from being cut off
+body .inline-group .tabular td.original p {
+	height: 1.6em;
+}
+
+// override excessive base.css styling for datepicker
+.bootstrap-datetimepicker-widget {
+	td {
+		padding-top: 0 !important;
+	}
+
+	ul.list-unstyled {
+		li {
+			list-style-type: none;
+		}
+	}
+}
+
+.form-row {
+	kbd {
+		padding: inherit;
+		color: inherit;
+		background-color: inherit;
+		border-radius: inherit;
+		box-shadow: none;
+	}
+}

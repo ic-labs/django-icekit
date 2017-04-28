@@ -19,6 +19,6 @@ class AbstractOEmbedWithCaptionItem(AbstractOEmbedItem):
                        'max width.'
 
     class Meta:
-        verbose_name = 'Online Media with Caption'
+        verbose_name = 'Embedded Media with Caption'
         abstract = True
 

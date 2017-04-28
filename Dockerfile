@@ -1,15 +1,28 @@
 FROM buildpack-deps:jessie
 
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
+        apt-transport-https \
+        apt-utils \
         gettext \
+        gnupg2 \
         jq \
+        locales \
         nano \
         nginx \
         postgresql-client \
         python \
         python-dev \
         pv \
+        vim-tiny \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN echo 'deb https://dl.bintray.com/sobolevn/deb git-secret main' | tee -a /etc/apt/sources.list
+RUN wget -nv -O - https://api.bintray.com/users/sobolevn/keys/gpg/public.key | apt-key add -
+RUN apt-get update \
+    && apt-get install --yes --force-yes --no-install-recommends \
+        git-secret \
     && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_VERSION=4.4.2
@@ -31,11 +44,11 @@ RUN md5sum bower.json > bower.json.md5
 WORKDIR /opt/django-icekit/
 
 RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python
+ENV PIP_SRC=/opt
 
 COPY requirements.txt setup.py /opt/django-icekit/
-RUN pip install --no-cache-dir -r requirements.txt
-RUN touch requirements-local.txt
-RUN md5sum requirements.txt requirements-local.txt > requirements.md5
+RUN pip install --no-cache-dir -r requirements.txt -U
+RUN md5sum requirements.txt > requirements.txt.md5
 
 ENV DOCKERIZE_VERSION=0.2.0
 RUN wget -nv -O - "https://github.com/jwilder/dockerize/releases/download/v${DOCKERIZE_VERSION}/dockerize-linux-amd64-v${DOCKERIZE_VERSION}.tar.gz" | tar -xz -C /usr/local/bin/ -f -
@@ -53,13 +66,24 @@ RUN cd /usr/local/bin \
 # RUN echo "int chown() { return 0; }" > preload.c && gcc -shared -o /libpreload.so preload.c && rm preload.c
 # ENV LD_PRELOAD=/libpreload.so
 
+RUN echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
+RUN locale-gen
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+
 ENV CRONLOCK_HOST=redis
 ENV DOCKER=1
+ENV ELASTICSEARCH_ADDRESS=elasticsearch:9200
 ENV ICEKIT_DIR=/opt/django-icekit/icekit
 ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/project_template
 ENV PATH=/opt/django-icekit/icekit/bin:$PATH
 ENV PGHOST=postgres
 ENV PGUSER=postgres
+ENV PIP_DISABLE_PIP_VERSION_CHECK=on
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONHASHSEED=random
+ENV PYTHONWARNINGS=ignore
 ENV REDIS_ADDRESS=redis:6379
 ENV SUPERVISORD_CONFIG_INCLUDE=supervisord-django.conf
 ENV WAITLOCK_ENABLE=1

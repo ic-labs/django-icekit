@@ -1,33 +1,53 @@
-from fluent_contents.admin import PlaceholderEditorAdmin
-from fluent_contents.models import PlaceholderData
+import warnings
+
+from icekit.utils.deprecation import deprecated
+
+from icekit.admin_tools.mixins import \
+    FluentLayoutsMixin as new_FluentLayoutsMixin, \
+    HeroMixinAdmin as new_HeroMixinAdmin, \
+    ListableMixinAdmin as new_ListableMixinAdmin
+
+from icekit.admin_tools.polymorphic import \
+    ICEkitFluentPagesParentAdmin as new_ICEkitFluentPagesParentAdmin
 
 
-class FluentLayoutsMixin(PlaceholderEditorAdmin):
+warnings.warn(
+    "the icekit.admin_mixins module is deprecated. Use icekit.admin_tools.mixins instead.",
+    DeprecationWarning,
+    stacklevel=2)
+
+
+@deprecated
+class FluentLayoutsMixin(new_FluentLayoutsMixin):
     """
-    Mixin class for models that have a ``layout`` field and fluent content.
+    .. deprecated::
+    Use :class:`icekit.admin_tools.mixins.FluentLayoutsMixin` instead.
     """
+    pass
 
-    change_form_template = 'icekit/admin/fluent_layouts_change_form.html'
 
-    class Media:
-        js = ('icekit/admin/js/fluent_layouts.js', )
+@deprecated
+class HeroMixinAdmin(new_HeroMixinAdmin):
+    """
+    .. deprecated::
+    Use :class:`icekit.admin_tools.mixins.HeroMixinAdmin` instead.
+    """
+    pass
 
-    def formfield_for_foreignkey(self, db_field, *args, **kwargs):
-        """
-        Update queryset for ``layout`` field.
-        """
-        formfield = super(FluentLayoutsMixin, self).formfield_for_foreignkey(
-            db_field, *args, **kwargs)
-        if db_field.name == 'layout':
-            formfield.queryset = formfield.queryset.for_model(self.model)
-        return formfield
 
-    def get_placeholder_data(self, request, obj):
-        """
-        Get placeholder data from layout.
-        """
-        if not obj or not obj.layout:
-            data = [PlaceholderData(slot='main', role='m', title='Main')]
-        else:
-            data = obj.layout.get_placeholder_data()
-        return data
+@deprecated
+class ListableMixinAdmin(new_ListableMixinAdmin):
+    """
+    .. deprecated::
+    Use :class:`icekit.admin_tools.mixins.ListableMixinAdmin` instead.
+    """
+    pass
+
+
+@deprecated
+class ICEkitFluentPagesParentAdmin(new_ICEkitFluentPagesParentAdmin):
+    """
+    .. deprecated::
+    Use :class:`icekit.admin_tools.mixins.ICEkitFluentPagesParentAdmin` instead.
+    """
+    pass

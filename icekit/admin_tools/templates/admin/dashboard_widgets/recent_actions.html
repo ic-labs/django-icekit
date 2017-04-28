@@ -1,0 +1,24 @@
+{% extends "admin/dashboard_widgets/_widget.html" %}
+{% load i18n %}
+
+{% block title %}Recent actions{% endblock %}}
+
+{% block content %}
+	{% load log %}
+	{% get_admin_log 10 as content_list for_user user %}
+	{% if not content_list %}
+		<p>{% trans 'None available' %}</p>
+	{% else %}
+		<ul class="actionlist col-xs-6" style="padding:0;">
+			{% for entry in content_list|slice:":5" %}
+				{% include "admin/dashboard_widgets/_widget_recent_actions_link.html" %}
+			{% endfor %}
+		</ul>
+		<ul class="actionlist col-xs-6" style="padding:0;">
+			{% for entry in content_list|slice:"5:10" %}
+				{% include "admin/dashboard_widgets/_widget_recent_actions_link.html" %}
+			{% endfor %}
+		</ul>
+	{% endif %}
+{% endblock %}
+

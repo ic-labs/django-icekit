@@ -39,13 +39,22 @@ class AbstractFile(models.Model):
     def __str__(self):
         return self.title or os.path.basename(self.file.name).split('.')[0]
 
+    def exists(self):
+        return os.path.isfile(self.file.path)
+
     def file_size(self):
         """
         Obtain the file size for the file in human readable format.
+        If the file isn't fount, return "0 bytes" rather than crash
 
         :return: String of file size with unit.
+
         """
-        return filesizeformat(self.file.size)
+        try:
+            return filesizeformat(self.file.size)
+        except OSError:
+            return filesizeformat(0)
+
 
     def extension(self):
         """
@@ -66,7 +75,8 @@ class AbstractFileItem(ContentItem):
     """
     file = models.ForeignKey(
         appsettings.FILE_CLASS,
-        help_text=_('A file from the file library.')
+        help_text=_('A file from the file library.'),
+        on_delete=models.CASCADE,
     )
 
     class Meta:

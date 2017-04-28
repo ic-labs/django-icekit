@@ -1,14 +1,14 @@
+from __future__ import absolute_import, print_function
+
 import importlib
 import os
 import sys
 
 from icekit.utils.sequences import dedupe_and_sort
 
-BASE_SETTINGS_MODULE = os.environ.setdefault('BASE_SETTINGS_MODULE', 'base')
-
-print '# BASE_SETTINGS_MODULE: %s' % BASE_SETTINGS_MODULE
-
 # Emulate `from ... import *` with base settings module from environment.
+BASE_SETTINGS_MODULE = os.environ.setdefault('BASE_SETTINGS_MODULE', 'base')
+print('# BASE_SETTINGS_MODULE: %s' % BASE_SETTINGS_MODULE)
 try:
     locals().update(importlib.import_module(
         'icekit.project.settings._%s' % BASE_SETTINGS_MODULE).__dict__)
@@ -45,8 +45,8 @@ INSTALLED_APPS = dedupe_and_sort(
     INSTALLED_APPS,
     [
         # First our apps.
+        'icekit.admin_tools',  # Must be before `icekit`
         'icekit',
-        'icekit.dashboard',
         'icekit.integration.reversion',
         'polymorphic_auth',
 
@@ -56,8 +56,6 @@ INSTALLED_APPS = dedupe_and_sort(
         'flat',
         'test_without_migrations',
     ],
-     # These apps last:
-     []
 )
 
 # Sort middleware according to documentation.
@@ -97,7 +95,7 @@ except IOError:
         secret = open(SECRET_FILE, 'w')
         secret.write(SECRET_KEY)
         secret.close()
-        os.chmod(SECRET_FILE, 0400)
+        os.chmod(SECRET_FILE, 0o400)
     except IOError:
         raise Exception(
             'Please create a %s file with 50 random characters to set your '

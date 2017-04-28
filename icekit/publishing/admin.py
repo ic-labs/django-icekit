@@ -1,10 +1,10 @@
 import json
+import six
 
 import django
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
-from django.conf import settings
 from django.conf.urls import patterns, url
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -18,8 +18,6 @@ from django.template import loader, Context
 from fluent_pages.models.db import UrlNode
 from fluent_pages.adminui.pageadmin import _select_template_name
 from fluent_pages.adminui.urlnodeparentadmin import UrlNodeParentAdmin
-
-from icekit.admin_mixins import FluentLayoutsMixin
 
 from .models import PublishingModel
 
@@ -56,8 +54,30 @@ class PublishingPublishedFilter(SimpleListFilter):
         except TypeError:
             return queryset
 
-        isnull = not value
-        return queryset.filter(publishing_linked__isnull=isnull)
+        show_published = bool(value)
+
+        # If admin is for a `PublishingModel` subclass use simple query...
+        if issubclass(queryset.model, PublishingModel):
+            return queryset.filter(
+                publishing_linked__isnull=not show_published)
+
+        # ...if admin is not for a `PublishingModel` subclass we must iterate
+        # over child model instances to keep compatibility with Fluent page
+        # admin and models not derived from `PublishingModel`.
+        pks_to_exclude = []
+        for item in queryset.get_real_instances():
+            if show_published:
+                if item.status == UrlNode.PUBLISHED:
+                    continue  # Published according to Fluent Pages' UrlNode
+                elif getattr(item, 'has_been_published', False):
+                    continue  # Published according to ICEKit Publishing
+            else:
+                if item.status == UrlNode.DRAFT \
+                        and not getattr(item, 'has_been_published', False):
+                    # Unpublished according to both Fluent and ICEKit
+                    continue
+            pks_to_exclude.append(item.pk)
+        return queryset.exclude(pk__in=pks_to_exclude)
 
 
 class PublishingStatusFilter(SimpleListFilter):
@@ -100,18 +120,52 @@ class PublishingStatusFilter(SimpleListFilter):
         return lookups
 
     def queryset(self, request, queryset):
-        if self.value() == 'unpublished':
-            return queryset.filter(publishing_linked__isnull=True)
-        elif self.value() == 'published':
-            return queryset.filter(publishing_linked__isnull=False)
-        elif self.value() == 'out_of_date':
-            return queryset.filter(
-                publishing_modified_at__gt=F(
-                    'publishing_linked__publishing_modified_at'))
-        elif self.value() == 'up_to_date':
-            return queryset.filter(
-                publishing_modified_at__lte=F(
-                    'publishing_linked__publishing_modified_at'))
+        value = self.value()
+        if not value:
+            return queryset
+        # If admin is for a `PublishingModel` subclass use simple queries...
+        if issubclass(queryset.model, PublishingModel):
+            if value == 'unpublished':
+                return queryset.filter(publishing_linked__isnull=True)
+            elif value == 'published':
+                return queryset.filter(publishing_linked__isnull=False)
+            elif value == 'out_of_date':
+                return queryset.filter(
+                    publishing_modified_at__gt=F(
+                        'publishing_linked__publishing_modified_at'))
+            elif value == 'up_to_date':
+                return queryset.filter(
+                    publishing_modified_at__lte=F(
+                        'publishing_linked__publishing_modified_at'))
+        # ...if admin is not for a `PublishingModel` subclass we must iterate
+        # over child model instances to keep compatibility with Fluent page
+        # admin and models not derived from `PublishingModel`.
+        pks_to_exclude = []
+        for item in queryset.get_real_instances():
+            if value == 'unpublished':
+                if item.status == UrlNode.DRAFT \
+                        and not getattr(item, 'has_been_published', False):
+                    # Unpublished according to both Fluent and ICEKit
+                    continue
+            elif value == 'published':
+                if item.status == UrlNode.PUBLISHED:
+                    continue  # Published according to Fluent Pages' UrlNode
+                elif getattr(item, 'has_been_published', False):
+                    continue  # Published according to ICEKit Publishing
+            elif value == 'out_of_date':
+                if (getattr(item, 'publishing_linked', None)
+                    and item.publishing_modified_at
+                    > item.publishing_linked.publishing_modified_at
+                ):
+                    continue  # Published and outdated according to ICEKit
+            elif value == 'up_to_date':
+                if (getattr(item, 'publishing_linked', None)
+                    and item.publishing_modified_at
+                    <= item.publishing_linked.publishing_modified_at
+                ):
+                    continue  # Published and up-to-date according to ICEKit
+            pks_to_exclude.append(item.pk)
+        return queryset.exclude(pk__in=pks_to_exclude)
 
 
 class PublishingAdminForm(forms.ModelForm):
@@ -225,11 +279,47 @@ class _PublishingHelpersMixin(object):
         :return: Boolean.
         """
         user_obj = request.user
-        if user_obj.is_superuser:
-            return True
         if not user_obj.is_active:
             return False
-        return user_obj.has_perm('%s.can_publish' % self.opts.app_label)
+        if user_obj.is_superuser:
+            return True
+        # Normal user with `can_publish` permission can always publish
+        if user_obj.has_perm('%s.can_publish' % self.opts.app_label):
+            return True
+        # Normal user with `can_republish` permission can only publish if the
+        # item is already published.
+        if user_obj.has_perm('%s.can_republish' % self.opts.app_label) and \
+                obj and getattr(obj, 'has_been_published', False):
+            return True
+        # User does not meet any publishing permisison requirements; reject!
+        return False
+
+    def has_preview_permission(self, request, obj=None):
+        """
+        Return `True` if the user has permissions to preview a publishable
+        item.
+
+        NOTE: this method does not actually change who can or cannot preview
+        any particular item, just whether to show the preview link. The real
+        dcision is made by a combination of:
+
+        - `PublishingMiddleware` which chooses who can view draft content
+        - the view code for a particular item, which may or may not render
+          draft content for a specific user.
+
+        :param request: Django request object.
+        :param obj: The object the user would preview, if permitted.
+        :return: Boolean.
+        """
+        # User who can publish always has preview permission.
+        if self.has_publish_permission(request, obj=obj):
+            return True
+        user_obj = request.user
+        if not user_obj.is_active:
+            return False
+        if user_obj.is_staff:
+            return True
+        return False
 
     def publishing_column(self, obj):
         """
@@ -240,13 +330,20 @@ class _PublishingHelpersMixin(object):
         if hasattr(obj, 'get_real_instance'):
             obj = obj.get_real_instance()
 
+        try:
+            object_url = obj.get_absolute_url()
+        except (NoReverseMatch, AttributeError):
+            object_url = ''
+
         template_name = 'admin/publishing/_change_list_publishing_column.html'
         t = loader.get_template(template_name)
         c = Context({
             'object': obj,
+            'object_url': object_url,
             'has_publish_permission':
                 self.has_publish_permission(self.request, obj),
-            'img_path': settings.STATIC_URL + 'admin/img/',
+            'has_preview_permission':
+                self.has_preview_permission(self.request, obj),
         })
         try:
             if isinstance(obj, PublishingModel):
@@ -263,10 +360,8 @@ class _PublishingHelpersMixin(object):
 
 class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
     form = PublishingAdminForm
-    # publish or unpublish actions sometime makes the plugins disappear from
-    # page so we disable it for now, until we can investigate it further.
-    # actions = (make_published, make_unpublished, )
-    list_display = ('publishing_object_title', 'publishing_column',)
+    list_display = ('publishing_object_title', 'publishing_column', 'publishing_modified_at')
+    list_display_links = ('publishing_object_title', ) # default, but makes it easier to extend
     list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
 
     actions = ['publish', 'unpublish']
@@ -275,9 +370,6 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         js = (
             'publishing/publishing.js',
         )
-        css = {
-            'all': ('publishing/publishing.css', ),
-        }
 
     def __init__(self, model, admin_site):
         super(PublishingAdmin, self).__init__(model, admin_site)
@@ -312,7 +404,7 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         Given a list of template names, find the first one that actually exists
         and is available.
         """
-        if isinstance(template_name_list, basestring):
+        if isinstance(template_name_list, six.string_types):
             return template_name_list
         else:
             # Take advantage of fluent_pages' internal implementation
@@ -462,10 +554,21 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         """
         obj = context.get('original', None)
         if obj:
+            context['object'] = obj
+            context['has_been_published'] = obj.has_been_published
+            context['is_dirty'] = obj.is_dirty
+            context['has_preview_permission'] = \
+                self.has_preview_permission(request, obj)
+
             if not self.has_publish_permission(request, obj):
                 context['has_publish_permission'] = False
             else:
                 context['has_publish_permission'] = True
+
+                try:
+                    object_url = obj.get_absolute_url()
+                except (NoReverseMatch, AttributeError):
+                    object_url = ''
 
                 # If the user has publishing permission and if there are
                 # changes which are to be published show the publish button
@@ -483,12 +586,6 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
                     unpublish_btn = reverse(
                         self.unpublish_reverse(type(obj)), args=(obj.pk, ))
 
-                # By default don't show the preview draft button unless there
-                # is a `get_absolute_url` definition on the object.
-                preview_draft_btn = None
-                if callable(getattr(obj, 'get_absolute_url', None)):
-                    preview_draft_btn = True
-
                 # If the user has publishing permission, the object has draft
                 # changes and a published version show a revert button to
                 # change back to the published information.
@@ -497,11 +594,9 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
                     revert_btn = reverse(self.revert_reverse, args=(obj.pk, ))
 
                 context.update({
-                    'is_dirty': obj.is_dirty,
-                    'has_been_published': obj.has_been_published,
+                    'object_url': object_url,
                     'publish_btn': publish_btn,
                     'unpublish_btn': unpublish_btn,
-                    'preview_draft_btn': preview_draft_btn,
                     'revert_btn': revert_btn,
                 })
 
@@ -588,7 +683,8 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
         except AttributeError:
             pass
         for q in qs:
-            q.publish()
+            if self.has_publish_permission(request, q):
+                q.publish()
 
     def unpublish(self, request, qs):
         # Convert polymorphic queryset instances to real ones if/when necessary
@@ -631,6 +727,9 @@ class ICEKitFluentPagesParentAdminMixin(
     """ Add publishing features for FluentPage parent admin (listing) pages """
     list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
 
+
+# this import must go here to avoid import errors
+from icekit.admin_tools.mixins import FluentLayoutsMixin
 
 class PublishableFluentContentsAdmin(PublishingAdmin, FluentLayoutsMixin):
     """

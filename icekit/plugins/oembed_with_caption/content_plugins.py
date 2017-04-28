@@ -27,6 +27,17 @@ class OEmbedWithCaptionPlugin(ContentPlugin):
                 'caption',
             ),
         }),
+        ('Advanced', {
+            'fields': (
+                # 'description',
+                # 'height',
+                # 'width',
+                # 'html',
+                'embed_max_width',
+                'embed_max_height',
+            ),
+            'classes': ('collapse',),
+        })
     )
 
     class Media:

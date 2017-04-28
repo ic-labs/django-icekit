@@ -8,15 +8,20 @@ from django.utils.translation import ugettext_lazy as _
 
 import platform
 import re
-import urllib2
-import urlparse
+
+try:
+	import urllib2
+	import urlparse
+except ImportError:
+	from urllib import request as urllib2
+	from urllib import parse as urlparse
 
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.core.urlresolvers import resolve
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 
 def template_name(value):
     """
@@ -57,10 +62,10 @@ class RelativeURLValidator(RegexValidator):
     def __call__(self, value):
         try:
             super(RelativeURLValidator, self).__call__(value)
-        except ValidationError, e:
+        except ValidationError as e:
             # Trivial case failed. Try for possible IDN domain
             if value:
-                value = smart_unicode(value)
+                value = smart_text(value)
                 scheme, netloc, path, query, fragment = urlparse.urlsplit(value)
                 try:
                     netloc = netloc.encode('idna') # IDN -> ACE

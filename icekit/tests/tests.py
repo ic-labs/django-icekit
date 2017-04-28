@@ -4,15 +4,15 @@ Tests for ``icekit`` app.
 import os
 
 # WebTest API docs: http://webtest.readthedocs.org/en/latest/api.html
+from unittest import skip
+
 from django.apps import apps
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core import exceptions
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 from django.utils import six
 from django_dynamic_fixture import G
 from django_webtest import WebTest
@@ -38,8 +38,7 @@ from icekit.response_pages.models import ResponsePage
 from mock import patch, Mock
 
 from icekit.utils import fluent_contents, implementation
-from icekit.utils.admin import mixins
-from icekit.utils.pagination import describe_page_numbers
+from icekit.admin_tools import mixins
 
 from icekit import admin_forms, models, validators
 from icekit.tests import models as test_models
@@ -128,7 +127,7 @@ class Forms(WebTest):
         self.assertEqual(teaf.cleaned_data['twitter_url'], twitter_url)
 
 
-class Layout(WebTest):
+class LayoutTest(WebTest):
 
     def test_auto_add(self):
         # No layouts.
@@ -393,8 +392,14 @@ class Models(WebTest):
         mixin_layout.delete()
 
     def test_article_publishing_querysets(self):
+        article_listing = test_models.ArticleListing.objects.create(
+            title="Article listing",
+            author=self.user_1,
+        )
+
         article_1 = test_models.Article.objects.create(
-            title='Test Article'
+            title='Test Article',
+            parent=article_listing,
         )
         self.assertIn(article_1, test_models.Article.objects.all())
         self.assertEqual(test_models.Article.objects.count(), 1)
@@ -491,6 +496,16 @@ class Views(WebTest):
                 user=self.super_user_1)
             self.assertEqual(response.status_code, 200)
 
+    # Test workaround applied for django-polymorphic 1.0+ per #31
+    def test_can_save_polymorphic_page_in_admin(self):
+        response = self.app.get(
+            reverse('admin:fluent_pages_page_change',
+                    args=(self.layoutpage_1.pk,)),
+            user=self.super_user_1)
+        # Hit 'Save' in form -- does nothing really, but will fail with
+        # `ParentAdminNotRegistered` if polymorphic issue #31 is present.
+        response.forms[0].submit()
+
     def test_response_pages(self):
         response = self.app.get(reverse('404'), expect_errors=404)
         self.assertEqual(response.status_code, 404)
@@ -523,39 +538,6 @@ class Views(WebTest):
         self.layoutpage_1.publish()
         response = self.client.get(self.layoutpage_1.get_absolute_url())
         self.assertEqual(response.status_code, 200)
-
-    def test_page_api(self):
-        self.layoutpage_1.publish()
-        for j in range(20):
-            published_layoutpage = LayoutPage.objects.create(
-                author=self.super_user_1,
-                title='Test LayoutPage %s' % j,
-                layout=self.layout_1,
-            )
-            published_layoutpage.publish()
-
-            draft_layoutpage = LayoutPage.objects.create(
-                author=self.super_user_1,
-                title='Draft LayoutPage %s' % j,
-                layout=self.layout_1,
-            )
-
-        response = self.client.get(reverse('page-list'))
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data['results']), 5)
-        self.assertEqual(response.data['count'], 21)
-        response = self.client.get(reverse('page-detail', args=(self.layoutpage_1.id,)))
-        self.assertEqual(response.status_code, 404)
-        response = self.client.get(reverse('page-detail', args=(self.layoutpage_1.get_published().id,)))
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 6)
-        for key in response.data.keys():
-            if key is not 'content':
-                self.assertEqual(response.data[key],
-                                 getattr(self.layoutpage_1.get_published(), key))
-        self.assertEqual(len(response.data['content']), 3)
-        for number, item in enumerate(response.data['content'], 1):
-            self.assertEqual(item['content'], getattr(self, 'content_instance_%s' % number).html)
 
 
 class TestValidators(WebTest):
@@ -619,48 +601,3 @@ class TestIceKitTags(WebTest):
         response.mustcontain('<div class="tag-fake-slot"></div>')
         response.mustcontain('<div class="tag-fake-slot-render">None</div>')
         response.mustcontain('div class="filter-fake-slot">None</div>')
-
-
-class TestDescribePageNumbers(TestCase):
-    def test_join_words(self):
-        self.assertEqual(
-            describe_page_numbers(1, 500, 10),
-            {
-                'numbers': [1, 2, 3, 4, None, 48, 49, 50],
-                'has_previous': False,
-                'has_next': True,
-                'previous_page': 0,
-                'current_page': 1,
-                'next_page': 2,
-                'total_count': 500,
-                'per_page': 10,
-            },
-        )
-
-        self.assertEqual(
-            describe_page_numbers(10, 500, 10),
-            {
-                'numbers': [1, 2, 3, None, 7, 8, 9, 10, 11, 12, 13, None, 48, 49, 50],
-                'has_previous': True,
-                'has_next': True,
-                'previous_page': 9,
-                'current_page': 10,
-                'next_page': 11,
-                'total_count': 500,
-                'per_page': 10,
-            },
-        )
-
-        self.assertEqual(
-            describe_page_numbers(50, 500, 10),
-            {
-                'numbers': [1, 2, 3, None, 47, 48, 49, 50],
-                'has_previous': True,
-                'has_next': False,
-                'previous_page': 49,
-                'current_page': 50,
-                'next_page': 51,
-                'total_count': 500,
-                'per_page': 10,
-            },
-        )

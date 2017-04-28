@@ -62,6 +62,7 @@ class PublishingModel(models.Model):
         abstract = True
         permissions = (
             ('can_publish', 'Can publish'),
+            ('can_republish', 'Can republish'),
         )
 
     @property
@@ -78,13 +79,12 @@ class PublishingModel(models.Model):
             return True
 
         # Get all placeholders + their plugins to find their modified date
-        for placeholder_field in self.get_placeholder_fields():
+        for placeholder_field in self.get_cms_placeholder_fields():
             placeholder = getattr(self, placeholder_field)
             for plugin in placeholder.get_plugins_list():
                 if plugin.changed_date \
                         > self.publishing_linked.publishing_modified_at:
                     return True
-
         return False
 
     @property
@@ -146,7 +146,14 @@ class PublishingModel(models.Model):
         if self.is_draft:
             return self
         elif self.is_published:
-            return self.publishing_draft
+            draft = self.publishing_draft
+            # Previously the reverse relation could be `DraftItemBoobyTrapped`
+            # in some cases. This should be fixed by extra monkey-patching of
+            # the `publishing_draft` field in icekit.publishing.apps, but we
+            # will leave this extra sanity check here just in case.
+            if hasattr(draft, 'get_draft_payload'):
+                draft = draft.get_draft_payload()
+            return draft
         raise ValueError(  # pragma: no cover
             "Publishable object %r is neither draft nor published" % self)
 
@@ -174,6 +181,21 @@ class PublishingModel(models.Model):
         else:
             return self.get_published()
 
+    def get_published_or_draft(self):
+        """
+        Return the published item, if it exists, otherwise, for privileged
+        users, return the draft version.
+        """
+        if self.is_published:
+            return self
+        elif self.publishing_linked:
+            return self.publishing_linked
+        if is_draft_request_context():
+            return self.get_draft()
+        # There is no public version, and there is no privilege to view the
+        # draft version
+        return None
+
     def get_unique_together(self):
         return self._meta.unique_together
 
@@ -184,17 +206,18 @@ class PublishingModel(models.Model):
         except models.fields.FieldDoesNotExist:
             return None
 
-    def get_placeholder_fields(self, obj=None):
-        placeholder_fields = []
-
+    def get_cms_placeholder_fields(self, obj=None):
         try:
             from cms.models.placeholdermodel import Placeholder
+            return self.get_placeholder_fields(Placeholder, obj=obj)
         except ImportError:
-            return placeholder_fields
+            return []
 
+    def get_placeholder_fields(self, placeholder_class, obj=None):
         if obj is None:
             obj = self
 
+        placeholder_fields = []
         model_fields = obj.__class__._meta.get_all_field_names()
         for field in model_fields:
             if field in self.publishing_ignore_fields:
@@ -206,7 +229,6 @@ class PublishingModel(models.Model):
                     placeholder_fields.append(field)
             except (ObjectDoesNotExist, AttributeError):
                 continue
-
         return placeholder_fields
 
     @assert_draft
@@ -219,8 +241,7 @@ class PublishingModel(models.Model):
         :param self: The object to tbe published.
         :return: The published object.
         """
-        # Make sure that this object is dirty and a draft.
-        if self.is_draft and self.is_dirty:
+        if self.is_draft:
             # If the object has previously been linked then patch the
             # placeholder data and remove the previously linked object.
             # Otherwise set the published date.
@@ -333,7 +354,11 @@ class PublishingModel(models.Model):
 
     def publishing_prepare_published_copy(self, draft_obj):
         """ Prepare published copy of draft prior to saving it """
-        pass
+        # We call super here, somewhat perversely, to ensure this method will
+        # be called on publishable subclasses if implemented there.
+        mysuper = super(PublishingModel, self)
+        if hasattr(mysuper, 'publishing_prepare_published_copy'):
+            mysuper.publishing_prepare_published_copy(draft_obj)
 
     def publishing_clone_relations(self, src_obj):
         """
@@ -343,111 +368,154 @@ class PublishingModel(models.Model):
         confusing, but here is a summary that might help:
 
             - when a draft object is published, the "current" and definitive
-            relationships are cloned to the published copy. The definitive
-            relationships are the draft-to-draft ones, as set in the admin.
+              relationships are cloned to the published copy. The definitive
+              relationships are the draft-to-draft ones, as set in the admin.
             - a "related draft" is the draft object at the other side of
-            a draft-to-draft M2M relationship
+              a draft-to-draft M2M relationship
             - if a related draft also has a published copy, a draft-to-
-            published relationship is added to that published copy. This
-            makes our newly-published item also "published" from the reverse
-            direction
+              published relationship is added to that published copy. This
+              makes our newly-published item also "published" from the reverse
+              direction
             - if our draft object has a related published copy without a
-            correponding related draft -- that is, a draft-to-published
-            relation without a definitive draft-to-draft relation -- then
-            we remove that relation as it is no longer "current". This
-            makes our newly-published item "unpublished" from the reverse
-            direction when an admin removes the underlying relationship.
+              correponding related draft -- that is, a draft-to-published
+              relation without a definitive draft-to-draft relation -- then
+              we remove that relation as it is no longer "current". This
+              makes our newly-published item "unpublished" from the reverse
+              direction when an admin removes the underlying relationship.
 
         An example case:
 
             - We have Event "E" (unpublished) and Program "P" (published)
             - We add an M2M relationship from E to P. Until the relationship
-            change is published it only affects drafts. Relationships are:
-                E draft <-> P draft
+              change is published it only affects drafts. Relationships are:
+                  E draft <-> P draft
             - We publish E, applying the relationship to published copies on
-            both sides:
-                E draft <-> P draft
-                E published <-> P draft
-                P published <-> E draft
+              both sides:
+                  E draft <-> P draft
+                  E published <-> P draft
+                  P published <-> E draft
             - We remove the M2M relationship between E and P (We could do this
-            from either side: remove E from P; or, remove P from E). The
-            draft-to-draft relation is removed but published copy
-            relationships are not affected:
-                E published <-> P draft
-                P published <-> E draft
+              from either side: remove E from P; or, remove P from E). The
+              draft-to-draft relation is removed but published copy
+              relationships are not affected:
+                  E published <-> P draft
+                  P published <-> E draft
             - We publish P (or E) to apply the relationshp removal to
-            published copies on both sides. No relationships remain.
+              published copies on both sides. No relationships remain.
 
-        See unit test ``.test_m2m_handling_in_publishing_clone_relations``
-        in ``sfmoma.tests.tests.TestPagePublishing``
+        To handle M2M relationships in general we iterate over entries in the
+        through-table relationship table to clone these entries, or remove
+        them, as appropriate. By processing the M2M relationships in this way
+        we can handle both kinds of M2M relationship:
+
+            - standard M2M relationships with no explicit through table defined
+              (these get an auto-generated through table) which are easier to
+              handle because we can add/remove items with the relationship's
+              queryset directly
+            - M2M relationships with an explicit through table defined, which
+              are more difficult to handle because we must use the through
+              model's manager to add/remove relationships.
+
+        See unit tests in ``TestPublishingOfM2MRelationships``.
         """
-        def clone(src, dst):
-            published_rel_obj_copies_to_add = []
+
+        def clone_through_model_relationship(src_manager, through_entry,
+                                             dst_obj, rel_obj):
+            if src_manager.through.objects.filter(**{
+                src_manager.source_field_name: dst_obj,
+                src_manager.target_field_name: rel_obj,
+            }).exists():
+                return
+            through_entry.pk = None
+            setattr(through_entry, src_manager.source_field_name, dst_obj)
+            setattr(through_entry, src_manager.target_field_name, rel_obj)
+            through_entry.save()
+
+        def delete_through_model_relationship(src_manager, rel_obj):
+            src_manager.through.objects.filter(**{
+                src_manager.source_field_name: src_obj,
+                src_manager.target_field_name: rel_obj,
+            }).delete()
+
+        def clone(src_manager):
+            through_qs = src_manager.through.objects \
+                .filter(**{src_manager.source_field_name: src_obj})
             published_rel_objs_maybe_obsolete = []
-            for rel_obj in src.all():
-                # If the object referenced by the M2M is publishable we
-                # clone it only if it is a draft copy. If it is not a
-                # publishable object we also clone it (True by default).
+            current_draft_rel_pks = set()
+            for through_entry in through_qs:
+                rel_obj = getattr(
+                    through_entry, src_manager.target_field_name)
+                # If the object referenced by the M2M is publishable we only
+                # clone the relationship if it is to a draft copy, not if it is
+                # to a published copy. If it is not a publishable object at
+                # all then we always clone the relationship (True by default).
                 if getattr(rel_obj, 'publishing_is_draft', True):
-                    dst.add(rel_obj)
-                    # If the related object also has a published copy, we
-                    # need to make sure the published copy also knows about
-                    # this newly-published draft. We defer this until below
-                    # when we are no longer iterating over the queryset
-                    # we need to modify.
+                    clone_through_model_relationship(
+                        src_manager, through_entry, self, rel_obj)
+                    # If the related draft object also has a published copy,
+                    # we need to make sure the published copy also knows about
+                    # this newly-published draft.
                     try:
-                        if rel_obj.publishing_linked:
-                            published_rel_obj_copies_to_add.append(
-                                rel_obj.publishing_linked)
+                        # Get published copy for related object, if any
+                        rel_obj_published = rel_obj.publishing_linked
                     except AttributeError:
-                        pass  # No `publishing_linked` attr to handle
+                        pass  # Related item has no published copy
+                    else:
+                        if rel_obj_published:
+                            clone_through_model_relationship(
+                                src_manager, through_entry, src_obj,
+                                rel_obj_published)
+                    # Track IDs of related draft copies, so we can tell later
+                    # whether relationshps with published copies are obsolete
+                    current_draft_rel_pks.add(rel_obj.pk)
                 else:
                     # Track related published copies, in case they have
                     # become obsolete
                     published_rel_objs_maybe_obsolete.append(rel_obj)
-            # Make published copies of related objects aware of our
-            # newly-published draft, in case they weren't already.
-            if published_rel_obj_copies_to_add:
-                src.add(*published_rel_obj_copies_to_add)
             # If related published copies have no corresponding related
             # draft after all the previous processing, the relationship is
             # obsolete and must be removed.
-            current_draft_rel_pks = set([
-                i.pk for i in src.all() if getattr(i, 'is_draft', False)
-            ])
             for published_rel_obj in published_rel_objs_maybe_obsolete:
                 draft = published_rel_obj.get_draft()
                 if not draft or draft.pk not in current_draft_rel_pks:
-                    src.remove(published_rel_obj)
+                    delete_through_model_relationship(
+                        src_manager, published_rel_obj)
+
         # Track the relationship through-tables we have processed to avoid
         # processing the same relationships in both forward and reverse
         # directions, which could otherwise happen in unusual cases like
         # for SFMOMA event M2M inter-relationships which are explicitly
         # defined both ways as a hack to expose form widgets.
         seen_rel_through_tables = set()
+
         # Forward.
         for field in src_obj._meta.many_to_many:
-            src = getattr(src_obj, field.name)
-            dst = getattr(self, field.name)
-            clone(src, dst)
+            src_manager = getattr(src_obj, field.name)
+            clone(src_manager)
             seen_rel_through_tables.add(field.rel.through)
+
         # Reverse.
-        for field in \
-                src_obj._meta.get_all_related_many_to_many_objects():
-            # Skip reverse relationship if we have already seen, see note
-            # about `seen_rel_through_tables` above.
+        for field in src_obj._meta.get_all_related_many_to_many_objects():
+            # Skip reverse relationship we have already seen
             if field.field.rel.through in seen_rel_through_tables:
                 continue
             field_accessor_name = field.get_accessor_name()
             # M2M relationships with `self` don't have accessor names
             if not field_accessor_name:
                 continue
-            src = getattr(src_obj, field_accessor_name)
-            dst = getattr(self, field_accessor_name)
-            clone(src, dst)
+            src_manager = getattr(src_obj, field_accessor_name)
+            clone(src_manager)
+
+    def has_placeholder_relationships(self):
+        return hasattr(self, 'placeholder_set') \
+            or hasattr(self, 'placeholders') \
+            or len(self.get_placeholder_fields(Placeholder)) > 0
 
     @assert_draft
     def patch_placeholders(self):
+        if not self.has_placeholder_relationships():
+            return
+
         published_obj = self.publishing_linked
 
         for draft_placeholder, published_placeholder in zip(
@@ -493,6 +561,9 @@ class PublishingModel(models.Model):
         are to be related.
         :return: None
         """
+        if not self.has_placeholder_relationships():
+            return
+
         for src_placeholder in Placeholder.objects.parent(self):
             dst_placeholder = Placeholder.objects.create_for_object(
                 dst_obj,
@@ -530,9 +601,23 @@ class PublishingModel(models.Model):
                 # re-created on publish thus always have empty M2M rels.
                 dst_m2m.add(*src_m2m.all())
 
+    def suppressed_message(self):
+        """
+        Occasionally items may not be visible to the public even if they have
+        been published and can be previewed. For example, if they belong to a
+        parent who is not published.
 
-class PublishableFluentContentsPage(FluentContentsPage,
-                                    PublishingModel):
+        In that case, returning a string here will result in a red `published`
+        indicator in admin, and the string will be shown in the hyperlink
+        title.
+
+        :return: A message to be shown to the user only if the content can be
+        previewed but not published.
+        """
+        return None
+
+
+class PublishableFluentContentsPage(FluentContentsPage, PublishingModel):
     """
     Basic Page subtype (ie that lives in the Page tree)
     """
@@ -549,6 +634,15 @@ class PublishableFluentContentsPage(FluentContentsPage,
     @property
     def is_published(self):
         return not self.publishing_is_draft
+
+    # borrowed from FluentFieldsMixin. TODO: send upstream
+    def placeholders(self):
+        # return a dict of placeholders, organised by slot, for access in
+        # templates use `page.placeholders.<slot_name>.get_content_items` to
+        # test if a placeholder has any items.
+        return dict([(p.slot, p)
+                     for p in self.placeholder_set.all().select_related()])
+
 
     class Meta:
         abstract = True
@@ -643,7 +737,8 @@ def sync_mptt_tree_fields_from_draft_to_published_post_save(
         sync_mptt_tree_fields_from_draft_to_published(instance)
 
 
-def sync_mptt_tree_fields_from_draft_to_published(draft_copy, dry_run=False):
+def sync_mptt_tree_fields_from_draft_to_published(
+        draft_copy, dry_run=False, force_update_cached_urls=False):
     """
     Sync tree structure changes from a draft publishable object to its
     published copy, and updates the published copy's Fluent cached URLs when
@@ -655,7 +750,7 @@ def sync_mptt_tree_fields_from_draft_to_published(draft_copy, dry_run=False):
     mptt_opts = getattr(draft_copy, '_mptt_meta', None)
     published_copy = getattr(draft_copy, 'publishing_linked', None)
     if not mptt_opts or not published_copy:
-        return
+        return {}
     # Identify changed values and prepare dict of changes to apply to DB
     parent_changed = draft_copy.parent != published_copy.parent
     update_kwargs = {
@@ -672,22 +767,26 @@ def sync_mptt_tree_fields_from_draft_to_published(draft_copy, dry_run=False):
         # Only parent may be None, never set tree_id/left/right/level to None
         and not (field != 'parent' and value is None)
     )
+
+    change_report = []
+    for field, new_value in update_kwargs.items():
+        old_value = getattr(published_copy, field)
+        change_report.append((draft_copy, field, old_value, new_value))
+
     # Forcibly update MPTT field values via UPDATE commands instead of normal
     # model attr changes, which MPTT ignores when you `save`
     if update_kwargs and not dry_run:
         type(published_copy).objects.filter(pk=published_copy.pk).update(
             **update_kwargs)
 
-    change_report = update_kwargs
-
     # If real tree structure (not just MPTT fields) has changed we must
     # regenerate the cached URLs for published copy translations.
-    if parent_changed:
+    if parent_changed or force_update_cached_urls:
         # Make our local published obj aware of DB change made by `update`
         published_copy.parent = draft_copy.parent
         # Regenerate the cached URLs for published copy translations.
-        change_report.update(
-            update_fluent_cached_urls(published_copy, dry_run=dry_run))
+        change_report += \
+            update_fluent_cached_urls(published_copy, dry_run=dry_run)
 
     return change_report
 
@@ -699,11 +798,13 @@ def update_fluent_cached_urls(item, dry_run=False):
     unnecessary and unwanted slug changes to ensure uniqueness, the logic for
     which doesn't work with our publishing.
     """
-    change_report = {}
+    change_report = []
     if hasattr(item, 'translations'):
         for translation in item.translations.all():
+            old_url = translation._cached_url
             item._update_cached_url(translation)
-            change_report['_cached_url'] = translation._cached_url
+            change_report.append(
+                (translation, '_cached_url', old_url, translation._cached_url))
             if not dry_run:
                 translation.save()
         if not dry_run:
@@ -719,8 +820,6 @@ def update_fluent_cached_urls(item, dry_run=False):
                         if child.is_published]
         for child in children:
             update_fluent_cached_urls(child, dry_run=dry_run)
-            change_report[u' child %s : _cached_url' % child] = \
-                child._cached_url
 
     return change_report
 
@@ -742,9 +841,10 @@ def delete_published_copy_when_draft_deleted(sender, **kwargs):
 
 
 @receiver(models.signals.post_migrate)
-def create_can_publish_permission(sender, **kwargs):
+def create_can_publish_and_can_republish_permissions(sender, **kwargs):
     """
-    Add `can_publish` permission for each of the publishable model.
+    Add `can_publish` and `ca_nrepublish` permissions for each publishable
+    model in the system.
     """
     for model in sender.get_models():
         if not issubclass(model, PublishingModel):
@@ -753,3 +853,6 @@ def create_can_publish_permission(sender, **kwargs):
         permission, created = Permission.objects.get_or_create(
             content_type=content_type, codename='can_publish',
             defaults=dict(name='Can Publish %s' % model.__name__))
+        permission, created = Permission.objects.get_or_create(
+            content_type=content_type, codename='can_republish',
+            defaults=dict(name='Can Republish %s' % model.__name__))

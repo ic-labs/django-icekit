@@ -6,7 +6,10 @@ from fluent_contents.models import ContentItem
 
 @python_2_unicode_compatible
 class AbstractFormItem(ContentItem):
-    form = models.ForeignKey('forms.Form')
+    form = models.ForeignKey(
+        'forms.Form',
+        on_delete=models.CASCADE,
+    )
 
     class Meta:
         abstract = True

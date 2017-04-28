@@ -1,17 +1,11 @@
 from django.conf.urls import patterns, url
 from fluent_pages.extensions import page_type_pool
-from fluent_pages.models import UrlNode
-from haystack.views import SearchView
+
+from icekit.plugins import ICEkitFluentContentsPagePlugin
+from icekit.utils.search import ICEkitSearchView
 
 from . import admin, models
-from icekit.plugins import ICEkitFluentContentsPagePlugin
 
-
-class FluentSearchView(SearchView):
-    def extra_context(self):
-        return {
-            'instance': UrlNode.objects.get_for_path(self.request.path)
-        }
 
 
 # Register this plugin to the page plugin pool.
@@ -20,13 +14,9 @@ class SearchPagePlugin(ICEkitFluentContentsPagePlugin):
     model = models.SearchPage
     model_admin = admin.SearchPageAdmin
 
-    urls = patterns(
-        '',
-        url(
-            r'^$',
-            FluentSearchView(
-                template='icekit/page_types/search_page/default.html',
-            ),
-            name='haystack_search'
-        ),
-    )
+    def get_response(self, request, page, **kwargs):
+
+        return ICEkitSearchView.as_view(
+            template_name='icekit/page_types/search_page/default.html',
+            fluent_page=page,
+        )(request)
