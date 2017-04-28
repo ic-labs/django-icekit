@@ -6,7 +6,7 @@ celery:
   environment:
     - BASE_SETTINGS_MODULE=production
     - DOTENV=production
-    - GPG_PASSPHRASE=
+    - GPG_PASSPHRASE= # Get from 1Password
   links:
     - elasticsearch
     # - postgres
@@ -24,7 +24,7 @@ celerybeat:
   environment:
     - BASE_SETTINGS_MODULE=production
     - DOTENV=production
-    - GPG_PASSPHRASE=
+    - GPG_PASSPHRASE= # Get from 1Password
   links:
     - redis
   restart: on-failure
@@ -40,7 +40,7 @@ celeryflower:
   environment:
     - BASE_SETTINGS_MODULE=production
     - DOTENV=production
-    - GPG_PASSPHRASE=
+    - GPG_PASSPHRASE= # Get from 1Password
     - VIRTUAL_HOST=https://flower.example.com
   expose:
     - '5555'
@@ -60,7 +60,7 @@ django:
     - BASE_SETTINGS_MODULE=production
     - DOTENV=production
     - FORCE_SSL=yes
-    - GPG_PASSPHRASE=
+    - GPG_PASSPHRASE= # Get from 1Password
     - VIRTUAL_HOST=https://www.example.com
   expose:
     - '8000'
