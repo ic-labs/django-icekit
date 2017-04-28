@@ -3,7 +3,6 @@ FROM buildpack-deps:xenial
 RUN apt-get update \
     && apt-get upgrade -y --no-install-recommends \
     && apt-get install -y --no-install-recommends \
-        apt-transport-https \
         apt-utils \
         gettext \
         gnupg2 \
@@ -17,12 +16,13 @@ RUN apt-get update \
         vim-tiny \
     && rm -rf /var/lib/apt/lists/*
 
-RUN echo 'deb https://dl.bintray.com/sobolevn/deb git-secret main' | tee -a /etc/apt/sources.list
-RUN wget -nv -O - https://api.bintray.com/users/sobolevn/keys/gpg/public.key | apt-key add -
-RUN apt-get update \
-    && apt-get install --yes --force-yes --no-install-recommends \
-        git-secret \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /opt/git-secret/
+
+ENV GIT_SECRET_VERSION=0.2.1
+RUN git clone https://github.com/sobolevn/git-secret.git /opt/git-secret/ \
+    && git checkout "v$GIT_SECRET_VERSION" \
+    && make build \
+    && PREFIX=/usr/local make install
 
 ENV NODE_VERSION=4.4.2
 RUN wget -nv -O - "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" | tar -Jx -C /opt/ -f -
