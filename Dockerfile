@@ -12,7 +12,6 @@ RUN apt-get update \
         nano \
         nginx \
         postgresql-client \
-        python \
         python-dev \
         pv \
         vim-tiny \
