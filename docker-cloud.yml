@@ -4,6 +4,7 @@ celery:
   deployment_strategy: high_availability
   environment:
     - BASE_SETTINGS_MODULE=production
+    - DOTENV=production
   image: 'interaction/icekit:master'
   links:
     - elasticsearch
@@ -20,6 +21,7 @@ celerybeat:
   deployment_strategy: high_availability
   environment:
     - BASE_SETTINGS_MODULE=production
+    - DOTENV=production
   image: 'interaction/icekit:master'
   links:
     - redis
@@ -34,6 +36,7 @@ celeryflower:
   deployment_strategy: high_availability
   environment:
     - BASE_SETTINGS_MODULE=production
+    - DOTENV=production
     - VIRTUAL_HOST=https://flower.example.com
   expose:
     - '5555'
@@ -51,6 +54,7 @@ django:
   deployment_strategy: every_node
   environment:
     - BASE_SETTINGS_MODULE=production
+    - DOTENV=production
     - VIRTUAL_HOST=https://www.example.com
   expose:
     - '8000'
