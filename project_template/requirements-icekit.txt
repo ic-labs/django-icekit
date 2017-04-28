@@ -4,7 +4,7 @@
 # it should pin icekit to the same version or commit mentioned at the top of
 # `Dockerfile`:
 
--e ..[api,brightcove,dev,django18,forms,glamkit,project,search,test]
+-e ..[api,brightcove,dev,django18,docs,forms,glamkit,project,search,test]
 
 # and any dependencies that django-icekit has in its requirements.txt
 # (the following should be copied from there once versions are pegged):
