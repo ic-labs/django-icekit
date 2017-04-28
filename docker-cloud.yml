@@ -23,7 +23,7 @@ celery:
     - elasticsearch
     - postgres
     - redis
-  restart: always
+  restart: on-failure
   tags:
     - icekit
   volumes:
@@ -51,7 +51,7 @@ celerybeat:
   image: 'interaction/icekit:master'
   links:
     - redis
-  restart: always
+  restart: on-failure
   tags:
     - icekit
   volumes:
@@ -82,7 +82,7 @@ celeryflower:
   image: 'interaction/icekit:master'
   links:
     - redis
-  restart: always
+  restart: on-failure
   tags:
     - icekit
   volumes:
@@ -118,7 +118,7 @@ django:
     - elasticsearch
     - postgres
     - redis
-  restart: always
+  restart: on-failure
   tags:
     - icekit
   volumes:
@@ -126,7 +126,7 @@ django:
 elasticsearch:
   # autoredeploy: true
   image: 'interaction/elasticsearch-icu:1'
-  restart: always
+  restart: on-failure
   tags:
     - icekit
 haproxy:
@@ -139,7 +139,7 @@ haproxy:
     - django
   ports:
     - '443:443'
-  restart: always
+  restart: on-failure
   roles:
     - global
   tags:
@@ -158,13 +158,13 @@ letsencrypt:
 postgres:
   # autoredeploy: true
   image: 'onjin/alpine-postgres:9.4'
-  restart: always
+  restart: on-failure
   tags:
     - icekit
 redis:
   # autoredeploy: true
   command: 'redis-server --appendonly yes'
   image: 'redis:3-alpine'
-  restart: always
+  restart: on-failure
   tags:
     - icekit
