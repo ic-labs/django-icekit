@@ -7,8 +7,6 @@ services:
       MASTER_PASSWORD: # Get from environment
       TERM: # Get from environment
     image: interaction/project_template:local
-    tmpfs:
-      - /tmp
     volumes:
       - ./:/opt/project_template
   celery:
