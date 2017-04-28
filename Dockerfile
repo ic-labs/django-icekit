@@ -44,6 +44,7 @@ WORKDIR /opt/django-icekit/
 
 ENV PYTHON_PIP_VERSION=9.0.1
 RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python - "pip==${PYTHON_PIP_VERSION}"
+ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_SRC=/opt
 
 COPY requirements.txt setup.py /opt/django-icekit/
@@ -75,7 +76,6 @@ ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/project_template
 ENV PATH=/opt/django-icekit/icekit/bin:$PATH
 ENV PGHOST=postgres
 ENV PGUSER=postgres
-ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONHASHSEED=random
 ENV PYTHONWARNINGS=ignore
