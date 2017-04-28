@@ -49,10 +49,10 @@ COPY requirements.txt setup.py /opt/django-icekit/
 RUN pip install --no-cache-dir -r requirements.txt -U
 RUN md5sum requirements.txt > requirements.txt.md5
 
-ENV DOCKERIZE_VERSION=0.2.0
+ENV DOCKERIZE_VERSION=0.4.0
 RUN wget -nv -O - "https://github.com/jwilder/dockerize/releases/download/v${DOCKERIZE_VERSION}/dockerize-linux-amd64-v${DOCKERIZE_VERSION}.tar.gz" | tar -xz -C /usr/local/bin/ -f -
 
-ENV TINI_VERSION=0.9.0
+ENV TINI_VERSION=0.14.0
 RUN wget -nv -O /usr/local/bin/tini "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini-static"
 RUN chmod +x /usr/local/bin/tini
 
