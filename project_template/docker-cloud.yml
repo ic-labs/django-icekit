@@ -11,7 +11,7 @@ celery:
     - elasticsearch
     # - postgres
     - redis
-  restart: always
+  restart: on-failure
   tags:
     - project_template
   volumes:
@@ -27,7 +27,7 @@ celerybeat:
     - GPG_PASSPHRASE=
   links:
     - redis
-  restart: always
+  restart: on-failure
   tags:
     - project_template
   volumes:
@@ -46,7 +46,7 @@ celeryflower:
     - '5555'
   links:
     - redis
-  restart: always
+  restart: on-failure
   tags:
     - project_template
   volumes:
@@ -71,7 +71,7 @@ django:
     - elasticsearch
     # - postgres
     - redis
-  restart: always
+  restart: on-failure
   tags:
     - project_template
   volumes:
@@ -79,7 +79,7 @@ django:
 elasticsearch:
   image: 'interaction/elasticsearch-icu:1'
   # autoredeploy: true
-  restart: always
+  restart: on-failure
   tags:
     - project_template
 haproxy:
@@ -92,7 +92,7 @@ haproxy:
     - django
   ports:
     - '443:443'
-  restart: always
+  restart: on-failure
   roles:
     - global
   tags:
@@ -111,13 +111,13 @@ letsencrypt:
 # postgres:
 #   image: 'onjin/alpine-postgres:9.4'
 #   # autoredeploy: true
-#   restart: always
+#   restart: on-failure
 #   tags:
 #     - project_template
 redis:
   image: 'redis:3-alpine'
   # autoredeploy: true
   command: 'redis-server --appendonly yes'
-  restart: always
+  restart: on-failure
   tags:
     - project_template
