@@ -48,7 +48,7 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_SRC=/opt
 
 COPY requirements.txt setup.py /opt/django-icekit/
-RUN pip install --no-cache-dir -r requirements.txt -U
+RUN bash -c 'pip install --no-cache-dir -r <(grep -v setuptools requirements.txt)'  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
 RUN md5sum requirements.txt > requirements.txt.md5
 
 ENV DOCKERIZE_VERSION=0.4.0
