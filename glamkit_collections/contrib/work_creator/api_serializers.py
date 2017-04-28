@@ -4,7 +4,9 @@ from rest_framework import serializers
 from rest_framework.settings import api_settings
 
 from icekit.api.base_serializers import ModelSubSerializer, \
-    PolymorphicHyperlinkedModelSerializer, PolymorphicHyperlinkedRelatedField
+    PolymorphicHyperlinkedModelSerializer, \
+    PolymorphicHyperlinkedRelatedField, \
+    ModelSubSerializerParentMixin
 
 from .models import WorkBase, CreatorBase, WorkCreator as WorkCreatorModel, \
     WorkImage as WorkImageModel, WorkImageType as WorkImageTypeModel, \
@@ -64,7 +66,8 @@ class WorkDate(ModelSubSerializer):
         )
 
 
-class WorkSummary(PolymorphicHyperlinkedModelSerializer):
+class WorkSummary(ModelSubSerializerParentMixin,
+                  PolymorphicHyperlinkedModelSerializer):
     """ Minimal information about a work """
     date = WorkDate()
 
@@ -98,7 +101,8 @@ class Role(serializers.ModelSerializer):
         )
 
 
-class WorkCreator(serializers.HyperlinkedModelSerializer):
+class WorkCreator(ModelSubSerializerParentMixin,
+                  serializers.HyperlinkedModelSerializer):
     """ Relationship between a work and a creator """
     work = WorkSummary()
     creator = CreatorSummary()
@@ -137,7 +141,8 @@ class WorkCreatorFromCreator(WorkCreator):
         ]
 
 
-class Creator(serializers.HyperlinkedModelSerializer):
+class Creator(ModelSubSerializerParentMixin,
+              serializers.HyperlinkedModelSerializer):
     works = WorkCreatorFromCreator(
         source='workcreator_set',
         many=True,
@@ -192,7 +197,8 @@ class WorkImageType(serializers.ModelSerializer):
         )
 
 
-class WorkImage(serializers.ModelSerializer):
+class WorkImage(ModelSubSerializerParentMixin,
+                serializers.ModelSerializer):
     image = Image()
     image_type = WorkImageType(
         source='type',
@@ -212,7 +218,8 @@ class WorkImage(serializers.ModelSerializer):
         )
 
 
-class Work(serializers.HyperlinkedModelSerializer):
+class Work(ModelSubSerializerParentMixin,
+           serializers.HyperlinkedModelSerializer):
     creators = WorkCreatorFromWork(
         source='workcreator_set',
         many=True,
