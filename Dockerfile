@@ -61,10 +61,6 @@ RUN cd /usr/local/bin \
     && wget -N -nv "https://raw.githubusercontent.com/ixc/docker/${DOCKER_COMMIT}/bin/transfer.sh" \
     && chmod +x *.sh
 
-# See: https://github.com/codekitchen/dinghy/issues/17#issuecomment-209545602
-# RUN echo "int chown() { return 0; }" > preload.c && gcc -shared -o /libpreload.so preload.c && rm preload.c
-# ENV LD_PRELOAD=/libpreload.so
-
 RUN echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
 RUN locale-gen
 ENV LANG=en_US.UTF-8
