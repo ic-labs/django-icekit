@@ -1,5 +1,4 @@
 celery:
-  image: 'interaction/project_template:master'
   # autoredeploy: true
   command: 'setup-django.sh celery.sh'
   deployment_strategy: high_availability
@@ -7,6 +6,7 @@ celery:
     - BASE_SETTINGS_MODULE=production
     - DOTENV=production
     - GPG_PASSPHRASE= # Get from 1Password
+  image: 'interaction/project_template:master'
   links:
     - elasticsearch
     # - postgres
@@ -17,7 +17,6 @@ celery:
   volumes:
     - /opt/project_template/var
 celerybeat:
-  image: 'interaction/project_template:master'
   # autoredeploy: true
   command: 'setup-django.sh celerybeat.sh'
   deployment_strategy: high_availability
@@ -25,6 +24,7 @@ celerybeat:
     - BASE_SETTINGS_MODULE=production
     - DOTENV=production
     - GPG_PASSPHRASE= # Get from 1Password
+  image: 'interaction/project_template:master'
   links:
     - redis
   restart: on-failure
@@ -33,7 +33,6 @@ celerybeat:
   volumes:
     - /opt/project_template/var
 celeryflower:
-  image: 'interaction/project_template:master'
   # autoredeploy: true
   command: 'setup-django.sh celeryflower.sh'
   deployment_strategy: high_availability
@@ -44,6 +43,7 @@ celeryflower:
     - VIRTUAL_HOST=https://flower.example.com
   expose:
     - '5555'
+  image: 'interaction/project_template:master'
   links:
     - redis
   restart: on-failure
@@ -52,7 +52,6 @@ celeryflower:
   volumes:
     - /opt/project_template/var
 django:
-  image: 'interaction/project_template:master'
   # autoredeploy: true
   command: 'setup-django.sh supervisord.sh'
   deployment_strategy: every_node
@@ -63,6 +62,7 @@ django:
     - VIRTUAL_HOST=https://www.example.com
   expose:
     - '8000'
+  image: 'interaction/project_template:master'
   links:
     - celery
     - celerybeat
@@ -76,13 +76,12 @@ django:
   volumes:
     - /opt/project_template/var
 elasticsearch:
-  image: 'interaction/elasticsearch-icu:1-alpine'
   # autoredeploy: true
+  image: 'interaction/elasticsearch-icu:1-alpine'
   restart: on-failure
   tags:
     - project_template
 haproxy:
-  image: 'dockercloud/haproxy:1.6.3'
   # autoredeploy: true
   environment:
     - |
@@ -132,6 +131,7 @@ haproxy:
       s3KYY2u5A8AT6CJoeYFKdB38ydKA0OusVDR/9Ply+30EO8OfCB1jCY8hyXFjGtpb
       HCbQSupHz2fuF5ka
       -----END CERTIFICATE-----
+  image: 'dockercloud/haproxy:1.6.3'
   links:
     - celeryflower
     - django
@@ -145,11 +145,11 @@ haproxy:
   volumes_from:
     - letsencrypt
 letsencrypt:
-  image: 'interaction/letsencrypt:standalone'
   environment:
     - DOMAINS=www.example.com,flower.example.com
     - EMAIL=admins@interaction.net.au
     - 'HAPROXY_IMAGE=dockercloud/haproxy:1.6.3'
+  image: 'interaction/letsencrypt:standalone'
   ports:
     - '80:80'
   roles:
@@ -159,15 +159,15 @@ letsencrypt:
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
 # postgres:
-#   image: 'postgres:9.4-alpine'
 #   # autoredeploy: true
+#   image: 'postgres:9.4-alpine'
 #   restart: on-failure
 #   tags:
 #     - project_template
 redis:
-  image: 'redis:3-alpine'
   # autoredeploy: true
   command: 'redis-server --appendonly yes'
+  image: 'redis:3-alpine'
   restart: on-failure
   tags:
     - project_template
