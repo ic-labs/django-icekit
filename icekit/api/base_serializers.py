@@ -63,6 +63,37 @@ class ModelSubSerializer(serializers.ModelSerializer):
         return instance
 
 
+class ModelSubSerializerParentMixin(object):
+    """
+    Mixin class to apply to serializers that *use* `ModelSubSerializer` fields
+    to group data, so they can handle create & update write operations on these
+    fields without failing with errors like:
+
+        The `.update()` method does not support writable nested fields by default.
+        Write an explicit `.update()` method for serializer...
+    """
+
+    def _populate_validated_data_with_sub_field_data(self, validated_data):
+        """
+        Move field data nested in `ModelSubSerializer` fields back into the
+        overall validated data dict.
+        """
+        for fieldname, field in self.get_fields().items():
+            if isinstance(field, ModelSubSerializer):
+                field_data = validated_data.pop(fieldname)
+                validated_data.update(field_data)
+
+    def create(self, validated_data):
+        self._populate_validated_data_with_sub_field_data(validated_data)
+        return super(ModelSubSerializerParentMixin, self).create(
+            validated_data)
+
+    def update(self, instance, validated_data):
+        self._populate_validated_data_with_sub_field_data(validated_data)
+        return super(ModelSubSerializerParentMixin, self).update(
+            instance, validated_data)
+
+
 class PolymorphicHyperlinkedRelatedField(HyperlinkedIdentityField):
     """
     Custom `HyperlinkedIdentityField` that allows the lookup view name for a
