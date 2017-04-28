@@ -55,7 +55,7 @@ django:
   image: 'interaction/project_template:master'
   # autoredeploy: true
   command: 'setup-django.sh supervisord.sh'
-  deployment_strategy: high_availability
+  deployment_strategy: every_node
   environment:
     - BASE_SETTINGS_MODULE=production
     - DOTENV=production
