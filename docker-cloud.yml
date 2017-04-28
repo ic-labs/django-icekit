@@ -1,5 +1,4 @@
 celery:
-  image: 'interaction/icekit:master'
   # autoredeploy: true
   command: 'setup-django.sh celery.sh'
   deployment_strategy: high_availability
@@ -19,6 +18,7 @@ celery:
     # - SENTRY_DSN=
     # - SITE_DOMAIN=
     # - SITE_NAME=
+  image: 'interaction/icekit:master'
   links:
     - elasticsearch
     - postgres
@@ -29,7 +29,6 @@ celery:
   volumes:
     - /opt/django-icekit/project_template/var
 celerybeat:
-  image: 'interaction/icekit:master'
   # autoredeploy: true
   command: 'setup-django.sh celerybeat.sh'
   deployment_strategy: high_availability
@@ -49,6 +48,7 @@ celerybeat:
     # - SENTRY_DSN=
     # - SITE_DOMAIN=
     # - SITE_NAME=
+  image: 'interaction/icekit:master'
   links:
     - redis
   restart: always
@@ -57,7 +57,6 @@ celerybeat:
   volumes:
     - /opt/django-icekit/project_template/var
 celeryflower:
-  image: 'interaction/icekit:master'
   # autoredeploy: true
   command: 'setup-django.sh celeryflower.sh'
   deployment_strategy: high_availability
@@ -80,6 +79,7 @@ celeryflower:
     - VIRTUAL_HOST=https://flower.example.com
   expose:
     - '5555'
+  image: 'interaction/icekit:master'
   links:
     - redis
   restart: always
@@ -88,7 +88,6 @@ celeryflower:
   volumes:
     - /opt/django-icekit/project_template/var
 django:
-  image: 'interaction/icekit:master'
   # autoredeploy: true
   command: 'setup-django.sh supervisord.sh'
   deployment_strategy: high_availability
@@ -111,6 +110,7 @@ django:
     - VIRTUAL_HOST=https://www.example.com
   expose:
     - '8000'
+  image: 'interaction/icekit:master'
   links:
     - celery
     - celerybeat
@@ -124,16 +124,16 @@ django:
   volumes:
     - /opt/django-icekit/project_template/var
 elasticsearch:
-  image: 'interaction/elasticsearch-icu:1'
   # autoredeploy: true
+  image: 'interaction/elasticsearch-icu:1'
   restart: always
   tags:
     - icekit
 haproxy:
-  image: 'interaction/haproxy:master'
   # autoredeploy: true
   environment:
     - 'EXTRA_SETTINGS=http-request add-header X-Forwarded-Proto https if { ssl_fc }'
+  image: 'interaction/haproxy:master'
   links:
     - celeryflower
     - django
@@ -147,24 +147,24 @@ haproxy:
   volumes_from:
     - letsencrypt
 letsencrypt:
-  image: 'interaction/letsencrypt:master'
   environment:
     - DOMAINS=www.example.com,flower.example.com
     - EMAIL=admin@example.com
+  image: 'interaction/letsencrypt:master'
   ports:
     - '80:80'
   tags:
     - icekit
 postgres:
-  image: 'onjin/alpine-postgres:9.4'
   # autoredeploy: true
+  image: 'onjin/alpine-postgres:9.4'
   restart: always
   tags:
     - icekit
 redis:
-  image: 'redis:3-alpine'
   # autoredeploy: true
   command: 'redis-server --appendonly yes'
+  image: 'redis:3-alpine'
   restart: always
   tags:
     - icekit
