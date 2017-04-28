@@ -1,4 +1,4 @@
-FROM buildpack-deps:jessie
+FROM buildpack-deps:xenial
 
 RUN apt-get update \
     && apt-get upgrade -y \
