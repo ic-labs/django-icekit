@@ -1,7 +1,7 @@
 FROM buildpack-deps:xenial
 
 RUN apt-get update \
-    && apt-get upgrade -y \
+    && apt-get upgrade -y --no-install-recommends \
     && apt-get install -y --no-install-recommends \
         apt-transport-https \
         apt-utils \
