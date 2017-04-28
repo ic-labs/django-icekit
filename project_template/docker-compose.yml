@@ -44,11 +44,11 @@ services:
     ports:
       - 8000:8000
   elasticsearch:
-    image: interaction/elasticsearch-icu:1
+    image: interaction/elasticsearch-icu:1-alpine
     ports:
       - 9200
   postgres:
-    image: onjin/alpine-postgres:9.4
+    image: postgres:9.4-alpine
     ports:
       - 5432
   redis:

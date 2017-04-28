@@ -76,7 +76,7 @@ django:
   volumes:
     - /opt/project_template/var
 elasticsearch:
-  image: 'interaction/elasticsearch-icu:1'
+  image: 'interaction/elasticsearch-icu:1-alpine'
   # autoredeploy: true
   restart: on-failure
   tags:
@@ -159,7 +159,7 @@ letsencrypt:
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
 # postgres:
-#   image: 'onjin/alpine-postgres:9.4'
+#   image: 'postgres:9.4-alpine'
 #   # autoredeploy: true
 #   restart: on-failure
 #   tags:
