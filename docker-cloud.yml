@@ -90,7 +90,7 @@ celeryflower:
 django:
   # autoredeploy: true
   command: 'setup-django.sh supervisord.sh'
-  deployment_strategy: high_availability
+  deployment_strategy: every_node
   environment:
     - BASE_SETTINGS_MODULE=production
     # - EMAIL_HOST=
