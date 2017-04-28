@@ -86,6 +86,7 @@ ENV WAITLOCK_ENABLE=1
 VOLUME /root
 
 ENTRYPOINT ["tini", "--", "entrypoint.sh"]
+CMD ["bash.sh"]
 
 COPY . /opt/django-icekit/
 
