@@ -5,6 +5,20 @@ celery:
   environment:
     - BASE_SETTINGS_MODULE=production
     - DOTENV=production
+    # - EMAIL_HOST=
+    # - EMAIL_HOST_PASSWORD=
+    # - EMAIL_HOST_USER=
+    # - MEDIA_AWS_ACCESS_KEY_ID=
+    # - MEDIA_AWS_SECRET_ACCESS_KEY=
+    # - MEDIA_AWS_STORAGE_BUCKET_NAME=
+    # - PGDATABASE=
+    # - PGHOST=
+    # - PGPASSWORD=
+    # - PGPORT=
+    # - PGUSER=
+    # - SENTRY_DSN=
+    # - SITE_DOMAIN=
+    # - SITE_NAME=
   image: 'interaction/icekit:master'
   links:
     - elasticsearch
@@ -22,6 +36,20 @@ celerybeat:
   environment:
     - BASE_SETTINGS_MODULE=production
     - DOTENV=production
+    # - EMAIL_HOST=
+    # - EMAIL_HOST_PASSWORD=
+    # - EMAIL_HOST_USER=
+    # - MEDIA_AWS_ACCESS_KEY_ID=
+    # - MEDIA_AWS_SECRET_ACCESS_KEY=
+    # - MEDIA_AWS_STORAGE_BUCKET_NAME=
+    # - PGDATABASE=
+    # - PGHOST=
+    # - PGPASSWORD=
+    # - PGPORT=
+    # - PGUSER=
+    # - SENTRY_DSN=
+    # - SITE_DOMAIN=
+    # - SITE_NAME=
   image: 'interaction/icekit:master'
   links:
     - redis
@@ -37,6 +65,20 @@ celeryflower:
   environment:
     - BASE_SETTINGS_MODULE=production
     - DOTENV=production
+    # - EMAIL_HOST=
+    # - EMAIL_HOST_PASSWORD=
+    # - EMAIL_HOST_USER=
+    # - MEDIA_AWS_ACCESS_KEY_ID=
+    # - MEDIA_AWS_SECRET_ACCESS_KEY=
+    # - MEDIA_AWS_STORAGE_BUCKET_NAME=
+    # - PGDATABASE=
+    # - PGHOST=
+    # - PGPASSWORD=
+    # - PGPORT=
+    # - PGUSER=
+    # - SENTRY_DSN=
+    # - SITE_DOMAIN=
+    # - SITE_NAME=
     - VIRTUAL_HOST=https://flower.example.com
   expose:
     - '5555'
@@ -55,6 +97,20 @@ django:
   environment:
     - BASE_SETTINGS_MODULE=production
     - DOTENV=production
+    # - EMAIL_HOST=
+    # - EMAIL_HOST_PASSWORD=
+    # - EMAIL_HOST_USER=
+    # - MEDIA_AWS_ACCESS_KEY_ID=
+    # - MEDIA_AWS_SECRET_ACCESS_KEY=
+    # - MEDIA_AWS_STORAGE_BUCKET_NAME=
+    # - PGDATABASE=
+    # - PGHOST=
+    # - PGPASSWORD=
+    # - PGPORT=
+    # - PGUSER=
+    # - SENTRY_DSN=
+    # - SITE_DOMAIN=
+    # - SITE_NAME=
     - VIRTUAL_HOST=https://www.example.com
   expose:
     - '8000'
