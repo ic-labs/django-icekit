@@ -1,8 +1,8 @@
 Changelog
 =========
 
-In development
---------------
+0.16 (2017-04-30)
+-----------------
 
 -  Changed the way that we specify the homepage: create a page with url
    override `/`. This is the way fluent does it. As a fallback, we look for a

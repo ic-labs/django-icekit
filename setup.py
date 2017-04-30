@@ -92,7 +92,7 @@ setuptools.setup(
         ],
         'project': [
             'boto3',
-            'celery[redis]==3.1.24',
+            'celery[redis]<4.0',
             'ConcurrentLogHandler',
             'django-celery',
             'django-celery-email',
