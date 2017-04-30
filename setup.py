@@ -30,7 +30,7 @@ if os.path.exists('.git'):
 else:
     kwargs = dict(version='0+d' + datetime.date.today().strftime('%Y%m%d'))
 
-with open('README.rst') as f:
+with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
     long_description = f.read()
 
 setuptools.setup(
