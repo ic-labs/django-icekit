@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Configures the environment so we can run entrypoint.sh and other scripts.
+# Configure the environment so we can run `entrypoint.sh` and other scripts.
 
 cat <<EOF
 # `whoami`@`hostname`:$PWD$ go.sh $@
@@ -10,26 +10,20 @@ set -e
 
 # Get absolute project directory from the location of this script.
 # See: http://stackoverflow.com/a/4774063
-export ICEKIT_PROJECT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}"); pwd -P)
+export PROJECT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}"); pwd -P)
 
 # Set location of virtualenv.
-export ICEKIT_VENV="$ICEKIT_PROJECT_DIR/var/go.sh-venv"
+export PROJECT_VENV_DIR="${VIRTUAL_ENV:-$PROJECT_DIR/var/go.sh-venv}"
 
-# Don't write `*.pyc` files.
-export PYTHONDONTWRITEBYTECODE=1
-
-# Create local (non-Docker) virtualenv.
-if [[ ! -d "$ICEKIT_VENV" ]]; then
-    virtualenv "$ICEKIT_VENV"
+# Create virtualenv.
+if [[ ! -d "$PROJECT_VENV_DIR" ]]; then
+    virtualenv "$PROJECT_VENV_DIR"
 fi
 
-# Install ICEKit project.
-if [[ -z $("$ICEKIT_VENV/bin/python" -m pip freeze | grep django-icekit) ]]; then
-    "$ICEKIT_VENV/bin/python" -m pip install -r requirements-icekit.txt
+# Install ICEkit.
+if [[ -z $("$PROJECT_VENV_DIR/bin/python" -m pip freeze | grep django-icekit) ]]; then
+    "$PROJECT_VENV_DIR/bin/python" -m pip install -r requirements-icekit.txt
 fi
-
-# Get absolute directory for the `icekit` package.
-export ICEKIT_DIR=$("$ICEKIT_VENV/bin/python" -c "import icekit, os, sys; sys.stdout.write('%s\n' % os.path.dirname(icekit.__file__));")
 
 # Execute entrypoint and command.
-exec "$ICEKIT_DIR/bin/entrypoint.sh" ${@:-setup-django.sh bash.sh}
+exec "$PROJECT_VENV_DIR/bin/entrypoint.sh" ${@:-setup-django.sh bash.sh}

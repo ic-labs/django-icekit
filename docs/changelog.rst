@@ -1,6 +1,14 @@
 Changelog
 =========
 
+In development
+--------------
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+-  Rename ``ICEKIT_CONTEXT_PROCESSOR_SETTINGS`` to ``CONTEXT_PROCESSOR_SETTINGS``.
+
 0.17 (2017-04-30)
 -----------------
 

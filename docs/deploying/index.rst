@@ -22,7 +22,7 @@ something like::
    RUN pip install --no-cache-dir -r requirements.txt
    RUN md5sum requirements.txt > requirements.txt.md5
 
-   ENV ICEKIT_PROJECT_DIR=/opt/project_template
+   ENV PROJECT_DIR=/opt/project_template
 
    COPY . /opt/project_template/
 
