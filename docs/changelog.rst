@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.16 (2017-04-30)
+0.17 (2017-04-30)
 -----------------
 
 -  Changed the way that we specify the homepage: create a page with url
