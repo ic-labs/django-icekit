@@ -112,7 +112,7 @@ class WritableSerializerHelperMixin(object):
         """
         for fieldname, field in self.get_fields().items():
             if isinstance(field, ModelSubSerializer):
-                field_data = validated_data.pop(fieldname)
+                field_data = validated_data.pop(fieldname, None)
                 if field_data:
                     validated_data.update(field_data)
 
@@ -131,7 +131,11 @@ class WritableSerializerHelperMixin(object):
                 continue  # Skip field
 
             ModelClass = field.Meta.model
-            field_data = validated_data.pop(fieldname)
+            field_data = validated_data.pop(fieldname, None)
+
+            # Skip field if no data was provided
+            if field_data is None:
+                continue
 
             # Get settings for writable related field
             if fieldname not in writable_related_fields:
