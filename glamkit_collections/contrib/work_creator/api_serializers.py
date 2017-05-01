@@ -6,6 +6,7 @@ from rest_framework.settings import api_settings
 from icekit.api.base_serializers import ModelSubSerializer, \
     PolymorphicHyperlinkedModelSerializer, WritableSerializerHelperMixin, \
     WritableRelatedFieldSettings
+from icekit.api.images.serializers import RelatedImageSerializer
 
 from .models import WorkBase, CreatorBase, WorkCreator as WorkCreatorModel, \
     WorkImage as WorkImageModel, WorkImageType as WorkImageTypeModel, \
@@ -13,26 +14,6 @@ from .models import WorkBase, CreatorBase, WorkCreator as WorkCreatorModel, \
 from .plugins.moving_image.models import Rating as RatingModel, \
     Genre as GenreModel, MediaType as MediaTypeModel, \
     MovingImageWork as MovingImageWorkModel
-
-
-ImageModel = apps.get_model('icekit_plugins_image.Image')
-
-
-class Image(serializers.ModelSerializer):
-    class Meta:
-        model = ImageModel
-        fields = (
-            'image',
-            'width',
-            'height',
-            'title',
-            'caption',
-            'credit',
-            'source',
-            'license',
-            'notes',
-            'is_ok_for_web',
-        )
 
 
 class CreatorSummary(PolymorphicHyperlinkedModelSerializer):
@@ -152,8 +133,8 @@ class Creator(WritableSerializerHelperMixin,
         many=True,
         read_only=True,
     )
-    portrait = Image(
-        allow_null=True,
+    portrait = RelatedImageSerializer(
+        required=False,
     )
 
     class Meta:
@@ -174,8 +155,7 @@ class Creator(WritableSerializerHelperMixin,
             'admin_notes',
         )
         writable_related_fields = {
-            'portrait': WritableRelatedFieldSettings(
-                lookup_field='image', can_create=True),
+            'portrait': WritableRelatedFieldSettings(can_create=True),
         }
 
 
@@ -209,9 +189,12 @@ class WorkImageType(serializers.ModelSerializer):
 
 class WorkImage(WritableSerializerHelperMixin,
                 serializers.ModelSerializer):
-    image = Image()
+    image = RelatedImageSerializer(
+        required=False,
+    )
     image_type = WorkImageType(
         source='type',
+        required=False,
     )
 
     class Meta:
@@ -245,10 +228,10 @@ class Work(WritableSerializerHelperMixin,
         read_only=True,
     )
     date = WorkDate(
-        allow_null=True,
+        required=False,
     )
     origin = WorkOrigin(
-        allow_null=True,
+        required=False,
     )
 
     class Meta:
@@ -281,8 +264,11 @@ class Rating(serializers.ModelSerializer):
             'image',
         )
         extra_kwargs = {
+            'title': {
+                'required': False,
+            },
             'image': {
-                'allow_null': True,
+                'required': False,
             },
         }
 
@@ -303,15 +289,24 @@ class MediaType(serializers.ModelSerializer):
             'title',
             'slug',
         )
+        extra_kwargs = {
+            'title': {
+                'required': False,
+            },
+        }
 
 
 class MovingImageWork(Work):
-    rating = Rating()
+    rating = Rating(
+        required=False,
+    )
     genres = Genre(
         many=True,
         read_only=True,
     )
-    media_type = MediaType()
+    media_type = MediaType(
+        required=False,
+    )
 
     class Meta:
         model = MovingImageWorkModel
@@ -328,7 +323,7 @@ class MovingImageWork(Work):
         )
         writable_related_fields = {
             'rating': WritableRelatedFieldSettings(
-                lookup_field='slug', can_create=True, can_update=True),
+                lookup_field='slug', can_create=True, can_update=False),
             'media_type': WritableRelatedFieldSettings(
-                lookup_field='slug', can_create=True, can_update=True),
+                lookup_field='slug', can_create=True, can_update=False),
         }
