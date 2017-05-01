@@ -113,7 +113,8 @@ class WritableSerializerHelperMixin(object):
         for fieldname, field in self.get_fields().items():
             if isinstance(field, ModelSubSerializer):
                 field_data = validated_data.pop(fieldname)
-                validated_data.update(field_data)
+                if field_data:
+                    validated_data.update(field_data)
 
     def _get_or_create_related_model_instances(self, validated_data):
         """
@@ -183,10 +184,10 @@ class WritableSerializerHelperMixin(object):
                                 u" 'can_update' is not set for this field in"
                                 u" 'writable_related_fields' but submitted"
                                 u" value `%s=%s` does not match existing"
-                                u" instance %s"
+                                u" instance value `%s`"
                                 % (fieldname, ModelClass.__name__,
                                    self.Meta.model.__name__, name, value,
-                                   related_instance)
+                                   original_value)
                             )
                         setattr(related_instance, name, value)
                         is_updated = True
