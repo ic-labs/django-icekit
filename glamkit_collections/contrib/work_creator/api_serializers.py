@@ -244,8 +244,12 @@ class Work(WritableSerializerHelperMixin,
         many=True,
         read_only=True,
     )
-    date = WorkDate()
-    origin = WorkOrigin()
+    date = WorkDate(
+        allow_null=True,
+    )
+    origin = WorkOrigin(
+        allow_null=True,
+    )
 
     class Meta:
         model = WorkBase
@@ -276,6 +280,11 @@ class Rating(serializers.ModelSerializer):
             'slug',
             'image',
         )
+        extra_kwargs = {
+            'image': {
+                'allow_null': True,
+            },
+        }
 
 
 class Genre(serializers.ModelSerializer):
@@ -319,7 +328,7 @@ class MovingImageWork(Work):
         )
         writable_related_fields = {
             'rating': WritableRelatedFieldSettings(
-                lookup_field='slug', can_create=True, can_update=False),
+                lookup_field='slug', can_create=True, can_update=True),
             'media_type': WritableRelatedFieldSettings(
-                lookup_field='slug', can_create=True, can_update=False),
+                lookup_field='slug', can_create=True, can_update=True),
         }
