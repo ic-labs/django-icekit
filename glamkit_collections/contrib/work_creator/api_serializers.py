@@ -4,9 +4,8 @@ from rest_framework import serializers
 from rest_framework.settings import api_settings
 
 from icekit.api.base_serializers import ModelSubSerializer, \
-    PolymorphicHyperlinkedModelSerializer, \
-    PolymorphicHyperlinkedRelatedField, \
-    ModelSubSerializerParentMixin
+    PolymorphicHyperlinkedModelSerializer, WritableSerializerHelperMixin, \
+    WritableRelatedFieldSettings
 
 from .models import WorkBase, CreatorBase, WorkCreator as WorkCreatorModel, \
     WorkImage as WorkImageModel, WorkImageType as WorkImageTypeModel, \
@@ -66,7 +65,7 @@ class WorkDate(ModelSubSerializer):
         )
 
 
-class WorkSummary(ModelSubSerializerParentMixin,
+class WorkSummary(WritableSerializerHelperMixin,
                   PolymorphicHyperlinkedModelSerializer):
     """ Minimal information about a work """
     date = WorkDate()
@@ -101,7 +100,7 @@ class Role(serializers.ModelSerializer):
         )
 
 
-class WorkCreator(ModelSubSerializerParentMixin,
+class WorkCreator(WritableSerializerHelperMixin,
                   serializers.HyperlinkedModelSerializer):
     """ Relationship between a work and a creator """
     work = WorkSummary()
@@ -117,6 +116,11 @@ class WorkCreator(ModelSubSerializerParentMixin,
             'is_primary',
             'order',
         )
+        writable_related_fields = {
+            'work': WritableRelatedFieldSettings(),
+            'creator': WritableRelatedFieldSettings(),
+            'role': WritableRelatedFieldSettings(),
+        }
 
 
 class WorkCreatorFromWork(WorkCreator):
@@ -141,14 +145,16 @@ class WorkCreatorFromCreator(WorkCreator):
         ]
 
 
-class Creator(ModelSubSerializerParentMixin,
+class Creator(WritableSerializerHelperMixin,
               serializers.HyperlinkedModelSerializer):
     works = WorkCreatorFromCreator(
         source='workcreator_set',
         many=True,
         read_only=True,
     )
-    portrait = Image()
+    portrait = Image(
+        allow_null=True,
+    )
 
     class Meta:
         model = CreatorBase
@@ -167,6 +173,10 @@ class Creator(ModelSubSerializerParentMixin,
             'wikipedia_link',
             'admin_notes',
         )
+        writable_related_fields = {
+            'portrait': WritableRelatedFieldSettings(
+                lookup_field='image', can_create=True),
+        }
 
 
 class WorkOrigin(ModelSubSerializer):
@@ -197,7 +207,7 @@ class WorkImageType(serializers.ModelSerializer):
         )
 
 
-class WorkImage(ModelSubSerializerParentMixin,
+class WorkImage(WritableSerializerHelperMixin,
                 serializers.ModelSerializer):
     image = Image()
     image_type = WorkImageType(
@@ -216,9 +226,13 @@ class WorkImage(ModelSubSerializerParentMixin,
             'order',
             'image_type',
         )
+        writable_related_fields = {
+            'image': WritableRelatedFieldSettings(),
+            'image_type': WritableRelatedFieldSettings(),
+        }
 
 
-class Work(ModelSubSerializerParentMixin,
+class Work(WritableSerializerHelperMixin,
            serializers.HyperlinkedModelSerializer):
     creators = WorkCreatorFromWork(
         source='workcreator_set',
@@ -303,3 +317,9 @@ class MovingImageWork(Work):
             'trailer',
             'imdb_link',
         )
+        writable_related_fields = {
+            'rating': WritableRelatedFieldSettings(
+                lookup_field='slug', can_create=True, can_update=False),
+            'media_type': WritableRelatedFieldSettings(
+                lookup_field='slug', can_create=True, can_update=False),
+        }

@@ -26,6 +26,7 @@ class Organization(Creator):
                 'view_name': '%s-detail' % VIEWNAME,
             }
         }
+        writable_related_fields = Creator.Meta.writable_related_fields
 
     def get_type(self, obj):
         return obj.get_type()

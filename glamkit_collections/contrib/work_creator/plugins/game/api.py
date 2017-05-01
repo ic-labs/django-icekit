@@ -55,6 +55,7 @@ class Game(MovingImageWork):
                 'view_name': '%s-detail' % VIEWNAME,
             }
         }
+        writable_related_fields = MovingImageWork.Meta.writable_related_fields
 
 
 class APIViewSet(ModelViewSet):

@@ -60,7 +60,11 @@ class Person(Creator):
 
     class Meta:
         model = PersonCreatorModel
-        fields = Creator.Meta.fields + (
+        fields = tuple(
+            # Use Creator field names except for those grouped under PersonName
+            f for f in Creator.Meta.fields
+            if f not in ('name_display', 'name_sort')
+        ) + (
             'name',
             'life_info',
             'background',
@@ -71,6 +75,7 @@ class Person(Creator):
                 'view_name': '%s-detail' % VIEWNAME,
             }
         }
+        writable_related_fields = Creator.Meta.writable_related_fields
 
 
 class APIViewSet(ModelViewSet):
