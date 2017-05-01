@@ -40,6 +40,7 @@ setuptools.setup(
     packages=find_packages('icekit'),
     include_package_data=True,
     install_requires=[
+        'attrs',
         'django-any-urlfield',
         'django-app-namespace-template-loader',
         'django-bootstrap3',
