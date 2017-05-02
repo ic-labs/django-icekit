@@ -60,7 +60,7 @@ class CreatorBase(
 
     class Meta:
         verbose_name = "creator"
-        ordering = ('name_sort', 'slug')
+        ordering = ('name_sort', 'slug', 'publishing_is_draft')
         unique_together = ('slug', 'publishing_is_draft',)
 
     def __unicode__(self):
@@ -215,8 +215,8 @@ class WorkBase(
 
     class Meta:
         verbose_name = "work"
+        ordering = ('slug', 'publishing_is_draft', )
         unique_together = ('slug', 'publishing_is_draft',)
-        # ordering= ("date_sort_latest", )
 
     def __unicode__(self):
         if self.date_display:

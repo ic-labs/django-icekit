@@ -29,7 +29,9 @@ class ArtworkDimensions(ModelSubSerializer):
 
 
 class Artwork(Work):
-    dimensions = ArtworkDimensions()
+    dimensions = ArtworkDimensions(
+        required=False,
+    )
 
     class Meta:
         model = ArtworkModel

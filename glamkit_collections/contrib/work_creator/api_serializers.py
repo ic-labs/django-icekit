@@ -146,6 +146,7 @@ class Creator(WritableSerializerHelperMixin,
             # Sub-resources
             # Fields
             api_settings.URL_FIELD_NAME,
+            'publishing_is_draft',
             'slug',
             'alt_slug',
             'name_display',
@@ -245,6 +246,7 @@ class Work(WritableSerializerHelperMixin,
             'origin',
             # Fields
             api_settings.URL_FIELD_NAME,
+            'publishing_is_draft',
             'slug',
             'title',
             'subtitle',

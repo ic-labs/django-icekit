@@ -54,9 +54,17 @@ class Background(ModelSubSerializer):
 
 
 class Person(Creator):
-    name = PersonName(help_text="Parts and forms of the Artist's name")
-    life_info = LifeInfo(help_text="Birth and death dates and places")
-    background = Background(help_text="Ethnicity, nationality and culture")
+    name = PersonName(
+        help_text="Parts and forms of the Artist's name",
+    )
+    life_info = LifeInfo(
+        required=False,
+        help_text="Birth and death dates and places",
+    )
+    background = Background(
+        required=False,
+        help_text="Ethnicity, nationality and culture",
+    )
 
     class Meta:
         model = PersonCreatorModel
