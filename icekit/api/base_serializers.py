@@ -9,7 +9,7 @@ from rest_framework.relations import HyperlinkedIdentityField
 class ModelSubSerializer(serializers.ModelSerializer):
     """
     ModelSubSerializer allows you to wrap related attributes of a model into a
-    sub-model dict, that uses the same model. Works read-only for now.
+    sub-model dict, that uses the same model.
 
     Use ModelSubSerializer, rather than just populating a dict, for more
     rigorous specification and (hence) better Swagger-generated documentation.
@@ -58,6 +58,13 @@ class ModelSubSerializer(serializers.ModelSerializer):
             (k[len(prefix):], v)
             if k.startswith(prefix) else (k, v) for k, v in default_rep.items()
         ])
+
+    def to_internal_value(self, data):
+        prefix = getattr(self.Meta, 'source_prefix', '')
+        prefixed_data = dict([
+            (prefix + n, v) for n, v in data.items()
+        ])
+        return super(ModelSubSerializer, self).to_internal_value(prefixed_data)
 
     def get_attribute(self, instance):
         # This serializer also uses the same instance as the parent - we're
