@@ -129,6 +129,7 @@ class ImageAPITests(BaseAPITestCase):
                 'title': 'New image',
                 'image': open(self.image.image.file.name, 'rb'),
             },
+            format='multipart',  # Cannot upload image with JSON
         )
         self.assertEqual(201, response.status_code)
         new_image = Image.objects.get(pk=response.data['id'])
@@ -145,6 +146,7 @@ class ImageAPITests(BaseAPITestCase):
         response = self.client.put(
             self.detail_url(self.image.pk),
             image_data,
+            format='multipart',  # Cannot upload image with JSON
         )
         self.assertEqual(200, response.status_code)
         updated_image = Image.objects.get(pk=self.image.pk)
@@ -203,7 +205,8 @@ class ImageAPITests(BaseAPITestCase):
             self.image.pk,
             dict(image_data, **{
                 'image': open(self.image.image.file.name, 'rb'),
-            })
+            }),
+            format='multipart',  # Cannot upload image with JSON
         )
         self.assert_user_has_patch_permission(True, self.image.pk)
         self.assert_user_has_delete_permission(False, self.image.pk)
@@ -224,13 +227,15 @@ class ImageAPITests(BaseAPITestCase):
                 'title': 'New image',
                 'image': open(self.image.image.file.name, 'rb'),
             },
+            format='multipart',  # Cannot upload image with JSON
         )
         self.assert_user_has_put_permission(
             True,
             self.image.pk,
             dict(image_data, **{
                 'image': open(self.image.image.file.name, 'rb'),
-            })
+            }),
+            format='multipart',  # Cannot upload image with JSON
         )
         self.assert_user_has_patch_permission(True, self.image.pk)
         self.assert_user_has_delete_permission(False, self.image.pk)
@@ -253,13 +258,15 @@ class ImageAPITests(BaseAPITestCase):
                 'title': 'New image',
                 'image': open(self.image.image.file.name, 'rb'),
             },
+            format='multipart',  # Cannot upload image with JSON
         )
         self.assert_user_has_put_permission(
             True,
             self.image.pk,
             dict(image_data, **{
                 'image': open(self.image.image.file.name, 'rb'),
-            })
+            }),
+            format='multipart',  # Cannot upload image with JSON
         )
         self.assert_user_has_patch_permission(True, self.image.pk)
         self.assert_user_has_delete_permission(True, self.image.pk)

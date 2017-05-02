@@ -134,6 +134,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS':
         'icekit.api.pagination.DefaultPageNumberPagination',
     'PAGE_SIZE': 20,
+    # Test settings
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
 
 

@@ -75,9 +75,14 @@ class BaseAPITestCase(APITestCase):
             permitted and 200 or 403,
             response.status_code)
 
-    def assert_user_has_post_permission(self, permitted, item_data=None):
+    def assert_user_has_post_permission(
+        self, permitted, item_data=None, format='json'
+    ):
         response = self.client.post(
-            self.listing_url(), item_data or {})
+            self.listing_url(),
+            item_data or {},
+            format=format,
+        )
         if permitted:
             self.assertEqual(201, response.status_code)
         else:
@@ -85,10 +90,13 @@ class BaseAPITestCase(APITestCase):
             self.assertTrue(response.status_code in (403, 405))
 
     def assert_user_has_put_permission(
-        self, permitted, item_id, item_data=None
+        self, permitted, item_id, item_data=None, format='json'
     ):
         response = self.client.put(
-            self.detail_url(item_id), item_data or {})
+            self.detail_url(item_id),
+            item_data or {},
+            format=format,
+        )
         if permitted:
             self.assertEqual(200, response.status_code)
         else:
@@ -96,10 +104,13 @@ class BaseAPITestCase(APITestCase):
             self.assertTrue(response.status_code in (403, 405))
 
     def assert_user_has_patch_permission(
-        self, permitted, item_id, item_data=None
+        self, permitted, item_id, item_data=None, format='json'
     ):
         response = self.client.patch(
-            self.detail_url(item_id), item_data or {})
+            self.detail_url(item_id),
+            item_data or {},
+            format=format,
+        )
         if permitted:
             self.assertEqual(200, response.status_code)
         else:
