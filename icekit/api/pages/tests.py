@@ -7,11 +7,12 @@ from icekit.page_types.layout_page.models import LayoutPage
 from icekit.utils import fluent_contents
 
 
-from ..base_tests import BaseAPITestCase
+from .. import base_tests
 
 
-class PagesAPITests(BaseAPITestCase):
+class PagesAPITests(base_tests._BaseAPITestCase):
     API_NAME = 'pages-api'
+    API_IS_PUBLIC_READ = True
 
     def setUp(self):
         super(PagesAPITests, self).setUp()

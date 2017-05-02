@@ -1,3 +1,5 @@
+import json
+
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
@@ -13,15 +15,16 @@ User = get_user_model()
 Image = apps.get_model('icekit_plugins_image.Image')
 
 
-class BaseAPITestCase(APITestCase):
+class _BaseAPITestCase(APITestCase):
     API_NAME = None  # Set to reverse-able name for API URLs
+    API_IS_PUBLIC_READ = False
 
     def __init__(self, *args, **kwargs):
         if not self.API_NAME:
             raise Exception(
                 "Subclasses of %s must define the class attribute"
-                " 'API_NAME'" % BaseAPITestCase)
-        super(BaseAPITestCase, self).__init__(*args, **kwargs)
+                " 'API_NAME'" % _BaseAPITestCase)
+        super(_BaseAPITestCase, self).__init__(*args, **kwargs)
 
     def setUp(self):
         # Set up superuser and token
@@ -46,6 +49,13 @@ class BaseAPITestCase(APITestCase):
 
         self.active_user_token = Token.objects.create(user=self.active_user)
 
+        # Act as authenticated `superuser` by default
+        self.client_apply_token(self.superuser_token)
+
+    def pp_data(self, data, indent=4):
+        """ Pretty-print data to stdout, to help debugging unit tests """
+        print(json.dumps(data, indent=indent))
+
     def listing_url(self):
         """ Return the listing URL endpoint for this class's API """
         return reverse('api:%s-list' % self.API_NAME)
@@ -62,6 +72,50 @@ class BaseAPITestCase(APITestCase):
         requests from the client until reset by `self.client.credentials()`
         """
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+    def test_supports_session_authentication(self):
+        """ Confirm the API supports session-based authentication """
+        self.client.credentials()  # Clear any user credentials
+
+        if self.API_IS_PUBLIC_READ:
+            # Request without login is accepted
+            response = self.client.get(self.listing_url())
+            self.assertEqual(200, response.status_code)
+        else:
+            # Request without login is rejected
+            response = self.client.get(self.listing_url())
+            self.assertEqual(403, response.status_code)
+
+            self.assertTrue(
+                self.client.login(
+                    username=self.superuser.email,
+                    password='password',
+                )
+            )
+
+            # Request after login is accepted
+            response = self.client.get(self.listing_url())
+            self.assertEqual(200, response.status_code)
+
+    def test_supports_token_authentication(self):
+        """ Confirm the API supports token-based authentication """
+        self.client.credentials()  # Clear any user credentials
+
+        if self.API_IS_PUBLIC_READ:
+            # Request without token is accepted
+            response = self.client.get(self.listing_url())
+            self.assertEqual(200, response.status_code)
+        else:
+            # Request without token is rejected
+            response = self.client.get(self.listing_url())
+            self.assertEqual(403, response.status_code)
+
+            # Request with token is accepted
+            response = self.client.get(
+                self.listing_url(),
+                HTTP_AUTHORIZATION='Token %s' % self.superuser_token.key,
+            )
+            self.assertEqual(200, response.status_code)
 
     def assert_user_has_get_list_permission(self, permitted):
         response = self.client.get(self.listing_url())

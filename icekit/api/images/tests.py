@@ -5,10 +5,11 @@ from django_dynamic_fixture import G
 
 from icekit.utils.testing import get_test_image, setup_with_context_manager
 
-from ..base_tests import BaseAPITestCase, Image
+from .. import base_tests
+from ..base_tests import Image
 
 
-class ImageAPITests(BaseAPITestCase):
+class ImageAPITests(base_tests._BaseAPITestCase):
     API_NAME = 'images-api'
 
     def setUp(self):
@@ -27,41 +28,6 @@ class ImageAPITests(BaseAPITestCase):
         self.image.save()
 
         self.image_ct = ContentType.objects.get_for_model(Image)
-
-        # Act as authenticated `superuser` by default
-        self.client_apply_token(self.superuser_token)
-
-    def test_session_authentication(self):
-        self.client.credentials()  # Clear any user credentials
-
-        # Request without login is rejected
-        response = self.client.get(self.listing_url())
-        self.assertEqual(403, response.status_code)
-
-        self.assertTrue(
-            self.client.login(
-                username=self.superuser.email,
-                password='password',
-            )
-        )
-
-        # Request after login is accepted
-        response = self.client.get(self.listing_url())
-        self.assertEqual(200, response.status_code)
-
-    def test_token_authentication(self):
-        self.client.credentials()  # Clear any user credentials
-
-        # Request without token is rejected
-        response = self.client.get(self.listing_url())
-        self.assertEqual(403, response.status_code)
-
-        # Request with token is accepted
-        response = self.client.get(
-            self.listing_url(),
-            HTTP_AUTHORIZATION='Token %s' % self.superuser_token.key,
-        )
-        self.assertEqual(200, response.status_code)
 
     def test_list_images_with_get(self):
         response = self.client.get(self.listing_url())
