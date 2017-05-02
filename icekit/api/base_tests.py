@@ -20,6 +20,7 @@ Image = apps.get_model('icekit_plugins_image.Image')
 class _BaseAPITestCase(APITestCase):
     API_NAME = None  # Set to reverse-able name for API URLs
     API_IS_PUBLIC_READ = False
+    BASE_DATA = {}
 
     def __init__(self, *args, **kwargs):
         if not self.API_NAME:
@@ -57,6 +58,11 @@ class _BaseAPITestCase(APITestCase):
     def pp_data(self, data, indent=4):
         """ Pretty-print data to stdout, to help debugging unit tests """
         print(json.dumps(data, indent=indent))
+
+    def build_item_data(self, extend_data, base_data=None):
+        if base_data is None:
+            base_data = self.BASE_DATA
+        return dict(base_data, **extend_data)
 
     def listing_url(self):
         """ Return the listing URL endpoint for this class's API """
