@@ -189,7 +189,8 @@ class _BaseAPITestCase(APITestCase):
 
     def assert_api_user_permissions_are_correct(
         self, item_id, item_model=None, item_admin_name=None,
-        format='json', extra_item_data_for_writes_fn=lambda: {}
+        format='json', extra_item_data_for_writes_fn=lambda: {},
+        item_data_fields_to_remove=None,
     ):
         self.client.credentials()  # Clear any user credentials
 
@@ -246,6 +247,10 @@ class _BaseAPITestCase(APITestCase):
 
         # Get item data for later submission
         item_data = self.client.get(self.detail_url(item_id)).data
+        if item_data_fields_to_remove:
+            for field in item_data_fields_to_remove:
+                if field in item_data:
+                    del(item_data[field])
 
         self.assert_user_has_post_permission(False)
         self.assert_user_has_put_permission(

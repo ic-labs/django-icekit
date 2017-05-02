@@ -8,6 +8,9 @@ from . import base_tests
 Artwork = apps.get_model('gk_collections_artwork.Artwork')
 Film = apps.get_model('gk_collections_film.Film')
 Game = apps.get_model('gk_collections_game.Game')
+Person = apps.get_model('gk_collections_person.PersonCreator')
+Organization = apps.get_model(
+    'gk_collections_organization.OrganizationCreator')
 
 
 class _BaseCollectionAPITestCase(base_tests._BaseAPITestCase):
@@ -530,4 +533,195 @@ class FilmAPITestCase(_BaseCollectionAPITestCase):
             Film,
             'film',
             extra_item_data_for_writes_fn=extra_item_data_for_writes_fn
+        )
+
+
+class PersonAPITestCase(_BaseCollectionAPITestCase):
+    API_NAME = 'person-api'  # Set to reverse-able name for API URLs
+    BASE_DATA = {
+        "url": "",
+        "slug": "",
+        "works": [],
+        "portrait": None,
+        "publishing_is_draft": False,
+        "alt_slug": "",
+        "website": "",
+        "wikipedia_link": "",
+        "admin_notes": "",
+        "name": {
+            "display": "",
+            "sort": "",
+            "full": "",
+            "given": "",
+            "family": ""
+        },
+        "life_info": {
+            "birth_date_display": None,
+            "birth_date_edtf": "",
+            "birth_place": "",
+            "birth_place_historic": "",
+            "death_date_display": None,
+            "death_date_edtf": "",
+            "death_place": ""
+        },
+        "background": {
+            "ethnicity": "",
+            "nationality": "",
+            "neighborhood": "",
+            "city": "",
+            "state_province": "",
+            "country": "",
+            "continent": ""
+        }
+    }
+
+    def setUp(self):
+        super(PersonAPITestCase, self).setUp()
+
+        self.person = Person.objects.create(
+            slug='test-person',
+            name_display='Test Person',
+        )
+
+        self.person_published = self.person.publish()
+
+    def test_list_persons_with_get(self):
+        response = self.client.get(self.listing_url())
+        self.assertEqual(200, response.status_code)
+        expected = {
+            'count': 2,
+            'next': None,
+            'previous': None,
+            'results': [
+                self.build_item_data({
+                    "url": 'http://testserver%s'
+                    % self.detail_url(self.person_published.pk),
+                    "slug": "test-person",
+                    "name": {
+                        "display": "Test Person",
+                        "sort": "",
+                        "full": "",
+                        "given": "",
+                        "family": ""
+                    },
+                    "publishing_is_draft": False,
+                }),
+                self.build_item_data({
+                    "url": 'http://testserver%s'
+                    % self.detail_url(self.person.pk),
+                    "slug": "test-person",
+                    "name": {
+                        "display": "Test Person",
+                        "sort": "",
+                        "full": "",
+                        "given": "",
+                        "family": ""
+                    },
+                    "publishing_is_draft": True,
+                }),
+            ],
+        }
+        self.assertEqual(expected, response.data)
+
+    def test_get_person_detail_with_get(self):
+        response = self.client.get(
+            self.detail_url(self.person_published.pk))
+        self.assertEqual(200, response.status_code)
+        expected = self.build_item_data({
+            "url": 'http://testserver%s'
+            % self.detail_url(self.person_published.pk),
+            "slug": "test-person",
+            "name": {
+                "display": "Test Person",
+                "sort": "",
+                "full": "",
+                "given": "",
+                "family": "",
+            },
+            "publishing_is_draft": False,
+        })
+        self.assertEqual(expected, response.data)
+
+    def test_add_person_with_post(self):
+        response = self.client.post(
+            self.listing_url(),
+            {
+                'slug': 'new-person',
+                "name": {
+                    "display": "New Person",
+                    "sort": "New Person",
+                    "full": "New Person",
+                },
+            },
+        )
+        self.assertEqual(201, response.status_code)
+        new_person = Person.objects.get(
+            slug=response.data['slug'],
+            publishing_is_draft=response.data['publishing_is_draft'],
+        )
+        self.assertEqual('new-person', new_person.slug)
+        self.assertEqual('New Person', new_person.name_display)
+        self.assertTrue(new_person.publishing_is_draft)
+
+    def test_replace_person_with_put(self):
+        response = self.client.get(self.detail_url(self.person.id))
+        self.assertEqual(200, response.status_code)
+
+        person_data = response.data
+        person_data['name'] = {
+            'display': 'Replaced Person',
+            'full': 'Replaced Person',
+            'sort': 'Replaced Person',
+        }
+        del(person_data['portrait'])
+
+        response = self.client.put(
+            self.detail_url(self.person.id),
+            person_data,
+        )
+        self.assertEqual(200, response.status_code)
+        updated_person = Person.objects.get(pk=self.person.pk)
+        self.assertEqual('test-person', updated_person.slug)
+        self.assertEqual('Replaced Person', updated_person.name_display)
+
+    def test_update_person_with_patch(self):
+        response = self.client.patch(
+            self.detail_url(self.person.pk),
+            {
+                'name': {
+                    'display': 'Updated Person',
+                },
+            },
+        )
+        self.assertEqual(200, response.status_code)
+        updated_person = Person.objects.get(pk=self.person.pk)
+        self.assertEqual('Updated Person', updated_person.name_display)
+
+    def test_delete_person_with_delete(self):
+        response = self.client.delete(self.detail_url(self.person.pk))
+        self.assertEqual(204, response.status_code)
+        self.assertEqual(0, Person.objects.count())
+
+    def test_api_user_permissions_are_correct(self):
+        counter = {'value': 0}
+
+        def extra_item_data_for_writes_fn():
+            """ Hack to return a unique `slug` value each time """
+            counter['value'] += 1
+            value = counter['value']
+            return {
+                'name': {
+                    'display': 'Another Person %d' % value,
+                    'sort': 'Another Person %d' % value,
+                    'full': 'Another Person %d' % value,
+                },
+                'slug': 'another-person-%d' % value,
+            }
+
+        self.assert_api_user_permissions_are_correct(
+            self.person.pk,
+            Person,
+            'personcreator',
+            extra_item_data_for_writes_fn=extra_item_data_for_writes_fn,
+            item_data_fields_to_remove=['portrait']
         )
