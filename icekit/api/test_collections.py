@@ -541,13 +541,6 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
     BASE_DATA = {
         "url": "",
         "slug": "",
-        "works": [],
-        "portrait": None,
-        "publishing_is_draft": False,
-        "alt_slug": "",
-        "website": "",
-        "wikipedia_link": "",
-        "admin_notes": "",
         "name": {
             "display": "",
             "sort": "",
@@ -555,6 +548,13 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
             "given": "",
             "family": ""
         },
+        "publishing_is_draft": False,
+        "works": [],
+        "portrait": None,
+        "alt_slug": "",
+        "website": "",
+        "wikipedia_link": "",
+        "admin_notes": "",
         "life_info": {
             "birth_date_display": None,
             "birth_date_edtf": "",
@@ -722,6 +722,154 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
             self.person.pk,
             Person,
             'personcreator',
+            extra_item_data_for_writes_fn=extra_item_data_for_writes_fn,
+            item_data_fields_to_remove=['portrait']
+        )
+
+
+class OrganizationAPITestCase(_BaseCollectionAPITestCase):
+    API_NAME = 'organization-api'  # Set to reverse-able name for API URLs
+    BASE_DATA = {
+        "url": "",
+        "slug": "",
+        "name_display": "",
+        "name_sort": "",
+        "publishing_is_draft": False,
+        "works": [],
+        "portrait": None,
+        "alt_slug": "",
+        "website": "",
+        "wikipedia_link": "",
+        "admin_notes": "",
+        "type": "company",
+        "type_plural": "companies",
+    }
+
+    def setUp(self):
+        super(OrganizationAPITestCase, self).setUp()
+
+        self.organization = Organization.objects.create(
+            slug='test-organization',
+            name_display='Test Organization',
+        )
+
+        self.organization_published = self.organization.publish()
+
+    def test_list_organizations_with_get(self):
+        response = self.client.get(self.listing_url())
+        self.assertEqual(200, response.status_code)
+        expected = {
+            'count': 2,
+            'next': None,
+            'previous': None,
+            'results': [
+                self.build_item_data({
+                    "url": 'http://testserver%s'
+                    % self.detail_url(self.organization_published.pk),
+                    "slug": "test-organization",
+                    "name_display": "Test Organization",
+                    "publishing_is_draft": False,
+                }),
+                self.build_item_data({
+                    "url": 'http://testserver%s'
+                    % self.detail_url(self.organization.pk),
+                    "slug": "test-organization",
+                    "name_display": "Test Organization",
+                    "publishing_is_draft": True,
+                }),
+            ],
+        }
+        self.assertEqual(expected, response.data)
+
+    def test_get_organization_detail_with_get(self):
+        response = self.client.get(
+            self.detail_url(self.organization_published.pk))
+        self.assertEqual(200, response.status_code)
+        expected = self.build_item_data({
+            "url": 'http://testserver%s'
+            % self.detail_url(self.organization_published.pk),
+            "slug": "test-organization",
+            "name_display": "Test Organization",
+            "publishing_is_draft": False,
+        })
+        self.assertEqual(expected, response.data)
+
+    def test_add_organization_with_post(self):
+        response = self.client.post(
+            self.listing_url(),
+            {
+                'slug': 'new-organization',
+                "name_display": "New Organization",
+                "name_sort": "New Organization",
+            },
+        )
+        self.assertEqual(201, response.status_code)
+        new_organization = Organization.objects.get(
+            slug=response.data['slug'],
+            publishing_is_draft=response.data['publishing_is_draft'],
+        )
+        self.assertEqual('new-organization', new_organization.slug)
+        self.assertEqual('New Organization', new_organization.name_display)
+        self.assertTrue(new_organization.publishing_is_draft)
+
+    def test_replace_organization_with_put(self):
+        response = self.client.get(self.detail_url(self.organization.id))
+        self.assertEqual(200, response.status_code)
+
+        organization_data = response.data
+        organization_data['name_display'] = 'Replaced Organization'
+        organization_data['name_sort'] = 'Replaced Organization'
+        del(organization_data['portrait'])
+
+        response = self.client.put(
+            self.detail_url(self.organization.id),
+            organization_data,
+        )
+        self.assertEqual(200, response.status_code)
+        updated_organization = Organization.objects.get(
+            pk=self.organization.pk)
+        self.assertEqual('test-organization', updated_organization.slug)
+        self.assertEqual(
+            'Replaced Organization', updated_organization.name_display)
+
+    def test_update_organization_with_patch(self):
+        response = self.client.patch(
+            self.detail_url(self.organization.pk),
+            {
+                'name_display': 'Updated Organization',
+                'name_sort': 'Updated Organization',
+            },
+        )
+        self.assertEqual(200, response.status_code)
+        updated_organization = Organization.objects.get(
+            pk=self.organization.pk)
+        self.assertEqual(
+            'Updated Organization', updated_organization.name_display)
+        self.assertEqual(
+            'Updated Organization', updated_organization.name_sort)
+
+    def test_delete_organization_with_delete(self):
+        response = self.client.delete(self.detail_url(self.organization.pk))
+        self.assertEqual(204, response.status_code)
+        self.assertEqual(0, Organization.objects.count())
+
+    def test_api_user_permissions_are_correct(self):
+        counter = {'value': 0}
+
+        def extra_item_data_for_writes_fn():
+            """ Hack to return a unique `slug` value each time """
+            counter['value'] += 1
+            value = counter['value']
+            return {
+                'name_display': 'Another Organization %d' % value,
+                'name_sort': 'Another Organization %d' % value,
+                'slug': 'another-organization-%d' % value,
+            }
+
+        self.assert_api_user_permissions_are_correct(
+            self.organization.pk,
+            Organization,
+            'organizationcreator',
             extra_item_data_for_writes_fn=extra_item_data_for_writes_fn,
             item_data_fields_to_remove=['portrait']
         )
