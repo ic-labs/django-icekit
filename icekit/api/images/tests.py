@@ -1,6 +1,3 @@
-from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
-
 from django_dynamic_fixture import G
 
 from icekit.utils.testing import get_test_image, setup_with_context_manager
@@ -26,8 +23,6 @@ class ImageAPITests(base_tests._BaseAPITestCase):
         )  # context is automatically exited on teardown.
         self.image.image = self._image_name
         self.image.save()
-
-        self.image_ct = ContentType.objects.get_for_model(Image)
 
     def test_list_images_with_get(self):
         response = self.client.get(self.listing_url())
@@ -133,106 +128,12 @@ class ImageAPITests(base_tests._BaseAPITestCase):
         self.assertEqual(0, Image.objects.count())
 
     def test_api_user_permissions_are_correct(self):
-        # Anonymous user cannot do anything (no `user` provided)
-        self.client.credentials()  # Clear any user credentials
-        self.assert_user_has_get_list_permission(False)
-        self.assert_user_has_get_detail_permission(False, self.image.pk)
-        self.assert_user_has_post_permission(False)
-        self.assert_user_has_put_permission(False, self.image.pk)
-        self.assert_user_has_patch_permission(False, self.image.pk)
-        self.assert_user_has_delete_permission(False, self.image.pk)
-
-        # Authenticate in test client as `self.active_user`
-        self.client_apply_token(self.active_user_token)
-
-        # User without explicit model permissions cannot do anything
-        self.assert_user_has_get_list_permission(False)
-        self.assert_user_has_get_detail_permission(False, self.image.pk)
-        self.assert_user_has_post_permission(False)
-        self.assert_user_has_put_permission(False, self.image.pk)
-        self.assert_user_has_patch_permission(False, self.image.pk)
-        self.assert_user_has_delete_permission(False, self.image.pk)
-
-        # User with 'change' model permissions can list and change existing
-        # images but not add or delete
-        self.active_user.user_permissions = [
-            Permission.objects.get(
-                content_type=self.image_ct, codename='change_image')
-        ]
-        self.assert_user_has_get_list_permission(True)
-        self.assert_user_has_get_detail_permission(True, self.image.pk)
-
-        # Get image data for later submission
-        image_data = self.client.get(self.detail_url(self.image.pk)).data
-
-        self.assert_user_has_post_permission(False)
-        self.assert_user_has_put_permission(
-            True,
+        self.assert_api_user_permissions_are_correct(
             self.image.pk,
-            dict(image_data, **{
+            Image,
+            'image',
+            format='multipart',
+            extra_item_data_for_writes_fn=lambda: {
                 'image': open(self.image.image.file.name, 'rb'),
-            }),
-            format='multipart',  # Cannot upload image with JSON
+            }
         )
-        self.assert_user_has_patch_permission(True, self.image.pk)
-        self.assert_user_has_delete_permission(False, self.image.pk)
-
-        # User with 'change' and 'add' model permissions can list and change
-        # existing items and add new ones, but not delete
-        self.active_user.user_permissions = [
-            Permission.objects.get(
-                content_type=self.image_ct, codename='change_image'),
-            Permission.objects.get(
-                content_type=self.image_ct, codename='add_image'),
-        ]
-        self.assert_user_has_get_list_permission(True)
-        self.assert_user_has_get_detail_permission(True, self.image.pk)
-        self.assert_user_has_post_permission(
-            True,
-            {
-                'title': 'New image',
-                'image': open(self.image.image.file.name, 'rb'),
-            },
-            format='multipart',  # Cannot upload image with JSON
-        )
-        self.assert_user_has_put_permission(
-            True,
-            self.image.pk,
-            dict(image_data, **{
-                'image': open(self.image.image.file.name, 'rb'),
-            }),
-            format='multipart',  # Cannot upload image with JSON
-        )
-        self.assert_user_has_patch_permission(True, self.image.pk)
-        self.assert_user_has_delete_permission(False, self.image.pk)
-
-        # User with 'change', 'add', and 'delete' model permissions can do
-        # everything
-        self.active_user.user_permissions = [
-            Permission.objects.get(
-                content_type=self.image_ct, codename='change_image'),
-            Permission.objects.get(
-                content_type=self.image_ct, codename='add_image'),
-            Permission.objects.get(
-                content_type=self.image_ct, codename='delete_image')
-        ]
-        self.assert_user_has_get_list_permission(True)
-        self.assert_user_has_get_detail_permission(True, self.image.pk)
-        self.assert_user_has_post_permission(
-            True,
-            {
-                'title': 'New image',
-                'image': open(self.image.image.file.name, 'rb'),
-            },
-            format='multipart',  # Cannot upload image with JSON
-        )
-        self.assert_user_has_put_permission(
-            True,
-            self.image.pk,
-            dict(image_data, **{
-                'image': open(self.image.image.file.name, 'rb'),
-            }),
-            format='multipart',  # Cannot upload image with JSON
-        )
-        self.assert_user_has_patch_permission(True, self.image.pk)
-        self.assert_user_has_delete_permission(True, self.image.pk)

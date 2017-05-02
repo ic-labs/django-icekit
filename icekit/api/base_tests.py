@@ -2,6 +2,8 @@ import json
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 
 from rest_framework.test import APITestCase
@@ -178,3 +180,123 @@ class _BaseAPITestCase(APITestCase):
         else:
             # Response may be 403 or 405 for rejected POST
             self.assertTrue(response.status_code in (403, 405))
+
+    def assert_api_user_permissions_are_correct(
+        self, item_id, item_model=None, item_admin_name=None,
+        format='json', extra_item_data_for_writes_fn=lambda: {}
+    ):
+        self.client.credentials()  # Clear any user credentials
+
+        if self.API_IS_PUBLIC_READ:
+            # Anonymous user can peform all read operations, no writes
+            self.client.credentials()  # Clear any user credentials
+            self.assert_user_has_get_list_permission(True)
+            self.assert_user_has_get_detail_permission(True, item_id)
+            self.assert_user_has_post_permission(False)
+            self.assert_user_has_put_permission(False, item_id)
+            self.assert_user_has_patch_permission(False, item_id)
+            self.assert_user_has_delete_permission(False, item_id)
+
+            # Even superuser cannot peform write operations
+            self.client_apply_token(self.superuser_token)
+            self.assert_user_has_get_list_permission(True)
+            self.assert_user_has_get_detail_permission(True, item_id)
+            self.assert_user_has_post_permission(False)
+            self.assert_user_has_put_permission(False, item_id)
+            self.assert_user_has_patch_permission(False, item_id)
+            self.assert_user_has_delete_permission(False, item_id)
+
+            return  # Read-only public APIs need no further tests
+
+        item_ct = ContentType.objects.get_for_model(item_model)
+
+        # Anonymous user cannot do anything (no `user` provided)
+        self.assert_user_has_get_list_permission(False)
+        self.assert_user_has_get_detail_permission(False, item_id)
+        self.assert_user_has_post_permission(False)
+        self.assert_user_has_put_permission(False, item_id)
+        self.assert_user_has_patch_permission(False, item_id)
+        self.assert_user_has_delete_permission(False, item_id)
+
+        # Authenticate in test client as `self.active_user`
+        self.client_apply_token(self.active_user_token)
+
+        # User without explicit model permissions cannot do anything
+        self.assert_user_has_get_list_permission(False)
+        self.assert_user_has_get_detail_permission(False, item_id)
+        self.assert_user_has_post_permission(False)
+        self.assert_user_has_put_permission(False, item_id)
+        self.assert_user_has_patch_permission(False, item_id)
+        self.assert_user_has_delete_permission(False, item_id)
+
+        # User with 'change' model permissions can list and change existing
+        # items but not add or delete
+        self.active_user.user_permissions = [
+            Permission.objects.get(
+                content_type=item_ct, codename='change_%s' % item_admin_name)
+        ]
+        self.assert_user_has_get_list_permission(True)
+        self.assert_user_has_get_detail_permission(True, item_id)
+
+        # Get item data for later submission
+        item_data = self.client.get(self.detail_url(item_id)).data
+
+        self.assert_user_has_post_permission(False)
+        self.assert_user_has_put_permission(
+            True,
+            item_id,
+            dict(item_data, **extra_item_data_for_writes_fn()),
+            format=format,
+        )
+        self.assert_user_has_patch_permission(True, item_id)
+        self.assert_user_has_delete_permission(False, item_id)
+
+        # User with 'change' and 'add' model permissions can list and change
+        # existing items and add new ones, but not delete
+        self.active_user.user_permissions = [
+            Permission.objects.get(
+                content_type=item_ct, codename='change_%s' % item_admin_name),
+            Permission.objects.get(
+                content_type=item_ct, codename='add_%s' % item_admin_name),
+        ]
+        self.assert_user_has_get_list_permission(True)
+        self.assert_user_has_get_detail_permission(True, item_id)
+        self.assert_user_has_post_permission(
+            True,
+            extra_item_data_for_writes_fn(),
+            format=format,
+        )
+        self.assert_user_has_put_permission(
+            True,
+            item_id,
+            dict(item_data, **extra_item_data_for_writes_fn()),
+            format=format,
+        )
+        self.assert_user_has_patch_permission(True, item_id)
+        self.assert_user_has_delete_permission(False, item_id)
+
+        # User with 'change', 'add', and 'delete' model permissions can do
+        # everything
+        self.active_user.user_permissions = [
+            Permission.objects.get(
+                content_type=item_ct, codename='change_%s' % item_admin_name),
+            Permission.objects.get(
+                content_type=item_ct, codename='add_%s' % item_admin_name),
+            Permission.objects.get(
+                content_type=item_ct, codename='delete_%s' % item_admin_name)
+        ]
+        self.assert_user_has_get_list_permission(True)
+        self.assert_user_has_get_detail_permission(True, item_id)
+        self.assert_user_has_post_permission(
+            True,
+            extra_item_data_for_writes_fn(),
+            format=format,
+        )
+        self.assert_user_has_put_permission(
+            True,
+            item_id,
+            dict(item_data, **extra_item_data_for_writes_fn()),
+            format=format,
+        )
+        self.assert_user_has_patch_permission(True, item_id)
+        self.assert_user_has_delete_permission(True, item_id)
