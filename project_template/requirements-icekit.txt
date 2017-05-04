@@ -1,9 +1,8 @@
 # requirements-icekit.txt is used by go.sh to install whatever the icekit
 # Dockerfile installs into the icekit docker image.
 
-# it should pin icekit to the same version or commit mentioned at the top of
-# `Dockerfile`:
-
+# NB: IF YOU CHANGE THE REVISION, CHANGE IT IN THE PROJECT'S Dockerfile AS WELL!
+# In installed projects, this may end up as -e git+https://github.com/ic-labs/django-icekit@{COMMIT}#egg=django-icekit[api,dev,django18,forms,glamkit,project,search,test]
 -e ..[api,brightcove,dev,django18,forms,glamkit,project,search,test]
 
 # and any dependencies that django-icekit has in its requirements.txt
