@@ -49,6 +49,9 @@ In development
       consequently, models which use ``ThumbnailAdminMixin`` have a visual
       preview in ``raw_id`` fields, including ``icekit.plugins.image.Image``.
 
+   - The "icekit/admin/fluent_layouts_change_form.html" template has moved to
+      "admin/fluent_layouts_change_form.html". Please update your references.
+
 -  Add ``icekit.api`` application to provide APIs to read data from, and
    sometimes write data to, items in the site from program clients.
 
