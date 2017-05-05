@@ -11,6 +11,7 @@ if [[ -z $(which curl) ]]; then
 	exit 1
 fi
 
+# Validate destination directory.
 if [[ -z "$DEST_DIR" ]];
 then
 	>&2 echo 'You must specify a destination directory.'
@@ -25,6 +26,7 @@ fi
 
 DEST_DIR_BASENAME="$(basename $DEST_DIR)"
 
+# Prompt before we do anything.
 cat <<EOF
 
 This script will create a new ICEkit project in directory '${DEST_DIR}'.
@@ -37,9 +39,11 @@ echo
 # Get commit SHA for branch reference.
 COMMIT="$(curl -H 'Accept: application/vnd.github.VERSION.sha' https://api.github.com/repos/ic-labs/django-icekit/commits/$BRANCH)"
 
+# Create destination directory.
 mkdir -p "$DEST_DIR"
 cd "$DEST_DIR"
 
+# Download project template.
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/.coveragerc"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/.dockerignore"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/.editorconfig"
@@ -63,6 +67,7 @@ curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/pr
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/requirements.txt"
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/test_initial_data.sql"
 
+# Change permissions on executable files.
 chmod +x go.sh
 
 # Find and replace 'project_template' with destination directory basename.
