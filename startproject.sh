@@ -5,6 +5,12 @@ set -e
 DEST_DIR="$1"
 BRANCH="${2:-master}"
 
+# Validate dependencies.
+if [[ -z $(which curl) ]]; then
+	echo "'curl' is not available. Please install it and try again."
+	exit 1
+fi
+
 if [[ -z "$DEST_DIR" ]];
 then
 	>&2 echo 'You must specify a destination directory.'
@@ -27,11 +33,6 @@ EOF
 
 read -p 'Press CTRL-C to abort or any other key to continue...'
 echo
-
-if [[ -z $(which wget) ]]; then
-	echo "'wget' is not available. Please install it and try again."
-	exit 1
-fi
 
 # Get commit SHA for branch reference.
 COMMIT="$(curl -H 'Accept: application/vnd.github.VERSION.sha' https://api.github.com/repos/ic-labs/django-icekit/commits/$BRANCH)"
