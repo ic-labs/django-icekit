@@ -64,7 +64,6 @@ curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/pr
 curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/test_initial_data.sql"
 
 chmod +x go.sh
-touch requirements.txt
 
 # Find and replace 'project_template' with destination directory basename.
 find . -type f -exec sed -e "s/project_template/$DEST_DIR_BASENAME/g" -i.deleteme {} \;
