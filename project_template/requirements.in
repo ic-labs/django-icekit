@@ -1,4 +1,2 @@
-# Top level project requirements only.
-# Unpinned, except to exclude known incompatible versions.
-
-# ICEkit is already installed in the `interaction/icekit` image or via `go.sh`.
+# Additional project requirements only.
+# ICEkit is already installed in the base image or via `go.sh`.

@@ -1,9 +1,7 @@
-FROM interaction/icekit:local
+# IMPORTANT! If you update the version of ICEkit here, you must also update it
+# in `requirements-icekit.txt`.
 
-#
-# IMPORTANT! If you change the pinned version of ICEkit above, update this
-# project's `requirements-icekit.txt` to match.
-#
+FROM interaction/icekit:local
 
 WORKDIR /opt/project_template/
 
