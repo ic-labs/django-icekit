@@ -75,10 +75,12 @@ find . -type f -exec sed -e "s/project_template/$DEST_DIR_BASENAME/g" -i.deletem
 find . -type f -iname "*.deleteme" -delete
 
 # Pin ICEkit version.
-sed -e "s|\.\.|git+https://github.com/ic-labs/django-icekit@${COMMIT}#egg=django-icekit|" requirements-icekit.txt > requirements-icekit.txt.replaced
 sed -e "s|:local|:${COMMIT}|" Dockerfile > Dockerfile.replaced
-mv requirements-icekit.txt.replaced requirements-icekit.txt
 mv Dockerfile.replaced Dockerfile
+for EXT in 'in' txt; do
+	sed -e "s|django-icekit.git#egg|django-icekit.git@${COMMIT}#egg|" "requirements.$EXT" > "requirements.$EXT.replaced"
+	mv "requirements.$EXT.replaced" "requirements.$EXT"
+done
 
 if [[ -n $(which git) ]]; then
 	echo
