@@ -61,6 +61,7 @@ setuptools.setup(
         'django-wysiwyg',
         'django_extensions',
         'html5lib==0.999',  # See: https://github.com/html5lib/html5lib-python/issues/189 and https://github.com/pydanny-archive/django-wysiwyg/issues/61
+        'ixc-django-docker',
         'nltk',
         'Pillow>=4',  # See: https://github.com/python-pillow/Pillow/issues/2206
         'pip-tools',
@@ -116,6 +117,7 @@ setuptools.setup(
             'docutils',
             'easy_thumbnails',
             'flower',
+            'gevent',
             'gunicorn',
             'icekit-notifications',
             'ixc-django-compressor',

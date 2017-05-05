@@ -6,21 +6,26 @@ import sys
 
 from icekit.utils.sequences import dedupe_and_sort
 
-# Emulate `from ... import *` with base settings module from environment.
 BASE_SETTINGS_MODULE = os.environ.setdefault('BASE_SETTINGS_MODULE', 'base')
 print('# BASE_SETTINGS_MODULE: %s' % BASE_SETTINGS_MODULE)
+
+# Emulate `from {base_settings} import *`.
 try:
-    locals().update(importlib.import_module(
-        'icekit.project.settings._%s' % BASE_SETTINGS_MODULE).__dict__)
+    base_settings = importlib.import_module(
+        'project_settings_%s' % BASE_SETTINGS_MODULE)
 except ImportError:
-    locals().update(importlib.import_module(BASE_SETTINGS_MODULE).__dict__)
+    try:
+        base_settings = importlib.import_module(
+            'icekit.project.settings._%s' % BASE_SETTINGS_MODULE)
+    except ImportError:
+        base_settings = importlib.import_module(BASE_SETTINGS_MODULE)
+locals().update(base_settings.__dict__)
 
 # Create missing runtime directories.
 runtime_dirs = STATICFILES_DIRS + (
     MEDIA_ROOT,
     os.path.join(PROJECT_DIR, 'templates'),
     os.path.join(VAR_DIR, 'logs'),
-    os.path.join(VAR_DIR, 'run'),
     # TODO: Add layout diretories.
 )
 for dirname in runtime_dirs:
@@ -80,26 +85,24 @@ MIDDLEWARE_CLASSES = dedupe_and_sort(MIDDLEWARE_CLASSES, [
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
 ])
 
-# Get the secret key from a file that should never be committed to version
-# control. If it doesn't exist, create it.
-try:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or \
-        open(SECRET_FILE).read().strip()
-except IOError:
+# Get or generate and save random secret key.
+if not SECRET_KEY:
+    SECRET_FILE = os.path.join(VAR_DIR, 'secret.txt')
     try:
-        import random
-        import string
-        SECRET_CHARSET = ''.join([
-            string.digits, string.ascii_letters, string.punctuation])
-        SECRET_KEY = ''.join(random.choice(SECRET_CHARSET) for i in range(50))
-        secret = open(SECRET_FILE, 'w')
-        secret.write(SECRET_KEY)
-        secret.close()
-        os.chmod(SECRET_FILE, 0o400)
+        # Get the secret key from the file system.
+        with open(SECRET_FILE) as f:
+            SECRET_KEY = f.read()
     except IOError:
-        raise Exception(
-            'Please create a %s file with 50 random characters to set your '
-            'secret key.' % SECRET_FILE)
+        # Generate a random secret key.
+        SECRET_KEY = ''.join(random.choice(''.join([
+            string.ascii_letters,
+            string.digits,
+            string.punctuation,
+        ])) for i in range(50))
+        # Save the secret key to the file system.
+        with open(SECRET_FILE, 'w') as f:
+            f.write(SECRET_KEY)
+            os.chmod(SECRET_FILE, 0o400)  # Read only by owner
 
 # Enable template backends.
 TEMPLATES = [TEMPLATES_DJANGO, TEMPLATES_JINJA2]

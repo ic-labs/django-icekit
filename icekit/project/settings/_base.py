@@ -23,6 +23,7 @@ from django.utils.text import slugify
 from kombu import Exchange, Queue
 
 import icekit
+import ixc_django_docker
 
 BASE_SETTINGS_MODULE = os.environ.get('BASE_SETTINGS_MODULE', '')
 
@@ -33,12 +34,7 @@ ELASTICSEARCH_ADDRESS = os.environ.get(
 # Get Redis host and port.
 REDIS_ADDRESS = os.environ.get('REDIS_ADDRESS', 'localhost:6379')
 
-# Uniquely identify the base settings module, so we can avoid conflicts with
-# other projects running on the same system.
-SETTINGS_MODULE_HASH = hashlib.md5(
-    u''.join((__file__, BASE_SETTINGS_MODULE)).encode('utf-8')).hexdigest()
-
-PROJECT_NAME = os.environ.get('ICEKIT_PROJECT_NAME', 'ICEkit')
+PROJECT_NAME = os.environ.get('PROJECT_NAME', 'ICEkit')
 PROJECT_SLUG = re.sub(r'[^0-9A-Za-z]+', '-', slugify(PROJECT_NAME))
 
 SITE_DOMAIN = os.environ.get('SITE_DOMAIN', '%s.lvh.me' % PROJECT_SLUG)
@@ -49,17 +45,21 @@ SITE_PORT = None
 # FILE SYSTEM PATHS ###########################################################
 
 ICEKIT_DIR = os.path.abspath(os.path.dirname(icekit.__file__))
-PROJECT_DIR = os.path.abspath(os.environ['ICEKIT_PROJECT_DIR'])
+IXC_DJANGO_DOCKER_DIR = os.path.abspath(
+    os.path.dirname(ixc_django_docker.__file__))
+PROJECT_DIR = os.path.abspath(os.environ['PROJECT_DIR'])
 VAR_DIR = os.path.join(PROJECT_DIR, 'var')
 
-# Sanity-check the ICEKIT_DIR in our settings matches the $ICEKIT_DIR
-# environment variable, to ensure we are in sync with the external environment.
-if ICEKIT_DIR != os.path.abspath(os.environ['ICEKIT_DIR']):
+# Sanity-check the IXC_DJANGO_DOCKER_DIR in our settings matches the
+# $IXC_DJANGO_DOCKER_DIR environment variable, to ensure we are in sync with
+# the external environment.
+if IXC_DJANGO_DOCKER_DIR != \
+        os.path.abspath(os.environ['IXC_DJANGO_DOCKER_DIR']):
     raise Exception(
-        'Mismatching paths for project setting ICEKIT_DIR and env var '
-        '$ICEKIT_DIR: %s != %s' % (
-            ICEKIT_DIR,
-            os.path.abspath(os.environ['ICEKIT_DIR']),
+        'Mismatching paths for project setting IXC_DJANGO_DOCKER_DIR and env '
+        'var $IXC_DJANGO_DOCKER_DIR: %s != %s' % (
+            IXC_DJANGO_DOCKER_DIR,
+            os.path.abspath(os.environ['IXC_DJANGO_DOCKER_DIR']),
         )
     )
 
@@ -71,9 +71,11 @@ if ICEKIT_DIR != os.path.abspath(os.environ['ICEKIT_DIR']):
 # CRITICAL
 #
 
-SECRET_FILE = os.path.join(VAR_DIR, 'secret.txt')
+# Get the secret key from the environment.
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
-DEBUG = False  # Don't show detailed error pages when exceptions are raised
+# Don't show detailed error pages when exceptions are raised.
+DEBUG = False
 
 #
 # ENVIRONMENT SPECIFIC
@@ -82,12 +84,12 @@ DEBUG = False  # Don't show detailed error pages when exceptions are raised
 # Allow connections only on the site domain.
 ALLOWED_HOSTS = ('.%s' % SITE_DOMAIN, )
 
-# Use dummy caching, so we can build Docker images (with offline compression)
-# without a running Redis services.
+# Use dummy caching, so we don't get confused because a change is not taking
+# effect when we expect it to.
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        'KEY_PREFIX': 'default-%s' % SETTINGS_MODULE_HASH,
+        'KEY_PREFIX': 'default-%s' % PROJECT_SLUG,
         'LOCATION': 'redis://%s/1' % REDIS_ADDRESS,
     }
 }
@@ -104,7 +106,7 @@ DATABASES = {
     },
 }
 
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 EMAIL_HOST = os.environ.get('EMAIL_HOST')
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
@@ -186,14 +188,9 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',  # Default
 )
 
-# # Enable cross-subdomain cookies, only if `SITE_DOMAIN` is not a TLD.
-# if '.' in SITE_DOMAIN:
-#     CSRF_COOKIE_DOMAIN = LANGUAGE_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = \
-#         '.%s' % SITE_DOMAIN
-
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'noreply@%s' % SITE_DOMAIN
 
-EMAIL_SUBJECT_PREFIX = '[%s] ' % SITE_NAME
+EMAIL_SUBJECT_PREFIX = '[%s] ' % PROJECT_SLUG
 
 # FILE_UPLOAD_PERMISSIONS = 0755  # Default: None
 
@@ -250,7 +247,7 @@ ROOT_URLCONF = 'icekit.project.urls'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Avoid session conflicts when running multiple projects on the same domain.
-SESSION_COOKIE_NAME = 'sessionid-%s' % SETTINGS_MODULE_HASH
+SESSION_COOKIE_NAME = 'sessionid-%s' % PROJECT_SLUG
 
 # Every write to the cache will also be written to the database. Session reads
 # only use the database if the data is not already in the cache.
@@ -267,13 +264,13 @@ STATICFILES_DIRS = (
 )
 
 STATICFILES_FINDERS = (
-    # Defaults.
+    # Default.
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
 # Define template backends separately. Backends will be added to `TEMPLATES` in
-# `local.py`. This makes it easier to update for specific environments.
+# `calculated.py`. This makes it easier to update for specific environments.
 
 # Django templates backend.
 TEMPLATES_DJANGO = {
@@ -334,7 +331,7 @@ FORMAT_MODULE_PATH = [
     'icekit.formats',
 ]
 
-WSGI_APPLICATION = 'icekit.project.wsgi.application'
+WSGI_APPLICATION = 'ixc_django_docker.wsgi.application'
 
 # DJANGO REDIRECTS ############################################################
 
@@ -388,6 +385,7 @@ LOGGING['loggers']['icekit.tasks'] = {
 
 INSTALLED_APPS += (
     'djcelery',
+    'ixc_django_docker.celery',
     'kombu.transport.django',
 )
 
@@ -625,7 +623,7 @@ INSTALLED_APPS += (
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'icekit.utils.search.backends.ICEkitConfigurableElasticSearchEngine',
-        'INDEX_NAME': 'haystack-%s' % SETTINGS_MODULE_HASH,
+        'INDEX_NAME': 'haystack-%s' % PROJECT_SLUG,
         'URL': 'http://%s/' % ELASTICSEARCH_ADDRESS,
     },
 }
@@ -642,8 +640,6 @@ INSTALLED_APPS += ('haystack', )
 # ROOT_HOSTCONF = 'icekit.hosts'
 
 # ICEKIT ######################################################################
-
-ICEKIT_CONTEXT_PROCESSOR_SETTINGS = ()
 
 ICEKIT = {
     'LAYOUT_TEMPLATES': (
@@ -798,6 +794,10 @@ INSTALLED_APPS += (
 )
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
+
+# IXC DJANGO DOCKER ###########################################################
+
+CONTEXT_PROCESSOR_SETTINGS = ('COMPRESS_ENABLED', 'SITE_NAME')
 
 # MASTER PASSWORD #############################################################
 

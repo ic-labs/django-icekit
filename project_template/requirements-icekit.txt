@@ -1,7 +1,0 @@
-# This file is used by `go.sh` to install the same version of ICEkit that is
-# installed in the base image (see the `FROM` instruction in `Dockerfile`).
-
-# IMPORTANT! If you update the version of ICEkit in one place, you must also
-# update it in the other.
-
--e ..[api,brightcove,dev,django18,docs,forms,glamkit,project,search,test]

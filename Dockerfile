@@ -61,19 +61,14 @@ COPY README.rst setup.py /opt/django-icekit/
 RUN bash -c 'pip install --exists i --no-cache-dir --no-deps -e .. -r <(grep -v setuptools requirements.txt)'  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
 RUN md5sum requirements.txt > requirements.txt.md5
 
-WORKDIR /usr/local/bin/
-ENV DOCKER_COMMIT=0a214841ace30f8ff67cd1c3a9c2214b62eb4619
-RUN wget -N -nv "https://raw.githubusercontent.com/ixc/docker/${DOCKER_COMMIT}/bin/transfer.sh"
-RUN chmod +x *.sh
-
 ENV CRONLOCK_HOST=redis
+ENV DJANGO_SETTINGS_MODULE=icekit.project.settings
 ENV DOCKER=1
 ENV ELASTICSEARCH_ADDRESS=elasticsearch:9200
-ENV ICEKIT_DIR=/opt/django-icekit/icekit
-ENV ICEKIT_PROJECT_DIR=/opt/django-icekit/project_template
 ENV PATH=/opt/django-icekit/icekit/bin:$PATH
 ENV PGHOST=postgres
 ENV PGUSER=postgres
+ENV PROJECT_DIR=/opt/django-icekit/project_template
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONHASHSEED=random
 ENV PYTHONWARNINGS=ignore

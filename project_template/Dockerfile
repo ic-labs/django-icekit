@@ -16,7 +16,7 @@ COPY requirements.txt /opt/project_template/
 RUN bash -c 'pip install --no-cache-dir --no-deps -r <(grep -v setuptools requirements.txt)'  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
 RUN md5sum requirements.txt > requirements.txt.md5
 
-ENV ICEKIT_PROJECT_DIR=/opt/project_template
+ENV PROJECT_DIR=/opt/project_template
 
 COPY . /opt/project_template/
 
