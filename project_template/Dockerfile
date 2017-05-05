@@ -1,5 +1,10 @@
 FROM interaction/icekit:local
 
+#
+# IMPORTANT! If you change the pinned version of ICEkit above, update this
+# project's `requirements-icekit.txt` to match.
+#
+
 WORKDIR /opt/project_template/
 
 COPY package.json /opt/project_template/

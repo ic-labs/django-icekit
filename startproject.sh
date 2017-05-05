@@ -33,31 +33,34 @@ if [[ -z $(which wget) ]]; then
 	exit 1
 fi
 
+# Get commit SHA for branch reference.
+COMMIT="$(curl -H 'Accept: application/vnd.github.VERSION.sha' https://api.github.com/repos/ic-labs/django-icekit/commits/$BRANCH)"
+
 mkdir -p "$DEST_DIR"
 cd "$DEST_DIR"
 
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.coveragerc"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.dockerignore"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.editorconfig"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.env.local.sample"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.env.production"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.env.staging"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.gitignore"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/.travis.yml"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/bower.json"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/docker-cloud.yml"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/docker-compose.override.sample.yml"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/docker-compose.travis.yml"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/docker-compose.yml"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/Dockerfile"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/go.sh"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/package.json"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/project_settings.py"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/project_settings_local.sample.py"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements-icekit.txt"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements.in"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/requirements.txt"
-curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${BRANCH}/project_template/test_initial_data.sql"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/.coveragerc"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/.dockerignore"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/.editorconfig"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/.env.local.sample"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/.env.production"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/.env.staging"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/.gitignore"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/.travis.yml"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/bower.json"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/docker-cloud.yml"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/docker-compose.override.sample.yml"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/docker-compose.travis.yml"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/docker-compose.yml"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/Dockerfile"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/go.sh"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/package.json"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/project_settings.py"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/project_settings_local.sample.py"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/requirements-icekit.txt"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/requirements.in"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/requirements.txt"
+curl -#fLO "https://raw.githubusercontent.com/ic-labs/django-icekit/${COMMIT}/project_template/test_initial_data.sql"
 
 chmod +x go.sh
 touch requirements.txt
@@ -66,9 +69,9 @@ touch requirements.txt
 find . -type f -exec sed -e "s/project_template/$DEST_DIR_BASENAME/g" -i.deleteme {} \;
 find . -type f -iname "*.deleteme" -delete
 
-# Use release versions of ICEkit.
-sed -e "s|\.\.|git+https://github.com/ic-labs/django-icekit@master#egg=django-icekit|" requirements-icekit.txt > requirements-icekit.txt.replaced
-sed -e "s|:local|:master|" Dockerfile > Dockerfile.replaced
+# Pin ICEkit version.
+sed -e "s|\.\.|git+https://github.com/ic-labs/django-icekit@${COMMIT}#egg=django-icekit|" requirements-icekit.txt > requirements-icekit.txt.replaced
+sed -e "s|:local|:${COMMIT}|" Dockerfile > Dockerfile.replaced
 mv requirements-icekit.txt.replaced requirements-icekit.txt
 mv Dockerfile.replaced Dockerfile
 

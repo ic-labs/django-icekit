@@ -60,7 +60,7 @@ RUN md5sum bower.json > bower.json.md5
 WORKDIR /opt/django-icekit/
 
 COPY README.rst requirements.txt setup.py /opt/django-icekit/
-RUN bash -c 'pip install --no-cache-dir -r <(grep -v setuptools requirements.txt)'  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
+RUN pip install --no-cache-dir -e .[api,brightcove,dev,django18,docs,forms,glamkit,project,search,test] -r requirements.txt
 RUN md5sum requirements.txt > requirements.txt.md5
 
 ENV DOCKER_COMMIT=0a214841ace30f8ff67cd1c3a9c2214b62eb4619
