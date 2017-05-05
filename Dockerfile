@@ -39,7 +39,6 @@ RUN wget -nv -O /usr/local/bin/tini "https://github.com/krallin/tini/releases/do
 RUN chmod +x /usr/local/bin/tini
 
 WORKDIR /opt/git-secret/
-
 ENV GIT_SECRET_VERSION=0.2.1
 RUN git clone https://github.com/sobolevn/git-secret.git /opt/git-secret/
 RUN git checkout "v$GIT_SECRET_VERSION"
