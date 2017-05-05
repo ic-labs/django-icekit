@@ -127,7 +127,7 @@ Run the Django dev server:
 
 Open the site in a browser:
 
-	http://localhost:8000
+	http://${DEST_DIR}.lvh.me:8000
 
 When you're done, exit the container and stop all of its dependencies:
 
