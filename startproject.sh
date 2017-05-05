@@ -100,8 +100,8 @@ database and search engine, and makes deployment easy.
 
 If you haven't already, go install Docker:
 
-  * [macOS](https://download.docker.com/mac/stable/Docker.dmg)
   * [Linux](https://docs.docker.com/engine/installation/#supported-platforms)
+  * [macOS](https://download.docker.com/mac/stable/Docker.dmg)
   * [Windows](https://download.docker.com/win/stable/InstallDocker.msi)
 
 Build a Docker image:
