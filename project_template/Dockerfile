@@ -13,7 +13,7 @@ COPY bower.json /opt/project_template/
 RUN bower-install.sh && rm -rf /root/.cache/bower
 
 COPY requirements.txt /opt/project_template/
-RUN pip install --no-cache-dir -r requirements.txt
+RUN bash -c 'pip install --no-cache-dir --no-deps -r <(grep -v setuptools requirements.txt)'  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
 RUN md5sum requirements.txt > requirements.txt.md5
 
 ENV ICEKIT_PROJECT_DIR=/opt/project_template
