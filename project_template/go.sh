@@ -25,14 +25,12 @@ fi
 
 # Install ICEKit.
 if [[ -z $("$ICEKIT_VENV/bin/python" -m pip freeze | grep django-icekit) ]]; then
-    "$ICEKIT_VENV/bin/python" -m pip install -r requirements-icekit.txt
+	bash -c "'$ICEKIT_VENV/bin/python' -m pip install --no-cache-dir --no-deps -r <(grep -v setuptools requirements.txt)"  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
+	md5sum requirements.txt > requirements.txt.md5
 fi
 
 # Get absolute directory for the `icekit` package.
 export ICEKIT_DIR=$("$ICEKIT_VENV/bin/python" -c "import icekit, os, sys; sys.stdout.write('%s\n' % os.path.dirname(icekit.__file__));")
-
-# Install additional ICEkit dependencies.
-pip-install.sh "$ICEKIT_DIR"
 
 # Execute entrypoint and command.
 exec "$ICEKIT_DIR/bin/entrypoint.sh" ${@:-setup-django.sh bash.sh}
