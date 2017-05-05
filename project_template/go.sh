@@ -18,12 +18,12 @@ export ICEKIT_VENV="$ICEKIT_PROJECT_DIR/var/go.sh-venv"
 # Don't write `*.pyc` files.
 export PYTHONDONTWRITEBYTECODE=1
 
-# Create local (non-Docker) virtualenv.
+# Create virtualenv.
 if [[ ! -d "$ICEKIT_VENV" ]]; then
     virtualenv "$ICEKIT_VENV"
 fi
 
-# Install ICEKit project.
+# Install ICEKit.
 if [[ -z $("$ICEKIT_VENV/bin/python" -m pip freeze | grep django-icekit) ]]; then
     "$ICEKIT_VENV/bin/python" -m pip install -r requirements-icekit.txt
 fi
