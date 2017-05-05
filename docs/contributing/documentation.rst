@@ -10,41 +10,56 @@ compiled to HTML using Sphinx. Documentation is hosted on ReadTheDocs.
 Conventions
 -----------
 
-* Include examples so new contributors can get started quickly.
-* Keep the :doc:`../changelog` up to date. Describe features, not implementation
-  details, except for backwards incompatible changes.
-* We're aiming to document all non-private modules, classes and functions in
-  ICEkit. The easiest way to do this is in the docstrings of the class, with
-  an ``automodule`` call out from this document structure.
-* Titles should be sentence case.
-* File extensions are ``.rst`` and hard-wrapped at 80 columns.
+*  Include examples so new contributors can get started quickly.
+*  Keep the :doc:`../changelog` up to date. Describe features, not
+   implementation details, except for backwards incompatible changes.
+*  We're aiming to document all non-private modules, classes and functions in
+   ICEkit. The easiest way to do this is in the docstrings of the class, with
+   an ``automodule`` call out from this document structure.
+*  Titles should be sentence case.
+*  File extensions are ``.rst`` and hard-wrapped at 80 columns.
 
-Installing requirements
------------------------
+Setup (macOS)
+-------------
 
-You'll need a source installation of ICEkit.
+Install Homebrew::
 
-Activate the ICEkit virtualenv, e.g. with ``./go.sh bash``.
+   $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-Install pandoc::
+Install system dependencies::
 
-   brew install pandoc
+   $ brew install git pandoc pyenv pyenv-virtualenv
+   $ cat <<EOF >> ~/.bash_profile
 
-Install the python requirements::
+   # Configure pyenv.
+   export PATH="$HOME/.pyenv/bin:$PATH"
+   eval "$(pyenv init -)"
+   eval "$(pyenv virtualenv-init -)"
+   EOF
 
-   pip install sphinx sphinx-autobuild recommonmark
+Clone the repository and change directory::
 
-Making HTML documentation
--------------------------
+   $ git clone https://github.com/ic-labs/django-icekit.git
+   $ cd django-icekit/docs
 
-Run::
+Create a virtualenv::
 
-   cd $ICEKIT_DIR/../docs
-   sphinx-autobuild . _build_html
+   $ pyenv install 2.7.13
+   $ pyenv virtualenv django-icekit-docs 2.7.13
+   $ pyenv local django-icekit-docs
 
-And open http://localhost:8000 in a browser to preview the docs. Or, to build
-manually::
+Install Python dependencies::
 
-   make html
+   (django-icekit-docs)$ pip install -r requirements.txt
 
-And open ``_build/index.html`` in a browser to preview the docs.
+Building HTML documentation
+---------------------------
+
+Run a server to autobuild and preview the docs (open
+http://icekit-docs.lvh.me:8000 in a browser)::
+
+   (django-icekit-docs)$ sphinx-autobuild . _build_html
+
+Or build static HTML docs (open ``_build/index.html`` in a browser)::
+
+   (django-icekit-docs)$ make html
