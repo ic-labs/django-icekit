@@ -41,10 +41,10 @@ RUN chmod +x /usr/local/bin/tini
 WORKDIR /opt/git-secret/
 
 ENV GIT_SECRET_VERSION=0.2.1
-RUN git clone https://github.com/sobolevn/git-secret.git /opt/git-secret/ \
-    && git checkout "v$GIT_SECRET_VERSION" \
-    && make build \
-    && PREFIX=/usr/local make install
+RUN git clone https://github.com/sobolevn/git-secret.git /opt/git-secret/
+RUN git checkout "v$GIT_SECRET_VERSION"
+RUN make build
+RUN PREFIX=/usr/local make install
 
 WORKDIR /opt/django-icekit/project_template/
 
@@ -62,10 +62,10 @@ COPY README.rst setup.py /opt/django-icekit/
 RUN bash -c 'pip install --exists i --no-cache-dir --no-deps -e .. -r <(grep -v setuptools requirements.txt)'  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
 RUN md5sum requirements.txt > requirements.txt.md5
 
+WORKDIR /usr/local/bin/
 ENV DOCKER_COMMIT=0a214841ace30f8ff67cd1c3a9c2214b62eb4619
-RUN cd /usr/local/bin \
-    && wget -N -nv "https://raw.githubusercontent.com/ixc/docker/${DOCKER_COMMIT}/bin/transfer.sh" \
-    && chmod +x *.sh
+RUN wget -N -nv "https://raw.githubusercontent.com/ixc/docker/${DOCKER_COMMIT}/bin/transfer.sh"
+RUN chmod +x *.sh
 
 ENV CRONLOCK_HOST=redis
 ENV DOCKER=1
