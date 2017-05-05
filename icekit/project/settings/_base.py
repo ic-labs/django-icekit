@@ -50,19 +50,6 @@ IXC_DJANGO_DOCKER_DIR = os.path.abspath(
 PROJECT_DIR = os.path.abspath(os.environ['PROJECT_DIR'])
 VAR_DIR = os.path.join(PROJECT_DIR, 'var')
 
-# Sanity-check the IXC_DJANGO_DOCKER_DIR in our settings matches the
-# $IXC_DJANGO_DOCKER_DIR environment variable, to ensure we are in sync with
-# the external environment.
-if IXC_DJANGO_DOCKER_DIR != \
-        os.path.abspath(os.environ['IXC_DJANGO_DOCKER_DIR']):
-    raise Exception(
-        'Mismatching paths for project setting IXC_DJANGO_DOCKER_DIR and env '
-        'var $IXC_DJANGO_DOCKER_DIR: %s != %s' % (
-            IXC_DJANGO_DOCKER_DIR,
-            os.path.abspath(os.environ['IXC_DJANGO_DOCKER_DIR']),
-        )
-    )
-
 # DJANGO CHECKLIST ############################################################
 
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
