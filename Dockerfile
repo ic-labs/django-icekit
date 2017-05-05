@@ -57,10 +57,9 @@ COPY project_template/bower.json /opt/django-icekit/project_template/
 RUN bower install --allow-root && rm -rf /root/.cache/bower
 RUN md5sum bower.json > bower.json.md5
 
-WORKDIR /opt/django-icekit/
-
-COPY README.rst requirements.txt setup.py /opt/django-icekit/
-RUN pip install --no-cache-dir -e .[api,brightcove,dev,django18,docs,forms,glamkit,project,search,test] -r requirements.txt
+COPY project_template/requirements.txt /opt/django-icekit/project_template/
+COPY README.rst setup.py /opt/django-icekit/
+RUN bash -c 'pip install --exists i --no-cache-dir --no-deps -e .. -r <(grep -v setuptools requirements.txt)'  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
 RUN md5sum requirements.txt > requirements.txt.md5
 
 ENV DOCKER_COMMIT=0a214841ace30f8ff67cd1c3a9c2214b62eb4619
@@ -88,6 +87,7 @@ VOLUME /root
 ENTRYPOINT ["tini", "--", "entrypoint.sh"]
 CMD ["bash.sh"]
 
+WORKDIR /opt/django-icekit/
 COPY . /opt/django-icekit/
 
 RUN manage.py collectstatic --noinput --verbosity=0
