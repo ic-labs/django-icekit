@@ -94,13 +94,13 @@ All done! What now? First, change to the project directory:
 
 # Run with Docker
 
-The easiest way to run an ICEkit project is with Docker. It works on OS X,
+The easiest way to run an ICEkit project is with Docker. It works on macOS,
 Linux, and Windows, takes care of all the project dependencies like the
 database and search engine, and makes deployment easy.
 
 If you haven't already, go install Docker:
 
-  * [OS X](https://download.docker.com/mac/stable/Docker.dmg)
+  * [macOS](https://download.docker.com/mac/stable/Docker.dmg)
   * [Linux](https://docs.docker.com/engine/installation/#supported-platforms)
   * [Windows](https://download.docker.com/win/stable/InstallDocker.msi)
 
