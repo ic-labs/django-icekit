@@ -86,6 +86,7 @@ done
 sed -e "s/ -e ..//" -e "s/'django-icekit.git|setuptools'/setuptools/" go.sh > go.sh.replaced
 mv go.sh.replaced go.sh
 
+# Prompt to initialize a Git repository and create an initial commit.
 if [[ -n $(which git) ]]; then
 	echo
 	read -p 'Would you like to initialize a Git repository for your new project and create an initial commit? (Y/n) ' -n 1 -r
