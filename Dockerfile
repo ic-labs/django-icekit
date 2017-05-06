@@ -68,7 +68,6 @@ ENV PATH=/opt/django-icekit/icekit/bin:$PATH
 ENV PGHOST=postgres
 ENV PGUSER=postgres
 ENV PROJECT_DIR=/opt/django-icekit/project_template
-ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONHASHSEED=random
 ENV PYTHONWARNINGS=ignore
 ENV REDIS_ADDRESS=redis:6379
