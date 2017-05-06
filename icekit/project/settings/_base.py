@@ -281,7 +281,7 @@ TEMPLATES_DJANGO = {
             'django.core.context_processors.tz',
 
             # Project.
-            'icekit.project.context_processors.environment',
+            'ixc_django_docker.context_processors.environment',
         ],
         'loaders': [
             # Must come first. See:
@@ -303,7 +303,7 @@ TEMPLATES_JINJA2 = {
     ],
     'APP_DIRS': True,
     'OPTIONS': {
-        'environment': 'icekit.project.jinja2.environment',
+        'environment': 'ixc_django_docker.jinja2.environment',
     }
 }
 
