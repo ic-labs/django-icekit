@@ -61,7 +61,6 @@ COPY README.rst setup.py /opt/django-icekit/
 RUN bash -c 'pip install --exists i --no-cache-dir --no-deps -e .. -r <(grep -v setuptools requirements.txt)'  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
 RUN md5sum requirements.txt > requirements.txt.md5
 
-ENV CRONLOCK_HOST=redis
 ENV DJANGO_SETTINGS_MODULE=icekit.project.settings
 ENV DOCKER=1
 ENV ELASTICSEARCH_ADDRESS=elasticsearch:9200
@@ -73,8 +72,6 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONHASHSEED=random
 ENV PYTHONWARNINGS=ignore
 ENV REDIS_ADDRESS=redis:6379
-ENV SUPERVISORD_CONFIG_INCLUDE=supervisord-django.conf
-ENV WAITLOCK_ENABLE=1
 
 VOLUME /root
 
