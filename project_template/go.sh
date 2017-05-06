@@ -21,11 +21,9 @@ if [[ ! -d "$PROJECT_VENV_DIR" ]]; then
 fi
 
 # Install `ixc-django-docker` package.
-if [[ -f requirements.txt ]]; then
-	if [[ ! -s requirements.txt.md5 ]] || ! md5sum --status -c requirements.txt.md5 > /dev/null 2>&1; then
-		"$PROJECT_VENV_DIR/bin/python" -m pip install --no-cache-dir --no-deps -r <(grep -v setuptools requirements.txt)  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
-		md5sum requirements.txt > requirements.txt.md5
-	fi
+if [[ ! -s requirements.txt.md5 ]] || ! md5sum --status -c requirements.txt.md5 > /dev/null 2>&1; then
+	"$PROJECT_VENV_DIR/bin/python" -m pip install --no-cache-dir --no-deps -r <(grep -v setuptools requirements.txt)  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
+	md5sum requirements.txt > requirements.txt.md5
 fi
 
 # Execute entrypoint and command.
