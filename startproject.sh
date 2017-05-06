@@ -82,6 +82,10 @@ for EXT in 'in' txt; do
 	mv "requirements.$EXT.replaced" "requirements.$EXT"
 done
 
+# Don't install local ICEkit working copy.
+sed -e "s/ -e ..//" -e "s/'django-icekit.git|setuptools'/setuptools/" go.sh > go.sh.replaced
+mv go.sh.replaced go.sh
+
 if [[ -n $(which git) ]]; then
 	echo
 	read -p 'Would you like to initialize a Git repository for your new project and create an initial commit? (Y/n) ' -n 1 -r
