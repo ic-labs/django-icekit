@@ -60,6 +60,7 @@ COPY project_template/requirements.txt /opt/django-icekit/project_template/
 COPY README.rst setup.py /opt/django-icekit/
 RUN bash -c 'pip install --exists i --no-cache-dir --no-deps -e .. -r <(grep -v setuptools requirements.txt)'  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
 RUN md5sum requirements.txt > requirements.txt.md5
+RUN mkdir -p /usr/lib/python2.7/site-packages/  # Create directory that pip expects to exist
 
 ENV DJANGO_SETTINGS_MODULE=icekit.project.settings
 ENV DOCKER=1
