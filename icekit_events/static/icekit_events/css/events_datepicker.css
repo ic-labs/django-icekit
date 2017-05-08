@@ -1,0 +1,17 @@
+.events-datepicker {
+	max-width: 272px;
+	margin-top: 14px;
+	text-align: center;
+}
+.events-datepicker .ui-datepicker-next {
+	margin-left: 10px;
+}
+.events-datepicker td,
+.events-datepicker th {
+	padding: 10px;
+	text-align: center;
+}
+.events-datepicker .ui-datepicker-title {
+	font-size: 2em;
+	font-weight: bold;
+}

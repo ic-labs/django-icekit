@@ -4,6 +4,10 @@
 
 {% block title %}{{ page.get_title }} {{ start|date }}{% endblock %}
 
+{% block css %}
+    <link rel="stylesheet" href="{% static 'icekit_events/css/events_datepicker.css' %}">
+{% endblock %}
+
 {% block content %}
     <div class="container">
         <h1>{{ page.get_title }}</h1>
@@ -28,3 +32,11 @@
         <div class="events-datepicker" id="datepicker" data-period="{{ days }}" data-start="{{ start|date:'Y-m-d' }}"></div>
     </div>
 {% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'icekit_events/js/jquery-querystring.js' %}"></script>
+    <script src="{% static 'icekit_events/bower_components/jquery-ui/jquery-ui.min.js' %}"></script>
+    <script src="{% static 'icekit_events/js/events_datepicker.js' %}"></script>
+{% endblock %}
+
