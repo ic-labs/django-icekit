@@ -124,7 +124,7 @@ class WorkOrigin(models.Model):
     order = models.PositiveIntegerField(default=0)
 
     def __unicode__(self):
-        return "{0} originates from {1}".format(self.work, self.geographic_location)
+        return u"{0} originates from {1}".format(self.work, self.geographic_location)
 
     class Meta:
         ordering = ('order',)
@@ -142,6 +142,13 @@ class WorkBase(
     alt_slug = models.SlugField(max_length=255, blank=True, db_index=True)
     # using slugified, no-hyphens. Alt slug matches should redirect to the
     # canonical view.
+
+    external_ref = models.CharField(
+        'External reference',
+        max_length=255,
+        blank=True, null=True,
+        help_text="The reference identifier used by external data source."
+    )
 
     # what's it called
     title = models.CharField(

@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.safestring import mark_safe
 from django_countries.fields import CountryField
+from forms_builder.forms.utils import unique_slug, slugify
 from icekit.content_collections.abstract_models import TitleSlugMixin
 
 from glamkit_collections.utils.countries import ISO_CONTINENTS
@@ -67,6 +68,8 @@ class GeographicLocation(models.Model):
     )
     country = models.ForeignKey(Country, null=True, blank=True)
 
+    slug = models.SlugField(blank=True)
+
     class Meta:
         ordering = ('colloquial_historical', 'country', 'state_province', 'city', 'neighborhood',)
 
@@ -78,10 +81,15 @@ class GeographicLocation(models.Model):
         r = ", ".join (levels)
         if self.colloquial_historical:
             if r:
-                return "{0} ({1})".format(self.colloquial_historical, r)
+                r = "{0} ({1})".format(self.colloquial_historical, r)
             else:
-                return self.colloquial_historical
+                r = self.colloquial_historical
         return r
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_slug(type(self).objects, 'slug', slugify(unicode(self)))
+        return super(GeographicLocation, self).save(*args, **kwargs)
 
 
     def flag(self):
