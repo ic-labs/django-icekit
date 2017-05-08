@@ -2,9 +2,9 @@ django:
   command: runtests.sh
   environment:
     QUICK: 1
-    TRAVIS:
-    TRAVIS_BRANCH:
-    TRAVIS_JOB_ID:
+    TRAVIS: # Get from environment
+    TRAVIS_BRANCH: # Get from environment
+    TRAVIS_JOB_ID: # Get from environment
   image: interaction/icekit:${TAG}
   links:
     - elasticsearch
@@ -14,9 +14,9 @@ django:
     - ./.git:/opt/django-icekit/.git
     - ./project_template/var:/opt/django-icekit/project_template/var
 elasticsearch:
-  image: interaction/elasticsearch-icu:1
+  image: interaction/elasticsearch-icu:1-alpine
 postgres:
-  image: onjin/alpine-postgres:9.4
+  image: postgres:9.4-alpine
 redis:
   command: redis-server --appendonly yes
   image: redis:3-alpine

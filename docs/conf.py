@@ -19,10 +19,8 @@
 import sys
 from os.path import abspath, dirname, join
 from recommonmark.parser import CommonMarkParser
-from django.conf import settings
 
 sys.path.append(abspath(join(dirname(__file__), "_ext")))
-settings.configure()
 
 # -- General configuration ------------------------------------------------
 

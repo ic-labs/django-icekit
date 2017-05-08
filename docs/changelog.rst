@@ -1,8 +1,8 @@
 Changelog
 =========
 
-In development
---------------
+0.17 (2017-04-30)
+-----------------
 
 -  Changed the way that we specify the homepage: create a page with url
    override `/`. This is the way fluent does it. As a fallback, we look for a
@@ -48,6 +48,9 @@ In development
       The existing ``ThumbnailAdminMixin`` now inherits from this class and
       consequently, models which use ``ThumbnailAdminMixin`` have a visual
       preview in ``raw_id`` fields, including ``icekit.plugins.image.Image``.
+
+   - The "icekit/admin/fluent_layouts_change_form.html" template has moved to
+      "admin/fluent_layouts_change_form.html". Please update your references.
 
 -  Add ``icekit.api`` application to provide APIs to read data from, and
    sometimes write data to, items in the site from program clients.

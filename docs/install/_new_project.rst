@@ -3,7 +3,7 @@
 
 ::
 
-    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) {project_name}
+    $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/startproject.sh) {project_name}
 
 This will create a new project from the ICEkit project template, in a
 directory named ``{project_name}`` in the current working directory.
@@ -17,7 +17,7 @@ with `Git for Windows <https://git-for-windows.github.io/>`__.
    If you prefer to install the development release (the `develop` branch), use
    this::
 
-      $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/bin/startproject.sh) {project_name} develop
+      $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/develop/startproject.sh) {project_name} develop
 
    The above command differs from the normal one in two ways.
    First, it downloads (via curl) the develop version of the script, and second it

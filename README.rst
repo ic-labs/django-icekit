@@ -64,7 +64,7 @@ Otherwise, if you haven't already, `install Docker <https://docs.docker.com/engi
 
 ::
 
-   $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/icekit/bin/startproject.sh) {project_name}
+   $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/startproject.sh) {project_name}
 
 This will create a new project from the ICEkit project template, in a
 directory named ``{project_name}`` in the current working directory.
@@ -72,7 +72,7 @@ directory named ``{project_name}`` in the current working directory.
 If you want to create a new project from the ICEkit `develop` branch, do this
 instead::
 
-   $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/develop/icekit/bin/startproject.sh) {project_name} develop
+   $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/develop/startproject.sh) {project_name} develop
 
 and change the icekit branch in the generated :code:`requirements-icekit.txt` from :code:`@master` to :code:`@develop`.
 
