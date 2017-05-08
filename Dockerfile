@@ -61,6 +61,10 @@ COPY README.rst setup.py /opt/django-icekit/
 RUN bash -c 'pip install --exists i --no-cache-dir --no-deps -e .. -r <(grep -v setuptools requirements.txt)'  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
 RUN md5sum requirements.txt > requirements.txt.md5
 
+# For some reason pip allows us to install sdist packages, but not editable
+# packages, when this directory doesn't exist. So make sure it does.
+RUN mkdir -p /usr/lib/python2.7/site-packages
+
 ENV DJANGO_SETTINGS_MODULE=icekit.project.settings
 ENV ELASTICSEARCH_ADDRESS=elasticsearch:9200
 ENV ICEKIT_DIR=/opt/django-icekit/icekit
