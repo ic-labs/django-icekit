@@ -37,6 +37,11 @@ RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python - "pip==${PYTHON
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_SRC=/opt
 
+# For some reason pip allows us to install sdist packages, but not editable
+# packages, when this directory doesn't exist, even when installing into the
+# userbase directory. So make sure it does.
+RUN mkdir -p /usr/lib/python2.7/site-packages
+
 ENV TINI_VERSION=0.14.0
 RUN wget -nv -O /usr/local/bin/tini "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini-static"
 RUN chmod +x /usr/local/bin/tini
@@ -63,10 +68,6 @@ COPY project_template/requirements.txt /opt/django-icekit/project_template/
 COPY README.rst setup.py /opt/django-icekit/
 RUN bash -c 'pip install --exists i --no-cache-dir --no-deps -e .. -r <(grep -v setuptools requirements.txt)'  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
 RUN md5sum requirements.txt > requirements.txt.md5
-
-# For some reason pip allows us to install sdist packages, but not editable
-# packages, when this directory doesn't exist. So make sure it does.
-RUN mkdir -p /usr/lib/python2.7/site-packages
 
 ENV DJANGO_SETTINGS_MODULE=icekit.project.settings
 ENV ELASTICSEARCH_ADDRESS=elasticsearch:9200
