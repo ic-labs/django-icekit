@@ -50,6 +50,18 @@ IXC_DJANGO_DOCKER_DIR = os.path.abspath(
 PROJECT_DIR = os.path.abspath(os.environ['PROJECT_DIR'])
 VAR_DIR = os.path.join(PROJECT_DIR, 'var')
 
+# Sanity check that the `ICEKIT_DIR` setting matches the `ICEKIT_DIR`
+# environment variable. When run via docker-compose, a second ICEkit working
+# copy may be installed into the Pyrhon userbase directory. Which one you end
+# up using can depend on the current working directory when Python is executed.
+if ICEKIT_DIR != os.path.abspath(os.environ.get('ICEKIT_DIR', ICEKIT_DIR)):
+    raise Exception(
+        "'ICEKIT_DIR' setting and environment variable don't match: %r != %r" %
+        (
+            ICEKIT_DIR,
+            os.environ['ICEKIT_DIR'],
+        ))
+
 # DJANGO CHECKLIST ############################################################
 
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
