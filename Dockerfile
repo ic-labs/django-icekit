@@ -49,7 +49,7 @@ RUN chmod +x /usr/local/bin/tini
 WORKDIR /opt/git-secret/
 ENV GIT_SECRET_VERSION=0.2.1
 RUN git clone https://github.com/sobolevn/git-secret.git /opt/git-secret/
-RUN git checkout "v$GIT_SECRET_VERSION"
+RUN git checkout "v${GIT_SECRET_VERSION}"
 RUN make build
 RUN PREFIX=/usr/local make install
 
@@ -58,7 +58,7 @@ WORKDIR /opt/django-icekit/project_template/
 COPY project_template/package.json /opt/django-icekit/project_template/
 RUN npm install && rm -rf /root/.npm
 RUN md5sum package.json > package.json.md5
-ENV PATH="/opt/django-icekit/project_template/node_modules/.bin:$PATH"
+ENV PATH="/opt/django-icekit/project_template/node_modules/.bin:${PATH}"
 
 COPY project_template/bower.json /opt/django-icekit/project_template/
 RUN bower install --allow-root && rm -rf /root/.cache/bower
