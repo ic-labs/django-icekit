@@ -62,7 +62,6 @@ RUN bash -c 'pip install --exists i --no-cache-dir --no-deps -e .. -r <(grep -v 
 RUN md5sum requirements.txt > requirements.txt.md5
 
 ENV DJANGO_SETTINGS_MODULE=icekit.project.settings
-ENV DOCKER=1
 ENV ELASTICSEARCH_ADDRESS=elasticsearch:9200
 ENV PATH=/opt/django-icekit/icekit/bin:$PATH
 ENV PGHOST=postgres
