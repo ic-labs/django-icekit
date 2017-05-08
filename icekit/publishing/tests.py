@@ -1102,9 +1102,9 @@ class TestPublishingMiddleware(TestCase):
         self.assertEqual(404, response.status_code)
 
 
-class TestPublishingAdmin(BaseAdminTest):
+class TestPublishingAdminForSlideShow(BaseAdminTest):
     """
-    Test publishing features via site admin.
+    Test publishing features in site admin for SlideShow publishable item
     """
 
     def setUp(self):
@@ -1314,6 +1314,155 @@ class TestPublishingAdmin(BaseAdminTest):
         # Confirm user cannot perform publish/unpublish actions
         self.app.get(self.publish_link, user=user, status=403)
         self.app.get(self.unpublish_link, user=user, status=403)
+
+
+class TestPublishingAdminForLayoutPage(BaseAdminTest):
+    """
+    Test publishing features in site admin for LayoutPage publishable item
+    """
+
+    def setUp(self):
+        self.ct = self.ct_for_model(LayoutPage)
+        self.super_user = G(
+            User,
+            is_staff=True,
+            is_active=True,
+            is_superuser=True,
+        )
+        self.layout = G(
+            Layout,
+            template_name='icekit/layouts/default.html',
+        )
+        # LayoutPage is a PublishingModel
+        self.layoutpage = LayoutPage.objects.create(
+            author=self.super_user,
+            title='Test LayoutPage',
+            slug='test-layoutpage',
+            layout=self.layout,
+        )
+        self.layout.content_types.add(self.ct)
+
+        # Generate URL paths/links to test
+        self.admin_add_page_url = reverse(
+            'admin:layout_page_layoutpage_add')
+        self.admin_change_page_url = reverse(
+            'admin:layout_page_layoutpage_change',
+            args=(self.layoutpage.pk, ))
+
+    def test_admin_monkey_patch_slug_duplicates(self):
+        # Test our monkey patch works to fix duplicate `slug` field errors
+        # caused by draft and published copies of the same item sharing a slug.
+
+        # Confirm we have a draft publishable item that has a slug field
+        self.assertEqual('test-layoutpage', self.layoutpage.slug)
+        self.assertIsNone(self.layoutpage.publishing_linked)
+
+        # Publish item via admin with same slug
+        self.admin_publish_item(self.layoutpage, user=self.super_user)
+        self.layoutpage = self.refresh(self.layoutpage)
+        self.assertIsNotNone(self.layoutpage.publishing_linked)
+        self.assertEqual(
+            'test-layoutpage', self.layoutpage.get_published().slug)
+
+        # Confirm we can update draft version via admin with shared slug
+        response = self.app.get(
+            self.admin_change_page_url,
+            user=self.super_user)
+        self.assertEqual(response.status_code, 200)
+        form = response.forms['layoutpage_form']
+        form['title'].value = 'Test LayoutPage Updated'
+        response = form.submit('_continue', user=self.super_user)
+        self.assertFalse(
+            'This slug is already used by an other page at the same level'
+            in response.content)
+        self.layoutpage = self.refresh(self.layoutpage)
+        self.assertEqual('test-layoutpage', self.layoutpage.slug)
+        self.assertEqual('Test LayoutPage Updated', self.layoutpage.title)
+
+        # Confirm we can re-publish draft version via admin with shared slug
+        self.admin_publish_item(self.layoutpage, user=self.super_user)
+        self.layoutpage = self.refresh(self.layoutpage)
+        self.assertIsNotNone(self.layoutpage.publishing_linked)
+        self.assertEqual(
+            'test-layoutpage', self.layoutpage.get_published().slug)
+        self.assertEqual(
+            'Test LayoutPage Updated', self.layoutpage.get_published().title)
+
+        # Confirm we cannot create a different item via admin with same slug
+        response = self.app.get(
+            self.admin_add_page_url,
+            user=self.super_user)
+        form = response.forms['page_form']
+        form['ct_id'].select(self.ct.pk)  # Choose LayoutPage page type
+        response = form.submit(user=self.super_user).follow()
+        self.assertFalse('error' in response.content)
+        form = response.forms['layoutpage_form']
+        form['layout'].select(self.layout.pk)
+        form['title'] = 'Another Page'
+        form['slug'] = self.layoutpage.slug  # Same slug as existing page
+        response = form.submit('_continue', user=self.super_user)
+        self.assertTrue(
+            'This slug is already used by an other page at the same level'
+            in response.content)
+
+    def test_admin_monkey_patch_override_url_duplicates(self):
+        # Test our monkey patch works to fix duplicate `override_url` field
+        # errors caused by draft and published copies of the same item sharing
+        # an override URL.
+
+        # Add override URL to item
+        self.layoutpage.override_url = '/'
+        self.layoutpage.save()
+
+        # Publish item via admin with same override URL
+        self.admin_publish_item(self.layoutpage, user=self.super_user)
+        self.layoutpage = self.refresh(self.layoutpage)
+        self.assertIsNotNone(self.layoutpage.publishing_linked)
+        self.assertEqual(
+            '/', self.layoutpage.get_published().override_url)
+
+        # Confirm we can update draft version via admin with same override URL
+        response = self.app.get(
+            self.admin_change_page_url,
+            user=self.super_user)
+        self.assertEqual(response.status_code, 200)
+        form = response.forms['layoutpage_form']
+        form['title'].value = 'Test LayoutPage Updated'
+        response = form.submit('_continue', user=self.super_user)
+        self.assertFalse(
+            'This URL is already taken by an other page.'
+            in response.content)
+        self.layoutpage = self.refresh(self.layoutpage)
+        self.assertEqual('/', self.layoutpage.override_url)
+        self.assertEqual('Test LayoutPage Updated', self.layoutpage.title)
+
+        # Confirm we can re-publish draft version via admin with same override
+        self.admin_publish_item(self.layoutpage, user=self.super_user)
+        self.layoutpage = self.refresh(self.layoutpage)
+        self.assertIsNotNone(self.layoutpage.publishing_linked)
+        self.assertEqual(
+            '/', self.layoutpage.get_published().override_url)
+        self.assertEqual(
+            'Test LayoutPage Updated', self.layoutpage.get_published().title)
+
+        # Confirm we cannot create a different item via admin with same
+        # override URL
+        response = self.app.get(
+            self.admin_add_page_url,
+            user=self.super_user)
+        form = response.forms['page_form']
+        form['ct_id'].select(self.ct.pk)  # Choose LayoutPage page type
+        response = form.submit(user=self.super_user).follow()
+        self.assertFalse('error' in response.content)
+        form = response.forms['layoutpage_form']
+        form['layout'].select(self.layout.pk)
+        form['title'] = 'Another Page'
+        form['slug'] = 'another-page'
+        form['override_url'] = self.layoutpage.override_url  # Same override
+        response = form.submit('_continue', user=self.super_user)
+        self.assertTrue(
+            'This URL is already taken by an other page.'
+            in response.content)
 
 
 @modify_settings(MIDDLEWARE_CLASSES={
