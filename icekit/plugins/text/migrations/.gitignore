@@ -1,2 +1,0 @@
-# migrations created if CHOICES changes in a downstream project
-0003_auto*.py
