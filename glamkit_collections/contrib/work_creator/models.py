@@ -1,15 +1,19 @@
+from django.db import models
 from django.core.urlresolvers import reverse
-from django.template.defaultfilters import pluralize
 from django_countries.fields import CountryField
-from glamkit_collections.contrib.work_creator.managers import \
-    WorkCreatorQuerySet, WorkImageQuerySet
+from django.utils.text import slugify
+
+from polymorphic.models import PolymorphicModel
+
 from icekit.content_collections.abstract_models import TitleSlugMixin, \
     PluralTitleSlugMixin
 from icekit.mixins import FluentFieldsMixin, ListableMixin
 from icekit.plugins.image.abstract_models import ImageLinkMixin
 from icekit.models import ICEkitContentsMixin
-from polymorphic.models import PolymorphicModel
-from django.db import models
+from icekit.utils.strings import is_empty
+
+from glamkit_collections.contrib.work_creator.managers import \
+    WorkCreatorQuerySet, WorkImageQuerySet
 
 
 class CreatorBase(
@@ -18,6 +22,16 @@ class CreatorBase(
     ICEkitContentsMixin,
     ListableMixin,
 ):
+    # Primary, definitive, and one truly required name field
+    name_full = models.CharField(
+        max_length=255,
+        help_text='A public "label" for the creator, from which all other '
+                  'name values will be derived unless they are also provided. '
+                  'E.g. for Person, composed of the Prefix, First Names, Last '
+                  'Name Prefix, Last Name, Suffix, and Variant Name fields'
+    )
+
+    # Other name fields that will be derived from `name_full` unless provided
     name_display = models.CharField(
         max_length=255,
         help_text='The commonly known or generally recognized name of the '
@@ -25,6 +39,13 @@ class CreatorBase(
                   'e.g., "Rembrandt" or "Guercino" as opposed to the full name '
                   '"Rembrandt Harmenszoon Van Rijn" or "Giovanni Francesco '
                   'Barbieri."'
+    )
+    name_sort = models.CharField(
+        max_length=255,
+        help_text='For searching and organizing, the name or sequence of names '
+                  'which determines the position of the creator in the list of '
+                  'creators, so that he or she may be found where expected, '
+                  'e.g. "Rembrandt" under "R" or "Guercino" under "G"'
     )
 
     #for URLs
@@ -50,13 +71,6 @@ class CreatorBase(
     )
     wikipedia_link = models.URLField(blank=True, help_text="e.g. 'https://en.wikipedia.org/wiki/Pablo_Picasso'")
     admin_notes = models.TextField(blank=True)
-    name_sort = models.CharField(
-        max_length=255,
-        help_text='For searching and organizing, the name or sequence of names '
-                  'which determines the position of the creator in the list of '
-                  'creators, so that he or she may be found where expected, '
-                  'e.g. "Rembrandt" under "R" or "Guercino" under "G"'
-    )
 
     class Meta:
         verbose_name = "creator"
@@ -66,8 +80,35 @@ class CreatorBase(
     def __unicode__(self):
         return self.name_display
 
+    def save(self, *args, **kwargs):
+        self.derive_and_set_name_fields_and_slug()
+        return super(CreatorBase, self).save(*args, **kwargs)
+
+    def derive_and_set_name_fields_and_slug(
+            self, set_name_sort=True, set_slug=True
+    ):
+        """
+        Derive subordinate name_* field values from the `name_full` field
+        unless these fields are set in their own right.
+
+        This method is called during `save()`
+        """
+        # name_full is the primary required name field. It must be set.
+        if is_empty(self.name_full):
+            raise ValueError(
+                u"%s.name_full cannot be empty at save" % type(self).__name__)
+        # if empty, `name_display` == `name_full`
+        if is_empty(self.name_display):
+            self.name_display = self.name_full
+        # if empty, `name_sort` == `name_full`
+        if set_name_sort and is_empty(self.name_sort):
+            self.name_sort = self.name_full
+        # if empty, `slug` is set to slugified `name_full`
+        if set_slug and is_empty(self.slug):
+            self.slug = slugify(self.name_full)
+
     def get_absolute_url(self):
-        return reverse("gk_collections_creator", kwargs={'slug' :self.slug})
+        return reverse("gk_collections_creator", kwargs={'slug': self.slug})
 
     def get_works(self):
         """

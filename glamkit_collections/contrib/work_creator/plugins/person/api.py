@@ -15,12 +15,21 @@ class PersonName(ModelSubSerializer):
         model = PersonCreatorModel
         source_prefix = 'name_'
         fields = (
+            'name_full',
             'name_display',
             'name_sort',
-            'name_full',
             'name_given',
             'name_family',
         )
+        extra_kwargs = {
+            # Name fields derived from `name_full` are not required
+            'name_display': {
+                'required': False,
+            },
+            'name_sort': {
+                'required': False,
+            },
+        }
 
 
 class LifeInfo(ModelSubSerializer):
@@ -71,7 +80,7 @@ class Person(Creator):
         fields = tuple(
             # Use Creator field names except for those grouped under PersonName
             f for f in Creator.Meta.fields
-            if f not in ('name_display', 'name_sort')
+            if f not in PersonName.Meta.fields
         ) + (
             'name',
             'life_info',
@@ -81,7 +90,11 @@ class Person(Creator):
             'url': {
                 'lookup_field': 'pk',
                 'view_name': '%s-detail' % VIEWNAME,
-            }
+            },
+            # Slug field derived from `name_full` is not required
+            'slug': {
+                'required': False,
+            },
         }
         writable_related_fields = Creator.Meta.writable_related_fields
 

@@ -1,14 +1,13 @@
-from django.utils.safestring import mark_safe
-from glamkit_collections.contrib.work_creator.models import CreatorBase
 from django.db import models
+from django.utils.safestring import mark_safe
+from django.utils.text import slugify
+
+from icekit.utils.strings import is_empty
+
+from glamkit_collections.contrib.work_creator.models import CreatorBase
+
 
 class PersonCreator(CreatorBase):
-    #more name fields
-    name_full = models.CharField(
-        max_length=255,
-        help_text='A public "label" composed of the Prefix, First Names, Last '
-                  'Name Prefix, Last Name, Suffix, and Variant Name fields'
-    )
     name_given = models.CharField(
         blank=True,
         max_length=255,
@@ -122,6 +121,38 @@ class PersonCreator(CreatorBase):
 
     class Meta:
         verbose_name = "person"
+
+    def derive_and_set_name_fields_and_slug(
+        self, set_name_sort=True, set_slug=True
+    ):
+        """
+        Override this method from `CreatorBase` to handle additional name
+        fields for Person creators.
+
+        This method is called during `save()`
+        """
+        super(PersonCreator, self).derive_and_set_name_fields_and_slug(
+            set_name_sort=False, set_slug=False)
+        # Collect person name fields, but only if they are not empty
+        person_names = [
+            name for name in [self.name_family, self.name_given]
+            if not is_empty(name)
+        ]
+        # if empty, set `name_sort` = '{name_family}, {name_given}' if these
+        # person name values are available otherwise `name_full`
+        if set_name_sort and is_empty(self.name_sort):
+            if person_names:
+                self.name_sort = ', '.join(person_names)
+            else:
+                self.name_sort = self.name_full
+        # if empty, set `slug` to slugified '{name_family} {name_given}' if
+        # these person name values are available otherwise slugified
+        # `name_full`
+        if set_slug and is_empty(self.slug):
+            if person_names:
+                self.slug = slugify(' '.join(person_names))
+            else:
+                self.slug = slugify(self.name_full)
 
     def lifespan_for_web(self, join="&nbsp;&ndash; "):
         """

@@ -2,6 +2,7 @@ from django.apps import apps
 
 from rest_framework import serializers
 from rest_framework.settings import api_settings
+from rest_framework.validators import UniqueTogetherValidator
 
 from icekit.api.base_serializers import ModelSubSerializer, \
     PolymorphicHyperlinkedModelSerializer, WritableSerializerHelperMixin, \
@@ -143,21 +144,56 @@ class Creator(WritableSerializerHelperMixin,
             # Relationships
             'works',
             'portrait',
-            # Sub-resources
             # Fields
             api_settings.URL_FIELD_NAME,
             'publishing_is_draft',
             'slug',
             'alt_slug',
+            'name_full',
             'name_display',
             'name_sort',
             'website',
             'wikipedia_link',
             'admin_notes',
         )
+        extra_kwargs = {
+            # Slug and name fields derived from `name_full` are not required
+            'slug': {
+                # NOTE: See extra work in `get_validators` to prevent DRF from
+                # requiring the 'slug field despite our explicit setting here.
+                'required': False,
+            },
+            'name_display': {
+                'required': False,
+            },
+            'name_sort': {
+                'required': False,
+            },
+        }
         writable_related_fields = {
             'portrait': WritableRelatedFieldSettings(can_create=True),
         }
+
+    def get_validators(self):
+        """
+        Override default validators in DRF to disable checking of unique-
+        together constraints that include the 'slug' because this check in
+        the API effectively makes 'slug' a required field when we do not want
+        it to be.
+        """
+        validators = super(Creator, self).get_validators()
+        validators = [
+            v for v in validators
+            # Only disable validation in specific case where it would apply
+            # unique-together checks including the 'slug' field where that
+            # field is not present in the available data.
+            if not(
+                type(v) == UniqueTogetherValidator and
+                'slug' in v.fields and
+                'slug' not in self.initial_data
+            )
+        ]
+        return validators
 
 
 class WorkOrigin(ModelSubSerializer):

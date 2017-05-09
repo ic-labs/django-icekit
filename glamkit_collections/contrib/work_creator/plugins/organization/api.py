@@ -20,12 +20,12 @@ class Organization(Creator):
             'type',
             'type_plural',
         )
-        extra_kwargs = {
+        extra_kwargs = dict(Creator.Meta.extra_kwargs, **{
             'url': {
                 'lookup_field': 'pk',
                 'view_name': '%s-detail' % VIEWNAME,
             }
-        }
+        })
         writable_related_fields = Creator.Meta.writable_related_fields
 
     def get_type(self, obj):
