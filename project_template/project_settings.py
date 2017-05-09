@@ -1,7 +1,6 @@
 # Do not commit secrets to VCS.
 
-# Local environment variables will be loaded from `.env.local`.
-# Additional environment variables will be loaded from `.env.$DOTENV`.
+# Environment variables will be loaded from `.env.$DOTENV` or `.env.local`.
 # Local settings will be imported from `project_settings_local.py`
 
 from icekit.project.settings.glamkit import *  # glamkit, icekit

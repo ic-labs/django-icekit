@@ -30,12 +30,16 @@ if os.path.exists('.git'):
 else:
     kwargs = dict(version='0+d' + datetime.date.today().strftime('%Y%m%d'))
 
+with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as f:
+    long_description = f.read()
+
 setuptools.setup(
     name='django-icekit',
     author='Interaction Consortium',
     author_email='studio@interaction.net.au',
     url='https://github.com/ic-labs/django-icekit',
     description='A modular content CMS by Interaction Consortium.',
+    long_description=long_description,
     license='MIT',
     packages=find_packages('icekit'),
     include_package_data=True,
@@ -95,7 +99,7 @@ setuptools.setup(
         ],
         'project': [
             'boto3',
-            'celery[redis]==3.1.24',
+            'celery[redis]<4.0',
             'ConcurrentLogHandler',
             'django-celery',
             'django-celery-email',

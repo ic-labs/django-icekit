@@ -18,6 +18,7 @@ INSTALLED_APPS += (
     'adminsortable2',  # required by glamkit-collections
 
     # GLAMkit Collection base implementation plugins
+    'glamkit_collections',
     'glamkit_collections.contrib.work_creator',
     'glamkit_collections.contrib.work_creator.plugins.artwork',
     'glamkit_collections.contrib.work_creator.plugins.film',

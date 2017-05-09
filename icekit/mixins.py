@@ -218,6 +218,7 @@ class ListableMixin(models.Model):
         if li:
             from easy_thumbnails.files import get_thumbnailer
             thumb_url = get_thumbnailer(li)['og_image'].url
+            # TODO: looks like this may fail if SITE_DOMAIN = "acmi.lvh.me"
             return urljoin(settings.SITE_DOMAIN, thumb_url)
 
     def get_og_description(self):
