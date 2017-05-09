@@ -290,7 +290,7 @@ class WorkBase(
 
     def get_title(self):
         if self.date_display:
-            return "{0} ({1})".format(self.title, self.date_display)
+            return u"{0} ({1})".format(self.title, self.date_display)
         return self.title
 
     def get_origin_countries(self):
