@@ -579,8 +579,9 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
         super(PersonAPITestCase, self).setUp()
 
         self.person = Person.objects.create(
-            slug='test-person',
-            name_display='Test Person',
+            name_full='Test Person',
+            name_family='Person',
+            name_given='Test',
         )
 
         self.person_published = self.person.publish()
@@ -596,26 +597,26 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
                 self.build_item_data({
                     "url": 'http://testserver%s'
                     % self.detail_url(self.person_published.pk),
-                    "slug": "test-person",
+                    "slug": "person-test",
                     "name": {
+                        "full": "Test Person",
                         "display": "Test Person",
-                        "sort": "",
-                        "full": "",
-                        "given": "",
-                        "family": ""
+                        "sort": "Person, Test",
+                        "given": "Test",
+                        "family": "Person"
                     },
                     "publishing_is_draft": False,
                 }),
                 self.build_item_data({
                     "url": 'http://testserver%s'
                     % self.detail_url(self.person.pk),
-                    "slug": "test-person",
+                    "slug": "person-test",
                     "name": {
+                        "full": "Test Person",
                         "display": "Test Person",
-                        "sort": "",
-                        "full": "",
-                        "given": "",
-                        "family": ""
+                        "sort": "Person, Test",
+                        "given": "Test",
+                        "family": "Person"
                     },
                     "publishing_is_draft": True,
                 }),
@@ -630,13 +631,13 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
         expected = self.build_item_data({
             "url": 'http://testserver%s'
             % self.detail_url(self.person_published.pk),
-            "slug": "test-person",
+            "slug": "person-test",
             "name": {
+                "full": "Test Person",
                 "display": "Test Person",
-                "sort": "",
-                "full": "",
-                "given": "",
-                "family": "",
+                "sort": "Person, Test",
+                "given": "Test",
+                "family": "Person"
             },
             "publishing_is_draft": False,
         })
@@ -646,21 +647,19 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
         response = self.client.post(
             self.listing_url(),
             {
-                'slug': 'new-person',
                 "name": {
-                    "display": "New Person",
-                    "sort": "New Person",
                     "full": "New Person",
                 },
             },
         )
+        self.pp_data(response.data)
         self.assertEqual(201, response.status_code)
         new_person = Person.objects.get(
             slug=response.data['slug'],
             publishing_is_draft=response.data['publishing_is_draft'],
         )
         self.assertEqual('new-person', new_person.slug)
-        self.assertEqual('New Person', new_person.name_display)
+        self.assertEqual('New Person', new_person.name_full)
         self.assertTrue(new_person.publishing_is_draft)
 
     def test_replace_person_with_put(self):
@@ -669,9 +668,7 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
 
         person_data = response.data
         person_data['name'] = {
-            'display': 'Replaced Person',
             'full': 'Replaced Person',
-            'sort': 'Replaced Person',
         }
         del(person_data['portrait'])
 
@@ -681,21 +678,21 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
         )
         self.assertEqual(200, response.status_code)
         updated_person = Person.objects.get(pk=self.person.pk)
-        self.assertEqual('test-person', updated_person.slug)
-        self.assertEqual('Replaced Person', updated_person.name_display)
+        self.assertEqual('person-test', updated_person.slug)
+        self.assertEqual('Replaced Person', updated_person.name_full)
 
     def test_update_person_with_patch(self):
         response = self.client.patch(
             self.detail_url(self.person.pk),
             {
                 'name': {
-                    'display': 'Updated Person',
+                    'full': 'Updated Person',
                 },
             },
         )
         self.assertEqual(200, response.status_code)
         updated_person = Person.objects.get(pk=self.person.pk)
-        self.assertEqual('Updated Person', updated_person.name_display)
+        self.assertEqual('Updated Person', updated_person.name_full)
 
     def test_delete_person_with_delete(self):
         response = self.client.delete(self.detail_url(self.person.pk))
@@ -706,16 +703,13 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
         counter = {'value': 0}
 
         def extra_item_data_for_writes_fn():
-            """ Hack to return a unique `slug` value each time """
+            """ Hack to return a unique `name.full` value each time """
             counter['value'] += 1
             value = counter['value']
             return {
                 'name': {
-                    'display': 'Another Person %d' % value,
-                    'sort': 'Another Person %d' % value,
                     'full': 'Another Person %d' % value,
                 },
-                'slug': 'another-person-%d' % value,
             }
 
         self.assert_api_user_permissions_are_correct(
@@ -732,6 +726,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
     BASE_DATA = {
         "url": "",
         "slug": "",
+        "name_full": "",
         "name_display": "",
         "name_sort": "",
         "publishing_is_draft": False,
@@ -749,8 +744,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
         super(OrganizationAPITestCase, self).setUp()
 
         self.organization = Organization.objects.create(
-            slug='test-organization',
-            name_display='Test Organization',
+            name_full='Test Organization',
         )
 
         self.organization_published = self.organization.publish()
@@ -766,15 +760,19 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
                 self.build_item_data({
                     "url": 'http://testserver%s'
                     % self.detail_url(self.organization_published.pk),
-                    "slug": "test-organization",
+                    "name_full": "Test Organization",
                     "name_display": "Test Organization",
+                    "name_sort": "Test Organization",
+                    "slug": "test-organization",
                     "publishing_is_draft": False,
                 }),
                 self.build_item_data({
                     "url": 'http://testserver%s'
                     % self.detail_url(self.organization.pk),
-                    "slug": "test-organization",
+                    "name_full": "Test Organization",
                     "name_display": "Test Organization",
+                    "name_sort": "Test Organization",
+                    "slug": "test-organization",
                     "publishing_is_draft": True,
                 }),
             ],
@@ -786,10 +784,12 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
             self.detail_url(self.organization_published.pk))
         self.assertEqual(200, response.status_code)
         expected = self.build_item_data({
+            "name_full": "Test Organization",
             "url": 'http://testserver%s'
             % self.detail_url(self.organization_published.pk),
-            "slug": "test-organization",
             "name_display": "Test Organization",
+            "name_sort": "Test Organization",
+            "slug": "test-organization",
             "publishing_is_draft": False,
         })
         self.assertEqual(expected, response.data)
@@ -798,18 +798,19 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
         response = self.client.post(
             self.listing_url(),
             {
-                'slug': 'new-organization',
-                "name_display": "New Organization",
-                "name_sort": "New Organization",
+                "name_full": "New Organization",
             },
         )
+        self.pp_data(response.data)
         self.assertEqual(201, response.status_code)
         new_organization = Organization.objects.get(
             slug=response.data['slug'],
             publishing_is_draft=response.data['publishing_is_draft'],
         )
         self.assertEqual('new-organization', new_organization.slug)
+        self.assertEqual('New Organization', new_organization.name_full)
         self.assertEqual('New Organization', new_organization.name_display)
+        self.assertEqual('New Organization', new_organization.name_sort)
         self.assertTrue(new_organization.publishing_is_draft)
 
     def test_replace_organization_with_put(self):
@@ -817,8 +818,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
         self.assertEqual(200, response.status_code)
 
         organization_data = response.data
-        organization_data['name_display'] = 'Replaced Organization'
-        organization_data['name_sort'] = 'Replaced Organization'
+        organization_data['name_full'] = 'Replaced Organization'
         del(organization_data['portrait'])
 
         response = self.client.put(
@@ -830,23 +830,30 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
             pk=self.organization.pk)
         self.assertEqual('test-organization', updated_organization.slug)
         self.assertEqual(
-            'Replaced Organization', updated_organization.name_display)
+            'Replaced Organization', updated_organization.name_full)
+        # Note derived name fields are *not* updated
+        self.assertEqual(
+            'Test Organization', updated_organization.name_display)
+        self.assertEqual(
+            'Test Organization', updated_organization.name_sort)
 
     def test_update_organization_with_patch(self):
         response = self.client.patch(
             self.detail_url(self.organization.pk),
             {
-                'name_display': 'Updated Organization',
-                'name_sort': 'Updated Organization',
+                'name_full': 'Updated Organization',
             },
         )
         self.assertEqual(200, response.status_code)
         updated_organization = Organization.objects.get(
             pk=self.organization.pk)
         self.assertEqual(
-            'Updated Organization', updated_organization.name_display)
+            'Updated Organization', updated_organization.name_full)
+        # Note other derived name fields are *not* updated
         self.assertEqual(
-            'Updated Organization', updated_organization.name_sort)
+            'Test Organization', updated_organization.name_display)
+        self.assertEqual(
+            'Test Organization', updated_organization.name_sort)
 
     def test_delete_organization_with_delete(self):
         response = self.client.delete(self.detail_url(self.organization.pk))
@@ -857,13 +864,11 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
         counter = {'value': 0}
 
         def extra_item_data_for_writes_fn():
-            """ Hack to return a unique `slug` value each time """
+            """ Hack to return a unique `name.full` value each time """
             counter['value'] += 1
             value = counter['value']
             return {
-                'name_display': 'Another Organization %d' % value,
-                'name_sort': 'Another Organization %d' % value,
-                'slug': 'another-organization-%d' % value,
+                'name_full': 'Another Organization %d' % value,
             }
 
         self.assert_api_user_permissions_are_correct(
