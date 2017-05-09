@@ -9,7 +9,7 @@
 -e git+https://github.com/ic-labs/glamkit-collections.git@389335cc217f415d7e078b06de450624be2e7b08#egg=glamkit-collections
 -e git+https://github.com/ic-labs/icekit-events.git@ef0d20368f6578d59937de344125255ba2a4b542#egg=icekit-events
 -e git+https://github.com/ic-labs/icekit-press-releases.git@35453b26502d3cf6cd433bffde546eb0102b942d#egg=icekit-press-releases
--e git+https://github.com/ixc/ixc-django-docker.git@fea28076423e61260f31b906e330e144a1576152#egg=ixc-django-docker
+-e git+https://github.com/ixc/ixc-django-docker.git@746bd8572040cfa04cbca839c17078d745aa19f1#egg=ixc-django-docker
 alabaster==0.7.10         # via sphinx
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
