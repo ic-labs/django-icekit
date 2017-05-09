@@ -37,11 +37,6 @@ RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python - "pip==${PYTHON
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 ENV PIP_SRC=/opt
 
-# For some reason pip allows us to install sdist packages, but not editable
-# packages, when this directory doesn't exist, even when installing into the
-# userbase directory. So make sure it does.
-RUN mkdir -p /usr/lib/python2.7/site-packages
-
 ENV TINI_VERSION=0.14.0
 RUN wget -nv -O /usr/local/bin/tini "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini-static"
 RUN chmod +x /usr/local/bin/tini
