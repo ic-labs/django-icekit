@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 
+from icekit.plugins.text import appsettings
+
 
 class Migration(migrations.Migration):
 
@@ -14,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='textitem',
             name='style',
-            field=models.CharField(blank=True, max_length=255, choices=[(b'', b'Normal')]),
+            field=models.CharField(blank=True, max_length=255, choices=appsettings.TEXT_STYLE_CHOICES),
         ),
     ]
