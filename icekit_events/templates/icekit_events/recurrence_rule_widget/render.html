@@ -14,7 +14,7 @@
 		var error = $('#{{ id }}_recurrence-rule-widget div.error');
 
 		// Bind click events to toggle links.
-		$('div.recurrence-rule-widget a[class^=toggle]').click(function(e) {
+		$(document).on('click', 'div.recurrence-rule-widget a[class^=toggle]', function(e) {
 			e.preventDefault();
 			var link = $(e.target);
 			link.closest('div.recurrence-rule-widget').find('div.' + link.data('target')).toggle();

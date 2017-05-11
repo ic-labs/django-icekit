@@ -5,12 +5,13 @@ from django.db import models, migrations
 
 
 RULES = [
-    ('Daily', 'RRULE:FREQ=DAILY'),
-    ('Daily, Weekdays', 'RRULE:FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR'),
-    ('Daily, Weekends', 'RRULE:FREQ=DAILY;BYDAY=SA,SU'),
-    ('Weekly', 'RRULE:FREQ=WEEKLY'),
-    ('Monthly', 'RRULE:FREQ=MONTHLY'),
-    ('Yearly', 'RRULE:FREQ=YEARLY'),
+    ('Daily, except Xmas day', 'RRULE:FREQ=DAILY;\nEXRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25'),
+    ('Daily, Weekdays, except Xmas day',
+     'RRULE:FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR;\nEXRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25'),
+    ('Daily, Weekends, except Xmas day', 'RRULE:FREQ=DAILY;BYDAY=SA,SU;\nEXRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25'),
+    ('Weekly, except Xmas day', 'RRULE:FREQ=WEEKLY;\nEXRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25'),
+    ('Monthly, except Xmas day', 'RRULE:FREQ=MONTHLY;\nEXRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25'),
+    ('Yearly, except Xmas day', 'RRULE:FREQ=YEARLY;\nEXRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25'),
 ]
 
 
