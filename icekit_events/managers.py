@@ -94,7 +94,9 @@ class EventQueryset(PublishingPolymorphicQuerySet):
                     # few days to avoid overflow)
                     return make_aware(datetime.max-timedelta(2))
 
-        return sorted(qs, key=_sort)
+        sorted_qs = sorted(qs, key=_sort)
+
+        return sorted_qs
 
 
 EventManager = PublishingPolymorphicManager.from_queryset(EventQueryset)
