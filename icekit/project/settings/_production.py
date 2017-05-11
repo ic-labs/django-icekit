@@ -2,15 +2,15 @@ from ._base import *
 
 # DJANGO ######################################################################
 
-CACHES['default'].update({'BACKEND': 'redis_lock.django_cache.RedisCache'})
+# CACHES['default'].update({'BACKEND': 'redis_lock.django_cache.RedisCache'})
 LOGGING['handlers']['logfile']['backupCount'] = 100
 
-TEMPLATES_DJANGO['OPTIONS']['loaders'] = [
-    (
-        'django.template.loaders.cached.Loader',
-        TEMPLATES_DJANGO['OPTIONS']['loaders'],
-    ),
-]
+# TEMPLATES_DJANGO['OPTIONS']['loaders'] = [
+#     (
+#         'django.template.loaders.cached.Loader',
+#         TEMPLATES_DJANGO['OPTIONS']['loaders'],
+#     ),
+# ]
 
 # CELERY EMAIL ################################################################
 
