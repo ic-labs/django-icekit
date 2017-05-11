@@ -50,7 +50,7 @@ class AbstractLinkItem(ContentItem):
         return self._item_cache
 
     def __unicode__(self):
-        return "Relation to '%s'" % unicode(self.item)
+        return "Link to '%s'" % unicode(self.item)
 
     def _resolve(self, attr):
         return resolve(self.get_item(), attr)
