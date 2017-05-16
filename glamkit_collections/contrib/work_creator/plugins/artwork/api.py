@@ -56,6 +56,8 @@ class ArtworkFilter(filters.FilterSet):
 
     class Meta:
         model = ArtworkModel
+        fields = Artwork.Meta.fields
+        exclude = ('date', 'origin', 'url', 'dimensions',)
 
 
 class APIViewSet(ModelViewSet):
