@@ -73,6 +73,7 @@ setuptools.setup(
             'djangorestframework',
             'django-rest-swagger',
             'djangorestframework-filters',
+            'djangorestframework-queryfields',
         ],
         'brightcove': [
             'django-brightcove',
