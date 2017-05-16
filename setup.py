@@ -35,6 +35,12 @@ setuptools.setup(
         'django-admin-sortable2',
     ],
     extras_require={
+        'api': [
+            'djangorestframework',
+            'django-rest-swagger',
+            'djangorestframework-filters',
+            'djangorestframework-queryfields',
+        ],
         'colors': [
             'webcolors==1.5',
             'colormath==2.1.1',

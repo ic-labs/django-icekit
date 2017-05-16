@@ -3,6 +3,7 @@ from django.apps import apps
 from rest_framework import serializers
 from rest_framework.settings import api_settings
 from rest_framework.validators import UniqueTogetherValidator
+from drf_queryfields import QueryFieldsMixin
 
 from icekit.api.base_serializers import ModelSubSerializer, \
     PolymorphicHyperlinkedModelSerializer, WritableSerializerHelperMixin, \
@@ -17,7 +18,15 @@ from .plugins.moving_image.models import Rating as RatingModel, \
     MovingImageWork as MovingImageWorkModel
 
 
-class _BypassSlugUniqueTogetherValidatorMixin(object):
+class BaseCollectionModelSerializerMixin(QueryFieldsMixin):
+    """
+    Mixin with convienient features used by serializers for underlying
+    `WorkBase` and `CreatorBase` serialization.
+
+    Includes:
+        - filter API results by fields, via djangorestframework-queryfields
+        - avoid 'slug' fields always being required when we don't want this.
+    """
 
     def get_validators(self):
         """
@@ -26,7 +35,7 @@ class _BypassSlugUniqueTogetherValidatorMixin(object):
         the API effectively makes 'slug' a required field when we do not want
         it to be.
         """
-        validators = super(_BypassSlugUniqueTogetherValidatorMixin, self) \
+        validators = super(BaseCollectionModelSerializerMixin, self) \
             .get_validators()
         validators = [
             v for v in validators
@@ -152,7 +161,7 @@ class WorkCreatorFromCreator(WorkCreator):
         ]
 
 
-class Creator(_BypassSlugUniqueTogetherValidatorMixin,
+class Creator(BaseCollectionModelSerializerMixin,
               WritableSerializerHelperMixin,
               serializers.HyperlinkedModelSerializer):
     works = WorkCreatorFromCreator(
@@ -180,12 +189,18 @@ class Creator(_BypassSlugUniqueTogetherValidatorMixin,
             'name_sort',
             'website',
             'wikipedia_link',
+            # Metadata fields
+            'id',
+            'external_identifier',
+            'dt_created',
+            'dt_modified',
             'admin_notes',
         )
         extra_kwargs = {
             # Slug and name fields derived from `name_full` are not required
             'slug': {
-                # NOTE: See also `_BypassSlugUniqueTogetherValidatorMixin`
+                # NOTE: See also
+                # `BaseCollectionModelSerializerMixin.get_validators()`
                 'required': False,
             },
             'name_display': {
@@ -256,7 +271,7 @@ class WorkImage(WritableSerializerHelperMixin,
         }
 
 
-class Work(_BypassSlugUniqueTogetherValidatorMixin,
+class Work(BaseCollectionModelSerializerMixin,
            WritableSerializerHelperMixin,
            serializers.HyperlinkedModelSerializer):
     creators = WorkCreatorFromWork(
@@ -295,11 +310,18 @@ class Work(_BypassSlugUniqueTogetherValidatorMixin,
             'department',
             'credit_line',
             'accession_number',
+            # Metadata fields
+            'id',
+            'external_identifier',
+            'dt_created',
+            'dt_modified',
+            'admin_notes',
         )
         extra_kwargs = {
             # Slug and name fields derived from `name_full` are not required
             'slug': {
-                # NOTE: See also `_BypassSlugUniqueTogetherValidatorMixin`
+                # NOTE: See also
+                # `BaseCollectionModelSerializerMixin.get_validators()`
                 'required': False,
             },
         }
