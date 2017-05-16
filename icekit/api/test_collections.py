@@ -62,7 +62,6 @@ class ArtworkAPITestCase(_BaseCollectionAPITestCase):
         super(ArtworkAPITestCase, self).setUp()
 
         self.artwork = Artwork.objects.create(
-            slug='test-artwork',
             title='Test Artwork',
         )
 
@@ -112,7 +111,6 @@ class ArtworkAPITestCase(_BaseCollectionAPITestCase):
             self.listing_url(),
             {
                 'title': 'New Artwork',
-                'slug': 'new-artwork',
             },
         )
         self.assertEqual(201, response.status_code)
@@ -169,7 +167,6 @@ class ArtworkAPITestCase(_BaseCollectionAPITestCase):
             value = counter['value']
             return {
                 'title': 'Another Artwork %d' % value,
-                'slug': 'another-artwork-%d' % value,
             }
 
         self.assert_api_user_permissions_are_correct(
@@ -228,7 +225,6 @@ class GameAPITestCase(_BaseCollectionAPITestCase):
         super(GameAPITestCase, self).setUp()
 
         self.game = Game.objects.create(
-            slug='test-game',
             title='Test Game',
         )
 
@@ -284,7 +280,6 @@ class GameAPITestCase(_BaseCollectionAPITestCase):
             self.listing_url(),
             {
                 'title': 'New Game',
-                'slug': 'new-game',
             },
         )
         self.assertEqual(201, response.status_code)
@@ -402,7 +397,6 @@ class FilmAPITestCase(_BaseCollectionAPITestCase):
         super(FilmAPITestCase, self).setUp()
 
         self.film = Film.objects.create(
-            slug='test-film',
             title='Test Film',
         )
 
@@ -458,7 +452,6 @@ class FilmAPITestCase(_BaseCollectionAPITestCase):
             self.listing_url(),
             {
                 'title': 'New Film',
-                'slug': 'new-film',
             },
         )
         self.assertEqual(201, response.status_code)
@@ -652,7 +645,6 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
                 },
             },
         )
-        self.pp_data(response.data)
         self.assertEqual(201, response.status_code)
         new_person = Person.objects.get(
             slug=response.data['slug'],
@@ -801,7 +793,6 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
                 "name_full": "New Organization",
             },
         )
-        self.pp_data(response.data)
         self.assertEqual(201, response.status_code)
         new_organization = Organization.objects.get(
             slug=response.data['slug'],
