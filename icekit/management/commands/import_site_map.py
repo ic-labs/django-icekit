@@ -4,6 +4,7 @@ from optparse import make_option
 import attr
 
 from django.apps import apps
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth import get_user_model
 from django.utils import translation
@@ -67,11 +68,12 @@ class Command(BaseCommand):
         author = user_model.objects.get(pk=author_id)
         self.log("Author for imported pages: %r" % author)
 
-        translation.activate('en')
+        translation.activate(settings.LANGUAGE_CODE)
 
         # Process CSV file to build a list of row entries to be created at the
         # end, *after* we have confirmed all data is valid
         entries = []
+        existing_pages = {}
         with open(file_path, 'rb') as f:
             reader = UnicodeReader(f)
 
@@ -93,8 +95,17 @@ class Command(BaseCommand):
                              % (row, entry.title))
                     continue
 
-                if page_model.objects \
-                        .filter(translations__title=entry.title).exists():
+                # Store row data at each level so we can find the parent data
+                # for following pages
+                parent_entry_by_level[entry.level] = entry
+
+                try:
+                    existing_page = page_model.objects \
+                        .get(translations__title=entry.title)
+                    existing_pages[entry] = existing_page
+                except page_model.DoesNotExist:
+                    existing_page = None
+                if existing_page:
                     self.log("SKIP row %d with title already in system: '%s'"
                              % (row, entry.title))
                     continue
@@ -105,27 +116,22 @@ class Command(BaseCommand):
                 # Check we have a valid parent page for levels > 1
                 if entry.level > 1 and not entry.parent_row_data:
                     raise Exception(
-                        "Row %d %s does not have a parent page defined earlier"
-                        " in the site map" % (row, entry)
+                        "Row %d does not have a parent page defined earlier"
+                        " in the site map: %s" % (row, entry)
                     )
                 entries.append(entry)
 
-                # Store most recent page created at each level so it can serve
-                # as the parent for pages to come
-                parent_entry_by_level[entry.level] = entry
-
         # Create pages and related records
-        created_pages = {}
         for entry in entries:
-            page = page_model.objects.create(
+            page = page_model.objects.language(settings.LANGUAGE_CODE).create(
                 title=entry.title,
                 author=author,
                 override_url=entry.override_url,
-                parent=created_pages.get(entry.parent_row_data),
+                parent=existing_pages.get(entry.parent_row_data),
             )
-            created_pages[entry] = page
             self.log("CREATE page %r for row %d: %s"
                      % (page, row, entry))
+            existing_pages[entry] = page
 
 
 @attr.s
