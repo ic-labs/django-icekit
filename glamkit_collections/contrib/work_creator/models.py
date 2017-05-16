@@ -264,8 +264,26 @@ class WorkBase(
             return u"%s (%s)" % (self.title, self.date_display)
         return self.title
 
+    def save(self, *args, **kwargs):
+        self.derive_and_set_slug()
+        return super(WorkBase, self).save(*args, **kwargs)
+
+    def derive_and_set_slug(self, set_name_sort=True, set_slug=True):
+        """
+        Derive `slug` field from `title` unless it is set in its own right.
+
+        This method is called during `save()`
+        """
+        # `title` is the primary required name field. It must be set.
+        if is_empty(self.title):
+            raise ValueError(
+                u"%s.title cannot be empty at save" % type(self).__name__)
+        # if empty, `slug` is set to slugified `title`
+        if set_slug and is_empty(self.slug):
+            self.slug = slugify(self.title)
+
     def get_absolute_url(self):
-        return reverse("gk_collections_work", kwargs={'slug' :self.slug})
+        return reverse("gk_collections_work", kwargs={'slug': self.slug})
 
     def get_images(self, **kwargs):
         # order images by the order given in WorkImage.

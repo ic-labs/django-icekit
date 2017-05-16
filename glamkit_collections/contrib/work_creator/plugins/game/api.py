@@ -49,12 +49,12 @@ class Game(MovingImageWork):
             'is_single_player',
             'is_multi_player',
         )
-        extra_kwargs = {
+        extra_kwargs = dict(MovingImageWork.Meta.extra_kwargs, **{
             'url': {
                 'lookup_field': 'pk',
                 'view_name': '%s-detail' % VIEWNAME,
             }
-        }
+        })
         writable_related_fields = MovingImageWork.Meta.writable_related_fields
 
 

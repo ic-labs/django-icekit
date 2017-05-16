@@ -41,12 +41,12 @@ class Artwork(Work):
             # Fields
             'medium_display',
         )
-        extra_kwargs = {
+        extra_kwargs = dict(Work.Meta.extra_kwargs, **{
             'url': {
                 'lookup_field': 'pk',
                 'view_name': '%s-detail' % VIEWNAME,
-            }
-        }
+            },
+        })
 
 
 class ArtworkFilter(filters.FilterSet):

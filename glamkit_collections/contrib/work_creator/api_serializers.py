@@ -17,6 +17,31 @@ from .plugins.moving_image.models import Rating as RatingModel, \
     MovingImageWork as MovingImageWorkModel
 
 
+class _BypassSlugUniqueTogetherValidatorMixin(object):
+
+    def get_validators(self):
+        """
+        Override default validators in DRF to disable checking of unique-
+        together constraints that include the 'slug' because this check in
+        the API effectively makes 'slug' a required field when we do not want
+        it to be.
+        """
+        validators = super(_BypassSlugUniqueTogetherValidatorMixin, self) \
+            .get_validators()
+        validators = [
+            v for v in validators
+            # Only disable validation in specific case where it would apply
+            # unique-together checks including the 'slug' field where that
+            # field is not present in the available data.
+            if not(
+                type(v) == UniqueTogetherValidator and
+                'slug' in v.fields and
+                'slug' not in self.initial_data
+            )
+        ]
+        return validators
+
+
 class CreatorSummary(PolymorphicHyperlinkedModelSerializer):
     """ Minimal information about a creator """
 
@@ -127,7 +152,8 @@ class WorkCreatorFromCreator(WorkCreator):
         ]
 
 
-class Creator(WritableSerializerHelperMixin,
+class Creator(_BypassSlugUniqueTogetherValidatorMixin,
+              WritableSerializerHelperMixin,
               serializers.HyperlinkedModelSerializer):
     works = WorkCreatorFromCreator(
         source='workcreator_set',
@@ -159,8 +185,7 @@ class Creator(WritableSerializerHelperMixin,
         extra_kwargs = {
             # Slug and name fields derived from `name_full` are not required
             'slug': {
-                # NOTE: See extra work in `get_validators` to prevent DRF from
-                # requiring the 'slug field despite our explicit setting here.
+                # NOTE: See also `_BypassSlugUniqueTogetherValidatorMixin`
                 'required': False,
             },
             'name_display': {
@@ -173,27 +198,6 @@ class Creator(WritableSerializerHelperMixin,
         writable_related_fields = {
             'portrait': WritableRelatedFieldSettings(can_create=True),
         }
-
-    def get_validators(self):
-        """
-        Override default validators in DRF to disable checking of unique-
-        together constraints that include the 'slug' because this check in
-        the API effectively makes 'slug' a required field when we do not want
-        it to be.
-        """
-        validators = super(Creator, self).get_validators()
-        validators = [
-            v for v in validators
-            # Only disable validation in specific case where it would apply
-            # unique-together checks including the 'slug' field where that
-            # field is not present in the available data.
-            if not(
-                type(v) == UniqueTogetherValidator and
-                'slug' in v.fields and
-                'slug' not in self.initial_data
-            )
-        ]
-        return validators
 
 
 class WorkOrigin(ModelSubSerializer):
@@ -252,7 +256,8 @@ class WorkImage(WritableSerializerHelperMixin,
         }
 
 
-class Work(WritableSerializerHelperMixin,
+class Work(_BypassSlugUniqueTogetherValidatorMixin,
+           WritableSerializerHelperMixin,
            serializers.HyperlinkedModelSerializer):
     creators = WorkCreatorFromWork(
         source='workcreator_set',
@@ -291,6 +296,13 @@ class Work(WritableSerializerHelperMixin,
             'credit_line',
             'accession_number',
         )
+        extra_kwargs = {
+            # Slug and name fields derived from `name_full` are not required
+            'slug': {
+                # NOTE: See also `_BypassSlugUniqueTogetherValidatorMixin`
+                'required': False,
+            },
+        }
 
 
 class Rating(serializers.ModelSerializer):
@@ -359,6 +371,7 @@ class MovingImageWork(Work):
             'trailer',
             'imdb_link',
         )
+        extra_kwargs = Work.Meta.extra_kwargs
         writable_related_fields = {
             'rating': WritableRelatedFieldSettings(
                 lookup_field='slug', can_create=True, can_update=False),
