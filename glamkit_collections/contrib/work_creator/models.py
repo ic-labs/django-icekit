@@ -16,11 +16,37 @@ from glamkit_collections.contrib.work_creator.managers import \
     WorkCreatorQuerySet, WorkImageQuerySet
 
 
+class _WorkCreatorMetaDataMixin(models.Model):
+    """ Basic metadata fields shared by all collection models """
+    external_identifier = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Unique identifier from an external system, such as from"
+                  " an external system from which records are imported."
+    )
+    dt_created = models.DateTimeField(
+        editable=False,
+        auto_now_add=True,
+    )
+    dt_modified = models.DateTimeField(
+        editable=False,
+        auto_now=True,
+    )
+    admin_notes = models.TextField(
+        blank=True,
+    )
+
+    class Meta:
+        abstract = True
+
+
 class CreatorBase(
     PolymorphicModel,
     FluentFieldsMixin,
     ICEkitContentsMixin,
     ListableMixin,
+    _WorkCreatorMetaDataMixin,
 ):
     # Primary, definitive, and one truly required name field
     name_full = models.CharField(
@@ -70,7 +96,6 @@ class CreatorBase(
         max_length=255,
     )
     wikipedia_link = models.URLField(blank=True, help_text="e.g. 'https://en.wikipedia.org/wiki/Pablo_Picasso'")
-    admin_notes = models.TextField(blank=True)
 
     class Meta:
         verbose_name = "creator"
@@ -161,6 +186,7 @@ class WorkBase(
     FluentFieldsMixin,
     ICEkitContentsMixin,
     ListableMixin,
+    _WorkCreatorMetaDataMixin,
 ):
     # meta
     slug = models.CharField(max_length=255, db_index=True)
@@ -251,7 +277,6 @@ class WorkBase(
         blank=True,
     )
     wikipedia_link = models.URLField(blank=True, help_text="e.g. 'https://en.wikipedia.org/wiki/Beauty_and_the_Beast_(2014_film)'")
-    admin_notes = models.TextField(blank=True)
     images = models.ManyToManyField('icekit_plugins_image.Image', through="WorkImage")
 
     class Meta:
