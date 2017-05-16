@@ -72,7 +72,7 @@ setuptools.setup(
         'api': [
             'djangorestframework',
             'django-rest-swagger',
-            'djangorestframework-filters<0.10',  # Avoid more finicky filter Meta reqs for now
+            'djangorestframework-filters',
         ],
         'brightcove': [
             'django-brightcove',
