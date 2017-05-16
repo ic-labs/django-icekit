@@ -32,6 +32,7 @@ INSTALLED_APPS += (
     'rest_framework',
     'rest_framework.authtoken',  # Required for `TokenAuthentication`
     'rest_framework_swagger',  # Required for automatic API documentation
+    'django_filters',  # Find djangorestframework-filters templates
 )
 
 # Paths to Django REST framework router objects to include in the base
