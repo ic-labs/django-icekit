@@ -1,10 +1,13 @@
 import json
+from pytz import timezone
 
 from django.apps import apps
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
+from django.utils.timezone import utc, is_aware
 
 from rest_framework.test import APITestCase
 
@@ -15,6 +18,8 @@ from rest_framework.authtoken.models import Token
 
 User = get_user_model()
 Image = apps.get_model('icekit_plugins_image.Image')
+
+TZ = timezone(settings.TIME_ZONE)
 
 
 class _BaseAPITestCase(APITestCase):
@@ -58,6 +63,18 @@ class _BaseAPITestCase(APITestCase):
     def pp_data(self, data, indent=4):
         """ Pretty-print data to stdout, to help debugging unit tests """
         print(json.dumps(data, indent=indent))
+
+    def iso8601(self, dt):
+        """
+        Return given datetime as UTC time in ISO 8601 format, cleaned up to
+        use trailing 'Z' instead of rubbish like '+00:00'.
+
+        Based on https://gist.github.com/bryanchow/1195854
+        """
+        if not is_aware(dt):
+            dt = TZ.localize(dt)
+        #dt = dt.replace(microsecond=0)
+        return dt.astimezone(utc).replace(tzinfo=None).isoformat() + 'Z'
 
     def build_item_data(self, extend_data, base_data=None):
         if base_data is None:

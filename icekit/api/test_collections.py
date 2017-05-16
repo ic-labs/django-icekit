@@ -56,6 +56,11 @@ class ArtworkAPITestCase(_BaseCollectionAPITestCase):
         "medium_display": "",
         "creators": [],
         "images": [],
+        "id": "",
+        "external_identifier": None,
+        "dt_created": "",
+        "dt_modified": "",
+        "admin_notes": "",
     }
 
     def setUp(self):
@@ -81,6 +86,11 @@ class ArtworkAPITestCase(_BaseCollectionAPITestCase):
                     "slug": "test-artwork",
                     "title": "Test Artwork",
                     "publishing_is_draft": False,
+                    "id": self.artwork_published.pk,
+                    "dt_created": self.iso8601(
+                        self.artwork_published.dt_created),
+                    "dt_modified": self.iso8601(
+                        self.artwork_published.dt_modified),
                 }),
                 self.build_item_data({
                     "url": 'http://testserver%s'
@@ -88,6 +98,11 @@ class ArtworkAPITestCase(_BaseCollectionAPITestCase):
                     "slug": "test-artwork",
                     "title": "Test Artwork",
                     "publishing_is_draft": True,
+                    "id": self.artwork.pk,
+                    "dt_created": self.iso8601(
+                        self.artwork.dt_created),
+                    "dt_modified": self.iso8601(
+                        self.artwork.dt_modified),
                 }),
             ],
         }
@@ -103,6 +118,11 @@ class ArtworkAPITestCase(_BaseCollectionAPITestCase):
             "slug": "test-artwork",
             "title": "Test Artwork",
             "publishing_is_draft": False,
+            "id": self.artwork_published.pk,
+            "dt_created": self.iso8601(
+                self.artwork_published.dt_created),
+            "dt_modified": self.iso8601(
+                self.artwork_published.dt_modified),
         })
         self.assertEqual(expected, response.data)
 
@@ -219,6 +239,11 @@ class GameAPITestCase(_BaseCollectionAPITestCase):
         "genres": [],
         "input_types": [],
         "platforms": [],
+        "id": "",
+        "external_identifier": None,
+        "dt_created": "",
+        "dt_modified": "",
+        "admin_notes": "",
     }
 
     def setUp(self):
@@ -246,6 +271,11 @@ class GameAPITestCase(_BaseCollectionAPITestCase):
                     "publishing_is_draft": False,
                     "rating": None,
                     "media_type": None,
+                    "id": self.game_published.pk,
+                    "dt_created": self.iso8601(
+                        self.game_published.dt_created),
+                    "dt_modified": self.iso8601(
+                        self.game_published.dt_modified),
                 }),
                 self.build_item_data({
                     "url": 'http://testserver%s'
@@ -255,6 +285,11 @@ class GameAPITestCase(_BaseCollectionAPITestCase):
                     "publishing_is_draft": True,
                     "rating": None,
                     "media_type": None,
+                    "id": self.game.pk,
+                    "dt_created": self.iso8601(
+                        self.game.dt_created),
+                    "dt_modified": self.iso8601(
+                        self.game.dt_modified),
                 }),
             ],
         }
@@ -272,6 +307,11 @@ class GameAPITestCase(_BaseCollectionAPITestCase):
             "publishing_is_draft": False,
             "rating": None,
             "media_type": None,
+            "id": self.game_published.pk,
+            "dt_created": self.iso8601(
+                self.game_published.dt_created),
+            "dt_modified": self.iso8601(
+                self.game_published.dt_modified),
         })
         self.assertEqual(expected, response.data)
 
@@ -390,7 +430,12 @@ class FilmAPITestCase(_BaseCollectionAPITestCase):
         "duration_minutes": None,
         "trailer": "",
         "imdb_link": "",
-        "formats": []
+        "formats": [],
+        "id": "",
+        "external_identifier": None,
+        "dt_created": "",
+        "dt_modified": "",
+        "admin_notes": "",
     }
 
     def setUp(self):
@@ -418,6 +463,11 @@ class FilmAPITestCase(_BaseCollectionAPITestCase):
                     "publishing_is_draft": False,
                     "rating": None,
                     "media_type": None,
+                    "id": self.film_published.pk,
+                    "dt_created": self.iso8601(
+                        self.film_published.dt_created),
+                    "dt_modified": self.iso8601(
+                        self.film_published.dt_modified),
                 }),
                 self.build_item_data({
                     "url": 'http://testserver%s'
@@ -427,6 +477,11 @@ class FilmAPITestCase(_BaseCollectionAPITestCase):
                     "publishing_is_draft": True,
                     "rating": None,
                     "media_type": None,
+                    "id": self.film.pk,
+                    "dt_created": self.iso8601(
+                        self.film.dt_created),
+                    "dt_modified": self.iso8601(
+                        self.film.dt_modified),
                 }),
             ],
         }
@@ -444,6 +499,11 @@ class FilmAPITestCase(_BaseCollectionAPITestCase):
             "publishing_is_draft": False,
             "rating": None,
             "media_type": None,
+            "id": self.film_published.pk,
+            "dt_created": self.iso8601(
+                self.film_published.dt_created),
+            "dt_modified": self.iso8601(
+                self.film_published.dt_modified),
         })
         self.assertEqual(expected, response.data)
 
@@ -547,7 +607,6 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
         "alt_slug": "",
         "website": "",
         "wikipedia_link": "",
-        "admin_notes": "",
         "life_info": {
             "birth_date_display": None,
             "birth_date_edtf": "",
@@ -565,7 +624,12 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
             "state_province": "",
             "country": "",
             "continent": ""
-        }
+        },
+        "id": "",
+        "external_identifier": None,
+        "dt_created": "",
+        "dt_modified": "",
+        "admin_notes": "",
     }
 
     def setUp(self):
@@ -599,6 +663,11 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
                         "family": "Person"
                     },
                     "publishing_is_draft": False,
+                    "id": self.person_published.pk,
+                    "dt_created": self.iso8601(
+                        self.person_published.dt_created),
+                    "dt_modified": self.iso8601(
+                        self.person_published.dt_modified),
                 }),
                 self.build_item_data({
                     "url": 'http://testserver%s'
@@ -612,6 +681,9 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
                         "family": "Person"
                     },
                     "publishing_is_draft": True,
+                    "id": self.person.pk,
+                    "dt_created": self.iso8601(self.person.dt_created),
+                    "dt_modified": self.iso8601(self.person.dt_modified),
                 }),
             ],
         }
@@ -633,6 +705,11 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
                 "family": "Person"
             },
             "publishing_is_draft": False,
+            "id": self.person_published.pk,
+            "dt_created": self.iso8601(
+                self.person_published.dt_created),
+            "dt_modified": self.iso8601(
+                self.person_published.dt_modified),
         })
         self.assertEqual(expected, response.data)
 
@@ -730,6 +807,11 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
         "admin_notes": "",
         "type": "company",
         "type_plural": "companies",
+        "id": "",
+        "external_identifier": None,
+        "dt_created": "",
+        "dt_modified": "",
+        "admin_notes": "",
     }
 
     def setUp(self):
@@ -757,6 +839,11 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
                     "name_sort": "Test Organization",
                     "slug": "test-organization",
                     "publishing_is_draft": False,
+                    "id": self.organization_published.pk,
+                    "dt_created": self.iso8601(
+                        self.organization_published.dt_created),
+                    "dt_modified": self.iso8601(
+                        self.organization_published.dt_modified),
                 }),
                 self.build_item_data({
                     "url": 'http://testserver%s'
@@ -766,6 +853,9 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
                     "name_sort": "Test Organization",
                     "slug": "test-organization",
                     "publishing_is_draft": True,
+                    "id": self.organization.pk,
+                    "dt_created": self.iso8601(self.organization.dt_created),
+                    "dt_modified": self.iso8601(self.organization.dt_modified),
                 }),
             ],
         }
@@ -783,6 +873,11 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
             "name_sort": "Test Organization",
             "slug": "test-organization",
             "publishing_is_draft": False,
+            "id": self.organization_published.pk,
+            "dt_created": self.iso8601(
+                self.organization_published.dt_created),
+            "dt_modified": self.iso8601(
+                self.organization_published.dt_modified),
         })
         self.assertEqual(expected, response.data)
 
