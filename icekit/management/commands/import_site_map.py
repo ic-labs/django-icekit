@@ -7,7 +7,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth import get_user_model
-from django.utils import translation
+from django.utils import translation, timezone
 from django.utils.encoding import smart_text
 
 from icekit.utils.csv_unicode import UnicodeReader
@@ -123,11 +123,18 @@ class Command(BaseCommand):
 
         # Create pages and related records
         for entry in entries:
+            admin_notes = "IMPORTED by %s from file '%s' on %s" % (
+                __name__.split('.')[-1],
+                file_path,
+                timezone.now().isoformat()
+            )
             page = page_model.objects.language(settings.LANGUAGE_CODE).create(
                 title=entry.title,
                 author=author,
                 override_url=entry.override_url,
                 parent=existing_pages.get(entry.parent_row_data),
+                brief=entry.brief,
+                admin_notes=admin_notes,
             )
             self.log("CREATE page %r for row %d: %s"
                      % (page, row, entry))
