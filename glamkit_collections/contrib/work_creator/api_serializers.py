@@ -140,6 +140,14 @@ class Role(serializers.ModelSerializer):
             'title_plural',
             'past_tense',
         )
+        extra_kwargs = {
+            'title': {
+                'required': False,
+            },
+            'past_tense': {
+                'required': False,
+            },
+        }
 
 
 class WorkCreator(BaseCollectionModelSerializerMixin,
@@ -173,7 +181,8 @@ class WorkCreator(BaseCollectionModelSerializerMixin,
         writable_related_fields = {
             'work': WritableRelatedFieldSettings(),
             'creator': WritableRelatedFieldSettings(),
-            'role': WritableRelatedFieldSettings(),
+            'role': WritableRelatedFieldSettings(
+                lookup_field='slug', can_create=True),
         }
         disable_unique_together_constraint_fields = ['role']
 
