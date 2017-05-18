@@ -1,5 +1,5 @@
 -e .[api,brightcove,dev,docs,django18,forms,glamkit,project,search,test]
 -e git+https://github.com/ic-labs/icekit-events.git@ef0d20368f6578d59937de344125255ba2a4b542#egg=icekit-events
--e git+https://github.com/ic-labs/glamkit-collections.git@ee8f2784b86293260ef141890cdf318c2bd403b6#egg=glamkit-collections
+-e git+https://github.com/ic-labs/glamkit-collections.git@72c97d85d8ca0c502294d4a5764d73c24ea51b31#egg=glamkit-collections
 -e git+https://github.com/ic-labs/icekit-press-releases.git@35453b26502d3cf6cd433bffde546eb0102b942d#egg=icekit-press-releases
 -e git+https://github.com/ixc/django-dynamic-fixture.git@caeb3427399edd3b0d589516993c7da55e0de560#egg=django-dynamic-fixture

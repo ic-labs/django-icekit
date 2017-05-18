@@ -73,13 +73,24 @@ class _BaseAPITestCase(APITestCase):
         """
         if not is_aware(dt):
             dt = TZ.localize(dt)
-        #dt = dt.replace(microsecond=0)
         return dt.astimezone(utc).replace(tzinfo=None).isoformat() + 'Z'
 
     def build_item_data(self, extend_data, base_data=None):
+        """ Populate a base data dict with new or overriden content """
         if base_data is None:
-            base_data = self.BASE_DATA
-        return dict(base_data, **extend_data)
+            base_data = dict(self.BASE_DATA)
+        for name, new_value in extend_data.items():
+            # Perform smart overrides inside nested dict content
+            if (
+                name in base_data and
+                isinstance(base_data[name], dict) and
+                isinstance(new_value, dict)
+            ):
+                self.build_item_data(extend_data[name], base_data[name])
+            # Override value from base dict
+            else:
+                base_data[name] = new_value
+        return base_data
 
     def listing_url(self):
         """ Return the listing URL endpoint for this class's API """

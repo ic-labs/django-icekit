@@ -2,6 +2,7 @@
 # project, not here, but that project has no test infrastructure so this is
 # the quickest place and way to get some unit test coverage for now.
 from django.apps import apps
+from django.core.urlresolvers import reverse
 
 from . import base_tests
 
@@ -11,6 +12,8 @@ Game = apps.get_model('gk_collections_game.Game')
 Person = apps.get_model('gk_collections_person.PersonCreator')
 Organization = apps.get_model(
     'gk_collections_organization.OrganizationCreator')
+WorkCreator = apps.get_model(
+    'gk_collections_work_creator.WorkCreator')
 
 
 class _BaseCollectionAPITestCase(base_tests._BaseAPITestCase):
@@ -963,4 +966,194 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
             'organizationcreator',
             extra_item_data_for_writes_fn=extra_item_data_for_writes_fn,
             item_data_fields_to_remove=['portrait']
+        )
+
+
+class WorkCreatorRelationshipAPITestCase(_BaseCollectionAPITestCase):
+    API_NAME = 'workcreator-api'  # Set to reverse-able name for API URLs
+    BASE_DATA = {
+        "url": "",
+        "work": {
+            "url": "",
+            "title": "",
+            "date": {
+                "display": "",
+                "edtf": None,
+            }
+        },
+        "creator": {
+            "url": "",
+            "name_display": ""
+        },
+        "role": None,
+        "is_primary": True,
+        "order": 0,
+    }
+
+    def setUp(self):
+        super(WorkCreatorRelationshipAPITestCase, self).setUp()
+
+        self.artwork = Artwork.objects.create(
+            title='Test Artwork',
+        )
+
+        self.person = Person.objects.create(
+            name_full='Test Person',
+            name_family='Person',
+            name_given='Test',
+        )
+
+        self.organization = Organization.objects.create(
+            name_full='Test Organization',
+        )
+
+        self.workcreator = WorkCreator.objects.create(
+            work=self.artwork,
+            creator=self.person,
+        )
+
+    def test_list_workcreators_with_get(self):
+        response = self.client.get(self.listing_url())
+        self.assertEqual(200, response.status_code)
+        expected = {
+            'count': 1,
+            'next': None,
+            'previous': None,
+            'results': [
+                self.build_item_data({
+                    "url": "http://testserver%s"
+                    % self.detail_url(self.workcreator.pk),
+                    "id": self.workcreator.pk,
+                    "work": {
+                        "url": "http://testserver%s" % reverse(
+                            'api:%s-detail' % ArtworkAPITestCase.API_NAME,
+                            args=[self.artwork.pk]),
+                        "id": self.artwork.pk,
+                        "title": self.artwork.title,
+                    },
+                    "creator": {
+                        "url": "http://testserver%s" % reverse(
+                            'api:%s-detail' % PersonAPITestCase.API_NAME,
+                            args=[self.person.pk]),
+                        "id": self.person.pk,
+                        "name_display": self.person.name_display,
+                    },
+                }),
+            ],
+        }
+        self.assertEqual(expected, response.data)
+
+    def test_get_workcreator_detail_with_get(self):
+        response = self.client.get(
+            self.detail_url(self.workcreator.pk))
+        self.assertEqual(200, response.status_code)
+        expected = self.build_item_data({
+            "url": 'http://testserver%s'
+            % self.detail_url(self.workcreator.pk),
+            "id": self.workcreator.pk,
+            "work": {
+                "url": "http://testserver%s" % reverse(
+                    'api:%s-detail' % ArtworkAPITestCase.API_NAME,
+                    args=[self.artwork.pk]),
+                "id": self.artwork.pk,
+                "title": self.artwork.title,
+            },
+            "creator": {
+                "url": "http://testserver%s" % reverse(
+                    'api:%s-detail' % PersonAPITestCase.API_NAME,
+                    args=[self.person.pk]),
+                "id": self.person.pk,
+                "name_display": self.person.name_display,
+            },
+        })
+        self.assertEqual(expected, response.data)
+
+    def test_add_workcreator_with_post(self):
+        response = self.client.post(
+            self.listing_url(),
+            {
+                'work': {'id': self.artwork.pk},
+                'creator': {'id': self.organization.pk},
+            },
+        )
+        self.assertEqual(201, response.status_code)
+        self.assertEqual(2, WorkCreator.objects.count())
+        new_workcreator = WorkCreator.objects.get(pk=response.data['id'])
+        self.assertEqual(self.artwork, new_workcreator.work)
+        self.assertEqual(self.organization, new_workcreator.creator)
+
+    def test_replace_workcreator_creator_with_put(self):
+        self.assertEqual(self.person, self.workcreator.creator)
+
+        response = self.client.get(self.detail_url(self.workcreator.id))
+        self.assertEqual(200, response.status_code)
+
+        workcreator_data = response.data
+        workcreator_data['creator'] = {'id': self.organization.pk}
+
+        response = self.client.put(
+            self.detail_url(self.workcreator.pk),
+            workcreator_data,
+        )
+        self.assertEqual(200, response.status_code)
+        updated_workcreator = WorkCreator.objects.get(pk=self.workcreator.pk)
+        self.assertEqual(self.organization, updated_workcreator.creator)
+
+    def test_replace_workcreator_work_with_put(self):
+        self.assertEqual(self.artwork, self.workcreator.work)
+
+        response = self.client.get(self.detail_url(self.workcreator.id))
+        self.assertEqual(200, response.status_code)
+
+        film = Film.objects.create(
+            title='Test Film',
+        )
+        workcreator_data = response.data
+        workcreator_data['work'] = {'id': film.pk}
+
+        response = self.client.put(
+            self.detail_url(self.workcreator.pk),
+            workcreator_data,
+        )
+        self.assertEqual(200, response.status_code)
+        updated_workcreator = WorkCreator.objects.get(pk=self.workcreator.pk)
+        self.assertEqual(film, updated_workcreator.work)
+
+    def test_update_workcreator_with_patch(self):
+        self.assertEqual(self.artwork, self.workcreator.work)
+        self.assertEqual(self.person, self.workcreator.creator)
+
+        game = Game.objects.create(
+            title='Test Game',
+        )
+        response = self.client.patch(
+            self.detail_url(self.workcreator.pk),
+            {
+                'work': {'id': game.pk},
+                'creator': {'id': self.organization.pk},
+            },
+        )
+        self.assertEqual(200, response.status_code)
+
+        updated_workcreator = WorkCreator.objects.get(pk=self.workcreator.pk)
+        self.assertEqual(game, updated_workcreator.work)
+        self.assertEqual(self.organization, updated_workcreator.creator)
+
+    def test_delete_workcreator_with_delete(self):
+        response = self.client.delete(self.detail_url(self.workcreator.pk))
+        self.assertEqual(204, response.status_code)
+        self.assertEqual(0, WorkCreator.objects.count())
+
+    def test_api_user_permissions_are_correct(self):
+        def extra_item_data_for_writes_fn():
+            return {
+                'work': {'id': self.artwork.pk},
+                'creator': {'id': self.organization.pk},
+            }
+
+        self.assert_api_user_permissions_are_correct(
+            self.workcreator.pk,
+            WorkCreator,
+            'workcreator',
+            extra_item_data_for_writes_fn=extra_item_data_for_writes_fn,
         )
