@@ -35,17 +35,20 @@ class BaseCollectionModelSerializerMixin(QueryFieldsMixin):
         the API effectively makes 'slug' a required field when we do not want
         it to be.
         """
+        disabled_fields = set(getattr(
+            self.Meta, 'disable_unique_together_constraint_fields', []))
+        initial_data_keys = set(self.initial_data.keys())
         validators = super(BaseCollectionModelSerializerMixin, self) \
             .get_validators()
         validators = [
             v for v in validators
             # Only disable validation in specific case where it would apply
-            # unique-together checks including the 'slug' field where that
+            # unique-together checks including the disabled fields where that
             # field is not present in the available data.
             if not(
                 type(v) == UniqueTogetherValidator and
-                'slug' in v.fields and
-                'slug' not in self.initial_data
+                disabled_fields.issubset(set(v.fields)) and
+                not disabled_fields.intersection(initial_data_keys)
             )
         ]
         return validators
@@ -67,8 +70,18 @@ class CreatorSummary(PolymorphicHyperlinkedModelSerializer):
         model = CreatorBase
         fields = (
             api_settings.URL_FIELD_NAME,
+            'id',
             'name_display',
         )
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+            },
+            'name_display': {
+                'required': False,
+                'read_only': True,
+            },
+        }
 
 
 class WorkDate(ModelSubSerializer):
@@ -84,7 +97,10 @@ class WorkDate(ModelSubSerializer):
 class WorkSummary(WritableSerializerHelperMixin,
                   PolymorphicHyperlinkedModelSerializer):
     """ Minimal information about a work """
-    date = WorkDate()
+    date = WorkDate(
+        required=False,
+        read_only=True,
+    )
 
     def get_child_view_name_data(self):
         from .plugins.game import api as game_api
@@ -100,9 +116,19 @@ class WorkSummary(WritableSerializerHelperMixin,
         model = WorkBase
         fields = (
             api_settings.URL_FIELD_NAME,
+            'id',
             'title',
             'date',
         )
+        extra_kwargs = {
+            'id': {
+                'read_only': False,
+            },
+            'title': {
+                'required': False,
+                'read_only': True,
+            },
+        }
 
 
 class Role(serializers.ModelSerializer):
@@ -116,27 +142,40 @@ class Role(serializers.ModelSerializer):
         )
 
 
-class WorkCreator(WritableSerializerHelperMixin,
+class WorkCreator(BaseCollectionModelSerializerMixin,
+                  WritableSerializerHelperMixin,
                   serializers.HyperlinkedModelSerializer):
     """ Relationship between a work and a creator """
     work = WorkSummary()
     creator = CreatorSummary()
-    role = Role()
+    role = Role(
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
         model = WorkCreatorModel
         fields = (
+            api_settings.URL_FIELD_NAME,
+            'id',
             'work',
             'creator',
             'role',
             'is_primary',
             'order',
         )
+        extra_kwargs = {
+            api_settings.URL_FIELD_NAME: {
+                'lookup_field': 'pk',
+                'view_name': 'api:workcreator-api-detail',
+            },
+        }
         writable_related_fields = {
             'work': WritableRelatedFieldSettings(),
             'creator': WritableRelatedFieldSettings(),
             'role': WritableRelatedFieldSettings(),
         }
+        disable_unique_together_constraint_fields = ['role']
 
 
 class WorkCreatorFromWork(WorkCreator):
@@ -213,6 +252,7 @@ class Creator(BaseCollectionModelSerializerMixin,
         writable_related_fields = {
             'portrait': WritableRelatedFieldSettings(can_create=True),
         }
+        disable_unique_together_constraint_fields = ['slug']
 
 
 class WorkOrigin(ModelSubSerializer):
@@ -325,6 +365,7 @@ class Work(BaseCollectionModelSerializerMixin,
                 'required': False,
             },
         }
+        disable_unique_together_constraint_fields = ['slug']
 
 
 class Rating(serializers.ModelSerializer):
