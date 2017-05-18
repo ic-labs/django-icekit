@@ -14,6 +14,8 @@ Organization = apps.get_model(
     'gk_collections_organization.OrganizationCreator')
 WorkCreator = apps.get_model(
     'gk_collections_work_creator.WorkCreator')
+Role = apps.get_model(
+    'gk_collections_work_creator.Role')
 
 
 class _BaseCollectionAPITestCase(base_tests._BaseAPITestCase):
@@ -985,7 +987,12 @@ class WorkCreatorRelationshipAPITestCase(_BaseCollectionAPITestCase):
             "url": "",
             "name_display": ""
         },
-        "role": None,
+        "role": {
+            "slug": "painter",
+            "title": "Painter",
+            "title_plural": "Painters",
+            "past_tense": "Painted",
+        },
         "is_primary": True,
         "order": 0,
     }
@@ -1007,9 +1014,16 @@ class WorkCreatorRelationshipAPITestCase(_BaseCollectionAPITestCase):
             name_full='Test Organization',
         )
 
+        self.role = Role.objects.create(
+            slug='painter',
+            title='Painter',
+            title_plural='Painters',
+            past_tense='Painted',
+        )
         self.workcreator = WorkCreator.objects.create(
             work=self.artwork,
             creator=self.person,
+            role=self.role,
         )
 
     def test_list_workcreators_with_get(self):
@@ -1074,6 +1088,13 @@ class WorkCreatorRelationshipAPITestCase(_BaseCollectionAPITestCase):
             {
                 'work': {'id': self.artwork.pk},
                 'creator': {'id': self.organization.pk},
+                # Create new role
+                'role': {
+                    'slug': 'funder',
+                    'title': 'Funder',
+                    'title_plural': 'Funders',
+                    'past_tense': 'Funded',
+                },
             },
         )
         self.assertEqual(201, response.status_code)
@@ -1081,6 +1102,7 @@ class WorkCreatorRelationshipAPITestCase(_BaseCollectionAPITestCase):
         new_workcreator = WorkCreator.objects.get(pk=response.data['id'])
         self.assertEqual(self.artwork, new_workcreator.work)
         self.assertEqual(self.organization, new_workcreator.creator)
+        self.assertEqual('funder', new_workcreator.role.slug)
 
     def test_replace_workcreator_creator_with_put(self):
         self.assertEqual(self.person, self.workcreator.creator)
@@ -1101,6 +1123,7 @@ class WorkCreatorRelationshipAPITestCase(_BaseCollectionAPITestCase):
 
     def test_replace_workcreator_work_with_put(self):
         self.assertEqual(self.artwork, self.workcreator.work)
+        self.assertEqual(self.role, self.workcreator.role)
 
         response = self.client.get(self.detail_url(self.workcreator.id))
         self.assertEqual(200, response.status_code)
@@ -1108,8 +1131,15 @@ class WorkCreatorRelationshipAPITestCase(_BaseCollectionAPITestCase):
         film = Film.objects.create(
             title='Test Film',
         )
+        role = Role.objects.create(
+            slug='director',
+            title='Director',
+            title_plural='Directors',
+            past_tense='Directed',
+        )
         workcreator_data = response.data
         workcreator_data['work'] = {'id': film.pk}
+        workcreator_data['role'] = {'slug': role.slug}
 
         response = self.client.put(
             self.detail_url(self.workcreator.pk),
@@ -1118,6 +1148,7 @@ class WorkCreatorRelationshipAPITestCase(_BaseCollectionAPITestCase):
         self.assertEqual(200, response.status_code)
         updated_workcreator = WorkCreator.objects.get(pk=self.workcreator.pk)
         self.assertEqual(film, updated_workcreator.work)
+        self.assertEqual(role, updated_workcreator.role)
 
     def test_update_workcreator_with_patch(self):
         self.assertEqual(self.artwork, self.workcreator.work)
