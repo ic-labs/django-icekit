@@ -197,7 +197,7 @@ class WorkBase(
 
     # what's it called
     title = models.CharField(
-        max_length=255,
+        max_length=511,  # 511? Good question: aping `subtitle` & `oneliner`
         help_text='The official title of this object. Includes series title '
                   'when appropriate.'
     )
