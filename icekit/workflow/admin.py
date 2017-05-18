@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django import forms
+from django.utils.text import Truncator
 
 from . import models
 
@@ -98,7 +99,7 @@ class WorkflowStateTabularInline(GenericTabularInline):
     model = models.WorkflowState
     form = WorkflowStateForm
 
-    # Permit only a sinlge workflow state relationships now for simplicity
+    # Permit only a single workflow state relationships now for simplicity
     extra = 0
     min_num = 1
     max_num = 1
@@ -107,7 +108,8 @@ class WorkflowStateTabularInline(GenericTabularInline):
 
 class WorkflowMixinAdmin(admin.ModelAdmin):
     list_display = (
-        "last_edited_by_column", "workflow_states_column")
+        "last_edited_by_column", "workflow_states_column",
+        "brief_summary_column", "admin_notes_summary_column")
     list_filter = (
         WorkflowStateStatusFilter, WorkflowStateAssignedToFilter)
 
@@ -158,3 +160,11 @@ class WorkflowMixinAdmin(admin.ModelAdmin):
         else:
             return None
     last_edited_by_column.short_description = 'Last edited by'
+
+    def brief_summary_column(self, obj):
+        return Truncator(obj.get_real_instance().brief).chars(150)
+    brief_summary_column.short_description = 'Brief'
+
+    def admin_notes_summary_column(self, obj):
+        return Truncator(obj.get_real_instance().admin_notes).chars(150)
+    admin_notes_summary_column.short_description = 'Admin notes'
