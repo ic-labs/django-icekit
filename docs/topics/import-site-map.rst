@@ -17,18 +17,18 @@ Here is a brief example site map showing some of the key features:
 Level 1          Level 2          Level 3  Brief  Alternative titles  override_url
 ===============  ===============  =======  =====  ==================  ============
 Home                                                                  /
-What's on
-                 Exhibitions
-                 Performances
-Plan your visit
-                 Buy tickets
-                 Group visits
-                 Public tours
-About us
-                 Our history
-                 Annual reports
-                 (Not ready yet)
-                                  2017
+What's on                                                              
+                 Exhibitions                                           
+                 Performances                                          
+Plan your visit                                                        
+                 Buy tickets                                           
+                 Group visits                                          
+                 Public tours                                          
+About us                                                               
+                 Our history                                           
+                 Annual reports                                        
+                 (Not ready yet)                                       
+                                  2017                                 
 ===============  ===============  =======  =====  ==================  ============
 
 
