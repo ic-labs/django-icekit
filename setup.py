@@ -65,11 +65,12 @@ setuptools.setup(
         'fluentevent': ['django-fluent-contents'],
         'postgres': ['psycopg2'],
         'test': [
-            'coverage', 'django-nose', 'nose-progressive', 'django-webtest', 'WebTest',
-            # TODO Specific version of django-dynamic-fixture is necessary to avoid
-            # AttributeError: can't set attribute` failures on polymorphic models.
-            # See https://github.com/paulocheque/django-dynamic-fixture/pull/59
-            'django-dynamic-fixture==1.9.0+0.caeb3427399edd3b0d589516993c7da55e0de560.ixc',
+            'coverage',
+            'django-dynamic-fixture',
+            'django-nose',
+            'django-webtest',
+            'nose-progressive',
+            'WebTest',
         ]
     },
     setup_requires=['setuptools_scm'],

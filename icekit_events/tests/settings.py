@@ -71,6 +71,7 @@ USE_TZ = True  # Default: False
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DDF_FILL_NULLABLE_FIELDS = False
+DDF_IGNORE_FIELDS = ['*_ptr']  # Ignore django-polymorphic pointer fields
 FLUENT_PAGES_TEMPLATE_DIR = os.path.join(BASE_DIR, '..', 'templates')
 
 TEMPLATES = [
