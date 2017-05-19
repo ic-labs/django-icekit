@@ -55,7 +55,7 @@ Here is what the column headers mean:
 
 - Level N: columns where you must put page titles, higher-level titles are
   created as children of lower-level ones
-- Brief: a document brief describing the purpose of this item
+- Brief: a document brief describing the purpose of this content
 - Alternative titles: not yet used
 - override_url: the URL path "slug" to use for the page instead of a default
   slug based on the page name. This is mostly used to specify the site's home

@@ -71,11 +71,11 @@ class WorkflowStateMixin(models.Model):
     workflow_states = GenericRelation(WorkflowState)
     brief = models.TextField(
         blank=True,
-        help_text="A document brief describing the purpose of this item"
+        help_text="A document brief describing the purpose of this content"
     )
     admin_notes = models.TextField(
         blank=True,
-        help_text="Administrator's notes about this item"
+        help_text="Administrator's notes about this content"
     )
 
     class Meta:

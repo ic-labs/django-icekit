@@ -57,8 +57,8 @@ up the workflow states associated with an item more easily using the
 The ``WorkflowStateMixin`` mixin model class inlcudes extra fields to
 help with workflow management in general:
 
-- ``brief`` - document brief describing the purpose of this item
-- ``admin_notes`` - Administrator's notes about this item.
+- ``brief`` - document brief describing the purpose of this content
+- ``admin_notes`` - Administrator's notes about this content.
 
 Workflow Admin
 --------------

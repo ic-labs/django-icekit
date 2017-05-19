@@ -14,21 +14,21 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='article',
             name='admin_notes',
-            field=models.TextField(help_text=b"Administrator's notes about this item", blank=True),
+            field=models.TextField(help_text=b"Administrator's notes about this content", blank=True),
         ),
         migrations.AddField(
             model_name='article',
             name='brief',
-            field=models.TextField(help_text=b'A document brief describing the purpose of this item', blank=True),
+            field=models.TextField(help_text=b'A document brief describing the purpose of this content', blank=True),
         ),
         migrations.AddField(
             model_name='articlecategorypage',
             name='admin_notes',
-            field=models.TextField(help_text=b"Administrator's notes about this item", blank=True),
+            field=models.TextField(help_text=b"Administrator's notes about this content", blank=True),
         ),
         migrations.AddField(
             model_name='articlecategorypage',
             name='brief',
-            field=models.TextField(help_text=b'A document brief describing the purpose of this item', blank=True),
+            field=models.TextField(help_text=b'A document brief describing the purpose of this content', blank=True),
         ),
     ]
