@@ -763,37 +763,31 @@ class TestEventManager(TestCase):
         self.child_event_3 = G(SimpleEvent, part_of=self.parent_event)
 
     def test_upcoming(self):
-        self.assertEqual(list(SimpleEvent.objects.with_upcoming_occurrences()), [
-            self.child_event_2,
-        ])
+        self.assertEqual(
+            set(SimpleEvent.objects.with_upcoming_occurrences()),
+            set([self.child_event_2]))
 
-        self.assertEqual(list(SimpleEvent.objects.with_no_occurrences()), [
-            self.parent_event,
-            self.child_event_3,
-        ])
+        self.assertEqual(
+            set(SimpleEvent.objects.with_no_occurrences()),
+            set([self.parent_event, self.child_event_3]))
 
-        self.assertEqual(list(SimpleEvent.objects.with_upcoming_or_no_occurrences()), [
-            self.parent_event,
-            self.child_event_2,
-            self.child_event_3,
-        ])
+        self.assertEqual(
+            set(SimpleEvent.objects.with_upcoming_or_no_occurrences()),
+            set([self.parent_event, self.child_event_2, self.child_event_3]))
 
     def test_contained(self):
-        self.assertEqual(list(self.parent_event.get_children()), [
-            self.child_event_1,
-            self.child_event_2,
-            self.child_event_3,
-        ])
-        self.assertEqual(list(self.parent_event.get_children().with_upcoming_occurrences()), [
-            self.child_event_2,
-        ])
-        self.assertEqual(list(self.parent_event.get_children().with_no_occurrences()), [
-            self.child_event_3,
-        ])
-        self.assertEqual(list(self.parent_event.get_children().with_upcoming_or_no_occurrences()), [
-            self.child_event_2,
-            self.child_event_3,
-        ])
+        self.assertEqual(
+            set(self.parent_event.get_children()),
+            set([self.child_event_1, self.child_event_2, self.child_event_3]))
+        self.assertEqual(
+            set(self.parent_event.get_children().with_upcoming_occurrences()),
+            set([self.child_event_2]))
+        self.assertEqual(
+            set(self.parent_event.get_children().with_no_occurrences()),
+            set([self.child_event_3]))
+        self.assertEqual(
+            set(self.parent_event.get_children().with_upcoming_or_no_occurrences()),
+            set([self.child_event_2, self.child_event_3]))
 
 
 class TestEventRepeatOccurrencesRespectLocalTimeDefinition(TestCase):
