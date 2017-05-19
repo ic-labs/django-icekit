@@ -162,9 +162,13 @@ class WorkflowMixinAdmin(admin.ModelAdmin):
     last_edited_by_column.short_description = 'Last edited by'
 
     def brief_summary_column(self, obj):
-        return Truncator(obj.get_real_instance().brief).chars(150)
+        if hasattr(obj, 'get_real_instance'):
+            obj = obj.get_real_instance()
+        return Truncator(obj.brief).chars(150)
     brief_summary_column.short_description = 'Brief'
 
     def admin_notes_summary_column(self, obj):
-        return Truncator(obj.get_real_instance().admin_notes).chars(150)
+        if hasattr(obj, 'get_real_instance'):
+            obj = obj.get_real_instance()
+        return Truncator(obj.admin_notes).chars(150)
     admin_notes_summary_column.short_description = 'Admin notes'
