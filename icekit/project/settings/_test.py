@@ -29,8 +29,6 @@ ROOT_URLCONF = 'icekit.tests.urls'
 TEMPLATES_DJANGO['DIRS'].insert(
     0, os.path.join(ICEKIT_DIR, 'tests', 'templates')),
 
-DDF_IGNORE_FIELDS = ['*_ptr']  # Ignore django-polymorphic pointer fields
-
 # ICEKIT ######################################################################
 
 # RESPONSE_PAGE_PLUGINS = ['ImagePlugin', ]
