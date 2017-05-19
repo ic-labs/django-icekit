@@ -63,7 +63,7 @@ Here are rules applied when a site map is imported:
   means that you can re-import the same site map document multiple times and
   only new or changed pages will be created.
 
-For a more complete example site map see the `IC museum sitemap template`__.
+For a more complete example site map see the `IC museum sitemap template`_.
 
 Import Command
 --------------
