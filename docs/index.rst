@@ -19,6 +19,7 @@ This documentation covers the technical usage and API of GLAMkit and ICEkit.
    install/docker
    install/existing-project
    overview/first-site
+   topics/import-site-map
    customising/index
    deploying/index
    glossary
