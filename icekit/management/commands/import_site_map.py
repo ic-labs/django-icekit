@@ -46,6 +46,30 @@ class Command(BaseCommand):
         if self.verbosity >= min_verbosity:
             self.stdout.write(smart_text(msg))
 
+    def find_existing_page(self, titles_hierarchy):
+        """
+        Find and return existing page matching the given titles hierarchy
+        """
+        # Step backwards through import doc's titles hierarchy with a parent
+        # count which is the offset from the current level to each ancestor
+        titles_filters = {'publishing_is_draft': True}
+        for parent_count, ancestor_title \
+                in enumerate(titles_hierarchy[::-1]):
+            # Convert import doc's ancestor title and parent count into
+            # a filter query of the form:
+            #    translations__title=<entry (ancestor 0) title>
+            #    parent__translations__title=<ancestor 1 title>
+            #    parent__parent__translations__title=<ancestor 2 title>
+            #    parent__parent__parent__translations__title=<ancestor 3 title>
+            parent_path = '__'.join(['parent'] * parent_count)
+            filter_name = '%s%stranslations__title' % (
+                parent_path, parent_path and '__' or '')
+            titles_filters[filter_name] = ancestor_title
+        # Return a corresponding page if one exists
+        return self.page_model.objects \
+            .filter(**titles_filters) \
+            .first()  # Returns `None` if no matches
+
     def handle(self, *args, **options):
         if len(args) != 1:
             raise CommandError("The <site_map.csv> argument is required")
@@ -61,12 +85,11 @@ class Command(BaseCommand):
         self.verbosity = options.get('verbosity', 1)
 
         # This will raise an exception if the model isn't available
-        page_model = apps.get_model(model_name)
+        self.page_model = apps.get_model(model_name)
 
         user_model = get_user_model()
 
         author = user_model.objects.get(pk=author_id)
-        self.log("Author for imported pages: %r" % author)
 
         translation.activate(settings.LANGUAGE_CODE)
 
@@ -80,38 +103,48 @@ class Command(BaseCommand):
             headers = reader.next()
             check_headers(headers, level_count, file_path)
 
-            parent_entry_by_level = {}
+            ancestor_entry_by_level = {}
             for row, data in enumerate(reader, 2):
-                entry = parse_line(data, level_count)
+                entry = parse_line(row, data, level_count)
 
                 if not entry.title:
                     self.log("SKIP row %d with no title: %s" % (row, data),
                              min_verbosity=2)
                     continue
 
+                # Build list with titles hierarchy from the import document
+                titles_hierarchy = []
+                for ancestor_level in range(1, entry.level):
+                    ancestor = ancestor_entry_by_level.get(ancestor_level)
+                    titles_hierarchy.append(ancestor and ancestor.title or '')
+                titles_hierarchy.append(entry.title)
+                # Description of titles hierarchy for logging
+                entry.titles_hierarchy_desc = ' | '.join(titles_hierarchy)
+
+                # Skip titles that start with bracket characters, unless we
+                # are explicitly instructed to import these
                 if not include_titles_with_brackets and \
                         entry.title[0] in ('[', '('):
                     self.log("SKIP row %d with title in brackets: '%s'"
-                             % (row, entry.title))
+                             % (row, entry.titles_hierarchy_desc),
+                             min_verbosity=2)
                     continue
 
                 # Store row data at each level so we can find the parent data
-                # for following pages
-                parent_entry_by_level[entry.level] = entry
+                # for following pages in the site map document
+                ancestor_entry_by_level[entry.level] = entry
 
-                try:
-                    existing_page = page_model.objects \
-                        .get(translations__title=entry.title)
-                    existing_pages[entry] = existing_page
-                except page_model.DoesNotExist:
-                    existing_page = None
+                # Skip existing pages
+                existing_page = self.find_existing_page(titles_hierarchy)
                 if existing_page:
-                    self.log("SKIP row %d with title already in system: '%s'"
-                             % (row, entry.title))
+                    existing_pages[entry] = existing_page
+                    self.log("SKIP row %d already in system: %s"
+                             % (row, entry.titles_hierarchy_desc),
+                             min_verbosity=2)
                     continue
 
                 entry.parent_row_data = \
-                    parent_entry_by_level.get(entry.level - 1)
+                    ancestor_entry_by_level.get(entry.level - 1)
 
                 # Check we have a valid parent page for levels > 1
                 if entry.level > 1 and not entry.parent_row_data:
@@ -122,48 +155,54 @@ class Command(BaseCommand):
                 entries.append(entry)
 
         # Create pages and related records
+        if entries:
+            self.log("Author for imported pages: %r" % author)
         for entry in entries:
             admin_notes = "IMPORTED by %s from file '%s' on %s" % (
                 __name__.split('.')[-1],
                 file_path,
                 timezone.now().isoformat()
             )
-            page = page_model.objects.language(settings.LANGUAGE_CODE).create(
-                title=entry.title,
-                author=author,
-                override_url=entry.override_url,
-                parent=existing_pages.get(entry.parent_row_data),
-                brief=entry.brief,
-                admin_notes=admin_notes,
-            )
-            self.log("CREATE page %r for row %d: %s"
-                     % (page, row, entry))
+            page = self.page_model.objects \
+                .language(settings.LANGUAGE_CODE) \
+                .create(
+                    title=entry.title,
+                    author=author,
+                    override_url=entry.override_url,
+                    parent=existing_pages.get(entry.parent_row_data),
+                    brief=entry.brief,
+                    admin_notes=admin_notes,
+                )
+            self.log("CREATE row %d: %s %r"
+                     % (entry.row, entry.titles_hierarchy_desc, page))
             existing_pages[entry] = page
 
 
 @attr.s
 class RowData(object):
     """ Capture key details of a site map line entry """
+    row = attr.ib()
     level = attr.ib()
     title = attr.ib()
     brief = attr.ib()
     alternative_titles = attr.ib()
     override_url = attr.ib()
-    parent_row_data = attr.ib()
+    parent_row_data = attr.ib(default=None)
+    titles_hierarchy_desc = attr.ib(default='')
 
 
-def parse_line(line, level_count):
+def parse_line(row, line, level_count):
     # Find level and title for first non-empty level column
     for level, title in enumerate(line[:level_count], 1):
         if title.strip():
             break
     return RowData(
+        row=row,
         level=level,
         title=title,
         brief=line[level_count].strip(),
         alternative_titles=line[level_count + 1].strip(),
         override_url=line[level_count + 2].strip(),
-        parent_row_data=None,  # Set elsewhere
     )
 
 
