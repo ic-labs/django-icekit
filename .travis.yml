@@ -18,6 +18,7 @@ before_script:
   - docker-compose --version
   - docker-compose -f docker-compose.travis.yml config
   - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - echo "TAG=$TAG TRAVIS_COMMIT=$TRAVIS_COMMIT"
   - docker pull "interaction/icekit:$TAG" || true
   - docker build --pull --cache-from "interaction/icekit:$TAG" -t "interaction/icekit:$TAG" .
 
