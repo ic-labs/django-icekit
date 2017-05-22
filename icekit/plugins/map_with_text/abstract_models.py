@@ -19,7 +19,7 @@ class AbstractMapWithTextItem(AbstractMapItem):
         default=False
     )
 
-    help_me_out_here = 'A map with text on the side (allows the choice of map to be on the ' \
+    help_text = 'A map with text on the side (allows the choice of map to be on the ' \
                        'left or right of the text).'
 
     class Meta:
