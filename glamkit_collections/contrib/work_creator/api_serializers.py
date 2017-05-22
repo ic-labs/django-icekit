@@ -267,7 +267,7 @@ class Creator(BaseCollectionModelSerializerMixin,
 class WorkOrigin(ModelSubSerializer):
     origin_country = serializers.SerializerMethodField()
 
-    def get_origin_country(self, obj):
+    def get_country(self, obj):
         return obj.origin_country.name
 
     class Meta:
