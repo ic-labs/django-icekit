@@ -4,6 +4,10 @@ Changelog
 0.17 (2017-04-30)
 -----------------
 
+-  Rename the GET parameter used to trigger and permit preview of draft pages
+   to be 'preview' instead of 'edit'. The legacy 'edit' parameter name is still
+   supported.
+
 -  Changed the way that we specify the homepage: create a page with url
    override `/`. This is the way fluent does it. As a fallback, we look for a
    page with slug `home`. If you mount pages under a page with override URL and

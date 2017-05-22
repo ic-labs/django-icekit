@@ -886,29 +886,29 @@ class TestPublishingMiddleware(TestCase):
 
     def test_middleware_method_is_draft_request(self):
         # The `is_draft_request(request)` middleware method only checks if the
-        # 'edit' flag is present in the querystring. So for content reviewers,
-        # who *always* see draft content, their requests don't have the 'edit'
-        # flag and so they will never be "draft requests". Confusingly, the
-        # `is_draft(request)` is the one that determines the actual draft
-        # status of a request!
+        # 'preview' flag is present in the querystring. So for content
+        # reviewers, who *always* see draft content, their requests don't have
+        # the 'preview' flag and so they will never be "draft requests".
+        # Confusingly, the `is_draft(request)` is the one that determines the
+        # actual draft status of a request!
 
-        # Staff, with 'edit' flag.
-        request = self._request(data={'edit': ''}, user=self.staff_1)
+        # Staff, with 'preview' flag.
+        request = self._request(data={'preview': ''}, user=self.staff_1)
         self.assertTrue(PublishingMiddleware.is_draft_request(request))
-        # Reviewer, with 'edit' flag.
-        request = self._request(data={'edit': ''}, user=self.reviewer_user)
+        # Reviewer, with 'preview' flag.
+        request = self._request(data={'preview': ''}, user=self.reviewer_user)
         self.assertTrue(PublishingMiddleware.is_draft_request(request))
-        # Anonymous, with 'edit' flag.
-        request = self._request(data={'edit': ''})
+        # Anonymous, with 'preview' flag.
+        request = self._request(data={'preview': ''})
         self.assertTrue(PublishingMiddleware.is_draft_request(request))
 
-        # Staff, without 'edit' flag.
+        # Staff, without 'preview' flag.
         request = self._request(user=self.staff_1)
         self.assertFalse(PublishingMiddleware.is_draft_request(request))
-        # Reviewer, without 'edit' flag.
+        # Reviewer, without 'preview' flag.
         request = self._request(user=self.reviewer_user)
         self.assertFalse(PublishingMiddleware.is_draft_request(request))
-        # Anonymous, without 'edit' flag.
+        # Anonymous, without 'preview' flag.
         request = self._request()
         self.assertFalse(PublishingMiddleware.is_draft_request(request))
 
@@ -917,31 +917,31 @@ class TestPublishingMiddleware(TestCase):
         request = self._request(reverse('admin:index'), user=self.staff_1)
         self.assertTrue(PublishingMiddleware.is_draft(request))
 
-        # Requests from content reviewers are draft, with the 'edit' flag...
-        request = self._request(data={'edit': ''}, user=self.reviewer_user)
+        # Requests from content reviewers are draft, with the 'preview' flag...
+        request = self._request(data={'preview': ''}, user=self.reviewer_user)
         self.assertTrue(PublishingMiddleware.is_draft(request))
         # ...and without.
         request = self._request(user=self.reviewer_user)
         self.assertTrue(PublishingMiddleware.is_draft(request))
 
         # Staff can request draft...
-        request = self._request(data={'edit': ''}, user=self.staff_1)
+        request = self._request(data={'preview': ''}, user=self.staff_1)
         self.assertTrue(PublishingMiddleware.is_draft(request))
         # ...or published.
         request = self._request(user=self.staff_1)
         self.assertFalse(PublishingMiddleware.is_draft(request))
 
         # Draft flag is ignored for unprivileged users.
-        request = self._request(data={'edit': ''}, user=self.public_user)
+        request = self._request(data={'preview': ''}, user=self.public_user)
         self.assertFalse(PublishingMiddleware.is_draft(request))
 
         # Draft flag is honored for anonymous users if it has a valid draft
         # mode HMAC...
         request = self._request(
-            '/', data={'edit': '%s:%s' % (1, get_draft_hmac(1, '/'))})
+            '/', data={'preview': '%s:%s' % (1, get_draft_hmac(1, '/'))})
         self.assertTrue(PublishingMiddleware.is_draft(request))
         # ...and ignored if it is invalid.
-        request = self._request('/', data={'edit': '1:abc'})
+        request = self._request('/', data={'preview': '1:abc'})
         self.assertFalse(PublishingMiddleware.is_draft(request))
 
     def test_middleware_active_status(self):
@@ -981,7 +981,7 @@ class TestPublishingMiddleware(TestCase):
         self.assertIsNone(mw.get_current_user())
         self.assertIsNone(get_current_user())
 
-    def test_middleware_edit_param_triggers_draft_request_context(self):
+    def test_middleware_preview_param_triggers_draft_request_context(self):
         mw = PublishingMiddleware()
 
         # Request processing normal URL does not trigger draft status
@@ -989,20 +989,20 @@ class TestPublishingMiddleware(TestCase):
         self.assertFalse(mw.is_draft_request_context())
         self.assertFalse(is_draft_request_context())
 
-        # Request URL from Content Reviewers is always draft, no 'edit' req'd
+        # Request URL from Content Reviewers is always draft, no 'preview' req'd
         request = self._request(user=self.reviewer_user)
         mw.process_request(request)
         self.assertTrue(mw.is_draft_request_context())
         self.assertTrue(is_draft_request_context())
 
-        # Request URL with 'edit' param triggers draft for staff
-        request = self._request(data={'edit': ''}, user=self.staff_1)
+        # Request URL with 'preview' param triggers draft for staff
+        request = self._request(data={'preview': ''}, user=self.staff_1)
         mw.process_request(request)
         self.assertTrue(mw.is_draft_request_context())
         self.assertTrue(is_draft_request_context())
 
-        # Non-privileged users cannot trigger draft mode with 'edit' param
-        request = self._request(data={'edit': ''}, user=self.public_user)
+        # Non-privileged users cannot trigger draft mode with 'preview' param
+        request = self._request(data={'preview': ''}, user=self.public_user)
         mw.process_request(self._request())
         self.assertFalse(mw.is_draft_request_context())
         self.assertFalse(is_draft_request_context())
@@ -1030,28 +1030,28 @@ class TestPublishingMiddleware(TestCase):
         mw.process_request(request)
         self.assertFalse(request.IS_DRAFT)
 
-        # Request URL with 'edit' param from staff sets IS_DRAFT to True
+        # Request URL with 'preview' param from staff sets IS_DRAFT to True
         request = self._request(
             '/',
-            data={'edit': '%s:%s' % (1, get_draft_hmac(1, '/'))},
+            data={'preview': '%s:%s' % (1, get_draft_hmac(1, '/'))},
             user=self.staff_1,
         )
         mw.process_request(request)
         self.assertTrue(request.IS_DRAFT)
 
     def test_middleware_redirect_staff_to_draft_mode(self):
-        # If staff use the 'edit' flag, it is automatically populated with a
+        # If staff use the 'preview' flag, it is automatically populated with a
         # valid draft mode HMAC, making the URL shareable.
         mw = PublishingMiddleware()
 
-        # Empty 'edit' flag are populated.
-        request = self._request(data={'edit': ''}, user=self.staff_1)
+        # Empty 'preview' flag are populated.
+        request = self._request(data={'preview': ''}, user=self.staff_1)
         response = mw.process_request(request)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(verify_draft_url(response['Location']))
 
-        # Invalid 'edit' flags are corrected.
-        request = self._request(data={'edit': '1:abc'}, user=self.staff_1)
+        # Invalid 'preview' flags are corrected.
+        request = self._request(data={'preview': '1:abc'}, user=self.staff_1)
         response = mw.process_request(request)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(verify_draft_url(response['Location']))
@@ -1077,12 +1077,12 @@ class TestPublishingMiddleware(TestCase):
         response = mw.process_response(request, HttpResponseNotFound())
         self.assertEqual(302, response.status_code)
         query = QueryDict(urlparse.urlparse(response['Location']).query)
-        self.assertIn('edit', query)
+        self.assertIn('preview', query)
         self.assertEqual(query['x'], 'y')
         self.assertEqual(query['a'], '432')
 
         # 404 response for draft view does not redirect
-        request = self._request(data={'edit': ''}, user=self.staff_1)
+        request = self._request(data={'preview': ''}, user=self.staff_1)
         response = mw.process_response(request, HttpResponseNotFound())
         self.assertEqual(404, response.status_code)
 
@@ -1511,7 +1511,7 @@ class TestPublishingForPageViews(BaseAdminTest):
         # Unpublished page is not visible to anonymous users
         response = self.app.get('/test-layoutpage/', expect_errors=True)
         self.assertEqual(response.status_code, 404)
-        # Unpublished page is visible to staff user with '?edit' param redirect
+        # Unpublished page is visible to staff user with '?preview' param redirect
         response = self.app.get(
             '/test-layoutpage/',
             user=self.super_user,
@@ -1556,17 +1556,17 @@ class TestPublishingForPageViews(BaseAdminTest):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Updated LayoutPage')
 
-        # Draft page is visible at changed URL via ?edit URL
+        # Draft page is visible at changed URL via ?preview URL
         response = self.app.get(
-            '/updated-layoutpage/?edit',
+            '/updated-layoutpage/?preview',
             user=self.super_user,
         ).follow()
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Updated LayoutPage')
 
-        # Draft page is *not* visible at ?edit URL of old (published page) URL
+        # Draft page is *not* visible at ?preview URL of old (published page) URL
         response = self.app.get(
-            '/test-layoutpage/?edit',
+            '/test-layoutpage/?preview',
             user=self.super_user,
         )
         self.assertEqual(response.status_code, 302)
@@ -1580,19 +1580,19 @@ class TestPublishingForPageViews(BaseAdminTest):
             user=self.normal_user,
             expect_errors=True)
         self.assertEqual(response.status_code, 404)
-        # Unpublished page is visible to staff user with '?edit' param redirect
+        # Unpublished page visible to staff user via '?preview' param redirect
         response = self.app.get(
             self.layoutpage.get_absolute_url(),
             user=self.super_user)
         self.assertEqual(response.status_code, 302)
-        self.assertTrue('?edit=' in response['Location'])
+        self.assertTrue('?preview=' in response['Location'])
         response = response.follow()
         self.assertEqual(response.status_code, 200)
-        # Unpublished page is visible to any user with signed '?edit' param
+        # Unpublished page is visible to any user with signed '?preview' param
         salt = '123'
         url_hmac = get_draft_hmac(salt, self.layoutpage.get_absolute_url())
         response = self.app.get(
-            self.layoutpage.get_absolute_url() + '?edit=%s:%s' % (
+            self.layoutpage.get_absolute_url() + '?preview=%s:%s' % (
                 salt, url_hmac),
             user=self.normal_user)
         self.assertEqual(response.status_code, 200)
@@ -1616,20 +1616,21 @@ class TestPublishingForPageViews(BaseAdminTest):
             user=self.normal_user,
             expect_errors=True)
         self.assertEqual(response.status_code, 404)
-        # Unpublished page is visible to staff user with '?edit' param redirect
+        # Unpublished page visible to staff user via '?preview' param redirect
         response = self.app.get(
             self.unpublishablelayoutpage.get_absolute_url(),
             user=self.super_user)
         self.assertEqual(response.status_code, 302)
-        self.assertTrue('?edit=' in response['Location'])
+        self.assertTrue('?preview=' in response['Location'])
         response = response.follow()
         self.assertEqual(response.status_code, 200)
-        # Unpublished page is visible to any user with signed '?edit' param
+        # Unpublished page is visible to any user with signed '?preview' param
         salt = '123'
-        url_hmac = get_draft_hmac(salt, self.unpublishablelayoutpage.get_absolute_url())
+        url_hmac = get_draft_hmac(
+            salt, self.unpublishablelayoutpage.get_absolute_url())
         response = self.app.get(
-            self.unpublishablelayoutpage.get_absolute_url() + '?edit=%s:%s' % (
-                salt, url_hmac),
+            self.unpublishablelayoutpage.get_absolute_url() +
+            '?preview=%s:%s' % (salt, url_hmac),
             user=self.normal_user)
         self.assertEqual(response.status_code, 200)
 
