@@ -1077,12 +1077,12 @@ class TestPublishingMiddleware(TestCase):
         response = mw.process_response(request, HttpResponseNotFound())
         self.assertEqual(302, response.status_code)
         query = QueryDict(urlparse.urlparse(response['Location']).query)
-        self.assertIn('edit', query)
+        self.assertIn('preview', query)
         self.assertEqual(query['x'], 'y')
         self.assertEqual(query['a'], '432')
 
         # 404 response for draft view does not redirect
-        request = self._request(data={'edit': ''}, user=self.staff_1)
+        request = self._request(data={'preview': ''}, user=self.staff_1)
         response = mw.process_response(request, HttpResponseNotFound())
         self.assertEqual(404, response.status_code)
 
@@ -1580,19 +1580,19 @@ class TestPublishingForPageViews(BaseAdminTest):
             user=self.normal_user,
             expect_errors=True)
         self.assertEqual(response.status_code, 404)
-        # Unpublished page is visible to staff user with '?edit' param redirect
+        # Unpublished page visible to staff user via '?preview' param redirect
         response = self.app.get(
             self.layoutpage.get_absolute_url(),
             user=self.super_user)
         self.assertEqual(response.status_code, 302)
-        self.assertTrue('?edit=' in response['Location'])
+        self.assertTrue('?preview=' in response['Location'])
         response = response.follow()
         self.assertEqual(response.status_code, 200)
-        # Unpublished page is visible to any user with signed '?edit' param
+        # Unpublished page is visible to any user with signed '?preview' param
         salt = '123'
         url_hmac = get_draft_hmac(salt, self.layoutpage.get_absolute_url())
         response = self.app.get(
-            self.layoutpage.get_absolute_url() + '?edit=%s:%s' % (
+            self.layoutpage.get_absolute_url() + '?preview=%s:%s' % (
                 salt, url_hmac),
             user=self.normal_user)
         self.assertEqual(response.status_code, 200)
@@ -1616,20 +1616,21 @@ class TestPublishingForPageViews(BaseAdminTest):
             user=self.normal_user,
             expect_errors=True)
         self.assertEqual(response.status_code, 404)
-        # Unpublished page is visible to staff user with '?edit' param redirect
+        # Unpublished page visible to staff user via '?preview' param redirect
         response = self.app.get(
             self.unpublishablelayoutpage.get_absolute_url(),
             user=self.super_user)
         self.assertEqual(response.status_code, 302)
-        self.assertTrue('?edit=' in response['Location'])
+        self.assertTrue('?preview=' in response['Location'])
         response = response.follow()
         self.assertEqual(response.status_code, 200)
-        # Unpublished page is visible to any user with signed '?edit' param
+        # Unpublished page is visible to any user with signed '?preview' param
         salt = '123'
-        url_hmac = get_draft_hmac(salt, self.unpublishablelayoutpage.get_absolute_url())
+        url_hmac = get_draft_hmac(
+            salt, self.unpublishablelayoutpage.get_absolute_url())
         response = self.app.get(
-            self.unpublishablelayoutpage.get_absolute_url() + '?edit=%s:%s' % (
-                salt, url_hmac),
+            self.unpublishablelayoutpage.get_absolute_url() +
+            '?preview=%s:%s' % (salt, url_hmac),
             user=self.normal_user)
         self.assertEqual(response.status_code, 200)
 
