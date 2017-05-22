@@ -51,7 +51,6 @@ class CreatorBase(
         max_length=255,
     )
     wikipedia_link = models.URLField(blank=True, help_text="e.g. 'https://en.wikipedia.org/wiki/Pablo_Picasso'")
-    admin_notes = models.TextField(blank=True)
     name_sort = models.CharField(
         max_length=255,
         help_text='For searching and organizing, the name or sequence of names '
