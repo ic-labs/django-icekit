@@ -54,6 +54,12 @@ Once the reverse relationship is made navigable in this way you can look
 up the workflow states associated with an item more easily using the
 ``workflow_states`` relationship attribute.
 
+The ``WorkflowStateMixin`` mixin model class inlcudes extra fields to
+help with workflow management in general:
+
+- ``brief`` - document brief describing the purpose of this content
+- ``admin_notes`` - Administrator's notes about this content.
+
 Workflow Admin
 --------------
 
@@ -72,6 +78,10 @@ Admin list views columns you can add to ``list_display``:
    the Django admin
 -  ``last_edited_by_column`` renders the user to last edited (added or
    changed) an item in the admin.
+-  ``brief_summary_column`` renders the first few characters of a
+   workflow briefing document associated with the item.
+-  ``admin_notes_summary_column`` renders the first few characters of a
+   workflow admin notes document associated with the item.
 
 NOTE: The model change tracking is based on Django admin's ``LogEntry``
 mechanisms and is fairly simplistic: it will not track model changes
