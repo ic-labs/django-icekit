@@ -105,12 +105,25 @@ class CreatorChildAdmin(
     FluentLayoutsMixin,
 ):
     base_model = models.CreatorBase
+    save_on_top = True
     raw_id_fields = ['portrait', ]
     exclude = ('layout', 'alt_slug',)
     prepopulated_fields = {"slug": ("name_display",)}
     inlines = [WorkCreatorsInlineForCreators] + \
         ICEkitContentsAdmin.inlines
 
+    readonly_fields = (
+        'birth_date_earliest',
+        'birth_date_latest',
+        'birth_date_sort_ascending',
+        'birth_date_sort_descending',
+        'birth_date_edtf',
+        'death_date_earliest',
+        'death_date_latest',
+        'death_date_sort_ascending',
+        'death_date_sort_descending',
+        'death_date_edtf',
+    )
 
     NAME_FIELDSET =  ('Name', {
         'fields': (
@@ -120,6 +133,33 @@ class CreatorChildAdmin(
             'admin_notes',
         ),
     })
+
+    DATE_FIELDSETS = (
+        ("Dates", {
+            'fields': (
+                ('birth_date_display',
+                'death_date_display',),
+            ),
+        }),
+        ("Advanced date controls", {
+            'classes': ('collapse',),
+            'fields': (
+                ('birth_date_earliest',
+                'birth_date_latest',),
+                ('birth_date_sort_ascending',
+                'birth_date_sort_descending',),
+                'birth_date_edtf',
+
+                ('death_date_earliest',
+                'death_date_latest',),
+                ('death_date_sort_ascending',
+                'death_date_sort_descending',),
+                'death_date_edtf',
+            ),
+        }),
+    )
+
+
     LINKS_FIELDSET = ('Links', {
         'fields': (
             'website',
@@ -129,6 +169,7 @@ class CreatorChildAdmin(
 
     fieldsets = (
         NAME_FIELDSET,
+    ) + DATE_FIELDSETS + (
         LINKS_FIELDSET,
         ("Details", {
             'fields': (
@@ -148,18 +189,38 @@ class WorkChildAdmin(
     TitleSlugAdmin,
 ):
     base_model = models.WorkBase
+    save_on_top = True
     exclude = ('layout', 'alt_slug',)
     prepopulated_fields = {"slug": ("accession_number", "title",)}
+    readonly_fields = (
+        "date_edtf",
+        'date_earliest',
+        'date_latest',
+        'date_sort_ascending',
+        'date_sort_descending',
+    )
 
     inlines = [WorkOriginsInline, WorkCreatorsInlineForWorks, WorkImageInline] + \
         ICEkitContentsAdmin.inlines
 
-    DATE_FIELDSET = ("Place and date", {
-        'fields': (
-            'date_display',
-            'date_edtf',
-        ),
-    })
+    DATE_FIELDSETS = (
+        ("Date", {
+            'fields': (
+                'date_display',
+            ),
+        }),
+        ("Advanced date controls", {
+            'classes': ('collapse',),
+            'fields': (
+                ('date_earliest',
+                 'date_latest',),
+                ('date_sort_ascending',
+                 'date_sort_descending',),
+                'date_edtf',
+            ),
+        }),
+
+    )
     LINKS_FIELDSET = ('Links', {
         'fields': (
             'website',
@@ -176,7 +237,7 @@ class WorkChildAdmin(
                 'oneliner',
             ),
         }),
-        DATE_FIELDSET,
+    ) + DATE_FIELDSETS + (
         ("Details", {
             'fields': (
                 'credit_line',

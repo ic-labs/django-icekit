@@ -1,7 +1,5 @@
 from django.core.urlresolvers import reverse
-from django.template.defaultfilters import pluralize
 from django.utils.datastructures import OrderedSet
-from django_countries.fields import CountryField
 from glamkit_collections.contrib.work_creator.managers import \
     WorkCreatorQuerySet, WorkImageQuerySet
 from icekit.content_collections.abstract_models import TitleSlugMixin, \
@@ -11,6 +9,7 @@ from icekit.plugins.image.abstract_models import ImageLinkMixin
 from icekit.models import ICEkitContentsMixin
 from polymorphic.models import PolymorphicModel
 from django.db import models
+from edtf.fields import EDTFField
 
 from glamkit_collections.models import GeographicLocation
 
@@ -60,6 +59,91 @@ class CreatorBase(
                   'creators, so that he or she may be found where expected, '
                   'e.g. "Rembrandt" under "R" or "Guercino" under "G"'
     )
+
+    birth_date_display = models.CharField(
+        "Date of birth (display)",
+        blank=True,
+        max_length=255,
+        help_text='Displays date as formatted for display, rather '
+                  'than sorting.'
+    )
+    birth_date_edtf = EDTFField(
+        "Date of creation (EDTF)",
+        natural_text_field='birth_date_display',
+        lower_strict_field='birth_date_earliest',
+        upper_strict_field='birth_date_latest',
+        lower_fuzzy_field='birth_date_sort_ascending',
+        upper_fuzzy_field='birth_date_sort_descending',
+        blank=True,
+        null=True,
+        help_text="an <a href='http://www.loc.gov/standards/datetime/"
+                  "implementations.html'>EDTF</a>-formatted "
+                  "date, parsed from the display date, e.g. "
+                  "'1855/1860-06-04'",
+    )
+    birth_date_earliest = models.DateField(
+        "Earliest birth date",
+        blank=True,
+        null=True,
+    )
+    birth_date_latest = models.DateField(
+        "Latest birth date",
+        blank=True,
+        null=True,
+    )
+    birth_date_sort_ascending = models.DateField(
+        "Ascending sort by birth",
+        blank=True,
+        null=True,
+    )
+    birth_date_sort_descending = models.DateField(
+        "Descending sort by birth",
+        blank=True,
+        null=True,
+    )
+
+    death_date_display = models.CharField(
+        "Date of death (display)",
+        blank=True,
+        max_length=255,
+        help_text='Displays date as formatted for display, rather '
+                  'than sorting.'
+    )
+    death_date_edtf = EDTFField(
+        "Date of death (EDTF)",
+        natural_text_field='death_date_display',
+        lower_strict_field='death_date_earliest',
+        upper_strict_field='death_date_latest',
+        lower_fuzzy_field='death_date_sort_ascending',
+        upper_fuzzy_field='death_date_sort_descending',
+        blank=True,
+        null=True,
+        help_text="an <a href='http://www.loc.gov/standards/datetime/"
+                  "implementations.html'>EDTF</a>-formatted "
+                  "date, parsed from the display date, e.g. "
+                  "'1855/1860-06-04'",
+    )
+    death_date_earliest = models.DateField(
+        "Earliest death date",
+        blank=True,
+        null=True,
+    )
+    death_date_latest = models.DateField(
+        "Latest death date",
+        blank=True,
+        null=True,
+    )
+    death_date_sort_ascending = models.DateField(
+        "Ascending sort by death",
+        blank=True,
+        null=True,
+    )
+    death_date_sort_descending = models.DateField(
+        "Descending sort by death",
+        blank=True,
+        null=True,
+    )
+
 
     class Meta:
         verbose_name = "creator"
@@ -169,20 +253,43 @@ class WorkBase(
         "Date of creation (display)",
         blank=True,
         max_length=255,
-        help_text='Displays date as formatted for labels and reports, rather '
+        help_text='Displays date as formatted for display, rather '
                   'than sorting.'
     )  # used on 'Explore Modern Art' 53841 records
-    date_edtf = models.CharField(
+    date_edtf = EDTFField(
         "Date of creation (EDTF)",
+        natural_text_field='date_display',
+        lower_strict_field='date_earliest',
+        upper_strict_field='date_latest',
+        lower_fuzzy_field='date_sort_ascending',
+        upper_fuzzy_field='date_sort_descending',
         blank=True,
         null=True,
-        max_length=64,
         help_text="an <a href='http://www.loc.gov/standards/datetime/"
                   "implementations.html'>EDTF</a>-formatted "
-                  "date, as best as we could parse from the display date, e.g. "
+                  "date, parsed from the display date, e.g. "
                   "'1855/1860-06-04'",
     )
-
+    date_earliest = models.DateField(
+        "Earliest date",
+        blank=True,
+        null=True,
+    )
+    date_latest = models.DateField(
+        "Latest date",
+        blank=True,
+        null=True,
+    )
+    date_sort_ascending = models.DateField(
+        "Ascending sort",
+        blank=True,
+        null=True,
+    )
+    date_sort_descending = models.DateField(
+        "Descending sort",
+        blank=True,
+        null=True,
+    )
     # where was it made
     origin_locations = models.ManyToManyField(GeographicLocation, through=WorkOrigin)
 
