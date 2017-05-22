@@ -1,12 +1,9 @@
-from fluent_pages.integration.fluent_contents.admin import FluentContentsPageAdmin
+from fluent_pages.integration.fluent_contents.admin \
+    import FluentContentsPageAdmin
 
 from icekit.admin_tools.mixins import FluentLayoutsMixin, HeroMixinAdmin, \
     ListableMixinAdmin
 from icekit.admin import ICEkitContentsAdmin
-
-
-class UnpublishableLayoutPageAdmin(FluentLayoutsMixin, FluentContentsPageAdmin):
-    raw_id_fields = ('parent',)
 
 
 class LayoutPageAdmin(

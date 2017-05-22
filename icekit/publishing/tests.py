@@ -13,8 +13,6 @@ from django.test import TestCase, TransactionTestCase, RequestFactory
 from django.test.utils import override_settings, modify_settings
 from django.utils import timezone
 
-from django_webtest import WebTest
-
 from mock import patch, Mock
 
 from django_dynamic_fixture import G
@@ -39,7 +37,7 @@ from icekit.publishing.utils import get_draft_hmac, verify_draft_url, \
     get_draft_url, PublishingException, NotDraftException
 from icekit.publishing.tests_base import BaseAdminTest
 from icekit.tests.models import LayoutPageWithRelatedPages, \
-    UnpublishableLayoutPage, Article, ArticleListing, PublishingM2MModelA, \
+    Article, ArticleListing, PublishingM2MModelA, \
     PublishingM2MModelB, PublishingM2MThroughTable
 
 User = get_user_model()
@@ -1494,18 +1492,6 @@ class TestPublishingForPageViews(BaseAdminTest):
             self.layoutpage,
             html='<b>test content instance</b>'
         )
-        # UnpublishableLayoutPage is not a PublishingModel
-        self.unpublishablelayoutpage = UnpublishableLayoutPage.objects.create(
-            author=self.super_user,
-            title='Test Unpublishable LayoutPage',
-            layout=self.layout,
-            status=UrlNode.DRAFT,
-        )
-        self.content_instance = fluent_contents.create_content_instance(
-            RawHtmlItem,
-            self.unpublishablelayoutpage,
-            html='<b>test content instance</b>'
-        )
 
     def test_url_routing_for_draft_and_published_copies(self):
         # Unpublished page is not visible to anonymous users
@@ -1603,44 +1589,6 @@ class TestPublishingForPageViews(BaseAdminTest):
         # Published page is visible to anonymous users
         response = self.app.get(
             self.layoutpage.get_absolute_url(),
-            user=self.normal_user)
-        self.assertEqual(response.status_code, 200)
-
-    # This is a duplicate of `test_verified_draft_url_for_publishingmodel` but
-    # for a non-publishable model instead, to ensure verified draft URLs work
-    # in all cases.
-    def test_verified_draft_url_for_non_publishingmodel(self):
-        # Unpublished page is not visible to anonymous users
-        response = self.app.get(
-            self.unpublishablelayoutpage.get_absolute_url(),
-            user=self.normal_user,
-            expect_errors=True)
-        self.assertEqual(response.status_code, 404)
-        # Unpublished page visible to staff user via '?preview' param redirect
-        response = self.app.get(
-            self.unpublishablelayoutpage.get_absolute_url(),
-            user=self.super_user)
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue('?preview=' in response['Location'])
-        response = response.follow()
-        self.assertEqual(response.status_code, 200)
-        # Unpublished page is visible to any user with signed '?preview' param
-        salt = '123'
-        url_hmac = get_draft_hmac(
-            salt, self.unpublishablelayoutpage.get_absolute_url())
-        response = self.app.get(
-            self.unpublishablelayoutpage.get_absolute_url() +
-            '?preview=%s:%s' % (salt, url_hmac),
-            user=self.normal_user)
-        self.assertEqual(response.status_code, 200)
-
-        # Publish page by changing status (no `published()` method)
-        self.unpublishablelayoutpage.status = UrlNode.PUBLISHED
-        self.unpublishablelayoutpage.save()
-
-        # Published page is visible to anonymous users
-        response = self.app.get(
-            self.unpublishablelayoutpage.get_absolute_url(),
             user=self.normal_user)
         self.assertEqual(response.status_code, 200)
 

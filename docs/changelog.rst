@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Develop
+-------
+
+-  Remove unpublishable variants of the main GLAMkit models as keeping them is
+   not worth the maintenance overhead or chance for confusion.
+
 0.17 (2017-04-30)
 -----------------
 
