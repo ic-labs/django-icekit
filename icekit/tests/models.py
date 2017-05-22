@@ -1,8 +1,6 @@
 """
 Test models for ``icekit`` app.
 """
-from urlparse import urljoin
-
 from django.db import models
 from django.http import HttpResponse
 
@@ -14,11 +12,11 @@ from icekit.content_collections.abstract_models import AbstractListingPage, \
     AbstractCollectedContent, TitleSlugMixin
 from icekit.content_collections.page_type_plugins import ListingPagePlugin
 
-from icekit.page_types.layout_page.abstract_models import \
-    AbstractLayoutPage, AbstractUnpublishableLayoutPage
+from icekit.page_types.layout_page.abstract_models import AbstractLayoutPage
 from icekit.publishing.models import PublishingModel
 from icekit.plugins import ICEkitFluentContentsPagePlugin
 from icekit import mixins
+
 
 class BaseModel(abstract_models.AbstractBaseModel):
     """
@@ -58,7 +56,8 @@ class ArticleListing(AbstractListingPage):
         db_table = 'test_articlelisting'
 
 
-class Article(AbstractCollectedContent, PublishableFluentContents, TitleSlugMixin):
+class Article(AbstractCollectedContent, PublishableFluentContents,
+              TitleSlugMixin):
     """Articles that belong to a particular listing"""
     parent = models.ForeignKey(
         ArticleListing,
@@ -88,16 +87,6 @@ class LayoutPageWithRelatedPagesPlugin(ICEkitFluentContentsPagePlugin):
     """
     model = LayoutPageWithRelatedPages
     render_template = 'icekit/page_types/article/default.html'
-
-
-class UnpublishableLayoutPage(AbstractUnpublishableLayoutPage):
-    pass
-
-
-@page_type_pool.register
-class UnpublishableLayoutPagePlugin(ICEkitFluentContentsPagePlugin):
-    model = UnpublishableLayoutPage
-    render_template = 'icekit/layouts/default.html'
 
 
 @page_type_pool.register
