@@ -72,7 +72,7 @@ def get_draft_url(url):
     salt = get_random_string(5)
     # QueryDict requires a bytestring as its first argument
     query = QueryDict(force_bytes(url.query), mutable=True)
-    query['edit'] = '%s:%s' % (salt, get_draft_hmac(salt, url.path))
+    query['preview'] = '%s:%s' % (salt, get_draft_hmac(salt, url.path))
     # Reconstruct URL.
     parts = list(url)
     parts[4] = query.urlencode(safe=':')
@@ -87,8 +87,9 @@ def verify_draft_url(url):
     url = urlparse.urlparse(url)
     # QueryDict requires a bytestring as its first argument
     query = QueryDict(force_bytes(url.query))
-    try:
-        salt, hmac = query['edit'].split(':')
-    except (KeyError, ValueError):
-        return False
-    return hmac == get_draft_hmac(salt, url.path)
+    # TODO Support legacy 'edit' param name for now
+    preview_hmac = query.get('preview') or query.get('edit')
+    if preview_hmac:
+        salt, hmac = preview_hmac.split(':')
+        return hmac == get_draft_hmac(salt, url.path)
+    return False

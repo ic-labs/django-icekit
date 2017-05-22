@@ -4,12 +4,18 @@ Changelog
 In development
 --------------
 
-Updated glamkit-collections to use new EDTF fields and automatically derive
-EDTF date from plain text date.
+-  Updated glamkit-collections to use new EDTF fields and automatically derive
+   EDTF date from plain text date.
 
+-  Remove unpublishable variants of the main GLAMkit models as keeping them is
+   not worth the maintenance overhead or chance for confusion.
 
 0.17 (2017-04-30)
 -----------------
+
+-  Rename the GET parameter used to trigger and permit preview of draft pages
+   to be 'preview' instead of 'edit'. The legacy 'edit' parameter name is still
+   supported.
 
 -  Changed the way that we specify the homepage: create a page with url
    override `/`. This is the way fluent does it. As a fallback, we look for a

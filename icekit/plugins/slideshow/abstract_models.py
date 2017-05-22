@@ -1,6 +1,5 @@
 from django.db import models
 from django.template import Context
-from django.template import RequestContext
 from django.template import Template
 from django.utils import six
 from django.utils.encoding import python_2_unicode_compatible
@@ -13,7 +12,7 @@ from . import appsettings
 
 
 @python_2_unicode_compatible
-class AbstractUnpublishableSlideShow(models.Model):
+class AbstractSlideShow(ICEkitContentsMixin):
     """
     A reusable Slide Show.
     """
@@ -51,18 +50,6 @@ class AbstractUnpublishableSlideShow(models.Model):
             'obj': self,
         })
         return t.render(c)
-
-
-@python_2_unicode_compatible
-class AbstractSlideShow(AbstractUnpublishableSlideShow, ICEkitContentsMixin):
-
-    class Meta:
-        abstract = True
-        verbose_name = "Image gallery"
-        verbose_name_plural = "Image galleries"
-
-    def __str__(self):
-        return self.title
 
 
 @python_2_unicode_compatible
