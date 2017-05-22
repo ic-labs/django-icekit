@@ -45,26 +45,27 @@ class ModelSubSerializer(serializers.ModelSerializer):
         },
         ...
     }
-
-
     """
 
-    def to_representation(self, instance):
-        """Strips Meta.source_prefix from the front of keys"""
+    def get_fields(self):
+        """
+        Convert default field names for this sub-serializer into versions where
+        the field name has the prefix removed, but each field object knows the
+        real model field name by setting the field's `source` attribute.
+        """
         prefix = getattr(self.Meta, 'source_prefix', '')
-        default_rep = super(ModelSubSerializer, self)\
-            .to_representation(instance)
-        return OrderedDict([
-            (k[len(prefix):], v)
-            if k.startswith(prefix) else (k, v) for k, v in default_rep.items()
-        ])
-
-    def to_internal_value(self, data):
-        prefix = getattr(self.Meta, 'source_prefix', '')
-        prefixed_data = dict([
-            (prefix + n, v) for n, v in data.items()
-        ])
-        return super(ModelSubSerializer, self).to_internal_value(prefixed_data)
+        fields = super(ModelSubSerializer, self).get_fields()
+        fields_without_prefix = OrderedDict()
+        for field_name, field in fields.items():
+            if field_name.startswith(prefix):
+                # Set real model field name as field's `source` unless the
+                # source is already explicitly set, in which case it is
+                # probably a method name not the direct field name
+                if not field.source:
+                    field.source = field_name
+                field_name = field_name[len(prefix):]
+            fields_without_prefix[field_name] = field
+        return fields_without_prefix
 
     def get_attribute(self, instance):
         # This serializer also uses the same instance as the parent - we're
