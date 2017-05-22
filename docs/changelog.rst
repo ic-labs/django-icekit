@@ -1,6 +1,13 @@
 Changelog
 =========
 
+In development
+--------------
+
+Updated glamkit-collections to use new EDTF fields and automatically derive
+EDTF date from plain text date.
+
+
 0.17 (2017-04-30)
 -----------------
 
