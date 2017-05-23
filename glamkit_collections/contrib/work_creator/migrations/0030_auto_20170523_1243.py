@@ -8,7 +8,9 @@ import edtf.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gk_collections_work_creator', '0029_auto_20170523_1149'),
+        # this migration is cherry-picked. The ref is updated to point to the 
+        # most recent existing migration. After merge, it should be reverted.
+        ('gk_collections_work_creator', '0023_auto_20170522_1508'),
     ]
 
     operations = [
