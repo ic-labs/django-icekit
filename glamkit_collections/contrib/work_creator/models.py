@@ -21,7 +21,7 @@ from glamkit_collections.models import GeographicLocation
 
 class _WorkCreatorMetaDataMixin(models.Model):
     """ Basic metadata fields shared by all collection models """
-    external_identifier = models.CharField(
+    external_ref = models.CharField(
         max_length=255,
         blank=True,
         null=True,
