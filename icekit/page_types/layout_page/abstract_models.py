@@ -1,15 +1,7 @@
-from fluent_pages.integration.fluent_contents import FluentContentsPage
-
 from icekit.models import ICEkitFluentContentsPageMixin
 from icekit.mixins import LayoutFieldMixin, HeroMixin, ListableMixin
-from icekit.plugins.descriptors import contribute_to_class as contribute_placeholder_descriptor_to_class
-
-
-class AbstractUnpublishableLayoutPage(FluentContentsPage, LayoutFieldMixin):
-    class Meta:
-        abstract = True
-
-contribute_placeholder_descriptor_to_class(AbstractUnpublishableLayoutPage, name='slots')
+from icekit.plugins.descriptors import \
+    contribute_to_class as contribute_placeholder_descriptor_to_class
 
 
 class AbstractLayoutPage(ICEkitFluentContentsPageMixin, LayoutFieldMixin,

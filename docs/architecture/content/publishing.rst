@@ -106,8 +106,8 @@ Draft Request Context
 
 The ``icekit.publishing.middleware.PublishingMiddleware`` middleware
 class allows privileged users to view draft pages and page content
-before it has been published by adding the 'edit' GET parameter to page
-URLs, for example: http://site.com/welcome-page/?edit
+before it has been published by adding the 'preview' GET parameter to page
+URLs, for example: http://site.com/welcome-page/?preview
 
 For the draft request context mechanism to work you must define a text
 model setting ``DRAFT_SECRET_KEY`` in the CMS admin at
@@ -118,7 +118,7 @@ If you need to perform custom logic to show content to privileged users
 you can use the ``is_draft_request_context()`` global function defined
 with the middleware that will return true if, and only if, a privileged
 user has explicitly requested to view the draft version of a page by
-providing the 'edit' GET parameter.
+providing the 'preview' GET parameter.
 
 Implementation details
 ----------------------

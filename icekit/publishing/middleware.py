@@ -69,7 +69,8 @@ class PublishingMiddleware(object):
     @staticmethod
     def is_draft_request(request):
         """ Is this request explicly flagged as for draft content? """
-        return 'edit' in request.GET
+        return 'preview' in request.GET \
+            or 'edit' in request.GET  # TODO Support legacy 'edit' name for now
 
     @staticmethod
     def is_draft(request):
@@ -82,11 +83,11 @@ class PublishingMiddleware(object):
           reviewers' sole purpose is to review draft content and they need not
           see the published content
         - the user is a staff member and therefore can see draft versions of
-          pages if they wish, and the 'edit' GET parameter flag is included to
-          show the draft page is definitely wanted instead of a normal
+          pages if they wish, and the 'preview' GET parameter flag is included
+          to show the draft page is definitely wanted instead of a normal
           published page.
-        - the 'edit' GET parameter flag is included with a valid HMAC for the
-          requested URL, regardless of authenticated permissions.
+        - the 'preview' GET parameter flag is included with a valid HMAC for
+          the requested URL, regardless of authenticated permissions.
         """
         # Admin resource requested.
         if PublishingMiddleware.is_admin_request(request):
@@ -193,7 +194,7 @@ class PublishingMiddleware(object):
                 and not PublishingMiddleware.is_admin_request(request)
                 # Don't mess with API requests at all
                 and not PublishingMiddleware.is_api_request(request)
-                # Can user view draft content if we add the 'edit' param
+                # Can user view draft content if we add the 'preview' param
                 and PublishingMiddleware.is_staff_user(request)):
             # TODO Is there a sane way to check for draft version of resource
             # at this URL path, without just redirecting the user to it?

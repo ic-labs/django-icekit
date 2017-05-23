@@ -127,7 +127,8 @@ Next steps
 ==========
 
 -  `Start building your site <docs/howto/start.md>`__
--  `Architectural overview <docs/intro/architecture.md>`__
+-  `Create pages quickly with a site map document <docs/topics/import-site-map.rst>`__
+-  `Architectural overview <docs/architecture/index.rst>`__
 -  `Read the Documentation <http://docs.glamkit.com>`__
 
 .. |Build Status| image:: https://img.shields.io/travis/ic-labs/django-icekit.svg
