@@ -36,9 +36,6 @@ class _WorkCreatorMetaDataMixin(models.Model):
         editable=False,
         auto_now=True,
     )
-    admin_notes = models.TextField(
-        blank=True,
-    )
 
     class Meta:
         abstract = True
