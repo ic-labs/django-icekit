@@ -1,9 +1,11 @@
 from django.db import models
 from django.core.urlresolvers import reverse
-from django_countries.fields import CountryField
 from django.utils.text import slugify
+from django.utils.datastructures import OrderedSet
 
 from polymorphic.models import PolymorphicModel
+
+from edtf.fields import EDTFField
 
 from icekit.content_collections.abstract_models import TitleSlugMixin, \
     PluralTitleSlugMixin
@@ -14,6 +16,7 @@ from icekit.utils.strings import is_empty
 
 from glamkit_collections.contrib.work_creator.managers import \
     WorkCreatorQuerySet, WorkImageQuerySet
+from glamkit_collections.models import GeographicLocation
 
 
 class _WorkCreatorMetaDataMixin(models.Model):
@@ -96,6 +99,91 @@ class CreatorBase(
         max_length=255,
     )
     wikipedia_link = models.URLField(blank=True, help_text="e.g. 'https://en.wikipedia.org/wiki/Pablo_Picasso'")
+
+    birth_date_display = models.CharField(
+        "Date of birth (display)",
+        blank=True,
+        max_length=255,
+        help_text='Displays date as formatted for display, rather '
+                  'than sorting.'
+    )
+    birth_date_edtf = EDTFField(
+        "Date of creation (EDTF)",
+        natural_text_field='birth_date_display',
+        lower_strict_field='birth_date_earliest',
+        upper_strict_field='birth_date_latest',
+        lower_fuzzy_field='birth_date_sort_ascending',
+        upper_fuzzy_field='birth_date_sort_descending',
+        blank=True,
+        null=True,
+        help_text="an <a href='http://www.loc.gov/standards/datetime/"
+                  "implementations.html'>EDTF</a>-formatted "
+                  "date, parsed from the display date, e.g. "
+                  "'1855/1860-06-04'",
+    )
+    birth_date_earliest = models.DateField(
+        "Earliest birth date",
+        blank=True,
+        null=True,
+    )
+    birth_date_latest = models.DateField(
+        "Latest birth date",
+        blank=True,
+        null=True,
+    )
+    birth_date_sort_ascending = models.DateField(
+        "Ascending sort by birth",
+        blank=True,
+        null=True,
+    )
+    birth_date_sort_descending = models.DateField(
+        "Descending sort by birth",
+        blank=True,
+        null=True,
+    )
+
+    death_date_display = models.CharField(
+        "Date of death (display)",
+        blank=True,
+        max_length=255,
+        help_text='Displays date as formatted for display, rather '
+                  'than sorting.'
+    )
+    death_date_edtf = EDTFField(
+        "Date of death (EDTF)",
+        natural_text_field='death_date_display',
+        lower_strict_field='death_date_earliest',
+        upper_strict_field='death_date_latest',
+        lower_fuzzy_field='death_date_sort_ascending',
+        upper_fuzzy_field='death_date_sort_descending',
+        blank=True,
+        null=True,
+        help_text="an <a href='http://www.loc.gov/standards/datetime/"
+                  "implementations.html'>EDTF</a>-formatted "
+                  "date, parsed from the display date, e.g. "
+                  "'1855/1860-06-04'",
+    )
+    death_date_earliest = models.DateField(
+        "Earliest death date",
+        blank=True,
+        null=True,
+    )
+    death_date_latest = models.DateField(
+        "Latest death date",
+        blank=True,
+        null=True,
+    )
+    death_date_sort_ascending = models.DateField(
+        "Ascending sort by death",
+        blank=True,
+        null=True,
+    )
+    death_date_sort_descending = models.DateField(
+        "Descending sort by death",
+        blank=True,
+        null=True,
+    )
+
 
     class Meta:
         verbose_name = "creator"
@@ -181,6 +269,18 @@ class CreatorBase(
         return self.get_roles().filter(is_primary=True)
 
 
+class WorkOrigin(models.Model):
+    work = models.ForeignKey('WorkBase')
+    geographic_location = models.ForeignKey(GeographicLocation)
+    order = models.PositiveIntegerField(default=0)
+
+    def __unicode__(self):
+        return u"{0} originates from {1}".format(self.work, self.geographic_location)
+
+    class Meta:
+        ordering = ('order',)
+
+
 class WorkBase(
     PolymorphicModel,
     FluentFieldsMixin,
@@ -194,6 +294,13 @@ class WorkBase(
     alt_slug = models.SlugField(max_length=255, blank=True, db_index=True)
     # using slugified, no-hyphens. Alt slug matches should redirect to the
     # canonical view.
+
+    external_ref = models.CharField(
+        'External reference',
+        max_length=255,
+        blank=True, null=True,
+        help_text="The reference identifier used by external data source."
+    )
 
     # what's it called
     title = models.CharField(
@@ -214,40 +321,46 @@ class WorkBase(
         "Date of creation (display)",
         blank=True,
         max_length=255,
-        help_text='Displays date as formatted for labels and reports, rather '
+        help_text='Displays date as formatted for display, rather '
                   'than sorting.'
     )  # used on 'Explore Modern Art' 53841 records
-    date_edtf = models.CharField(
+    date_edtf = EDTFField(
         "Date of creation (EDTF)",
+        natural_text_field='date_display',
+        lower_strict_field='date_earliest',
+        upper_strict_field='date_latest',
+        lower_fuzzy_field='date_sort_ascending',
+        upper_fuzzy_field='date_sort_descending',
         blank=True,
         null=True,
-        max_length=64,
         help_text="an <a href='http://www.loc.gov/standards/datetime/"
                   "implementations.html'>EDTF</a>-formatted "
-                  "date, as best as we could parse from the display date, e.g. "
+                  "date, parsed from the display date, e.g. "
                   "'1855/1860-06-04'",
     )
-
-    # where was it made
-    origin_continent = models.CharField(
+    date_earliest = models.DateField(
+        "Earliest date",
         blank=True,
-        max_length=255)
-    origin_country = CountryField(blank=True)
-    origin_state_province = models.CharField(
-        blank=True,
-        max_length=255)
-    origin_city = models.CharField(
-        blank=True,
-        max_length=255)
-    origin_neighborhood = models.CharField(
-        blank=True,
-        max_length=255)
-    origin_colloquial = models.CharField(
-        blank=True,
-        max_length=255,
-        help_text='The colloquial or historical name of the place at the time '
-                  'of the object\'s creation, e.g., "East Bay"'
+        null=True,
     )
+    date_latest = models.DateField(
+        "Latest date",
+        blank=True,
+        null=True,
+    )
+    date_sort_ascending = models.DateField(
+        "Ascending sort",
+        blank=True,
+        null=True,
+    )
+    date_sort_descending = models.DateField(
+        "Descending sort",
+        blank=True,
+        null=True,
+    )
+    # where was it made
+    origin_locations = models.ManyToManyField(GeographicLocation, through=WorkOrigin)
+
     credit_line = models.TextField(
         blank=True,
         help_text="A formal public credit statement about a transfer of "
@@ -366,6 +479,19 @@ class WorkBase(
     def get_primary_roles(self):
         """Return the m2m relations connecting me to creators as primary creator"""
         return self.get_roles().filter(is_primary=True)
+
+    def get_title(self):
+        if self.date_display:
+            return u"{0} ({1})".format(self.title, self.date_display)
+        return self.title
+
+    def get_origin_countries(self):
+        countries = OrderedSet()
+        for o in WorkOrigin.objects.filter(work=self):
+            if o.geographic_location.country:
+                countries.add(o.geographic_location.country)
+        return countries
+
 
 
 class Role(PluralTitleSlugMixin):

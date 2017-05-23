@@ -33,6 +33,7 @@ setuptools.setup(
         'pyparsing',
         'unidecode',
         'django-admin-sortable2',
+        'edtf>=2.0.1',
     ],
     extras_require={
         'api': [
