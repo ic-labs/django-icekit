@@ -295,13 +295,6 @@ class WorkBase(
     # using slugified, no-hyphens. Alt slug matches should redirect to the
     # canonical view.
 
-    external_ref = models.CharField(
-        'External reference',
-        max_length=255,
-        blank=True, null=True,
-        help_text="The reference identifier used by external data source."
-    )
-
     # what's it called
     title = models.CharField(
         max_length=511,  # 511? Good question: aping `subtitle` & `oneliner`
