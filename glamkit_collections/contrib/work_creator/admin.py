@@ -106,7 +106,7 @@ class CreatorChildAdmin(
 ):
     base_model = models.CreatorBase
     save_on_top = True
-    raw_id_fields = ['portrait', ]
+    raw_id_fields = ('portrait', )
     exclude = ('layout', 'alt_slug',)
     prepopulated_fields = {"slug": ("name_display",)}
     inlines = [WorkCreatorsInlineForCreators] + \
@@ -130,7 +130,6 @@ class CreatorChildAdmin(
             'name_display',
             'slug',
             'name_sort',
-            'admin_notes',
         ),
     })
 
