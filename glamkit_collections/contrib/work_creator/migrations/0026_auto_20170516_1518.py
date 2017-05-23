@@ -9,7 +9,7 @@ from django.utils.timezone import utc
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gk_collections_work_creator', '0013_creatorbase_name_full'),
+        ('gk_collections_work_creator', '0025_creatorbase_name_full'),
     ]
 
     operations = [
