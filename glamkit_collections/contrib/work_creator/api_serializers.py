@@ -12,7 +12,7 @@ from icekit.api.images.serializers import RelatedImageSerializer
 
 from .models import WorkBase, CreatorBase, WorkCreator as WorkCreatorModel, \
     WorkImage as WorkImageModel, WorkImageType as WorkImageTypeModel, \
-    Role as RoleModel
+    Role as RoleModel, WorkOrigin as WorkOriginModel
 from .plugins.moving_image.models import Rating as RatingModel, \
     Genre as GenreModel, MediaType as MediaTypeModel, \
     MovingImageWork as MovingImageWorkModel
@@ -264,22 +264,12 @@ class Creator(BaseCollectionModelSerializerMixin,
         disable_unique_together_constraint_fields = ['slug']
 
 
-class WorkOrigin(ModelSubSerializer):
-    origin_country = serializers.SerializerMethodField()
-
-    def get_country(self, obj):
-        return obj.origin_country.name
+class WorkOrigin(serializers.ModelSerializer):
 
     class Meta:
-        model = WorkBase
-        source_prefix = 'origin_'
+        model = WorkOriginModel
         fields = (
-            'origin_continent',
-            'origin_country',
-            'origin_state_province',
-            'origin_city',
-            'origin_neighborhood',
-            'origin_colloquial',
+            'geographic_location',
         )
 
 
@@ -337,7 +327,9 @@ class Work(BaseCollectionModelSerializerMixin,
         required=False,
     )
     origin = WorkOrigin(
-        required=False,
+        source="workorigin_set",
+        many=True,
+        read_only=True,
     )
 
     class Meta:
@@ -346,9 +338,9 @@ class Work(BaseCollectionModelSerializerMixin,
             # Relationships
             'creators',
             'images',
+            'origin',
             # Sub-resources
             'date',
-            'origin',
             # Fields
             api_settings.URL_FIELD_NAME,
             'publishing_is_draft',
