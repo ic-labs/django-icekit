@@ -321,7 +321,6 @@ class WorkBase(
         blank=True,
     )
     wikipedia_link = models.URLField(blank=True, help_text="e.g. 'https://en.wikipedia.org/wiki/Beauty_and_the_Beast_(2014_film)'")
-    admin_notes = models.TextField(blank=True)
     images = models.ManyToManyField('icekit_plugins_image.Image', through="WorkImage")
 
     class Meta:
