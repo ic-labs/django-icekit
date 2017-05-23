@@ -6,8 +6,6 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-from glamkit_collections.utils import alt_slugify
-
 
 class ModelViewSet(viewsets.ModelViewSet):
     """
@@ -60,6 +58,7 @@ class RedirectViewset(viewsets.ReadOnlyModelViewSet):
 
         # fall back to alt slug
         try:
+            from glamkit_collections.utils import alt_slugify
             alt_slug = alt_slugify(slug)
             alt = get_object_or_404(self.queryset, alt_slug=alt_slug)
             return HttpResponseRedirect(
