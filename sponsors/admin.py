@@ -2,7 +2,7 @@
 Administration configuration for Sponser models.
 """
 from django.contrib import admin
-from icekit.utils.admin.mixins import ThumbnailAdminMixin
+from icekit.admin_tools.mixins import ThumbnailAdminMixin
 
 from . import models
 
