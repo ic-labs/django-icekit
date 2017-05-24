@@ -6,3 +6,8 @@
 from icekit.project.settings.glamkit import *  # glamkit, icekit
 
 # Override the default ICEkit settings to form project settings.
+
+
+# Prepend local apps, so that their static files are used in preference.
+# INSTALLED_APPS = (
+# ) + INSTALLED_APPS

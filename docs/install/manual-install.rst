@@ -22,7 +22,7 @@ Install ICEkit system dependencies
 This section describes how to install the required system packages:
 
 -  PostgreSQL
--  Elasticsearch
+-  Elasticsearch 2.x
 -  git-secret
 -  md5sum
 -  Nginx
@@ -49,9 +49,11 @@ the instructions to configure Postgres to start automatically.
 Homebrew
 ........
 
-The rest can be installed with `Homebrew <http://brew.sh/>`__::
+The rest can be installed with `Homebrew <http://brew.sh/>`__. Elastic search
+ 2.4 is keg-only so must be force-linked::
 
-    $ brew install elasticsearch git-secret md5sha1sum nginx npm pv python redis
+    $ brew install elasticsearch@2.4 git-secret md5sha1sum nginx npm pv python redis
+    $ brew link elasticsearch@2.4 --force
 
 You may want to use ``launchd`` to start these services and restart them at login::
 
