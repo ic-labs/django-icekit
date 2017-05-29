@@ -191,6 +191,7 @@ class WorkCreatorFromWork(WorkCreator):
     """ Relationship from a work to its creators """
     class Meta:
         model = WorkCreatorModel
+        extra_kwargs = WorkCreator.Meta.extra_kwargs
         # All fields from base WorkCreator except 'work' which is redundant
         fields = [
             f for f in WorkCreator.Meta.fields
@@ -202,6 +203,7 @@ class WorkCreatorFromCreator(WorkCreator):
     """ Relationship from a creator to their works """
     class Meta:
         model = WorkCreatorModel
+        extra_kwargs = WorkCreator.Meta.extra_kwargs
         # All fields from base WorkCreator except 'creator' which is redundant
         fields = [
             f for f in WorkCreator.Meta.fields
