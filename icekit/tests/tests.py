@@ -587,3 +587,4 @@ class TestIceKitTags(WebTest):
         response.mustcontain('<div class="tag-fake-slot"></div>')
         response.mustcontain('<div class="tag-fake-slot-render">None</div>')
         response.mustcontain('div class="filter-fake-slot">None</div>')
+
