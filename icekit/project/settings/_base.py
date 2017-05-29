@@ -782,7 +782,6 @@ INSTALLED_APPS += (
     'icekit.plugins.instagram_embed',
     'icekit.plugins.links',
     'icekit.plugins.map',
-    'icekit.plugins.map_with_text',
     'icekit.plugins.oembed_with_caption',
     # Replaces 'icekit.plugins.oembed_with_caption',
     # Includes fix for https://github.com/django-fluent/django-fluent-contents/issues/65
