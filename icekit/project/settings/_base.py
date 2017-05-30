@@ -519,7 +519,6 @@ ASSETS_PLUGINS = [
 EMBED_PLUGINS = [
     'IframePlugin',
     'MapPlugin',
-    'MapWithTextPlugin',
 
     # Oembeds
     'InstagramEmbedPlugin',
