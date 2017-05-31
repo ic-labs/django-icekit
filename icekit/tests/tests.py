@@ -227,9 +227,10 @@ class Models(WebTest):
         self.map_1 = fluent_contents.create_content_instance(
             MapItem,
             self.page_1,
-            share_url='https://www.google.com.au/maps/place/The+Interaction+Consortium/'
-                      '@-33.8884315,151.2006512,17z/data=!3m1!4b1!4m2!3m1!1s0x6b12b1d842ee9aa9:'
-                      '0xb0a19ac433ef0be8'
+            _embed_code='<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3312.0476344648832!2d151.'
+                        '19845715159963!3d-33.88842702741586!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12'
+                        'b1d842ee9aa9%3A0xb0a19ac433ef0be8!2sThe+Interaction+Consortium!5e0!3m2!1sen!2sau!4v149620126'
+                        '4670" width="600" height="450" frameborder="0" style="border:0" allowfullscreen></iframe>'
         )
         self.horizontal_rule_1 = fluent_contents.create_content_instance(
             HorizontalRuleItem,
