@@ -41,7 +41,7 @@ def add_days(date, days):
 
 
 YEAR_RE = r"\W*(o|y|Y)\W*" # year markers, plus any surrounding non-word text
-MONTH_RE = r"\W*(b|E|F|m|M|n|N)\W*" # month markers, plus any surrounding non-word text
+MONTH_RE = r"\W*(b|E|F|m|M|n|N|S|t)\W*" # month markers, plus any surrounding non-word text
 
 def _format_with_same_year(format_specifier):
     """
