@@ -10,6 +10,11 @@ In development
 -  Remove unpublishable variants of the main GLAMkit models as keeping them is
    not worth the maintenance overhead or chance for confusion.
 
+-  `events_tags.date_range` is now smart enough to remove year and month from
+   date formats. This behaviour can be overwridden by specifying named formats
+   in your `formats` module with `_SAME_YEAR` and `_SAME_YEAR_SAME_MONTH`
+   appended.
+
 0.17 (2017-04-30)
 -----------------
 
