@@ -27,7 +27,7 @@ from django.template.response import TemplateResponse
 from django.utils.timezone import get_current_timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from icekit.admin_mixins import FluentLayoutsMixin
+from icekit.admin_tools.mixins import FluentLayoutsMixin
 from icekit.admin_tools.polymorphic import \
     ChildModelPluginPolymorphicParentModelAdmin
 from icekit.content_collections.admin import TitleSlugAdmin

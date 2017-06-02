@@ -422,6 +422,9 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         """
         Return the first and last chronological `Occurrence` for this event.
         """
+
+        # TODO: if the event has a generator that never ends, return "None"
+        # for the last item.
         first = self.get_occurrences().order_by('start').first()
         last = self.get_occurrences().order_by('-end').first()
         return (first, last)
