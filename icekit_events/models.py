@@ -12,6 +12,7 @@ import six
 from django.db.models import Q
 from django.template import Context
 from django.template import Template
+from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 
 from icekit_events.managers import EventManager, OccurrenceManager
@@ -161,6 +162,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     instances that define the rules for automatically generating repeating
     occurrences.
     """
+
     objects = EventManager()
 
     primary_type = models.ForeignKey(
@@ -282,7 +284,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         We don't really delete occurrences because doing so would just cause
         them to be re-generated the next time occurrence generation is done.
         """
-        if occurrence not in self.occurrences.all():
+        if occurrence not in self.occurrence_list:
             return  # No-op
         occurrence.is_protected_from_regeneration = True
         occurrence.is_cancelled = True
@@ -404,19 +406,32 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
             generator.event = dst_obj
             generator.save()
 
-    def get_part_of(self):
-        if self.part_of:
+    @cached_property
+    def visible_part_of(self):
+        if self.part_of_id:
             return self.part_of.get_visible()
+        return False
 
-    def get_occurrences(self):
+    @cached_property
+    def occurrence_list(self):
         """
-        :return: My occurrences, or those of my get_part_of() event
+        :return: A list of my occurrences, or those of my visible_part_of event
         """
-        if self.occurrences.count():
-            return self.occurrences
-        elif self.get_part_of():
-            return self.get_part_of().get_occurrences()
-        return self.occurrences # will be empty, but at least queryable
+        o = list(self.occurrences.all())
+        if o:
+            return o
+        if self.visible_part_of:
+            return self.visible_part_of.occurrence_list
+        return o # empty
+
+    @cached_property
+    def upcoming_occurrence_list(self):
+        o = list(self.occurrences.upcoming())
+        if o:
+            return o
+        if self.visible_part_of:
+            return self.visible_part_of.upcoming_occurrence_list
+        return o # empty
 
     def get_occurrences_range(self):
         """
@@ -425,8 +440,15 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
 
         # TODO: if the event has a generator that never ends, return "None"
         # for the last item.
-        first = self.get_occurrences().order_by('start').first()
-        last = self.get_occurrences().order_by('-end').first()
+        try:
+            first = self.occurrence_list[0]
+        except IndexError:
+            first = None
+
+        try:
+            last = self.occurrence_list[-1]
+        except IndexError:
+            last = None
         return (first, last)
 
     def get_upcoming_occurrences_by_day(self):
@@ -435,7 +457,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         """
         result = OrderedDict()
 
-        for occ in self.get_occurrences().upcoming().order_by('start'):
+        for occ in self.upcoming_occurrence_list:
             result.setdefault(occ.local_start.date(), []).append(occ)
 
         return result.items()
@@ -446,9 +468,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         :return: a sorted set of all the different dates that this event
         happens on.
         """
-        occurrences = self.get_occurrences().filter(
-            is_cancelled=False
-        )
+        occurrences = [o for o in self.occurrence_list if not o.is_cancelled]
         dates = set([o.local_start.date() for o in occurrences])
         sorted_dates = sorted(dates)
         return sorted_dates
@@ -458,9 +478,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         :return: a sorted set of all the different times that this event
         happens on.
         """
-        occurrences = self.get_occurrences().filter(
-            is_all_day=False, is_cancelled=False
-        )
+        occurrences = [o for o in self.occurrence_list if not o.is_cancelled and not o.is_all_day]
         times = set([o.local_start.time() for o in occurrences])
         sorted_times = sorted(times)
         return sorted_times
@@ -469,10 +487,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         return reverse('icekit_events_eventbase_detail', args=(self.slug,))
 
     def get_children(self):
-        events = EventBase.objects.filter(
-            id__in=self.get_draft().contained_events.values_list('id', flat=True)
-        )
-        return events
+        return EventBase.objects.filter(part_of_id=self.get_draft().id)
 
     def get_cta(self):
         if self.cta_url and self.cta_text:
@@ -494,10 +509,21 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         return self.get_all_types().filter(slug='members')
 
     def is_upcoming(self):
-        return self.get_occurrences().upcoming()
+        return self.upcoming_occurrence_list
 
     def get_next_occurrence(self):
-        return self.occurrences.next_occurrence()
+        try:
+            return self.upcoming_occurence_list[0]
+        except IndexError:
+            return None
+
+    def has_finished(self):
+        """
+        :return: True if:
+            There are occurrences, and
+            There are no upcoming occurrences
+        """
+        return self.occurrence_list and not self.upcoming_occurrence_list
 
 
 class AbstractEventWithLayouts(EventBase, FluentFieldsMixin):
@@ -836,14 +862,12 @@ def get_occurrence_times_for_event(event):
     """
     occurrences_starts = set()
     occurrences_ends = set()
-    for start, original_start, end, original_end in \
-            event.occurrences.all().values_list('start', 'original_start',
-                                                'end', 'original_end'):
+    for o in event.occurrence_list:
         occurrences_starts.add(
-            coerce_naive(original_start or start)
+            coerce_naive(o.original_start or o.start)
         )
         occurrences_ends.add(
-            coerce_naive(original_end or end)
+            coerce_naive(o.original_end or o.end)
         )
     return occurrences_starts, occurrences_ends
 

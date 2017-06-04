@@ -12,14 +12,17 @@ from icekit.publishing.managers import PublishingPolymorphicManager, \
     PublishingPolymorphicQuerySet
 
 from django.db import models
-from django.db.models.query import QuerySet
+from django.db.models.query import QuerySet, Prefetch
 from django.db.models import Q
 from icekit.publishing.middleware import is_draft_request_context
+from timezone.timezone import now, localize
+
 from icekit_events.utils.timeutils import zero_datetime, coerce_dt_awareness
 from timezone import timezone as djtz  # django-timezone
 
 
 class EventQueryset(PublishingPolymorphicQuerySet):
+
     def with_upcoming_occurrences(self):
         """
         :return: events having upcoming occurrences, and all their children
@@ -62,8 +65,13 @@ class EventQueryset(PublishingPolymorphicQuerySet):
         """
         :return: The event in order of minimum occurrence. 
         """
-        return self.annotate(first_occurrence=models.Min('occurrences__start')).order_by(
-            'first_occurrence')
+        def _key(e):
+            try:
+                return e.occurrence_list[0].start
+            except IndexError: # no occurrences; put last
+                return localize(datetime.max - timedelta(days=365))
+
+        return sorted(list(self), key=_key)
 
     def order_by_next_occurrence(self):
         """
@@ -101,6 +109,7 @@ class EventQueryset(PublishingPolymorphicQuerySet):
 
 EventManager = PublishingPolymorphicManager.from_queryset(EventQueryset)
 EventManager.use_for_related_fields = True
+
 
 
 class OccurrenceQueryset(QuerySet):
@@ -264,3 +273,7 @@ class OccurrenceQueryset(QuerySet):
 
 OccurrenceManager = models.Manager.from_queryset(OccurrenceQueryset)
 OccurrenceManager.use_for_related_fields = True
+# monkeypatch in a default queryset
+def _get_queryset(self):
+    return super(OccurrenceManager, self).get_queryset().select_related('event')
+OccurrenceManager.get_queryset = _get_queryset
