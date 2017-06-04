@@ -25,7 +25,7 @@ def times_range(event, format=None):
         return event.human_times.strip()
 
     sts = timesf(event.start_times_set(), format=format)
-    all_days = [o for o in event.occurrence_list if o.is_all_day]
+    all_days = [o for o in event.get_occurrences() if o.is_all_day]
     if all_days:
         sts = ["all day"] + sts
 
@@ -94,6 +94,7 @@ def dates_range(event, format=""):
             default ''
         from_text - text to prepend if the event never ends (the 'last' date is 
             None)
+        ended_text - text to append if the event has ended
     :return: text describing the date range for the event. If human dates are 
     given, use that, otherwise, use the first and last occurrences for an event.
 
@@ -110,14 +111,12 @@ def dates_range(event, format=""):
     # TODO: factor out a more general filter that accepts 1-2 dates and
     # renders the range.
 
-    if event.human_dates:
-        return event.human_dates.strip()
-
     # resolve arguments
     date_format = settings.DATE_FORMAT # Django's default
     separator = "&nbsp;&ndash; "
     no_dates_text = ''
     from_text = "from "
+    ended_text = " (ended)"
     arg_list = [arg.strip() for arg in format.split('|')]
     if arg_list:
         date_format = arg_list[0]
@@ -125,8 +124,17 @@ def dates_range(event, format=""):
             separator = arg_list[1]
             no_dates_text = arg_list[2]
             from_text = arg_list[3]
+            ended_text = arg_list[4]
         except IndexError:
             pass
+
+    if event.has_finished():
+        f = ended_text
+    else:
+        f = ""
+
+    if event.human_dates:
+        return event.human_dates.strip() + f
 
     # Get the dates from the occurrence
     first, last = event.get_occurrences_range()
@@ -147,16 +155,16 @@ def dates_range(event, format=""):
                 first_date_format = _format_with_same_year_and_month(date_format)
                 if start.day == end.day:
                     # the two dates are equal, just return one date.
-                    return mark_safe(datefilter(start, date_format))
+                    return mark_safe(datefilter(start, date_format) + f)
 
         return mark_safe('%s%s%s' % (
             datefilter(start, first_date_format),
             separator,
             datefilter(end, date_format)
-        ))
+        ) + f)
 
     elif start and not end:
-        return '%s%s' % (from_text, datefilter(start, date_format))
+        return '%s%s' % (from_text, datefilter(start, date_format)) + f
     elif not (start or end):
         return no_dates_text
     else:
