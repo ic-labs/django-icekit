@@ -585,6 +585,7 @@ INSTALLED_APPS += (
     # 'fluent_pages.pagetypes.flatpage',
     # 'fluent_pages.pagetypes.fluentpage',
     'fluent_pages.pagetypes.redirectnode',
+    'fluent_pages.pagetypes.textfile',
 
     # Content plugins.
     # 'fluent_contents.plugins.code',
