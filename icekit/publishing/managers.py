@@ -44,7 +44,6 @@ class DraftItemBoobyTrap(object):
         'get_published',
         'get_visible',
         'get_published_or_draft',
-        # NOTE: `get_draft` is not included here to discourage getting a draft
         'publishing_linked',
         'publishing_linked_id',
         'publishing_is_draft',
@@ -413,6 +412,9 @@ PublishingManager = \
     models.Manager.from_queryset(PublishingQuerySet)
 # Tell Django that related fields also need to use this manager
 PublishingManager.use_for_related_fields = True
+def _gqs(self):
+    return super(PublishingManager, self).get_queryset().select_related('publishing_linked', 'publishing_draft')
+PublishingManager.get_queryself = _gqs
 
 
 PublishingPolymorphicManager = \

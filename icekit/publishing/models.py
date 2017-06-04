@@ -188,7 +188,7 @@ class PublishingModel(models.Model):
         """
         if self.is_published:
             return self
-        elif self.publishing_linked:
+        elif self.publishing_linked_id:
             return self.publishing_linked
         if is_draft_request_context():
             return self.get_draft()
