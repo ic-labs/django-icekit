@@ -1,6 +1,6 @@
 {% load humanize %}
 
-{% with instance.get_occurrences as occs %}
+{% with instance.occurrence_list as occs %}
     {% if occs %}
         <h3 class="primary-divider">
             <span class="content-max-width">

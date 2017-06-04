@@ -25,7 +25,7 @@ def times_range(event, format=None):
         return event.human_times.strip()
 
     sts = timesf(event.start_times_set(), format=format)
-    all_days = [o for o in event.get_occurrences() if o.is_all_day]
+    all_days = [o for o in event.occurrence_list if o.is_all_day]
     if all_days:
         sts = ["all day"] + sts
 
