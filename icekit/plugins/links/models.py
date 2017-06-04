@@ -29,6 +29,9 @@ class AuthorLink(AbstractLinkItem):
         on_delete=models.CASCADE,
     )
 
+    exclude_from_contributions = models.BooleanField(help_text="Exclude this content "
+         "from the author's contributions.", default=False)
+
     class Meta:
         verbose_name = "Author link"
 
