@@ -1,5 +1,5 @@
 {% if instance.include_even_when_finished or not instance.item.has_finished %}
-	{% if instance.get_item.has_finished %}<div style="opacity:0.4">{% endif %}
+	{% if instance.get_item.has_finished %}<div class="event--finished">{% endif %}
 		{% include 'plugins/link/default.html' %}
 	{% if instance.get_item.has_finished %}</div>{% endif %}
 {% endif %}
