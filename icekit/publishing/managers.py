@@ -258,7 +258,10 @@ class PublishingQuerySet(QuerySet):
 
     def published(self, for_user=UNSET, force_exchange=False):
         """
-        Filter items to include only those that are actually published.
+        Transform the queryset to include published equivalents of items in it. 
+        This is a combination of filtering items that are published or have 
+        published versions, and exchanging (effectively the latter) for their 
+        published versions.
 
         By default, this method will apply a filter to find published items
         where `publishing_is_draft==False`.
