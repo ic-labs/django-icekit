@@ -13,7 +13,10 @@ In development
 -  `events_tags.date_range` is now smart enough to remove year and month from
    date formats. This behaviour can be overwridden by specifying named formats
    in your `formats` module with `_SAME_YEAR` and `_SAME_YEAR_SAME_MONTH`
-   appended.
+   appended. When the event has finished, " (ended)" is appended to the date
+   range.
+
+-  Minor performance improvements to Events links, reducing database queries.
 
 0.17 (2017-04-30)
 -----------------
