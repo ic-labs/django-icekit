@@ -1,5 +1,3 @@
-from django.core.urlresolvers import reverse
-
 from django_dynamic_fixture import G
 
 from fluent_contents.plugins.rawhtml.models import RawHtmlItem
@@ -9,11 +7,12 @@ from icekit.page_types.layout_page.models import LayoutPage
 from icekit.utils import fluent_contents
 
 
-from ..base_tests import BaseAPITestCase
+from .. import base_tests
 
 
-class PagesAPITests(BaseAPITestCase):
+class PagesAPITests(base_tests._BaseAPITestCase):
     API_NAME = 'pages-api'
+    API_IS_PUBLIC_READ = True
 
     def setUp(self):
         super(PagesAPITests, self).setUp()
@@ -83,21 +82,5 @@ class PagesAPITests(BaseAPITestCase):
     def test_api_user_permissions_are_correct(self):
         self.layoutpage_1.publish()
         page_published_id = self.layoutpage_1.get_published().pk
-
-        # Anonymous user can peform all read operations, no write operations
-        self.client.credentials()  # Clear any user credentials
-        self.assert_user_has_get_list_permission(True)
-        self.assert_user_has_get_detail_permission(True, page_published_id)
-        self.assert_user_has_post_permission(False)
-        self.assert_user_has_put_permission(False, page_published_id)
-        self.assert_user_has_patch_permission(False, page_published_id)
-        self.assert_user_has_delete_permission(False, page_published_id)
-
-        # Even superuser cannot peform write operations
-        self.client_apply_token(self.superuser_token)
-        self.assert_user_has_get_list_permission(True)
-        self.assert_user_has_get_detail_permission(True, page_published_id)
-        self.assert_user_has_post_permission(False)
-        self.assert_user_has_put_permission(False, page_published_id)
-        self.assert_user_has_patch_permission(False, page_published_id)
-        self.assert_user_has_delete_permission(False, page_published_id)
+        self.assert_api_user_permissions_are_correct(
+            page_published_id, models.Layout)

@@ -44,6 +44,7 @@ setuptools.setup(
     packages=find_packages('icekit'),
     include_package_data=True,
     install_requires=[
+        'attrs',
         'django-any-urlfield',
         'django-app-namespace-template-loader',
         'django-bootstrap3',
@@ -71,6 +72,9 @@ setuptools.setup(
     extras_require={
         'api': [
             'djangorestframework',
+            'django-rest-swagger',
+            'djangorestframework-filters',
+            'djangorestframework-queryfields',
         ],
         'brightcove': [
             'django-brightcove',
@@ -106,6 +110,7 @@ setuptools.setup(
             'django-flat-theme<1.1.3',  # See: https://github.com/elky/django-flat-theme/issues/30
             'django-fluent-contents[markupoembeditemtext]',
             'django-fluent-pages[redirectnodereversion]',
+            'django-hosts',
             'django-master-password',
             'django-polymorphic-auth',
             'django-post-office',

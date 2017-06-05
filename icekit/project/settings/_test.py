@@ -45,3 +45,12 @@ TEMPLATES_DJANGO['DIRS'].insert(
 
 if 'TRAVIS' in os.environ:
     NOSE_ARGS.remove('--with-progressive')
+
+# Unconfigure django-hosts
+INSTALLED_APPS = tuple([
+    app for app in INSTALLED_APPS if app != 'django_hosts'
+])
+MIDDLEWARE_CLASSES = tuple([
+    classname for classname in MIDDLEWARE_CLASSES
+    if 'django_hosts' not in classname
+])

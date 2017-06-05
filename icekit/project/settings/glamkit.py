@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from .icekit import *
 
 # DJANGO ######################################################################
@@ -10,10 +8,6 @@ INSTALLED_APPS += (
     'icekit.api',
     'icekit.plugins.iiif',
 
-    # Django REST framework
-    'rest_framework',
-    'rest_framework.authtoken',  # Required for `TokenAuthentication`
-
     'icekit_events',
     'icekit_events.event_types.simple',
     'icekit_events.plugins.event_content_listing',
@@ -21,7 +15,39 @@ INSTALLED_APPS += (
     'icekit_events.plugins.todays_occurrences',
     'icekit_events.page_types.eventlistingfordate',
 
+    'adminsortable2',  # required by glamkit-collections
+
+    # GLAMkit Collection base implementation plugins
     'glamkit_collections',
+    'glamkit_collections.contrib.work_creator',
+    'glamkit_collections.contrib.work_creator.plugins.artwork',
+    'glamkit_collections.contrib.work_creator.plugins.film',
+    'glamkit_collections.contrib.work_creator.plugins.game',
+    'glamkit_collections.contrib.work_creator.plugins.links',
+    'glamkit_collections.contrib.work_creator.plugins.moving_image',
+    'glamkit_collections.contrib.work_creator.plugins.organization',
+    'glamkit_collections.contrib.work_creator.plugins.person',
+
+    # Django REST framework for APIs
+    'rest_framework',
+    'rest_framework.authtoken',  # Required for `TokenAuthentication`
+    'rest_framework_swagger',  # Required for automatic API documentation
+    'django_filters',  # Find djangorestframework-filters templates
+)
+
+# Paths to Django REST framework router objects to include in the base
+# API provided by `icekit.api.urls`.
+# Defined as tuples of (optional) apisection name prefixes and dotted-path to
+# a router object.
+EXTRA_API_ROUTERS = (
+    # Include base API routes for GLAMkit Collection.
+    ('', 'glamkit_collections.contrib.work_creator.api.router'),
+
+    # Include API routes for all installed GLAMkit Collection plugins.
+    ('', 'glamkit_collections.contrib.work_creator.api.plugins_router'),
+    # To expose only some GLAMkit Collection plugins instead of all, define
+    # more specific router entries such as:
+    #     ('', 'glamkit_collections.contrib.work_creator.plugins.artwork.api.router'
 )
 
 # This settings file is loaded after calculated.py, so we don't want to
@@ -104,5 +130,33 @@ REST_FRAMEWORK = {
         # to those users permitted to view model listings in the admin. See
         # http://www.django-rest-framework.org/api-guide/permissions/#djangomodelpermissions
         'icekit.utils.api.DjangoModelPermissionsRestrictedListing',
-    )
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework_filters.backends.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ),
+    # Pagination settings
+    'DEFAULT_PAGINATION_CLASS':
+        'icekit.api.pagination.DefaultPageNumberPagination',
+    'PAGE_SIZE': 20,
+    # Test settings
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+}
+
+
+# REST Swagger/OpenAPI Documentation via Django REST Swagger
+
+SWAGGER_SETTINGS = {
+    # 'doc_expansion': 'full',
+    'version': '0.1',
+    'api_path': "/api/",
+    'enabled_methods': ['get'],
+    'info': {
+        "title": "GLAMkit API",
+        "description": "GLAMkit API for Pages, Images, Artists, and Artworks",
+        # "termsOfServiceUrl": "http://helloreverb.com/terms/",
+        # "contact": "apiteam@wordnik.com",
+        # "license": "Apache 2.0",
+        # "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
 }
