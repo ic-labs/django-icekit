@@ -36,6 +36,12 @@ setuptools.setup(
         'edtf>=2.0.1',
     ],
     extras_require={
+        'api': [
+            'djangorestframework',
+            'django-rest-swagger',
+            'djangorestframework-filters',
+            'djangorestframework-queryfields',
+        ],
         'colors': [
             'webcolors==1.5',
             'colormath==2.1.1',

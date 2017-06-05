@@ -1,17 +1,44 @@
+from django.db import models
 from django.core.urlresolvers import reverse
+from django.utils.text import slugify
 from django.utils.datastructures import OrderedSet
-from glamkit_collections.contrib.work_creator.managers import \
-    WorkCreatorQuerySet, WorkImageQuerySet
+
+from polymorphic.models import PolymorphicModel
+
+from edtf.fields import EDTFField
+
 from icekit.content_collections.abstract_models import TitleSlugMixin, \
     PluralTitleSlugMixin
 from icekit.mixins import FluentFieldsMixin, ListableMixin
 from icekit.plugins.image.abstract_models import ImageLinkMixin
 from icekit.models import ICEkitContentsMixin
-from polymorphic.models import PolymorphicModel
-from django.db import models
-from edtf.fields import EDTFField
+from icekit.utils.strings import is_empty
 
+from glamkit_collections.contrib.work_creator.managers import \
+    WorkCreatorQuerySet, WorkImageQuerySet
 from glamkit_collections.models import GeographicLocation
+
+
+class _WorkCreatorMetaDataMixin(models.Model):
+    """ Basic metadata fields shared by all collection models """
+    external_ref = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Unique identifier from an external system, such as from"
+                  " an external system from which records are imported."
+    )
+    dt_created = models.DateTimeField(
+        editable=False,
+        auto_now_add=True,
+    )
+    dt_modified = models.DateTimeField(
+        editable=False,
+        auto_now=True,
+    )
+
+    class Meta:
+        abstract = True
 
 
 class CreatorBase(
@@ -19,7 +46,18 @@ class CreatorBase(
     FluentFieldsMixin,
     ICEkitContentsMixin,
     ListableMixin,
+    _WorkCreatorMetaDataMixin,
 ):
+    # Primary, definitive, and one truly required name field
+    name_full = models.CharField(
+        max_length=255,
+        help_text='A public "label" for the creator, from which all other '
+                  'name values will be derived unless they are also provided. '
+                  'E.g. for Person, composed of the Prefix, First Names, Last '
+                  'Name Prefix, Last Name, Suffix, and Variant Name fields'
+    )
+
+    # Other name fields that will be derived from `name_full` unless provided
     name_display = models.CharField(
         max_length=255,
         help_text='The commonly known or generally recognized name of the '
@@ -27,6 +65,13 @@ class CreatorBase(
                   'e.g., "Rembrandt" or "Guercino" as opposed to the full name '
                   '"Rembrandt Harmenszoon Van Rijn" or "Giovanni Francesco '
                   'Barbieri."'
+    )
+    name_sort = models.CharField(
+        max_length=255,
+        help_text='For searching and organizing, the name or sequence of names '
+                  'which determines the position of the creator in the list of '
+                  'creators, so that he or she may be found where expected, '
+                  'e.g. "Rembrandt" under "R" or "Guercino" under "G"'
     )
 
     #for URLs
@@ -51,13 +96,6 @@ class CreatorBase(
         max_length=255,
     )
     wikipedia_link = models.URLField(blank=True, help_text="e.g. 'https://en.wikipedia.org/wiki/Pablo_Picasso'")
-    name_sort = models.CharField(
-        max_length=255,
-        help_text='For searching and organizing, the name or sequence of names '
-                  'which determines the position of the creator in the list of '
-                  'creators, so that he or she may be found where expected, '
-                  'e.g. "Rembrandt" under "R" or "Guercino" under "G"'
-    )
 
     birth_date_display = models.CharField(
         "Date of birth (display)",
@@ -146,14 +184,41 @@ class CreatorBase(
 
     class Meta:
         verbose_name = "creator"
-        ordering = ('name_sort', 'slug')
+        ordering = ('name_sort', 'slug', 'publishing_is_draft')
         unique_together = ('slug', 'publishing_is_draft',)
 
     def __unicode__(self):
         return self.name_display
 
+    def save(self, *args, **kwargs):
+        self.derive_and_set_name_fields_and_slug()
+        return super(CreatorBase, self).save(*args, **kwargs)
+
+    def derive_and_set_name_fields_and_slug(
+            self, set_name_sort=True, set_slug=True
+    ):
+        """
+        Derive subordinate name_* field values from the `name_full` field
+        unless these fields are set in their own right.
+
+        This method is called during `save()`
+        """
+        # name_full is the primary required name field. It must be set.
+        if is_empty(self.name_full):
+            raise ValueError(
+                u"%s.name_full cannot be empty at save" % type(self).__name__)
+        # if empty, `name_display` == `name_full`
+        if is_empty(self.name_display):
+            self.name_display = self.name_full
+        # if empty, `name_sort` == `name_full`
+        if set_name_sort and is_empty(self.name_sort):
+            self.name_sort = self.name_full
+        # if empty, `slug` is set to slugified `name_full`
+        if set_slug and is_empty(self.slug):
+            self.slug = slugify(self.name_full)
+
     def get_absolute_url(self):
-        return reverse("gk_collections_creator", kwargs={'slug' :self.slug})
+        return reverse("gk_collections_creator", kwargs={'slug': self.slug})
 
     def get_works(self):
         """
@@ -218,6 +283,7 @@ class WorkBase(
     FluentFieldsMixin,
     ICEkitContentsMixin,
     ListableMixin,
+    _WorkCreatorMetaDataMixin,
 ):
     # meta
     slug = models.CharField(max_length=255, db_index=True)
@@ -226,16 +292,9 @@ class WorkBase(
     # using slugified, no-hyphens. Alt slug matches should redirect to the
     # canonical view.
 
-    external_ref = models.CharField(
-        'External reference',
-        max_length=255,
-        blank=True, null=True,
-        help_text="The reference identifier used by external data source."
-    )
-
     # what's it called
     title = models.CharField(
-        max_length=255,
+        max_length=511,  # 511? Good question: aping `subtitle` & `oneliner`
         help_text='The official title of this object. Includes series title '
                   'when appropriate.'
     )
@@ -325,16 +384,34 @@ class WorkBase(
 
     class Meta:
         verbose_name = "work"
+        ordering = ('slug', 'publishing_is_draft', )
         unique_together = ('slug', 'publishing_is_draft',)
-        # ordering= ("date_sort_latest", )
 
     def __unicode__(self):
         if self.date_display:
             return u"%s (%s)" % (self.title, self.date_display)
         return self.title
 
+    def save(self, *args, **kwargs):
+        self.derive_and_set_slug()
+        return super(WorkBase, self).save(*args, **kwargs)
+
+    def derive_and_set_slug(self, set_name_sort=True, set_slug=True):
+        """
+        Derive `slug` field from `title` unless it is set in its own right.
+
+        This method is called during `save()`
+        """
+        # `title` is the primary required name field. It must be set.
+        if is_empty(self.title):
+            raise ValueError(
+                u"%s.title cannot be empty at save" % type(self).__name__)
+        # if empty, `slug` is set to slugified `title`
+        if set_slug and is_empty(self.slug):
+            self.slug = slugify(self.title)
+
     def get_absolute_url(self):
-        return reverse("gk_collections_work", kwargs={'slug' :self.slug})
+        return reverse("gk_collections_work", kwargs={'slug': self.slug})
 
     def get_images(self, **kwargs):
         # order images by the order given in WorkImage.
