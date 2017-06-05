@@ -24,12 +24,13 @@ class AbstractLayoutPage(ICEkitFluentContentsPageMixin, LayoutFieldMixin,
     def get_related_items(self):
         items = []
 
-        related_placeholder = self.slots.related
-        if related_placeholder.exists():
-            items += list(related_placeholder)
+        related_placeholder = getattr(self.slots, 'related', None)
+        if related_placeholder:
+            if related_placeholder.exists():
+                items += list(related_placeholder)
 
-        if hasattr(self, 'get_auto_related_items'):
-            items += list(self.get_auto_related_items())
+            if hasattr(self, 'get_auto_related_items'):
+                items += list(self.get_auto_related_items())
 
         return items
 

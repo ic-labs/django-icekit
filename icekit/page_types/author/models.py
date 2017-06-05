@@ -3,7 +3,9 @@ Model declaration for the `author` app.
 """
 import re
 
+from django.utils.timezone import now
 from icekit.mixins import HeroMixin
+from icekit.plugins.links.models import AuthorLink
 
 try:
     from urlparse import urljoin
@@ -124,3 +126,19 @@ class Author(
 
     class Meta:
         ordering = ('family_name', 'given_names', )
+
+    def contributions(self):
+        """
+        :return: All content that has a link to the (draft) author. 
+        """
+        draft = self.get_draft()
+        links = AuthorLink.objects.filter(item_id=draft.id, exclude_from_contributions=False)
+
+        default_time = now()
+        def _key(x):
+            return getattr(x, 'publishing_published_at',
+                    getattr(x, 'publishing_modified_at',
+                            default_time)) or default_time
+
+        return sorted([x.parent for x in links if x.parent.is_visible], key=_key)
+

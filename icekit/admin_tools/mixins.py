@@ -163,7 +163,7 @@ class ThumbnailAdminMixin(PreviewAdminMixin):
                 logger.warning(
                     _(
                         '`easy_thumbnails` is not installed and required for '
-                        'icekit.utils.admin.mixins.ThumbnailAdminMixin'
+                        'icekit.admin_tools.mixins.ThumbnailAdminMixin'
                     )
                 )
                 return ''

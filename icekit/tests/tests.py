@@ -28,7 +28,6 @@ from icekit.plugins.faq.models import FAQItem
 from icekit.plugins.horizontal_rule.models import HorizontalRuleItem
 from icekit.plugins.instagram_embed.models import InstagramEmbedItem
 from icekit.plugins.map.models import MapItem
-from icekit.plugins.map_with_text.models import MapWithTextItem
 from icekit.plugins.quote.models import QuoteItem
 from icekit.plugins.reusable_form.models import FormItem
 from icekit.plugins.slideshow.models import SlideShow, SlideShowItem
@@ -228,16 +227,10 @@ class Models(WebTest):
         self.map_1 = fluent_contents.create_content_instance(
             MapItem,
             self.page_1,
-            share_url='https://www.google.com.au/maps/place/The+Interaction+Consortium/'
-                      '@-33.8884315,151.2006512,17z/data=!3m1!4b1!4m2!3m1!1s0x6b12b1d842ee9aa9:'
-                      '0xb0a19ac433ef0be8'
-        )
-        self.map_with_text_1 = fluent_contents.create_content_instance(
-            MapWithTextItem,
-            self.page_1,
-            share_url='https://www.google.com.au/maps/place/The+Interaction+Consortium/'
-                      '@-33.8884315,151.2006512,17z/data=!3m1!4b1!4m2!3m1!1s0x6b12b1d842ee9aa9:'
-                      '0xb0a19ac433ef0be8'
+            _embed_code='<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3312.0476344648832!2d151.'
+                        '19845715159963!3d-33.88842702741586!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12'
+                        'b1d842ee9aa9%3A0xb0a19ac433ef0be8!2sThe+Interaction+Consortium!5e0!3m2!1sen!2sau!4v149620126'
+                        '4670" width="600" height="450" frameborder="0" style="border:0" allowfullscreen></iframe>'
         )
         self.horizontal_rule_1 = fluent_contents.create_content_instance(
             HorizontalRuleItem,
@@ -258,7 +251,7 @@ class Models(WebTest):
         anticipated_content_instances = [
             self.image_item_1, self.faq_item_1, self.quote_item_1,
             self.slide_show_item_1, self.twitter_response_1, self.instagram_embed_1,
-            self.reusable_form_1, self.map_1, self.map_with_text_1, self.horizontal_rule_1,
+            self.reusable_form_1, self.map_1, self.horizontal_rule_1,
         ]
         if apps.is_installed('icekit.plugins.brightcove'):
             anticipated_content_instances.append(self.brightcove_item_1)
@@ -366,12 +359,6 @@ class Models(WebTest):
             tei = TwitterEmbedItem(twitter_url='http://www.google.com')
             with self.assertRaises(exceptions.ValidationError):
                 tei.full_clean()
-
-    def test_map_with_text_item(self):
-        self.assertEqual(
-            self.map_with_text_1.get_text(),
-            self.map_with_text_1.text
-        )
 
     def test_incorrect_declaration_on_item(self):
         initial_count = FAQItem.objects.count()
@@ -601,3 +588,4 @@ class TestIceKitTags(WebTest):
         response.mustcontain('<div class="tag-fake-slot"></div>')
         response.mustcontain('<div class="tag-fake-slot-render">None</div>')
         response.mustcontain('div class="filter-fake-slot">None</div>')
+

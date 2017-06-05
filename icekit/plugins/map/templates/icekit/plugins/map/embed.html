@@ -1,19 +1,7 @@
-<div class="map">
-	{% if instance.share_url %}
-		<div class="embed-responsive embed-responsive-16by9">
-			<iframe
-				class="embed-responsive-item"
-				{% if instance.loc %}
-					src="http://maps.google.com/maps?q={{ instance.place_name }}&loc:{{ instance.loc }}&z=15&output=embed"
-				{% else %}
-					src="{{ instance.share_url }}"
-				{% endif %}
-				frameborder="0"
-				style="border:0"
-				allowfullscreen
-			></iframe>
-		</div>
-	{% else %}
-		Map cannot be displayed
-	{% endif %}
+<div class="ik-map-embed">
+    <div class="embed-responsive embed-responsive-16by9">
+        <div class="embed-responsive-item">
+            {{ instance.get_embed_code|safe }}
+        </div>
+    </div>
 </div>

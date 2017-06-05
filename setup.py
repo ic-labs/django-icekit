@@ -67,6 +67,7 @@ setuptools.setup(
         'pip-tools',
         'requests',
         'unidecode',
+        'bleach<2',  # Bleach 2 adds a dependency on html5lib>=0.99999999, which breaks our above requirement of html5lib==0.999
     ],
     extras_require={
         'api': [

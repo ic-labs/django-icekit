@@ -10,10 +10,10 @@
                 {% endif %}
             </h5>
             <p class="contact-name-details">
-            {% if contact.phone %}
-                <a href="tel:+1{{ contact.phone }}">
+            {% if contact.phone_full %}
+                <a href="tel:{{ contact.phone_full }}">
                     <i class="fa fa-phone-square" aria-hidden="true"></i>
-                    <span class="contact-name-data">{{ contact.phone }}</span>
+                    <span class="contact-name-data">{% firstof contact.phone_display contact.phone_full %}</span>
                 </a><br />
             {% endif %}
             {% if contact.email %}

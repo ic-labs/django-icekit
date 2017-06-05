@@ -3,6 +3,7 @@ from fluent_contents.models import ContentItem
 from django.db import models
 import appsettings
 from icekit.fields import ICEkitURLField
+from icekit.plugins.links.managers import LinkManager
 from icekit.utils.attributes import resolve
 
 
@@ -20,6 +21,8 @@ class AbstractLinkItem(ContentItem):
     This class acts as a wrapper on the item - all the item's attributes are
     attributes of the AbstractLinkItem too, with some values overridden.
     """
+    objects = LinkManager()
+
     style = models.CharField("Link style", max_length=255, choices=appsettings.RELATION_STYLE_CHOICES, blank=True)
     type_override = models.CharField(max_length=255, blank=True)
     title_override = models.CharField(max_length=255, blank=True)

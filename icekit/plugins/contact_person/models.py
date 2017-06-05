@@ -9,7 +9,8 @@ from fluent_contents.models import ContentItem
 class ContactPerson(models.Model):
     name = models.CharField(max_length=255)
     title = models.CharField(max_length=255, blank=True)
-    phone = models.CharField(max_length=255, blank=True)
+    phone_full = models.CharField("Phone number", max_length=255, blank=True, help_text="The full (international) phone number to dial, including the country code, e.g. '+61 123456789'")
+    phone_display = models.CharField("Phone number to display", max_length=255, blank=True, help_text="The phone number to display, if different from above, e.g. '0123 456-789'")
     email = models.EmailField(max_length=255, blank=True)
 
     def __str__(self):
