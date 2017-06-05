@@ -733,15 +733,12 @@ class TestEventManager(TestCase):
 
         # occurrences in the past only
         self.child_event_1 = G(SimpleEvent, part_of=self.parent_event, title="1")
-        occ1 = G(Occurrence, start=now-timedelta(hours=2), end=now-timedelta(hours=1))
-        self.child_event_1.occurrences.add(occ1)
+        occ1 = G(Occurrence, event=self.child_event_1, start=now-timedelta(hours=2), end=now-timedelta(hours=1))
 
         # occurrences in the past and the future
         self.child_event_2 = G(SimpleEvent, part_of=self.parent_event, title="2")
-        occ2a = G(Occurrence, start=now-timedelta(hours=2), end=now-timedelta(hours=1))
-        self.child_event_2.occurrences.add(occ2a)
-        occ2b = G(Occurrence, start=now+timedelta(hours=1), end=now+timedelta(hours=2))
-        self.child_event_2.occurrences.add(occ2b)
+        occ2a = G(Occurrence, event=self.child_event_2, start=now-timedelta(hours=2), end=now-timedelta(hours=1))
+        occ2b = G(Occurrence, event=self.child_event_2, start=now+timedelta(hours=1), end=now+timedelta(hours=2))
 
         # no occurrences (inherits parent occurrences)
         self.child_event_3 = G(SimpleEvent, part_of=self.parent_event, title="3")
