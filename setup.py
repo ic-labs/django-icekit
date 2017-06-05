@@ -91,7 +91,6 @@ setuptools.setup(
         ],
         'glamkit': [
             'glamkit-sponsors',
-            'icekit-events',
             'icekit-press-releases>=0.81',
             'glamkit-collections>=0.35',
         ],
@@ -153,6 +152,12 @@ setuptools.setup(
             'sphinx-autobuild',
             'recommonmark',
         ],
+        'events': [
+            'python-dateutil',
+            'six',
+            'sqlparse',  # Required for SQL migrations, apparently
+            'django-colorful',
+        ]
     },
     **kwargs
 )

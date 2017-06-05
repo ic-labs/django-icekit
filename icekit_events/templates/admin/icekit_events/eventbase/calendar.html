@@ -1,0 +1,111 @@
+{% load static %}
+
+<!doctype html>
+
+<html>
+	<head>
+		<link rel='stylesheet' href='{% static "icekit_events/bower_components/fullcalendar/dist/fullcalendar.css" %}' />
+		<style>
+			html, body {
+				/*height: 100%;*/
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
+				font-size: 12px;
+			}
+
+			.fcc-do-not-show-in-calendar {
+				background-image: url({% static 'icekit_events/img/stripe.png' %});
+				background-repeat: repeat;
+				opacity: 0.5;
+			}
+
+			.fcc-is-all-day .fc-title {
+				text-decoration: underline;
+			}
+
+			.fcc-is-cancelled {
+				background-image: url({% static 'icekit_events/img/fade.png' %});
+				background-repeat: repeat;
+			}
+			.fcc-is-cancelled .fc-title {
+				color: red;
+				text-decoration: line-through;
+			}
+
+			.fcc-is-user-modified {
+				background-image: url({% static 'icekit_events/img/fade.png' %});
+				background-repeat: repeat;
+			}
+
+			.fcc-draft {
+				opacity: 0.4;
+			}
+		</style>
+		<script src='{% static "icekit_events/bower_components/jquery/dist/jquery.js" %}'></script>
+		<script src='{% static "icekit_events/bower_components/moment/moment.js" %}'></script>
+		<script src='{% static "icekit_events/bower_components/fullcalendar/dist/fullcalendar.min.js" %}'></script>
+		<script src='{% static "icekit_events/bower_components/iframe-resizer/src/iframeResizer.contentWindow.js" %}'></script>
+		<script src='{% static "icekit_events/bower_components/js-cookie/src/js.cookie.js" %}'></script>
+
+		<script>
+			var icekit_events = icekit_events || {};
+			icekit_events.jQuery = jQuery.noConflict(true);
+			(function($) {
+				$(document).ready(function() {
+					var eid;
+
+					// get an object with the get parameters
+					var search = location.search.substring(1);
+					var GET = search?JSON.parse('{"' + search.replace(/&/g, '","').replace(/=/g,'":"') + '"}',
+						 function(key, value) { return key===""?value:decodeURIComponent(value) }):{}
+
+					$('#calendar').fullCalendar({
+						{% if is_popup %}
+							eventClick: function(calEvent, jsEvent, view) {
+								parent.opener.dismissRelatedLookupPopup(parent, calEvent.id);
+								return false;
+							},
+						{% endif %}
+						events: {
+							url: '{% url "admin:icekit_events_eventbase_calendar_data" %}',
+							cache: true,
+							data: GET
+						},
+						header: {
+							left: 'prevYear,prev,next,nextYear today',
+							center: 'title',
+							right: 'month,basicWeek,agendaWeek,agendaDay'
+						},
+						height: 'auto',
+						scrollTime: '08:00:00',
+						slotDuration: '01:00:00',
+						slotLabelInterval: '02:00:00',
+						snapDuration: '00:30:00',
+						firstDay: 1, //monday
+						defaultView: Cookies.get("calendar-defaultView") || 'agendaWeek',
+						defaultDate: Cookies.get("calendar-defaultDate") || null,
+						viewRender: function(view, element) {
+							$('.fc-basicWeek-button').text('week (list)');
+							$('.fc-agendaDay-button').text('day');
+
+							Cookies.set('calendar-defaultView', view.type);
+							Cookies.set('calendar-defaultDate', view.intervalStart);
+						}
+					}).on('click', 'a.fc-event', function(e) {
+						// Open links in the top frame.
+						if (self != top) {
+							e.preventDefault();
+							top.location.href = $(e.currentTarget).attr('href');
+						}
+					});
+				});
+			})(icekit_events.jQuery);
+		</script>
+	</head>
+	<body>
+		<div id='calendar'></div>
+	</body>
+</html>

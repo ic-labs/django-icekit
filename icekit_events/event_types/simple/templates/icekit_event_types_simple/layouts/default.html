@@ -1,0 +1,7 @@
+{% extends "icekit_events/event.html" %}
+{% load fluent_contents_tags %}
+
+{% block content %}
+    {{ block.super }}
+    {% page_placeholder event "main" role="m" %}
+{% endblock content %}

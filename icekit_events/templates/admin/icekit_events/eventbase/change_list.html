@@ -1,0 +1,47 @@
+{% extends "admin/change_list.html" %}
+
+{% load static %}
+
+{% block object-tools-items %}
+	{% if not is_popup %}
+		<li>
+			<a id="toggle-calendar" href="#">Toggle Calendar</a>
+		</li>
+	{% endif %}
+	{{ block.super }}
+{% endblock %}
+
+{% block result_list %}
+
+	{% if not is_popup %}
+		<style>
+			iframe {
+				border: 0;
+				width: 100%;
+			}
+		</style>
+		<script src='{% static "icekit_events/bower_components/iframe-resizer/src/iframeResizer.js" %}'></script>
+		<script src='{% static "icekit_events/bower_components/js-cookie/src/js.cookie.js" %}'></script>
+		<div class="results">
+			<iframe id="calendar" src="{% url "admin:icekit_events_eventbase_calendar" %}?{{ request.GET.urlencode }}" scrolling="no"></iframe>
+			<script>
+				(function($) {
+					// load the stored cookie state, default true
+					var c = Cookies.get("calendar-toggle");
+					if (c===undefined)
+						c = "true";
+
+					$("#calendar").toggle(c === 'true');
+
+					$('#toggle-calendar').on('click', function(e) {
+						e.preventDefault();
+						$('#calendar').toggle();
+						Cookies.set('calendar-toggle', $("#calendar").is(':visible'));
+					});
+				})(window.jQuery || django.jQuery);
+				iFrameResize({}, '#calendar');
+			</script>
+		</div>
+	{% endif %}
+	{{ block.super }}
+{% endblock %}

@@ -1,7 +1,6 @@
 **/*.md5
 **/*.orig
-**/*.pyc
-**/*.pyo
+**/*.py[co]
 **/*.swp
 **/.coverage
 **/.DS_Store
@@ -16,6 +15,7 @@
 /build/
 /dist/
 /docker-compose.override.yml
+/htmlcov/
 /project_template/bower_components/
 /project_template/node_modules/
 /project_template/static_root/

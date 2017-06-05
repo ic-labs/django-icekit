@@ -1,4 +1,5 @@
 recursive-include icekit *
+recursive-include icekit_events *
 recursive-exclude icekit *.md5 *.orig *.pyc *.pyo *.swp .DS_Store requirements.txt requirements-local.txt
 prune icekit/bower_components
 prune icekit/node_modules

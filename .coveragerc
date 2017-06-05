@@ -2,7 +2,7 @@
 branch = True
 data_file = project_template/var/.coverage
 omit = */migrations/*, */tests.py, */tests/*
-source = icekit
+source = icekit, icekit_events
 
 [report]
 exclude_lines =

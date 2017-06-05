@@ -1,6 +1,5 @@
--e .[api,brightcove,dev,docs,django18,forms,glamkit,project,search,test]
+-e .[api,brightcove,dev,docs,django18,forms,glamkit,project,search,test,events]
 
--e git+https://github.com/ic-labs/icekit-events.git@ec97d97000d19c6a811ffb3358d2c0514e5b15a7#egg=icekit-events
 -e git+https://github.com/ic-labs/glamkit-collections.git@c8e7b267989640a3c5887b8580aa788b6096ffb8#egg=glamkit-collections
 -e git+https://github.com/ic-labs/icekit-press-releases.git@1da520787717117b0413715f9a6df834f2d9e7e1#egg=icekit-press-releases
 -e git+https://github.com/ic-labs/glamkit-sponsors.git@8064c233be0b10da6b97e94ac074391205d78b1c#egg=glamkit-sponsors
