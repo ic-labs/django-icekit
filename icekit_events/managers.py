@@ -273,7 +273,3 @@ class OccurrenceQueryset(QuerySet):
 
 OccurrenceManager = models.Manager.from_queryset(OccurrenceQueryset)
 OccurrenceManager.use_for_related_fields = True
-# monkeypatch in a default queryset
-def _get_queryset(self):
-    return super(OccurrenceManager, self).get_queryset().select_related('event')
-OccurrenceManager.get_queryset = _get_queryset

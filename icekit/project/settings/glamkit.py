@@ -5,8 +5,8 @@ from .icekit import *
 # DJANGO ######################################################################
 
 INSTALLED_APPS += (
-    'sponsors',
-    'press_releases',
+    # 'sponsors',
+    # 'press_releases',
     'icekit.api',
     'icekit.plugins.iiif',
 
@@ -14,14 +14,8 @@ INSTALLED_APPS += (
     'rest_framework',
     'rest_framework.authtoken',  # Required for `TokenAuthentication`
 
-    'icekit_events',
-    'icekit_events.event_types.simple',
-    'icekit_events.plugins.event_content_listing',
-    'icekit_events.plugins.links',
-    'icekit_events.plugins.todays_occurrences',
-    'icekit_events.page_types.eventlistingfordate',
 
-    'glamkit_collections',
+    # 'glamkit_collections',
 )
 
 # This settings file is loaded after calculated.py, so we don't want to
@@ -35,33 +29,14 @@ ICEKIT['DASHBOARD_FEATURED_APPS'][0]['models'] += [
     ('icekit_press_releases.PressRelease', {})
 ]
 
-# ICEKIT EVENTS ###############################################################
-
-ICEKIT['DASHBOARD_FEATURED_APPS'] = [
-    {
-        'name': 'Events',
-        'icon_html': '<i class="content-type-icon fa fa-calendar-o"></i>',
-        'models': [
-            ('icekit_events.EventBase', {})
-        ],
-    },
-    {
-        'name': 'Collection',
-        'icon_html': '<i class="content-type-icon fa fa-diamond"></i>',
-        'models': [
-            ('gk_collections_work_creator.WorkBase', {}),
-            ('gk_collections_work_creator.CreatorBase', {}),
-        ],
-    },
-] + ICEKIT['DASHBOARD_FEATURED_APPS']
 
 ICEKIT['DASHBOARD_FEATURED_APPS'][3]['models'] += [('glamkit_sponsors.Sponsor', {})]
 
 # GLAMKIT SPONSORS ############################################################
 SPONSOR_PLUGINS = [
-    'BeginSponsorBlockPlugin',
-    'EndSponsorBlockPlugin',
-    'SponsorPromoPlugin',
+    # 'BeginSponsorBlockPlugin',
+    # 'EndSponsorBlockPlugin',
+    # 'SponsorPromoPlugin',
 ]
 
 LINK_PLUGINS += [

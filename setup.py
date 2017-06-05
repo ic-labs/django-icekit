@@ -90,9 +90,9 @@ setuptools.setup(
             'django-forms-builder',
         ],
         'glamkit': [
-            'glamkit-sponsors',
-            'icekit-press-releases>=0.81',
-            'glamkit-collections>=0.35',
+            # 'glamkit-sponsors',
+            # 'icekit-press-releases>=0.81',
+            # 'glamkit-collections>=0.35',
         ],
         'project': [
             'boto3',

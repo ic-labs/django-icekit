@@ -267,13 +267,15 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     def add_occurrence(self, start, end=None):
         if not end:
             end = start
-        return Occurrence.objects.create(
+        o = Occurrence.objects.create(
             event=self,
             start=start,
             end=end,
             generator=None,
             is_protected_from_regeneration=True,
         )
+        self.invalidate_caches()
+        return o
 
     def cancel_occurrence(self, occurrence, hide_cancelled_occurrence=False,
                           reason=u'Cancelled'):
@@ -291,6 +293,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         occurrence.is_hidden = hide_cancelled_occurrence
         occurrence.cancel_reason = reason
         occurrence.save()
+        self.invalidate_caches()
 
     @transaction.atomic
     def make_variation(self, occurrence):
@@ -343,6 +346,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
                         or end in existing_ends:
                     continue
                 yield(start, end, generator)
+        self.invalidate_caches()
 
     @transaction.atomic
     def extend_occurrences(self, until=None):
@@ -369,6 +373,8 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
                 is_all_day=generator.is_all_day,
             )
             count += 1
+
+        self.invalidate_caches()
         return count
 
     @transaction.atomic
@@ -432,6 +438,26 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         if self.visible_part_of:
             return self.visible_part_of.upcoming_occurrence_list
         return o # empty
+
+    def invalidate_caches(self):
+        """
+        Call this to clear out cached values, in case you want to access cached
+         properties after changing occurrences.
+        """
+        try:
+            del self.visible_part_of
+        except AttributeError:
+            pass
+
+        try:
+            del self.occurrence_list
+        except AttributeError:
+            pass
+
+        try:
+            del self.upcoming_occurrence_list
+        except AttributeError:
+            pass
 
     def get_occurrences_range(self):
         """

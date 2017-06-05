@@ -199,14 +199,10 @@ class TestAdmin(WebTest):
         # Add timed occurrence manually
         #######################################################################
         form = response.forms[0]
-        form['occurrences-0-start_0'].value = \
-            self.start.strftime('%Y-%m-%d')
-        form['occurrences-0-start_1'].value = \
-            self.start.strftime('%H:%M:%S')
-        form['occurrences-0-end_0'].value = \
-            self.end.strftime('%Y-%m-%d')
-        form['occurrences-0-end_1'].value = \
-            self.end.strftime('%H:%M:%S')
+        form['occurrences-0-start'].value = \
+            self.start.strftime('%Y-%m-%d %H:%M:%S')
+        form['occurrences-0-end'].value = \
+            self.end.strftime('%Y-%m-%d %H:%M:%S')
         response = form.submit('_continue')
         self.assertEqual(1, event.occurrences.count())
         timed_occurrence = event.occurrences.all()[0]
@@ -220,12 +216,10 @@ class TestAdmin(WebTest):
         #######################################################################
         form = response.follow().forms[0]
         all_day_start = self.start + timedelta(days=3)
-        form['occurrences-1-start_0'].value = \
-            all_day_start.strftime('%Y-%m-%d')
-        form['occurrences-1-start_1'].value = '00:00:00'
-        form['occurrences-1-end_0'].value = \
-            all_day_start.strftime('%Y-%m-%d')
-        form['occurrences-1-end_1'].value = '00:00:00'
+        form['occurrences-1-start'].value = \
+            all_day_start.strftime('%Y-%m-%d 00:00:00')
+        form['occurrences-1-end'].value = \
+            all_day_start.strftime('%Y-%m-%d 00:00:00')
         form['occurrences-1-is_all_day'].value = True
         response = form.submit('_continue')
         event = SimpleEvent.objects.get(pk=event.pk)
@@ -290,14 +284,10 @@ class TestAdmin(WebTest):
             .astimezone(djtz.get_current_timezone())
         extra_occurrence_end = (first_occurrence.end - timedelta(days=3)) \
             .astimezone(djtz.get_current_timezone())
-        form['occurrences-10-start_0'].value = \
-            extra_occurrence_start.strftime('%Y-%m-%d')
-        form['occurrences-10-start_1'].value = \
-            extra_occurrence_start.strftime('%H:%M:%S')
-        form['occurrences-10-end_0'].value = \
-            extra_occurrence_end.strftime('%Y-%m-%d')
-        form['occurrences-10-end_1'].value = \
-            extra_occurrence_end.strftime('%H:%M:%S')
+        form['occurrences-10-start'].value = \
+            extra_occurrence_start.strftime('%Y-%m-%d %H:%M:%S')
+        form['occurrences-10-end'].value = \
+            extra_occurrence_end.strftime('%Y-%m-%d %H:%M:%S')
         response = form.submit('_continue')
         self.assertEqual(10 + 1, event.occurrences.count())
         extra_occurrence = event.occurrences.all()[0]
@@ -316,10 +306,8 @@ class TestAdmin(WebTest):
         shifted_occurrence_start = \
             (shifted_occurrence.start + timedelta(minutes=30)) \
             .astimezone(djtz.get_current_timezone())
-        form['occurrences-6-start_0'].value = \
-            shifted_occurrence_start.strftime('%Y-%m-%d')
-        form['occurrences-6-start_1'].value =\
-            shifted_occurrence_start.strftime('%H:%M:%S')
+        form['occurrences-6-start'].value = \
+            shifted_occurrence_start.strftime('%Y-%m-%d %H:%M:%S')
         response = form.submit('_continue')
         event = SimpleEvent.objects.get(pk=event.pk)
         self.assertEqual(10 + 1, event.occurrences.count())
@@ -467,14 +455,10 @@ class TestAdmin(WebTest):
         extra_occurrence_start = (self.start - timedelta(days=30)) \
             .astimezone(djtz.get_current_timezone())
         extra_occurrence_end = extra_occurrence_start + timedelta(hours=3)
-        form['occurrences-0-start_0'].value = \
-            extra_occurrence_start.strftime('%Y-%m-%d')
-        form['occurrences-0-start_1'].value = \
-            extra_occurrence_start.strftime('%H:%M:%S')
-        form['occurrences-0-end_0'].value = \
-            extra_occurrence_end.strftime('%Y-%m-%d')
-        form['occurrences-0-end_1'].value = \
-            extra_occurrence_end.strftime('%H:%M:%S')
+        form['occurrences-0-start'].value = \
+            extra_occurrence_start.strftime('%Y-%m-%d %H:%M:%S')
+        form['occurrences-0-end'].value = \
+            extra_occurrence_end.strftime('%Y-%m-%d %H:%M:%S')
         # Submit form
         response = form.submit(name='_continue')
         self.assertEqual(302, response.status_code)
@@ -748,19 +732,19 @@ class TestEventManager(TestCase):
         self.parent_event = G(SimpleEvent)
 
         # occurrences in the past only
-        self.child_event_1 = G(SimpleEvent, part_of=self.parent_event)
+        self.child_event_1 = G(SimpleEvent, part_of=self.parent_event, title="1")
         occ1 = G(Occurrence, start=now-timedelta(hours=2), end=now-timedelta(hours=1))
         self.child_event_1.occurrences.add(occ1)
 
         # occurrences in the past and the future
-        self.child_event_2 = G(SimpleEvent, part_of=self.parent_event)
+        self.child_event_2 = G(SimpleEvent, part_of=self.parent_event, title="2")
         occ2a = G(Occurrence, start=now-timedelta(hours=2), end=now-timedelta(hours=1))
         self.child_event_2.occurrences.add(occ2a)
         occ2b = G(Occurrence, start=now+timedelta(hours=1), end=now+timedelta(hours=2))
         self.child_event_2.occurrences.add(occ2b)
 
         # no occurrences (inherits parent occurrences)
-        self.child_event_3 = G(SimpleEvent, part_of=self.parent_event)
+        self.child_event_3 = G(SimpleEvent, part_of=self.parent_event, title="3")
 
     def test_upcoming(self):
         self.assertEqual(
@@ -1255,6 +1239,8 @@ class TestEventOccurrences(TestCase):
         # Find valid occurrences to cancel
         occurrence_to_cancel_1 = event.occurrences.all()[3]
         occurrence_to_cancel_2 = event.occurrences.all()[5]
+
+        # this also tests the cached occurrence lists
         occurrence_starts, __ = get_occurrence_times_for_event(event)
         self.assertTrue(
             coerce_naive(occurrence_to_cancel_1.start)

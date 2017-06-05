@@ -1,3 +1,5 @@
+# from events merge. Still necessary?
+
 django-compressor<1.6  # See: https://github.com/django-compressor/django-compressor/issues/706
 django-el-pagination<3  # See: http://django-el-pagination.readthedocs.io/en/latest/changelog.html#version-3-0-0
 django-fluent-contents<1.1  # See: https://github.com/edoburu/django-fluent-contents/issues/67

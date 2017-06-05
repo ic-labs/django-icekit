@@ -44,8 +44,9 @@ Speed up test running
 
     QUICK=1 runtests.sh ...
 
-This reuses the test databases, and skips collectstatic and compress
-steps.
+This reuses the test databases, and skips the collectstatic
+step -- you'll need to populate a test database and run collectstatic
+beforehand.
 
 
 Working with the database for tests
@@ -63,7 +64,7 @@ Opening an interactive shell to inspect the test database
 
 ::
 
-    BASE_SETTINGS_MODULE=icekit.tests.settings manage.py shell_plus
+    BASE_SETTINGS_MODULE=test manage.py shell_plus
 
 
 Creating a data dump with migrations applied
@@ -88,7 +89,7 @@ applied:
 
 3. Dump the database to ``test_initial_data.sql``::
 
-       pg_dump -O -x -f test_initial_data.sql -d FOO_test_develop
+       pg_dump -O -x -f test_initial_data.sql -d test_FOO_develop
        git add test_initial_data.sql
 
 Creating fluent pages in tests

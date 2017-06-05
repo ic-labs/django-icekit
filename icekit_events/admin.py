@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 class EventRepeatGeneratorsInline(ICEkitInlineAdmin, admin.TabularInline):
     model = models.EventRepeatsGenerator
     form = admin_forms.BaseEventRepeatsGeneratorForm
-    extra = 0
+    extra = 1 # setting to 0 breaks tests
     fields = ('is_all_day', 'start', 'end', 'recurrence_rule', 'repeat_end',)
     formfield_overrides = {
         models.RecurrenceRuleField: {
@@ -191,8 +191,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
 
     class Media:
         css = {
-            'all': ('icekit_events/bower_components/'
-                    'font-awesome/css/font-awesome.css',),
+            'all': ('font-awesome/css/font-awesome.css',),
         }
 
     def get_queryset(self, request):

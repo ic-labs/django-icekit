@@ -670,6 +670,21 @@ ICEKIT = {
 
     'DASHBOARD_FEATURED_APPS': [
         {
+            'name': 'Events',
+            'icon_html': '<i class="content-type-icon fa fa-calendar-o"></i>',
+            'models': [
+                ('icekit_events.EventBase', {})
+            ],
+        },
+        {
+            'name': 'Collection',
+            'icon_html': '<i class="content-type-icon fa fa-diamond"></i>',
+            'models': [
+                ('gk_collections_work_creator.WorkBase', {}),
+                ('gk_collections_work_creator.CreatorBase', {}),
+            ],
+        },
+        {
             'name': 'Content',
             'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
             'models': [
@@ -794,6 +809,15 @@ INSTALLED_APPS += (
     'icekit.plugins.image_gallery',
     'icekit.plugins.twitter_embed',
     'icekit.plugins.text',
+
+    # Events
+    'icekit_events',
+    'icekit_events.event_types.simple',
+    'icekit_events.plugins.event_content_listing',
+    'icekit_events.plugins.links',
+    'icekit_events.plugins.todays_occurrences',
+    'icekit_events.page_types.eventlistingfordate',
+
 )
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )

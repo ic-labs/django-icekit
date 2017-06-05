@@ -22,12 +22,21 @@ DATABASES['default'].update({
 INSTALLED_APPS += (
     'fluent_pages.pagetypes.fluentpage',
     'icekit.tests',
+    'icekit_events.tests',
 )
 
 ROOT_URLCONF = 'icekit.tests.urls'
 
 TEMPLATES_DJANGO['DIRS'].insert(
     0, os.path.join(ICEKIT_DIR, 'tests', 'templates')),
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+TIME_ZONE = 'Australia/Sydney'  # Default: America/Chicago
+
+DDF_FILL_NULLABLE_FIELDS = False
+DDF_IGNORE_FIELDS = ['*_ptr']  # Ignore django-polymorphic pointer fields
+
+DEBUG = True
 
 # ICEKIT ######################################################################
 

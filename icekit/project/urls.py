@@ -153,6 +153,10 @@ urlpatterns = patterns(
         ),
     ))),
 
+    # GLAMkit URLs
+    url(r'^events/', include('icekit_events.urls')),
+    url(r'^iiif/', include('icekit.plugins.iiif.urls')),
+
     # Catch all, fluent page dispatcher.
     url(r'^', include('fluent_pages.urls')),
 )
