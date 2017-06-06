@@ -32,10 +32,8 @@ class ArtworkAPITestCase(_BaseCollectionAPITestCase):
         "slug": "",
         "title": "",
         "publishing_is_draft": False,
-        "date": {
-            "display": "",
-            "edtf": None,
-        },
+        "creation_date_display": "",
+        "creation_date_edtf": None,
         "origin": [],
         "subtitle": "",
         "oneliner": "",
@@ -198,10 +196,8 @@ class ArtworkAPITestCase(_BaseCollectionAPITestCase):
 class GameAPITestCase(_BaseCollectionAPITestCase):
     API_NAME = 'game-api'  # Set to reverse-able name for API URLs
     BASE_DATA = {
-        "date": {
-            "display": "",
-            "edtf": None,
-        },
+        "creation_date_display": "",
+        "creation_date_edtf": None,
         "origin": [],
         "slug": "",
         "title": "",
@@ -397,10 +393,8 @@ class FilmAPITestCase(_BaseCollectionAPITestCase):
         "title": "",
         "creators": [],
         "images": [],
-        "date": {
-            "display": "",
-            "edtf": None,
-        },
+        "creation_date_display": "",
+        "creation_date_edtf": None,
         "origin": [],
         "subtitle": "",
         "oneliner": "",
@@ -591,15 +585,13 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
         "alt_slug": "",
         "website": "",
         "wikipedia_link": "",
-        "life_info": {
-            "birth_date_display": None,
-            "birth_date_edtf": "",
-            "birth_place": "",
-            "birth_place_historic": "",
-            "death_date_display": None,
-            "death_date_edtf": "",
-            "death_place": ""
-        },
+        "birth_date_display": "",
+        "birth_date_edtf": None,
+        "birth_place": "",
+        "birth_place_historic": "",
+        "death_date_display": "",
+        "death_date_edtf": None,
+        "death_place": "",
         "background": {
             "ethnicity": "",
             "nationality": "",
@@ -782,6 +774,10 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
         "name_full": "",
         "name_display": "",
         "name_sort": "",
+        "creation_date_display": "",
+        "creation_date_edtf": None,
+        "closure_date_display": "",
+        "closure_date_edtf": None,
         "publishing_is_draft": False,
         "works": [],
         "portrait": None,
@@ -957,10 +953,8 @@ class WorkCreatorRelationshipAPITestCase(_BaseCollectionAPITestCase):
         "work": {
             "url": "",
             "title": "",
-            "date": {
-                "display": "",
-                "edtf": None,
-            }
+            "creation_date_display": "",
+            "creation_date_edtf": None,
         },
         "creator": {
             "url": "",
