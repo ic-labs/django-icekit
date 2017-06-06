@@ -28,8 +28,8 @@ class EventQueryset(PublishingPolymorphicQuerySet):
         :return: events having upcoming occurrences, and all their children
         """
         return self.filter(
-            Q(is_drop_in=False, occurrences__start__gte=datetime.now) |
-            Q(Q(is_drop_in=True) | Q(occurrences__is_all_day=True), occurrences__end__gt=datetime.now)
+            Q(is_drop_in=False, occurrences__start__gte=djtz.now) |
+            Q(Q(is_drop_in=True) | Q(occurrences__is_all_day=True), occurrences__end__gt=djtz.now)
         )
 
     def with_no_occurrences(self):

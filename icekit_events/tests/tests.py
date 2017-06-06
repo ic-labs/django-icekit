@@ -744,7 +744,6 @@ class TestEventManager(TestCase):
         # no occurrences (inherits parent occurrences)
         self.child_event_3 = G(SimpleEvent, part_of=self.parent_event, title="3")
 
-    @skip("passes locally, doesn't pass on Travis")
     def test_upcoming(self):
         # fails here on travis
         self.assertEqual(
@@ -759,7 +758,6 @@ class TestEventManager(TestCase):
             set(SimpleEvent.objects.with_upcoming_or_no_occurrences()),
             set([self.parent_event, self.child_event_2, self.child_event_3]))
 
-    @skip("passes locally, doesn't pass on Travis")
     def test_contained(self):
         # fails here on travis
         self.assertEqual(
