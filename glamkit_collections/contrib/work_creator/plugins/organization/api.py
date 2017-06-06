@@ -13,12 +13,48 @@ VIEWNAME = 'api:organization-api'
 class Organization(Creator):
     type = serializers.SerializerMethodField()
     type_plural = serializers.SerializerMethodField()
+    # Rename start/end date creator fields to creation/closure for organization
+    creation_date_display = serializers.CharField(
+        source='start_date_display',
+        required=False,
+        allow_blank=True,
+    )
+    creation_date_edtf = serializers.CharField(
+        source='start_date_edtf',
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+    )
+    closure_date_display = serializers.CharField(
+        source='end_date_display',
+        required=False,
+        allow_blank=True,
+    )
+    closure_date_edtf = serializers.CharField(
+        source='end_date_edtf',
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+    )
 
     class Meta:
         model = OrganizationCreatorModel
-        fields = Creator.Meta.fields + (
+        # Use Creator field names except for those for start/end dates which we
+        # rename to creation/closure
+        _creator_fields = tuple(
+            f for f in Creator.Meta.fields
+            if (
+                not f.startswith('start_date_') and
+                not f.startswith('end_date_')
+            )
+        )
+        fields = _creator_fields + (
             'type',
             'type_plural',
+            'creation_date_display',
+            'creation_date_edtf',
+            'closure_date_display',
+            'closure_date_edtf',
         )
         extra_kwargs = dict(Creator.Meta.extra_kwargs, **{
             'url': {

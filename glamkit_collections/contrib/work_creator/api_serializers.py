@@ -1,13 +1,10 @@
-from django.apps import apps
-
 from rest_framework import serializers
 from rest_framework.settings import api_settings
 from rest_framework.validators import UniqueTogetherValidator
 from drf_queryfields import QueryFieldsMixin
 
-from icekit.api.base_serializers import ModelSubSerializer, \
-    PolymorphicHyperlinkedModelSerializer, WritableSerializerHelperMixin, \
-    WritableRelatedFieldSettings
+from icekit.api.base_serializers import WritableSerializerHelperMixin, \
+    PolymorphicHyperlinkedModelSerializer, WritableRelatedFieldSettings
 from icekit.api.images.serializers import RelatedImageSerializer
 
 from .models import WorkBase, CreatorBase, WorkCreator as WorkCreatorModel, \
@@ -84,23 +81,9 @@ class CreatorSummary(PolymorphicHyperlinkedModelSerializer):
         }
 
 
-class WorkDate(ModelSubSerializer):
-    class Meta:
-        model = WorkBase
-        source_prefix = 'date_'
-        fields = (
-            'date_display',
-            'date_edtf',
-        )
-
-
 class WorkSummary(WritableSerializerHelperMixin,
                   PolymorphicHyperlinkedModelSerializer):
     """ Minimal information about a work """
-    date = WorkDate(
-        required=False,
-        read_only=True,
-    )
 
     def get_child_view_name_data(self):
         from .plugins.game import api as game_api
@@ -118,7 +101,8 @@ class WorkSummary(WritableSerializerHelperMixin,
             api_settings.URL_FIELD_NAME,
             'id',
             'title',
-            'date',
+            'creation_date_display',
+            'creation_date_edtf',
         )
         extra_kwargs = {
             'id': {
@@ -239,6 +223,10 @@ class Creator(BaseCollectionModelSerializerMixin,
             'name_sort',
             'website',
             'wikipedia_link',
+            'start_date_display',
+            'start_date_edtf',
+            'end_date_display',
+            'end_date_edtf',
             # Metadata fields
             'id',
             'external_ref',
@@ -325,9 +313,6 @@ class Work(BaseCollectionModelSerializerMixin,
         many=True,
         read_only=True,
     )
-    date = WorkDate(
-        required=False,
-    )
     origin = WorkOrigin(
         source="workorigin_set",
         many=True,
@@ -341,8 +326,6 @@ class Work(BaseCollectionModelSerializerMixin,
             'creators',
             'images',
             'origin',
-            # Sub-resources
-            'date',
             # Fields
             api_settings.URL_FIELD_NAME,
             'publishing_is_draft',
@@ -353,6 +336,8 @@ class Work(BaseCollectionModelSerializerMixin,
             'department',
             'credit_line',
             'accession_number',
+            'creation_date_display',
+            'creation_date_edtf',
             # Metadata fields
             'id',
             'external_ref',

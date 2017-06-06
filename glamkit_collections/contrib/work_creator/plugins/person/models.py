@@ -36,50 +36,18 @@ class PersonCreator(CreatorBase):
         max_length=255,
     )
 
-    life_info_birth_date_display = models.CharField(
-        blank=True,
-        max_length=255,
-        help_text='The display version of the creator\'s birth date, '
-                  'e.g. "circa August 1645"',
-        null=True
-    )
-    life_info_birth_date_edtf = models.CharField(
-        blank=True,
-        max_length=63,
-        help_text=
-            '<a href="http://www.loc.gov/standards/datetime/'
-            'implementations.html">EDTF</a>'
-            " version of the creator\'s birth date, as best as we could parse"
-            " from the display date e.g. \"1645-08~\""
-    )
-
-    life_info_birth_place = models.CharField(
+    birth_place = models.CharField(
         blank=True,
         max_length=255,
         help_text='The location of the creator\'s birth, e.g., "Utrecht"'
     )
-    life_info_birth_place_historic = models.CharField(
+    birth_place_historic = models.CharField(
         blank=True,
         max_length=255,
         help_text='The historical name of the place at the time of the '
                   'creator\'s birth, e.g., "Flanders"'
     )
-    life_info_death_date_display = models.CharField(
-        blank=True,
-        max_length=255,
-        help_text='The display version of the creator\'s death date, '
-                  'e.g., "before 1720s"',
-        null=True,
-    )
-    life_info_death_date_edtf = models.CharField(
-        blank=True,
-        max_length=63,
-        help_text=
-            '<a href="http://www.loc.gov/standards/datetime/'
-            'implementations.html">EDTF</a> '
-            'version of the creator\'s death date, e.g. \"[..172x]\"'
-    )
-    life_info_death_place = models.CharField(
+    death_place = models.CharField(
         blank=True,
         max_length=255,
         help_text='The location of the creator\'s death, e.g., "Antwerp."',
@@ -164,12 +132,12 @@ class PersonCreator(CreatorBase):
         n.d. - 1540s
         """
         birth = ", ".join(filter(None, (
-            self.life_info_birth_date_display,
-            self.life_info_birth_place
+            self.start_date_display,
+            self.start_place
         )))
         death = ", ".join(filter(None, (
-            self.life_info_death_date_display,
-            self.life_info_death_place
+            self.end_date_display,
+            self.end_place
         )))
 
         if death and not birth:

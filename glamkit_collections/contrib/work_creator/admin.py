@@ -113,16 +113,16 @@ class CreatorChildAdmin(
         ICEkitContentsAdmin.inlines
 
     readonly_fields = (
-        'birth_date_earliest',
-        'birth_date_latest',
-        'birth_date_sort_ascending',
-        'birth_date_sort_descending',
-        'birth_date_edtf',
-        'death_date_earliest',
-        'death_date_latest',
-        'death_date_sort_ascending',
-        'death_date_sort_descending',
-        'death_date_edtf',
+        'start_date_earliest',
+        'start_date_latest',
+        'start_date_sort_ascending',
+        'start_date_sort_descending',
+        'start_date_edtf',
+        'end_date_earliest',
+        'end_date_latest',
+        'end_date_sort_ascending',
+        'end_date_sort_descending',
+        'end_date_edtf',
     )
 
     NAME_FIELDSET =  ('Name', {
@@ -136,24 +136,24 @@ class CreatorChildAdmin(
     DATE_FIELDSETS = (
         ("Dates", {
             'fields': (
-                ('birth_date_display',
-                'death_date_display',),
+                ('start_date_display',
+                 'end_date_display',),
             ),
         }),
         ("Advanced date controls", {
             'classes': ('collapse',),
             'fields': (
-                ('birth_date_earliest',
-                'birth_date_latest',),
-                ('birth_date_sort_ascending',
-                'birth_date_sort_descending',),
-                'birth_date_edtf',
+                ('start_date_earliest',
+                 'start_date_latest',),
+                ('start_date_sort_ascending',
+                 'start_date_sort_descending',),
+                'start_date_edtf',
 
-                ('death_date_earliest',
-                'death_date_latest',),
-                ('death_date_sort_ascending',
-                'death_date_sort_descending',),
-                'death_date_edtf',
+                ('end_date_earliest',
+                 'end_date_latest',),
+                ('end_date_sort_ascending',
+                 'end_date_sort_descending',),
+                'end_date_edtf',
             ),
         }),
     )
@@ -192,11 +192,11 @@ class WorkChildAdmin(
     exclude = ('layout', 'alt_slug',)
     prepopulated_fields = {"slug": ("accession_number", "title",)}
     readonly_fields = (
-        "date_edtf",
-        'date_earliest',
-        'date_latest',
-        'date_sort_ascending',
-        'date_sort_descending',
+        "creation_date_edtf",
+        'creation_date_earliest',
+        'creation_date_latest',
+        'creation_date_sort_ascending',
+        'creation_date_sort_descending',
     )
 
     inlines = [WorkOriginsInline, WorkCreatorsInlineForWorks, WorkImageInline] + \
@@ -205,17 +205,17 @@ class WorkChildAdmin(
     DATE_FIELDSETS = (
         ("Date", {
             'fields': (
-                'date_display',
+                'creation_date_display',
             ),
         }),
         ("Advanced date controls", {
             'classes': ('collapse',),
             'fields': (
-                ('date_earliest',
-                 'date_latest',),
-                ('date_sort_ascending',
-                 'date_sort_descending',),
-                'date_edtf',
+                ('creation_date_earliest',
+                 'creation_date_latest',),
+                ('creation_date_sort_ascending',
+                 'creation_date_sort_descending',),
+                'creation_date_edtf',
             ),
         }),
 

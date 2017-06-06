@@ -97,20 +97,24 @@ class CreatorBase(
     )
     wikipedia_link = models.URLField(blank=True, help_text="e.g. 'https://en.wikipedia.org/wiki/Pablo_Picasso'")
 
-    birth_date_display = models.CharField(
-        "Date of birth (display)",
+    ###########################################################################
+    # "Start" date common fields for person's birth and organisation's creation
+    ###########################################################################
+    start_date_display = models.CharField(
+        "Date of birth/creation (display)",
         blank=True,
         max_length=255,
         help_text='Displays date as formatted for display, rather '
                   'than sorting.'
     )
-    birth_date_edtf = EDTFField(
-        "Date of creation (EDTF)",
-        natural_text_field='birth_date_display',
-        lower_strict_field='birth_date_earliest',
-        upper_strict_field='birth_date_latest',
-        lower_fuzzy_field='birth_date_sort_ascending',
-        upper_fuzzy_field='birth_date_sort_descending',
+    start_date_edtf = EDTFField(
+        "Date of birth/creation (EDTF)",
+        natural_text_field='start_date_display',
+        # Use "start" date common fields from CreatorBase
+        lower_strict_field='start_date_earliest',
+        upper_strict_field='start_date_latest',
+        lower_fuzzy_field='start_date_sort_ascending',
+        upper_fuzzy_field='start_date_sort_descending',
         blank=True,
         null=True,
         help_text="an <a href='http://www.loc.gov/standards/datetime/"
@@ -118,41 +122,45 @@ class CreatorBase(
                   "date, parsed from the display date, e.g. "
                   "'1855/1860-06-04'",
     )
-    birth_date_earliest = models.DateField(
-        "Earliest birth date",
+    start_date_earliest = models.DateField(
+        "Earliest start date",
         blank=True,
         null=True,
     )
-    birth_date_latest = models.DateField(
-        "Latest birth date",
+    start_date_latest = models.DateField(
+        "Latest start date",
         blank=True,
         null=True,
     )
-    birth_date_sort_ascending = models.DateField(
-        "Ascending sort by birth",
+    start_date_sort_ascending = models.DateField(
+        "Ascending sort by start",
         blank=True,
         null=True,
     )
-    birth_date_sort_descending = models.DateField(
-        "Descending sort by birth",
+    start_date_sort_descending = models.DateField(
+        "Descending sort by start",
         blank=True,
         null=True,
     )
 
-    death_date_display = models.CharField(
-        "Date of death (display)",
+    ########################################################################
+    # "End" date common fields for person's death and organisation's closure
+    ########################################################################
+    end_date_display = models.CharField(
+        "Date of death/closure (display)",
         blank=True,
         max_length=255,
         help_text='Displays date as formatted for display, rather '
                   'than sorting.'
     )
-    death_date_edtf = EDTFField(
-        "Date of death (EDTF)",
-        natural_text_field='death_date_display',
-        lower_strict_field='death_date_earliest',
-        upper_strict_field='death_date_latest',
-        lower_fuzzy_field='death_date_sort_ascending',
-        upper_fuzzy_field='death_date_sort_descending',
+    end_date_edtf = EDTFField(
+        "Date of death/closure (EDTF)",
+        natural_text_field='end_date_display',
+        # Use "end" date common fields from CreatorBase
+        lower_strict_field='end_date_earliest',
+        upper_strict_field='end_date_latest',
+        lower_fuzzy_field='end_date_sort_ascending',
+        upper_fuzzy_field='end_date_sort_descending',
         blank=True,
         null=True,
         help_text="an <a href='http://www.loc.gov/standards/datetime/"
@@ -160,27 +168,26 @@ class CreatorBase(
                   "date, parsed from the display date, e.g. "
                   "'1855/1860-06-04'",
     )
-    death_date_earliest = models.DateField(
-        "Earliest death date",
+    end_date_earliest = models.DateField(
+        "Earliest end date",
         blank=True,
         null=True,
     )
-    death_date_latest = models.DateField(
-        "Latest death date",
+    end_date_latest = models.DateField(
+        "Latest end date",
         blank=True,
         null=True,
     )
-    death_date_sort_ascending = models.DateField(
-        "Ascending sort by death",
+    end_date_sort_ascending = models.DateField(
+        "Ascending sort by end",
         blank=True,
         null=True,
     )
-    death_date_sort_descending = models.DateField(
-        "Descending sort by death",
+    end_date_sort_descending = models.DateField(
+        "Descending sort by end",
         blank=True,
         null=True,
     )
-
 
     class Meta:
         verbose_name = "creator"
@@ -300,27 +307,27 @@ class WorkBase(
     )
     subtitle = models.CharField(max_length=511, blank=True)
     oneliner = models.CharField("One-liner", max_length=511, blank=True,
-                                 help_text="A pithy description of the work")
+                                help_text="A pithy description of the work")
 
     # who made it
     creators = models.ManyToManyField(
         'CreatorBase', through='WorkCreator', related_name='works'
     )
 
-    date_display = models.CharField(
+    creation_date_display = models.CharField(
         "Date of creation (display)",
         blank=True,
         max_length=255,
         help_text='Displays date as formatted for display, rather '
                   'than sorting.'
     )  # used on 'Explore Modern Art' 53841 records
-    date_edtf = EDTFField(
+    creation_date_edtf = EDTFField(
         "Date of creation (EDTF)",
-        natural_text_field='date_display',
-        lower_strict_field='date_earliest',
-        upper_strict_field='date_latest',
-        lower_fuzzy_field='date_sort_ascending',
-        upper_fuzzy_field='date_sort_descending',
+        natural_text_field='creation_date_display',
+        lower_strict_field='creation_date_earliest',
+        upper_strict_field='creation_date_latest',
+        lower_fuzzy_field='creation_date_sort_ascending',
+        upper_fuzzy_field='creation_date_sort_descending',
         blank=True,
         null=True,
         help_text="an <a href='http://www.loc.gov/standards/datetime/"
@@ -328,22 +335,22 @@ class WorkBase(
                   "date, parsed from the display date, e.g. "
                   "'1855/1860-06-04'",
     )
-    date_earliest = models.DateField(
+    creation_date_earliest = models.DateField(
         "Earliest date",
         blank=True,
         null=True,
     )
-    date_latest = models.DateField(
+    creation_date_latest = models.DateField(
         "Latest date",
         blank=True,
         null=True,
     )
-    date_sort_ascending = models.DateField(
+    creation_date_sort_ascending = models.DateField(
         "Ascending sort",
         blank=True,
         null=True,
     )
-    date_sort_descending = models.DateField(
+    creation_date_sort_descending = models.DateField(
         "Descending sort",
         blank=True,
         null=True,
@@ -388,8 +395,8 @@ class WorkBase(
         unique_together = ('slug', 'publishing_is_draft',)
 
     def __unicode__(self):
-        if self.date_display:
-            return u"%s (%s)" % (self.title, self.date_display)
+        if self.creation_date_display:
+            return u"%s (%s)" % (self.title, self.creation_date_display)
         return self.title
 
     def save(self, *args, **kwargs):
@@ -471,8 +478,8 @@ class WorkBase(
         return self.get_roles().filter(is_primary=True)
 
     def get_title(self):
-        if self.date_display:
-            return u"{0} ({1})".format(self.title, self.date_display)
+        if self.creation_date_display:
+            return u"{0} ({1})".format(self.title, self.creation_date_display)
         return self.title
 
     def get_origin_countries(self):
