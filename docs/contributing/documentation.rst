@@ -1,10 +1,10 @@
 Writing documentation
 =====================
 
-Good documentation is just as important as tests. ICEkit pull requests should
+Good documentation is just as important as tests. GLAMkit pull requests should
 endeavour to include and/or update documentation where appropriate.
 
-ICEkit documentation is written in ReStructured Text (ReST) format, and
+GLAMkit documentation is written in ReStructured Text (ReST) format, and
 compiled to HTML using Sphinx. Documentation is hosted on ReadTheDocs.
 
 Conventions
@@ -14,7 +14,7 @@ Conventions
 *  Keep the :doc:`../changelog` up to date. Describe features, not
    implementation details, except for backwards incompatible changes.
 *  We're aiming to document all non-private modules, classes and functions in
-   ICEkit. The easiest way to do this is in the docstrings of the class, with
+   GLAMkit. The easiest way to do this is in the docstrings of the class, with
    an ``automodule`` call out from this document structure.
 *  Titles should be sentence case.
 *  File extensions are ``.rst`` and hard-wrapped at 80 columns.

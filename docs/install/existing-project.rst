@@ -1,7 +1,7 @@
-Installing an existing ICEkit project
-=====================================
+Installing an existing GLAMkit project
+======================================
 
-The instructions for setting up an existing ICEkit project are identical to
+The instructions for setting up an existing GLAMkit project are identical to
 starting a new project, except instead of step 1. 'Create a new project'
 (the ``$ bash <(curl ... `` line), just clone your git repository.
 

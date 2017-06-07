@@ -1,7 +1,7 @@
 Architectural conventions
 =========================
 
-One of ICEkit's intentions is to implement a common approach for
+One of GLAMkit's intentions is to implement a common approach for
 working with web content, in order to maximise predictability and template
 reusability, without being so prescriptive as to prevent innovation and
 easy extension.
@@ -13,7 +13,7 @@ the CMS.
 Template contexts
 -----------------
 
-In ICEkit contents models  that render templates, there is a convention of
+In GLAMkit contents models that render templates, there is a convention of
 naming the primary content object ``page`` in the template context. Thus, in an Article
 view, the template context is populated with the context ``{'page': article}``.
 Similarly in Event models, the context variable ``page`` is the event to be
@@ -53,7 +53,7 @@ is trivial, like a field.
 Portable apps
 -------------
 
-ICEkit models and content plugins are portable, which means the code can be
+GLAMkit models and content plugins are portable, which means the code can be
 moved without affecting table names or migration history.
 
 This is useful to cleanly extend functionality beyond what can be
@@ -65,7 +65,6 @@ Naming Conventions
 ------------------
 
 GLAMkit is spelled as one word with an uppercase GLAM and lowercase 'kit'.
-Same with ICEkit.
 
 Model Classes
 ~~~~~~~~~~~~~

@@ -31,6 +31,6 @@ churn and make collaboration easier.
 -  Follow `PEP8 <http://legacy.python.org/dev/peps/pep-0008/>`__ for
    Python code, unless there is a good reason not to.
 -  Install the `EditorConfig <http://editorconfig.org/>`__ plugin for
-   your preferred code editor. ICEkit comes with an ``.editorconfig`` file which
+   your preferred code editor. GLAMkit comes with an ``.editorconfig`` file which
    indicates which formatting defaults to use for different file types.
 

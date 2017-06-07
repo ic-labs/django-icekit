@@ -1,15 +1,15 @@
-Refactor of ICEKit Events' Repeating Events - Functional Spec
-=============================================================
+Refactor of GLAMkit Events' Repeating Events - Functional Spec
+================-=============================================
 
 Document history:
 
-* 2016-03-08 - jmurty : Revised draft following feedback from Greg in https://github.com/ixc/icekit-events/pull/9/files#r54678289
-* 2016-03-01 - jmurty : Revised draft following discussions with Greg and Tai and comments in https://github.com/ixc/icekit-events/pull/9/files
+* 2016-03-08 - jmurty : Revised draft following feedback from Greg in https://github.com/ixc/GLAMkit-events/pull/9/files#r54678289
+* 2016-03-01 - jmurty : Revised draft following discussions with Greg and Tai and comments in https://github.com/ixc/GLAMkit-events/pull/9/files
 * 2016-02-18 – jmurty : Initial draft, up to technical decision point described in Occurrence Implementation Options
 
 ## Goals
 
-We need to simplify the way ICEKit Events stores and manages repeating events.
+We need to simplify the way GLAMkit Events stores and manages repeating events.
 
 Currently, repeating occurrences of events (including variations) are stored as full copies of the original event model. At best this means that all repeating events are based on a relatively heavyweight `PolymorphicMPTTModel` model, and at worst in cases like SFMOMA they are based on much richer models that include support for layouts, publishing, and other complex features.
 
@@ -89,7 +89,7 @@ Instead of event clone children we will instead use lightweight Occurrence objec
 
 ### Occurrence
 
-An Occurrence is a new light-weight representation we will use in ICEKit Events to store the date/time and duration when an Event should be shown on a calendar. In particular, it replaces the need to clone whole Event models just to change their date/time as is currently the case.
+An Occurrence is a new light-weight representation we will use in GLAMkit Events to store the date/time and duration when an Event should be shown on a calendar. In particular, it replaces the need to clone whole Event models just to change their date/time as is currently the case.
 
 The main purpose of Occurrences is to serve as an in-database representation for each instance in an event family so we can quickly find and display future events, rather than needing to regenerate an entire event family to find information we need. To be absolutely clear, events will only appear in a calendar if they have at least one occurrence – an event with no occurrences is invisible in a calendar.
 
@@ -118,7 +118,7 @@ Regarding the "status" field, we may need both "Cancelled" and "Excluded" status
 
 ### Admin UI
 
-The model changes in this spec will require numerous admin changes for ICEKit Events:
+The model changes in this spec will require numerous admin changes for GLAMkit Events:
 
 * the calendar on the event listing page will show only occurrences
 * the event list on the event listing page will include all events, whether or not they have occurrences
@@ -132,7 +132,7 @@ The model changes in this spec will require numerous admin changes for ICEKit Ev
 
 ### Publishing (SFMOMA)
 
-Events are publishable in SFMOMA, and likely will also be so in future projects even though ICEKit Events itself has no publishing features. As such, we need to understand how publishing will interact with events.
+Events are publishable in SFMOMA, and likely will also be so in future projects even though GLAMkit Events itself has no publishing features. As such, we need to understand how publishing will interact with events.
 
 A publishable event:
 

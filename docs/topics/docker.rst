@@ -1,7 +1,7 @@
 More about Docker
 =================
 
-ICEkit is Docker-compatible, and we recommend using Docker for development and
+GLAMkit is Docker-compatible, and we recommend using Docker for development and
 deployment. Docker has many advantages over a simple Python virtualenv
 environment:
 
@@ -88,7 +88,7 @@ Remove ALL containers, images and volumes, to start from scratch::
 Docker Cloud commands
 ---------------------
 
-The following commands can be run on a terminal in ICEkit's Django
+The following commands can be run on a terminal in GLAMkit's Django
 `docker cloud`_ container. First run ``entrypoint.sh bash`` to set up the
 environment.
 
@@ -128,8 +128,8 @@ Finally, load the data::
    $ psql < dump.sql
    $ rm dump.sql
 
-Uninstalling a GLAMkit/ICEkit project from Docker
--------------------------------------------------
+Uninstalling a GLAMkit project from Docker
+------------------------------------------
 
 Delete all containers with a name matching ``{project_name}``::
 
@@ -143,7 +143,7 @@ and for each image you want to delete::
 
     $ docker rmi {image id}
 
-If you are running other ICEkit projects, then you only need to delete
+If you are running other GLAMkit projects, then you only need to delete
 the image that starts with ``[project_name]`` - the other images will be
 used by other projects. To remove all "dangling" images (untagged and
 not referenced by a container)::

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# ICEkit documentation build configuration file, created by
+# GLAMkit documentation build configuration file, created by
 # sphinx-quickstart on Tue Dec 20 00:39:45 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -55,7 +55,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = u'ICEkit'
+project = u'GLAMkit'
 copyright = u'2016, the Interaction Consortium'
 author = u'the Interaction Consortium'
 
@@ -113,7 +113,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'ICEkitdoc'
+htmlhelp_basename = 'GLAMkitdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -140,7 +140,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'ICEkit.tex', u'ICEkit Documentation',
+    (master_doc, 'GLAMkit.tex', u'GLAMkit Documentation',
      u'the Interaction Consortium', 'manual'),
 ]
 
@@ -150,7 +150,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'icekit', u'ICEkit Documentation',
+    (master_doc, 'glamkit', u'GLAMkit Documentation',
      [author], 1)
 ]
 
@@ -167,8 +167,8 @@ source_parsers = {
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'ICEkit', u'ICEkit Documentation',
-     author, 'ICEkit', 'One line description of project.',
+    (master_doc, 'GLAMkit', u'GLAMkit Documentation',
+     author, 'GLAMkit', 'One line description of project.',
      'Miscellaneous'),
 ]
 

@@ -2,7 +2,7 @@ Working with rich content
 =========================
 
 This section contains an in-depth discussion of the architecture and design
-decisions behind ICEkit's enterprise-level tools for working with content.
+decisions behind GLAMkit's enterprise-level tools for working with content.
 
 .. toctree::
    :maxdepth: 2

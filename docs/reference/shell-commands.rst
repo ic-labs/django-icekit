@@ -24,7 +24,7 @@ Or open a shell on a new container, and remove it on exit::
 Without Docker
 ~~~~~~~~~~~~~~
 
-Or open a shell without Docker from the ICEkit project template (or an ICEkit
+Or open a shell without Docker from the GLAMkit project template (or a GLAMkit
 project) directory::
 
     $ cd project_template

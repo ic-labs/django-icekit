@@ -5,7 +5,7 @@
 
     $ bash <(curl -Ls https://raw.githubusercontent.com/ic-labs/django-icekit/master/startproject.sh) {project_name}
 
-This will create a new project from the ICEkit project template, in a
+This will create a new project from the GLAMkit project template, in a
 directory named ``{project_name}`` in the current working directory.
 
 NOTE: Windows users should run this command in Git Bash, which comes

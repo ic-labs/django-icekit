@@ -35,7 +35,7 @@ of available template names by plugins, if the ``plugin_class`` kwarg is
 given.
 
 The ``Layout.template_name`` field uses the
-``TemplateNameFieldChoicesPlugin`` mount point, and ICEkit ships with
+``TemplateNameFieldChoicesPlugin`` mount point, and GLAMkit ships with
 several plugins.
 
 AppModelDefaultLayoutsPlugin

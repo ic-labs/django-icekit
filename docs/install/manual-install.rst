@@ -3,7 +3,7 @@
 Installing and running without Docker
 =====================================
 
-If you are not yet ready for Docker, you can run an ICEkit project directly.
+If you are not yet ready for Docker, you can run an GLAMkit project directly.
 You will need to install and configure all of its dependencies manually.
 
 0. Install prerequisites (once per machine)
@@ -17,8 +17,8 @@ tools::
     xcode-select --install
 
 
-Install ICEkit system dependencies
-----------------------------------
+Install GLAMkit system dependencies
+-----------------------------------
 This section describes how to install the required system packages:
 
 -  PostgreSQL
@@ -35,7 +35,7 @@ This section describes how to install the required system packages:
 Database
 ........
 
-ICEkit requires a PostgreSQL database. On OS X, we recommend
+GLAMkit requires a PostgreSQL database. On OS X, we recommend
 `Postgres.app <http://postgresapp.com/>`__. It is easy to install,
 start, stop, and upgrade.
 
@@ -92,7 +92,7 @@ Install Bower
 2. Run the project
 ^^^^^^^^^^^^^^^^^^
 
-Change to the ICEkit project template (or an ICEkit project) directory::
+Change to the GLAMkit project template (or a GLAMkit project) directory::
 
     $ cd project_template
 

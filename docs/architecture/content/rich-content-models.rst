@@ -1,7 +1,7 @@
 Rich content models
 ===================
 
-ICEkit's approach to rich content is based on the ``fluent-contents`` system.
+GLAMkit's approach to rich content is based on the ``fluent-contents`` system.
 In that system, content models contain placeholders, and placeholders contain
 content items.
 .. TODO: describe the system.
@@ -13,7 +13,7 @@ content items.
 Placeholders
 ------------
 
-When an end-user editor edits rich content in ICEkit, she adds **Content
+When an end-user editor edits rich content in GLAMkit, she adds **Content
 Plugins** into one or more **Placeholders**.
 
 Placeholders are specified in the html template that is associated with

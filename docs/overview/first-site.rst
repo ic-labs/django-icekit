@@ -13,14 +13,14 @@ Next steps
 ----------
 
 At this point you can get a long way simply by overriding
-templates and CSS styles. ICEkit sites are Django projects, and you can add
+templates and CSS styles. GLAMkit sites are Django projects, and you can add
 models, views, templates and URLs to your project in much the same way as you
 would in any Django project.
 
 Where to put your project files
 -------------------------------
 
-ICEkit looks for templates in the project root's `templates` folder. This is
+GLAMkit looks for templates in the project root's `templates` folder. This is
 a good place to override 3rd-party templates.
 
 You can create apps in your project as normal, with ``manage.py startapp``.

@@ -1,7 +1,7 @@
 Deploying your site
 ===================
 
-ICEkit is designed to be easily deployed and scaled using Docker.
+GLAMkit is designed to be easily deployed and scaled using Docker.
 See :doc:`../topics/docker`.
 
 Your project's ``Dockerfile`` is used to prepare a Docker image. It looks
@@ -36,7 +36,7 @@ the instructions therein.
 Deploy a Demo to Docker Cloud
 -----------------------------
 
-Use the Deploy to Docker Cloud button to create a new default ICEkit stack on
+Use the Deploy to Docker Cloud button to create a new default GLAMkit stack on
 `Docker Cloud`_.
 
 .. image:: https://files.cloud.docker.com/images/deploy-to-dockercloud.svg
@@ -44,7 +44,7 @@ Use the Deploy to Docker Cloud button to create a new default ICEkit stack on
    :alt: Deploy to Docker Cloud
 
 (This is mostly for testing and demonstration purposes - you won't be able to
-customise your project when deploying the official ICEkit Docker image this way.)
+customise your project when deploying the official GLAMkit Docker image this way.)
 
 .. TODO: document how to deploy your own project for the first time.
 

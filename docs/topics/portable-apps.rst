@@ -1,17 +1,17 @@
 Portable Content Plugin & Page Type Apps
 ========================================
 
-ICEkit page types and plugins are portable, which means they can be copied into
+GLAMkit page types and plugins are portable, which means they can be copied into
 a project without affecting database table names and (relative) imports.
 
 It's important to make the content plugin and page type apps
-that ship with ICEkit as generic as possible, so that developers can re-use them
+that ship with GLAMkit as generic as possible, so that developers can re-use them
 as-is for the most common cases, while making it possible to customise
 when needed.
 
 When we do need to customise, we should be able to do so simply by copying the
 entire app (admin classes, forms, migrations, models, templates, views,
-etc.) from ICEkit into a project, and having it work exactly as it did
+etc.) from GLAMkit into a project, and having it work exactly as it did
 before.
 
 If we can ensure that the database table names don't change and imports

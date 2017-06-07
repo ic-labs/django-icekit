@@ -10,7 +10,7 @@ model, or an entirely new model.
 Page types
 ----------
 
-ICEkit uses [django-fluent-pages] to provide a tree of pages for your
+GLAMkit uses [django-fluent-pages] to provide a tree of pages for your
 site. Each page is an instance of a Page Type.
 
 Pages can be arranged in any tree shape. The URL of a page is made up of
@@ -48,7 +48,7 @@ A Page Type always inherits:
 
 Page Types normally, but don't have to, inherit from:
 
--  ICEkit's publishing, enabling the page to be published and
+-  GLAMkit's publishing, enabling the page to be published and
    unpublished.
 -  Fluent-contents, enabling the page to have rich modular content.
 
@@ -70,7 +70,7 @@ don't forget to register the model with ICEkitURLField in ``models.py``:
 Abstract Page Type mixins
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-ICEkit comes with a number of mixins to create different types of
+GLAMkit comes with a number of mixins to create different types of
 content. Here's a rough guide:
 
 +-----------+------------+-------+---------------------------+----------------------+

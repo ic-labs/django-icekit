@@ -3,7 +3,7 @@ Important concepts
 
 .. TODO: cross-ref from glossary
 
-In a nutshell, ICEkit allows easy creation of Rich content models. Rich
+In a nutshell, GLAMkit allows easy creation of Rich content models. Rich
 content models contain one or more placeholders. Placeholders represent
 areas in a template that contain zero or more rich content items.
 
@@ -14,7 +14,7 @@ areas in a template that contain zero or more rich content items.
 Rich content models
 -------------------
 
-ICEkit's rich content models allow a human editor to add and arrange
+GLAMkit's rich content models allow a human editor to add and arrange
 many **Content Items** in any order into one or more **Content
 Placeholder** slots. This is accomplished using the
 `django-fluent-contents <https://github.com/edoburu/django-fluent-contents>`__
@@ -59,7 +59,7 @@ types of content that you might need in a project.
 Pages vs Collections
 --------------------
 
-ICEkit uses
+GLAMkit uses
 `django-fluent-pages <https://github.com/edoburu/django-fluent-pages>`__
 to provide a **tree of pages** for your site. Pages can be arranged in any tree
 shape. The slug of a page is made up of its slug plus that of its parent.
@@ -88,7 +88,7 @@ Blog Post, Press Release, User, Artwork, etc.
 
 For collections of content, consider using a more traditional Django model,
 and maybe define a Page Type and/or Content Plugin for listing/navigating
-through the collection. ICEkit provides some
+through the collection. GLAMkit provides some
 :ref:`collection helpers <content-collections>` to aid this process.
 
 .. TODO: link to creating content models/content plugins

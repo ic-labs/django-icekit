@@ -3,10 +3,10 @@ APIs
 
 
 APIs provide a way for clients to read data from, and sometimes write data
-to, ICEkit sites using programmatic interfaces instead of manually through
+to, GLAMkit sites using programmatic interfaces instead of manually through
 the web admin.
 
-ICEkit's API features are built with the `Django REST framework
+GLAMkit's API features are built with the `Django REST framework
 <http://www.django-rest-framework.org/>`_ library.
 
 Settings
