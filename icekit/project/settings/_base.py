@@ -838,14 +838,19 @@ INSTALLED_APPS += (
 
     # Events
     'icekit_events',
+
     'icekit_events.event_types.simple',
+
+    'icekit_events.page_types.eventlistingfordate',
+
     'icekit_events.plugins.event_content_listing',
     'icekit_events.plugins.links',
     'icekit_events.plugins.todays_occurrences',
-    'icekit_events.page_types.eventlistingfordate',
 
     # Collections
-    # 'glamkit_collections',
+    'glamkit_collections',
+    'glamkit_collections.contrib.work_creator',
+    'glamkit_collections.contrib.work_creator.plugins.links',
 
     # Sponsors
     'glamkit_sponsors',
