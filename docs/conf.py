@@ -190,7 +190,6 @@ rst_epilog = """
 .. _Travis: https://travis-ci.org/
 .. _icekit-events: https://github.com/ic-labs/icekit-events/
 .. _icekit-press-releases: https://github.com/ic-labs/icekit-press-releases/
-.. _glamkit-sponsors: https://github.com/ic-labs/glamkit-sponsors/
 .. _glamkit-collections: https://github.com/ic-labs/glamkit-collections/
 .. _django-dynamic-fixture: http://paulocheque.github.io/django-dynamic-fixture/
 """

@@ -9,29 +9,6 @@ Installation
 .. include:: ../install/docker.rst
 
 
-Enabling GLAMkit features
--------------------------
-
-The key differences between ICEkit and GLAMkit come down to the settings file
-that's used. To enable GLAMkit features, change your ``project_settings.py``
-file from::
-
-   from icekit.project.settings.icekit import *
-
-to::
-
-   from icekit.project.settings.glamkit import *
-
-The GLAMkit settings file enables:
-
--  the icekit-events_ package, and some standard events types
--  the icekit-press-releases_ package
--  the glamkit-collections_ package, and some standard events types
--  the glamkit-sponsors_ package
--  urls for the above
--  dashboard customisations for the above
-
-
 Next steps
 ----------
 

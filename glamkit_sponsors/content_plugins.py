@@ -7,18 +7,18 @@ from . import models
 class BeginSponsorBlockPlugin(ContentPlugin):
     model = models.BeginSponsorBlockItem
     render_template = 'plugins/sponsor_block/begin.html'
-    category = _('Sponsorship')
+    category = _('Sponsors')
 
 @plugin_pool.register
 class EndSponsorBlockPlugin(ContentPlugin):
     model = models.EndSponsorBlockItem
     render_template = 'plugins/sponsor_block/end.html'
-    category = _('Sponsorship')
+    category = _('Sponsors')
 
 
 @plugin_pool.register
 class SponsorPromoPlugin(ContentPlugin):
     model = models.SponsorPromoItem
     render_template = 'plugins/sponsor_block/sponsor.html'
-    category = _('Sponsorship')
+    category = _('Sponsors')
     raw_id_fields = ['sponsor', ]
