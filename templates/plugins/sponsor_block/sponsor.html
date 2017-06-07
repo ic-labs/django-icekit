@@ -1,0 +1,17 @@
+{% load thumbnail %}
+
+<div class="patron">{# avoid 'sponsors' in HTML due to adblockers #}
+	{# no sponsor labels per client request in ticket #461 #}
+	{% if instance.title %}<h6 class="patron-title">{{ instance.title }} &nbsp;</h6>{% endif %}
+	{% if instance.sponsor.url %}<a href="{{ instance.sponsor.url }}">{% endif %}
+        <img
+                src="{% thumbnail instance.sponsor.logo.image instance.dimensions quality=instance.quality %}"
+                alt="{{ instance.sponsor.logo.alt_text }}"
+                class="img-responsive"
+        >
+	{% if instance.sponsor.url %}</a>{% endif %}
+</div>
+
+{% if instance.clear_after_sponsor %}
+	<div class="clearfix"></div>
+{% endif %}
