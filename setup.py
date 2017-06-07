@@ -145,6 +145,8 @@ setuptools.setup(
             'nose-progressive',
             'psycopg2',
             'WebTest',
+            'requests',
+            'mock',
         ],
         'docs': [
             'sphinx',
