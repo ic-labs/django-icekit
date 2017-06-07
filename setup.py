@@ -165,7 +165,8 @@ setuptools.setup(
             'edtf>=2.0.1',
             'webcolors==1.5',
             'colormath==2.1.1',
-            'colorweave==0.1+0.ce27c83b4e06a8185531538fa11c18c5ea2c1aba.ixc',
+            # Disable as it's devpi-only
+            # 'colorweave==0.1+0.ce27c83b4e06a8185531538fa11c18c5ea2c1aba.ixc',
         ]
     },
     setup_requires=['setuptools_scm'],
