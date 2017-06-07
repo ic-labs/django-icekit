@@ -1,4 +1,4 @@
-from rest_framework import routers
+from rest_framework import routers, serializers
 
 from icekit.api.base_serializers import ModelSubSerializer
 from icekit.api.base_views import ModelViewSet
@@ -32,21 +32,6 @@ class PersonName(ModelSubSerializer):
         }
 
 
-class LifeInfo(ModelSubSerializer):
-    class Meta:
-        model = PersonCreatorModel
-        source_prefix = 'life_info_'
-        fields = (
-            'life_info_birth_date_display',
-            'life_info_birth_date_edtf',
-            'life_info_birth_place',
-            'life_info_birth_place_historic',
-            'life_info_death_date_display',
-            'life_info_death_date_edtf',
-            'life_info_death_place',
-        )
-
-
 class Background(ModelSubSerializer):
     class Meta:
         model = PersonCreatorModel
@@ -66,24 +51,55 @@ class Person(Creator):
     name = PersonName(
         help_text="Parts and forms of the Artist's name",
     )
-    life_info = LifeInfo(
-        required=False,
-        help_text="Birth and death dates and places",
-    )
     background = Background(
         required=False,
         help_text="Ethnicity, nationality and culture",
     )
+    # Rename start/end date creator fields to birth/death for person
+    birth_date_display = serializers.CharField(
+        source='start_date_display',
+        required=False,
+        allow_blank=True,
+    )
+    birth_date_edtf = serializers.CharField(
+        source='start_date_edtf',
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+    )
+    death_date_display = serializers.CharField(
+        source='end_date_display',
+        required=False,
+        allow_blank=True,
+    )
+    death_date_edtf = serializers.CharField(
+        source='end_date_edtf',
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+    )
 
     class Meta:
         model = PersonCreatorModel
-        fields = tuple(
-            # Use Creator field names except for those grouped under PersonName
+        # Use Creator field names except for those grouped under PersonName
+        # and those for start/end dates which we rename to birth/death
+        _creator_fields = tuple(
             f for f in Creator.Meta.fields
-            if f not in PersonName.Meta.fields
-        ) + (
+            if (
+                f not in PersonName.Meta.fields and
+                not f.startswith('start_date_') and
+                not f.startswith('end_date_')
+            )
+        )
+        fields = _creator_fields + (
             'name',
-            'life_info',
+            'birth_date_display',
+            'birth_date_edtf',
+            'death_date_display',
+            'death_date_edtf',
+            'birth_place',
+            'birth_place_historic',
+            'death_place',
             'background',
         )
         extra_kwargs = {
