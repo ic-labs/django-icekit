@@ -71,6 +71,9 @@ setuptools.setup(
     extras_require={
         'api': [
             'djangorestframework',
+            'django-rest-swagger',
+            'djangorestframework-filters',
+            'djangorestframework-queryfields',
         ],
         'brightcove': [
             'django-brightcove',
@@ -93,6 +96,7 @@ setuptools.setup(
             'boto3',
             'celery[redis]<4.0',
             'ConcurrentLogHandler',
+            'django-admin-sortable2',
             'django-celery',
             'django-celery-email',
             'django-countries',
@@ -154,7 +158,15 @@ setuptools.setup(
             'six',
             'sqlparse',  # Required for SQL migrations, apparently
             'django-colorful',
+        ],
+        'collections': [
+            'pyparsing',
+            'unidecode',
+            'edtf>=2.0.1',
+            'webcolors==1.5',
+            'colormath==2.1.1',
+            'colorweave==0.1+0.ce27c83b4e06a8185531538fa11c18c5ea2c1aba.ixc',
         ]
     },
-    **kwargs
+    setup_requires=['setuptools_scm'],
 )

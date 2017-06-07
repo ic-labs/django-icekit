@@ -1,4 +1,3 @@
--e .[api,brightcove,dev,docs,django18,forms,project,search,test,events]
+-e .[api,brightcove,dev,docs,django18,forms,project,search,test,events,collections]
 
--e git+https://github.com/ic-labs/glamkit-collections.git@c8e7b267989640a3c5887b8580aa788b6096ffb8#egg=glamkit-collections
 -e git+https://github.com/ixc/django-dynamic-fixture.git@caeb3427399edd3b0d589516993c7da55e0de560#egg=django-dynamic-fixture
