@@ -856,8 +856,6 @@ INSTALLED_APPS += (
     # APIs
     'icekit.api',
     'icekit.plugins.iiif',
-
-
 )
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
