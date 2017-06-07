@@ -89,10 +89,6 @@ setuptools.setup(
         'forms': [
             'django-forms-builder',
         ],
-        'glamkit': [
-            # 'icekit-press-releases>=0.81',
-            # 'glamkit-collections>=0.35',
-        ],
         'project': [
             'boto3',
             'celery[redis]<4.0',

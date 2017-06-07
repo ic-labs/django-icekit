@@ -2,8 +2,8 @@
 # django-icekit `Dockerfile` installs into the `interaction/icekit` image.
 
 # NB: IF YOU CHANGE THE REVISION, CHANGE IT IN THE PROJECT'S Dockerfile AS WELL!
-# In installed projects, this may end up as -e git+https://github.com/ic-labs/django-icekit@{COMMIT}#egg=django-icekit[api,dev,django18,forms,glamkit,project,search,test]
--e ..[api,brightcove,dev,django18,docs,forms,glamkit,project,search,test]
+# In installed projects, this may end up as -e git+https://github.com/ic-labs/django-icekit@{COMMIT}#egg=django-icekit[api,dev,django18,forms,project,search,test]
+-e ..[api,brightcove,dev,django18,docs,forms,project,search,test]
 
 # IMPORTANT! If you change the pinned version of ICEkit above, update the `FROM`
 # instruction in `Dockerfile` to match, and copy the ICEkit `requirements.txt`
