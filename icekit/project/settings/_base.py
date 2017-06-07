@@ -851,7 +851,7 @@ INSTALLED_APPS += (
     'glamkit_sponsors',
 
     # Press releases
-    # 'icekit_press_releases',
+    'icekit_press_releases',
 
     # APIs
     'icekit.api',
