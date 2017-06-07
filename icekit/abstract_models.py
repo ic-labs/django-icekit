@@ -237,7 +237,7 @@ class BoostedTermsMixin(models.Model):
             'Words (space separated) added here are boosted in relevance for search results '
             'increasing the chance of this appearing higher in the search results.'
         ),
-        verbose_name=_('Boosted Search Terms'),
+        verbose_name='Boosted Search Terms',
     )
 
     class Meta:
