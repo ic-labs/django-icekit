@@ -14,7 +14,6 @@ import hashlib
 import multiprocessing
 import os
 import re
-from collections import OrderedDict
 
 from celery.schedules import crontab
 
@@ -221,6 +220,10 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'django.contrib.sitemaps',
     'django.contrib.humanize',
+
+    # Django REST framework
+    'rest_framework',
+    'rest_framework.authtoken',  # Required for `TokenAuthentication`
 )
 
 LANGUAGE_CODE = 'en-au'  # Default: en-us
@@ -532,10 +535,23 @@ NAVIGATION_PLUGINS = [
     'ChildPagesPlugin',
 ]
 
+EVENTS_PLUGINS = [
+    'EventContentListingPlugin',
+]
+
 LINK_PLUGINS = [
     'ArticleLinkPlugin',
     'PageLinkPlugin',
     'AuthorLinkPlugin',
+    'EventLinkPlugin',
+    'TodaysOccurrencesPlugin',
+
+]
+
+SPONSOR_PLUGINS = [
+    'BeginSponsorBlockPlugin',
+    'EndSponsorBlockPlugin',
+    'SponsorPromoPlugin',
 ]
 
 DEFAULT_PLUGINS = \
@@ -544,7 +560,9 @@ DEFAULT_PLUGINS = \
     ASSETS_PLUGINS + \
     EMBED_PLUGINS + \
     NAVIGATION_PLUGINS + \
-    LINK_PLUGINS
+    EVENTS_PLUGINS + \
+    LINK_PLUGINS + \
+    SPONSOR_PLUGINS
 
 FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     'main': {
@@ -552,7 +570,13 @@ FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     },
     'related': {
         'plugins': LINK_PLUGINS,
-    }
+    },
+    'pressrelease_contacts': {
+        'plugins': (
+            'ContactPersonPlugin',
+            'TextPlugin',
+        ),
+    },
 }
 
 FLUENT_MARKUP_LANGUAGES = ('restructuredtext', 'markdown', 'textile')
@@ -694,6 +718,7 @@ ICEKIT = {
                 ('fluent_pages.Page', {
                     'verbose_name_plural': 'Pages',
                 }),
+                ('icekit_press_releases.PressRelease', {})
             ],
         },
         {
@@ -703,6 +728,7 @@ ICEKIT = {
                 ('icekit_plugins_image.Image', {}),
                 ('icekit_plugins_file.File', {}),
                 ('icekit_plugins_slideshow.SlideShow', {}),
+                ('glamkit_sponsors.Sponsor', {}),
             ],
         },
     ],
@@ -817,6 +843,20 @@ INSTALLED_APPS += (
     'icekit_events.plugins.links',
     'icekit_events.plugins.todays_occurrences',
     'icekit_events.page_types.eventlistingfordate',
+
+    # Collections
+    # 'glamkit_collections',
+
+    # Sponsors
+    'glamkit_sponsors',
+
+    # Press releases
+    # 'icekit_press_releases',
+
+    # APIs
+    'icekit.api',
+    'icekit.plugins.iiif',
+
 
 )
 
@@ -942,6 +982,30 @@ WSGI_ADDRESS = '127.0.0.1'
 WSGI_PORT = 8080
 WSGI_TIMEOUT = 60
 WSGI_WORKERS = multiprocessing.cpu_count() * 2 + 1
+
+# REST FRAMEWORK ##############################################################
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # Enable session authentication for simple access via web browser and
+        # for AJAX requests, see
+        # http://www.django-rest-framework.org/api-guide/authentication/#sessionauthentication
+        'rest_framework.authentication.SessionAuthentication',
+        # Enable token authentication for access by clients such as bots
+        # outside a web browser context, see
+        # http://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        # Apply Django's standard model permissions for API operations, with
+        # customisation to prevent any API access for GET listings, HEAD etc
+        # to those users permitted to view model listings in the admin. See
+        # http://www.django-rest-framework.org/api-guide/permissions/#djangomodelpermissions
+        'icekit.utils.api.DjangoModelPermissionsRestrictedListing',
+    )
+}
+
+
 
 # DEBUG TOOLBAR (not enabled by default) ######################################
 
