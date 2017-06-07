@@ -10,13 +10,24 @@ In development
 -  Remove unpublishable variants of the main GLAMkit models as keeping them is
    not worth the maintenance overhead or chance for confusion.
 
--  `events_tags.date_range` is now smart enough to remove year and month from
+-  ``events_tags.date_range`` is now smart enough to remove year and month from
    date formats. This behaviour can be overwridden by specifying named formats
-   in your `formats` module with `_SAME_YEAR` and `_SAME_YEAR_SAME_MONTH`
+   in your ``formats`` module with ``_SAME_YEAR`` and ``_SAME_YEAR_SAME_MONTH``
    appended. When the event has finished, " (ended)" is appended to the date
    range.
 
 -  Minor performance improvements to Events links, reducing database queries.
+
+Backwards-incompatible changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-  icekit_events, icekit_press_releases, glamkit_collections and
+   glamkit_sponsors are now merged with the main ICEkit repository and do not
+   need to be installed or enabled separately. The only library name change is
+   that ``press_releases`` is renamed ``icekit_press_releases``.
+
+-  the corresponding ``icekit`` and ``glamkit`` settings files are no longer
+   needed.
 
 0.17 (2017-04-30)
 -----------------
