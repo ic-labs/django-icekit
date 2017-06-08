@@ -1,6 +1,3 @@
-# TODO GLAMkit Collections unit tests should be in the 'glamkit-collections'
-# project, not here, but that project has no test infrastructure so this is
-# the quickest place and way to get some unit test coverage for now.
 from django.apps import apps
 from django.core.urlresolvers import reverse
 
