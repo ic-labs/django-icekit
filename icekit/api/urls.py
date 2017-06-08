@@ -20,8 +20,8 @@ schema_doc_view = get_swagger_view(title='GLAMkit API')
 
 # Obtain the default router and register local APIs
 router = routers.DefaultRouter()
-router.register(r'images', images_views.ImageViewSet, 'images-api')
-router.register(r'pages', pages_views.PageViewSet, 'pages-api')
+router.register(r'image', images_views.ImageViewSet, 'image-api')
+router.register(r'page', pages_views.PageViewSet, 'page-api')
 
 # Register pluggable API routers defined elsewhere
 for api_section_name, pluggable_router \

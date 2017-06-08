@@ -11,7 +11,7 @@ from .. import base_tests
 
 
 class PagesAPITests(base_tests._BaseAPITestCase):
-    API_NAME = 'pages-api'
+    API_NAME = 'page-api'
     API_IS_PUBLIC_READ = True
 
     def setUp(self):

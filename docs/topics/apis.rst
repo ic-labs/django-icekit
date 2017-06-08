@@ -86,11 +86,11 @@ requests from your client. Note that the full format for this header is::
 
     Authorization: Token <token-key-value>
 
-Images API
-----------
+Image API
+---------
 
-The Images API is a **read and write** API for the ``icekit.plugins.image.Image``
-model, and is available by default at */images/*.
+The Image API is a **read and write** API for the ``icekit.plugins.image.Image``
+model, and is available by default at */image/*.
 
 This API uses the default access and privilege settings, which means you must
 provide an authorization token in requests.
@@ -101,44 +101,44 @@ authorisation, assuming the token's associated user has sufficient permissions.
 List Images::
     curl -X GET \
          -H 'Authorization: Token abc123' \
-         http://api.icekit.lvh.me:8000/images/
+         http://api.icekit.lvh.me:8000/image/
 
 Create an Image::
     curl -X POST \
          -H 'Authorization: Token abc123' \
          --form title='New image' \
          --form image=@image_file.jpg \
-         http://api.icekit.lvh.me:8000/images/
+         http://api.icekit.lvh.me:8000/image/
 
 Get details of a specific image with ID=1::
     curl -X GET \
          -H 'Authorization: Token abc123' \
-         http://api.icekit.lvh.me:8000/images/1/
+         http://api.icekit.lvh.me:8000/image/1/
 
 Replace an image with ID=1 (must include image file data)::
     curl -X PUT \
          -H 'Authorization: Token abc123' \
          --form title='Replaced image' \
          --form image=@image_file.jpg \
-         http://api.icekit.lvh.me:8000/images/1/
+         http://api.icekit.lvh.me:8000/image/1/
 
 Update an image with ID=1 (for partial changes, image file data not required)::
     curl -X PATCH \
          -H 'Authorization: Token abc123' \
          --form title='Updated image' \
-         http://api.icekit.lvh.me:8000/images/1/
+         http://api.icekit.lvh.me:8000/image/1/
 
 Delete an image with ID=1::
     curl -X DELETE \
          -H 'Authorization: Token abc123' \
-         http://api.icekit.lvh.me:8000/images/1/
+         http://api.icekit.lvh.me:8000/image/1/
 
 
-Pages API
----------
+Page API
+--------
 
-The Pages API is a **public-access** and **read-only** API for site pages that
-are published, and is available by default at */pages/*.
+The Page API is a **public-access** and **read-only** API for site pages that
+are published, and is available by default at */page/*.
 
 This API does not use the default privilege settings, since it is available to
 the general public (you don't need to authenticated) and provides only
@@ -147,10 +147,10 @@ read-only access.
 Here are example curl commands to perform API operations.
 
 List Pages::
-    curl -X GET http://api.icekit.lvh.me:8000/pages/
+    curl -X GET http://api.icekit.lvh.me:8000/page/
 
 Get details of a specific published page with ID=1::
-    curl -X GET http://api.icekit.lvh.me:8000/pages/1/
+    curl -X GET http://api.icekit.lvh.me:8000/page/1/
 
 
 GLAMkit Collections API

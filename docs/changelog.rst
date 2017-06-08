@@ -40,6 +40,9 @@ In development
 
 -  Minor performance improvements to Events links, reducing database queries.
 
+-  Renamed URL endpoints for Page and Image APIs to singular: */page/* instead
+   of */pages/* and */image/* instead of */images/*
+
 Backwards-incompatible changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
