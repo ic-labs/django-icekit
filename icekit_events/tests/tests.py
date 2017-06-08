@@ -28,7 +28,7 @@ from icekit import models as icekit_models
 from icekit_events import appsettings, forms, models
 from icekit_events.event_types.simple.models import SimpleEvent
 from icekit_events.models import get_occurrence_times_for_event, coerce_naive, \
-    Occurrence
+    Occurrence, RecurrenceRule
 from icekit_events.utils import timeutils
 
 
@@ -51,6 +51,30 @@ class TestAdmin(WebTest):
             'icekit_event_types_simple/layouts/default.html',
             SimpleEvent,
         )
+        # Make sure default recurrence rules exist
+        # TODO I'm not sure why this is necessary in unit tests, but something
+        # is blowing away RecurrenceRule entries during test runs so we do this
+        # to replace the defaults if necessary.
+        # RULES are from *icekit_events/migrations/0002_recurrence_rules.py*
+        RULES = [
+            ('Daily, except Xmas day', 'RRULE:FREQ=DAILY;\nEXRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25'),
+            ('Daily, Weekdays, except Xmas day', 'RRULE:FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR;\nEXRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25'),
+            ('Daily, Weekends, except Xmas day', 'RRULE:FREQ=DAILY;BYDAY=SA,SU;\nEXRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25'),
+            ('Weekly, except Xmas day', 'RRULE:FREQ=WEEKLY;\nEXRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25'),
+            ('Monthly, except Xmas day', 'RRULE:FREQ=MONTHLY;\nEXRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25'),
+            ('Yearly, except Xmas day', 'RRULE:FREQ=YEARLY;\nEXRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25'),
+        ]
+        for description, recurrence_rule in RULES:
+            RecurrenceRule.objects.get_or_create(
+                description=description,
+                defaults=dict(recurrence_rule=recurrence_rule),
+            )
+        self.daily_recurrence_rule = RecurrenceRule.objects.get(
+            description='Daily, except Xmas day')
+        self.weekend_days_recurrence_rule = RecurrenceRule.objects.get(
+            description='Daily, Weekends, except Xmas day')
+        self.weekly_recurrence_rule = RecurrenceRule.objects.get(
+            description='Weekly, except Xmas day')
 
     def test_urls(self):
         response = self.app.get(
@@ -102,7 +126,8 @@ class TestAdmin(WebTest):
         #######################################################################
         repeat_end = self.start + timedelta(days=7)
         form = response.forms[0]
-        form['repeat_generators-0-recurrence_rule_0'].select('1')
+        form['repeat_generators-0-recurrence_rule_0'].select(
+            str(self.daily_recurrence_rule.pk))
         form['repeat_generators-0-recurrence_rule_1'].value = 'every day'
         form['repeat_generators-0-recurrence_rule_2'].value = "RRULE:FREQ=DAILY"
         form['repeat_generators-0-start_0'].value = \
@@ -134,7 +159,8 @@ class TestAdmin(WebTest):
         # Add "Daily on weekends" all-day repeat generator, no repeat end
         #######################################################################
         form = response.follow().forms[0]
-        form['repeat_generators-1-recurrence_rule_0'].select('3')
+        form['repeat_generators-1-recurrence_rule_0'].select(
+            str(self.weekend_days_recurrence_rule.pk))
         form['repeat_generators-1-recurrence_rule_1'].value = \
             'every day on Saturday, Sunday'
         form['repeat_generators-1-recurrence_rule_2'].value = \
@@ -437,7 +463,8 @@ class TestAdmin(WebTest):
         form['title'].value += ' - Update 1'
         # Add weekly repeat for 4 weeks
         repeat_end = self.start + timedelta(days=28)
-        form['repeat_generators-0-recurrence_rule_0'].select('4')
+        form['repeat_generators-0-recurrence_rule_0'].select(
+            str(self.weekly_recurrence_rule.pk))
         form['repeat_generators-0-recurrence_rule_1'].value = 'weekly'
         form['repeat_generators-0-recurrence_rule_2'].value = "FREQ=WEEKLY"
         form['repeat_generators-0-start_0'].value = \
