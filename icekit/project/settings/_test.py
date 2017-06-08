@@ -23,6 +23,13 @@ INSTALLED_APPS += (
     'fluent_pages.pagetypes.fluentpage',
     'icekit.tests',
     'icekit_events.tests',
+
+    'glamkit_collections.contrib.work_creator.plugins.artwork',
+    'glamkit_collections.contrib.work_creator.plugins.film',
+    'glamkit_collections.contrib.work_creator.plugins.game',
+    'glamkit_collections.contrib.work_creator.plugins.moving_image',
+    'glamkit_collections.contrib.work_creator.plugins.organization',
+    'glamkit_collections.contrib.work_creator.plugins.person',
 )
 
 ROOT_URLCONF = 'icekit.tests.urls'

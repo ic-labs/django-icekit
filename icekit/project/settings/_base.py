@@ -841,14 +841,10 @@ INSTALLED_APPS += (
 
     # Collections
     'glamkit_collections',
+    # We're assuming that the default is for museums with work/creator
+    # collections. Other types of museum may need to disable this.
     'glamkit_collections.contrib.work_creator',
     'glamkit_collections.contrib.work_creator.plugins.links',
-    'glamkit_collections.contrib.work_creator.plugins.artwork',
-    'glamkit_collections.contrib.work_creator.plugins.film',
-    'glamkit_collections.contrib.work_creator.plugins.game',
-    'glamkit_collections.contrib.work_creator.plugins.moving_image',
-    'glamkit_collections.contrib.work_creator.plugins.organization',
-    'glamkit_collections.contrib.work_creator.plugins.person',
 
     # Sponsors
     'glamkit_sponsors',
