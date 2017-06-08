@@ -164,7 +164,7 @@ setuptools.setup(
         'collections': [
             'pyparsing',
             'unidecode',
-            'edtf>=2.0.1',
+            'edtf>=2.5',
             'webcolors==1.5',
             'colormath==2.1.1',
             # Disable as it's devpi-only
