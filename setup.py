@@ -93,16 +93,11 @@ setuptools.setup(
         'forms': [
             'django-forms-builder',
         ],
-        'glamkit': [
-            'glamkit-sponsors',
-            'icekit-events',
-            'icekit-press-releases>=0.81',
-            'glamkit-collections>=0.35',
-        ],
         'project': [
             'boto3',
             'celery[redis]<4.0',
             'ConcurrentLogHandler',
+            'django-admin-sortable2',
             'django-celery',
             'django-celery-email',
             'django-countries',
@@ -152,12 +147,29 @@ setuptools.setup(
             'nose-progressive',
             'psycopg2',
             'WebTest',
+            'requests',
+            'mock',
         ],
         'docs': [
             'sphinx',
             'sphinx-autobuild',
             'recommonmark',
         ],
+        'events': [
+            'python-dateutil',
+            'six',
+            'sqlparse',  # Required for SQL migrations, apparently
+            'django-colorful',
+        ],
+        'collections': [
+            'pyparsing',
+            'unidecode',
+            'edtf>=2.0.1',
+            'webcolors==1.5',
+            'colormath==2.1.1',
+            # Disable as it's devpi-only
+            # 'colorweave==0.1+0.ce27c83b4e06a8185531538fa11c18c5ea2c1aba.ixc',
+        ]
     },
-    **kwargs
+    setup_requires=['setuptools_scm'],
 )

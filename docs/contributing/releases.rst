@@ -5,7 +5,7 @@ When the `changelog <../changelog.md>`__ for a release gets sufficiently
 long or major features or fixes are implemented, we will tag and upload
 a release to PyPI.
 
-Steps to prepare an ICEkit release:
+Steps to prepare a GLAMkit release:
 
 1. Merge all features to be included and ensure that tests pass and code
    operates as it should.

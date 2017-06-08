@@ -8,15 +8,15 @@ We don't strictly require 100% test coverage (yet), but we aim to have:
 -  Unit or integration tests for complex, fragile, or important
    functionality.
 
-ICEkit uses a custom script ``runtests.sh`` to run tests, which
+GLAMkit uses a custom script ``runtests.sh`` to run tests, which
 configures the test database and restores from ``test_initial_data.sql``
 if available, to speed up migrations.
 
 Running tests
 -------------
 
-Run ICEkit tests
-~~~~~~~~~~~~~~~~
+Run GLAMkit tests
+~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -44,8 +44,9 @@ Speed up test running
 
     QUICK=1 runtests.sh ...
 
-This reuses the test databases, and skips collectstatic and compress
-steps.
+This reuses the test databases, and skips the collectstatic
+step -- you'll need to populate a test database and run collectstatic
+beforehand.
 
 
 Working with the database for tests
@@ -63,7 +64,7 @@ Opening an interactive shell to inspect the test database
 
 ::
 
-    BASE_SETTINGS_MODULE=icekit.tests.settings manage.py shell_plus
+    BASE_SETTINGS_MODULE=test manage.py shell_plus
 
 
 Creating a data dump with migrations applied
@@ -71,7 +72,7 @@ Creating a data dump with migrations applied
 
 The slowest part of running tests from scratch is usually the "Rendering
 Model States..." stage of migrations. This can be speeded up by loading
-a pre- migrated database dump. ICEkit's ``runtests.sh`` automatically
+a pre- migrated database dump. GLAMkit's ``runtests.sh`` automatically
 uses a file called ``test_initial_data.sql``.
 
 To create a data dump called ``test_initial_data.sql`` with migrations
@@ -88,7 +89,7 @@ applied:
 
 3. Dump the database to ``test_initial_data.sql``::
 
-       pg_dump -O -x -f test_initial_data.sql -d FOO_test_develop
+       pg_dump -O -x -f test_initial_data.sql -d test_FOO_develop
        git add test_initial_data.sql
 
 Creating fluent pages in tests

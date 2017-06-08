@@ -9,8 +9,7 @@ GLAMkit is a next-generation Python CMS by `the Interaction
 Consortium <http://interaction.net.au>`__, designed especially for
 the cultural sector.
 
-ICEkit sits one layer below GLAMkit, and is a framework for building CMSes.
-It has publishing and workflow tools for teams of content professionals,
+GLAMkit has publishing and workflow tools for teams of content professionals,
 and a powerful content framework, based on django-fluent. Everything is written
 in Python, using the Django framework.
 
@@ -19,11 +18,16 @@ in Python, using the Django framework.
 Key features
 ============
 
-ICEkit has:
+GLAMkit has:
 
+-  complex repeating calendared events
+-  collection patterns: art, moving image, etc.
+-  a story-telling engine (e.g. rich 'watch', 'read', 'listen' articles)
 -  Patterns for hierarchical pages and collections of rich content models.
 -  Advanced publishing / preview / unpublishing controls
 -  Simple workflow controls
+-  press releases
+-  sponsors
 -  Content plugins for working with rich text, images, embedded media, etc.
 -  Customisable site search using Elastic Search
 -  ``django-reversion`` compatible, allowing versioning of content
@@ -32,13 +36,6 @@ ICEkit has:
 -  Batteries included: bower, LessCSS, Bootstrap
 -  Easily extensible with models, templates, plugins, etc.
 
-GLAMkit extends ICEkit with:
-
--  complex repeating calendared events
--  collection patterns: art, moving image, etc.
--  a story-telling engine (e.g. rich 'watch', 'read', 'listen' articles)
--  press releases
--  sponsors
 
 GLAMkit is delivered as a Docker-compatible package, which means that it's easy
 to share a consistent development environment across your team, or to deploy on

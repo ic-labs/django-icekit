@@ -1,7 +1,7 @@
 Search
 ======
 
-ICEkit uses Haystack with an Elastic Search backend for its onsite
+GLAMkit uses Haystack with an Elastic Search backend for its onsite
 search.
 
 It comes with a simple SearchIndex,
@@ -15,7 +15,7 @@ that:
 -  Is polymorphic (the ``django_ct`` value always matches
    ``get_model()``, rather than varying by the object being indexed.
 
-ICEkit and GLAMkit's default content models use this index:
+GLAMkit's default content models use this index:
 
 -  Page (including LayoutPage, ArticleListingPage, etc.)
 -  Article

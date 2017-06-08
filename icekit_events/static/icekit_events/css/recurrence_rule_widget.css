@@ -1,0 +1,55 @@
+div.recurrence-rule-widget {
+	display: inline-block;
+}
+
+div.recurrence-rule-widget div.natural-examples,
+div.recurrence-rule-widget div.rfc,
+div.recurrence-rule-widget div.preview {
+	display: none;
+}
+
+div.recurrence-rule-widget div.natural-examples ul
+{
+	margin: 0 0 4px;
+	padding: 0;
+}
+
+div.recurrence-rule-widget div.natural-examples li {
+	list-style-type: disc;
+	margin: 0 3em;
+}
+
+div.recurrence-rule-widget table.dates {
+	background: #fff;
+	border-collapse: collapse;
+	font-size: 0.9em;
+}
+
+div.recurrence-rule-widget table.dates,
+div.recurrence-rule-widget table.dates td {
+	border: 1px solid #fafafa;
+}
+
+div.recurrence-rule-widget table.dates td {
+	padding: 0.4em;
+}
+
+div.recurrence-rule-widget table.dates td:first-child {
+	color: #ccc;
+}
+
+div.recurrence-rule-widget table.dates td:first-child {
+	text-align: right;
+}
+
+div.recurrence-rule-widget table.dates td.b {
+	background: #eaeaea;
+}
+
+div.recurrence-rule-widget table.dates td.b {
+	background: #f0f0f0;
+}
+
+div.recurrence-rule-widget div.error {
+	color: #c11;
+}

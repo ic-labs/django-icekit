@@ -1,0 +1,8 @@
+<div class="content-listing">
+	{% for event in instance.get_items %}
+		{% include "icekit_events/plugins/event_content_listing/_event.html" %}
+	{% empty %}
+		<li>{{ instance.no_items_message|default:"There are no items to show" }}</li>
+	{% endfor %}
+</div>
+

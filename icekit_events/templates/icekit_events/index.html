@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block body %}
+	{% if occurrences %}
+		{% for occurrence in occurrences %}
+			<ul>
+				<li>
+					{{ occurrence.event.title }} &mdash; {{ occurrence.start }} - {{ occurrence.end }}
+				</li>
+			</ul>
+		{% endfor %}
+	{% else %}
+		<div>There are no events.</div>
+	{% endif %}
+{% endblock %}
+

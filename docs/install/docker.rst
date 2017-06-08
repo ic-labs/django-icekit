@@ -3,8 +3,6 @@
 Installing and running
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. TODO: make the default install GLAMkit, with a variation for ICEkit.
-
 The recommended installation method uses Docker.
 Docker works on OS X, Linux, and Windows, takes care of all the project
 dependencies (e.g. database, search engine, web server, etc.), and makes

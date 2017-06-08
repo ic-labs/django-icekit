@@ -165,6 +165,11 @@ urlpatterns = patterns(
 
     url(getattr(settings, 'ICEKIT_LOGIN_URL_PREFIX', r''), include(auth_urlpatterns)),
 
+    # GLAMkit URLs
+    url(r'^events/', include('icekit_events.urls')),
+    url(r'^collection/', include('glamkit_collections.contrib.work_creator.urls')),
+    url(r'^iiif/', include('icekit.plugins.iiif.urls')),
+
     # Catch all, fluent page dispatcher.
     url(r'^', include('fluent_pages.urls')),
 )

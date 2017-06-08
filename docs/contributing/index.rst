@@ -1,7 +1,7 @@
 Contributing to the project
 ===========================
 
-Please follow these guidelines when making contributions to ICEkit.
+Please follow these guidelines when making contributions to GLAMkit.
 
 .. toctree::
    :maxdepth: 1
@@ -14,10 +14,10 @@ Please follow these guidelines when making contributions to ICEkit.
    releases
    conduct
 
-Installing the development version of ICEkit on an existing project
+Installing the development version of GLAMkit on an existing project
 -------------------------------------------------------------------
 
-To use the development version of ICEkit (rather than a pegged release) in your
+To use the development version of GLAMkit (rather than a pegged release) in your
 docker project.
 
 ::

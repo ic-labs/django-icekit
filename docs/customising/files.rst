@@ -13,12 +13,12 @@ Relative to the project root:
 
 .. note::
    Anything you put in the ``static`` or ``templates`` directories will override the
-   default ICEkit static files and templates.
+   default GLAMkit static files and templates.
 
 Python packages
 ~~~~~~~~~~~~~~~
 
-ICEkit projects use `pip-tools <https://github.com/nvie/pip-tools>`_ to keep
+GLAMkit projects use `pip-tools <https://github.com/nvie/pip-tools>`_ to keep
 requirements fresh, even when the versions are pinned.
 
 Add project-specific requirements to ``requirements.in`` and compile into
@@ -42,7 +42,7 @@ Create a ``urls.py`` file in a project folder of your choice, such as
    urlpatterns = patterns(
        'myproject.views',
        ... your URLs here ...
-       # finally, fall back to ICEkit/GLAMkit URLs.
+       # finally, fall back to GLAMkit URLs.
        url('', include('icekit.project.urls')), # use `icekit.project.glamkit_urls` if this is a GLAMkit project
    ]
 
@@ -51,17 +51,17 @@ Lastly, in ``project_settings.py``, override the default URL path::
    ROOT_URLCONF = 'myproject.urls'
 
 
-How do I override ICEkit's base template?
------------------------------------------
+How do I override GLAMkit's base template?
+------------------------------------------
 
-All ICEkit templates extend a template named ``base.html`` which is automatically
-provided by ICEkit. To change the base template, you can add a file named
+All GLAMkit templates extend a template named ``base.html`` which is automatically
+provided by GLAMkit. To change the base template, you can add a file named
 ``base.html`` into your root ``templates`` directory. This ensures that all
-ICEkit templates will now default to using your template as a base.
+GLAMkit templates will now default to using your template as a base.
 
-To ensure maximum compatibility with ICEkit's conventions for block names, we
+To ensure maximum compatibility with GLAMkit's conventions for block names, we
 recommend referring to the names in
-`ICEkit's base template <../../../icekit/templates/icekit/base.html>`_.
+`GLAMkit's base template <../../../icekit/templates/icekit/base.html>`_.
 
 .. TODO: reference for template block names/context variables
 

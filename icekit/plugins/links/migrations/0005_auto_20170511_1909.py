@@ -8,6 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('ik_links', '0004_auto_20170314_1401'),
+        ('ik_links', '0004_auto_20170306_1529'),
     ]
 
     operations = [

@@ -1,13 +1,13 @@
-Workflow in ICEkit
-==================
+Workflow in GLAMkit
+===================
 
-ICEKit includes a very simple workflow system to help manage content
+GLAMkit includes a simple workflow system to help manage content
 generation and `publishing <publishing.md>`__.
 
 Quick Start
 -----------
 
-To get started with ICEKit Workflow:
+To get started with GLAMkit Workflow:
 
 -  Add the ``icekit.workflow`` to ``INSTALLED_APPS`` (this is included
    by default)

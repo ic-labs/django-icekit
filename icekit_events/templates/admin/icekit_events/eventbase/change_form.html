@@ -1,0 +1,77 @@
+{% extends "admin/polymorphic/change_form.html" %}
+
+{% load static %}
+
+{% block inline_field_sets %}
+	{% if object_id %}
+		<style>
+			iframe {
+				border: 0;
+				width: 100%;
+			}
+
+			#calendar-container {
+				margin: 0 0 30px 0;
+			}
+			.object-tools.inline {
+				margin-top: 0;
+				display: inline-block;
+				float:none;
+			}
+
+		</style>
+		<script src='{% static "iframe-resizer/src/iframeResizer.js" %}'></script>
+		<script src='{% static "js-cookie/src/js.cookie.js" %}'></script>
+
+		<div id="calendar-container">
+
+			<div class="object-tools inline">
+				<a id="toggle-calendar" href="#">Toggle Calendar</a>
+			</div>
+			<iframe id="calendar" src="{% url "admin:icekit_events_eventbase_calendar" %}?pk={{ object_id }}" scrolling="no"></iframe>
+		</div>
+		<script>
+			(function($) {
+
+				// load the stored cookie state, default true
+				var c = Cookies.get("calendar-toggle-change");
+				if (c===undefined)
+					c = "true";
+
+				// move the container to between the generator and the
+				// occurrences inlines, waiting until the destination inline
+				// group is available.
+				function sleep(ms) {
+				  return new Promise(resolve => setTimeout(resolve, ms));
+				}
+
+				async function move_calendar() {
+
+					$("#calendar-container").hide();
+
+					var group = $("#repeat_generators-group");
+					do {
+						await
+						sleep(200);
+						group = $("#repeat_generators-group");
+					} while (!group);
+
+					$('#calendar-container').insertAfter(group).show();
+
+					$("#calendar").toggle(c === 'true');
+
+					$('#toggle-calendar').on('click', function(e) {
+						e.preventDefault();
+						$('#calendar').toggle();
+						Cookies.set('calendar-toggle-change', $("#calendar").is(':visible'));
+					});
+					iFrameResize({}, '#calendar');
+				}
+
+				move_calendar();
+
+			})(window.jQuery || django.jQuery);
+		</script>
+	{% endif %}
+	{{ block.super }}
+{% endblock %}

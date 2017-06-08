@@ -98,7 +98,7 @@ Made for developers to love
 
 .. rubric:: More information
 
-For more detail on how ICEkit works, see :doc:`/architecture/index`.
+For more detail on how GLAMkit works, see :doc:`/architecture/index`.
 
 For recent updates, see the :doc:`/changelog`.
 

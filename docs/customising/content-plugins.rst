@@ -1,7 +1,7 @@
 Creating a new content plugin
 =============================
 
-Most ICEkit content uses the Fluent Contents system for adding an
+Most GLAMkit content uses the Fluent Contents system for adding an
 ordered list of arbitrary content items to a given Django model (aka
 "Rich Content"). A Content Item is (usually) a small model for
 representing an item of content on a page and can have any fields that a
@@ -37,7 +37,7 @@ To remove a content plugin first ensure all the content instances have
 been removed from your database and then remove the content plugin from
 ``INSTALLED_APPS`` and ``FLUENT_CONTENTS_PLACEHOLDER_CONFIG``.
 
-ICEkit also has a simpler ``PublishableArticle`` model, which implements
+GLAMkit also has a simpler ``PublishableArticle`` model, which implements
 a Publishable Fluent Contents model - ie it's a straightforward Django
 model that happens to have rich content and be publishable. This is
 useful for more normal Django collections-of-things, like Press
@@ -71,7 +71,7 @@ You can also add help text to a placeholder, by specifying a
 The placeholder help text displays when its tab is selected.
 
 Note: Placeholder help text is currently only implemented for Models
-that inherit ICEkit's ``LayoutFieldMixin``, and with an Admin that
+that inherit GLAMkit's ``LayoutFieldMixin``, and with an Admin that
 inherits from ``FluentLayoutsMixin``. This is because
 ``icekit.admin.LayoutAdmin`` defines a URL/view that includes the help
 text, and the ``icekit/static/icekit/admin/js/fluent_layouts.js`` file
@@ -137,7 +137,7 @@ Before we make a new plugin in the project, we should consider that:
    project plugins into ``icekit`` after a project has ended.
 
 3. The project won't get "free" plugin enhancements when upgrading to a
-   new version of ICEkit.
+   new version of GLAMkit.
 
 4. We may end up re-implementing very similar plugins again and again in
    different projects.

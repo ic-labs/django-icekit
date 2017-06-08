@@ -33,7 +33,7 @@ for api_section_name, pluggable_router \
             logger.warn(
                 "Failed to load API router '%s' from EXTRA_API_ROUTERS: %s"
                 % (pluggable_router, ex))
-            continue
+            raise
     for prefix, viewset, basename in pluggable_router.registry:
         if api_section_name:
             prefix = api_section_name + prefix

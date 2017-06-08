@@ -33,8 +33,8 @@ Examples:
 Counter-examples:
 ~~~~~~~~~~~~~~~~~
 
--  Pages in a tree (use fluent-pages)
--  Events (use icekit-events)
+-  Pages in a tree (use fluent_pages)
+-  Events (use icekit_events)
 -  Assets like images (which don't need to be mounted at a URL)
 
 Possibly useful for:

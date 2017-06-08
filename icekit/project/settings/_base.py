@@ -14,7 +14,6 @@ import hashlib
 import multiprocessing
 import os
 import re
-from collections import OrderedDict
 
 from celery.schedules import crontab
 
@@ -221,6 +220,10 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'django.contrib.sitemaps',
     'django.contrib.humanize',
+
+    # Django REST framework
+    'rest_framework',
+    'rest_framework.authtoken',  # Required for `TokenAuthentication`
 )
 
 LANGUAGE_CODE = 'en-au'  # Default: en-us
@@ -532,10 +535,23 @@ NAVIGATION_PLUGINS = [
     'ChildPagesPlugin',
 ]
 
+EVENTS_PLUGINS = [
+    'EventContentListingPlugin',
+]
+
 LINK_PLUGINS = [
     'ArticleLinkPlugin',
     'PageLinkPlugin',
     'AuthorLinkPlugin',
+    'EventLinkPlugin',
+    'TodaysOccurrencesPlugin',
+
+]
+
+SPONSOR_PLUGINS = [
+    'BeginSponsorBlockPlugin',
+    'EndSponsorBlockPlugin',
+    'SponsorPromoPlugin',
 ]
 
 DEFAULT_PLUGINS = \
@@ -544,7 +560,9 @@ DEFAULT_PLUGINS = \
     ASSETS_PLUGINS + \
     EMBED_PLUGINS + \
     NAVIGATION_PLUGINS + \
-    LINK_PLUGINS
+    EVENTS_PLUGINS + \
+    LINK_PLUGINS + \
+    SPONSOR_PLUGINS
 
 FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     'main': {
@@ -552,7 +570,13 @@ FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     },
     'related': {
         'plugins': LINK_PLUGINS,
-    }
+    },
+    'pressrelease_contacts': {
+        'plugins': (
+            'ContactPersonPlugin',
+            'TextPlugin',
+        ),
+    },
 }
 
 FLUENT_MARKUP_LANGUAGES = ('restructuredtext', 'markdown', 'textile')
@@ -662,6 +686,21 @@ ICEKIT = {
 
     'DASHBOARD_FEATURED_APPS': [
         {
+            'name': 'Events',
+            'icon_html': '<i class="content-type-icon fa fa-calendar-o"></i>',
+            'models': [
+                ('icekit_events.EventBase', {})
+            ],
+        },
+        {
+            'name': 'Collection',
+            'icon_html': '<i class="content-type-icon fa fa-diamond"></i>',
+            'models': [
+                ('gk_collections_work_creator.WorkBase', {}),
+                ('gk_collections_work_creator.CreatorBase', {}),
+            ],
+        },
+        {
             'name': 'Content',
             'icon_html': '<i class="content-type-icon fa fa-files-o"></i>',
             'models': [
@@ -671,6 +710,7 @@ ICEKIT = {
                 ('fluent_pages.Page', {
                     'verbose_name_plural': 'Pages',
                 }),
+                ('icekit_press_releases.PressRelease', {})
             ],
         },
         {
@@ -680,6 +720,7 @@ ICEKIT = {
                 ('icekit_plugins_image.Image', {}),
                 ('icekit_plugins_file.File', {}),
                 ('icekit_plugins_slideshow.SlideShow', {}),
+                ('glamkit_sponsors.Sponsor', {}),
             ],
         },
     ],
@@ -786,6 +827,44 @@ INSTALLED_APPS += (
     'icekit.plugins.image_gallery',
     'icekit.plugins.twitter_embed',
     'icekit.plugins.text',
+
+    # Events
+    'icekit_events',
+
+    'icekit_events.event_types.simple',
+
+    'icekit_events.page_types.eventlistingfordate',
+
+    'icekit_events.plugins.event_content_listing',
+    'icekit_events.plugins.links',
+    'icekit_events.plugins.todays_occurrences',
+
+    # Collections
+    'glamkit_collections',
+    'glamkit_collections.contrib.work_creator',
+    'glamkit_collections.contrib.work_creator.plugins.links',
+    'glamkit_collections.contrib.work_creator.plugins.artwork',
+    'glamkit_collections.contrib.work_creator.plugins.film',
+    'glamkit_collections.contrib.work_creator.plugins.game',
+    'glamkit_collections.contrib.work_creator.plugins.moving_image',
+    'glamkit_collections.contrib.work_creator.plugins.organization',
+    'glamkit_collections.contrib.work_creator.plugins.person',
+
+    # Sponsors
+    'glamkit_sponsors',
+
+    # Press releases
+    'icekit_press_releases',
+
+    # APIs
+    'icekit.api',
+    'icekit.plugins.iiif',
+
+    # Django REST framework for APIs
+    'rest_framework',
+    'rest_framework.authtoken',  # Required for `TokenAuthentication`
+    'rest_framework_swagger',  # Required for automatic API documentation
+    'django_filters',  # Find djangorestframework-filters templates
 )
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
@@ -910,6 +989,70 @@ WSGI_ADDRESS = '127.0.0.1'
 WSGI_PORT = 8080
 WSGI_TIMEOUT = 60
 WSGI_WORKERS = multiprocessing.cpu_count() * 2 + 1
+
+# REST FRAMEWORK ##############################################################
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # Enable session authentication for simple access via web browser and
+        # for AJAX requests, see
+        # http://www.django-rest-framework.org/api-guide/authentication/#sessionauthentication
+        'rest_framework.authentication.SessionAuthentication',
+        # Enable token authentication for access by clients such as bots
+        # outside a web browser context, see
+        # http://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        # Apply Django's standard model permissions for API operations, with
+        # customisation to prevent any API access for GET listings, HEAD etc
+        # to those users permitted to view model listings in the admin. See
+        # http://www.django-rest-framework.org/api-guide/permissions/#djangomodelpermissions
+        'icekit.utils.api.DjangoModelPermissionsRestrictedListing',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework_filters.backends.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ),
+    # Pagination settings
+    'DEFAULT_PAGINATION_CLASS':
+        'icekit.api.pagination.DefaultPageNumberPagination',
+    'PAGE_SIZE': 20,
+    # Test settings
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+}
+
+# REST Swagger/OpenAPI Documentation via Django REST Swagger
+
+SWAGGER_SETTINGS = {
+    # 'doc_expansion': 'full',
+    'version': '0.1',
+    'api_path': "/api/",
+    'enabled_methods': ['get'],
+    'info': {
+        "title": "GLAMkit API",
+        "description": "GLAMkit API for Pages, Images, Artists, and Artworks",
+        # "termsOfServiceUrl": "http://helloreverb.com/terms/",
+        # "contact": "apiteam@wordnik.com",
+        # "license": "Apache 2.0",
+        # "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+}
+
+# Paths to Django REST framework router objects to include in the base
+# API provided by `icekit.api.urls`.
+# Defined as tuples of (optional) apisection name prefixes and dotted-path to
+# a router object.
+EXTRA_API_ROUTERS = (
+    # Include base API routes for GLAMkit Collection.
+    ('', 'glamkit_collections.contrib.work_creator.api.router'),
+
+    # Include API routes for all installed GLAMkit Collection plugins.
+    ('', 'glamkit_collections.contrib.work_creator.api.plugins_router'),
+    # To expose only some GLAMkit Collection plugins instead of all, define
+    # more specific router entries such as:
+    #     ('', 'glamkit_collections.contrib.work_creator.plugins.artwork.api.router'
+)
 
 # DEBUG TOOLBAR (not enabled by default) ######################################
 

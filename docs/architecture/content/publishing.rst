@@ -1,9 +1,9 @@
 .. _publishing:
 
-Publishing in ICEkit
-====================
+Publishing in GLAMkit
+=====================
 
-The publishing system used in ICEKit is a re-implementation of concepts
+The publishing system used in GLAMkit is a re-implementation of concepts
 and code from
 ```django-model-publisher`` <https://github.com/jp74/django-model-publisher>`__,
 though heavily customised for our purposes.
@@ -19,25 +19,25 @@ publishing system and major ideas that need to be known.
 Use Publishing in your Project
 ------------------------------
 
-To use ICEKit Publishing in your project:
+To use GLAMkit Publishing in your project:
 
--  make sure you install ICEKit with the optional 'publishing' extra to
+-  make sure you install GLAMkit with the optional 'publishing' extra to
    get any required libraries, e.g. in your *setup.py* include something
    like: 'django-icekit[forms,search,publishing]'
 -  add ``'icekit.publishing'`` to ``INSTALLED_APPS``
 -  add ``'icekit.publishing.middleware.PublishingMiddleware'`` to
    ``MIDDLEWARE_CLASSES``
 
-Once set up in this way, the page and plugin models defined in ICEKit
+Once set up in this way, the page and plugin models defined in GLAMkit
 such as ``ArticlePage`` and ``SlideShow`` will gain publishing features
 in your project.
 
 Make Custom Publishable Models
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-While ICEKit's models will general have publishing features built-in,
+While GLAMkit's models will general have publishing features built-in,
 you can add publishing to your own models by subclassing both the model
-and admin base classes provide in ICEKit.
+and admin base classes provide in GLAMkit.
 
 To make a standard Django model publishable:
 

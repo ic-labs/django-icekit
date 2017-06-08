@@ -2,7 +2,7 @@
 branch = True
 data_file = project_template/var/.coverage
 omit = */migrations/*, */tests.py, */tests/*
-source = icekit
+source = glamkit_collections, glamkit_sponsors, icekit, icekit_events, icekit_press_releases
 
 [report]
 exclude_lines =

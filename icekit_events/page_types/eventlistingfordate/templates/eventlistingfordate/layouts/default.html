@@ -1,0 +1,42 @@
+{% extends 'icekit_content_collections/layouts/default.html' %}
+
+{%  load static events_tags icekit_tags %}
+
+{% block title %}{{ page.get_title }} {{ start|date }}{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'icekit_events/css/events_datepicker.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>{{ page.get_title }}</h1>
+        <h2>{{ start|date }}</h2>
+
+        <ul>
+            {% for item in items_to_list %}
+                <li><a href="{{ item.get_absolute_url }}">
+                    {{ item.event|safe }}: {{ item.time_range_string }}
+                </a></li>
+            {% empty %}
+                <li>There are no events happening today</li>
+            {% endfor %}
+        </ul>
+
+
+        {% with tomorrow=start.date|add_days:1 yesterday=start.date|add_days:-1 %}
+            <p><a href="?{% update_GET 'date' = yesterday %}">{{ yesterday }}</a></p>
+            <p><a href="?{% update_GET 'date' = tomorrow %}">{{ tomorrow }}</a></p>
+        {% endwith %}
+
+        <div class="events-datepicker" id="datepicker" data-period="{{ days }}" data-start="{{ start|date:'Y-m-d' }}"></div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'icekit_events/js/jquery-querystring.js' %}"></script>
+    <script src="{% static 'jquery-ui/jquery-ui.min.js' %}"></script>
+    <script src="{% static 'icekit_events/js/events_datepicker.js' %}"></script>
+{% endblock %}
+
