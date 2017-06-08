@@ -32,6 +32,22 @@ class PublishingMiddleware(object):
             return False
 
     @staticmethod
+    def is_api_request(request):
+        # Match API requests via a URL path like /api/
+        try:
+            if resolve(request.path).app_name == 'icekit-api':
+                return True
+        except Resolver404:
+            pass
+        # Match API requests via a django-hosts subdomain like api.HOSTNAME
+        try:
+            if request.host.urlconf == 'icekit.api.urls':
+                return True
+        except AttributeError:
+            pass
+        return False
+
+    @staticmethod
     def is_draft_only_view(request):
         resolved = resolve(request.path)
         if inspect.isfunction(resolved.func):
@@ -76,6 +92,9 @@ class PublishingMiddleware(object):
         # Admin resource requested.
         if PublishingMiddleware.is_admin_request(request):
             return True
+        # API resource requested.
+        if PublishingMiddleware.is_api_request(request):
+            return True
         # Draft-only view requested.
         if PublishingMiddleware.is_draft_only_view(request):
             return True
@@ -100,6 +119,7 @@ class PublishingMiddleware(object):
         # the querystring, to make URL sharing easy.
         if all([
             not PublishingMiddleware.is_admin_request(request),
+            not PublishingMiddleware.is_api_request(request),
             request.method == 'GET',
             is_draft,
             PublishingMiddleware.is_staff_user(request),
@@ -172,6 +192,8 @@ class PublishingMiddleware(object):
                 and not PublishingMiddleware.is_draft_request(request)
                 # Don't mess with admin requests at all
                 and not PublishingMiddleware.is_admin_request(request)
+                # Don't mess with API requests at all
+                and not PublishingMiddleware.is_api_request(request)
                 # Can user view draft content if we add the 'preview' param
                 and PublishingMiddleware.is_staff_user(request)):
             # TODO Is there a sane way to check for draft version of resource

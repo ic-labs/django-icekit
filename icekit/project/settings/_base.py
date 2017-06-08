@@ -657,14 +657,6 @@ HAYSTACK_CONNECTIONS = {
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.BaseSignalProcessor'
 INSTALLED_APPS += ('haystack', )
 
-# HOSTS #######################################################################
-
-# INSTALLED_APPS += ('django_hosts', )
-# MIDDLEWARE_CLASSES += ('django_hosts.middleware.HostsMiddleware', )
-
-# DEFAULT_HOST = 'www'
-# ROOT_HOSTCONF = 'icekit.hosts'
-
 # ICEKIT ######################################################################
 
 ICEKIT_CONTEXT_PROCESSOR_SETTINGS = ()
@@ -851,6 +843,12 @@ INSTALLED_APPS += (
     'glamkit_collections',
     'glamkit_collections.contrib.work_creator',
     'glamkit_collections.contrib.work_creator.plugins.links',
+    'glamkit_collections.contrib.work_creator.plugins.artwork',
+    'glamkit_collections.contrib.work_creator.plugins.film',
+    'glamkit_collections.contrib.work_creator.plugins.game',
+    'glamkit_collections.contrib.work_creator.plugins.moving_image',
+    'glamkit_collections.contrib.work_creator.plugins.organization',
+    'glamkit_collections.contrib.work_creator.plugins.person',
 
     # Sponsors
     'glamkit_sponsors',
@@ -861,6 +859,12 @@ INSTALLED_APPS += (
     # APIs
     'icekit.api',
     'icekit.plugins.iiif',
+
+    # Django REST framework for APIs
+    'rest_framework',
+    'rest_framework.authtoken',  # Required for `TokenAuthentication`
+    'rest_framework_swagger',  # Required for automatic API documentation
+    'django_filters',  # Find djangorestframework-filters templates
 )
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
@@ -1005,10 +1009,50 @@ REST_FRAMEWORK = {
         # to those users permitted to view model listings in the admin. See
         # http://www.django-rest-framework.org/api-guide/permissions/#djangomodelpermissions
         'icekit.utils.api.DjangoModelPermissionsRestrictedListing',
-    )
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework_filters.backends.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ),
+    # Pagination settings
+    'DEFAULT_PAGINATION_CLASS':
+        'icekit.api.pagination.DefaultPageNumberPagination',
+    'PAGE_SIZE': 20,
+    # Test settings
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
 
+# REST Swagger/OpenAPI Documentation via Django REST Swagger
 
+SWAGGER_SETTINGS = {
+    # 'doc_expansion': 'full',
+    'version': '0.1',
+    'api_path': "/api/",
+    'enabled_methods': ['get'],
+    'info': {
+        "title": "GLAMkit API",
+        "description": "GLAMkit API for Pages, Images, Artists, and Artworks",
+        # "termsOfServiceUrl": "http://helloreverb.com/terms/",
+        # "contact": "apiteam@wordnik.com",
+        # "license": "Apache 2.0",
+        # "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+}
+
+# Paths to Django REST framework router objects to include in the base
+# API provided by `icekit.api.urls`.
+# Defined as tuples of (optional) apisection name prefixes and dotted-path to
+# a router object.
+EXTRA_API_ROUTERS = (
+    # Include base API routes for GLAMkit Collection.
+    ('', 'glamkit_collections.contrib.work_creator.api.router'),
+
+    # Include API routes for all installed GLAMkit Collection plugins.
+    ('', 'glamkit_collections.contrib.work_creator.api.plugins_router'),
+    # To expose only some GLAMkit Collection plugins instead of all, define
+    # more specific router entries such as:
+    #     ('', 'glamkit_collections.contrib.work_creator.plugins.artwork.api.router'
+)
 
 # DEBUG TOOLBAR (not enabled by default) ######################################
 
@@ -1028,3 +1072,14 @@ except ImportError:
 DEBUG_TOOLBAR_PANELS = [
     'fluent_contents.panels.ContentPluginPanel',
 ] + PANELS_DEFAULTS
+
+# HOSTS #######################################################################
+
+INSTALLED_APPS += ('django_hosts', )
+MIDDLEWARE_CLASSES = \
+    ('django_hosts.middleware.HostsRequestMiddleware', ) + \
+    MIDDLEWARE_CLASSES + \
+    ('django_hosts.middleware.HostsResponseMiddleware', )
+
+DEFAULT_HOST = 'www'
+ROOT_HOSTCONF = 'icekit.project.hosts'

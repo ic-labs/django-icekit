@@ -44,6 +44,7 @@ setuptools.setup(
     packages=find_packages('icekit'),
     include_package_data=True,
     install_requires=[
+        'attrs',
         'django-any-urlfield',
         'django-app-namespace-template-loader',
         'django-bootstrap3',
@@ -104,6 +105,7 @@ setuptools.setup(
             'django-flat-theme<1.1.3',  # See: https://github.com/elky/django-flat-theme/issues/30
             'django-fluent-contents[markupoembeditemtext]',
             'django-fluent-pages[redirectnodereversion]',
+            'django-hosts',
             'django-master-password',
             'django-polymorphic-auth',
             'django-post-office',
@@ -162,7 +164,7 @@ setuptools.setup(
         'collections': [
             'pyparsing',
             'unidecode',
-            'edtf>=2.0.1',
+            'edtf>=2.5',
             'webcolors==1.5',
             'colormath==2.1.1',
             # Disable as it's devpi-only
