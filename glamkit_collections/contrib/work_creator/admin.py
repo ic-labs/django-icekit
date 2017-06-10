@@ -294,7 +294,7 @@ class CreatorBaseAdmin(
 
     def get_queryset(self, request):
         return super(CreatorBaseAdmin, self).get_queryset(request)\
-            .annotate(works_count=Count('works'))
+            .annotate(works_count=Count('works')).defer('start_date_edtf', 'end_date_edtf')
 
     def works_count(self, inst):
         return inst.works_count
@@ -349,8 +349,10 @@ class WorkBaseAdmin(
         CountryFilter,
     )
 
+    list_filter = ()
+
     def get_queryset(self, request):
-        return super(WorkBaseAdmin, self).get_queryset(request).prefetch_related('origin_locations__country')
+        return super(WorkBaseAdmin, self).get_queryset(request).prefetch_related('origin_locations__country').defer('creation_date_edtf',)
 
     def country_flags(self, inst):
         result = []
