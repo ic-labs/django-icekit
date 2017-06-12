@@ -416,7 +416,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     def visible_part_of(self):
         if self.part_of_id:
             return self.part_of.get_visible()
-        return False
+        return None
 
     @cached_property
     def occurrence_list(self):
