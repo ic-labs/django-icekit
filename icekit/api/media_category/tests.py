@@ -70,7 +70,7 @@ class MediaCategoryAPITests(base_tests._BaseAPITestCase):
     def test_update_media_category_with_patch(self):
         response = self.client.patch(
             self.detail_url(self.media_category.pk),
-            {'title': 'Updated media category'},
+            {'name': 'Updated media category'},
         )
         self.assertEqual(200, response.status_code)
         updated_media_category = MediaCategory.objects.get(pk=self.media_category.pk)
