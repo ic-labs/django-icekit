@@ -27,7 +27,7 @@ class WorkCreatorAPIViewSet(ModelViewSet):
     serializer_class = WorkCreator
 
 router = routers.DefaultRouter()
-router.register('workcreator', WorkCreatorAPIViewSet, 'workcreator-api')
+router.register('work-creator', WorkCreatorAPIViewSet, 'workcreator-api')
 
 
 ###############################################################################

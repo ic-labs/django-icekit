@@ -377,35 +377,35 @@ system with IDs 1 and 2 for works, and 3 for creators.
 Get list of relationships::
     curl -X GET \
          -H 'Authorization: Token abc123' \
-         http://api.icekit.lvh.me:8000/workcreator/
+         http://api.icekit.lvh.me:8000/work-creator/
 
 Create a minimal relationship, with required fields only::
     curl -X POST \
          -H 'Authorization: Token abc123' \
          -H 'Content-Type: application/json' \
          -d '{"work": {"id": 1}, "creator": {"id": 4}}' \
-         http://api.icekit.lvh.me:8000/workcreator/
+         http://api.icekit.lvh.me:8000/work-creator/
 
 Get details of a specific relationship with ID=1::
     curl -X GET  \
          -H 'Authorization: Token abc123' \
-         http://api.icekit.lvh.me:8000/workcreator/1/
+         http://api.icekit.lvh.me:8000/work-creator/1/
 
 Replace a relationship with ID=1::
     curl -X PUT \
          -H 'Authorization: Token abc123' \
          -H 'Content-Type: application/json' \
          -d '{"work": {"id": 2}, "creator": {"id": 3}}' \
-         http://api.icekit.lvh.me:8000/workcreator/1/
+         http://api.icekit.lvh.me:8000/work-creator/1/
 
 Update a relationship with ID=1::
     curl -X PATCH \
          -H 'Authorization: Token abc123' \
          -H 'Content-Type: application/json' \
          -d '{"work": {"id": 1}, "creator": {"id": 3}}' \
-         http://api.icekit.lvh.me:8000/workcreator/1/
+         http://api.icekit.lvh.me:8000/work-creator/1/
 
 Delete a relationship with ID=1::
     curl -X DELETE \
          -H 'Authorization: Token abc123' \
-         http://api.icekit.lvh.me:8000/workcreator/1/
+         http://api.icekit.lvh.me:8000/work-creator/1/
