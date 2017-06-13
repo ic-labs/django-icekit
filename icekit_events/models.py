@@ -466,6 +466,11 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
             pass
 
         try:
+            del self.own_occurrences
+        except AttributeError:
+            pass
+
+        try:
             del self.upcoming_occurrence_list
         except AttributeError:
             pass
