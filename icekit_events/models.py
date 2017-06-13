@@ -419,25 +419,36 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         return None
 
     @cached_property
+    def own_occurrences(self):
+        """
+        The value is returned as a list, to emphasise its cached/resolved nature.
+        Manipulating a queryset would lose the benefit of caching.
+
+        :return: A list of occurrences directly attached to the event. Used to 
+        fall back to `part_of` occurrences.         
+        """
+        return list(self.occurrences.all())
+
+    @cached_property
     def occurrence_list(self):
         """
         :return: A list of my occurrences, or those of my visible_part_of event
         """
-        o = list(self.occurrences.all())
+        o = self.own_occurrences
         if o:
             return o
         if self.visible_part_of:
             return self.visible_part_of.occurrence_list
-        return o # empty
+        return []
 
     @cached_property
     def upcoming_occurrence_list(self):
-        o = list(self.occurrences.upcoming())
-        if o:
-            return o
+        if self.own_occurrences:
+            return list(self.occurrences.upcoming())
+
         if self.visible_part_of:
             return self.visible_part_of.upcoming_occurrence_list
-        return o # empty
+        return []
 
     def invalidate_caches(self):
         """
@@ -549,6 +560,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
             There are occurrences, and
             There are no upcoming occurrences
         """
+
         return self.occurrence_list and not self.upcoming_occurrence_list
 
 
