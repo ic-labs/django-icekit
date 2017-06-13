@@ -12,6 +12,7 @@ from icekit.project.urls import auth_urlpatterns
 
 from .images import views as images_views
 from .pages import views as pages_views
+from .media_category import views as media_category_views
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ schema_doc_view = get_swagger_view(title='GLAMkit API')
 router = routers.DefaultRouter()
 router.register(r'image', images_views.ImageViewSet, 'image-api')
 router.register(r'page', pages_views.PageViewSet, 'page-api')
+router.register(r'media-category', media_category_views.MediaCategoryViewSet, 'media-category-api')
 
 # Register pluggable API routers defined elsewhere
 for api_section_name, pluggable_router \
