@@ -458,7 +458,11 @@ THUMBNAIL_ALIASES = {
             'size': (360, 640),
         },
         'admin': {
+            # let images be a few pixels larger if it's a better match for
+            # aspect ratio
+            'size_range': (10, 10),
             'size': (150, 150),
+            'detail': True,
         },
         'content_image': {
             'size': (1138, 0), # maximum width of a bootstrap content column
@@ -471,10 +475,12 @@ THUMBNAIL_ALIASES = {
         },
         'list_image': {
             'size': (150, 0),
+            'detail': True,
         },
         'og_image': {
             'size': (1200, 630), #facebook recommends
             'crop': True,
+            'detail': True,
         },
         'hero_image': {
             'size': (800, 0),
@@ -484,6 +490,17 @@ THUMBNAIL_ALIASES = {
 
 THUMBNAIL_BASEDIR = 'thumbs'
 THUMBNAIL_HIGH_RESOLUTION = True
+
+# Replace ET's built-in scale_and_crop with GLAMkit's variant that accepts
+# ranges in the `size` parameter.
+
+from easy_thumbnails.conf import Settings as easy_thumbnails_defaults
+THUMBNAIL_PROCESSORS = tuple([
+    'icekit.utils.images.scale_and_crop_with_ranges'
+        if x == 'easy_thumbnails.processors.scale_and_crop'
+    else x for x in easy_thumbnails_defaults.THUMBNAIL_PROCESSORS
+])
+
 
 # FLAT THEME ##################################################################
 
