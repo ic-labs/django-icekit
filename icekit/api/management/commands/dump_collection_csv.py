@@ -47,7 +47,7 @@ class Command(BaseCommand):
                 a['accession_number'] = artwork.accession_number
                 a['medium_display'] = artwork.medium_display
                 a['medium_medium'] = artwork.medium_medium
-                a['date_display'] = artwork.date_display
+                a['creation_date_display'] = artwork.creation_date_display
                 a['object_type'] = artwork.type
                 a['origin_country'] = artwork.origin_country
                 a['dimensions_display'] = artwork.dimensions_display
@@ -61,7 +61,7 @@ class Command(BaseCommand):
                     # primary_artists_list = list()
                     # for work in artist.public_artworks:
                     #      work_accession_numbers.append(work.accession_number)
-                    
+
                     # works = ",".join(work_accession_numbers)
                     # a['artwork_accession_numbers'] = works
                     # artist_csv.append(a)
@@ -70,7 +70,7 @@ class Command(BaseCommand):
                 # for artist in artwork.primary_artists:
                 #     primary_artist = artist.name_display
                 #     primary_artists.append(primary_artist)
-                
+
                 # primary_artists = ",".join(primary_artists)
                 # a['primary_artists'] = primary_artists
 
@@ -106,7 +106,7 @@ class Command(BaseCommand):
                 work_accession_numbers = list()
                 for work in artist.public_artworks:
                      work_accession_numbers.append(work.accession_number)
-                
+
                 works = ",".join(work_accession_numbers)
                 a['artwork_accession_numbers'] = works
                 artist_csv.append(a)

@@ -21,6 +21,8 @@ from fluent_contents.plugins.rawhtml.models import RawHtmlItem
 from fluent_pages.models import PageLayout
 from fluent_pages.pagetypes.fluentpage.models import FluentPage
 from forms_builder.forms.models import Form
+
+from icekit.admin_tools.forms import PasswordResetForm
 from icekit.mixins import LayoutFieldMixin
 from icekit.page_types.layout_page.models import LayoutPage
 from icekit.plugins import descriptors
@@ -39,7 +41,7 @@ from mock import patch, Mock
 from icekit.utils import fluent_contents, implementation
 from icekit.admin_tools import mixins
 
-from icekit import admin_forms, models, validators
+from icekit import models, validators
 from icekit.tests import models as test_models
 
 # Conditional imports
@@ -78,14 +80,14 @@ class Forms(WebTest):
 
     def test_password_reset_form(self):
         self.assertEqual(
-            six.next(admin_forms.PasswordResetForm().get_users(self.user_1.email)),
+            six.next(PasswordResetForm().get_users(self.user_1.email)),
             self.user_1
         )
         with self.assertRaises(StopIteration):
-            six.next(admin_forms.PasswordResetForm().get_users(self.user_2.email))
+            six.next(PasswordResetForm().get_users(self.user_2.email))
 
         with self.assertRaises(StopIteration):
-            six.next(admin_forms.PasswordResetForm().get_users(self.user_3.email))
+            six.next(PasswordResetForm().get_users(self.user_3.email))
 
     def test_twitter_embed_admin_form(self):
         twitter_url = 'https://twitter.com/Interior/status/463440424141459456'
