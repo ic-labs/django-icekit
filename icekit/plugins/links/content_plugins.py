@@ -17,5 +17,8 @@ class ArticleLinkPlugin(LinkPlugin):
 class AuthorLinkPlugin(LinkPlugin):
     model = models.AuthorLink
     fieldsets = deepcopy(LinkPlugin.fieldsets)
-    fieldsets[1][1]['fields'] += ("exclude_from_contributions", )
+    fieldsets[1][1]['fields'] += (
+        "exclude_from_contributions",
+        "exclude_from_authorship",
+    )
 

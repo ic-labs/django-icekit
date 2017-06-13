@@ -31,6 +31,8 @@ class AuthorLink(AbstractLinkItem):
 
     exclude_from_contributions = models.BooleanField(help_text="Exclude this content "
          "from the author's contributions.", default=False)
+    exclude_from_authorship = models.BooleanField(help_text="Exclude this author "
+         "from the list of authors on the page.", default=False)
 
     class Meta:
         verbose_name = "Author link"
