@@ -206,6 +206,9 @@ class CreatorBase(
         self.derive_and_set_name_fields_and_slug()
         return super(CreatorBase, self).save(*args, **kwargs)
 
+    def derive_sort_name(self):
+        return (self.name_display or self.name_full).strip()
+
     def derive_and_set_name_fields_and_slug(
             self, set_name_sort=True, set_slug=True
     ):
@@ -224,11 +227,7 @@ class CreatorBase(
                     u"%s.name_full cannot be empty at save" % type(self).__name__)
         # if empty, `name_sort` == `name_full`
         if set_name_sort and is_empty(self.name_sort):
-            names = (self.name_display or self.name_full).strip().split()
-            if len(names) > 1:
-                self.name_sort = u"%s, %s" % (names[-1], " ".join(names[:-1]))
-            else:
-                self.name_sort = (self.name_display or self.name_full).strip()
+            self.name_sort = self.derive_sort_name()
         # if empty, `slug` is set to slugified `name_full`
         if set_slug and is_empty(self.slug):
             self.slug = slugify(self.name_display)
