@@ -77,6 +77,12 @@ class ModelSubSerializer(serializers.ModelSerializer):
 @attr.s
 class WritableRelatedFieldSettings(object):
     """
+    - lookup_field: a field name, or list of field names, that uniquely
+      identify an instance and will be used to look up an existing instance
+      based on data provided. If a list of field names is provided, the first
+      field name matching a provided value will be used.
+    - can_create: ``True`` means new instances can be created for the field
+    - can_update: ``True`` means instances can be updated for the field
     """
     lookup_field = attr.ib(default='id')
     can_create = attr.ib(default=False)
@@ -242,24 +248,28 @@ class WritableSerializerHelperMixin(object):
                 % (fieldname, ModelClass.__name__, type(field_settings))
             )
 
-        # Get settings for lookup field
-        lookup_field = field_settings.lookup_field
-        try:
-            lookup_value = field_data.pop(lookup_field)
-        except KeyError:
-            if field_settings.can_create:
-                # Do not fail yet because although we cannot look up an
-                # existing item by the lookup field, we may still be able to
-                # create a new item.
-                lookup_value = None
-            else:
-                raise TypeError(
-                    "Cannot look up related model field '%s' for %s on %s"
-                    " using '%s' as the lookup field because no value"
-                    " for this field was provided in %s"
-                    % (fieldname, ModelClass.__name__,
-                       self.Meta.model.__name__, lookup_field, field_data)
-                )
+        # Get settings for lookup field; may be a string or a strings list
+        lookup_fields = field_settings.lookup_field
+        if not isinstance(lookup_fields, (list, tuple)):
+            lookup_fields = [lookup_fields]
+
+        # We use the first of potentially multiple lookup field values for
+        # which we have been given field data.
+        lookup_value = None
+        for lookup_field in lookup_fields:
+            if lookup_field in field_data:
+                lookup_value = field_data.pop(lookup_field)
+                break
+
+        # Fail if we have no lookup value and we cannot create an instance
+        if lookup_value is None and not field_settings.can_create:
+            raise TypeError(
+                "Cannot look up related model field '%s' for %s on %s"
+                " using the lookup field(s) %r because no value"
+                " was provided for the lookup field(s) in %s"
+                % (fieldname, ModelClass.__name__,
+                    self.Meta.model.__name__, lookup_fields, field_data)
+            )
 
         related_instance = None
 
