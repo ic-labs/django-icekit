@@ -205,33 +205,6 @@ class ImageAPITests(base_tests._BaseAPITestCase):
             set(['New category 1', 'New category 2']),
             set([c.name for c in new_image.categories.all()]))
 
-    def test_add_image_with_post_and_update_mediacategories(self):
-        self.assertEqual(0, self.image.categories.count())
-        category_1 = MediaCategory.objects.create(name='Category 1')
-        category_2 = MediaCategory.objects.create(name='Category 2')
-        response = self.client.post(
-            self.listing_url(),
-            {
-                'title': 'New image',
-                'image': open(self.image.image.file.name, 'rb'),
-                # See `rest_framework.utils.html.parse_html_list`
-                'categories[0]id': category_1.pk,
-                'categories[0]name': 'Updated name 1',
-                'categories[1]id': category_2.pk,
-                'categories[1]name': 'Updated name 2',
-            },
-            format='multipart',  # Cannot upload image with JSON
-        )
-        self.assertEqual(201, response.status_code)
-        new_image = Image.objects.get(pk=response.data['id'])
-        self.assertEqual('New image', new_image.title)
-        self.assertEqual(
-            set([
-                (category_1.pk, 'Updated name 1'),
-                (category_2.pk, 'Updated name 2')
-            ]),
-            set([(c.pk, c.name) for c in new_image.categories.all()]))
-
     def test_update_image_with_patch_and_relate_mediacategories_by_id(self):
         self.assertEqual(0, self.image.categories.count())
         category_1 = MediaCategory.objects.create(name='Category 1')
@@ -292,27 +265,3 @@ class ImageAPITests(base_tests._BaseAPITestCase):
         self.assertEqual(
             set(['New category 1', 'New category 2']),
             set([c.name for c in updated_image.categories.all()]))
-
-    def test_update_image_with_patch_and_update_mediacategories(self):
-        self.assertEqual(0, self.image.categories.count())
-        category_1 = MediaCategory.objects.create(name='Category 1')
-        category_2 = MediaCategory.objects.create(name='Category 2')
-        response = self.client.patch(
-            self.detail_url(self.image.pk),
-            {
-                'title': 'Updated image',
-                'categories': [
-                    {'id': category_1.pk, 'name': 'Updated name 1'},
-                    {'id': category_2.pk, 'name': 'Updated name 2'},
-                ],
-            }
-        )
-        self.assertEqual(200, response.status_code)
-        updated_image = Image.objects.get(pk=self.image.pk)
-        self.assertEqual('Updated image', updated_image.title)
-        self.assertEqual(
-            set([
-                (category_1.pk, 'Updated name 1'),
-                (category_2.pk, 'Updated name 2')
-            ]),
-            set([(c.pk, c.name) for c in updated_image.categories.all()]))

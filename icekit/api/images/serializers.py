@@ -49,7 +49,7 @@ class ImageSerializer(
                   'is_ok_for_web', 'is_cropping_allowed']
         writable_related_fields = {
             'categories': WritableRelatedFieldSettings(
-                lookup_field=['id', 'name'], can_create=True, can_update=True),
+                lookup_field=['id', 'name'], can_create=True),
         }
 
 
