@@ -127,9 +127,10 @@ class CreatorChildAdmin(
 
     NAME_FIELDSET =  ('Name', {
         'fields': (
+            'name_full',
             'name_display',
-            'slug',
             'name_sort',
+            'slug',
         ),
     })
 

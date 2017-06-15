@@ -50,6 +50,7 @@ class CreatorBase(
 ):
     # Primary, definitive, and one truly required name field
     name_full = models.CharField(
+        "Full name",
         max_length=255,
         help_text='A public "label" for the creator, from which all other '
                   'name values will be derived unless they are also provided. '
@@ -59,7 +60,9 @@ class CreatorBase(
 
     # Other name fields that will be derived from `name_full` unless provided
     name_display = models.CharField(
+        "Display name",
         max_length=255,
+        blank=True, # derived from name_full if omitted
         help_text='The commonly known or generally recognized name of the '
                   'creator, for display, publication and reproduction purposes, '
                   'e.g., "Rembrandt" or "Guercino" as opposed to the full name '
@@ -67,11 +70,13 @@ class CreatorBase(
                   'Barbieri."'
     )
     name_sort = models.CharField(
+        "Name for sorting",
         max_length=255,
-        help_text='For searching and organizing, the name or sequence of names '
-                  'which determines the position of the creator in the list of '
-                  'creators, so that he or she may be found where expected, '
-                  'e.g. "Rembrandt" under "R" or "Guercino" under "G"'
+        help_text='A behind-the-scenes value to use when sorting lists of '
+                  'creators, so that each creator may be found where expected. '
+                  'Generally, use "lastname, firstname", although exceptions '
+                  'may exist, such as "Leonardo da Vinci". Omit words that are '
+                  'to be ignored when sorting, such as "The".'
     )
 
     #for URLs
@@ -195,7 +200,7 @@ class CreatorBase(
         unique_together = ('slug', 'publishing_is_draft',)
 
     def __unicode__(self):
-        return self.name_display
+        return self.get_title()
 
     def save(self, *args, **kwargs):
         self.derive_and_set_name_fields_and_slug()
@@ -212,17 +217,21 @@ class CreatorBase(
         """
         # name_full is the primary required name field. It must be set.
         if is_empty(self.name_full):
-            raise ValueError(
-                u"%s.name_full cannot be empty at save" % type(self).__name__)
-        # if empty, `name_display` == `name_full`
-        if is_empty(self.name_display):
-            self.name_display = self.name_full
+            if not is_empty(self.name_display):
+                self.name_full = self.name_display
+            else:
+                raise ValueError(
+                    u"%s.name_full cannot be empty at save" % type(self).__name__)
         # if empty, `name_sort` == `name_full`
         if set_name_sort and is_empty(self.name_sort):
-            self.name_sort = self.name_full
+            names = (self.name_display or self.name_full).strip().split()
+            if len(names) > 1:
+                self.name_sort = u"%s, %s" % (names[-1], " ".join(names[:-1]))
+            else:
+                self.name_sort = (self.name_display or self.name_full).strip()
         # if empty, `slug` is set to slugified `name_full`
         if set_slug and is_empty(self.slug):
-            self.slug = slugify(self.name_full)
+            self.slug = slugify(self.name_display)
 
     def get_absolute_url(self):
         return reverse("gk_collections_creator", kwargs={'slug': self.slug})
@@ -255,7 +264,7 @@ class CreatorBase(
             return self.list_image or self.portrait.image
 
     def get_title(self):
-        return self.name_display
+        return self.name_display or self.name_full
 
     def get_type(self):
         return "creator"
