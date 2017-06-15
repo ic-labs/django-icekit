@@ -4,6 +4,7 @@ import attr
 
 from rest_framework import serializers
 from rest_framework.relations import HyperlinkedIdentityField
+from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
 
 class ModelSubSerializer(serializers.ModelSerializer):
@@ -382,3 +383,37 @@ class PolymorphicHyperlinkedModelSerializer(
     def get_child_view_name_data(self, obj):
         raise NotImplementedError(
             "%s must implement `get_child_view_name_data`" % type(self))
+
+
+class DisableUniqueTogetherValidatorMixin(object):
+    """
+    Mixin to easily disable the problematic `UniqueTogetherValidator` from
+    DjangoRestFramework that automatically applies unique-together constraints
+    of model fields so early in request processing that it makes it impossible
+    to have any custom handling of affected fields.
+
+    This mixin can help avoid situations like an API field being required
+    despite us explicitly setting it as not required, e.g. the `slug` field in
+    GLAMkit Collection models.
+    """
+
+    def get_validators(self):
+        validators = super(DisableUniqueTogetherValidatorMixin, self) \
+            .get_validators()
+        disable_unique_together_fields = set(getattr(
+            self.Meta, 'disable_unique_together_constraint_fields', []))
+        if disable_unique_together_fields:
+            initial_data_keys = set(self.initial_data.keys())
+            validators = [
+                v for v in validators
+                # Only disable validation in specific case where it would apply
+                # unique-together checks including the disabled fields where
+                # that field is not present in the available data.
+                if not(
+                    type(v) == UniqueTogetherValidator and
+                    disable_unique_together_fields.issubset(set(v.fields)) and
+                    not disable_unique_together_fields.intersection(
+                        initial_data_keys)
+                )
+            ]
+        return validators

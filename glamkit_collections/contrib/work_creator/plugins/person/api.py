@@ -113,6 +113,8 @@ class Person(Creator):
             },
         }
         writable_related_fields = Creator.Meta.writable_related_fields
+        disable_unique_together_constraint_fields = \
+            Creator.Meta.disable_unique_together_constraint_fields
 
 
 class APIViewSet(ModelViewSet):

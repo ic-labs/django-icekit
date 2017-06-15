@@ -38,6 +38,8 @@ class Film(MovingImageWork):
             },
         })
         writable_related_fields = MovingImageWork.Meta.writable_related_fields
+        disable_unique_together_constraint_fields = \
+            MovingImageWork.Meta.disable_unique_together_constraint_fields
 
 
 class APIViewSet(ModelViewSet):
