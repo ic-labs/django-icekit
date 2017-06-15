@@ -872,7 +872,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
         )
         self.assertEqual('new-organization', new_organization.slug)
         self.assertEqual('New Organization', new_organization.name_full)
-        self.assertEqual('New Organization', new_organization.name_display)
+        self.assertEqual('', new_organization.name_display)
         self.assertEqual('New Organization', new_organization.name_sort)
         self.assertTrue(new_organization.publishing_is_draft)
 
@@ -896,7 +896,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
             'Replaced Organization', updated_organization.name_full)
         # Note derived name fields are *not* updated
         self.assertEqual(
-            'Test Organization', updated_organization.name_display)
+            '', updated_organization.name_display)
         self.assertEqual(
             'Test Organization', updated_organization.name_sort)
 
@@ -914,7 +914,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
             'Updated Organization', updated_organization.name_full)
         # Note other derived name fields are *not* updated
         self.assertEqual(
-            'Test Organization', updated_organization.name_display)
+            '', updated_organization.name_display)
         self.assertEqual(
             'Test Organization', updated_organization.name_sort)
 
