@@ -142,7 +142,7 @@ class ImageAPITests(base_tests._BaseAPITestCase):
             }
         )
 
-    def test_add_image_with_post_and_relate_existing_mediacategories(self):
+    def test_add_image_with_post_and_relate_mediacategories_by_id(self):
         self.assertEqual(0, self.image.categories.count())
         category_1 = MediaCategory.objects.create(name='Category 1')
         category_2 = MediaCategory.objects.create(name='Category 2')
@@ -154,6 +154,28 @@ class ImageAPITests(base_tests._BaseAPITestCase):
                 # See `rest_framework.utils.html.parse_html_list`
                 'categories[0]id': category_1.pk,
                 'categories[1]id': category_2.pk,
+            },
+            format='multipart',  # Cannot upload image with JSON
+        )
+        self.assertEqual(201, response.status_code)
+        new_image = Image.objects.get(pk=response.data['id'])
+        self.assertEqual('New image', new_image.title)
+        self.assertEqual(
+            set([category_1, category_2]),
+            set(new_image.categories.all()))
+
+    def test_add_image_with_post_and_relate_mediacategories_by_name(self):
+        self.assertEqual(0, self.image.categories.count())
+        category_1 = MediaCategory.objects.create(name='Category 1')
+        category_2 = MediaCategory.objects.create(name='Category 2')
+        response = self.client.post(
+            self.listing_url(),
+            {
+                'title': 'New image',
+                'image': open(self.image.image.file.name, 'rb'),
+                # See `rest_framework.utils.html.parse_html_list`
+                'categories[0]name': category_1.name,
+                'categories[1]name': category_2.name,
             },
             format='multipart',  # Cannot upload image with JSON
         )
@@ -210,7 +232,7 @@ class ImageAPITests(base_tests._BaseAPITestCase):
             ]),
             set([(c.pk, c.name) for c in new_image.categories.all()]))
 
-    def test_update_image_with_patch_and_relate_existing_mediacategories(self):
+    def test_update_image_with_patch_and_relate_mediacategories_by_id(self):
         self.assertEqual(0, self.image.categories.count())
         category_1 = MediaCategory.objects.create(name='Category 1')
         category_2 = MediaCategory.objects.create(name='Category 2')
@@ -221,6 +243,27 @@ class ImageAPITests(base_tests._BaseAPITestCase):
                 'categories': [
                     {'id': category_1.pk},
                     {'id': category_2.pk},
+                ],
+            }
+        )
+        self.assertEqual(200, response.status_code)
+        updated_image = Image.objects.get(pk=self.image.pk)
+        self.assertEqual('Updated image', updated_image.title)
+        self.assertEqual(
+            set([category_1, category_2]),
+            set(updated_image.categories.all()))
+
+    def test_update_image_with_patch_and_relate_mediacategories_by_name(self):
+        self.assertEqual(0, self.image.categories.count())
+        category_1 = MediaCategory.objects.create(name='Category 1')
+        category_2 = MediaCategory.objects.create(name='Category 2')
+        response = self.client.patch(
+            self.detail_url(self.image.pk),
+            {
+                'title': 'Updated image',
+                'categories': [
+                    {'name': category_1.name},
+                    {'name': category_2.name},
                 ],
             }
         )
