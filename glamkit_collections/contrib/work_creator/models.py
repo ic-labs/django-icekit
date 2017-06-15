@@ -230,7 +230,7 @@ class CreatorBase(
             self.name_sort = self.derive_sort_name()
         # if empty, `slug` is set to slugified `name_full`
         if set_slug and is_empty(self.slug):
-            self.slug = slugify(self.name_display)
+            self.slug = slugify(self.name_display or self.name_full)
 
     def get_absolute_url(self):
         return reverse("gk_collections_creator", kwargs={'slug': self.slug})
