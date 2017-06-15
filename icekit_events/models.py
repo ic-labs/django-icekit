@@ -551,11 +551,11 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         return self.get_all_types().filter(slug='members')
 
     def is_upcoming(self):
-        return self.upcoming_occurrence_list
+        return len(self.upcoming_occurrence_list) != 0
 
     def get_next_occurrence(self):
         try:
-            return self.upcoming_occurence_list[0]
+            return self.upcoming_occurrence_list[0]
         except IndexError:
             return None
 
