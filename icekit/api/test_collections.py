@@ -630,7 +630,7 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
                     "slug": "person-test",
                     "name": {
                         "full": "Test Person",
-                        "display": "Test Person",
+                        "display": "",
                         "sort": "Person, Test",
                         "given": "Test",
                         "family": "Person"
@@ -648,7 +648,7 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
                     "slug": "person-test",
                     "name": {
                         "full": "Test Person",
-                        "display": "Test Person",
+                        "display": "",
                         "sort": "Person, Test",
                         "given": "Test",
                         "family": "Person"
@@ -812,7 +812,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
                     "url": 'http://testserver%s'
                     % self.detail_url(self.organization_published.pk),
                     "name_full": "Test Organization",
-                    "name_display": "Test Organization",
+                    "name_display": "",
                     "name_sort": "Test Organization",
                     "slug": "test-organization",
                     "publishing_is_draft": False,
@@ -826,7 +826,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
                     "url": 'http://testserver%s'
                     % self.detail_url(self.organization.pk),
                     "name_full": "Test Organization",
-                    "name_display": "Test Organization",
+                    "name_display": "",
                     "name_sort": "Test Organization",
                     "slug": "test-organization",
                     "publishing_is_draft": True,
