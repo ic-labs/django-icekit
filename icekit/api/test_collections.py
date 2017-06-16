@@ -630,7 +630,7 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
                     "slug": "person-test",
                     "name": {
                         "full": "Test Person",
-                        "display": "Test Person",
+                        "display": "",
                         "sort": "Person, Test",
                         "given": "Test",
                         "family": "Person"
@@ -648,7 +648,7 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
                     "slug": "person-test",
                     "name": {
                         "full": "Test Person",
-                        "display": "Test Person",
+                        "display": "",
                         "sort": "Person, Test",
                         "given": "Test",
                         "family": "Person"
@@ -672,7 +672,7 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
             "slug": "person-test",
             "name": {
                 "full": "Test Person",
-                "display": "Test Person",
+                "display": "",
                 "sort": "Person, Test",
                 "given": "Test",
                 "family": "Person"
@@ -812,7 +812,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
                     "url": 'http://testserver%s'
                     % self.detail_url(self.organization_published.pk),
                     "name_full": "Test Organization",
-                    "name_display": "Test Organization",
+                    "name_display": "",
                     "name_sort": "Test Organization",
                     "slug": "test-organization",
                     "publishing_is_draft": False,
@@ -826,7 +826,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
                     "url": 'http://testserver%s'
                     % self.detail_url(self.organization.pk),
                     "name_full": "Test Organization",
-                    "name_display": "Test Organization",
+                    "name_display": "",
                     "name_sort": "Test Organization",
                     "slug": "test-organization",
                     "publishing_is_draft": True,
@@ -846,7 +846,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
             "name_full": "Test Organization",
             "url": 'http://testserver%s'
             % self.detail_url(self.organization_published.pk),
-            "name_display": "Test Organization",
+            "name_display": "",
             "name_sort": "Test Organization",
             "slug": "test-organization",
             "publishing_is_draft": False,
@@ -872,7 +872,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
         )
         self.assertEqual('new-organization', new_organization.slug)
         self.assertEqual('New Organization', new_organization.name_full)
-        self.assertEqual('New Organization', new_organization.name_display)
+        self.assertEqual('', new_organization.name_display)
         self.assertEqual('New Organization', new_organization.name_sort)
         self.assertTrue(new_organization.publishing_is_draft)
 
@@ -896,7 +896,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
             'Replaced Organization', updated_organization.name_full)
         # Note derived name fields are *not* updated
         self.assertEqual(
-            'Test Organization', updated_organization.name_display)
+            '', updated_organization.name_display)
         self.assertEqual(
             'Test Organization', updated_organization.name_sort)
 
@@ -914,7 +914,7 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
             'Updated Organization', updated_organization.name_full)
         # Note other derived name fields are *not* updated
         self.assertEqual(
-            'Test Organization', updated_organization.name_display)
+            '', updated_organization.name_display)
         self.assertEqual(
             'Test Organization', updated_organization.name_sort)
 

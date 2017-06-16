@@ -161,3 +161,10 @@ class PersonCreator(CreatorBase):
         if roles:
             return roles[0].role.get_plural()
         return "people"
+
+    def derive_sort_name(self):
+        names = (self.name_display or self.name_full).strip().split()
+        if len(names) > 1:
+            return u"%s, %s" % (names[-1], " ".join(names[:-1]))
+        else:
+            return super(PersonCreator, self).derive_sort_name()
