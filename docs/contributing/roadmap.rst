@@ -2,7 +2,7 @@ Roadmap
 =======
 
 Like every open-source project, GLAMkit is looking for people to help contribute
-ideas, features, code and issues reports. This document outlines the medium- and
+ideas, features, code and issues. This document outlines the medium- and
 long-term feature roadmap for GLAMkit. If anything on this list is of interest,
 you should get involved - see :doc:`index`.
 
@@ -34,12 +34,12 @@ Version 0.18
 * Include Events/Collections/Press Releases/Sponsors in the main repository as standard
 * Add REST API endpoints for Collection and Images
 * Include new EDTF fields in Collection
-* Drop deprecation shims added in 0.16.
+* Drop any deprecation shims added in 0.16.
 * Author listings
 
 Version 0.19
 ~~~~~~~~~~~~
-* Drop deprecation shims added in 0.17.
+* Drop any deprecation shims added in 0.17.
 * Remove Django-Haystack, using ElasticSearch libraries directly.
 * Events Location model
 * Solution for adding extended information and themes to Events (a.k.a the minisites replacement)
@@ -47,14 +47,14 @@ Version 0.19
 
 Version 0.20
 ~~~~~~~~~~~~
-* Drop deprecation shims added in 0.18.
+* Drop any deprecation shims added in 0.18.
 * Return of versioning and reverting
 * Factored-out collection search
 * Events API
 
 Version 1.0
 ~~~~~~~~~~~
-* Drop deprecation shims added in 0.19.
+* Drop any deprecation shims added in 0.19.
 * Polymorphic asset refactor
 * Solution for reducing the need to fork apps merely to add fields to models.
 * Navigation content model

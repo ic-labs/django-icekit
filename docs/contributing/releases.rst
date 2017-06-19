@@ -77,3 +77,41 @@ accept packages with `local version identifiers`_.
 
 .. _devpi: http://doc.devpi.net/latest/
 .. _`local version identifiers`: https://www.python.org/dev/peps/pep-0440/#local-version-identifiers
+
+Release announcement template
+-----------------------------
+
+The Interaction Consortium is pleased to announce the new release of GLAMkit
+(http://glamkit.com), the open-source CMS for the cultural sector, used by
+ACMI, SFMOMA and others.
+
+Version [x] features [...]
+
+Full details can be found in the release notes at
+http://docs.glamkit.com/en/latest/changelog.html .
+
+Get GLAMkit
+~~~~~~~~~~~
+To install the development version of GLAMkit, see the instructions at
+http://glamkit.com/get-started.html .
+
+Help improve GLAMkit
+~~~~~~~~~~~~~~~~~~~~
+Like every open-source project, GLAMkit relies on people to help contribute
+ideas, features, code and issues. If you wish to suggest improvements, please
+add them to the project’s GitHub issue tracker:
+https://github.com/ic-labs/django-icekit/issues .
+
+User guides and documentation can be found at: http://docs.glamkit.com .
+
+About GLAMkit
+~~~~~~~~~~~~~
+GLAMkit is a next-generation open-source CMS by the Interaction
+Consortium (http://interaction.net.au), designed especially for
+the cultural sector. It's used by SFMOMA, ACMI, MCA Australia, and the Art
+Galleries of New South Wales and South Australia, among others.
+
+GLAMkit has rich Events, Collections, asset management and storytelling tools
+for teams of content professionals in public-facing institutions, supported by
+a powerful content publishing framework. Everything is written in Python,
+using the Django framework.

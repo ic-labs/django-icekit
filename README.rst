@@ -5,13 +5,14 @@
 
 .. The following is taken from docs/includes/intro.rst. Keep synchronised.
 
-GLAMkit is a next-generation Python CMS by `the Interaction
+GLAMkit is a next-generation CMS by `the Interaction
 Consortium <http://interaction.net.au>`__, designed especially for
 the cultural sector.
 
-GLAMkit has publishing and workflow tools for teams of content professionals,
-and a powerful content framework, based on django-fluent. Everything is written
-in Python, using the Django framework.
+GLAMkit has rich Events, Collections and storytelling tools for teams of content
+professionals in public-facing institutions, supported by a powerful content
+framework, based on django-fluent. Everything is written in Python, using the
+Django framework.
 
 `Read the documentation for the latest release <http://docs.glamkit.com>`_
 
