@@ -5,14 +5,13 @@ We improve GLAMkit every day by releasing new features, squashing bugs and
 improving test coverage and documentation. This document describes those
 changes.
 
-Notes for contributors:
-~~~~~~~~~~~~~~~~~~~~~~~
+.. note:: For contributors
 
--  use plain English where the feature is user-facing
--  use past tense to describe actions ('renamed' rather than 'rename').
-   Reserve present tense for describing current state ('GLAMkit now includes...').
--  document backwards-incompatible changes in its own section
--  before release, group and summarise features by category
+   -  use plain English where the feature is user-facing
+   -  use past tense to describe actions ('renamed' rather than 'rename').
+      Reserve present tense for describing current state ('GLAMkit now includes...').
+   -  document backwards-incompatible changes in its own section
+   -  before release, group and summarise features by category
 
 
 In development
