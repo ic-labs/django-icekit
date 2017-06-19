@@ -86,6 +86,20 @@ requests from your client. Note that the full format for this header is::
 
     Authorization: Token <token-key-value>
 
+Filter Fields
+^^^^^^^^^^^^^
+
+All GLAMkit APIs support filtering of query results to return only specific
+fields from ``GET`` listing queries, based on the `QueryFields
+<http://djangorestframework-queryfields.readthedocs.io/>`_ extension to
+Django REST Framework.
+
+For example, to retrieve just the ID and Title for all Images in the system::
+    curl -X GET \
+         -H 'Authorization: Token abc123' \
+         http://api.icekit.lvh.me:8000/image/?fields=id,title
+
+
 Image API
 ---------
 

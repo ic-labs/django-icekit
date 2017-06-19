@@ -60,6 +60,21 @@ class ImageAPITests(base_tests._BaseAPITestCase):
             },
             response.data)
 
+    def test_list_images_with_get_and_filtered_fields(self):
+        response = self.client.get(self.listing_url() + '?fields=id,title')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            {
+                'count': 1,
+                'next': None,
+                'previous': None,
+                'results': [{
+                    'id': self.image.pk,
+                    'title': self.image.title,
+                }]
+            },
+            response.data)
+
     def test_get_image_detail_with_get(self):
         response = self.client.get(self.detail_url(self.image.pk))
         self.assertEqual(200, response.status_code)

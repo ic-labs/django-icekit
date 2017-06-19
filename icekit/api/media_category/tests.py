@@ -31,6 +31,20 @@ class MediaCategoryAPITests(base_tests._BaseAPITestCase):
             },
             response.data)
 
+    def test_list_media_categories_with_get_and_filtered_fields(self):
+        response = self.client.get(self.listing_url() + '?fields=name')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            {
+                'count': 1,
+                'next': None,
+                'previous': None,
+                'results': [{
+                    'name': 'Test media category',
+                }]
+            },
+            response.data)
+
     def test_get_media_category_detail_with_get(self):
         response = self.client.get(self.detail_url(self.media_category.pk))
         self.assertEqual(200, response.status_code)

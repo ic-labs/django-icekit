@@ -1,6 +1,7 @@
 from django.apps import apps
 
 from rest_framework import serializers
+from drf_queryfields import QueryFieldsMixin
 
 from icekit.api.base_serializers import WritableSerializerHelperMixin, \
     WritableRelatedFieldSettings
@@ -32,7 +33,8 @@ class MediaCategorySerializer(serializers.ModelSerializer):
 
 
 class ImageSerializer(
-    WritableSerializerHelperMixin, serializers.ModelSerializer
+    WritableSerializerHelperMixin, QueryFieldsMixin,
+    serializers.ModelSerializer
 ):
     """
     A serializer for an ICEkit Image.

@@ -1,5 +1,7 @@
 from fluent_pages.models import Page
+
 from rest_framework import serializers
+from drf_queryfields import QueryFieldsMixin
 
 
 class ContentSerializer(serializers.Serializer):
@@ -12,7 +14,7 @@ class ContentSerializer(serializers.Serializer):
         return obj.plugin.render(self.context['request'], obj)
 
 
-class PageSerializer(serializers.ModelSerializer):
+class PageSerializer(QueryFieldsMixin, serializers.ModelSerializer):
     """
     A serializer for a fluent page.
     """
