@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from rest_framework.settings import api_settings
-from rest_framework.validators import UniqueTogetherValidator
 from drf_queryfields import QueryFieldsMixin
 
 from icekit.api.base_serializers import WritableSerializerHelperMixin, \
-    PolymorphicHyperlinkedModelSerializer, WritableRelatedFieldSettings
+    PolymorphicHyperlinkedModelSerializer, WritableRelatedFieldSettings, \
+    DisableUniqueTogetherValidatorMixin
 from icekit.api.images.serializers import RelatedImageSerializer
 
 from .models import WorkBase, CreatorBase, WorkCreator as WorkCreatorModel, \
@@ -13,42 +13,6 @@ from .models import WorkBase, CreatorBase, WorkCreator as WorkCreatorModel, \
 from .plugins.moving_image.models import Rating as RatingModel, \
     Genre as GenreModel, MediaType as MediaTypeModel, \
     MovingImageWork as MovingImageWorkModel
-
-
-class BaseCollectionModelSerializerMixin(QueryFieldsMixin):
-    """
-    Mixin with convienient features used by serializers for underlying
-    `WorkBase` and `CreatorBase` serialization.
-
-    Includes:
-        - filter API results by fields, via djangorestframework-queryfields
-        - avoid 'slug' fields always being required when we don't want this.
-    """
-
-    def get_validators(self):
-        """
-        Override default validators in DRF to disable checking of unique-
-        together constraints that include the 'slug' because this check in
-        the API effectively makes 'slug' a required field when we do not want
-        it to be.
-        """
-        disabled_fields = set(getattr(
-            self.Meta, 'disable_unique_together_constraint_fields', []))
-        initial_data_keys = set(self.initial_data.keys())
-        validators = super(BaseCollectionModelSerializerMixin, self) \
-            .get_validators()
-        validators = [
-            v for v in validators
-            # Only disable validation in specific case where it would apply
-            # unique-together checks including the disabled fields where that
-            # field is not present in the available data.
-            if not(
-                type(v) == UniqueTogetherValidator and
-                disabled_fields.issubset(set(v.fields)) and
-                not disabled_fields.intersection(initial_data_keys)
-            )
-        ]
-        return validators
 
 
 class CreatorSummary(PolymorphicHyperlinkedModelSerializer):
@@ -134,7 +98,8 @@ class Role(serializers.ModelSerializer):
         }
 
 
-class WorkCreator(BaseCollectionModelSerializerMixin,
+class WorkCreator(DisableUniqueTogetherValidatorMixin,
+                  QueryFieldsMixin,
                   WritableSerializerHelperMixin,
                   serializers.HyperlinkedModelSerializer):
     """ Relationship between a work and a creator """
@@ -195,7 +160,8 @@ class WorkCreatorFromCreator(WorkCreator):
         ]
 
 
-class Creator(BaseCollectionModelSerializerMixin,
+class Creator(DisableUniqueTogetherValidatorMixin,
+              QueryFieldsMixin,
               WritableSerializerHelperMixin,
               serializers.HyperlinkedModelSerializer):
     works = WorkCreatorFromCreator(
@@ -237,8 +203,7 @@ class Creator(BaseCollectionModelSerializerMixin,
         extra_kwargs = {
             # Slug and name fields derived from `name_full` are not required
             'slug': {
-                # NOTE: See also
-                # `BaseCollectionModelSerializerMixin.get_validators()`
+                # NOTE: See also `DisableUniqueTogetherValidatorMixin`
                 'required': False,
             },
             'name_display': {
@@ -300,7 +265,8 @@ class WorkImage(WritableSerializerHelperMixin,
         }
 
 
-class Work(BaseCollectionModelSerializerMixin,
+class Work(DisableUniqueTogetherValidatorMixin,
+           QueryFieldsMixin,
            WritableSerializerHelperMixin,
            serializers.HyperlinkedModelSerializer):
     creators = WorkCreatorFromWork(
@@ -348,8 +314,7 @@ class Work(BaseCollectionModelSerializerMixin,
         extra_kwargs = {
             # Slug and name fields derived from `name_full` are not required
             'slug': {
-                # NOTE: See also
-                # `BaseCollectionModelSerializerMixin.get_validators()`
+                # NOTE: See also `DisableUniqueTogetherValidatorMixin`
                 'required': False,
             },
         }
@@ -429,3 +394,5 @@ class MovingImageWork(Work):
             'media_type': WritableRelatedFieldSettings(
                 lookup_field='slug', can_create=True, can_update=False),
         }
+        disable_unique_together_constraint_fields = \
+            Work.Meta.disable_unique_together_constraint_fields
