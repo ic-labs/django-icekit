@@ -4,84 +4,63 @@ Changelog
 0.17 (2017-04-30)
 -----------------
 
--  Changed the way that we specify the homepage: create a page with url
-   override `/`. This is the way fluent does it. As a fallback, we look for a
-   page with slug `home`. If you mount pages under a page with override URL and
-   slug, the child pages inherit the override URL, making the page tree more
-   natural.
+This release is all about the APIs. Well, mostly.
 
--  Page Admin no longer replaces the change_list table with a tree.
+- GLAMkit now supports IIIF 2.1, for privileged users. See :doc:`topics/iiif`.
 
--  Provide default Localization formats.
+-  Fleshed out Image model with more metadata and fields to cover rights/usage.
 
--  Improvements to Events admin and calendar. Calendar shows for single event.
+-  We added the ``icekit.api`` application to provide more consistent RESTful
+   APIs to read data from, and sometimes write data to, content in GLAMkit.
 
--  Better Date/Time/Datetime widgets in Admin forms
-
--  Front-end improvements: updated preview links in templates, included
-   Bootstrap in backend and front-end by default.
-
--  Added implementation of key parts of IIIF 2.1 spec for privileged users.
-
--  Fleshed out Image model with more metadata and fields for rights/usage.
-
--  Refactor ``icekit.admin*``, ``icekit.dashboard`` and
-   ``icekit.utils.admin`` to ``icekit.admin_tools``
-   in preparation for admin consolidation and extension. Previous classes,
-   templates and functions are deprecated.
-
-   -  A new setting ``ICEKIT['DASHBOARD_SORTED_APPS']`` to manually group
-      models in the list below the dashboard panels. Models that aren't
-      manually grouped are grouped by their apps as normal.
-
-   -  New dashboard panels for Recent Actions (the Django admin changelist) and
-      Assigned To Me (a workflow list). ``WorkflowState`` gets a
-      ``datetime_modified`` field to support this.
-
-   -  ``raw_id``s have previews and edit links if the admin subclasses
-      ``RawIdPreviewAdminMixin`` (which ICEkit's default admins do; note
-      ``InlineAdmin``s do not need this subclass). If the linked object has a
-      ``preview()`` method, it is used for the preview, wrapped in an 'edit'
-      link.
-
-   -  New ``PreviewAdminMixin`` which calls an object's ``preview()`` method.
-      The existing ``ThumbnailAdminMixin`` now inherits from this class and
-      consequently, models which use ``ThumbnailAdminMixin`` have a visual
-      preview in ``raw_id`` fields, including ``icekit.plugins.image.Image``.
-
--  Add ``icekit.api`` application to provide APIs to read data from, and
-   sometimes write data to, items in the site from program clients.
-
-   - Relocate public-access and read-only API for published pages to the new
+   -  The public-access and read-only API for published pages is in the new
       app location.
 
-   - Add new authenticated-access and permissions-based API for images.
+   -  There's a new authenticated-access and permissions-based API for images.
 
-   - See documentation in *docs/topics/apis.rst*.
+   -  See documentation in :doc:`topics/apis`.
 
--  Add ``icekit.workflow`` application to associate, manage, and filter
-   workflow state information like status and user-assigment for
-   arbitrary models.
+-  Overhaul of search system, using a consistent approach to index and
+   depict rich/publishable/polymorphic models, and to facet on them, using
+   ElasticSearch.
 
--  Add ``ICEkitContentsMixin`` and ``ICEkitFluentContentsMixin``
-   abstract classes in ``icekit.models`` to use as a base for models
-   that will include publishing and workflow features.
+-  Documentation is refactored into ReStructuredText. This means much
+   more coherence, and the ability to generate documentation from within
+   code. Also documentation focuses on GLAMkit rather than ICEkit to align
+   with current development focus.
 
--  Add ``ICEkitContentsAdmin`` and ``ICEkitFluentContentsAdmin`` admin
-   classes in ``icekit.admin`` as bases for admins for models with
-   publishing and workflow features.
 
--  Add workflow features to all publishable models in ICEkit using the
-   new abstract model mixins and admin base classes mentioned above.
+We also made some UI improvements:
+
+-  Bootstrap is included in backend and front-end by default.
+
+-  Improvements to Events admin and calendar. The overall calendar remembers its
+   settings, and now each event has its own calendar.
+
+-  New workflow dashboard panels for Recent Actions and Assigned To Me.
+
+-  Better Date/Time/Datetime widgets in Admin forms
 
 -  Preview pages are now visually highlighted, and have a different HTML
    title.
 
 -  "Preview draft" button is now near "View published" button.
 
+-  Page Admin no longer replaces the change_list table with a tree. We've kept
+   it as a table to keep all the bulk-edit and filtering/sorting goodness.
+
+And some content model changes:
+
 -  "Slideshow" is now renamed "Image Gallery" and there is a new Image
    Gallery content plugin available (which renders a grid of thumbnails
    into a lightbox).
+
+-  Added ``icekit.workflow`` application to associate, manage, and filter
+   workflow state information like status and user-assigment for
+   arbitrary models.
+
+   -  Workflow features are added to all publishable models in ICEkit using the
+      new abstract model mixins and admin base classes mentioned below.
 
 -  ``icekit.content_collections`` app which defines an abstract listing
    page type that lists a collection of content, and an abstract model
@@ -94,9 +73,6 @@ Changelog
 -  New ``icekit.page_types.article`` app which is a concrete
    implementation of the content collections pattern.
 
--  Ignore ``.env`` and ``docker-cloud.*.yml`` files, which frequently
-   contain secrets that should not be committed.
-
 -  New ``ContactPerson`` model + and plugin added, allowing adding of
    staff contacts to most types of content.
 
@@ -104,18 +80,61 @@ Changelog
 
 -  Text plugin now has a style setting
 
--  Overhaul of search system, using a consistent approach to index and
-   depict rich/publishable/polymorphic models, and to facet on them.
+And some under-the-hood changes:
 
--  Documentation is refactored into ReStructuredText. This means much
-   more coherence, and the ability to generate documentation from within
-   code. Also documentation focuses on GLAMkit rather than ICEkit to align
-   with current development focus.
+-  Added ``ICEkitContentsMixin`` and ``ICEkitFluentContentsMixin``
+   abstract classes in ``icekit.models`` to use as a base for models
+   that will include publishing and workflow features.
+
+-  Added ``ICEkitContentsAdmin`` and ``ICEkitFluentContentsAdmin`` admin
+   classes in ``icekit.admin`` as bases for admins for models with
+   publishing and workflow features.
+
+-  Refactored ``icekit.admin*``, ``icekit.dashboard`` and
+   ``icekit.utils.admin`` to ``icekit.admin_tools``
+   in preparation for admin consolidation and extension. Previous classes,
+   templates and functions are deprecated.
+
+   -  A new setting ``ICEKIT['DASHBOARD_SORTED_APPS']`` to manually group
+      models in the list below the dashboard panels. Models that aren't
+      manually grouped are grouped by their apps as normal.
+
+   -  ``WorkflowState`` gets a ``datetime_modified`` field to support new
+      dashboard panels.
+
+   -  ``raw_id``s have previews and edit links if the admin subclasses
+      ``RawIdPreviewAdminMixin`` (which ICEkit's default admins do; note
+      ``InlineAdmin``s do not need this subclass). If the linked object has a
+      ``preview()`` method, it is used for the preview, wrapped in an 'edit'
+      link.
+
+   -  New ``PreviewAdminMixin`` which calls an object's ``preview()`` method.
+      The existing ``ThumbnailAdminMixin`` now inherits from this class and
+      consequently, models which use ``ThumbnailAdminMixin`` have a visual
+      preview in ``raw_id`` fields, including ``icekit.plugins.image.Image``.
+
+   - The "icekit/admin/fluent_layouts_change_form.html" template has moved to
+      "admin/fluent_layouts_change_form.html". Please update your references.
+
+-  Renamed the GET parameter used to trigger and permit preview of draft pages
+   to be 'preview' instead of 'edit'. The legacy 'edit' parameter name is still
+   supported.
+
+-  Changed the way that we specify the homepage: create a page with url
+   override `/`. This is the way fluent does it. As a fallback, we look for a
+   page with slug `home`. If you mount pages under a page with override URL and
+   slug, the child pages inherit the override URL, making the page tree more
+   natural.
+
+-  Provided default Localization formats.
+
+-  Ignore ``.env`` and ``docker-cloud.*.yml`` files, which frequently
+   contain secrets that should not be committed.
 
 Breaking changes
 ~~~~~~~~~~~~~~~~
 
--  ``DASHBOARD_FEATURED_APPS[]['models']`` should now be a list of tuples, not
+-  ``DASHBOARD_FEATURED_APPS[]['models']`` is now a list of tuples, not
    a dict, so that ordering is preserved. Dict-based definitions still work, but
    operations that rely on the value being a dict (such as ``update()``)
    will fail.
@@ -148,13 +167,14 @@ Breaking changes
    ``update()``ing the default settings no longer works, use tuple operations
    instead.
 
--  Added HeroMixin and ListableMixin to LayoutPage and Article. This
-   will break ported/subclass models that define similarly-named fields.
-   Either remove the definition or migrate data somehow.
+-  Added ``HeroMixin`` and ``ListableMixin`` to ``LayoutPage`` and ``Article``.
+   This will break ported/subclass models that define similarly-named fields.
+   Either remove the definition or migrate data.
 
 -  The required version of Press Releases removes the ``PressContact``
    model, in favour of ``ContactPerson``. If you have ``PressContacts``,
    you will need to migrate to the new model.
+
 
 0.15 (2016-09-27)
 -----------------
