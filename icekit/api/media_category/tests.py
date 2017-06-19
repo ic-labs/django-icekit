@@ -82,8 +82,15 @@ class MediaCategoryAPITests(base_tests._BaseAPITestCase):
         self.assertEqual(0, MediaCategory.objects.count())
 
     def test_api_user_permissions_are_correct(self):
+
+        def extra_item_data_for_writes_fn():
+            return {
+                'name': "Test Media Category %d" % self.get_unique_int()
+            }
+
         self.assert_api_user_permissions_are_correct(
             self.media_category.pk,
-            MediaCategory,
-            'mediacategory',
+            item_model=MediaCategory,
+            item_admin_name='mediacategory',
+            extra_item_data_for_writes_fn=extra_item_data_for_writes_fn,
         )

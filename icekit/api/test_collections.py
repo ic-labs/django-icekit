@@ -172,14 +172,11 @@ class ArtworkAPITestCase(_BaseCollectionAPITestCase):
         self.assertEqual(0, Artwork.objects.count())
 
     def test_api_user_permissions_are_correct(self):
-        counter = {'value': 0}
 
         def extra_item_data_for_writes_fn():
             """ Hack to return a unique `slug` value each time """
-            counter['value'] += 1
-            value = counter['value']
             return {
-                'title': 'Another Artwork %d' % value,
+                'title': 'Another Artwork %d' % self.get_unique_int(),
             }
 
         self.assert_api_user_permissions_are_correct(
@@ -356,15 +353,13 @@ class GameAPITestCase(_BaseCollectionAPITestCase):
         self.assertEqual(0, Game.objects.count())
 
     def test_api_user_permissions_are_correct(self):
-        counter = {'value': 0}
 
         def extra_item_data_for_writes_fn():
             """ Hack to return a unique `slug` value each time """
-            counter['value'] += 1
-            value = counter['value']
+            unique_int = self.get_unique_int()
             return {
-                'title': 'Another Game %d' % value,
-                'slug': 'another-game-%d' % value,
+                'title': 'Another Game %d' % unique_int,
+                'slug': 'another-game-%d' % unique_int,
                 'rating': {
                     'slug': 'pg',
                 },
@@ -539,15 +534,13 @@ class FilmAPITestCase(_BaseCollectionAPITestCase):
         self.assertEqual(0, Film.objects.count())
 
     def test_api_user_permissions_are_correct(self):
-        counter = {'value': 0}
 
         def extra_item_data_for_writes_fn():
             """ Hack to return a unique `slug` value each time """
-            counter['value'] += 1
-            value = counter['value']
+            unique_int = self.get_unique_int()
             return {
-                'title': 'Another Film %d' % value,
-                'slug': 'another-film-%d' % value,
+                'title': 'Another Film %d' % unique_int,
+                'slug': 'another-film-%d' % unique_int,
                 'rating': {
                     'slug': 'pg',
                 },
@@ -742,15 +735,12 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
         self.assertEqual(0, Person.objects.count())
 
     def test_api_user_permissions_are_correct(self):
-        counter = {'value': 0}
 
         def extra_item_data_for_writes_fn():
             """ Hack to return a unique `name.full` value each time """
-            counter['value'] += 1
-            value = counter['value']
             return {
                 'name': {
-                    'full': 'Another Person %d' % value,
+                    'full': 'Another Person %d' % self.get_unique_int(),
                 },
             }
 
@@ -924,14 +914,11 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
         self.assertEqual(0, Organization.objects.count())
 
     def test_api_user_permissions_are_correct(self):
-        counter = {'value': 0}
 
         def extra_item_data_for_writes_fn():
             """ Hack to return a unique `name.full` value each time """
-            counter['value'] += 1
-            value = counter['value']
             return {
-                'name_full': 'Another Organization %d' % value,
+                'name_full': 'Another Organization %d' % self.get_unique_int(),
             }
 
         self.assert_api_user_permissions_are_correct(
