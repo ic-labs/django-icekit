@@ -243,6 +243,7 @@ Breaking changes
    model, in favour of ``ContactPerson``. If you have ``PressContacts``,
    you will need to migrate to the new model.
 
+
 0.15 (2016-09-27)
 -----------------
 
