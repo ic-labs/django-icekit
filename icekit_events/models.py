@@ -9,6 +9,8 @@ from datetime import timedelta
 from colorful.fields import RGBColorField
 from dateutil import rrule
 import six
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.db.models import Q
 from django.template import Context
 from django.template import Template
@@ -567,6 +569,14 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         """
 
         return self.occurrence_list and not self.upcoming_occurrence_list
+
+    def get_occurrence_url(self, occurrence):
+        # Calculate and return the URL for an occurrence
+        try:
+            URLValidator()(occurrence.external_ref)
+            return occurrence.external_ref
+        except ValidationError:
+            return ""
 
 
 class AbstractEventWithLayouts(EventBase, FluentFieldsMixin):
