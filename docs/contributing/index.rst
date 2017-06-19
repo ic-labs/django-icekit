@@ -12,6 +12,7 @@ Please follow these guidelines when making contributions to GLAMkit.
    testing
    documentation
    releases
+   roadmap
    conduct
 
 Installing the development version of GLAMkit on an existing project

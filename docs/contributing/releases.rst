@@ -1,17 +1,16 @@
 Releases
 ========
 
-When the `changelog <../changelog.md>`__ for a release gets sufficiently
-long or major features or fixes are implemented, we will tag and upload
-a release to PyPI.
+We will tag and upload a release to PyPI according to the :doc:`roadmap`.
 
 Steps to prepare a GLAMkit release:
 
 1. Merge all features to be included and ensure that tests pass and code
    operates as it should.
-2. Ensure documentation and changelog is up to date. In particular, edit the
+2. Ensure documentation and :doc:`../changelog` is up to date. In particular, edit the
    changelog so that major features appear first and are written such that
-   users understand the benefits.
+   users understand the benefits. Update the :doc:`roadmap` to reflect current
+   status.
 3. In git, tag the release with the version number.
 4. Activate the pypi virtualenv and login to `devpi`_ using the password::
 
@@ -66,6 +65,10 @@ The version number will be one of::
 
 We use semantic versioning (``{major}.{minor}.{patch}``) when tagging
 releases.
+
+* MAJOR version when you make incompatible API changes,
+* MINOR version when you add functionality in a backwards-compatible manner, and
+* PATCH version when you make backwards-compatible bug fixes.
 
 For patch-level changes, you can forget about
 adding a tag and just use the generated version number. When uploading to a
