@@ -1,6 +1,7 @@
 from django.apps import apps
 
 from rest_framework import serializers
+from rest_framework.settings import api_settings
 from drf_queryfields import QueryFieldsMixin
 
 from icekit.api.base_serializers import WritableSerializerHelperMixin, \
@@ -33,8 +34,9 @@ class MediaCategorySerializer(serializers.ModelSerializer):
 
 
 class ImageSerializer(
-    WritableSerializerHelperMixin, QueryFieldsMixin,
-    serializers.ModelSerializer
+    WritableSerializerHelperMixin,
+    QueryFieldsMixin,
+    serializers.HyperlinkedModelSerializer
 ):
     """
     A serializer for an ICEkit Image.
@@ -45,10 +47,32 @@ class ImageSerializer(
 
     class Meta:
         model = Image
-        fields = ['id', 'image', 'width', 'height', 'title', 'alt_text',
-                  'caption', 'credit', 'source', 'external_ref', 'categories',
-                  'license', 'notes', 'date_created', 'date_modified',
-                  'is_ok_for_web', 'is_cropping_allowed']
+        fields = [
+            api_settings.URL_FIELD_NAME,
+            'id',
+            'image',
+            'width',
+            'height',
+            'title',
+            'alt_text',
+            'caption',
+            'credit',
+            'source',
+            'external_ref',
+            'categories',
+            'license',
+            'notes',
+            'date_created',
+            'date_modified',
+            'is_ok_for_web',
+            'is_cropping_allowed',
+        ]
+        extra_kwargs = {
+            'url': {
+                'lookup_field': 'pk',
+                'view_name': 'api:image-api-detail',
+            },
+        }
         writable_related_fields = {
             'categories': WritableRelatedFieldSettings(
                 lookup_field=['id', 'name'], can_create=True),

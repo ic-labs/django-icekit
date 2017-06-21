@@ -3,7 +3,6 @@ import logging
 from django.conf import settings
 from django.conf.urls import url, include
 from django.utils.module_loading import import_string
-from django.contrib.auth import views as auth_views
 
 from rest_framework import routers
 from rest_framework_swagger.views import get_swagger_view
@@ -23,7 +22,8 @@ schema_doc_view = get_swagger_view(title='GLAMkit API')
 router = routers.DefaultRouter()
 router.register(r'image', images_views.ImageViewSet, 'image-api')
 router.register(r'page', pages_views.PageViewSet, 'page-api')
-router.register(r'media-category', media_category_views.MediaCategoryViewSet, 'media-category-api')
+router.register(r'media-category', media_category_views.MediaCategoryViewSet,
+                'media-category-api')
 
 # Register pluggable API routers defined elsewhere
 for api_section_name, pluggable_router \

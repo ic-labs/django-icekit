@@ -37,6 +37,8 @@ class ImageAPITests(base_tests._BaseAPITestCase):
                 'next': None,
                 'previous': None,
                 'results': [{
+                    "url": 'http://testserver%s'
+                    % self.detail_url(self.image.pk),
                     'id': self.image.pk,
                     'image': 'http://testserver%s' % self.image.image.url,
                     'width': self.image.width,
@@ -80,6 +82,8 @@ class ImageAPITests(base_tests._BaseAPITestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(
             {
+                "url": 'http://testserver%s'
+                % self.detail_url(self.image.pk),
                 'id': self.image.pk,
                 'image': 'http://testserver%s' % self.image.image.url,
                 'width': self.image.width,
