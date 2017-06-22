@@ -108,7 +108,9 @@ class CreatorChildAdmin(
     save_on_top = True
     raw_id_fields = ('portrait', )
     exclude = ('layout', 'alt_slug',)
-    prepopulated_fields = {"slug": ("name_display",)}
+    # the back-end code prefers name_display for creating the slug, but
+    # that field isn't required.
+    prepopulated_fields = {"slug": ("name_full",)}
     inlines = [WorkCreatorsInlineForCreators] + \
         ICEkitContentsAdmin.inlines
 
