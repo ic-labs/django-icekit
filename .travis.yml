@@ -11,7 +11,7 @@ before_script:
   - docker-compose -f docker-compose.travis.yml config
   - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
   - docker pull "interaction/icekit:$TAG" || true
-  - docker build --pull --cache-from "interaction/icekit:$TAG" -t "interaction/icekit:$TAG" .
+  - docker build --cache-from "interaction/icekit:$TAG" -t "interaction/icekit:$TAG" .
 
 script:
   - docker-compose -f docker-compose.travis.yml run --rm django
