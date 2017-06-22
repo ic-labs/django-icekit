@@ -1,0 +1,18 @@
+<li class="ik-nav-accounts-navigation-item">
+    {% if request.user.is_authenticated %}
+        {{ request.user }}
+        <a
+            class="btn btn-primary"
+            href="{% url 'logout' %}"
+        >
+            Logout
+        </a>
+    {% else %}
+        <a
+            class="btn btn-primary"
+            href="{% url 'login' %}"
+        >
+            Login
+        </a>
+    {% endif %}
+</li>

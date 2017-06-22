@@ -1,0 +1,8 @@
+<li class="ik-nav-navigation-item">
+    <a
+        {% if instance.html_class %}
+            class="{{ instance.html_class }}"
+        {% endif %}
+        href="{{ instance.url }}"
+    >{{ instance.title }}</a>
+</li>

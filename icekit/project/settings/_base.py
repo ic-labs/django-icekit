@@ -581,6 +581,12 @@ DEFAULT_PLUGINS = \
     LINK_PLUGINS + \
     SPONSOR_PLUGINS
 
+ICEKIT_CONTRIB_NAVIGATION_PLUGINS = (
+    'NavigationItemPlugin',
+    'AccountsNavigationItemPlugin',
+    'RawHtmlPlugin',
+)
+
 FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     'main': {
         'plugins': DEFAULT_PLUGINS,
@@ -593,7 +599,7 @@ FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
             'ContactPersonPlugin',
             'TextPlugin',
         ),
-    },
+    }
 }
 
 FLUENT_MARKUP_LANGUAGES = ('restructuredtext', 'markdown', 'textile')
