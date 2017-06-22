@@ -60,6 +60,20 @@ class _BaseAPITestCase(APITestCase):
         # Act as authenticated `superuser` by default
         self.client_apply_token(self.superuser_token)
 
+    # TODO Must be made thread-safe if we want to run multiple tests at once
+    def get_unique_int(self):
+        """
+        Return a new auto-incremented integer value every time this method is
+        called. This is useful where we need unique test data for things like
+        writing new records with name or other values that must never match
+        existing records.
+        """
+        try:
+            self._unique_int += 1
+        except AttributeError:
+            self._unique_int = 1
+        return self._unique_int
+
     def pp_data(self, data, indent=4):
         """ Pretty-print data to stdout, to help debugging unit tests """
         print(json.dumps(data, indent=indent))

@@ -47,6 +47,8 @@ class Artwork(Work):
                 'view_name': '%s-detail' % VIEWNAME,
             },
         })
+        disable_unique_together_constraint_fields = \
+            Work.Meta.disable_unique_together_constraint_fields
 
 
 class ArtworkFilter(filters.FilterSet):

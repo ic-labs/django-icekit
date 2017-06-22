@@ -54,7 +54,7 @@ class AbstractImage(models.Model):
         help_text=_("Where this image came from."),
     )
     external_ref = models.CharField(
-        max_length=255,
+        max_length=1024,
         blank=True,
         help_text=_("The reference for this image in a 3rd-party system"),
     )

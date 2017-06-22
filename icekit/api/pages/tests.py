@@ -42,6 +42,21 @@ class PagesAPITests(base_tests._BaseAPITestCase):
             html='<b>test 3</b>'
         )
 
+    def test_list_pages_with_get_and_filtered_fields(self):
+        self.layoutpage_1.publish()
+        response = self.client.get(self.listing_url() + '?fields=title')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            {
+                'count': 1,
+                'next': None,
+                'previous': None,
+                'results': [{
+                    'title': 'Test LayoutPage',
+                }]
+            },
+            response.data)
+
     def test_page_api(self):
         self.layoutpage_1.publish()
         for j in range(20):

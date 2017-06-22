@@ -101,6 +101,26 @@ class ArtworkAPITestCase(_BaseCollectionAPITestCase):
         }
         self.assertEqual(expected, response.data)
 
+    def test_list_artworks_with_get_and_filtered_fields(self):
+        response = self.client.get(self.listing_url() + '?fields=id,slug')
+        self.assertEqual(200, response.status_code)
+        expected = {
+            'count': 2,
+            'next': None,
+            'previous': None,
+            'results': [
+                {
+                    "slug": "test-artwork",
+                    "id": self.artwork_published.pk,
+                },
+                {
+                    "slug": "test-artwork",
+                    "id": self.artwork.pk,
+                },
+            ],
+        }
+        self.assertEqual(expected, response.data)
+
     def test_get_artwork_detail_with_get(self):
         response = self.client.get(
             self.detail_url(self.artwork_published.pk))
@@ -172,14 +192,11 @@ class ArtworkAPITestCase(_BaseCollectionAPITestCase):
         self.assertEqual(0, Artwork.objects.count())
 
     def test_api_user_permissions_are_correct(self):
-        counter = {'value': 0}
 
         def extra_item_data_for_writes_fn():
             """ Hack to return a unique `slug` value each time """
-            counter['value'] += 1
-            value = counter['value']
             return {
-                'title': 'Another Artwork %d' % value,
+                'title': 'Another Artwork %d' % self.get_unique_int(),
             }
 
         self.assert_api_user_permissions_are_correct(
@@ -279,6 +296,31 @@ class GameAPITestCase(_BaseCollectionAPITestCase):
         }
         self.assertEqual(expected, response.data)
 
+    def test_list_games_with_get_and_filtered_fields(self):
+        response = self.client.get(
+            self.listing_url() + '?fields=id,slug,title,publishing_is_draft')
+        self.assertEqual(200, response.status_code)
+        expected = {
+            'count': 2,
+            'next': None,
+            'previous': None,
+            'results': [
+                {
+                    "id": self.game_published.pk,
+                    "slug": "test-game",
+                    "title": "Test Game",
+                    "publishing_is_draft": False,
+                },
+                {
+                    "id": self.game.pk,
+                    "slug": "test-game",
+                    "title": "Test Game",
+                    "publishing_is_draft": True,
+                },
+            ],
+        }
+        self.assertEqual(expected, response.data)
+
     def test_get_game_detail_with_get(self):
         response = self.client.get(
             self.detail_url(self.game_published.pk))
@@ -356,15 +398,13 @@ class GameAPITestCase(_BaseCollectionAPITestCase):
         self.assertEqual(0, Game.objects.count())
 
     def test_api_user_permissions_are_correct(self):
-        counter = {'value': 0}
 
         def extra_item_data_for_writes_fn():
             """ Hack to return a unique `slug` value each time """
-            counter['value'] += 1
-            value = counter['value']
+            unique_int = self.get_unique_int()
             return {
-                'title': 'Another Game %d' % value,
-                'slug': 'another-game-%d' % value,
+                'title': 'Another Game %d' % unique_int,
+                'slug': 'another-game-%d' % unique_int,
                 'rating': {
                     'slug': 'pg',
                 },
@@ -462,6 +502,31 @@ class FilmAPITestCase(_BaseCollectionAPITestCase):
         }
         self.assertEqual(expected, response.data)
 
+    def test_list_films_with_get_and_filtered_fields(self):
+        response = self.client.get(
+            self.listing_url() + '?fields=id,slug,title,publishing_is_draft')
+        self.assertEqual(200, response.status_code)
+        expected = {
+            'count': 2,
+            'next': None,
+            'previous': None,
+            'results': [
+                {
+                    "id": self.film_published.pk,
+                    "slug": "test-film",
+                    "title": "Test Film",
+                    "publishing_is_draft": False,
+                },
+                {
+                    "id": self.film.pk,
+                    "slug": "test-film",
+                    "title": "Test Film",
+                    "publishing_is_draft": True,
+                },
+            ],
+        }
+        self.assertEqual(expected, response.data)
+
     def test_get_film_detail_with_get(self):
         response = self.client.get(
             self.detail_url(self.film_published.pk))
@@ -539,15 +604,13 @@ class FilmAPITestCase(_BaseCollectionAPITestCase):
         self.assertEqual(0, Film.objects.count())
 
     def test_api_user_permissions_are_correct(self):
-        counter = {'value': 0}
 
         def extra_item_data_for_writes_fn():
             """ Hack to return a unique `slug` value each time """
-            counter['value'] += 1
-            value = counter['value']
+            unique_int = self.get_unique_int()
             return {
-                'title': 'Another Film %d' % value,
-                'slug': 'another-film-%d' % value,
+                'title': 'Another Film %d' % unique_int,
+                'slug': 'another-film-%d' % unique_int,
                 'rating': {
                     'slug': 'pg',
                 },
@@ -662,6 +725,29 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
         }
         self.assertEqual(expected, response.data)
 
+    def test_list_films_with_get_and_filtered_fields(self):
+        response = self.client.get(
+            self.listing_url() + '?fields=id,slug,publishing_is_draft')
+        self.assertEqual(200, response.status_code)
+        expected = {
+            'count': 2,
+            'next': None,
+            'previous': None,
+            'results': [
+                {
+                    "id": self.person_published.pk,
+                    "slug": "person-test",
+                    "publishing_is_draft": False,
+                },
+                {
+                    "id": self.person.pk,
+                    "slug": "person-test",
+                    "publishing_is_draft": True,
+                },
+            ],
+        }
+        self.assertEqual(expected, response.data)
+
     def test_get_person_detail_with_get(self):
         response = self.client.get(
             self.detail_url(self.person_published.pk))
@@ -742,15 +828,12 @@ class PersonAPITestCase(_BaseCollectionAPITestCase):
         self.assertEqual(0, Person.objects.count())
 
     def test_api_user_permissions_are_correct(self):
-        counter = {'value': 0}
 
         def extra_item_data_for_writes_fn():
             """ Hack to return a unique `name.full` value each time """
-            counter['value'] += 1
-            value = counter['value']
             return {
                 'name': {
-                    'full': 'Another Person %d' % value,
+                    'full': 'Another Person %d' % self.get_unique_int(),
                 },
             }
 
@@ -834,6 +917,29 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
                     "dt_created": self.iso8601(self.organization.dt_created),
                     "dt_modified": self.iso8601(self.organization.dt_modified),
                 }),
+            ],
+        }
+        self.assertEqual(expected, response.data)
+
+    def test_list_organizations_with_get_and_filtered_fields(self):
+        response = self.client.get(
+            self.listing_url() + '?fields=id,slug,publishing_is_draft')
+        self.assertEqual(200, response.status_code)
+        expected = {
+            'count': 2,
+            'next': None,
+            'previous': None,
+            'results': [
+                {
+                    "id": self.organization_published.pk,
+                    "slug": "test-organization",
+                    "publishing_is_draft": False,
+                },
+                {
+                    "id": self.organization.pk,
+                    "slug": "test-organization",
+                    "publishing_is_draft": True,
+                },
             ],
         }
         self.assertEqual(expected, response.data)
@@ -924,14 +1030,11 @@ class OrganizationAPITestCase(_BaseCollectionAPITestCase):
         self.assertEqual(0, Organization.objects.count())
 
     def test_api_user_permissions_are_correct(self):
-        counter = {'value': 0}
 
         def extra_item_data_for_writes_fn():
             """ Hack to return a unique `name.full` value each time """
-            counter['value'] += 1
-            value = counter['value']
             return {
-                'name_full': 'Another Organization %d' % value,
+                'name_full': 'Another Organization %d' % self.get_unique_int(),
             }
 
         self.assert_api_user_permissions_are_correct(
@@ -1023,6 +1126,23 @@ class WorkCreatorRelationshipAPITestCase(_BaseCollectionAPITestCase):
                         "name_display": self.person.name_display,
                     },
                 }),
+            ],
+        }
+        self.assertEqual(expected, response.data)
+
+    def test_list_workcreators_with_get_and_filtered_fields(self):
+        # NOTE: No support in queryfields for nested field refs :(
+        # https://github.com/wimglenn/djangorestframework-queryfields/issues/8
+        response = self.client.get(self.listing_url() + '?fields=id')
+        self.assertEqual(200, response.status_code)
+        expected = {
+            'count': 1,
+            'next': None,
+            'previous': None,
+            'results': [
+                {
+                    "id": self.workcreator.pk,
+                },
             ],
         }
         self.assertEqual(expected, response.data)

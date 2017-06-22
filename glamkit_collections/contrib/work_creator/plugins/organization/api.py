@@ -63,6 +63,8 @@ class Organization(Creator):
             }
         })
         writable_related_fields = Creator.Meta.writable_related_fields
+        disable_unique_together_constraint_fields = \
+            Creator.Meta.disable_unique_together_constraint_fields
 
     def get_type(self, obj):
         return obj.get_type()

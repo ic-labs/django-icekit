@@ -86,6 +86,20 @@ requests from your client. Note that the full format for this header is::
 
     Authorization: Token <token-key-value>
 
+Filter Fields
+^^^^^^^^^^^^^
+
+All GLAMkit APIs support filtering of query results to return only specific
+fields from ``GET`` listing queries, based on the `QueryFields
+<http://djangorestframework-queryfields.readthedocs.io/>`_ extension to
+Django REST Framework.
+
+For example, to retrieve just the ID and Title for all Images in the system::
+    curl -X GET \
+         -H 'Authorization: Token abc123' \
+         http://api.icekit.lvh.me:8000/image/?fields=id,title
+
+
 Image API
 ---------
 
@@ -151,6 +165,51 @@ List Pages::
 
 Get details of a specific published page with ID=1::
     curl -X GET http://api.icekit.lvh.me:8000/page/1/
+
+Media Category API
+------------------
+
+The Media Category API is a **read and write** API for the ``icekit.MediaCategory``
+model, and is available by default at */media-category/*.
+
+This API uses the default access and privilege settings, which means you must
+provide an authorization token in requests.
+
+Here are example curl commands to perform API operations with token
+authorisation, assuming the token's associated user has sufficient permissions.
+
+List Media Categories::
+    curl -X GET \
+         -H 'Authorization: Token abc123' \
+         http://api.icekit.lvh.me:8000/media-category/
+
+Create a Media Category::
+    curl -X POST \
+         -H 'Authorization: Token abc123' \
+         --form name='New media category' \
+         http://api.icekit.lvh.me:8000/media-category/
+
+Get details of a specific media category with ID=1::
+    curl -X GET \
+         -H 'Authorization: Token abc123' \
+         http://api.icekit.lvh.me:8000/media-category/1/
+
+Replace a media category with ID=1::
+    curl -X PUT \
+         -H 'Authorization: Token abc123' \
+         --form name='Replaced media category' \
+         http://api.icekit.lvh.me:8000/media-category/1/
+
+Update a media category with ID=1::
+    curl -X PATCH \
+         -H 'Authorization: Token abc123' \
+         --form name='Updated media category' \
+         http://api.icekit.lvh.me:8000/media-category/1/
+
+Delete a media category with ID=1::
+    curl -X DELETE \
+         -H 'Authorization: Token abc123' \
+         http://api.icekit.lvh.me:8000/media-category/1/
 
 
 GLAMkit Collections API
@@ -377,35 +436,35 @@ system with IDs 1 and 2 for works, and 3 for creators.
 Get list of relationships::
     curl -X GET \
          -H 'Authorization: Token abc123' \
-         http://api.icekit.lvh.me:8000/workcreator/
+         http://api.icekit.lvh.me:8000/work-creator/
 
 Create a minimal relationship, with required fields only::
     curl -X POST \
          -H 'Authorization: Token abc123' \
          -H 'Content-Type: application/json' \
          -d '{"work": {"id": 1}, "creator": {"id": 4}}' \
-         http://api.icekit.lvh.me:8000/workcreator/
+         http://api.icekit.lvh.me:8000/work-creator/
 
 Get details of a specific relationship with ID=1::
     curl -X GET  \
          -H 'Authorization: Token abc123' \
-         http://api.icekit.lvh.me:8000/workcreator/1/
+         http://api.icekit.lvh.me:8000/work-creator/1/
 
 Replace a relationship with ID=1::
     curl -X PUT \
          -H 'Authorization: Token abc123' \
          -H 'Content-Type: application/json' \
          -d '{"work": {"id": 2}, "creator": {"id": 3}}' \
-         http://api.icekit.lvh.me:8000/workcreator/1/
+         http://api.icekit.lvh.me:8000/work-creator/1/
 
 Update a relationship with ID=1::
     curl -X PATCH \
          -H 'Authorization: Token abc123' \
          -H 'Content-Type: application/json' \
          -d '{"work": {"id": 1}, "creator": {"id": 3}}' \
-         http://api.icekit.lvh.me:8000/workcreator/1/
+         http://api.icekit.lvh.me:8000/work-creator/1/
 
 Delete a relationship with ID=1::
     curl -X DELETE \
          -H 'Authorization: Token abc123' \
-         http://api.icekit.lvh.me:8000/workcreator/1/
+         http://api.icekit.lvh.me:8000/work-creator/1/
