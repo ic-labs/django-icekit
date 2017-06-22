@@ -5,17 +5,13 @@ language: python
 services:
   - docker
 
-install:
-  # Use Docker Engine 1.9.x for build cache support. See: https://github.com/docker/docker/issues/20380#issuecomment-212388961
-  - sudo apt-get -o Dpkg::Options::="--force-confnew" -q -y --force-yes install docker-engine=1.9.1-0~trusty
-
 before_script:
   - docker --version
   - docker-compose --version
   - docker-compose -f docker-compose.travis.yml config
   - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
   - docker pull "interaction/icekit:$TAG" || true
-  - docker build --pull -t "interaction/icekit:$TAG" .
+  - docker build --cache-from "interaction/icekit:$TAG" -t "interaction/icekit:$TAG" .
 
 script:
   - docker-compose -f docker-compose.travis.yml run --rm django
