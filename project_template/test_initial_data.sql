@@ -2,12 +2,11 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.1
--- Dumped by pg_dump version 9.6.1
+-- Dumped from database version 9.5.5
+-- Dumped by pg_dump version 9.5.5
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -545,7 +544,8 @@ CREATE TABLE contentitem_ik_links_authorlink (
     item_id integer NOT NULL,
     url_override character varying(255) NOT NULL,
     oneliner_override character varying(255) NOT NULL,
-    exclude_from_contributions boolean NOT NULL
+    exclude_from_contributions boolean NOT NULL,
+    exclude_from_authorship boolean NOT NULL
 );
 
 
@@ -1628,6 +1628,467 @@ ALTER SEQUENCE forms_formentry_id_seq OWNED BY forms_formentry.id;
 
 
 --
+-- Name: gk_collections_artwork_artwork; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_artwork_artwork (
+    workbase_ptr_id integer NOT NULL,
+    medium_display character varying(255) NOT NULL,
+    dimensions_is_two_dimensional boolean NOT NULL,
+    dimensions_display character varying(255) NOT NULL,
+    dimensions_extent character varying(255) NOT NULL,
+    dimensions_width_cm double precision,
+    dimensions_height_cm double precision,
+    dimensions_depth_cm double precision,
+    dimensions_weight_kg double precision
+);
+
+
+--
+-- Name: gk_collections_film_film; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_film_film (
+    workbase_ptr_id integer NOT NULL,
+    rating_annotation character varying(255) NOT NULL,
+    imdb_link character varying(200) NOT NULL,
+    media_type_id integer,
+    rating_id integer,
+    trailer character varying(200) NOT NULL,
+    duration_minutes integer,
+    CONSTRAINT gk_collections_film_film_duration_minutes_check CHECK ((duration_minutes >= 0))
+);
+
+
+--
+-- Name: gk_collections_film_film_formats; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_film_film_formats (
+    id integer NOT NULL,
+    film_id integer NOT NULL,
+    format_id integer NOT NULL
+);
+
+
+--
+-- Name: gk_collections_film_film_formats_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gk_collections_film_film_formats_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gk_collections_film_film_formats_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE gk_collections_film_film_formats_id_seq OWNED BY gk_collections_film_film_formats.id;
+
+
+--
+-- Name: gk_collections_film_film_genres; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_film_film_genres (
+    id integer NOT NULL,
+    film_id integer NOT NULL,
+    genre_id integer NOT NULL
+);
+
+
+--
+-- Name: gk_collections_film_film_genres_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gk_collections_film_film_genres_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gk_collections_film_film_genres_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE gk_collections_film_film_genres_id_seq OWNED BY gk_collections_film_film_genres.id;
+
+
+--
+-- Name: gk_collections_film_format; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_film_format (
+    id integer NOT NULL,
+    title character varying(255) NOT NULL,
+    slug character varying(255) NOT NULL
+);
+
+
+--
+-- Name: gk_collections_film_format_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gk_collections_film_format_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gk_collections_film_format_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE gk_collections_film_format_id_seq OWNED BY gk_collections_film_format.id;
+
+
+--
+-- Name: gk_collections_game_game; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_game_game (
+    workbase_ptr_id integer NOT NULL,
+    rating_annotation character varying(255) NOT NULL,
+    imdb_link character varying(200) NOT NULL,
+    is_single_player boolean NOT NULL,
+    is_multi_player boolean NOT NULL,
+    media_type_id integer,
+    rating_id integer,
+    trailer character varying(200) NOT NULL,
+    duration_minutes integer,
+    CONSTRAINT gk_collections_game_game_duration_minutes_check CHECK ((duration_minutes >= 0))
+);
+
+
+--
+-- Name: gk_collections_game_game_genres; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_game_game_genres (
+    id integer NOT NULL,
+    game_id integer NOT NULL,
+    genre_id integer NOT NULL
+);
+
+
+--
+-- Name: gk_collections_game_game_genres_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gk_collections_game_game_genres_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gk_collections_game_game_genres_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE gk_collections_game_game_genres_id_seq OWNED BY gk_collections_game_game_genres.id;
+
+
+--
+-- Name: gk_collections_game_game_input_types; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_game_game_input_types (
+    id integer NOT NULL,
+    game_id integer NOT NULL,
+    gameinputtype_id integer NOT NULL
+);
+
+
+--
+-- Name: gk_collections_game_game_input_types_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gk_collections_game_game_input_types_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gk_collections_game_game_input_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE gk_collections_game_game_input_types_id_seq OWNED BY gk_collections_game_game_input_types.id;
+
+
+--
+-- Name: gk_collections_game_game_platforms; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_game_game_platforms (
+    id integer NOT NULL,
+    game_id integer NOT NULL,
+    gameplatform_id integer NOT NULL
+);
+
+
+--
+-- Name: gk_collections_game_game_platforms_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gk_collections_game_game_platforms_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gk_collections_game_game_platforms_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE gk_collections_game_game_platforms_id_seq OWNED BY gk_collections_game_game_platforms.id;
+
+
+--
+-- Name: gk_collections_game_gameinputtype; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_game_gameinputtype (
+    id integer NOT NULL,
+    title character varying(255) NOT NULL,
+    slug character varying(255) NOT NULL
+);
+
+
+--
+-- Name: gk_collections_game_gameinputtype_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gk_collections_game_gameinputtype_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gk_collections_game_gameinputtype_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE gk_collections_game_gameinputtype_id_seq OWNED BY gk_collections_game_gameinputtype.id;
+
+
+--
+-- Name: gk_collections_game_gameplatform; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_game_gameplatform (
+    id integer NOT NULL,
+    title character varying(255) NOT NULL,
+    slug character varying(255) NOT NULL
+);
+
+
+--
+-- Name: gk_collections_game_gameplatform_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gk_collections_game_gameplatform_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gk_collections_game_gameplatform_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE gk_collections_game_gameplatform_id_seq OWNED BY gk_collections_game_gameplatform.id;
+
+
+--
+-- Name: gk_collections_moving_image_genre; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_moving_image_genre (
+    id integer NOT NULL,
+    title character varying(255) NOT NULL,
+    slug character varying(255) NOT NULL
+);
+
+
+--
+-- Name: gk_collections_moving_image_genre_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gk_collections_moving_image_genre_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gk_collections_moving_image_genre_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE gk_collections_moving_image_genre_id_seq OWNED BY gk_collections_moving_image_genre.id;
+
+
+--
+-- Name: gk_collections_moving_image_mediatype; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_moving_image_mediatype (
+    id integer NOT NULL,
+    title character varying(255) NOT NULL,
+    slug character varying(255) NOT NULL,
+    title_plural character varying(255) NOT NULL
+);
+
+
+--
+-- Name: gk_collections_moving_image_mediatype_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gk_collections_moving_image_mediatype_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gk_collections_moving_image_mediatype_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE gk_collections_moving_image_mediatype_id_seq OWNED BY gk_collections_moving_image_mediatype.id;
+
+
+--
+-- Name: gk_collections_moving_image_movingimagework; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_moving_image_movingimagework (
+    workbase_ptr_id integer NOT NULL,
+    rating_annotation character varying(255) NOT NULL,
+    imdb_link character varying(200) NOT NULL,
+    media_type_id integer,
+    rating_id integer,
+    trailer character varying(200) NOT NULL,
+    duration_minutes integer,
+    CONSTRAINT gk_collections_moving_image_movingimagew_duration_minutes_check CHECK ((duration_minutes >= 0))
+);
+
+
+--
+-- Name: gk_collections_moving_image_movingimagework_genres; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_moving_image_movingimagework_genres (
+    id integer NOT NULL,
+    movingimagework_id integer NOT NULL,
+    genre_id integer NOT NULL
+);
+
+
+--
+-- Name: gk_collections_moving_image_movingimagework_genres_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gk_collections_moving_image_movingimagework_genres_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gk_collections_moving_image_movingimagework_genres_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE gk_collections_moving_image_movingimagework_genres_id_seq OWNED BY gk_collections_moving_image_movingimagework_genres.id;
+
+
+--
+-- Name: gk_collections_moving_image_rating; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_moving_image_rating (
+    id integer NOT NULL,
+    title character varying(255) NOT NULL,
+    slug character varying(255) NOT NULL,
+    image character varying(100) NOT NULL
+);
+
+
+--
+-- Name: gk_collections_moving_image_rating_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE gk_collections_moving_image_rating_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gk_collections_moving_image_rating_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE gk_collections_moving_image_rating_id_seq OWNED BY gk_collections_moving_image_rating.id;
+
+
+--
+-- Name: gk_collections_organization_organizationcreator; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_organization_organizationcreator (
+    creatorbase_ptr_id integer NOT NULL
+);
+
+
+--
+-- Name: gk_collections_person_personcreator; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE gk_collections_person_personcreator (
+    creatorbase_ptr_id integer NOT NULL,
+    name_given character varying(255) NOT NULL,
+    name_family character varying(255) NOT NULL,
+    gender character varying(255) NOT NULL,
+    primary_occupation character varying(255) NOT NULL,
+    birth_place character varying(255) NOT NULL,
+    birth_place_historic character varying(255) NOT NULL,
+    death_place character varying(255) NOT NULL,
+    background_ethnicity character varying(255) NOT NULL,
+    background_nationality character varying(255) NOT NULL,
+    background_neighborhood character varying(255) NOT NULL,
+    background_city character varying(255) NOT NULL,
+    background_state_province character varying(255) NOT NULL,
+    background_country character varying(255) NOT NULL,
+    background_continent character varying(255) NOT NULL
+);
+
+
+--
 -- Name: gk_collections_work_creator_creatorbase; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2530,7 +2991,7 @@ CREATE TABLE icekit_plugins_image_image (
     source character varying(255) NOT NULL,
     width integer NOT NULL,
     is_cropping_allowed boolean NOT NULL,
-    external_ref character varying(255) NOT NULL,
+    external_ref character varying(1024) NOT NULL,
     CONSTRAINT icekit_plugins__maximum_dimension_pixels_4cc2ace4519637a2_check CHECK ((maximum_dimension_pixels >= 0)),
     CONSTRAINT icekit_plugins_image_image_height_check CHECK ((height >= 0)),
     CONSTRAINT icekit_plugins_image_image_width_check CHECK ((width >= 0))
@@ -2621,7 +3082,9 @@ CREATE TABLE icekit_press_releases_pressrelease (
     layout_id integer,
     publishing_linked_id integer,
     boosted_search_terms text NOT NULL,
-    list_image character varying(100) NOT NULL
+    list_image character varying(100) NOT NULL,
+    admin_notes text NOT NULL,
+    brief text NOT NULL
 );
 
 
@@ -4334,6 +4797,90 @@ ALTER TABLE ONLY forms_formentry ALTER COLUMN id SET DEFAULT nextval('forms_form
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY gk_collections_film_film_formats ALTER COLUMN id SET DEFAULT nextval('gk_collections_film_film_formats_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_film_genres ALTER COLUMN id SET DEFAULT nextval('gk_collections_film_film_genres_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_format ALTER COLUMN id SET DEFAULT nextval('gk_collections_film_format_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_genres ALTER COLUMN id SET DEFAULT nextval('gk_collections_game_game_genres_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_input_types ALTER COLUMN id SET DEFAULT nextval('gk_collections_game_game_input_types_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_platforms ALTER COLUMN id SET DEFAULT nextval('gk_collections_game_game_platforms_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_gameinputtype ALTER COLUMN id SET DEFAULT nextval('gk_collections_game_gameinputtype_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_gameplatform ALTER COLUMN id SET DEFAULT nextval('gk_collections_game_gameplatform_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_genre ALTER COLUMN id SET DEFAULT nextval('gk_collections_moving_image_genre_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_mediatype ALTER COLUMN id SET DEFAULT nextval('gk_collections_moving_image_mediatype_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_movingimagework_genres ALTER COLUMN id SET DEFAULT nextval('gk_collections_moving_image_movingimagework_genres_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_rating ALTER COLUMN id SET DEFAULT nextval('gk_collections_moving_image_rating_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY gk_collections_work_creator_creatorbase ALTER COLUMN id SET DEFAULT nextval('gk_collections_work_creator_creatorbase_id_seq'::regclass);
 
 
@@ -4827,6 +5374,510 @@ SELECT pg_catalog.setval('auth_group_permissions_id_seq', 1, false);
 --
 
 COPY auth_permission (id, name, content_type_id, codename) FROM stdin;
+851	Can Use IIIF Image API	303	can_use_iiif_image_api
+852	Can add layout	304	add_layout
+853	Can change layout	304	change_layout
+854	Can delete layout	304	delete_layout
+855	Can add Asset category	305	add_mediacategory
+856	Can change Asset category	305	change_mediacategory
+857	Can delete Asset category	305	delete_mediacategory
+858	Can add user	303	add_user
+859	Can change user	303	change_user
+860	Can delete user	303	delete_user
+861	Can add Form entry	307	add_formentry
+862	Can change Form entry	307	change_formentry
+863	Can delete Form entry	307	delete_formentry
+864	Can add Form field entry	308	add_fieldentry
+865	Can change Form field entry	308	change_fieldentry
+866	Can delete Form field entry	308	delete_fieldentry
+867	Can add Form	309	add_form
+868	Can change Form	309	change_form
+869	Can delete Form	309	delete_form
+870	Can add Field	310	add_field
+871	Can change Field	310	change_field
+872	Can delete Field	310	delete_field
+873	Can add revision	311	add_revision
+874	Can change revision	311	change_revision
+875	Can delete revision	311	delete_revision
+876	Can add version	312	add_version
+877	Can change version	312	change_version
+878	Can delete version	312	delete_version
+879	Can add log entry	313	add_logentry
+880	Can change log entry	313	change_logentry
+881	Can delete log entry	313	delete_logentry
+882	Can add permission	314	add_permission
+883	Can change permission	314	change_permission
+884	Can delete permission	314	delete_permission
+885	Can add group	315	add_group
+886	Can change group	315	change_group
+887	Can delete group	315	delete_group
+888	Can add content type	316	add_contenttype
+889	Can change content type	316	change_contenttype
+890	Can delete content type	316	delete_contenttype
+891	Can add session	317	add_session
+892	Can change session	317	change_session
+893	Can delete session	317	delete_session
+894	Can add Token	318	add_token
+895	Can change Token	318	change_token
+896	Can delete Token	318	delete_token
+897	Can add redirect	319	add_redirect
+898	Can change redirect	319	change_redirect
+899	Can delete redirect	319	delete_redirect
+900	Can add site	320	add_site
+901	Can change site	320	change_site
+902	Can delete site	320	delete_site
+903	Can add task state	321	add_taskmeta
+904	Can change task state	321	change_taskmeta
+905	Can delete task state	321	delete_taskmeta
+906	Can add saved group result	322	add_tasksetmeta
+907	Can change saved group result	322	change_tasksetmeta
+908	Can delete saved group result	322	delete_tasksetmeta
+909	Can add interval	323	add_intervalschedule
+910	Can change interval	323	change_intervalschedule
+911	Can delete interval	323	delete_intervalschedule
+912	Can add crontab	324	add_crontabschedule
+913	Can change crontab	324	change_crontabschedule
+914	Can delete crontab	324	delete_crontabschedule
+915	Can add periodic tasks	325	add_periodictasks
+916	Can change periodic tasks	325	change_periodictasks
+917	Can delete periodic tasks	325	delete_periodictasks
+918	Can add periodic task	326	add_periodictask
+919	Can change periodic task	326	change_periodictask
+920	Can delete periodic task	326	delete_periodictask
+921	Can add worker	327	add_workerstate
+922	Can change worker	327	change_workerstate
+923	Can delete worker	327	delete_workerstate
+924	Can add task	328	add_taskstate
+925	Can change task	328	change_taskstate
+926	Can delete task	328	delete_taskstate
+927	Can add queue	329	add_queue
+928	Can change queue	329	change_queue
+929	Can delete queue	329	delete_queue
+930	Can add message	330	add_message
+931	Can change message	330	change_message
+932	Can delete message	330	delete_message
+933	Can add source	331	add_source
+934	Can change source	331	change_source
+935	Can delete source	331	delete_source
+936	Can add thumbnail	332	add_thumbnail
+937	Can change thumbnail	332	change_thumbnail
+938	Can delete thumbnail	332	delete_thumbnail
+939	Can add thumbnail dimensions	333	add_thumbnaildimensions
+940	Can change thumbnail dimensions	333	change_thumbnaildimensions
+941	Can delete thumbnail dimensions	333	delete_thumbnaildimensions
+942	Can add Placeholder	334	add_placeholder
+943	Can change Placeholder	334	change_placeholder
+944	Can delete Placeholder	334	delete_placeholder
+945	Can add Contentitem link	335	add_contentitem
+946	Can change Contentitem link	335	change_contentitem
+947	Can delete Contentitem link	335	delete_contentitem
+948	Can add URL Node	336	add_urlnode
+949	Can change URL Node	336	change_urlnode
+950	Can delete URL Node	336	delete_urlnode
+951	Can change Shared fields	336	change_shared_fields_urlnode
+952	Can change Override URL field	336	change_override_url_urlnode
+953	Can add URL Node translation	337	add_urlnode_translation
+954	Can change URL Node translation	337	change_urlnode_translation
+955	Can delete URL Node translation	337	delete_urlnode_translation
+956	Can add Page	336	add_page
+957	Can change Page	336	change_page
+958	Can delete Page	336	delete_page
+959	Can add html page	336	add_htmlpage
+960	Can change html page	336	change_htmlpage
+961	Can delete html page	336	delete_htmlpage
+962	Can add Layout	339	add_pagelayout
+963	Can change Layout	339	change_pagelayout
+964	Can delete Layout	339	delete_pagelayout
+965	Can add Redirect	343	add_redirectnode
+966	Can change Redirect	343	change_redirectnode
+967	Can delete Redirect	343	delete_redirectnode
+968	Can add Plain text file	345	add_textfile
+969	Can change Plain text file	345	change_textfile
+970	Can delete Plain text file	345	delete_textfile
+971	Can add Iframe	346	add_iframeitem
+972	Can change Iframe	346	change_iframeitem
+973	Can delete Iframe	346	delete_iframeitem
+974	Can add Online media	347	add_oembeditem
+975	Can change Online media	347	change_oembeditem
+976	Can delete Online media	347	delete_oembeditem
+977	Can add HTML code	348	add_rawhtmlitem
+978	Can change HTML code	348	change_rawhtmlitem
+979	Can delete HTML code	348	delete_rawhtmlitem
+980	Can add Shared content	350	add_sharedcontent
+981	Can change Shared content	350	change_sharedcontent
+982	Can delete Shared content	350	delete_sharedcontent
+983	Can add Shared content	351	add_sharedcontentitem
+984	Can change Shared content	351	change_sharedcontentitem
+985	Can delete Shared content	351	delete_sharedcontentitem
+986	Can add workflow state	352	add_workflowstate
+987	Can change workflow state	352	change_workflowstate
+988	Can delete workflow state	352	delete_workflowstate
+989	Can add response page	353	add_responsepage
+990	Can change response page	353	change_responsepage
+991	Can delete response page	353	delete_responsepage
+992	Can add notification setting	354	add_notificationsetting
+993	Can change notification setting	354	change_notificationsetting
+994	Can delete notification setting	354	delete_notificationsetting
+995	Can add has read message	355	add_hasreadmessage
+996	Can change has read message	355	change_hasreadmessage
+997	Can delete has read message	355	delete_hasreadmessage
+998	Can add notification	356	add_notification
+999	Can change notification	356	change_notification
+1000	Can delete notification	356	delete_notification
+1001	Can add follower information	357	add_followerinformation
+1002	Can change follower information	357	change_followerinformation
+1003	Can delete follower information	357	delete_followerinformation
+1004	Can Publish Article	358	can_publish
+1005	Can Republish Article	358	can_republish
+1006	Can Publish ArticleCategoryPage	359	can_publish
+1007	Can Republish ArticleCategoryPage	359	can_republish
+1008	Can add article	358	add_article
+1009	Can change article	358	change_article
+1010	Can delete article	358	delete_article
+1011	Can add article category page	359	add_articlecategorypage
+1012	Can change article category page	359	change_articlecategorypage
+1013	Can delete article category page	359	delete_articlecategorypage
+1014	Can Publish AuthorListing	360	can_publish
+1015	Can Republish AuthorListing	360	can_republish
+1016	Can Publish Author	361	can_publish
+1017	Can Republish Author	361	can_republish
+1018	Can add author listing	360	add_authorlisting
+1019	Can change author listing	360	change_authorlisting
+1020	Can delete author listing	360	delete_authorlisting
+1021	Can add author	361	add_author
+1022	Can change author	361	change_author
+1023	Can delete author	361	delete_author
+1024	Can Publish LayoutPage	362	can_publish
+1025	Can Republish LayoutPage	362	can_republish
+1026	Can add Page	362	add_layoutpage
+1027	Can change Page	362	change_layoutpage
+1028	Can delete Page	362	delete_layoutpage
+1029	Can Publish SearchPage	363	can_publish
+1030	Can Republish SearchPage	363	can_republish
+1031	Can add search page	363	add_searchpage
+1032	Can change search page	363	change_searchpage
+1033	Can delete search page	363	delete_searchpage
+1034	Can add Child Pages	364	add_childpageitem
+1035	Can change Child Pages	364	change_childpageitem
+1036	Can delete Child Pages	364	delete_childpageitem
+1037	Can add contact person	365	add_contactperson
+1038	Can change contact person	365	change_contactperson
+1039	Can delete contact person	365	delete_contactperson
+1040	Can add Contact Person	366	add_contactpersonitem
+1041	Can change Contact Person	366	change_contactpersonitem
+1042	Can delete Contact Person	366	delete_contactpersonitem
+1043	Can add Content Listing	367	add_contentlistingitem
+1044	Can change Content Listing	367	change_contentlistingitem
+1045	Can delete Content Listing	367	delete_contentlistingitem
+1046	Can add FAQ	368	add_faqitem
+1047	Can change FAQ	368	change_faqitem
+1048	Can delete FAQ	368	delete_faqitem
+1049	Can add file	369	add_file
+1050	Can change file	369	change_file
+1051	Can delete file	369	delete_file
+1052	Can add File	370	add_fileitem
+1053	Can change File	370	change_fileitem
+1054	Can delete File	370	delete_fileitem
+1055	Can add Horizontal Rule	371	add_horizontalruleitem
+1056	Can change Horizontal Rule	371	change_horizontalruleitem
+1057	Can delete Horizontal Rule	371	delete_horizontalruleitem
+1058	Can add image	372	add_image
+1059	Can change image	372	change_image
+1060	Can delete image	372	delete_image
+1061	Can add Image	373	add_imageitem
+1062	Can change Image	373	change_imageitem
+1063	Can delete Image	373	delete_imageitem
+1064	Can add Image derivative	374	add_imagerepurposeconfig
+1065	Can change Image derivative	374	change_imagerepurposeconfig
+1066	Can delete Image derivative	374	delete_imagerepurposeconfig
+1067	Can add Instagram Embed	375	add_instagramembeditem
+1068	Can change Instagram Embed	375	change_instagramembeditem
+1069	Can delete Instagram Embed	375	delete_instagramembeditem
+1070	Can add Page link	376	add_pagelink
+1071	Can change Page link	376	change_pagelink
+1072	Can delete Page link	376	delete_pagelink
+1073	Can add Article link	377	add_articlelink
+1074	Can change Article link	377	change_articlelink
+1075	Can delete Article link	377	delete_articlelink
+1076	Can add Author link	378	add_authorlink
+1077	Can change Author link	378	change_authorlink
+1078	Can delete Author link	378	delete_authorlink
+1079	Can add Google Map	379	add_mapitem
+1080	Can change Google Map	379	change_mapitem
+1081	Can delete Google Map	379	delete_mapitem
+1082	Can add Embedded media	380	add_oembedwithcaptionitem
+1083	Can change Embedded media	380	change_oembedwithcaptionitem
+1084	Can delete Embedded media	380	delete_oembedwithcaptionitem
+1085	Can add Page Anchor	381	add_pageanchoritem
+1086	Can change Page Anchor	381	change_pageanchoritem
+1087	Can delete Page Anchor	381	delete_pageanchoritem
+1088	Can add Page Anchor List	382	add_pageanchorlistitem
+1089	Can change Page Anchor List	382	change_pageanchorlistitem
+1090	Can delete Page Anchor List	382	delete_pageanchorlistitem
+1091	Can add Pull quote	383	add_quoteitem
+1092	Can change Pull quote	383	change_quoteitem
+1093	Can delete Pull quote	383	delete_quoteitem
+1094	Can add Form	384	add_formitem
+1095	Can change Form	384	change_formitem
+1096	Can delete Form	384	delete_formitem
+1097	Can Publish SlideShow	385	can_publish
+1098	Can Republish SlideShow	385	can_republish
+1099	Can add Image gallery	385	add_slideshow
+1100	Can change Image gallery	385	change_slideshow
+1101	Can delete Image gallery	385	delete_slideshow
+1102	Can add Slide show	386	add_slideshowitem
+1103	Can change Slide show	386	change_slideshowitem
+1104	Can delete Slide show	386	delete_slideshowitem
+1105	Can add Image Gallery	387	add_imagegalleryshowitem
+1106	Can change Image Gallery	387	change_imagegalleryshowitem
+1107	Can delete Image Gallery	387	delete_imagegalleryshowitem
+1108	Can add Twitter Embed	388	add_twitterembeditem
+1109	Can change Twitter Embed	388	change_twitterembeditem
+1110	Can delete Twitter Embed	388	delete_twitterembeditem
+1111	Can add Text	389	add_textitem
+1112	Can change Text	389	change_textitem
+1113	Can delete Text	389	delete_textitem
+1114	Can Publish EventBase	390	can_publish
+1115	Can Republish EventBase	390	can_republish
+1116	Can add recurrence rule	391	add_recurrencerule
+1117	Can change recurrence rule	391	change_recurrencerule
+1118	Can delete recurrence rule	391	delete_recurrencerule
+1119	Can add Event category	392	add_eventtype
+1120	Can change Event category	392	change_eventtype
+1121	Can delete Event category	392	delete_eventtype
+1122	Can add Event	390	add_eventbase
+1123	Can change Event	390	change_eventbase
+1124	Can delete Event	390	delete_eventbase
+1125	Can add event repeats generator	393	add_eventrepeatsgenerator
+1126	Can change event repeats generator	393	change_eventrepeatsgenerator
+1127	Can delete event repeats generator	393	delete_eventrepeatsgenerator
+1128	Can add occurrence	394	add_occurrence
+1129	Can change occurrence	394	change_occurrence
+1130	Can delete occurrence	394	delete_occurrence
+1131	Can Publish SimpleEvent	395	can_publish
+1132	Can Republish SimpleEvent	395	can_republish
+1133	Can add Simple event	395	add_simpleevent
+1134	Can change Simple event	395	change_simpleevent
+1135	Can delete Simple event	395	delete_simpleevent
+1136	Can Publish EventListingPage	396	can_publish
+1137	Can Republish EventListingPage	396	can_republish
+1138	Can add Event listing for date	396	add_eventlistingpage
+1139	Can change Event listing for date	396	change_eventlistingpage
+1140	Can delete Event listing for date	396	delete_eventlistingpage
+1141	Can add Event Content Listing	397	add_eventcontentlistingitem
+1142	Can change Event Content Listing	397	change_eventcontentlistingitem
+1143	Can delete Event Content Listing	397	delete_eventcontentlistingitem
+1144	Can add Event link	398	add_eventlink
+1145	Can change Event link	398	change_eventlink
+1146	Can delete Event link	398	delete_eventlink
+1147	Can add Today's events	399	add_todaysoccurrences
+1148	Can change Today's events	399	change_todaysoccurrences
+1149	Can delete Today's events	399	delete_todaysoccurrences
+1150	Can add country	400	add_country
+1151	Can change country	400	change_country
+1152	Can delete country	400	delete_country
+1153	Can add geographic location	401	add_geographiclocation
+1154	Can change geographic location	401	change_geographiclocation
+1155	Can delete geographic location	401	delete_geographiclocation
+1156	Can Publish CreatorBase	402	can_publish
+1157	Can Republish CreatorBase	402	can_republish
+1158	Can Publish WorkBase	403	can_publish
+1159	Can Republish WorkBase	403	can_republish
+1160	Can add creator	402	add_creatorbase
+1161	Can change creator	402	change_creatorbase
+1162	Can delete creator	402	delete_creatorbase
+1163	Can add work origin	404	add_workorigin
+1164	Can change work origin	404	change_workorigin
+1165	Can delete work origin	404	delete_workorigin
+1166	Can add work	403	add_workbase
+1167	Can change work	403	change_workbase
+1168	Can delete work	403	delete_workbase
+1169	Can add role	405	add_role
+1170	Can change role	405	change_role
+1171	Can delete role	405	delete_role
+1172	Can add Work-Creator relation	406	add_workcreator
+1173	Can change Work-Creator relation	406	change_workcreator
+1174	Can delete Work-Creator relation	406	delete_workcreator
+1175	Can add Image type	407	add_workimagetype
+1176	Can change Image type	407	change_workimagetype
+1177	Can delete Image type	407	delete_workimagetype
+1178	Can add Image	408	add_workimage
+1179	Can change Image	408	change_workimage
+1180	Can delete Image	408	delete_workimage
+1181	Can add Work link	409	add_worklink
+1182	Can change Work link	409	change_worklink
+1183	Can delete Work link	409	delete_worklink
+1184	Can add Creator link	410	add_creatorlink
+1185	Can change Creator link	410	change_creatorlink
+1186	Can delete Creator link	410	delete_creatorlink
+1187	Can add sponsor	411	add_sponsor
+1188	Can change sponsor	411	change_sponsor
+1189	Can delete sponsor	411	delete_sponsor
+1190	Can add Begin Sponsor Block	412	add_beginsponsorblockitem
+1191	Can change Begin Sponsor Block	412	change_beginsponsorblockitem
+1192	Can delete Begin Sponsor Block	412	delete_beginsponsorblockitem
+1193	Can add End sponsor block	413	add_endsponsorblockitem
+1194	Can change End sponsor block	413	change_endsponsorblockitem
+1195	Can delete End sponsor block	413	delete_endsponsorblockitem
+1196	Can add Sponsor promo	414	add_sponsorpromoitem
+1197	Can change Sponsor promo	414	change_sponsorpromoitem
+1198	Can delete Sponsor promo	414	delete_sponsorpromoitem
+1199	Can Publish PressReleaseListing	415	can_publish
+1200	Can Republish PressReleaseListing	415	can_republish
+1201	Can Publish PressRelease	416	can_publish
+1202	Can Republish PressRelease	416	can_republish
+1203	Can add Press release listing	415	add_pressreleaselisting
+1204	Can change Press release listing	415	change_pressreleaselisting
+1205	Can delete Press release listing	415	delete_pressreleaselisting
+1206	Can add press release category	417	add_pressreleasecategory
+1207	Can change press release category	417	change_pressreleasecategory
+1208	Can delete press release category	417	delete_pressreleasecategory
+1209	Can add press release	416	add_pressrelease
+1210	Can change press release	416	change_pressrelease
+1211	Can delete press release	416	delete_pressrelease
+1212	Can add setting	418	add_setting
+1213	Can change setting	418	change_setting
+1214	Can delete setting	418	delete_setting
+1215	Can add boolean	419	add_boolean
+1216	Can change boolean	419	change_boolean
+1217	Can delete boolean	419	delete_boolean
+1218	Can add date	420	add_date
+1219	Can change date	420	change_date
+1220	Can delete date	420	delete_date
+1221	Can add date time	421	add_datetime
+1222	Can change date time	421	change_datetime
+1223	Can delete date time	421	delete_datetime
+1224	Can add decimal	422	add_decimal
+1225	Can change decimal	422	change_decimal
+1226	Can delete decimal	422	delete_decimal
+1227	Can add file	423	add_file
+1228	Can change file	423	change_file
+1229	Can delete file	423	delete_file
+1230	Can add float	424	add_float
+1231	Can change float	424	change_float
+1232	Can delete float	424	delete_float
+1233	Can add image	425	add_image
+1234	Can change image	425	change_image
+1235	Can delete image	425	delete_image
+1236	Can add integer	426	add_integer
+1237	Can change integer	426	change_integer
+1238	Can delete integer	426	delete_integer
+1239	Can add text	427	add_text
+1240	Can change text	427	change_text
+1241	Can delete text	427	delete_text
+1242	Can add time	428	add_time
+1243	Can change time	428	change_time
+1244	Can delete time	428	delete_time
+1245	Can add user with email login	306	add_emailuser
+1246	Can change user with email login	306	change_emailuser
+1247	Can delete user with email login	306	delete_emailuser
+1248	Can add Email	429	add_email
+1249	Can change Email	429	change_email
+1250	Can delete Email	429	delete_email
+1251	Can add Log	430	add_log
+1252	Can change Log	430	change_log
+1253	Can delete Log	430	delete_log
+1254	Can add Email Template	431	add_emailtemplate
+1255	Can change Email Template	431	change_emailtemplate
+1256	Can delete Email Template	431	delete_emailtemplate
+1257	Can add Attachment	432	add_attachment
+1258	Can change Attachment	432	change_attachment
+1259	Can delete Attachment	432	delete_attachment
+1260	Can add Page	433	add_fluentpage
+1261	Can change Page	433	change_fluentpage
+1262	Can delete Page	433	delete_fluentpage
+1263	Can change Page layout	433	change_page_layout
+1264	Can Publish ArticleListing	434	can_publish
+1265	Can Republish ArticleListing	434	can_republish
+1266	Can Publish Article	435	can_publish
+1267	Can Republish Article	435	can_republish
+1268	Can Publish LayoutPageWithRelatedPages	436	can_publish
+1269	Can Republish LayoutPageWithRelatedPages	436	can_republish
+1270	Can Publish PublishingM2MModelA	437	can_publish
+1271	Can Republish PublishingM2MModelA	437	can_republish
+1272	Can Publish PublishingM2MModelB	438	can_publish
+1273	Can Republish PublishingM2MModelB	438	can_republish
+1274	Can add base model	439	add_basemodel
+1275	Can change base model	439	change_basemodel
+1276	Can delete base model	439	delete_basemodel
+1277	Can add foo with layout	440	add_foowithlayout
+1278	Can change foo with layout	440	change_foowithlayout
+1279	Can delete foo with layout	440	delete_foowithlayout
+1280	Can add bar with layout	441	add_barwithlayout
+1281	Can change bar with layout	441	change_barwithlayout
+1282	Can delete bar with layout	441	delete_barwithlayout
+1283	Can add baz with layout	442	add_bazwithlayout
+1284	Can change baz with layout	442	change_bazwithlayout
+1285	Can delete baz with layout	442	delete_bazwithlayout
+1286	Can add image test	443	add_imagetest
+1287	Can change image test	443	change_imagetest
+1288	Can delete image test	443	delete_imagetest
+1289	Can add article listing	434	add_articlelisting
+1290	Can change article listing	434	change_articlelisting
+1291	Can delete article listing	434	delete_articlelisting
+1292	Can add article	435	add_article
+1293	Can change article	435	change_article
+1294	Can delete article	435	delete_article
+1295	Can add layout page with related pages	436	add_layoutpagewithrelatedpages
+1296	Can change layout page with related pages	436	change_layoutpagewithrelatedpages
+1297	Can delete layout page with related pages	436	delete_layoutpagewithrelatedpages
+1298	Can add publishing m2m model a	437	add_publishingm2mmodela
+1299	Can change publishing m2m model a	437	change_publishingm2mmodela
+1300	Can delete publishing m2m model a	437	delete_publishingm2mmodela
+1301	Can add publishing m2m model b	438	add_publishingm2mmodelb
+1302	Can change publishing m2m model b	438	change_publishingm2mmodelb
+1303	Can delete publishing m2m model b	438	delete_publishingm2mmodelb
+1304	Can add publishing m2m through table	444	add_publishingm2mthroughtable
+1305	Can change publishing m2m through table	444	change_publishingm2mthroughtable
+1306	Can delete publishing m2m through table	444	delete_publishingm2mthroughtable
+1307	Can Publish Artwork	445	can_publish
+1308	Can Republish Artwork	445	can_republish
+1309	Can add artwork	445	add_artwork
+1310	Can change artwork	445	change_artwork
+1311	Can delete artwork	445	delete_artwork
+1312	Can Publish Film	446	can_publish
+1313	Can Republish Film	446	can_republish
+1314	Can add format	447	add_format
+1315	Can change format	447	change_format
+1316	Can delete format	447	delete_format
+1317	Can add film	446	add_film
+1318	Can change film	446	change_film
+1319	Can delete film	446	delete_film
+1320	Can Publish Game	448	can_publish
+1321	Can Republish Game	448	can_republish
+1322	Can add game input type	449	add_gameinputtype
+1323	Can change game input type	449	change_gameinputtype
+1324	Can delete game input type	449	delete_gameinputtype
+1325	Can add game platform	450	add_gameplatform
+1326	Can change game platform	450	change_gameplatform
+1327	Can delete game platform	450	delete_gameplatform
+1328	Can add game	448	add_game
+1329	Can change game	448	change_game
+1330	Can delete game	448	delete_game
+1331	Can Publish MovingImageWork	451	can_publish
+1332	Can Republish MovingImageWork	451	can_republish
+1333	Can add rating	452	add_rating
+1334	Can change rating	452	change_rating
+1335	Can delete rating	452	delete_rating
+1336	Can add genre	453	add_genre
+1337	Can change genre	453	change_genre
+1338	Can delete genre	453	delete_genre
+1339	Can add media type	454	add_mediatype
+1340	Can change media type	454	change_mediatype
+1341	Can delete media type	454	delete_mediatype
+1342	Can add moving image work	451	add_movingimagework
+1343	Can change moving image work	451	change_movingimagework
+1344	Can delete moving image work	451	delete_movingimagework
+1345	Can Publish OrganizationCreator	455	can_publish
+1346	Can Republish OrganizationCreator	455	can_republish
+1347	Can add organization	455	add_organizationcreator
+1348	Can change organization	455	change_organizationcreator
+1349	Can delete organization	455	delete_organizationcreator
+1350	Can Publish PersonCreator	456	can_publish
+1351	Can Republish PersonCreator	456	can_republish
+1352	Can add person	456	add_personcreator
+1353	Can change person	456	change_personcreator
+1354	Can delete person	456	delete_personcreator
 \.
 
 
@@ -4834,7 +5885,7 @@ COPY auth_permission (id, name, content_type_id, codename) FROM stdin;
 -- Name: auth_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('auth_permission_id_seq', 850, true);
+SELECT pg_catalog.setval('auth_permission_id_seq', 1354, true);
 
 
 --
@@ -5079,7 +6130,7 @@ COPY contentitem_ik_links_articlelink (contentitem_ptr_id, style, type_override,
 -- Data for Name: contentitem_ik_links_authorlink; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY contentitem_ik_links_authorlink (contentitem_ptr_id, style, type_override, title_override, image_override, item_id, url_override, oneliner_override, exclude_from_contributions) FROM stdin;
+COPY contentitem_ik_links_authorlink (contentitem_ptr_id, style, type_override, title_override, image_override, item_id, url_override, oneliner_override, exclude_from_contributions, exclude_from_authorship) FROM stdin;
 \.
 
 
@@ -5159,6 +6210,160 @@ SELECT pg_catalog.setval('django_admin_log_id_seq', 44, true);
 --
 
 COPY django_content_type (id, app_label, model) FROM stdin;
+303	polymorphic_auth	user
+304	icekit	layout
+305	icekit	mediacategory
+306	polymorphic_auth_email	emailuser
+307	forms	formentry
+308	forms	fieldentry
+309	forms	form
+310	forms	field
+311	reversion	revision
+312	reversion	version
+313	admin	logentry
+314	auth	permission
+315	auth	group
+316	contenttypes	contenttype
+317	sessions	session
+318	authtoken	token
+319	redirects	redirect
+320	sites	site
+321	djcelery	taskmeta
+322	djcelery	tasksetmeta
+323	djcelery	intervalschedule
+324	djcelery	crontabschedule
+325	djcelery	periodictasks
+326	djcelery	periodictask
+327	djcelery	workerstate
+328	djcelery	taskstate
+329	kombu_transport_django	queue
+330	kombu_transport_django	message
+331	easy_thumbnails	source
+332	easy_thumbnails	thumbnail
+333	easy_thumbnails	thumbnaildimensions
+334	fluent_contents	placeholder
+335	fluent_contents	contentitem
+336	fluent_pages	urlnode
+337	fluent_pages	urlnode_translation
+338	fluent_pages	htmlpagetranslation
+339	fluent_pages	pagelayout
+340	fluent_pages	htmlpage
+341	fluent_pages	page
+342	redirectnode	redirectnodetranslation
+343	redirectnode	redirectnode
+344	textfile	textfiletranslation
+345	textfile	textfile
+346	iframe	iframeitem
+347	oembeditem	oembeditem
+348	rawhtml	rawhtmlitem
+349	sharedcontent	sharedcontenttranslation
+350	sharedcontent	sharedcontent
+351	sharedcontent	sharedcontentitem
+352	icekit_workflow	workflowstate
+353	response_pages	responsepage
+354	notifications	notificationsetting
+355	notifications	hasreadmessage
+356	notifications	notification
+357	notifications	followerinformation
+358	icekit_article	article
+359	icekit_article	articlecategorypage
+360	icekit_authors	authorlisting
+361	icekit_authors	author
+362	layout_page	layoutpage
+363	search_page	searchpage
+364	icekit_plugins_child_pages	childpageitem
+365	icekit_plugins_contact_person	contactperson
+366	icekit_plugins_contact_person	contactpersonitem
+367	icekit_plugins_content_listing	contentlistingitem
+368	icekit_plugins_faq	faqitem
+369	icekit_plugins_file	file
+370	icekit_plugins_file	fileitem
+371	icekit_plugins_horizontal_rule	horizontalruleitem
+372	icekit_plugins_image	image
+373	icekit_plugins_image	imageitem
+374	icekit_plugins_image	imagerepurposeconfig
+375	icekit_plugins_instagram_embed	instagramembeditem
+376	ik_links	pagelink
+377	ik_links	articlelink
+378	ik_links	authorlink
+379	icekit_plugins_map	mapitem
+380	icekit_plugins_oembed_with_caption	oembedwithcaptionitem
+381	icekit_plugins_page_anchor	pageanchoritem
+382	icekit_plugins_page_anchor_list	pageanchorlistitem
+383	icekit_plugins_quote	quoteitem
+384	icekit_plugins_reusable_form	formitem
+385	icekit_plugins_slideshow	slideshow
+386	icekit_plugins_slideshow	slideshowitem
+387	image_gallery	imagegalleryshowitem
+388	icekit_plugins_twitter_embed	twitterembeditem
+389	text	textitem
+390	icekit_events	eventbase
+391	icekit_events	recurrencerule
+392	icekit_events	eventtype
+393	icekit_events	eventrepeatsgenerator
+394	icekit_events	occurrence
+395	icekit_event_types_simple	simpleevent
+396	eventlistingfordate	eventlistingpage
+397	ik_event_listing	eventcontentlistingitem
+398	icekit_events_links	eventlink
+399	ik_events_todays_occurrences	todaysoccurrences
+400	glamkit_collections	country
+401	glamkit_collections	geographiclocation
+402	gk_collections_work_creator	creatorbase
+403	gk_collections_work_creator	workbase
+404	gk_collections_work_creator	workorigin
+405	gk_collections_work_creator	role
+406	gk_collections_work_creator	workcreator
+407	gk_collections_work_creator	workimagetype
+408	gk_collections_work_creator	workimage
+409	gk_collections_links	worklink
+410	gk_collections_links	creatorlink
+411	glamkit_sponsors	sponsor
+412	glamkit_sponsors	beginsponsorblockitem
+413	glamkit_sponsors	endsponsorblockitem
+414	glamkit_sponsors	sponsorpromoitem
+415	icekit_press_releases	pressreleaselisting
+416	icekit_press_releases	pressrelease
+417	icekit_press_releases	pressreleasecategory
+418	model_settings	setting
+419	model_settings	boolean
+420	model_settings	date
+421	model_settings	datetime
+422	model_settings	decimal
+423	model_settings	file
+424	model_settings	float
+425	model_settings	image
+426	model_settings	integer
+427	model_settings	text
+428	model_settings	time
+429	post_office	email
+430	post_office	log
+431	post_office	emailtemplate
+432	post_office	attachment
+433	fluentpage	fluentpage
+434	tests	articlelisting
+435	tests	article
+436	tests	layoutpagewithrelatedpages
+437	tests	publishingm2mmodela
+438	tests	publishingm2mmodelb
+439	tests	basemodel
+440	tests	foowithlayout
+441	tests	barwithlayout
+442	tests	bazwithlayout
+443	tests	imagetest
+444	tests	publishingm2mthroughtable
+445	gk_collections_artwork	artwork
+446	gk_collections_film	film
+447	gk_collections_film	format
+448	gk_collections_game	game
+449	gk_collections_game	gameinputtype
+450	gk_collections_game	gameplatform
+451	gk_collections_moving_image	movingimagework
+452	gk_collections_moving_image	rating
+453	gk_collections_moving_image	genre
+454	gk_collections_moving_image	mediatype
+455	gk_collections_organization	organizationcreator
+456	gk_collections_person	personcreator
 \.
 
 
@@ -5166,7 +6371,7 @@ COPY django_content_type (id, app_label, model) FROM stdin;
 -- Name: django_content_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('django_content_type_id_seq', 302, true);
+SELECT pg_catalog.setval('django_content_type_id_seq', 465, true);
 
 
 --
@@ -5456,6 +6661,31 @@ COPY django_migrations (id, app, name, applied) FROM stdin;
 318	icekit_press_releases	0007_auto_20161117_1201	2017-06-08 10:29:58.546565+10
 319	icekit_press_releases	0008_auto_20161128_1049	2017-06-08 10:29:58.869652+10
 320	icekit_press_releases	0009_auto_20170519_1308	2017-06-08 10:29:59.5589+10
+321	gk_collections_artwork	0001_initial	2017-06-22 12:16:11.521618+10
+322	gk_collections_artwork	0002_remove_artwork_department	2017-06-22 12:16:11.527719+10
+323	gk_collections_moving_image	0001_initial	2017-06-22 12:16:11.587385+10
+324	gk_collections_moving_image	0002_auto_20161026_1312	2017-06-22 12:16:11.924056+10
+325	gk_collections_moving_image	0003_movingimagework_trailer	2017-06-22 12:16:12.086505+10
+326	gk_collections_moving_image	0004_auto_20161110_1419	2017-06-22 12:16:12.434671+10
+327	gk_collections_moving_image	0005_auto_20161117_1801	2017-06-22 12:16:13.176178+10
+328	gk_collections_film	0001_initial	2017-06-22 12:16:13.923159+10
+329	gk_collections_film	0002_film_trailer	2017-06-22 12:16:14.092603+10
+330	gk_collections_film	0003_auto_20161117_1801	2017-06-22 12:16:14.567418+10
+331	gk_collections_film	0004_auto_20161130_1109	2017-06-22 12:16:14.918338+10
+332	gk_collections_game	0001_initial	2017-06-22 12:16:15.82191+10
+333	gk_collections_game	0002_game_trailer	2017-06-22 12:16:16.011288+10
+334	gk_collections_game	0003_auto_20161117_1801	2017-06-22 12:16:16.96127+10
+335	gk_collections_game	0004_auto_20161130_1109	2017-06-22 12:16:17.347265+10
+336	gk_collections_moving_image	0006_auto_20161130_1142	2017-06-22 12:16:17.973666+10
+337	gk_collections_organization	0001_initial	2017-06-22 12:16:18.187568+10
+338	gk_collections_person	0001_initial	2017-06-22 12:16:18.391778+10
+339	gk_collections_person	0002_remove_personcreator_name_full	2017-06-22 12:16:18.596166+10
+340	gk_collections_person	0003_auto_20170606_1158	2017-06-22 12:16:20.000384+10
+341	gk_collections_work_creator	0032_tidy_names	2017-06-22 12:16:20.022329+10
+342	gk_collections_work_creator	0033_auto_20170615_2002	2017-06-22 12:16:21.077018+10
+343	icekit_plugins_image	0022_auto_20170622_1024	2017-06-22 12:16:21.406024+10
+344	icekit_press_releases	0010_add_brief	2017-06-22 12:16:22.219668+10
+345	ik_links	0007_authorlink_exclude_from_authorship	2017-06-22 12:16:22.655487+10
 \.
 
 
@@ -5463,7 +6693,7 @@ COPY django_migrations (id, app, name, applied) FROM stdin;
 -- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('django_migrations_id_seq', 320, true);
+SELECT pg_catalog.setval('django_migrations_id_seq', 345, true);
 
 
 --
@@ -5494,6 +6724,7 @@ COPY django_session (session_key, session_data, expire_date) FROM stdin;
 --
 
 COPY django_site (id, domain, name) FROM stdin;
+1	project-template.lvh.me	project_template
 \.
 
 
@@ -5688,7 +6919,7 @@ COPY fluent_contents_contentitem (id, parent_id, language_code, sort_order, pare
 -- Name: fluent_contents_contentitem_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('fluent_contents_contentitem_id_seq', 370, true);
+SELECT pg_catalog.setval('fluent_contents_contentitem_id_seq', 394, true);
 
 
 --
@@ -5703,7 +6934,7 @@ COPY fluent_contents_placeholder (id, slot, role, parent_id, title, parent_type_
 -- Name: fluent_contents_placeholder_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('fluent_contents_placeholder_id_seq', 180, true);
+SELECT pg_catalog.setval('fluent_contents_placeholder_id_seq', 188, true);
 
 
 --
@@ -5718,7 +6949,7 @@ COPY fluent_pages_htmlpage_translation (id, language_code, meta_keywords, meta_d
 -- Name: fluent_pages_htmlpage_translation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('fluent_pages_htmlpage_translation_id_seq', 316, true);
+SELECT pg_catalog.setval('fluent_pages_htmlpage_translation_id_seq', 384, true);
 
 
 --
@@ -5748,7 +6979,7 @@ COPY fluent_pages_urlnode (id, lft, rght, tree_id, level, status, publication_da
 -- Name: fluent_pages_urlnode_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('fluent_pages_urlnode_id_seq', 362, true);
+SELECT pg_catalog.setval('fluent_pages_urlnode_id_seq', 430, true);
 
 
 --
@@ -5763,7 +6994,7 @@ COPY fluent_pages_urlnode_translation (id, language_code, title, slug, override_
 -- Name: fluent_pages_urlnode_translation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('fluent_pages_urlnode_translation_id_seq', 340, true);
+SELECT pg_catalog.setval('fluent_pages_urlnode_translation_id_seq', 408, true);
 
 
 --
@@ -5842,6 +7073,234 @@ SELECT pg_catalog.setval('forms_formentry_id_seq', 1, false);
 
 
 --
+-- Data for Name: gk_collections_artwork_artwork; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_artwork_artwork (workbase_ptr_id, medium_display, dimensions_is_two_dimensional, dimensions_display, dimensions_extent, dimensions_width_cm, dimensions_height_cm, dimensions_depth_cm, dimensions_weight_kg) FROM stdin;
+\.
+
+
+--
+-- Data for Name: gk_collections_film_film; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_film_film (workbase_ptr_id, rating_annotation, imdb_link, media_type_id, rating_id, trailer, duration_minutes) FROM stdin;
+\.
+
+
+--
+-- Data for Name: gk_collections_film_film_formats; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_film_film_formats (id, film_id, format_id) FROM stdin;
+\.
+
+
+--
+-- Name: gk_collections_film_film_formats_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('gk_collections_film_film_formats_id_seq', 1, false);
+
+
+--
+-- Data for Name: gk_collections_film_film_genres; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_film_film_genres (id, film_id, genre_id) FROM stdin;
+\.
+
+
+--
+-- Name: gk_collections_film_film_genres_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('gk_collections_film_film_genres_id_seq', 1, false);
+
+
+--
+-- Data for Name: gk_collections_film_format; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_film_format (id, title, slug) FROM stdin;
+\.
+
+
+--
+-- Name: gk_collections_film_format_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('gk_collections_film_format_id_seq', 1, false);
+
+
+--
+-- Data for Name: gk_collections_game_game; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_game_game (workbase_ptr_id, rating_annotation, imdb_link, is_single_player, is_multi_player, media_type_id, rating_id, trailer, duration_minutes) FROM stdin;
+\.
+
+
+--
+-- Data for Name: gk_collections_game_game_genres; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_game_game_genres (id, game_id, genre_id) FROM stdin;
+\.
+
+
+--
+-- Name: gk_collections_game_game_genres_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('gk_collections_game_game_genres_id_seq', 1, false);
+
+
+--
+-- Data for Name: gk_collections_game_game_input_types; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_game_game_input_types (id, game_id, gameinputtype_id) FROM stdin;
+\.
+
+
+--
+-- Name: gk_collections_game_game_input_types_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('gk_collections_game_game_input_types_id_seq', 1, false);
+
+
+--
+-- Data for Name: gk_collections_game_game_platforms; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_game_game_platforms (id, game_id, gameplatform_id) FROM stdin;
+\.
+
+
+--
+-- Name: gk_collections_game_game_platforms_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('gk_collections_game_game_platforms_id_seq', 1, false);
+
+
+--
+-- Data for Name: gk_collections_game_gameinputtype; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_game_gameinputtype (id, title, slug) FROM stdin;
+\.
+
+
+--
+-- Name: gk_collections_game_gameinputtype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('gk_collections_game_gameinputtype_id_seq', 1, false);
+
+
+--
+-- Data for Name: gk_collections_game_gameplatform; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_game_gameplatform (id, title, slug) FROM stdin;
+\.
+
+
+--
+-- Name: gk_collections_game_gameplatform_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('gk_collections_game_gameplatform_id_seq', 1, false);
+
+
+--
+-- Data for Name: gk_collections_moving_image_genre; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_moving_image_genre (id, title, slug) FROM stdin;
+\.
+
+
+--
+-- Name: gk_collections_moving_image_genre_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('gk_collections_moving_image_genre_id_seq', 1, false);
+
+
+--
+-- Data for Name: gk_collections_moving_image_mediatype; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_moving_image_mediatype (id, title, slug, title_plural) FROM stdin;
+\.
+
+
+--
+-- Name: gk_collections_moving_image_mediatype_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('gk_collections_moving_image_mediatype_id_seq', 2, true);
+
+
+--
+-- Data for Name: gk_collections_moving_image_movingimagework; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_moving_image_movingimagework (workbase_ptr_id, rating_annotation, imdb_link, media_type_id, rating_id, trailer, duration_minutes) FROM stdin;
+\.
+
+
+--
+-- Data for Name: gk_collections_moving_image_movingimagework_genres; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_moving_image_movingimagework_genres (id, movingimagework_id, genre_id) FROM stdin;
+\.
+
+
+--
+-- Name: gk_collections_moving_image_movingimagework_genres_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('gk_collections_moving_image_movingimagework_genres_id_seq', 1, false);
+
+
+--
+-- Data for Name: gk_collections_moving_image_rating; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_moving_image_rating (id, title, slug, image) FROM stdin;
+\.
+
+
+--
+-- Name: gk_collections_moving_image_rating_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('gk_collections_moving_image_rating_id_seq', 4, true);
+
+
+--
+-- Data for Name: gk_collections_organization_organizationcreator; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_organization_organizationcreator (creatorbase_ptr_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: gk_collections_person_personcreator; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY gk_collections_person_personcreator (creatorbase_ptr_id, name_given, name_family, gender, primary_occupation, birth_place, birth_place_historic, death_place, background_ethnicity, background_nationality, background_neighborhood, background_city, background_state_province, background_country, background_continent) FROM stdin;
+\.
+
+
+--
 -- Data for Name: gk_collections_work_creator_creatorbase; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -5853,7 +7312,7 @@ COPY gk_collections_work_creator_creatorbase (id, list_image, boosted_search_ter
 -- Name: gk_collections_work_creator_creatorbase_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('gk_collections_work_creator_creatorbase_id_seq', 1, false);
+SELECT pg_catalog.setval('gk_collections_work_creator_creatorbase_id_seq', 60, true);
 
 
 --
@@ -5868,7 +7327,7 @@ COPY gk_collections_work_creator_role (id, title, slug, past_tense, title_plural
 -- Name: gk_collections_work_creator_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('gk_collections_work_creator_role_id_seq', 1, false);
+SELECT pg_catalog.setval('gk_collections_work_creator_role_id_seq', 8, true);
 
 
 --
@@ -5883,7 +7342,7 @@ COPY gk_collections_work_creator_workbase (id, list_image, boosted_search_terms,
 -- Name: gk_collections_work_creator_workbase_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('gk_collections_work_creator_workbase_id_seq', 1, false);
+SELECT pg_catalog.setval('gk_collections_work_creator_workbase_id_seq', 76, true);
 
 
 --
@@ -5898,7 +7357,7 @@ COPY gk_collections_work_creator_workcreator (id, "order", is_primary, creator_i
 -- Name: gk_collections_work_creator_workcreator_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('gk_collections_work_creator_workcreator_id_seq', 1, false);
+SELECT pg_catalog.setval('gk_collections_work_creator_workcreator_id_seq', 10, true);
 
 
 --
@@ -6162,7 +7621,7 @@ SELECT pg_catalog.setval('icekit_layout_content_types_id_seq', 131, true);
 -- Name: icekit_layout_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('icekit_layout_id_seq', 159, true);
+SELECT pg_catalog.setval('icekit_layout_id_seq', 164, true);
 
 
 --
@@ -6185,7 +7644,7 @@ COPY icekit_mediacategory (id, created, modified, name) FROM stdin;
 -- Name: icekit_mediacategory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('icekit_mediacategory_id_seq', 8, true);
+SELECT pg_catalog.setval('icekit_mediacategory_id_seq', 33, true);
 
 
 --
@@ -6262,7 +7721,7 @@ COPY icekit_plugins_slideshow_slideshow (id, title, show_title, publishing_is_dr
 -- Data for Name: icekit_press_releases_pressrelease; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY icekit_press_releases_pressrelease (id, publishing_is_draft, publishing_modified_at, publishing_published_at, title, slug, print_version, created, modified, released, category_id, layout_id, publishing_linked_id, boosted_search_terms, list_image) FROM stdin;
+COPY icekit_press_releases_pressrelease (id, publishing_is_draft, publishing_modified_at, publishing_published_at, title, slug, print_version, created, modified, released, category_id, layout_id, publishing_linked_id, boosted_search_terms, list_image, admin_notes, brief) FROM stdin;
 \.
 
 
@@ -6338,14 +7797,14 @@ SELECT pg_catalog.setval('ik_todays_occurrences_types_id_seq', 1, false);
 -- Name: image_image_categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('image_image_categories_id_seq', 1, false);
+SELECT pg_catalog.setval('image_image_categories_id_seq', 12, true);
 
 
 --
 -- Name: image_image_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('image_image_id_seq', 68, true);
+SELECT pg_catalog.setval('image_image_id_seq', 89, true);
 
 
 --
@@ -6523,6 +7982,7 @@ SELECT pg_catalog.setval('notifications_notification_id_seq', 1, false);
 --
 
 COPY notifications_notificationsetting (id, notification_type, user_id) FROM stdin;
+278	ALL	460
 \.
 
 
@@ -6530,7 +7990,7 @@ COPY notifications_notificationsetting (id, notification_type, user_id) FROM std
 -- Name: notifications_notificationsetting_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('notifications_notificationsetting_id_seq', 277, true);
+SELECT pg_catalog.setval('notifications_notificationsetting_id_seq', 367, true);
 
 
 --
@@ -6578,6 +8038,7 @@ COPY pagetype_textfile_textfile (urlnode_ptr_id, content_type) FROM stdin;
 --
 
 COPY polymorphic_auth_email_emailuser (user_ptr_id, email) FROM stdin;
+460	admin@project-template.lvh.me
 \.
 
 
@@ -6586,6 +8047,7 @@ COPY polymorphic_auth_email_emailuser (user_ptr_id, email) FROM stdin;
 --
 
 COPY polymorphic_auth_user (id, password, last_login, is_superuser, is_staff, is_active, first_name, last_name, created, polymorphic_ctype_id) FROM stdin;
+460	pbkdf2_sha256$20000$F5LHy83xc114$Ui87qfsnYkSm0x7H3Lxc0VUKed/rl5XhdMKe9S7TxCY=	\N	t	t	t	Admin		2017-06-22 12:16:22.707751+10	306
 \.
 
 
@@ -6608,7 +8070,7 @@ SELECT pg_catalog.setval('polymorphic_auth_user_groups_id_seq', 20, true);
 -- Name: polymorphic_auth_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('polymorphic_auth_user_id_seq', 459, true);
+SELECT pg_catalog.setval('polymorphic_auth_user_id_seq', 638, true);
 
 
 --
@@ -6623,7 +8085,7 @@ COPY polymorphic_auth_user_user_permissions (id, user_id, permission_id) FROM st
 -- Name: polymorphic_auth_user_user_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('polymorphic_auth_user_user_permissions_id_seq', 38, true);
+SELECT pg_catalog.setval('polymorphic_auth_user_user_permissions_id_seq', 86, true);
 
 
 --
@@ -7727,6 +9189,198 @@ ALTER TABLE ONLY forms_form
 
 ALTER TABLE ONLY forms_formentry
     ADD CONSTRAINT forms_formentry_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gk_collections_artwork_artwork_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_artwork_artwork
+    ADD CONSTRAINT gk_collections_artwork_artwork_pkey PRIMARY KEY (workbase_ptr_id);
+
+
+--
+-- Name: gk_collections_film_film_formats_film_id_format_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_film_formats
+    ADD CONSTRAINT gk_collections_film_film_formats_film_id_format_id_key UNIQUE (film_id, format_id);
+
+
+--
+-- Name: gk_collections_film_film_formats_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_film_formats
+    ADD CONSTRAINT gk_collections_film_film_formats_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gk_collections_film_film_genres_film_id_genre_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_film_genres
+    ADD CONSTRAINT gk_collections_film_film_genres_film_id_genre_id_key UNIQUE (film_id, genre_id);
+
+
+--
+-- Name: gk_collections_film_film_genres_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_film_genres
+    ADD CONSTRAINT gk_collections_film_film_genres_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gk_collections_film_film_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_film
+    ADD CONSTRAINT gk_collections_film_film_pkey PRIMARY KEY (workbase_ptr_id);
+
+
+--
+-- Name: gk_collections_film_format_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_format
+    ADD CONSTRAINT gk_collections_film_format_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gk_collections_game_game_genres_game_id_genre_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_genres
+    ADD CONSTRAINT gk_collections_game_game_genres_game_id_genre_id_key UNIQUE (game_id, genre_id);
+
+
+--
+-- Name: gk_collections_game_game_genres_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_genres
+    ADD CONSTRAINT gk_collections_game_game_genres_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gk_collections_game_game_input_typ_game_id_gameinputtype_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_input_types
+    ADD CONSTRAINT gk_collections_game_game_input_typ_game_id_gameinputtype_id_key UNIQUE (game_id, gameinputtype_id);
+
+
+--
+-- Name: gk_collections_game_game_input_types_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_input_types
+    ADD CONSTRAINT gk_collections_game_game_input_types_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gk_collections_game_game_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game
+    ADD CONSTRAINT gk_collections_game_game_pkey PRIMARY KEY (workbase_ptr_id);
+
+
+--
+-- Name: gk_collections_game_game_platforms_game_id_gameplatform_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_platforms
+    ADD CONSTRAINT gk_collections_game_game_platforms_game_id_gameplatform_id_key UNIQUE (game_id, gameplatform_id);
+
+
+--
+-- Name: gk_collections_game_game_platforms_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_platforms
+    ADD CONSTRAINT gk_collections_game_game_platforms_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gk_collections_game_gameinputtype_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_gameinputtype
+    ADD CONSTRAINT gk_collections_game_gameinputtype_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gk_collections_game_gameplatform_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_gameplatform
+    ADD CONSTRAINT gk_collections_game_gameplatform_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gk_collections_moving_image_genre_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_genre
+    ADD CONSTRAINT gk_collections_moving_image_genre_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gk_collections_moving_image_mediatype_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_mediatype
+    ADD CONSTRAINT gk_collections_moving_image_mediatype_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gk_collections_moving_image_mov_movingimagework_id_genre_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_movingimagework_genres
+    ADD CONSTRAINT gk_collections_moving_image_mov_movingimagework_id_genre_id_key UNIQUE (movingimagework_id, genre_id);
+
+
+--
+-- Name: gk_collections_moving_image_movingimagework_genres_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_movingimagework_genres
+    ADD CONSTRAINT gk_collections_moving_image_movingimagework_genres_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gk_collections_moving_image_movingimagework_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_movingimagework
+    ADD CONSTRAINT gk_collections_moving_image_movingimagework_pkey PRIMARY KEY (workbase_ptr_id);
+
+
+--
+-- Name: gk_collections_moving_image_rating_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_rating
+    ADD CONSTRAINT gk_collections_moving_image_rating_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: gk_collections_organization_organizationcreator_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_organization_organizationcreator
+    ADD CONSTRAINT gk_collections_organization_organizationcreator_pkey PRIMARY KEY (creatorbase_ptr_id);
+
+
+--
+-- Name: gk_collections_person_personcreator_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_person_personcreator
+    ADD CONSTRAINT gk_collections_person_personcreator_pkey PRIMARY KEY (creatorbase_ptr_id);
 
 
 --
@@ -9545,6 +11199,216 @@ CREATE INDEX forms_formentry_d6cba1ad ON forms_formentry USING btree (form_id);
 
 
 --
+-- Name: gk_collections_film_film_183208e5; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_film_film_183208e5 ON gk_collections_film_film USING btree (media_type_id);
+
+
+--
+-- Name: gk_collections_film_film_c14e3df7; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_film_film_c14e3df7 ON gk_collections_film_film USING btree (rating_id);
+
+
+--
+-- Name: gk_collections_film_film_formats_cd2a3d01; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_film_film_formats_cd2a3d01 ON gk_collections_film_film_formats USING btree (film_id);
+
+
+--
+-- Name: gk_collections_film_film_formats_f2fa2147; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_film_film_formats_f2fa2147 ON gk_collections_film_film_formats USING btree (format_id);
+
+
+--
+-- Name: gk_collections_film_film_genres_080a38f3; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_film_film_genres_080a38f3 ON gk_collections_film_film_genres USING btree (genre_id);
+
+
+--
+-- Name: gk_collections_film_film_genres_cd2a3d01; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_film_film_genres_cd2a3d01 ON gk_collections_film_film_genres USING btree (film_id);
+
+
+--
+-- Name: gk_collections_film_format_2dbcba41; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_film_format_2dbcba41 ON gk_collections_film_format USING btree (slug);
+
+
+--
+-- Name: gk_collections_film_format_slug_1cbd5a1e234f4625_like; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_film_format_slug_1cbd5a1e234f4625_like ON gk_collections_film_format USING btree (slug varchar_pattern_ops);
+
+
+--
+-- Name: gk_collections_game_game_183208e5; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_game_game_183208e5 ON gk_collections_game_game USING btree (media_type_id);
+
+
+--
+-- Name: gk_collections_game_game_c14e3df7; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_game_game_c14e3df7 ON gk_collections_game_game USING btree (rating_id);
+
+
+--
+-- Name: gk_collections_game_game_genres_080a38f3; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_game_game_genres_080a38f3 ON gk_collections_game_game_genres USING btree (genre_id);
+
+
+--
+-- Name: gk_collections_game_game_genres_6072f8b3; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_game_game_genres_6072f8b3 ON gk_collections_game_game_genres USING btree (game_id);
+
+
+--
+-- Name: gk_collections_game_game_input_types_0675d79d; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_game_game_input_types_0675d79d ON gk_collections_game_game_input_types USING btree (gameinputtype_id);
+
+
+--
+-- Name: gk_collections_game_game_input_types_6072f8b3; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_game_game_input_types_6072f8b3 ON gk_collections_game_game_input_types USING btree (game_id);
+
+
+--
+-- Name: gk_collections_game_game_platforms_46c9c2d4; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_game_game_platforms_46c9c2d4 ON gk_collections_game_game_platforms USING btree (gameplatform_id);
+
+
+--
+-- Name: gk_collections_game_game_platforms_6072f8b3; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_game_game_platforms_6072f8b3 ON gk_collections_game_game_platforms USING btree (game_id);
+
+
+--
+-- Name: gk_collections_game_gameinputtype_2dbcba41; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_game_gameinputtype_2dbcba41 ON gk_collections_game_gameinputtype USING btree (slug);
+
+
+--
+-- Name: gk_collections_game_gameinputtype_slug_480ca43ae6b6f6ed_like; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_game_gameinputtype_slug_480ca43ae6b6f6ed_like ON gk_collections_game_gameinputtype USING btree (slug varchar_pattern_ops);
+
+
+--
+-- Name: gk_collections_game_gameplatform_2dbcba41; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_game_gameplatform_2dbcba41 ON gk_collections_game_gameplatform USING btree (slug);
+
+
+--
+-- Name: gk_collections_game_gameplatform_slug_1fca5b380dc9627f_like; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_game_gameplatform_slug_1fca5b380dc9627f_like ON gk_collections_game_gameplatform USING btree (slug varchar_pattern_ops);
+
+
+--
+-- Name: gk_collections_moving_image_genre_2dbcba41; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_moving_image_genre_2dbcba41 ON gk_collections_moving_image_genre USING btree (slug);
+
+
+--
+-- Name: gk_collections_moving_image_genre_slug_4ba40edc3c8a7c64_like; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_moving_image_genre_slug_4ba40edc3c8a7c64_like ON gk_collections_moving_image_genre USING btree (slug varchar_pattern_ops);
+
+
+--
+-- Name: gk_collections_moving_image_mediatyp_slug_1fb7c057011cd46d_like; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_moving_image_mediatyp_slug_1fb7c057011cd46d_like ON gk_collections_moving_image_mediatype USING btree (slug varchar_pattern_ops);
+
+
+--
+-- Name: gk_collections_moving_image_mediatype_2dbcba41; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_moving_image_mediatype_2dbcba41 ON gk_collections_moving_image_mediatype USING btree (slug);
+
+
+--
+-- Name: gk_collections_moving_image_movingimagework_183208e5; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_moving_image_movingimagework_183208e5 ON gk_collections_moving_image_movingimagework USING btree (media_type_id);
+
+
+--
+-- Name: gk_collections_moving_image_movingimagework_c14e3df7; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_moving_image_movingimagework_c14e3df7 ON gk_collections_moving_image_movingimagework USING btree (rating_id);
+
+
+--
+-- Name: gk_collections_moving_image_movingimagework_genres_080a38f3; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_moving_image_movingimagework_genres_080a38f3 ON gk_collections_moving_image_movingimagework_genres USING btree (genre_id);
+
+
+--
+-- Name: gk_collections_moving_image_movingimagework_genres_61699a61; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_moving_image_movingimagework_genres_61699a61 ON gk_collections_moving_image_movingimagework_genres USING btree (movingimagework_id);
+
+
+--
+-- Name: gk_collections_moving_image_rating_2dbcba41; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_moving_image_rating_2dbcba41 ON gk_collections_moving_image_rating USING btree (slug);
+
+
+--
+-- Name: gk_collections_moving_image_rating_slug_4f02b85872741daf_like; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gk_collections_moving_image_rating_slug_4f02b85872741daf_like ON gk_collections_moving_image_rating USING btree (slug varchar_pattern_ops);
+
+
+--
 -- Name: gk_collections_work_creator_crea_alt_slug_48f4b7115becb078_like; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -10882,6 +12746,14 @@ CREATE INDEX workflow_workflowstate_417f1b1c ON icekit_workflow_workflowstate US
 
 
 --
+-- Name: D011a7a0f89ed3069923d4094258e251; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_movingimagework_genres
+    ADD CONSTRAINT "D011a7a0f89ed3069923d4094258e251" FOREIGN KEY (genre_id) REFERENCES gk_collections_moving_image_genre(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: D0245fb6fed75b5ab189d00502bf89ab; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -10919,6 +12791,14 @@ ALTER TABLE ONLY contentitem_icekit_plugins_reusable_form_formitem
 
 ALTER TABLE ONLY icekit_authors_author
     ADD CONSTRAINT "D1390adc07c948fcb4036694056c43f8" FOREIGN KEY (hero_image_id) REFERENCES icekit_plugins_image_image(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: D13cdac49b5b7d0b920e03076203a14b; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_genres
+    ADD CONSTRAINT "D13cdac49b5b7d0b920e03076203a14b" FOREIGN KEY (genre_id) REFERENCES gk_collections_moving_image_genre(id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -10970,6 +12850,22 @@ ALTER TABLE ONLY contentitem_icekit_events_links_eventlink
 
 
 --
+-- Name: D240164541d9c424b9e3cfdd1c0003b6; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game
+    ADD CONSTRAINT "D240164541d9c424b9e3cfdd1c0003b6" FOREIGN KEY (workbase_ptr_id) REFERENCES gk_collections_work_creator_workbase(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: D253e336318f8d0b8d7f69c26d859396; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_artwork_artwork
+    ADD CONSTRAINT "D253e336318f8d0b8d7f69c26d859396" FOREIGN KEY (workbase_ptr_id) REFERENCES gk_collections_work_creator_workbase(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: D2557a361662f5aad422a1fbfbf08942; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -10978,11 +12874,27 @@ ALTER TABLE ONLY pagetype_eventlistingfordate_eventlistingpage
 
 
 --
+-- Name: D28dc18b45f04c2123cfeae483dfca66; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_platforms
+    ADD CONSTRAINT "D28dc18b45f04c2123cfeae483dfca66" FOREIGN KEY (game_id) REFERENCES gk_collections_game_game(workbase_ptr_id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: D29f75d8d503c908cb3e4107e4c26fed; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY icekit_authorlisting
     ADD CONSTRAINT "D29f75d8d503c908cb3e4107e4c26fed" FOREIGN KEY (hero_image_id) REFERENCES icekit_plugins_image_image(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: D2a115e379e13af56aaa3fcc216fbe3c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_genres
+    ADD CONSTRAINT "D2a115e379e13af56aaa3fcc216fbe3c" FOREIGN KEY (game_id) REFERENCES gk_collections_game_game(workbase_ptr_id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -11015,6 +12927,14 @@ ALTER TABLE ONLY ik_todays_occurrences_types
 
 ALTER TABLE ONLY contentitem_gk_collections_links_creatorlink
     ADD CONSTRAINT "D3458cb454f1cf8e9cdc9b4bc892d82f" FOREIGN KEY (contentitem_ptr_id) REFERENCES fluent_contents_contentitem(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: D3523d444fe01cb958f16449bfb3536a; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_film_formats
+    ADD CONSTRAINT "D3523d444fe01cb958f16449bfb3536a" FOREIGN KEY (film_id) REFERENCES gk_collections_film_film(workbase_ptr_id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -11210,6 +13130,14 @@ ALTER TABLE ONLY icekit_events_eventbase
 
 
 --
+-- Name: D6cce62d9546147d9520959b0c2929c1; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_film_genres
+    ADD CONSTRAINT "D6cce62d9546147d9520959b0c2929c1" FOREIGN KEY (genre_id) REFERENCES gk_collections_moving_image_genre(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: D6d5ecb19efe9b26ef92eb5a19ccb895; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -11290,6 +13218,14 @@ ALTER TABLE ONLY icekit_article_article
 
 
 --
+-- Name: D852a3aba731da26dee201d9238e95a8; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game
+    ADD CONSTRAINT "D852a3aba731da26dee201d9238e95a8" FOREIGN KEY (media_type_id) REFERENCES gk_collections_moving_image_mediatype(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: D892b3ae82379c196d74d17cb7b26b14; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -11354,6 +13290,22 @@ ALTER TABLE ONLY contentitem_text_textitem
 
 
 --
+-- Name: D9740939fe93e03cf87a8b8849416fc0; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_film
+    ADD CONSTRAINT "D9740939fe93e03cf87a8b8849416fc0" FOREIGN KEY (workbase_ptr_id) REFERENCES gk_collections_work_creator_workbase(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: D9a2b44abb2f3caa6fd60bb7b0dcb0d3; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_platforms
+    ADD CONSTRAINT "D9a2b44abb2f3caa6fd60bb7b0dcb0d3" FOREIGN KEY (gameplatform_id) REFERENCES gk_collections_game_gameplatform(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: D9dffe0c8cd92e52bad901d12fb6cb94; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -11383,6 +13335,14 @@ ALTER TABLE ONLY contentitem_gk_collections_links_worklink
 
 ALTER TABLE ONLY contentitem_icekit_plugins_content_listing_contentlistingitem
     ADD CONSTRAINT a7ad0f3ab9eece5f10263ee1e751354f FOREIGN KEY (contentitem_ptr_id) REFERENCES fluent_contents_contentitem(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: a7e318c9fb8f09d59ec5346f4ed47d39; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_movingimagework
+    ADD CONSTRAINT a7e318c9fb8f09d59ec5346f4ed47d39 FOREIGN KEY (media_type_id) REFERENCES gk_collections_moving_image_mediatype(id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -11434,6 +13394,14 @@ ALTER TABLE ONLY icekit_plugins_slideshow_slideshow
 
 
 --
+-- Name: afe0ea1ecaa3d701f3a359f77efd6f30; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_movingimagework
+    ADD CONSTRAINT afe0ea1ecaa3d701f3a359f77efd6f30 FOREIGN KEY (workbase_ptr_id) REFERENCES gk_collections_work_creator_workbase(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: auth__content_type_id_a28c4ab1069e97b_fk_django_content_type_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -11466,11 +13434,35 @@ ALTER TABLE ONLY authtoken_token
 
 
 --
+-- Name: b2720e26ccef56064354b7a19ad91ce6; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_film_genres
+    ADD CONSTRAINT b2720e26ccef56064354b7a19ad91ce6 FOREIGN KEY (film_id) REFERENCES gk_collections_film_film(workbase_ptr_id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: b57d035c68cd3f3d512e48e3f2dedea8; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY test_articlelisting
     ADD CONSTRAINT b57d035c68cd3f3d512e48e3f2dedea8 FOREIGN KEY (hero_image_id) REFERENCES icekit_plugins_image_image(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: b94b0a39313a786602db4ba288bcb67e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_organization_organizationcreator
+    ADD CONSTRAINT b94b0a39313a786602db4ba288bcb67e FOREIGN KEY (creatorbase_ptr_id) REFERENCES gk_collections_work_creator_creatorbase(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: b98a8e0847ce4c6c0f259a82d44277e5; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_movingimagework_genres
+    ADD CONSTRAINT b98a8e0847ce4c6c0f259a82d44277e5 FOREIGN KEY (movingimagework_id) REFERENCES gk_collections_moving_image_movingimagework(workbase_ptr_id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -11498,11 +13490,35 @@ ALTER TABLE ONLY gk_collections_work_creator_workimage
 
 
 --
+-- Name: c1b5be7e9f5668b33b4c4b9b7e683670; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_moving_image_movingimagework
+    ADD CONSTRAINT c1b5be7e9f5668b33b4c4b9b7e683670 FOREIGN KEY (rating_id) REFERENCES gk_collections_moving_image_rating(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: c29bd526c9d43e9002aee16ab3d2b0f6; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_film
+    ADD CONSTRAINT c29bd526c9d43e9002aee16ab3d2b0f6 FOREIGN KEY (media_type_id) REFERENCES gk_collections_moving_image_mediatype(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: c2c288ab70dcc6f54ffee48b5bb4a431; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY contentitem_icekit_plugins_twitter_embed_twitterembeditem
     ADD CONSTRAINT c2c288ab70dcc6f54ffee48b5bb4a431 FOREIGN KEY (contentitem_ptr_id) REFERENCES fluent_contents_contentitem(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: c2eab0cc94871063f2a67f248f3c0fd8; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_film
+    ADD CONSTRAINT c2eab0cc94871063f2a67f248f3c0fd8 FOREIGN KEY (rating_id) REFERENCES gk_collections_moving_image_rating(id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -11730,6 +13746,22 @@ ALTER TABLE ONLY gk_collections_work_creator_workorigin
 
 
 --
+-- Name: e417b272a15860c20422e4371708eca4; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_input_types
+    ADD CONSTRAINT e417b272a15860c20422e4371708eca4 FOREIGN KEY (gameinputtype_id) REFERENCES gk_collections_game_gameinputtype(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: e62f59866eadaf2a0d07721875c5b023; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game
+    ADD CONSTRAINT e62f59866eadaf2a0d07721875c5b023 FOREIGN KEY (rating_id) REFERENCES gk_collections_moving_image_rating(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: e_thumbnail_id_329715e45dd2e01a_fk_easy_thumbnails_thumbnail_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -11778,6 +13810,14 @@ ALTER TABLE ONLY contentitem_icekit_plugins_contact_person_contactpersonitem
 
 
 --
+-- Name: f0b874edc5059546753c82cbb27e355b; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_person_personcreator
+    ADD CONSTRAINT f0b874edc5059546753c82cbb27e355b FOREIGN KEY (creatorbase_ptr_id) REFERENCES gk_collections_work_creator_creatorbase(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: f10d285205dd02ef874b92dedea80a53; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -11791,6 +13831,14 @@ ALTER TABLE ONLY icekit_articlecategorypage
 
 ALTER TABLE ONLY icekit_press_releases_pressrelease
     ADD CONSTRAINT f2323acad92abde7bd66315f7b79bd7b FOREIGN KEY (publishing_linked_id) REFERENCES icekit_press_releases_pressrelease(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: f557ebac1a1aa5125693255aba92ba7e; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_game_game_input_types
+    ADD CONSTRAINT f557ebac1a1aa5125693255aba92ba7e FOREIGN KEY (game_id) REFERENCES gk_collections_game_game(workbase_ptr_id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -11943,6 +13991,14 @@ ALTER TABLE ONLY forms_formentry
 
 ALTER TABLE ONLY glamkit_collections_geographiclocation
     ADD CONSTRAINT g_country_id_553ec213896c0857_fk_glamkit_collections_country_id FOREIGN KEY (country_id) REFERENCES glamkit_collections_country(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: gk__format_id_208133bdfc931da0_fk_gk_collections_film_format_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY gk_collections_film_film_formats
+    ADD CONSTRAINT gk__format_id_208133bdfc931da0_fk_gk_collections_film_format_id FOREIGN KEY (format_id) REFERENCES gk_collections_film_format(id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --

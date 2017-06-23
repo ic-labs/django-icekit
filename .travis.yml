@@ -5,6 +5,10 @@ language: python
 services:
   - docker
 
+# Skip any default but pointless (for us) work Travis does for `python` builds:
+# https://docs.travis-ci.com/user/customizing-the-build#Customizing-the-Installation-Step
+install: true
+
 before_script:
   - docker --version
   - docker-compose --version
