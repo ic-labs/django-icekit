@@ -111,7 +111,7 @@ setuptools.setup(
             'django-post-office',
             'django-redis',
             'django-reversion>=1.9.3,<1.10',  # 1.9.3+ use DB transactions 1.10 has breaking changes for Django 1.9'
-            'django-storages',
+            'django-storages<1.6', # 1.7 breaks s3 URLs - see https://github.com/jschneier/django-storages/issues/343
             'django-test-without-migrations',
             'django-timezone',
             'docutils',
