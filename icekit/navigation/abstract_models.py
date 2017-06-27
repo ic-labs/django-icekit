@@ -1,8 +1,11 @@
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.six import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
+from django.utils.six import text_type
 from fluent_contents.models import PlaceholderField, ContentItem
 from icekit.fields import ICEkitURLField
+from icekit.plugins import descriptors
 
 
 @python_2_unicode_compatible
@@ -18,6 +21,18 @@ class AbstractNavigation(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_active_items_for_request(self, request):
+        active_items = []
+        for item in self.slots.navigation_content:
+            if (
+                hasattr(item, 'is_active_for_request') and
+                item.is_active_for_request(request)
+            ):
+                active_items.append(item)
+        return active_items
+
+descriptors.contribute_to_class(AbstractNavigation, name='slots')
 
 
 @python_2_unicode_compatible
@@ -36,6 +51,11 @@ class AbstractNavigationItem(ContentItem):
     def get_absolute_url(self):
         return self.url
 
+    def is_active_for_request(self, request):
+        url = text_type(self.get_absolute_url())
+        # Note that `startswith` has an implicit equality check as well as substring matching
+        return request.path.startswith(url)
+
 
 @python_2_unicode_compatible
 class AbstractAccountsNavigationItem(ContentItem):
@@ -45,4 +65,16 @@ class AbstractAccountsNavigationItem(ContentItem):
 
     def __str__(self):
         return 'Accounts Navigation Item'
+
+    def get_login_url(self):
+        return reverse('login')
+
+    def get_logout_url(self):
+        return reverse('logout')
+
+    def is_active_for_request(self, request):
+        if request.user.is_authenticated:
+            return request.path == self.get_logout_url()
+        else:
+            return request.path == self.get_login_url()
 

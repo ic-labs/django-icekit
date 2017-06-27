@@ -369,10 +369,18 @@ def sharedcontent_exists(slug):
     takes_context=True,
 )
 def render_navigation(context, identifier):
-    slug = slugify(identifier)
-    navigation = navigation_models.Navigation.objects.filter(slug=slug).first()
+    request = context['request']
+
+    navigation_slug = slugify(identifier)
+    navigation = navigation_models.Navigation.objects.filter(slug=navigation_slug).first()
+    if navigation:
+        active_navigation_items = navigation.get_active_items_for_request(request)
+    else:
+        active_navigation_items = None
+
     return {
         'navigation': navigation,
+        'active_navigation_items': active_navigation_items,
         'page': context.get('page'),
         'request': context.get('request'),
     }
