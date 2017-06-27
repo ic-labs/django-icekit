@@ -374,13 +374,10 @@ def render_navigation(context, identifier):
     navigation_slug = slugify(identifier)
     navigation = navigation_models.Navigation.objects.filter(slug=navigation_slug).first()
     if navigation:
-        active_navigation_items = navigation.get_active_items_for_request(request)
-    else:
-        active_navigation_items = None
+        navigation.set_request(request)
 
     return {
         'navigation': navigation,
-        'active_navigation_items': active_navigation_items,
         'page': context.get('page'),
         'request': context.get('request'),
     }

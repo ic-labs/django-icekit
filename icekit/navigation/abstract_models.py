@@ -1,8 +1,8 @@
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.utils.six import python_2_unicode_compatible
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
-from django.utils.six import text_type
+from django.utils.six import text_type, python_2_unicode_compatible
 from fluent_contents.models import PlaceholderField, ContentItem
 from icekit.fields import ICEkitURLField
 from icekit.plugins import descriptors
@@ -15,6 +15,7 @@ class AbstractNavigation(models.Model):
     pre_html = models.TextField(blank=True)
     post_html = models.TextField(blank=True)
     content = PlaceholderField('navigation_content')
+    request = None
 
     class Meta:
         abstract = True
@@ -22,12 +23,19 @@ class AbstractNavigation(models.Model):
     def __str__(self):
         return self.name
 
-    def get_active_items_for_request(self, request):
+    def set_request(self, request):
+        self.request = request
+
+    @cached_property
+    def active_items(self):
+        if not self.request:
+            raise Exception('`active_items` requires access to a request object. Call `.set_request(...)`')
+
         active_items = []
         for item in self.slots.navigation_content:
             if (
                 hasattr(item, 'is_active_for_request') and
-                item.is_active_for_request(request)
+                item.is_active_for_request(self.request)
             ):
                 active_items.append(item)
         return active_items

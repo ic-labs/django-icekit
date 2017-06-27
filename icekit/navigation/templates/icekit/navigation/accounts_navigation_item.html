@@ -1,4 +1,4 @@
-<li class="ik-nav-item ik-nav-item--accounts {% if instance in active_navigation_items %}ik-nav-item--active{% endif %}">
+<li class="ik-nav-item ik-nav-item--accounts {% if instance in navigation.active_items %}ik-nav-item--active{% endif %}">
     {% if request.user.is_authenticated %}
         <span class="ik-nav-item-account-name">{{ request.user }}</span>
         <a class="ik-nav-item-link btn btn-primary" href="{{ instance.get_logout_url }}">

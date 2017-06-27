@@ -1,6 +1,6 @@
-<li class="ik-nav-item {% if instance in active_navigation_items %}ik-nav-item--active{% endif %}">
+<li class="ik-nav-item {% if instance in navigation.active_items %}ik-nav-item--active{% endif %} {{ instance.html_class }}">
     <a
-        class="ik-nav-item-link {% if instance.html_class %}{{ instance.html_class }}{% endif %}"
+        class="ik-nav-item-link"
         href="{{ instance.get_absolute_url }}"
     >
         <span class="ik-nav-item-title">{{ instance.title }}</span>

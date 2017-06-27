@@ -146,31 +146,31 @@ class TestNavigation(TestCase):
             parent_type_id=ContentType.objects.get_for_model(Navigation).id,
             parent_id=navigation.id,
         )
-        self.assertEqual(
-            navigation.get_active_items_for_request(self.create_request(path='/__no_match__/')),
-            [],
-        )
-        self.assertEqual(
-            navigation.get_active_items_for_request(self.create_request(path='/test/url/')),
-            [navigation_item_1],
-        )
-        self.assertEqual(
-            navigation.get_active_items_for_request(self.create_request(path='/test/url/nested/')),
-            [navigation_item_1, navigation_item_2],
-        )
-        self.assertEqual(
-            navigation.get_active_items_for_request(self.create_request(path=reverse('login'), is_authenticated=True)),
-            [],
-        )
-        self.assertEqual(
-            navigation.get_active_items_for_request(self.create_request(path=reverse('login'))),
-            [accounts_navigation_item],
-        )
-        self.assertEqual(
-            navigation.get_active_items_for_request(self.create_request(path=reverse('logout'))),
-            [],
-        )
-        self.assertEqual(
-            navigation.get_active_items_for_request(self.create_request(path=reverse('logout'), is_authenticated=True)),
-            [accounts_navigation_item],
-        )
+
+        navigation.set_request(self.create_request(path='/__no_match__/'))
+        self.assertEqual(navigation.active_items, [])
+        del navigation.active_items
+
+        navigation.set_request(self.create_request(path='/test/url/'))
+        self.assertEqual(navigation.active_items, [navigation_item_1])
+        del navigation.active_items
+
+        navigation.set_request(self.create_request(path='/test/url/nested/'))
+        self.assertEqual(navigation.active_items, [navigation_item_1, navigation_item_2])
+        del navigation.active_items
+
+        navigation.set_request(self.create_request(path=reverse('login'), is_authenticated=True))
+        self.assertEqual(navigation.active_items, [])
+        del navigation.active_items
+
+        navigation.set_request(self.create_request(path=reverse('login')))
+        self.assertEqual(navigation.active_items, [accounts_navigation_item])
+        del navigation.active_items
+
+        navigation.set_request(self.create_request(path=reverse('logout')))
+        self.assertEqual(navigation.active_items, [])
+        del navigation.active_items
+
+        navigation.set_request(self.create_request(path=reverse('logout'), is_authenticated=True))
+        self.assertEqual(navigation.active_items, [accounts_navigation_item])
+        del navigation.active_items
