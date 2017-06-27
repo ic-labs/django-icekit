@@ -570,13 +570,15 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
 
         return self.occurrence_list and not self.upcoming_occurrence_list
 
-    def get_occurrence_url(self, occurrence):
-        # Calculate and return the URL for an occurrence
-        try:
-            URLValidator()(occurrence.external_ref)
-            return occurrence.external_ref
-        except ValidationError:
-            return ""
+    # Commenting for now, because it sits earlier in the MRO than a
+    # project-specific mixin.
+    # def get_occurrence_url(self, occurrence):
+    #     # Calculate and return the URL for an occurrence
+    #     try:
+    #         URLValidator()(occurrence.external_ref)
+    #         return occurrence.external_ref
+    #     except ValidationError:
+    #         return ""
 
 
 class AbstractEventWithLayouts(EventBase, FluentFieldsMixin):

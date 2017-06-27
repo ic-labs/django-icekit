@@ -223,4 +223,22 @@ class ICEkitFluentPagesParentAdmin(
             return super(ICEkitFluentPagesParentAdmin, self).get_search_results(
                 request, queryset, search_term)
 
+    # Override default `get_actions` to control the actions exposed in pages
+    # parent admin to avoid unsafe/incompatible actions inherited from all
+    # admins in the MRO chain
+    def get_actions(self, request):
+        actions = super(ICEkitFluentPagesParentAdmin, self).get_actions(request)
 
+        # Remove `make_published` from `UrlNodeParentAdmin` because it works
+        # for Fluent Pages' default publishing mechanism, not GLAMkit's
+        actions.pop('make_published', None)
+
+        # Remove `delete_selected` which is provided by `AdminSite` by default
+        # but which fails due to a conflict between MPTT's overridden delete
+        # method `MPTTModelAdmin.delete_selected_tree` and polymorphic proxy
+        # models
+        # TODO Fix bulk delete to work, but *safely* with proper MPTT
+        # recalculation
+        actions.pop('delete_selected', None)
+
+        return actions

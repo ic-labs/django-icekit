@@ -45,6 +45,12 @@ DDF_IGNORE_FIELDS = ['*_ptr']  # Ignore django-polymorphic pointer fields
 
 DEBUG = True
 
+# Disable all django-compressor feature to speed up test runs
+COMPRESS_ENABLED = False
+COMPRESS_OFFLINE = False
+COMPRESS_PRECOMPILERS = []
+COMPRESS_CSS_FILTERS = []
+
 # ICEKIT ######################################################################
 
 # RESPONSE_PAGE_PLUGINS = ['ImagePlugin', ]

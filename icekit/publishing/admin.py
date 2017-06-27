@@ -239,6 +239,7 @@ class _PublishingHelpersMixin(object):
     models, and for the "parent" page admins used by Fluent which needs to
     cope with models that may or may not implement our publishing features.
     """
+    actions = ['publish', 'unpublish']
 
     def __init__(self, *args, **kwargs):
         super(_PublishingHelpersMixin, self).__init__(*args, **kwargs)
@@ -357,14 +358,33 @@ class _PublishingHelpersMixin(object):
     publishing_column.allow_tags = True
     publishing_column.short_description = _('Published')
 
+    def publish(self, request, qs):
+        """ Publish bulk action """
+        # Convert polymorphic queryset instances to real ones if/when necessary
+        try:
+            qs = self.model.objects.get_real_instances(qs)
+        except AttributeError:
+            pass
+        for q in qs:
+            if self.has_publish_permission(request, q):
+                q.publish()
+
+    def unpublish(self, request, qs):
+        """ Unpublish bulk action """
+        # Convert polymorphic queryset instances to real ones if/when necessary
+        try:
+            qs = self.model.objects.get_real_instances(qs)
+        except AttributeError:
+            pass
+        for q in qs:
+            q.unpublish()
+
 
 class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
     form = PublishingAdminForm
     list_display = ('publishing_object_title', 'publishing_column', 'publishing_modified_at')
     list_display_links = ('publishing_object_title', ) # default, but makes it easier to extend
     list_filter = (PublishingStatusFilter, PublishingPublishedFilter)
-
-    actions = ['publish', 'unpublish']
 
     class Media:
         js = (
@@ -675,25 +695,6 @@ class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
                 self.non_publishing_change_form_template
 
         return response
-
-    def publish(self, request, qs):
-        # Convert polymorphic queryset instances to real ones if/when necessary
-        try:
-            qs = self.model.objects.get_real_instances(qs)
-        except AttributeError:
-            pass
-        for q in qs:
-            if self.has_publish_permission(request, q):
-                q.publish()
-
-    def unpublish(self, request, qs):
-        # Convert polymorphic queryset instances to real ones if/when necessary
-        try:
-            qs = self.model.objects.get_real_instances(qs)
-        except AttributeError:
-            pass
-        for q in qs:
-            q.unpublish()
 
 
 class PublishingFluentPagesParentAdminMixin(_PublishingHelpersMixin):
