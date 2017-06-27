@@ -9,8 +9,8 @@ from icekit.fields import ICEkitURLField
 class AbstractNavigation(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField()
-    pre_html = models.TextField(blank=True, default='<nav><ul>')
-    post_html = models.TextField(blank=True, default='</ul></nav>')
+    pre_html = models.TextField(blank=True)
+    post_html = models.TextField(blank=True)
     content = PlaceholderField('navigation_content')
 
     class Meta:
@@ -33,6 +33,9 @@ class AbstractNavigationItem(ContentItem):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        return self.url
+
 
 @python_2_unicode_compatible
 class AbstractAccountsNavigationItem(ContentItem):
@@ -42,3 +45,4 @@ class AbstractAccountsNavigationItem(ContentItem):
 
     def __str__(self):
         return 'Accounts Navigation Item'
+

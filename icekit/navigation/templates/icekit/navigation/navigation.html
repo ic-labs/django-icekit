@@ -1,0 +1,25 @@
+{% load fluent_contents_tags %}
+
+{% if navigation %}
+    <div class="ik-nav ik-nav--{{ navigation.slug }}">
+        <!-- navigation pre_html start -->
+        {% if navigation.pre_html %}
+            {{ navigation.pre_html|safe }}
+        {% else %}
+            <nav class="ik-nav-container">
+                <ul class="ik-nav-list">
+        {% endif %}
+        <!-- navigation pre_html end -->
+
+        {% render_placeholder navigation.content %}
+
+        <!-- navigation post_html start -->
+        {% if navigation.post_html %}
+            {{ navigation.post_html|safe }}
+        {% else %}
+                </ul>
+            </nav>
+        {% endif %}
+        <!-- navigation post_html end -->
+    </div>
+{% endif %}

@@ -1,4 +1,4 @@
-from icekit.contrib.navigation.abstract_models import (
+from icekit.navigation.abstract_models import (
     AbstractNavigation, AbstractNavigationItem, AbstractAccountsNavigationItem
 )
 

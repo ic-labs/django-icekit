@@ -1,6 +1,6 @@
 from django.contrib import admin
 from fluent_contents.admin import PlaceholderFieldAdmin
-from icekit.contrib.navigation.models import Navigation
+from icekit.navigation.models import Navigation
 
 
 class NavigationAdmin(PlaceholderFieldAdmin):
