@@ -581,6 +581,12 @@ DEFAULT_PLUGINS = \
     LINK_PLUGINS + \
     SPONSOR_PLUGINS
 
+IK_NAVIGATION_PLUGINS = (
+    'NavigationItemPlugin',
+    'AccountsNavigationItemPlugin',
+    'RawHtmlPlugin',
+)
+
 FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
     'main': {
         'plugins': DEFAULT_PLUGINS,
@@ -593,6 +599,9 @@ FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
             'ContactPersonPlugin',
             'TextPlugin',
         ),
+    },
+    'navigation_content': {
+        'plugins': IK_NAVIGATION_PLUGINS,
     },
 }
 
@@ -814,6 +823,7 @@ INSTALLED_APPS += (
     'icekit.publishing',
     'icekit.response_pages',
     'icekit.content_collections',
+    'icekit.navigation',
     'notifications',
 
     'icekit.page_types.article',

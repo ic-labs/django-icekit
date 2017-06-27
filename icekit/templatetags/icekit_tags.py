@@ -9,11 +9,13 @@ from django.http import QueryDict
 from django.template import Library
 from django.template.base import Token, Variable
 from django.template.loader_tags import do_include
+from django.utils.text import slugify
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from fluent_contents.plugins.oembeditem.backend import get_oembed_data
-from icekit.admin_tools.utils import admin_link as admin_link_fn, admin_url as admin_url_fn
 from micawber import ProviderException
+from icekit.admin_tools.utils import admin_link as admin_link_fn, admin_url as admin_url_fn
+from icekit.navigation import models as navigation_models
 
 register = Library()
 
@@ -359,3 +361,24 @@ def sharedcontent_exists(slug):
     from fluent_contents.plugins.sharedcontent.models import SharedContent
     site = Site.objects.get_current()
     return SharedContent.objects.parent_site(site).filter(slug=slug).exists()
+
+
+@register.inclusion_tag(
+    'icekit/navigation/navigation.html',
+    name='render_navigation',
+    takes_context=True,
+)
+def render_navigation(context, identifier):
+    request = context['request']
+
+    navigation_slug = slugify(identifier)
+    navigation = navigation_models.Navigation.objects.filter(slug=navigation_slug).first()
+    if navigation:
+        navigation.set_request(request)
+
+    return {
+        'navigation': navigation,
+        'page': context.get('page'),
+        'request': context.get('request'),
+    }
+
