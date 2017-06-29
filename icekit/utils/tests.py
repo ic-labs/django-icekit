@@ -8,7 +8,7 @@ from django_webtest import WebTest
 from icekit.utils import testing
 from icekit.tests.models import ImageTest
 from icekit.utils.sequences import slice_sequences
-from icekit.utils.pagination import describe_page_numbers
+from icekit.utils.pagination import describe_page_numbers, parse_page_number
 
 
 class TestingUtils(WebTest):
@@ -185,3 +185,11 @@ class TestingUtils(WebTest):
              'previous_page': 0,
              'total_count': 0},
         )
+
+    def test_parse_page_number(self):
+        self.assertEqual(parse_page_number('1'), 1)
+        self.assertEqual(parse_page_number(None), 1)
+        self.assertEqual(parse_page_number(''), 1)
+        self.assertEqual(parse_page_number('2'), 2)
+        self.assertEqual(parse_page_number('-2'), 1)
+        self.assertEqual(parse_page_number('2.1'), 1)

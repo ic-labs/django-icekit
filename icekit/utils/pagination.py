@@ -54,6 +54,21 @@ def describe_page_numbers(current_page, total_count, per_page, page_numbers_at_e
     }
 
 
+def parse_page_number(page_number):
+    if page_number:
+        if isinstance(page_number, six.string_types):
+            try:
+                page_number = int(page_number)
+            except ValueError:
+                page_number = 1
+        if page_number < 1:
+            page_number = 1
+    else:
+        page_number = 1
+
+    return page_number
+
+
 class ICEKitAPIPagination(PageNumberPagination):
     """
     Default API pagination configuration for ICEKit.
