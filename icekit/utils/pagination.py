@@ -37,9 +37,15 @@ def describe_page_numbers(current_page, total_count, per_page, page_numbers_at_e
             extremes=page_numbers_at_ends,
             arounds=pages_numbers_around_current,
         )
+        current_items_start = (current_page * per_page) - per_page + 1
+        current_items_end = (current_items_start + per_page) - 1
+        if current_items_end > total_count:
+            current_items_end = total_count
     else:
         page_count = 0
         page_numbers = []
+        current_items_start = 0
+        current_items_end = 0
 
     return {
         'numbers': [num for num in page_numbers if not isinstance(num, six.string_types)],
@@ -51,6 +57,8 @@ def describe_page_numbers(current_page, total_count, per_page, page_numbers_at_e
         'total_count': total_count,
         'page_count': page_count,
         'per_page': per_page,
+        'current_items_start': current_items_start,
+        'current_items_end': current_items_end,
     }
 
 

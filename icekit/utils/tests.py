@@ -104,7 +104,7 @@ class TestingUtils(WebTest):
             slice_sequences([[[1, 2, 3], 3], [[4, 5, 6, 7], 4]], 100, 200),
             [],
         )
-        
+
     def test_describe_page_numbers(self):
         self.assertEqual(
             describe_page_numbers(1, 500, 10),
@@ -116,7 +116,9 @@ class TestingUtils(WebTest):
              'page_count': 50,
              'per_page': 10,
              'previous_page': 0,
-             'total_count': 500}
+             'total_count': 500,
+             'current_items_start': 1,
+             'current_items_end': 10},
         )
 
         self.assertEqual(
@@ -129,7 +131,9 @@ class TestingUtils(WebTest):
              'page_count': 50,
              'per_page': 10,
              'previous_page': 9,
-             'total_count': 500},
+             'total_count': 500,
+             'current_items_start': 91,
+             'current_items_end': 100},
         )
 
         self.assertEqual(
@@ -142,7 +146,9 @@ class TestingUtils(WebTest):
              'page_count': 50,
              'per_page': 10,
              'previous_page': 49,
-             'total_count': 500},
+             'total_count': 500,
+             'current_items_start': 491,
+             'current_items_end': 500},
         )
 
         self.assertEqual(
@@ -155,7 +161,9 @@ class TestingUtils(WebTest):
              'page_count': 4,
              'per_page': 10,
              'previous_page': 1,
-             'total_count': 40},
+             'total_count': 40,
+             'current_items_start': 11,
+             'current_items_end': 20},
         )
 
         self.assertEqual(
@@ -169,7 +177,9 @@ class TestingUtils(WebTest):
              'page_count': 1,
              'per_page': 20,
              'previous_page': 0,
-             'total_count': 1},
+             'total_count': 1,
+             'current_items_start': 1,
+             'current_items_end': 1},
         )
 
         self.assertEqual(
@@ -183,7 +193,9 @@ class TestingUtils(WebTest):
              'page_count': 0,
              'per_page': 20,
              'previous_page': 0,
-             'total_count': 0},
+             'total_count': 0,
+             'current_items_start': 0,
+             'current_items_end': 0},
         )
 
     def test_parse_page_number(self):
