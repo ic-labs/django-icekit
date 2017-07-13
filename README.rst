@@ -1,5 +1,5 @@
 |Build Status| |Coverage Status| |Documentation| |Requirements Status|
-|Version|
+|Version| |IRC|
 
 |Deploy to Docker Cloud|
 
@@ -139,5 +139,7 @@ Next steps
    :target: https://requires.io/github/ic-labs/django-icekit/requirements/
 .. |Version| image:: https://img.shields.io/pypi/v/django-icekit.svg
    :target: https://pypi.python.org/pypi/django-icekit
+.. |IRC| image:: https://img.shields.io/badge/IRC-%23glamkit-1e72ff.svg
+   :target: https://www.irccloud.com/invite?channel=%23glamkit&amp;hostname=irc.freenode.net&amp;port=6697&amp;ssl=1
 .. |Deploy to Docker Cloud| image:: https://files.cloud.docker.com/images/deploy-to-dockercloud.svg
    :target: https://cloud.docker.com/stack/deploy/?repo=https://github.com/ic-labs/django-icekit/
