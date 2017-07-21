@@ -2,13 +2,14 @@ import re
 import json
 import urllib
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from icekit.content_collections.abstract_models import TitleSlugMixin
 from icekit.models import ICEkitFluentContentsMixin
+
+from . import appsettings
 
 
 class Location(
@@ -160,8 +161,7 @@ class Location(
             'marker': self.map_marker or self.map_center,
             'zoom': self.map_zoom,
             'href': self.get_map_href(),
-            'key': getattr(settings, 'GOOGLE_MAPS_API_KEY',
-                           'MISSING_GOOGLE_MAPS_API_KEY'),
+            'key': appsettings.GOOGLE_MAPS_API_KEY,
             # Python's line-splitting is more cross-OS compatible, so we feed
             # a pre-built array to the front-end
             'description': [

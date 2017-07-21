@@ -830,7 +830,6 @@ INSTALLED_APPS += (
     'icekit.page_types.author',
     'icekit.page_types.layout_page',
     'icekit.page_types.search_page',
-    'icekit.page_types.location',
 
     # 'icekit.plugins.brightcove',
     'icekit.plugins.child_pages',
@@ -855,6 +854,7 @@ INSTALLED_APPS += (
     'icekit.plugins.image_gallery',
     'icekit.plugins.twitter_embed',
     'icekit.plugins.text',
+    'icekit.plugins.location',
 
     # Events
     'icekit_events',
