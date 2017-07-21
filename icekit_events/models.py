@@ -249,6 +249,13 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         help_text=_('The URL where visitors can arrange to attend an event'
                     ' by purchasing tickets or RSVPing.')
     )
+    location = models.ForeignKey(
+        'icekit_plugins_location.Location',
+        limit_choices_to={'publishing_is_draft': True},
+        null=True,
+        related_name='events',
+        on_delete=models.SET_NULL
+    )
 
     class Meta:
         ordering = ('title', 'pk')
