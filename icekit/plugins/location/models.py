@@ -138,19 +138,19 @@ class Location(
 
     def render_map(self):
         """
-        Returns either the map_embed_code field or renders a container and some
-        JSON that is picked up by `sfmoma_events/event_maps.js` which mounts
-        a responsive static map with overlays and links
+        Returns either the `map_embed_code` field or renders a container and
+        JSON that is picked up by `icekit/plugins/location/location_map.js`
+        which mounts a responsive static map with overlays and links
         """
 
         if self.map_embed_code.strip():
             return self.map_embed_code
 
         return '''
-            <div id="{container_id}" class="event-map"></div>
+            <div id="{container_id}" class="location-map"></div>
             <script>
-                sfmomaEventMaps = window.sfmomaEventMaps || [];
-                sfmomaEventMaps.push({data});
+                gkLocationMaps = window.gkLocationMaps || [];
+                gkLocationMaps.push({data});
             </script>
         '''.format(
             container_id=self.get_map_element_id(),
@@ -194,4 +194,4 @@ class Location(
         """
         Returns a unique identifier for a map element
         """
-        return 'event-map-' + str(id(self))
+        return 'location-map-' + str(id(self))

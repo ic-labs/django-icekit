@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load placeholder_tags icekit_tags events_tags %}
+{% load placeholder_tags icekit_tags static %}
 
 {% block title %}{{ location.title }}{% endblock %}
 
@@ -44,4 +44,10 @@
 {% block body_js %}
 	{{ block.super }}
 	{% render_content_items_media %}
+{% endblock %}
+
+{% block base_js %}
+	{{ block.super }}
+	<script src="{% static 'lodash/lodash.js' %}"></script>
+	<script src="{% static 'icekit/plugins/location/location_map.js' %}"></script>
 {% endblock %}
