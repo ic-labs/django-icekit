@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load placeholder_tags icekit_tags events_tags %}
+
+{% block title %}{{ location.title }}{% endblock %}
+
+{% block content %}
+	<h1>{{ location.title }}</h1>
+	<p>{{ location.map_description }}</p>
+
+	<h2>Map</h2>
+	{{ location.render_map|safe }}
+
+	<h2>Details</h2>
+	{% if location.address %}
+		<p>
+			Address:
+			{{ location.address }}
+		</p>
+	{% endif %}
+	{% if location.phone_number %}
+		<p>
+			Phone:
+			<a href="tel:{{ location.phone_number }}">{{ location.phone_number }}</a>
+		</p>
+	{% endif %}
+	{% if location.url %}
+		<p>
+			Web:
+			<a href="{{ location.url }}">{{ location.url }}</a>
+		</p>
+	{% endif %}
+	{% if location.email %}
+		<p>
+			<a href="mailto:{{ location.email }}">{{ location.email_call_to_action }}</a>
+		</p>
+	{% endif %}
+
+	<h2>Content</h2>
+	{% page_placeholder location "main" role="main" %}
+
+	<a href="{% url "icekit_plugins_location_index" %}">&lt; All Locations</a>
+{% endblock %}
+
+{% block body_js %}
+	{{ block.super }}
+	{% render_content_items_media %}
+{% endblock %}

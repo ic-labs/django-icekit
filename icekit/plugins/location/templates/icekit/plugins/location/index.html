@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block body %}
+	<h1>Locations</h1>
+	{% if locations %}
+		{% for location in locations %}
+			<ul>
+				<li>
+					<a href="{{ location.get_absolute_url }}">
+						{{ location.title }} &mdash; {{ location.map_description }}
+					</a>
+				</li>
+			</ul>
+		{% endfor %}
+	{% else %}
+		<div>There are no locations.</div>
+	{% endif %}
+{% endblock %}

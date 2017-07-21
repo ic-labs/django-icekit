@@ -3,6 +3,7 @@ import json
 import urllib
 
 from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -128,6 +129,12 @@ class Location(
             raise ValidationError(
                 'Either the map center or the map embed code must be defined'
             )
+
+    def get_absolute_url(self):
+        return reverse(
+            'icekit_plugins_location_detail',
+            kwargs={'slug': self.slug}
+        )
 
     def render_map(self):
         """

@@ -169,6 +169,7 @@ urlpatterns = patterns(
     url(r'^events/', include('icekit_events.urls')),
     url(r'^collection/', include('glamkit_collections.contrib.work_creator.urls')),
     url(r'^iiif/', include('icekit.plugins.iiif.urls')),
+    url(r'^location/', include('icekit.plugins.location.urls')),
 
     # Catch all, fluent page dispatcher.
     url(r'^', include('fluent_pages.urls')),
