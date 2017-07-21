@@ -252,7 +252,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     location = models.ForeignKey(
         'icekit_plugins_location.Location',
         limit_choices_to={'publishing_is_draft': True},
-        null=True,
+        blank=True, null=True,
         related_name='events',
         on_delete=models.SET_NULL
     )
