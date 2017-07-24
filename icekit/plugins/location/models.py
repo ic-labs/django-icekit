@@ -153,13 +153,13 @@ class Location(
         if self.map_embed_code.strip():
             return self.map_embed_code
 
-        return '''
-            <div id="{container_id}" class="location-map"></div>
-            <script>
-                gkLocationMaps = window.gkLocationMaps || [];
-                gkLocationMaps.push({data});
-            </script>
-        '''.format(
+        return (
+            '<div id="{container_id}" class="location-map"></div>'
+            '<script>'
+            '    gkLocationMaps = window.gkLocationMaps || [];'
+            '    gkLocationMaps.push({data});'
+            '</script>'
+        ).format(
             container_id=self.get_map_element_id(),
             data=json.dumps(self.get_map_data()),
         )
