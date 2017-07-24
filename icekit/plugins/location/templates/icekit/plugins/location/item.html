@@ -1,0 +1,10 @@
+{% block location %}
+<p class="location">
+	<a class="location-link" href="{{ instance.location.get_absolute_url }}">
+		<span class="location-name">{{ instance.location.title }}</span><br />
+		<small class="location-meta-data">
+			(<span class="location-description">{{ instance.location.map_description }}</span>)
+		</small>
+	</a>
+</p>
+{% endblock %}

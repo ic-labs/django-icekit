@@ -5,7 +5,10 @@ import urllib
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
+
+from fluent_contents.models import ContentItem
 
 from icekit.content_collections.abstract_models import TitleSlugMixin
 from icekit.models import ICEkitFluentContentsMixin
@@ -14,6 +17,7 @@ from icekit.mixins import ListableMixin, HeroMixin
 from . import appsettings
 
 
+@python_2_unicode_compatible
 class Location(
     ICEkitFluentContentsMixin,
     TitleSlugMixin,
@@ -124,7 +128,7 @@ class Location(
     class Meta:
         unique_together = (('slug', 'publishing_linked'), )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def clean(self):
@@ -198,3 +202,18 @@ class Location(
         Returns a unique identifier for a map element
         """
         return 'location-map-' + str(id(self))
+
+
+@python_2_unicode_compatible
+class LocationItem(ContentItem):
+    location = models.ForeignKey(
+        Location,
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        verbose_name = _('Location')
+        verbose_name_plural = _('Locations')
+
+    def __str__(self):
+        return str(self.location)
