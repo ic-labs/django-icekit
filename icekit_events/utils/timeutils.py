@@ -126,3 +126,21 @@ def format_naive_ical_dt(date_or_datetime):
         return dt.strftime('%Y%m%dT%H%M%S')
     else:
         return dt.astimezone(get_current_timezone()).strftime('%Y%m%dT%H%M%S')
+
+
+def localize_preserving_time_of_day(dt):
+    """
+    Return the given datetime with the same time-of-day (hours and minutes) as
+    it *seems* to have, even if it has been adjusted by applying `timedelta`
+    additions that traverse daylight savings dates and would therefore
+    otherwise trigger changes to its apparent time.
+    """
+    # Remember the apparent time-of-day hours and minutes
+    hour, minute = dt.hour, dt.minute
+    # Ensure we have a localized datetime, which will trigger any hour/minute
+    # changes depending on daylight saving changes triggered by a timedelta
+    # operation
+    dt_localized = djtz.localize(dt)
+    # Forcibly reset the hour and minute time-of-day values to the apparent
+    # values we stored
+    return dt_localized.replace(hour=hour, minute=minute)

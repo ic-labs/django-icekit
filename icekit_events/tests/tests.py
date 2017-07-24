@@ -29,6 +29,7 @@ from icekit_events import appsettings, forms, models
 from icekit_events.event_types.simple.models import SimpleEvent
 from icekit_events.models import get_occurrence_times_for_event, coerce_naive, \
     Occurrence, RecurrenceRule
+from icekit_events.utils.timeutils import localize_preserving_time_of_day
 from icekit_events.utils import timeutils
 
 
@@ -124,7 +125,8 @@ class TestAdmin(WebTest):
         #######################################################################
         # Add "Daily" repeat generator, spans 1 week
         #######################################################################
-        repeat_end = self.start + timedelta(days=7)
+        repeat_end = localize_preserving_time_of_day(
+            self.start + timedelta(days=7))
         form = response.forms[0]
         form['repeat_generators-0-recurrence_rule_0'].select(
             str(self.daily_recurrence_rule.pk))
@@ -152,9 +154,11 @@ class TestAdmin(WebTest):
         self.assertEqual(
             self.end, event.occurrences.all()[0].end)
         self.assertEqual(
-            self.start + timedelta(days=6), event.occurrences.all()[6].start)
+            localize_preserving_time_of_day(self.start + timedelta(days=6)),
+            event.occurrences.all()[6].start)
         self.assertEqual(
-            self.end + timedelta(days=6), event.occurrences.all()[6].end)
+            localize_preserving_time_of_day(self.end + timedelta(days=6)),
+            event.occurrences.all()[6].end)
         #######################################################################
         # Add "Daily on weekends" all-day repeat generator, no repeat end
         #######################################################################
@@ -242,7 +246,8 @@ class TestAdmin(WebTest):
         # Add all-day occurrence manually
         #######################################################################
         form = response.follow().forms[0]
-        all_day_start = self.start + timedelta(days=3)
+        all_day_start = localize_preserving_time_of_day(
+            self.start + timedelta(days=3))
         form['occurrences-1-start'].value = \
             all_day_start.strftime('%Y-%m-%d 00:00:00')
         form['occurrences-1-end'].value = \
@@ -288,13 +293,16 @@ class TestAdmin(WebTest):
             title='Test Event',
             layout=self.layout,
         )
+        # Generate a repeat end date 10 weeks ahead
+        repeat_end = localize_preserving_time_of_day(
+            self.start + timedelta(weeks=10))
         G(
             models.EventRepeatsGenerator,
             event=event,
             start=self.start,
             end=self.end,
             recurrence_rule='FREQ=WEEKLY',
-            repeat_end=self.start + timedelta(weeks=10),
+            repeat_end=repeat_end,
         )
         self.assertEqual(10, event.occurrences.count())
         self.assertEqual(10, event.occurrences.generated().count())
@@ -307,10 +315,10 @@ class TestAdmin(WebTest):
         # Add occurrence manually
         #######################################################################
         form = response.forms[0]
-        extra_occurrence_start = (first_occurrence.start - timedelta(days=3)) \
-            .astimezone(djtz.get_current_timezone())
-        extra_occurrence_end = (first_occurrence.end - timedelta(days=3)) \
-            .astimezone(djtz.get_current_timezone())
+        extra_occurrence_start = localize_preserving_time_of_day(
+            first_occurrence.start - timedelta(days=3))
+        extra_occurrence_end = localize_preserving_time_of_day(
+            first_occurrence.end - timedelta(days=3))
         form['occurrences-10-start'].value = \
             extra_occurrence_start.strftime('%Y-%m-%d %H:%M:%S')
         form['occurrences-10-end'].value = \
@@ -462,7 +470,8 @@ class TestAdmin(WebTest):
         # Update event title
         form['title'].value += ' - Update 1'
         # Add weekly repeat for 4 weeks
-        repeat_end = self.start + timedelta(days=28)
+        repeat_end = localize_preserving_time_of_day(
+            self.start + timedelta(days=28))
         form['repeat_generators-0-recurrence_rule_0'].select(
             str(self.weekly_recurrence_rule.pk))
         form['repeat_generators-0-recurrence_rule_1'].value = 'weekly'
@@ -480,8 +489,8 @@ class TestAdmin(WebTest):
         form['repeat_generators-0-repeat_end_1'].value = \
             repeat_end.strftime('%H:%M:%S')
         # Add ad-hoc occurrence
-        extra_occurrence_start = (self.start - timedelta(days=30)) \
-            .astimezone(djtz.get_current_timezone())
+        extra_occurrence_start = localize_preserving_time_of_day(
+            self.start - timedelta(days=30))
         extra_occurrence_end = extra_occurrence_start + timedelta(hours=3)
         form['occurrences-0-start'].value = \
             extra_occurrence_start.strftime('%Y-%m-%d %H:%M:%S')
@@ -591,7 +600,8 @@ class TestAdmin(WebTest):
             title='Test Event',
             layout=self.layout,
         )
-        repeat_end = self.end + timedelta(days=7)
+        repeat_end = localize_preserving_time_of_day(
+            self.end + timedelta(days=7))
         G(
             models.EventRepeatsGenerator,
             event=event,
@@ -804,32 +814,76 @@ class TestEventManager(TestCase):
 class TestEventRepeatOccurrencesRespectLocalTimeDefinition(TestCase):
 
     def setUp(self):
-        self.start = djtz.datetime(2016,10,1, 9,0)
-        self.end = djtz.datetime(2016,10,1, 17)
-        self.repeat_end = djtz.datetime(2016,10,31, 17)
-
         self.event = G(SimpleEvent)
 
     def test_daily_occurrences_spanning_aus_daylight_saving_change(self):
-        generator = models.EventRepeatsGenerator.objects.create(
+        # Aus daylight savings +1 hour on Sun, 2 Oct 2016 at 2:00 am
+        start = djtz.datetime(2016,10,1, 9,0)
+        end = djtz.datetime(2016,10,1, 17)
+        repeat_end = djtz.datetime(2016,10,31, 17)
+
+        models.EventRepeatsGenerator.objects.create(
             event=self.event,
-            start=self.start,
-            end=self.end,
-            repeat_end=self.repeat_end,
+            start=start,
+            end=end,
+            repeat_end=repeat_end,
             recurrence_rule='RRULE:FREQ=DAILY',
-        ) # This generates occurrences
+        )  # This generates occurrences
 
         occurrences = self.event.occurrences.all()
         self.assertEquals(occurrences.count(), 31)
 
-        st = djtz.localize(self.start).time()
-        et = djtz.localize(self.end).time()
+        st = djtz.localize(start).time()
+        et = djtz.localize(end).time()
         self.assertEquals(st, time(9,0))
         self.assertEquals(et, time(17,0))
 
         for o in occurrences:
             self.assertEquals(djtz.localize(o.start).time(), st)
             self.assertEquals(djtz.localize(o.end).time(), et)
+
+    def test_localize_preserving_time_of_day(self):
+        # Aus daylight savings +1 hour on Sun, 1 Oct 2017 at 2:00 am
+        start = djtz.datetime(2017,9,30, 9,0)
+        end = djtz.datetime(2017,9,30, 11,0)
+
+        # Direct use of `timedelta` arithmetic produces unexpected results when
+        # you cross daylight savings boundaries where the time-of-day can shift
+        repeat_end = start + timedelta(days=2)
+        self.assertEqual(9, start.hour)
+        self.assertEqual(9, repeat_end.hour)  # Seems okay so far
+        # But when the value gets localized, as it will sooner or later, the
+        # `timedelta` addition turns out to have triggered a time-of-day shift
+        repeat_end = djtz.localize(repeat_end)
+        self.assertEqual(10, repeat_end.hour)  # OOPS!
+        # And to show the direct `timedelta` causes problems when used
+        generator = models.EventRepeatsGenerator.objects.create(
+            event=self.event,
+            start=start,
+            end=end,
+            repeat_end=start + timedelta(days=2),
+            recurrence_rule='RRULE:FREQ=DAILY',
+        )  # This generates occurrences
+        self.assertEquals(3, self.event.occurrences.all().count())  # WRONG!
+        generator.delete()
+
+        # Use our utility method to avoid this surprise
+        repeat_end = localize_preserving_time_of_day(
+            start + timedelta(days=2))
+        self.assertEqual(9, repeat_end.hour)
+        repeat_end = djtz.localize(repeat_end)
+        self.assertEqual(9, repeat_end.hour)  # GOOD!
+        # And to confirm this does the right thing when used
+        models.EventRepeatsGenerator.objects.create(
+            event=self.event,
+            start=start,
+            end=end,
+            repeat_end=localize_preserving_time_of_day(
+                start + timedelta(days=2)),
+            recurrence_rule='RRULE:FREQ=DAILY',
+        )  # This generates occurrences
+        self.assertEquals(2, self.event.occurrences.all().count())  # RIGHT!
+
 
 class TestEventRepeatsGeneratorModel(TestCase):
 
@@ -948,7 +1002,8 @@ class TestEventRepeatsGeneratorModel(TestCase):
             start=self.start,
             end=self.end,
             recurrence_rule='FREQ=DAILY',
-            repeat_end=self.start + timedelta(days=20),  # Exclusive end time
+            repeat_end=localize_preserving_time_of_day(
+                self.start + timedelta(days=20)),  # Exclusive end time
         )
         # Repeating generator has expected date entries in its RRULESET
         rruleset = generator.get_rruleset()
@@ -1100,7 +1155,8 @@ class TestEventOccurrences(TestCase):
             start=self.start,
             end=self.end,
             recurrence_rule='FREQ=DAILY',
-            repeat_end=self.start + timedelta(days=20),  # Exclusive end time
+            repeat_end=localize_preserving_time_of_day(
+                self.start + timedelta(days=20)),  # Exclusive end time
         )
         self.assertEqual(event.occurrences.count(), 20)
         # An occurrence exists for each expected start time
@@ -1130,20 +1186,21 @@ class TestEventOccurrences(TestCase):
             start=self.start,
             end=self.end,
             recurrence_rule='FREQ=DAILY',
-            repeat_end=self.start + timedelta(days=20),  # Exclusive end time
+            repeat_end=localize_preserving_time_of_day(
+                self.start + timedelta(days=20)),  # Exclusive end time
         )
         self.assertEqual(20, event.occurrences.all().count())
         self.assertEqual(
             self.start,
             event.occurrences.all()[0].start)
         self.assertEqual(
-            self.start + timedelta(days=1),
+            localize_preserving_time_of_day(self.start + timedelta(days=1)),
             event.occurrences.all()[1].start)
         self.assertEqual(
-            self.start + timedelta(days=2),
+            localize_preserving_time_of_day(self.start + timedelta(days=2)),
             event.occurrences.all()[2].start)
         self.assertEqual(
-            self.start + timedelta(days=19),
+            localize_preserving_time_of_day(self.start + timedelta(days=19)),
             event.occurrences.all()[19].start)
 
     def test_unlimited_daily_repeating_occurrences(self):
@@ -1161,34 +1218,29 @@ class TestEventOccurrences(TestCase):
             self.start,
             event.occurrences.all()[0].start)
         self.assertEqual(
-            self.start + timedelta(days=1),
+            localize_preserving_time_of_day(self.start + timedelta(days=1)),
             event.occurrences.all()[1].start)
         self.assertEqual(
-            self.start + timedelta(days=2),
+            localize_preserving_time_of_day(self.start + timedelta(days=2)),
             event.occurrences.all()[2].start)
         self.assertEqual(
-            self.start + timedelta(days=19),
+            localize_preserving_time_of_day(self.start + timedelta(days=19)),
             event.occurrences.all()[19].start)
         # Default repeat limit prevents far-future occurrences but we can
         # override that if we want
         event.extend_occurrences(
             until=self.end + timedelta(days=999, seconds=1))
         self.assertEqual(1000, event.occurrences.all().count())
-        # We need to be careful comparing timese because our test start time
-        # is affected by daylight savings changes whereas the occurrence start
-        # time will remain at 9am (for example) regardless of daylight saving
-        # changes.
-        delta = \
-            self.start + timedelta(days=999) \
-            - event.occurrences.all()[999].start
-        self.assertTrue(
-            delta <= timedelta(hours=1) or delta <= timedelta(hours=-1))
+        self.assertEqual(
+            localize_preserving_time_of_day(self.start + timedelta(days=999)),
+            event.occurrences.all()[999].start)
 
     def test_add_arbitrary_occurrence_to_nonrepeating_event(self):
         event = G(SimpleEvent)
         self.assertEqual(0, event.occurrences.count())
         # Add an arbitrary occurrence
-        arbitrary_dt1 = self.start + timedelta(days=3, hours=-2)
+        arbitrary_dt1 = localize_preserving_time_of_day(
+            self.start + timedelta(days=3, hours=-2))
         added_occurrence = event.add_occurrence(arbitrary_dt1)
         # Confirm arbitrary occurrence is associated with event
         self.assertEqual(1, event.occurrences.count())
@@ -1213,7 +1265,8 @@ class TestEventOccurrences(TestCase):
             start=self.start,
             end=self.end,
             recurrence_rule='FREQ=WEEKLY',
-            repeat_end=self.start + timedelta(days=7 * 4),
+            repeat_end=localize_preserving_time_of_day(
+                self.start + timedelta(days=7 * 4)),
         )
         self.assertEqual(4, event.occurrences.count())
         self.assertEqual(self.start, event.occurrences.all()[0].start)
@@ -1260,7 +1313,8 @@ class TestEventOccurrences(TestCase):
             start=self.start,
             end=self.end,
             recurrence_rule='FREQ=WEEKLY',
-            repeat_end=self.start + timedelta(days=7 * 8),
+            repeat_end=localize_preserving_time_of_day(
+                self.start + timedelta(days=7 * 8)),
         )
         self.assertEqual(8, event.occurrences.count())
         # Find valid occurrences to cancel
@@ -1327,7 +1381,8 @@ class TestEventOccurrences(TestCase):
             start=self.start,
             end=self.end,
             recurrence_rule='FREQ=DAILY',
-            repeat_end=self.start + timedelta(days=20),  # Exclusive end time
+            repeat_end=localize_preserving_time_of_day(
+                self.start + timedelta(days=20)),  # Exclusive end time
         )
         self.assertEqual(len(list(event.missing_occurrence_data())), 0)
         # Delete a few occurrences to simulate "missing" ones
