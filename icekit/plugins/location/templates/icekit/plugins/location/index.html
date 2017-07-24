@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load thumbnail %}
 
 {% block body %}
 	<h1>Locations</h1>
@@ -7,6 +8,11 @@
 			<ul>
 				<li>
 					<a href="{{ location.get_absolute_url }}">
+						{% with list_image=location.get_list_image %}
+							{% if list_image %}
+								<img src="{{ list_image|thumbnail_url:"list_image" }}" alt="">
+							{% endif %}
+						{% endwith %}
 						{{ location.title }} &mdash; {{ location.map_description }}
 					</a>
 				</li>

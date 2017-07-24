@@ -9,13 +9,16 @@ from django.utils.translation import ugettext_lazy as _
 
 from icekit.content_collections.abstract_models import TitleSlugMixin
 from icekit.models import ICEkitFluentContentsMixin
+from icekit.mixins import ListableMixin, HeroMixin
 
 from . import appsettings
 
 
 class Location(
     ICEkitFluentContentsMixin,
-    TitleSlugMixin
+    TitleSlugMixin,
+    ListableMixin,
+    HeroMixin,
 ):
     """
     Location model with fluent contents.

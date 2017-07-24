@@ -1,11 +1,22 @@
 {% extends 'base.html' %}
-{% load placeholder_tags icekit_tags static events_tags %}
+{% load placeholder_tags icekit_tags static events_tags thumbnail %}
 
 {% block title %}{{ location.title }}{% endblock %}
 
 {% block content %}
 	<h1>{{ location.title }}</h1>
 	<p>{{ location.map_description }}</p>
+	{% with location.get_hero_image as hero_image %}
+		{% if hero_image %}
+			<div class="location-hero">
+				<img
+					class="location-hero__image"
+					src="{{ hero_image.image|thumbnail_url:"hero_image" }}"
+					alt="{{ hero_image.alt_text }}"
+				/>
+			</div>
+		{% endif %}
+	{% endwith %}
 
 	<h2>Map</h2>
 	{{ location.render_map|safe }}
