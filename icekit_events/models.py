@@ -268,7 +268,11 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         # if no sub/sister class defines this, just return own URL.
         if attr == "get_occurrence_url":
             return lambda occ: self.get_absolute_url()
-        return self.__getattribute__(attr)
+        super_type = super(EventBase, self)
+        if hasattr(super_type, '__getattr__'):
+            return super_type.__getattr__(attr)
+        else:
+            return self.__getattribute__(attr)
 
     def get_cloneable_fieldnames(self):
         return ['title']
