@@ -379,6 +379,21 @@ def render_navigation(context, identifier):
     return {
         'navigation': navigation,
         'page': context.get('page'),
-        'request': context.get('request'),
+        'request': request,
     }
+
+
+@register.assignment_tag(
+    name='get_navigation',
+    takes_context=True,
+)
+def get_navigation(context, identifier):
+    request = context['request']
+
+    navigation_slug = slugify(identifier)
+    navigation = navigation_models.Navigation.objects.get(slug=navigation_slug)
+    if request:
+        navigation.set_request(request)
+
+    return navigation
 

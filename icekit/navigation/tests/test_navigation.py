@@ -14,7 +14,7 @@ django_engine = engines['django']
 class TestNavigation(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
-        self.test_template = django_engine.from_string(
+        self.test_render_template = django_engine.from_string(
             '''{% load icekit_tags %}{% render_navigation 'test-nav' %}'''
         )
 
@@ -30,7 +30,7 @@ class TestNavigation(TestCase):
 
     def test_render_navigation_tag_renders_nothing_by_default(self):
         self.assertEqual(
-            self.test_template.render({'request': self.create_request()}).strip(),
+            self.test_render_template.render({'request': self.create_request()}).strip(),
             '',
         )
 
@@ -44,7 +44,7 @@ class TestNavigation(TestCase):
             parent=navigation,
         )
         request = self.create_request()
-        test_template_rendered = self.test_template.render({
+        test_template_rendered = self.test_render_template.render({
             'request': request,
         })
         expected_output = get_template('icekit/navigation/navigation.html').render({
@@ -70,7 +70,7 @@ class TestNavigation(TestCase):
             url=AnyUrlValue.from_db_value('http://example.com/')
         )
         request = self.create_request()
-        test_template_rendered = self.test_template.render({
+        test_template_rendered = self.test_render_template.render({
             'request': request,
         })
         self.assertIn('href="http://example.com/"', test_template_rendered)
@@ -91,7 +91,7 @@ class TestNavigation(TestCase):
             parent_id=navigation.id,
         )
         request = self.create_request()
-        test_template_rendered = self.test_template.render({
+        test_template_rendered = self.test_render_template.render({
             'request': request,
         })
         self.assertIn(reverse('login'), test_template_rendered)
@@ -112,7 +112,7 @@ class TestNavigation(TestCase):
             parent_id=navigation.id,
         )
         request = self.create_request(is_authenticated=True)
-        test_template_rendered = self.test_template.render({
+        test_template_rendered = self.test_render_template.render({
             'request': request,
         })
         self.assertIn(reverse('logout'), test_template_rendered)
@@ -174,3 +174,52 @@ class TestNavigation(TestCase):
         navigation.set_request(self.create_request(path=reverse('logout'), is_authenticated=True))
         self.assertEqual(navigation.active_items, [accounts_navigation_item])
         del navigation.active_items
+
+    def test_get_navigation_tag_assigns_correctly(self):
+        navigation = Navigation.objects.create(
+            name='test nav',
+            slug='test-nav',
+        )
+        Placeholder.objects.create(
+            slot='navigation_content',
+            parent=navigation,
+        )
+        template = django_engine.from_string(
+            '''{% load icekit_tags %}{% get_navigation 'test-nav' as nav %}{{ nav.name }}'''
+        )
+        rendered = template.render({
+            'request': self.create_request(),
+        })
+        self.assertEqual(rendered, 'test nav')
+
+    def test_get_navigation_tag_can_be_used_for_iteration(self):
+        navigation = Navigation.objects.create(
+            name='test nav',
+            slug='test-nav',
+        )
+        placeholder = Placeholder.objects.create(
+            slot='navigation_content',
+            parent=navigation,
+        )
+        NavigationItem.objects.create(
+            placeholder=placeholder,
+            parent_type_id=ContentType.objects.get_for_model(Navigation).id,
+            parent_id=navigation.id,
+            title='test nav item title 1',
+            url=AnyUrlValue.from_db_value('/test/url/')
+        )
+        NavigationItem.objects.create(
+            placeholder=placeholder,
+            parent_type_id=ContentType.objects.get_for_model(Navigation).id,
+            parent_id=navigation.id,
+            title='test nav item title 2',
+            url=AnyUrlValue.from_db_value('/test/url/nested/')
+        )
+        template = django_engine.from_string(
+            '''{% load icekit_tags %}{% get_navigation 'test-nav' as nav %}'''
+            '''{% for item in nav.slots.navigation_content %}{{ item.title }} {{ item.url }} |{% endfor %}'''
+        )
+        rendered = template.render({
+            'request': self.create_request(),
+        })
+        self.assertEqual(rendered, 'test nav item title 1 /test/url/ | test nav item title 2 /test/url/nested/ |')
