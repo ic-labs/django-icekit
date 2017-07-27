@@ -217,9 +217,9 @@ class TestNavigation(TestCase):
         )
         template = django_engine.from_string(
             '''{% load icekit_tags %}{% get_navigation 'test-nav' as nav %}'''
-            '''{% for item in nav.slots.navigation_content %}{{ item.title }} {{ item.url }} |{% endfor %}'''
+            '''{% for item in nav.slots.navigation_content %}{% if forloop.counter > 1 %} | {% endif %}{{ item.title }} {{ item.url }}{% endfor %}'''
         )
         rendered = template.render({
             'request': self.create_request(),
         })
-        self.assertEqual(rendered, 'test nav item title 1 /test/url/ | test nav item title 2 /test/url/nested/ |')
+        self.assertEqual(rendered, 'test nav item title 1 /test/url/ | test nav item title 2 /test/url/nested/')
