@@ -1,8 +1,10 @@
+from icekit_events.admin import EventChildModelPlugin
+
 import models
-from icekit_events.admin import EventChildModelPlugin, EventWithLayoutsAdmin
+import admin
 
 
 class BasicEventPlugin(EventChildModelPlugin):
     model = models.SimpleEvent
-    model_admin = EventWithLayoutsAdmin
+    model_admin = admin.SimpleEventAdmin
     sort_priority = 11
