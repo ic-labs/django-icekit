@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load placeholder_tags icekit_tags static events_tags thumbnail %}
+
+{% block title %}{{ location.title }}{% endblock %}
+
+{% block body %}
+	{% block content %}
+		<h1>{{ location.title }}</h1>
+		<p>{{ location.map_description }}</p>
+		{% with location.get_hero_image as hero_image %}
+			{% if hero_image %}
+				<div class="location-hero">
+					<img
+						class="location-hero__image"
+						src="{{ hero_image.image|thumbnail_url:"hero_image" }}"
+						alt="{{ hero_image.alt_text }}"
+					/>
+				</div>
+			{% endif %}
+		{% endwith %}
+
+		<h2>Map</h2>
+		{{ location.render_map|safe }}
+
+		<h2>Details</h2>
+		{% if location.address %}
+			<p>
+				Address:
+				{{ location.address }}
+			</p>
+		{% endif %}
+		{% if location.phone_number %}
+			<p>
+				Phone:
+				<a href="tel:{{ location.phone_number }}">{{ location.phone_number }}</a>
+			</p>
+		{% endif %}
+		{% if location.url %}
+			<p>
+				Web:
+				<a href="{{ location.url }}">{{ location.url }}</a>
+			</p>
+		{% endif %}
+		{% if location.email %}
+			<p>
+				<a href="mailto:{{ location.email }}">{{ location.email_call_to_action }}</a>
+			</p>
+		{% endif %}
+
+		<h2>Content</h2>
+		{% page_placeholder location "main" role="main" %}
+
+		{% if upcoming_event_occurrences %}
+			<h2>Upcoming Events</h2>
+			<dl>
+			{% for occurrence in upcoming_event_occurrences %}
+				<dt>{{ occurrence.event.title }}</dt>
+				<dd>{{ occurrence.time_range_string }}</dd>
+			{% endfor %}
+			</dl>
+		{% endif %}
+
+		<a href="{% url "icekit_plugins_location_index" %}">&lt; All Locations</a>
+	{% endblock %}
+
+	{% block body_js %}
+		{{ block.super }}
+		{% render_content_items_media %}
+	{% endblock %}
+
+	{% block base_js %}
+		{{ block.super }}
+		<script src="{% static 'lodash/lodash.js' %}"></script>
+		<script src="{% static 'icekit/plugins/location/location_map.js' %}"></script>
+	{% endblock %}
+{% endblock body %}

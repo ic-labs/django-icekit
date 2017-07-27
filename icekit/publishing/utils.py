@@ -4,7 +4,8 @@ except ImportError:
 	from urllib import parse as urlparse
 
 from django.apps import apps
-from django.http import QueryDict
+from django.http import QueryDict, Http404
+from django.shortcuts import get_object_or_404, _get_queryset
 from django.utils.crypto import get_random_string, salted_hmac
 from django.utils.encoding import force_bytes
 
@@ -93,3 +94,19 @@ def verify_draft_url(url):
         salt, hmac = preview_hmac.split(':')
         return hmac == get_draft_hmac(salt, url.path)
     return False
+
+
+def get_visible_object_or_404(klass, *args, **kwargs):
+    """
+    Convenience replacement for `get_object_or_404` that automatically finds
+    and returns only the *visible* copy of publishable items, or raises
+    `Http404` if a visible copy is not available even when a draft copy is
+    available.
+    """
+    qs = _get_queryset(klass)
+    # If class is publishable, find only *visible* objects
+    try:
+        qs = qs.visible()
+    except AttributeError:
+        pass  # Ignore error calling `visible()` on unpublishable class
+    return get_object_or_404(qs, *args, **kwargs)

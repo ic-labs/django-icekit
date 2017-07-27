@@ -103,6 +103,7 @@ class EventChildAdmin(
                 'secondary_types',
                 'part_of',
                 'external_ref',
+                'location',
             ),
         }),
         ('Dates, times & tickets', {

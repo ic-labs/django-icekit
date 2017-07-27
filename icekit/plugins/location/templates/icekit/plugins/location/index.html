@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+
+{% block body %}
+	{% block content %}
+		<h1>Locations</h1>
+		{% if locations %}
+			{% for location in locations %}
+				<ul>
+					<li>
+						<a href="{{ location.get_absolute_url }}">
+							{% with list_image=location.get_list_image %}
+								{% if list_image %}
+									<img src="{{ list_image|thumbnail_url:"list_image" }}" alt="">
+								{% endif %}
+							{% endwith %}
+							{{ location.title }} &mdash; {{ location.map_description }}
+						</a>
+					</li>
+				</ul>
+			{% endfor %}
+		{% else %}
+			<div>There are no locations.</div>
+		{% endif %}
+	{% endblock content %}
+{% endblock %}

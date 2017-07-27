@@ -1,0 +1,14 @@
+{% block location %}
+{% with visible_location=instance.location.get_visible %}
+	{% if visible_location %}
+		<p class="location">
+			<a class="location-link" href="{{ visible_location.get_absolute_url }}">
+				<span class="location-name">{{ visible_location.title }}</span><br />
+				<small class="location-meta-data">
+					(<span class="location-description">{{ visible_location.map_description }}</span>)
+				</small>
+			</a>
+		</p>
+	{% endif %}
+{% endwith %}
+{% endblock %}

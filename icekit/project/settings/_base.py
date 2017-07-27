@@ -539,6 +539,7 @@ ASSETS_PLUGINS = [
 EMBED_PLUGINS = [
     'IframePlugin',
     'MapPlugin',
+    'LocationPlugin',
 
     # Oembeds
     'InstagramEmbedPlugin',
@@ -854,6 +855,7 @@ INSTALLED_APPS += (
     'icekit.plugins.image_gallery',
     'icekit.plugins.twitter_embed',
     'icekit.plugins.text',
+    'icekit.plugins.location',
 
     # Events
     'icekit_events',

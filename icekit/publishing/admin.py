@@ -209,7 +209,7 @@ class PublishingAdminForm(forms.ModelForm):
                 field = instance.get_field(unique_field)
 
                 # Get value from the form or the model
-                if field.editable:
+                if field.editable and unique_field in cleaned_data:
                     unique_filter[unique_field] = cleaned_data[unique_field]
                 else:
                     unique_filter[unique_field] = \
