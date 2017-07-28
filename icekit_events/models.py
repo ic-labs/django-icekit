@@ -227,6 +227,13 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         max_length=255,
         blank=True,
         help_text='A one-line description of the price for this event, e.g. "$12 / $10 / $6"')
+    price_detailed = models.TextField(
+        blank=True,
+        help_text=(
+            'A multi-line description of the price for this event.'
+            ' This is shown instead of the one-line price description if set'
+        )
+    )
 
     special_instructions = models.TextField(
         blank=True,

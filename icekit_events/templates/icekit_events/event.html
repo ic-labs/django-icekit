@@ -12,12 +12,17 @@
     {% endwith %}
 	<p>Date{{ event.start_dates_set|pluralize }}: {{ event|dates_range }}</p>
 	<p>Time{{ event.start_times_set|pluralize }}: {{ event|times_range }}</p>
-	{% if event.price_line %}
+
+	{% if event.price_detailed %}
+		<p>Price: {{ event.price_detailed|linebreaksbr|safe }}</p>
+	{% elif event.price_line %}
 		<p>Price: {{ event.price_line|safe }}</p>
 	{% endif %}
+
 	{% if event.special_instructions %}
 		<p>Special instructions: {{ event.special_instructions|linebreaksbr }}</p>
 	{% endif %}
+
 	{% if event.cta_url %}
 		<p><a href="{{ event.cta_url }}">{{  event.cta_text }}</a></p>
 	{% endif %}

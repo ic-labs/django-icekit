@@ -115,6 +115,7 @@ class EventChildAdmin(
                 'is_drop_in',
                 'has_tickets_available',
                 'price_line',
+                'price_detailed',
             ),
         }),
         ('Content', {
