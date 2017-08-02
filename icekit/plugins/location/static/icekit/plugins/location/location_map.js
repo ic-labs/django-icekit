@@ -46,8 +46,8 @@ $(function() {
 			containerElement.append(map.overlay);
 		}
 
-		var containerWidth = map.container.outerWidth();
-		var containerHeight = map.container.outerHeight();
+		var containerWidth = parseInt(map.container.outerWidth());
+		var containerHeight = parseInt(map.container.outerHeight());
 
 		var staticMapParams = $.param({
 			center: map.center,
