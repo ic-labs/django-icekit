@@ -44,6 +44,21 @@ footer {
           color: white;
           background: #A4A3A3;
           border-radius: 4px;
+				  position: relative;
+				  padding-left: 20px;
+				  &::after {
+						  position: absolute;
+						  top: 0;
+						  left: 2px;
+						  height: 29px;
+						  width: 17px;
+						  content: '≡';
+						  visibility: visible;
+              line-height: 28px;
+              font-size: 20px;
+						  cursor: move;
+						  opacity: 0.5;
+					}
       }
 
       fieldset {
