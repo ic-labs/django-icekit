@@ -4,7 +4,7 @@
 
 {% block content %}
 	<div class="page-header">
-		<h2>Search</h2>
+		<h2>{{ page.title }}</h2>
 	</div>
 
 	{% page_placeholder page 'main' title='Main' role='m' fallback=True %}
@@ -20,10 +20,6 @@
 				<i class="fa fa-caret-down" aria-hidden="true"></i> <span class="underline">Skip to results</span>
 			</a>
 		</p>
-	{% else %}
-		<h2 class="hero-section__title">
-			Search ACMI
-		</h2>
 	{% endif %}
 
 	<form class="form-white" itemprop="potentialAction" itemscope
