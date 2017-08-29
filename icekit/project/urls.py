@@ -164,13 +164,30 @@ urlpatterns = patterns(
     ))),
 
     url(getattr(settings, 'ICEKIT_LOGIN_URL_PREFIX', r''), include(auth_urlpatterns)),
+)
 
-    # GLAMkit URLs
-    url(r'^events/', include('icekit_events.urls')),
-    url(r'^collection/', include('glamkit_collections.contrib.work_creator.urls')),
-    url(r'^iiif/', include('icekit.plugins.iiif.urls')),
-    url(r'^location/', include('icekit.plugins.location.urls')),
+if 'icekit_events' in settings.INSTALLED_APPS:
+    urlpatterns += patterns(
+        url(r'^events/', include('icekit_events.urls')),
+    )
 
+if 'icekit.plugins.iiif' in settings.INSTALLED_APPS:
+    urlpatterns += patterns(
+        url(r'^iiif/', include('icekit.plugins.iiif.urls')),
+    )
+
+if 'glamkit_collections.contrib.work_creator' in settings.INSTALLED_APPS:
+    urlpatterns += patterns(
+        url(r'^collection/', include('glamkit_collections.contrib.work_creator.urls')),
+    )
+
+if 'icekit.plugins.location' in settings.INSTALLED_APPS:
+    urlpatterns += patterns(
+        url(r'^location/', include('icekit.plugins.location.urls')),
+    )
+
+# keep this last
+urlpatterns += patterns(
     # Catch all, fluent page dispatcher.
     url(r'^', include('fluent_pages.urls')),
 )
