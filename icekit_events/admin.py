@@ -90,7 +90,7 @@ class EventChildAdmin(
         EventRepeatGeneratorsInline,
         OccurrencesInline,
     ] + icekit_admin.ICEkitContentsAdmin.inlines
-    raw_id_fields = ('part_of', )
+    raw_id_fields = ('part_of', 'location',)
     save_on_top = True
     filter_horizontal = ('secondary_types', )
 
