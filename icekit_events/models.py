@@ -123,7 +123,8 @@ class RecurrenceRule(AbstractBaseModel):
     def __str__(self):
         return self.description
 
-class EventType(PluralTitleSlugMixin):
+
+class AbstractEventType(PluralTitleSlugMixin):
     is_public = models.BooleanField(
         "Show to public?",
         default=True,
@@ -142,11 +143,15 @@ class EventType(PluralTitleSlugMixin):
         """).render(Context({'o': self, 'color_only': color_only}))
 
     class Meta:
+        abstract = True
         # changing the verbose name rather than renaming because model rename
         # migrations are sloooooow
         verbose_name = "Event category"
         verbose_name_plural = "Event categories"
 
+
+class EventType(AbstractEventType):
+    pass
 
 
 @encoding.python_2_unicode_compatible
@@ -168,7 +173,8 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     objects = EventManager()
 
     primary_type = models.ForeignKey(
-        EventType, blank=True, null=True,
+        'icekit_events.EventType',
+        blank=True, null=True,
         verbose_name="Primary category",
         help_text="The primary category of this event: Talk, workshop, etc. Only "
                   "'public' event categories can be primary.",
@@ -614,7 +620,7 @@ class GeneratorException(Exception):
 
 
 @encoding.python_2_unicode_compatible
-class EventRepeatsGenerator(AbstractBaseModel):
+class AbstractEventRepeatsGenerator(AbstractBaseModel):
     """
     A model storing the information and features required to generate a set
     of repeating datetimes for a given repeat rule.
@@ -633,7 +639,7 @@ class EventRepeatsGenerator(AbstractBaseModel):
     explicitly is most likely the easiest way to ensure this.
     """
     event = models.ForeignKey(
-        EventBase,
+        'icekit_events.EventBase',
         db_index=True,
         editable=False,
         related_name='repeat_generators',
@@ -661,6 +667,7 @@ class EventRepeatsGenerator(AbstractBaseModel):
     )
 
     class Meta:
+        abstract = True
         ordering = ['pk']  # Order by PK, essentially in creation order
 
     def __str__(self):
@@ -782,7 +789,7 @@ class EventRepeatsGenerator(AbstractBaseModel):
             self.end = zero_datetime(self.end) \
                 + timedelta(days=1, microseconds=-1)
 
-        super(EventRepeatsGenerator, self).save(*args, **kwargs)
+        super(AbstractEventRepeatsGenerator, self).save(*args, **kwargs)
 
     @property
     def duration(self):
@@ -792,8 +799,12 @@ class EventRepeatsGenerator(AbstractBaseModel):
         return self.end - self.start
 
 
+class EventRepeatsGenerator(AbstractEventRepeatsGenerator):
+    pass
+
+
 @encoding.python_2_unicode_compatible
-class Occurrence(AbstractBaseModel):
+class AbstractOccurrence(AbstractBaseModel):
     """
     A specific occurrence of an Event with start and end date times, and
     a reference back to the owner event that contains all the other data.
@@ -801,14 +812,14 @@ class Occurrence(AbstractBaseModel):
     objects = OccurrenceManager()
 
     event = models.ForeignKey(
-        EventBase,
+        'icekit_events.EventBase',
         db_index=True,
         editable=False,
         related_name='occurrences',
         on_delete=models.CASCADE
     )
     generator = models.ForeignKey(
-        EventRepeatsGenerator,
+        'icekit_events.EventRepeatsGenerator',
         blank=True, null=True,
         on_delete=models.SET_NULL
     )
@@ -850,6 +861,7 @@ class Occurrence(AbstractBaseModel):
         blank=True, null=True, editable=False)
 
     class Meta:
+        abstract = True
         ordering = ['start', '-is_all_day', 'event', 'pk']
 
     def time_range_string(self):
@@ -911,7 +923,7 @@ class Occurrence(AbstractBaseModel):
             self.original_start = self.start
         if not self.original_end:
             self.original_end = self.end
-        super(Occurrence, self).save(*args, **kwargs)
+        super(AbstractOccurrence, self).save(*args, **kwargs)
 
     # TODO Return __str__ as title for now, improve it later
     def title(self):
@@ -925,6 +937,10 @@ class Occurrence(AbstractBaseModel):
 
     def get_absolute_url(self):
         return self.event.get_occurrence_url(self)
+
+
+class Occurrence(AbstractOccurrence):
+    pass
 
 
 def get_occurrence_times_for_event(event):
