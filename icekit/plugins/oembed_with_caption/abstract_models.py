@@ -4,6 +4,7 @@ from fluent_contents.plugins.oembeditem.models import AbstractOEmbedItem
 
 
 class AbstractOEmbedWithCaptionItem(AbstractOEmbedItem):
+    content_title = models.CharField('title', max_length=1000, blank=True)
     caption = models.TextField(
         blank=True,
     )

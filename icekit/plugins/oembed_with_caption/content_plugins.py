@@ -24,6 +24,7 @@ class OEmbedWithCaptionPlugin(ContentPlugin):
         (None, {
             'fields': (
                 ('embed_url', 'is_16by9'),
+                'content_title',
                 'caption',
             ),
         }),
