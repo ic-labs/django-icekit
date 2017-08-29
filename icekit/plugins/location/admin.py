@@ -22,6 +22,7 @@ class LocationAdmin(
                     'title',
                     'slug',
                     'is_home_location',
+                    'layout',
                 )
             }),
             ('Map', {
