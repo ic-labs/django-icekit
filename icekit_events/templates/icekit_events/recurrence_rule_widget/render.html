@@ -75,15 +75,6 @@
 			natural_to_rfc($.trim(natural.val()));
 		});
 
-		function clean_rfc_value(val) {
-		    var cleaned = val.replace(/^(EX|R)RULE:/, '');
-		    cleaned = cleaned.trim();
-		    if (cleaned[cleaned.length - 1] === ';') {
-		        cleaned = cleaned.slice(0, -1);
-			}
-			return cleaned;
-		}
-
 		function rfc_to_natural(val) {
 			var error_text = '';
 			var lines = [];
@@ -92,10 +83,9 @@
 			if (val) {
 				$.each(val.match(/[^\r\n]+/g), function(i, line) {
 					// The rule is invalid if we can't convert it to text.
-					var cleaned_line = clean_rfc_value(line);
 					try {
 						var rule = RRule
-							.fromString(cleaned_line)
+							.fromString(line.replace(/^(EX|R)RULE:/, ''))
 							.toText()
 						;
 					}
