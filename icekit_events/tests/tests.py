@@ -88,7 +88,7 @@ class TestAdmin(WebTest):
     def test_admin_repeats_generator_form(self):
         # check the validation on the form
         current = djtz.now()
-        one_day = datetime.timedelta(days=1)
+        one_day = timedelta(days=1)
         past = current - one_day
         future = current + one_day
         recurrence_rule_list = [
