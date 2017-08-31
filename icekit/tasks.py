@@ -78,3 +78,8 @@ class UpdateSearchIndexTask(Task):
     @one_instance(key='UpdateSearchIndexTask')
     def run(self, **kwargs):
         call_command('update_index', remove=True)
+
+
+@shared_task
+def call_command_task(name, *args, **options):
+    call_command(name, *args, **options)
