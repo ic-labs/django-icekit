@@ -3,6 +3,7 @@ Admin forms for ``icekit_events`` app.
 """
 
 from django import forms
+from icekit_events.utils.timeutils import coerce_naive
 
 from . import models
 
@@ -23,13 +24,53 @@ class BaseEventRepeatsGeneratorForm(forms.ModelForm):
         cleaned_data = super(BaseEventRepeatsGeneratorForm, self).clean()
         # Handle situation where hidden time fields in admin UI submit the
         # value "00:00:00" for `repeat_end` without a corresponding date.
-        if cleaned_data['repeat_end'] and not cleaned_data['recurrence_rule']:
-            self.add_error('recurrence_rule', 'Recurrence rule must be set if a repeat end date/time is')
         if 'repeat_end' in self.errors:
             if self.data.get(self.prefix + '-repeat_end_1') == '00:00:00' \
                     and not self.data.get(self.prefix + '-repeat_end_0'):
                 cleaned_data['repeat_end'] = None
                 del(self.errors['repeat_end'])
+
+        if (cleaned_data.get('start') and cleaned_data.get('end')):
+            # End time must be equal to or after start time
+            if cleaned_data.get('end') < cleaned_data.get('start'):
+                self.add_error(
+                    'end',
+                    'End date/time must be after or equal to start date/time:'
+                    ' {0} < {1}'.format(
+                        cleaned_data.get('end'),
+                        cleaned_data.get('start')
+                    )
+                )
+
+            if cleaned_data.get('repeat_end'):
+                # A repeat end date/time requires a recurrence rule be set
+                if not cleaned_data.get('recurrence_rule'):
+                    self.add_error(
+                        'recurrence_rule',
+                        'Recurrence rule must be set if a repeat end date/time is'
+                        ' set: {0}'.format(cleaned_data.get('repeat_end'))
+                    )
+                # Repeat end time must be equal to or after start time
+                if cleaned_data.get('repeat_end') < cleaned_data.get('start'):
+                    self.add_error(
+                        'repeat_end',
+                        'Repeat end date/time must be after or equal to start'
+                        ' date/time: {0} < {1}'.format(
+                            cleaned_data.get('repeat_end'),
+                            cleaned_data.get('start'))
+                    )
+
+        if cleaned_data.get('is_all_day'):
+            # An all-day generator's start time must be at 00:00
+            naive_start = coerce_naive(cleaned_data.get('start'))
+            if naive_start.hour or naive_start.minute or naive_start.second \
+                    or naive_start.microsecond:
+                self.add_error(
+                    'is_all_day',
+                    'Start date/time must be at 00:00:00 hours/minutes/seconds'
+                    ' for all-day generators: {0}'.format(naive_start)
+                )
+
         return cleaned_data
 
 

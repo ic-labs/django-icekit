@@ -6,6 +6,7 @@ Tests for ``icekit_events`` app.
 # WebTest API docs: http://webtest.readthedocs.org/en/latest/api.html
 from unittest import skip
 
+from icekit_events.admin_forms import BaseEventRepeatsGeneratorForm
 from timezone import timezone as djtz  # django-timezone
 from datetime import datetime, timedelta, time
 import six
@@ -83,6 +84,83 @@ class TestAdmin(WebTest):
             user=self.superuser,
         )
         self.assertEqual(200, response.status_code)
+
+    def test_admin_repeats_generator_form(self):
+        # check the validation on the form
+        current = djtz.now()
+        one_day = datetime.timedelta(days=1)
+        past = current - one_day
+        future = current + one_day
+        recurrence_rule_list = [
+            self.daily_recurrence_rule.pk,
+            'every day',
+            'RRULE:FREQ=DAILY',
+            ]
+        # check we can submit a valid form
+        form = BaseEventRepeatsGeneratorForm(
+            {
+                'start': current,
+                'end': future,
+                'is_all_day': False,
+                'repeat_end': future,
+                'event': 1,
+                'recurrence_rule': recurrence_rule_list,
+            }
+        )
+        self.assertTrue(form.is_valid())
+
+        # if you provide a start, you must also provide an end
+        form = BaseEventRepeatsGeneratorForm(
+            {
+                'start': current,
+                'is_all_day': False,
+                'repeat_end': future,
+                'event': 1,
+                'recurrence_rule': recurrence_rule_list,
+            }
+        )
+        self.assertFalse(form.is_valid())
+
+        # end must be same as or after start
+        form = BaseEventRepeatsGeneratorForm(
+            {
+                'start': current,
+                'end': past,
+                'is_all_day': False,
+                'repeat_end': future,
+                'event': 1,
+                'recurrence_rule': recurrence_rule_list,
+            }
+        )
+        self.assertFalse(form.is_valid())
+
+        # if you supply repeat_end, you must supply a recurrence rule
+        form = BaseEventRepeatsGeneratorForm(
+            {
+                'start': current,
+                'end': future,
+                'is_all_day': False,
+                'repeat_end': future,
+                'event': 1,
+                'recurrence_rule': None,
+            }
+        )
+        self.assertFalse(form.is_valid())
+
+        # repeat_end cannot be before start
+        form = BaseEventRepeatsGeneratorForm(
+            {
+                'start': current,
+                'end': future,
+                'is_all_day': False,
+                'repeat_end': past,
+                'event': 1,
+                'recurrence_rule': recurrence_rule_list,
+            }
+        )
+        self.assertFalse(form.is_valid())
+        import pdb;pdb.set_trace()
+        # hello
 
     def test_create_event(self):
         # Load admin Add page, which lists polymorphic event child models
