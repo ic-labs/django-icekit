@@ -159,8 +159,6 @@ class TestAdmin(WebTest):
             }
         )
         self.assertFalse(form.is_valid())
-        import pdb;pdb.set_trace()
-        # hello
 
     def test_create_event(self):
         # Load admin Add page, which lists polymorphic event child models
