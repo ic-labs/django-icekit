@@ -23,6 +23,8 @@ class BaseEventRepeatsGeneratorForm(forms.ModelForm):
         cleaned_data = super(BaseEventRepeatsGeneratorForm, self).clean()
         # Handle situation where hidden time fields in admin UI submit the
         # value "00:00:00" for `repeat_end` without a corresponding date.
+        if cleaned_data['repeat_end'] and not cleaned_data['recurrence_rule']:
+            self.add_error('recurrence_rule', 'Recurrence rule must be set if a repeat end date/time is')
         if 'repeat_end' in self.errors:
             if self.data.get(self.prefix + '-repeat_end_1') == '00:00:00' \
                     and not self.data.get(self.prefix + '-repeat_end_0'):
