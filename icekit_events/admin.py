@@ -267,13 +267,19 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             tz = get_current_timezone()
 
         if 'start' in request.GET:
-            start = djtz.localize(
-                datetime.datetime.strptime(request.GET.pop('start')[0], '%Y-%m-%d'), tz)
+            start_dt = self._parse_dt_from_request(request, 'start')
+            if start_dt:
+                start = djtz.localize(start_dt, tz)
+            else:
+                start = None
         else:
             start = None
         if 'end' in request.GET:
-            end = djtz.localize(
-                datetime.datetime.strptime(request.GET.pop('end')[0], '%Y-%m-%d'), tz)
+            end_dt = self._parse_dt_from_request(request, 'end')
+            if end_dt:
+                end = djtz.localize(end_dt, tz)
+            else:
+                end = None
         else:
             end = None
 
@@ -292,6 +298,17 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
             data.append(self._calendar_json_for_occurrence(occurrence))
         data = json.dumps(data, cls=DjangoJSONEncoder)
         return HttpResponse(content=data, content_type='application/json')
+
+    def _parse_dt_from_request(self, request, param):
+        dt_str = request.GET.pop(param)[0]
+        # Handle cases such as '2017-09-04T00:00:00' where the timezone included
+        if 'T' in dt_str:
+            dt_str = dt_str.split('T')[0]
+        try:
+            dt = datetime.datetime.strptime(dt_str, '%Y-%m-%d')
+        except ValueError:  # Handle parse-failures of malformed dates
+            dt = None
+        return dt
 
     def _calendar_json_for_occurrence(self, occurrence):
         """
