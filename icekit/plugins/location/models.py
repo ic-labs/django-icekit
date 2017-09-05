@@ -119,6 +119,7 @@ class Location(
     )
     email_call_to_action = models.CharField(
         max_length=255,
+        blank=True,
         default='Email',
         help_text='''
             Call to action text to show next to the location's email address.
