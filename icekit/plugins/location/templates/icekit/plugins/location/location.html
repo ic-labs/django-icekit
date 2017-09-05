@@ -31,14 +31,12 @@
 		{% endif %}
 		{% if location.phone_number %}
 			<p>
-				Phone:
-				<a href="tel:{{ location.phone_number }}">{{ location.phone_number }}</a>
+				<a href="tel:{{ location.phone_number }}">{{ location.phone_number_call_to_action }}</a>
 			</p>
 		{% endif %}
 		{% if location.url %}
 			<p>
-				Web:
-				<a href="{{ location.url }}">{{ location.url }}</a>
+				<a href="{{ location.url }}">{{ location.url_call_to_action }}</a>
 			</p>
 		{% endif %}
 		{% if location.email %}

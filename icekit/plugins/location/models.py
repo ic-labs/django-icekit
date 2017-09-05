@@ -105,10 +105,26 @@ class Location(
             Location's contact phone number to show to the public.
         '''
     )
+    phone_number_call_to_action = models.CharField(
+        max_length=255,
+        blank=True,
+        default='Phone',
+        help_text='''
+            Call to action text to show for the location's phone number.
+        '''
+    )
     url = models.URLField(
         blank=True,
         help_text='''
             Location's external web site to show to the public.
+        '''
+    )
+    url_call_to_action = models.CharField(
+        max_length=255,
+        blank=True,
+        default='Website',
+        help_text='''
+            Call to action text to show for the location's url.
         '''
     )
     email = models.EmailField(
@@ -122,7 +138,7 @@ class Location(
         blank=True,
         default='Email',
         help_text='''
-            Call to action text to show next to the location's email address.
+            Call to action text to show for the location's email address.
         '''
     )
 
