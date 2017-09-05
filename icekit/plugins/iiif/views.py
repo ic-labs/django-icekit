@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import permission_required
 from django.core.files.storage import get_storage_class
 from django.db.models.loading import get_model
 from django.http import FileResponse, HttpResponseBadRequest, HttpResponse, \
-    HttpResponseRedirect
+    HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
 
 from fluent_utils.ajax import JsonResponse
@@ -44,7 +44,12 @@ def _get_image_or_404(identifier, load_image=False):
     The `identifier` is expected to be a raw image ID for now, but may be
     more complex later.
     """
-    ik_image = get_object_or_404(ICEkitImage, id=identifier)
+    try:
+        image_id = int(identifier)
+    except ValueError:
+        raise Http404()
+
+    ik_image = get_object_or_404(ICEkitImage, id=image_id)
     if not load_image:
         return ik_image, None
 
