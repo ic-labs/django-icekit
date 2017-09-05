@@ -38,7 +38,9 @@ class LocationAdmin(
                 'fields': (
                     'address',
                     'phone_number',
+                    'phone_number_call_to_action',
                     'url',
+                    'url_call_to_action',
                     'email',
                     'email_call_to_action',
                 )
