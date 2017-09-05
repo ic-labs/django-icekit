@@ -1,5 +1,6 @@
 from urlparse import urljoin
 
+from django.core.urlresolvers import reverse
 from icekit.content_collections.abstract_models import TitleSlugMixin
 from icekit.plugins.iiif.utils import SUPPORTED_EXTENSIONS
 from icekit.plugins.iiif.utils import SUPPORTED_QUALITY
@@ -52,21 +53,19 @@ class ImageRepurposeConfig(TitleSlugMixin):
             size = "!"+size
         return size
 
-    def iiif_url(self):
-        return "/full/%(size)s/0/%(style)s.%(format)s" % {
-            'size': self.size_spec(),
-            'style': self.style,
-            'format': self.format,
-        }
-
     def __unicode__(self):
-        return "%s (%s)" % (self.title, self.iiif_url())
+        return self.title
 
     def url_for_image(self, image):
-        return "/iiif/%(id)s%(url)s" % {
-            'id': image.pk,
-            'url': self.iiif_url(),
-        }
+        if image.pk:
+            return reverse('iiif_image_api', kwargs={
+                'identifier_param': image.pk,
+                'region_param': 'full',
+                'size_param': self.size_spec(),
+                'rotation_param': 0,
+                'quality_param': self.style,
+                'format_param': self.format,
+            })
 
     class Meta:
         verbose_name = "Image derivative"

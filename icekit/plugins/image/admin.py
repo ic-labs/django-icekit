@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.template import Context
 from django.template import Template
 from django.utils.safestring import mark_safe
@@ -73,9 +74,27 @@ class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
     image_tag.short_description = 'Image'
 
     def derivatives(self, obj):
-        return mark_safe("<br>".join([
-            "<a href='%s'>%s</a>" % (i.url_for_image(obj), i.title) for i in ImageRepurposeConfig.objects.all()
-        ])) or "None yet"
+        repurpose_configs_qs = ImageRepurposeConfig.objects.all()
+        if not repurpose_configs_qs:
+            add_url = reverse('admin:%s_%s_add' % (
+                ImageRepurposeConfig._meta.app_label,
+                ImageRepurposeConfig._meta.model_name
+            ))
+            return mark_safe(
+                '<a href="%s">Add %s</a>' % (add_url, ImageRepurposeConfig._meta.verbose_name_plural)
+            )
+
+        links = []
+        for repurpose_config in repurpose_configs_qs:
+            href = repurpose_config.url_for_image(obj)
+            if href:
+                links.append(
+                    '<a href="%s">%s</a>' % (href, repurpose_config.title)
+                )
+        if links:
+            return mark_safe('<br>'.join(links))
+        else:
+            return 'Derivatives are available once an image has been saved'
 
 
 admin.site.register(models.ImageRepurposeConfig, TitleSlugAdmin)
