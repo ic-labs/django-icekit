@@ -39,4 +39,4 @@ class ContactPersonItem(ContentItem):
         verbose_name = _('Contact Person')
 
     def __str__(self):
-        return str(self.contact)
+        return unicode(self.contact)

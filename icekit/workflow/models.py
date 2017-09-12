@@ -61,7 +61,7 @@ class WorkflowState(models.Model):
             return ' '.join([
                 self.get_status_display(),
                 ':',
-                str(self.assigned_to),
+                unicode(self.assigned_to),
             ])
         else:
             return self.get_status_display()

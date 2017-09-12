@@ -233,4 +233,4 @@ class LocationItem(ContentItem):
         verbose_name_plural = _('Locations')
 
     def __str__(self):
-        return str(self.location)
+        return unicode(self.location)

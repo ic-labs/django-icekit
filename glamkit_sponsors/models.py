@@ -79,7 +79,7 @@ class SponsorPromoItem(ContentItem):
         verbose_name = _('Sponsor promo')
 
     def __str__(self):
-        return str(self.sponsor)
+        return unicode(self.sponsor)
 
     def dimensions(self):
         return "%sx0" % self.width
