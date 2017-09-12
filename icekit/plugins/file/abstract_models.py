@@ -85,4 +85,4 @@ class AbstractFileItem(ContentItem):
         verbose_name_plural = _('Files')
 
     def __str__(self):
-        return str(self.file)
+        return unicode(self.file)
