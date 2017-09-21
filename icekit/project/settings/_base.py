@@ -205,7 +205,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'forms_builder.forms',
     # 'ixc_redactor',
-    'reversion',
+    # 'reversion',
     'django_object_actions',
 
     # Default.
@@ -818,7 +818,7 @@ ICEKIT = {
 INSTALLED_APPS += (
     'icekit',
     'icekit.admin_tools',  # Must come before `django.contrib.admin` and `flat`
-    'icekit.integration.reversion',
+    # 'icekit.integration.reversion',
     'icekit.layouts',
     'icekit.workflow',
     'icekit.publishing',
