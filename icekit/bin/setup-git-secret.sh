@@ -48,6 +48,15 @@ if [[ -d .git && ! -d .gitsecret ]]; then
 # won't miss any changes.
 #
 # For more information, see: http://sobolevn.github.io/git-secret/
+#
+# Troubleshooting on Mac OS
+# -------------------------
+# If 'git secret reveal' seems to do nothing for you on Mac OS and does not
+# give any feedback at all, try running the following in your terminal to
+# un-break the password prompt mechanism:
+#
+#     $ export GPG_TTY=\$(tty)
+#
 ###############################################################################
 EOF
 
