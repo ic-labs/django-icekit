@@ -138,13 +138,13 @@ In addition to the per-target configuration options you can configure the defaul
 values used.
 
 - ``WORKFLOW_EMAIL_NOTIFICATION_DEFAULT_FROM``: Address from which workflow
-   notification emails are sent. Defaults to ``settings.DEFAULT_FROM_EMAIL``
+  notification emails are sent. Defaults to ``settings.DEFAULT_FROM_EMAIL``
 
 - ``WORKFLOW_EMAIL_NOTIFICATION_SUBJECT_TEMPLATE``: Template for email subject
   line. See ``icekit.workflow.appsettings`` for the default subject template.
 
 - ``WORKFLOW_EMAIL_NOTIFICATION_MESSAGE_TEMPLATE``: Template for email body.
-   See ``icekit.workflow.appsettings`` for the default message template.
+  See ``icekit.workflow.appsettings`` for the default message template.
 
 The email subject and message templates above use standard Django template
 syntax to interpolate values. The following data items are provided to these
