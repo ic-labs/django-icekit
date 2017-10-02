@@ -1,0 +1,62 @@
+{% extends 'icekit_content_collections/layouts/default.html' %}
+
+{%  load static events_tags icekit_tags %}
+
+{% block title %}{{ page.get_title }}{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'icekit_events/css/events_datepicker.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>{{ page.get_title }}</h1>
+        <h2>{{ start|date }} - {{ end_date|date }}</h2>
+
+        <form method="get" action=".">
+          <p>Start Date</p>
+          <div class="events-datepicker" id="datepicker" data-period="{{ days }}" data-start="{{ start|date:'Y-m-d' }}"></div>
+
+          <p>Categories</p>
+          <select name="types" multiple>
+            {% for event_type in visible_event_types %}
+            <option
+                  value="{{ event_type.slug }}"
+                  {% if event_type in types %}selected="selected"{% endif %}
+              >{{ event_type.title }}</option>
+            {% endfor %}
+          </select>
+
+          <p>Locations</p>
+          <select name="locations" multiple>
+            {% for location in visible_locations %}
+            <option
+                  value="{{ location.slug }}"
+                  {% if location in locations %}selected="selected"{% endif %}
+              >{{ location.title }}</option>
+            {% endfor %}
+          </select>
+
+          <input type="submit">Submit</input>
+        </form>
+
+        <ul>
+            {% for item in items_to_list %}
+                <li><a href="{{ item.get_absolute_url }}">
+                    {{ item.event|safe }}: {{ item.time_range_string }}
+                </a></li>
+            {% empty %}
+                <li>There are no events matching constraints</li>
+            {% endfor %}
+        </ul>
+
+    </div>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{% static 'icekit_events/js/jquery-querystring.js' %}"></script>
+    <script src="{% static 'jquery-ui/jquery-ui.min.js' %}"></script>
+    <script src="{% static 'icekit_events/js/events_datepicker.js' %}"></script>
+{% endblock %}
+

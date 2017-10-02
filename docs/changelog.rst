@@ -45,6 +45,11 @@ In development
 -  Remove unpublishable variants of the main GLAMkit models as keeping them is
    not worth the maintenance overhead or chance for confusion.
 
+-  Add new Advanced Events Listing page type at
+   ``icekit_events.page_types.advancedeventlisting`` with generic and powerful
+   tools for filtering the event occurrences shown on a listing page, both
+   within the CMS and with on-page filtering options.
+
 -  ``events_tags.date_range`` is now smart enough to remove year and month from
    date formats. This behaviour can be overwridden by specifying named formats
    in your ``formats`` module with ``_SAME_YEAR`` and ``_SAME_YEAR_SAME_MONTH``

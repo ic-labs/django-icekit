@@ -863,6 +863,7 @@ INSTALLED_APPS += (
     'icekit_events.event_types.simple',
 
     'icekit_events.page_types.eventlistingfordate',
+    'icekit_events.page_types.advancedeventlisting',
 
     'icekit_events.plugins.event_content_listing',
     'icekit_events.plugins.links',
