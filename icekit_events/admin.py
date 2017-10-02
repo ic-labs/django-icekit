@@ -119,12 +119,12 @@ class EventChildAdmin(
             ),
         }),
         ('Content', {
-            'fields': {
+            'fields': (
                 'layout',
                 'special_instructions',
                 'cta_text',
                 'cta_url',
-            },
+            ),
         }),
     )
 

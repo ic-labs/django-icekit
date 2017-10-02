@@ -248,7 +248,10 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
     )
     cta_text = models.CharField(_("Call to action"),
         blank=True,
-        max_length=255, default=_("Book now")
+        max_length=255, default=_("Book now"),
+        help_text=_("The label to use for the call to action (CTA) URL for"
+                    " arranging to attend an event. This is only shown if a"
+                    " CTA URL is also provided"),
     )
     cta_url = ICEkitURLField(_("CTA URL"),
         blank=True,
