@@ -136,11 +136,11 @@ def localize_preserving_time_of_day(dt):
     otherwise trigger changes to its apparent time.
     """
     # Remember the apparent time-of-day hours and minutes
-    hour, minute = dt.hour, dt.minute
+    day, hour, minute = dt.day, dt.hour, dt.minute
     # Ensure we have a localized datetime, which will trigger any hour/minute
     # changes depending on daylight saving changes triggered by a timedelta
     # operation
     dt_localized = djtz.localize(dt)
     # Forcibly reset the hour and minute time-of-day values to the apparent
     # values we stored
-    return dt_localized.replace(hour=hour, minute=minute)
+    return dt_localized.replace(day=day, hour=hour, minute=minute)
