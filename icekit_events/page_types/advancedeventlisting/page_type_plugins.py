@@ -16,10 +16,10 @@ class AdvancedEventListingPagePlugin(ListingPagePlugin):
         context = super(AdvancedEventListingPagePlugin, self).get_context(
             request, page, **kwargs)
         # User-provided constraint data to render in page
-        context['start'] = page.parse_start_date(request)
+        context['start_date'] = page.parse_start_date(request)
         context['end_date'] = page.parse_end_date(
-            request, context['start'])
-        context['days'] = (context['end_date'] - context['start']).days
+            request, context['start_date'])
+        context['days'] = (context['end_date'] - context['start_date']).days
         context['primary_types'] = page.parse_primary_types(request)
         context['secondary_types'] = page.parse_secondary_types(request)
         context['types'] = page.parse_types(request)

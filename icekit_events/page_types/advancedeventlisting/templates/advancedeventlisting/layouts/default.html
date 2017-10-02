@@ -5,19 +5,26 @@
 {% block title %}{{ page.get_title }}{% endblock %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'icekit_events/css/events_datepicker.css' %}">
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'jquery-ui/themes/base/jquery-ui.css' %}">
 {% endblock %}
 
 {% block content %}
     <div class="container">
         <h1>{{ page.get_title }}</h1>
-        <h2>{{ start|date }} - {{ end_date|date }}</h2>
+        <h2>{{ start_date|date }} - {{ end_date|date }}</h2>
 
         <form method="get" action=".">
-          <p>Start Date</p>
-          <div class="events-datepicker" id="datepicker" data-period="{{ days }}" data-start="{{ start|date:'Y-m-d' }}"></div>
+          <label for="start_date">From</label>
+          <input id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" />
+          {% comment %}
+          <div class="events-datepicker" id="datepicker" data-period="{{ days }}" data-start-date="{{ start_date|date:'Y-m-d' }}"></div>
+          {% endcomment %}
 
-          <p>Categories</p>
+          <label for="end_date">To</label>
+          <input id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" />
+
+          <label for="types">Categories</label>
           <select name="types" multiple>
             {% for event_type in visible_event_types %}
             <option
@@ -27,7 +34,7 @@
             {% endfor %}
           </select>
 
-          <p>Locations</p>
+          <label for="locations">Locations</label>
           <select name="locations" multiple>
             {% for location in visible_locations %}
             <option
@@ -37,9 +44,10 @@
             {% endfor %}
           </select>
 
-          <input type="submit">Submit</input>
+          <input type="submit" value="Submit" />
         </form>
 
+        <h2>Occurrences</h2>
         <ul>
             {% for item in items_to_list %}
                 <li><a href="{{ item.get_absolute_url }}">
@@ -57,6 +65,42 @@
     {{ block.super }}
     <script src="{% static 'icekit_events/js/jquery-querystring.js' %}"></script>
     <script src="{% static 'jquery-ui/jquery-ui.min.js' %}"></script>
-    <script src="{% static 'icekit_events/js/events_datepicker.js' %}"></script>
+    <script>
+      $(function() {
+        var dateFormat = "yy-mm-dd";
+        var pickerDefaultOptions = {
+            dateFormat: dateFormat,
+            showButtonPanel: true,
+            closeText: "Close",
+        };
+        var start_date_field = $("#start_date")
+              .datepicker(pickerDefaultOptions)
+              .on("beforeShow", function(elem, picker) {
+                picker('setDate', getDate(elem));
+              })
+              .on("change", function() {
+                end_date_field.datepicker("option", "minDate", getDate(this));
+              });
+        var end_date_field = $( "#end_date" )
+              .datepicker(pickerDefaultOptions)
+              .on("beforeShow", function(elem, picker) {
+                picker('setDate', getDate(elem));
+              });
+
+        // Trigger initialisation of fields
+        start_date_field.change();
+        end_date_field.change();
+
+        function getDate(element) {
+          var date;
+          try {
+            date = $.datepicker.parseDate(dateFormat, element.value);
+          } catch(error) {
+            date = null;
+          }
+          return date;
+        }
+      });
+      </script>
 {% endblock %}
 

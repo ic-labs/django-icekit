@@ -63,13 +63,13 @@ class AbstractAdvancedEventListingPage(AbstractListingPage):
         """
         Return start date for event occurrences, which is one of the following
         in order of priority:
-         - `start` GET parameter value, if given and valid
+         - `start_date` GET parameter value, if given and valid
          - page's `default_start_date` if set
          - today's date
         """
-        if request.GET.get('start'):
+        if request.GET.get('start_date'):
             try:
-                return djtz.parse('%s 00:00' % request.GET.get('start'))
+                return djtz.parse('%s 00:00' % request.GET.get('start_date'))
             except ValueError:
                 pass
         return self.default_start_date or djtz.midnight()
@@ -86,7 +86,7 @@ class AbstractAdvancedEventListingPage(AbstractListingPage):
         """
         if request.GET.get('end_date'):
             try:
-                return djtz.parse('%s 23:59' % request.GET.get('end_date'))
+                return djtz.parse('%s 00:00' % request.GET.get('end_date'))
             except ValueError:
                 pass
         days_to_show = self.default_days_to_show or \
@@ -147,7 +147,10 @@ class AbstractAdvancedEventListingPage(AbstractListingPage):
         end_date = self.parse_end_date(request, start_date)
 
         # Find occurrences between start and end dates
-        qs = Occurrence.objects.overlapping(start_date, end_date)
+        qs = Occurrence.objects.overlapping(
+            start_date,
+            end_date + timedelta(days=1)  # End date is inclusive
+        )
 
         # Filter occurrences to match any constraints defined in page FKs
         if self.limit_to_primary_types.count():
