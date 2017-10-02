@@ -6,7 +6,7 @@
 #
 alabaster==0.7.10         # via sphinx
 argh==0.26.2              # via sphinx-autobuild, watchdog
-babel==2.5.0              # via sphinx
+babel==2.5.1              # via sphinx
 backports-abc==0.5        # via tornado
 certifi==2017.7.27.1        # via tornado
 commonmark==0.7.4         # via recommonmark
@@ -23,9 +23,9 @@ PyYAML==3.12              # via sphinx-autobuild, watchdog
 recommonmark==0.4.0
 requests==2.18.4          # via sphinx
 singledispatch==3.4.0.3   # via tornado
-six==1.10.0               # via livereload, singledispatch, sphinx
+six==1.11.0               # via livereload, singledispatch, sphinx
 snowballstemmer==1.2.1    # via sphinx
 sphinx-autobuild==0.7.1
-sphinx==1.6.3
+sphinx==1.6.4
 tornado==4.5.2            # via livereload, sphinx-autobuild
 watchdog==0.8.3           # via sphinx-autobuild
