@@ -144,6 +144,7 @@ class Location(
 
     class Meta:
         unique_together = (('slug', 'publishing_linked'), )
+        ordering = ('title',)
 
     def __str__(self):
         return self.title
