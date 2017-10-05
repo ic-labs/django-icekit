@@ -445,12 +445,12 @@ class GoogleMapMixin(models.Model):
         """
         Returns a link to an external view of the map
         """
-        if self.map_center_description:
-            params = {'q': self.map_center_description}
-        else:
+        if self.map_center_lat and self.map_center_long:
             params = {
                 'll': '%s,%s' % (self.map_center_lat, self.map_center_long)
             }
+        else:
+            params = {'q': self.map_center_description}
 
         return self.GOOGLE_MAPS_HREF_ROOT + urllib.urlencode(params)
 
