@@ -875,6 +875,7 @@ INSTALLED_APPS += (
     # collections. Other types of museum may need to disable this.
     'glamkit_collections.contrib.work_creator',
     'glamkit_collections.contrib.work_creator.plugins.links',
+    'adminsortable2',  # Required by work_creator.admin
 
     # Sponsors
     'glamkit_sponsors',
