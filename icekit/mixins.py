@@ -20,6 +20,7 @@ from fluent_contents.rendering import render_content_items
 
 from icekit.tasks import store_readability_score
 from icekit.utils.readability.readability import Readability
+from icekit import managers
 
 
 class LayoutFieldMixin(models.Model):
@@ -265,6 +266,7 @@ class GoogleMapMixin(models.Model):
     Mixin for models that will store location data and be able to render a
     Google Map for the location.
     """
+    objects = managers.GoogleMapManager()
 
     GOOGLE_MAPS_HREF_ROOT = '//maps.google.com/maps?'
     DEFAULT_MAP_ZOOM = 15

@@ -6,17 +6,29 @@ from django.utils.translation import ugettext_lazy as _
 from fluent_contents.models import ContentItem
 
 from icekit.models import ICEkitFluentContentsMixin
+from icekit.managers import GoogleMapManager
+from icekit.publishing.managers import PublishingManager
 
-from .abstract_models import AbstractLocationWithGoogleMap
+from icekit.plugins.location import abstract_models
+
+
+# We must combine managers here otherwise the `PublishingManager` applied via
+# `ICEkitFluentContentsMixin` will clobber the existing `GoogleMapManager`
+class PublishingManagerAndGoogleMapManager(
+    PublishingManager,
+    GoogleMapManager,
+):
+    pass
 
 
 class Location(
     ICEkitFluentContentsMixin,
-    AbstractLocationWithGoogleMap,
+    abstract_models.AbstractLocationWithGoogleMap,
 ):
     """
     Location model with fluent contents.
     """
+    objects = PublishingManagerAndGoogleMapManager()
 
     class Meta:
         unique_together = (('slug', 'publishing_linked'), )
