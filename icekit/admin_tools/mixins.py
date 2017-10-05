@@ -208,7 +208,10 @@ class GoogleMapMixinAdmin(object):
                     'map_zoom',
                     'map_center_lat',
                     'map_center_long',
-                    'map_center_description',
+                ) + (
+                    getattr(settings, 'GOOGLE_MAP_PERMISSIVE_CENTER', True)
+                    and ('map_center_description',) or tuple()
+                ) + (
                     'map_marker_lat',
                     'map_marker_long',
                     'map_marker_description',
