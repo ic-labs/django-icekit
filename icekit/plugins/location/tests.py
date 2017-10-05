@@ -1,6 +1,7 @@
 import json
 import unittest
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.contrib.auth import get_user_model
@@ -13,7 +14,7 @@ from icekit.models import Layout
 from icekit.page_types.layout_page.models import LayoutPage
 from icekit.utils import fluent_contents
 
-from . import models, appsettings
+from . import models
 
 User = get_user_model()
 
@@ -78,7 +79,7 @@ class LocationModelTests(unittest.TestCase):
                 'marker': self.location.map_marker or self.location.map_center,
                 'zoom': self.location.map_zoom,
                 'href': self.location.get_map_href(),
-                'key': appsettings.GOOGLE_MAPS_API_KEY,
+                'key': getattr(settings, 'GOOGLE_MAPS_API_KEY', ''),
                 'description': [
                     line for line in self.location.map_description.splitlines()
                     if line

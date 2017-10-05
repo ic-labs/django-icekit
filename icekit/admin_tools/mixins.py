@@ -198,3 +198,17 @@ class BetterDateTimeAdmin(object):
         DateField: {'widget': widgets.DateWidget},
         TimeField: {'widget': widgets.TimeWidget},
     }
+
+
+class GoogleMapMixinAdmin(object):
+    FIELDSETS = (
+            ('Map', {
+                'fields': (
+                    'map_description',
+                    'map_center',
+                    'map_zoom',
+                    'map_marker',
+                    'map_embed_code',
+                )
+            }),
+        )
