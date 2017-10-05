@@ -313,24 +313,15 @@ class GoogleMapMixin(models.Model):
             description, address, or latitude/longitude combination
         '''
     )
-    map_embed_code = models.TextField(
-        blank=True,
-        help_text='''
-            The HTML code that embeds a map.
-            <br>
-            This is an optional override for the map automatically generated
-            from the map center, map zoom, and map marker fields
-        '''
-    )
 
     class Meta:
         abstract = True
 
     def clean(self):
         super(GoogleMapMixin, self).clean()
-        if not self.map_center and not self.map_embed_code:
+        if not self.map_center:
             raise ValidationError(
-                'Either the map center or the map embed code must be defined'
+                'The map center must be defined'
             )
 
     def render_map(self):
@@ -339,10 +330,6 @@ class GoogleMapMixin(models.Model):
         JSON that is picked up by `icekit/plugins/location/location_map.js`
         which mounts a responsive static map with overlays and links
         """
-
-        if self.map_embed_code.strip():
-            return self.map_embed_code
-
         return (
             '<div id="{container_id}" class="location-map"></div>'
             '<script>'
