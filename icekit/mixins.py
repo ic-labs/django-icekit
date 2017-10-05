@@ -240,7 +240,6 @@ class ListableMixin(models.Model):
         return u"<a href='{0}'>{1}</a>".format(self.get_admin_url(), self.get_title())
 
 
-
 class HeroMixin(models.Model):
     """
     Mixin for adding hero content
@@ -268,27 +267,12 @@ class GoogleMapMixin(models.Model):
     """
 
     GOOGLE_MAPS_HREF_ROOT = '//maps.google.com/maps?'
-    LAT_LONG_REGEX = re.compile(r'^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$')
     DEFAULT_MAP_ZOOM = 15
 
     map_description = models.TextField(
-        help_text=_('A textual description of the location.'),
+        help_text=_('A textual description of the map.'),
     )
-    map_center = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text='''
-            Location's description, address or latitude/longitude combination.
-            <br />
-            <br />
-            Examples:
-            <br><br><em>San Francisco Museum of Modern Art</em>
-            <br><br><em>or</em>
-            <br><br><em>151 3rd St, San Francisco, CA 94103</em>
-            <br><br><em>or</em>
-            <br><br><em>37.785710, -122.401045</em>
-        '''
-    )
+
     map_zoom = models.PositiveIntegerField(
         default=DEFAULT_MAP_ZOOM,
         help_text='''
@@ -302,15 +286,78 @@ class GoogleMapMixin(models.Model):
             the default roadmap view.
         '''.format(DEFAULT_MAP_ZOOM)
     )
-    map_marker = models.CharField(
+
+    map_center_lat = models.DecimalField(
+        blank=True,
+        null=True,
+        max_digits=9,
+        decimal_places=6,
+        help_text='''
+            Latitude of map's center point.
+            <br/>
+            If set you must also set the map center longitude, and must not set
+            the map center description
+        '''
+    )
+    map_center_long = models.DecimalField(
+        blank=True,
+        null=True,
+        max_digits=9,
+        decimal_places=6,
+        help_text='''
+            Longitude of map's center point.
+            <br/>
+            If set you must also set the map center latitude, and must not set
+            the map center description
+        '''
+    )
+    map_center_description = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text='''
+            Map's description or address.
+            <br />
+            If set you must not set the map center latitude or longitude.
+            <br />
+            Examples:
+            <br><br><em>San Francisco Museum of Modern Art</em>
+            <br><br><em>or</em>
+            <br><br><em>151 3rd St, San Francisco, CA 94103</em>
+        '''
+    )
+
+    map_marker_lat = models.DecimalField(
+        blank=True,
+        null=True,
+        max_digits=9,
+        decimal_places=6,
+        help_text='''
+            Latitude of map's marker point.
+            <br/>
+            If set you must also set the map marker longitude, and must not set
+            the map marker description
+        '''
+    )
+    map_marker_long = models.DecimalField(
+        blank=True,
+        null=True,
+        max_digits=9,
+        decimal_places=6,
+        help_text='''
+            Longitude of map's marker point.
+            <br/>
+            If set you must also set the map marker latitude, and must not set
+            the map marker description
+        '''
+    )
+    map_marker_description = models.CharField(
         max_length=255,
         blank=True,
         help_text='''
             An override for the map's marker, which defaults to the center of
             the map.
             <br>
-            The value should take a similar form to the map center: a
-            description, address, or latitude/longitude combination
+            The value should take a description or address.
         '''
     )
 
@@ -319,10 +366,44 @@ class GoogleMapMixin(models.Model):
 
     def clean(self):
         super(GoogleMapMixin, self).clean()
-        if not self.map_center:
+        # Validate center location
+        if (
+            not self.map_center_description and
+            not self.map_center_lat and
+            not self.map_center_long
+        ):
             raise ValidationError(
-                'The map center must be defined'
+                'Either latitude/longitude for map center or the map center'
+                ' description must be defined'
             )
+        if self.map_center_description:
+            if self.map_center_lat or self.map_center_long:
+                raise ValidationError(
+                    'Latitude and longitude for the map center must not be'
+                    ' defined if the map center description is defined'
+                )
+        else:  # no map_center_description
+            if not self.map_center_lat or not self.map_center_long:
+                raise ValidationError(
+                    'Latitude and longitude must both be defined for map'
+                    ' center if one is defined'
+                )
+        # Validate marker location
+        if self.map_marker_description:
+            if self.map_marker_lat or self.map_marker_long:
+                raise ValidationError(
+                    'Latitude and longitude must not be defined for marker if'
+                    ' the map marker description is defined'
+                )
+        else:  # no map_marker_description
+            if (
+                (self.map_marker_lat and not self.map_marker_long) or
+                (self.map_marker_long and not self.map_marker_lat)
+            ):
+                raise ValidationError(
+                    'Latitude and longitude must both be defined for marker if'
+                    ' one is defined'
+                )
 
     def render_map(self):
         """
@@ -343,16 +424,16 @@ class GoogleMapMixin(models.Model):
 
     def get_map_data(self):
         """
-        Returns a serializable data set describing the location
+        Returns a serializable data set describing the map location
         """
 
         return {
             'containerSelector': '#' + self.get_map_element_id(),
-            'center': self.map_center,
-            'marker': self.map_marker or self.map_center,
+            'center': self.map_center_description,
+            'marker': self.map_marker_description or self.map_center_description,
             'zoom': self.map_zoom,
             'href': self.get_map_href(),
-            'key': getattr(settings, 'GOOGLE_MAPS_API_KEY'),
+            'key': getattr(settings, 'GOOGLE_MAPS_API_KEY', ''),
             # Python's line-splitting is more cross-OS compatible, so we feed
             # a pre-built array to the front-end
             'description': [
@@ -364,13 +445,12 @@ class GoogleMapMixin(models.Model):
         """
         Returns a link to an external view of the map
         """
-
-        map_href_center = self.map_marker or self.map_center
-
-        if self.LAT_LONG_REGEX.match(map_href_center):
-            params = {'ll': map_href_center}
+        if self.map_center_description:
+            params = {'q': self.map_center_description}
         else:
-            params = {'q': map_href_center}
+            params = {
+                'll': '%s,%s' % (self.map_center_lat, self.map_center_long)
+            }
 
         return self.GOOGLE_MAPS_HREF_ROOT + urllib.urlencode(params)
 
@@ -378,4 +458,4 @@ class GoogleMapMixin(models.Model):
         """
         Returns a unique identifier for a map element
         """
-        return 'location-map-' + str(id(self))
+        return 'google-map-' + str(id(self))
