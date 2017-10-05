@@ -1,18 +1,17 @@
 from django.contrib import admin
 
 from icekit.admin import ICEkitFluentContentsAdmin
-from icekit.admin_tools.mixins import ListableMixinAdmin, HeroMixinAdmin
+from icekit.admin_tools.mixins import ListableMixinAdmin, HeroMixinAdmin, \
+    GoogleMapMixinAdmin
 
 from . import models
 
 
-class LocationAdmin(
-    ICEkitFluentContentsAdmin,
+class AbstractLocationAdmin(
     ListableMixinAdmin,
     HeroMixinAdmin,
 ):
     prepopulated_fields = {"slug": ("title",)}
-    list_filter = ICEkitFluentContentsAdmin.list_filter
 
     raw_id_fields = HeroMixinAdmin.raw_id_fields
 
@@ -23,15 +22,6 @@ class LocationAdmin(
                     'slug',
                     'is_home_location',
                     'layout',
-                )
-            }),
-            ('Map', {
-                'fields': (
-                    'map_description',
-                    'map_center',
-                    'map_zoom',
-                    'map_marker',
-                    'map_embed_code',
                 )
             }),
             ('Display details', {
@@ -48,6 +38,21 @@ class LocationAdmin(
         ) + \
         HeroMixinAdmin.FIELDSETS + \
         ListableMixinAdmin.FIELDSETS
+
+
+class AbstractLocationWithGoogleMapAdmin(
+    AbstractLocationAdmin
+):
+
+    fieldsets = AbstractLocationAdmin.fieldsets + \
+        GoogleMapMixinAdmin.FIELDSETS
+
+
+class LocationAdmin(
+    AbstractLocationWithGoogleMapAdmin,
+    ICEkitFluentContentsAdmin,
+):
+    list_filter = ICEkitFluentContentsAdmin.list_filter
 
 
 admin.site.register(models.Location, LocationAdmin)

@@ -198,3 +198,23 @@ class BetterDateTimeAdmin(object):
         DateField: {'widget': widgets.DateWidget},
         TimeField: {'widget': widgets.TimeWidget},
     }
+
+
+class GoogleMapMixinAdmin(object):
+    FIELDSETS = (
+            ('Map', {
+                'fields': (
+                    'map_description',
+                    'map_zoom',
+                    'map_center_lat',
+                    'map_center_long',
+                ) + (
+                    getattr(settings, 'GOOGLE_MAP_PERMISSIVE_CENTER', True)
+                    and ('map_center_description',) or tuple()
+                ) + (
+                    'map_marker_lat',
+                    'map_marker_long',
+                    'map_marker_description',
+                )
+            }),
+        )

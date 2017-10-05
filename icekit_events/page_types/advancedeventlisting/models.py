@@ -142,6 +142,16 @@ class AbstractAdvancedEventListingPage(AbstractListingPage):
                 pass
         return None
 
+    def parse_is_nearby(self, request):
+        if request.GET.get('is-nearby'):
+            try:
+                splits = request.GET.get('is-nearby').split(',')
+                lat, lng, distance = map(float, splits)
+                return lat, lng, distance
+            except ValueError:
+                pass
+        return None
+
     def _apply_constraints(self, request):
         start_date = self.parse_start_date(request)
         end_date = self.parse_end_date(request, start_date)
@@ -186,6 +196,13 @@ class AbstractAdvancedEventListingPage(AbstractListingPage):
         locations = self.parse_locations(request)
         if locations is not None:
             qs = qs.filter(event__location__in=locations)
+        nearby_locations_constraint = self.parse_is_nearby(request)
+        if nearby_locations_constraint:
+            lat, lng, distance = nearby_locations_constraint
+            self.nearby_locations = Location.objects \
+                .nearby(lat, lng, distance) \
+                .visible()
+            qs = qs.filter(event__location__in=self.nearby_locations)
         is_home_location = self.parse_is_home_location(request)
         if is_home_location is not None:
             qs = qs.filter(event__location__is_home_location=is_home_location)

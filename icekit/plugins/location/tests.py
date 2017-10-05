@@ -1,6 +1,7 @@
 import json
 import unittest
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.contrib.auth import get_user_model
@@ -13,7 +14,7 @@ from icekit.models import Layout
 from icekit.page_types.layout_page.models import LayoutPage
 from icekit.utils import fluent_contents
 
-from . import models, appsettings
+from . import models
 
 User = get_user_model()
 
@@ -25,45 +26,72 @@ class LocationModelTests(unittest.TestCase):
             title='Test Location',
             slug='test-location',
             map_description='Location for testing',
-            map_center='Level 5, 48 Chippen St, Chippendale, NSW',
+            map_center_description='Level 5, 48 Chippen St, Chippendale, NSW',
         )
 
+    def tearDown(self):
+        models.Location.objects.all().delete()
+
     def test_clean(self):
-        # Map center or map embed code are required
+        # Map center is required
         with self.assertRaises(exceptions.ValidationError):
             models.Location.objects.create(
-                title='Test Location',
-                slug='test-location',
+                title='Test Location 1',
+                slug='test-location-1',
             ).clean()
         # Can create location with map center
         models.Location.objects.create(
-            title='Test Location',
-            slug='test-location',
-            map_center='somewhere',
+            title='Test Location 2',
+            slug='test-location-2',
+            map_center_description='somewhere',
         ).clean()
-        # Can create location with map embed code
+        # Can create location with lat/long center
         models.Location.objects.create(
-            title='Test Location',
-            slug='test-location',
-            map_embed_code='code',
+            title='Test Location 3',
+            slug='test-location-3',
+            map_center_lat='-33.85',
+            map_center_long='151.17',
         ).clean()
+        # Cannot create location with center description and lat/long values
+        with self.assertRaises(exceptions.ValidationError):
+            models.Location.objects.create(
+                title='Test Location 1',
+                slug='test-location-1',
+                map_center_description='somewhere',
+                map_center_lat='-33.85',
+            ).clean()
+        with self.assertRaises(exceptions.ValidationError):
+            models.Location.objects.create(
+                title='Test Location 1',
+                slug='test-location-1',
+                map_center_description='somewhere',
+                map_center_long='-33.85',
+            ).clean()
+        # Must include both lat and long fields if either are set
+        with self.assertRaises(exceptions.ValidationError):
+            models.Location.objects.create(
+                title='Test Location 1',
+                slug='test-location-1',
+                map_center_lat='-33.85',
+            ).clean()
+        with self.assertRaises(exceptions.ValidationError):
+            models.Location.objects.create(
+                title='Test Location 1',
+                slug='test-location-1',
+                map_center_long='-33.85',
+            ).clean()
 
     def test_location_has_absolute_url(self):
         self.assertEqual(
             '/location/test-location/',
             self.location.get_absolute_url())
 
-    def test_render_map_with_embed_code(self):
-        self.location.map_embed_code = 'explicit-embed-code'
-        self.location.save()
-        self.assertEquals('explicit-embed-code', self.location.render_map())
-
     def test_render_map(self):
         self.assertEquals(
-            '<div id="{container_id}" class="location-map"></div>'
+            '<div id="{container_id}" class="google-map"></div>'
             '<script>'
-            '    gkLocationMaps = window.gkLocationMaps || [];'
-            '    gkLocationMaps.push({data});'
+            '    gkGoogleMaps = window.gkGoogleMaps || [];'
+            '    gkGoogleMaps.push({data});'
             '</script>'.format(
                 container_id=self.location.get_map_element_id(),
                 data=json.dumps(self.location.get_map_data()),
@@ -74,11 +102,11 @@ class LocationModelTests(unittest.TestCase):
         self.assertEquals(
             {
                 'containerSelector': '#' + self.location.get_map_element_id(),
-                'center': self.location.map_center,
-                'marker': self.location.map_marker or self.location.map_center,
+                'center': self.location.map_center_description,
+                'marker': self.location.map_marker_description or self.location.map_center_description,
                 'zoom': self.location.map_zoom,
                 'href': self.location.get_map_href(),
-                'key': appsettings.GOOGLE_MAPS_API_KEY,
+                'key': getattr(settings, 'GOOGLE_MAPS_API_KEY', ''),
                 'description': [
                     line for line in self.location.map_description.splitlines()
                     if line
@@ -88,21 +116,23 @@ class LocationModelTests(unittest.TestCase):
         )
 
     def test_get_map_href(self):
-        # Location has map center, no map marker
+        # Location has map center description, no map marker
         self.assertEqual(
             '//maps.google.com/maps?'
             'q=Level+5%2C+48+Chippen+St%2C+Chippendale%2C+NSW',
             self.location.get_map_href())
-        # Location with map marker
-        self.location.map_marker = '100,100'  # Lat/long values
+        # Location with map center lat/long
+        self.location.map_center_description = ''
+        self.location.map_center_lat = '100.1234'
+        self.location.map_center_long = '100.2345'
         self.location.save()
         self.assertEqual(
-            '//maps.google.com/maps?ll=100%2C100',
+            '//maps.google.com/maps?ll=100.1234%2C100.2345',
             self.location.get_map_href())
 
     def test_get_map_element_id(self):
         self.assertEqual(
-            'location-map-%d' % id(self.location),
+            'google-map-%d' % id(self.location),
             self.location.get_map_element_id())
 
 
@@ -113,7 +143,7 @@ class LocationViewsTests(WebTest):
             title='Test Location',
             slug='test-location',
             map_description='Location for testing',
-            map_center='Level 5, 48 Chippen St, Chippendale, NSW',
+            map_center_description='Level 5, 48 Chippen St, Chippendale, NSW',
         )
 
     def test_list_view(self):
@@ -154,7 +184,7 @@ class LocationItemTests(WebTest):
             title='Test Location',
             slug='test-location',
             map_description='Location for testing',
-            map_center='Level 5, 48 Chippen St, Chippendale, NSW',
+            map_center_description='Level 5, 48 Chippen St, Chippendale, NSW',
         )
 
         self.layout = G(

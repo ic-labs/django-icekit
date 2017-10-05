@@ -44,6 +44,16 @@
             {% endfor %}
           </select>
 
+          <p/>
+
+          <label for="user_lat_long">Your Latitude/Longitude</label>
+          <input id="user_lat_long" name="user_lat_long" type="text" value="{{ request.GET.user_lat_long }}" />
+          <label for="distance_within">Within (km)</label>
+          <input id="distance_within" name="distance_within" type="text" value="{{ request.GET.distance_within }}" />
+          <input id="is-nearby" name="is-nearby" type="hidden" value="" />
+
+          <p/>
+
           <input type="submit" value="Submit" />
         </form>
 
@@ -65,6 +75,8 @@
     {{ block.super }}
     <script src="{% static 'icekit_events/js/jquery-querystring.js' %}"></script>
     <script src="{% static 'jquery-ui/jquery-ui.min.js' %}"></script>
+
+    {# Configure behaviour of start/end field datepicker widgets #}
     <script>
       $(function() {
         var dateFormat = "yy-mm-dd";
@@ -101,6 +113,32 @@
           return date;
         }
       });
-      </script>
+    </script>
+
+    {# Prompt user for permission to lookup location and populate into form #}
+    <script>
+      $(function() {
+          navigator.geolocation.getCurrentPosition(function(location) {
+              var coords = location.coords;
+              $("#user_lat_long").val(coords.latitude + "," + coords.longitude);
+          });
+      });
+    </script>
+
+    {# Keep is-nearby constraint field up-to-date with lat/long/distance field changes #}
+    <script>
+      $(function() {
+          var updateIsNearby = function() {
+              $("#is-nearby").val(
+                  $("#user_lat_long").val()
+                  + ","
+                  + $("#distance_within").val()
+              );
+          }
+
+          $("#user_lat_long").change(updateIsNearby).change();
+          $("#distance_within").change(updateIsNearby).change();
+      });
+    </script>
 {% endblock %}
 

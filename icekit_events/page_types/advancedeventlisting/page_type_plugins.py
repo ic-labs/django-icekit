@@ -28,5 +28,8 @@ class AdvancedEventListingPagePlugin(ListingPagePlugin):
         # General event data to render in page
         context['visible_event_types'] = \
             EventType.objects.filter(is_public=True)
-        context['visible_locations'] = Location.objects.visible()
+        if getattr(page, 'nearby_locations', None):
+            context['visible_locations'] = page.nearby_locations
+        else:
+            context['visible_locations'] = Location.objects.visible()
         return context
