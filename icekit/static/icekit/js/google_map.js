@@ -4,7 +4,7 @@ $(function() {
 		return setTimeout(cb, 33);
 	};
 
-	var locationMaps = window.gkLocationMaps || [];
+	var googleMaps = window.gkGoogleMaps || [];
 
 	function buildMap(map) {
 		// Builds up the map's DOM structure - if necessary - then
@@ -15,30 +15,30 @@ $(function() {
 		}
 
 		if (map.href && !map.link) {
-			map.link = $('<a class="location-map-link" href="' + map.href + '">');
+			map.link = $('<a class="google-map-link" href="' + map.href + '">');
 			map.container.append(map.link);
 		}
 
 		var containerElement = map.link || map.container;
 
 		if (!map.image) {
-			map.image = $('<img class="location-map-image">');
+			map.image = $('<img class="google-map-image">');
 			containerElement.append(map.image);
 		}
 
 		var overlayTitle = _.first(map.description);
 		var overlayDescription = _.tail(map.description);
 		if (overlayTitle && !map.overlay) {
-			map.overlay = $('<div class="location-map-overlay">');
+			map.overlay = $('<div class="google-map-overlay">');
 
 			map.overlay.append(
-				'<h4 class="location-map-overlay-title">' + overlayTitle + '</h4>'
+				'<h4 class="google-map-overlay-title">' + overlayTitle + '</h4>'
 			);
 
 			if (overlayDescription && overlayDescription.length) {
 				_.forEach(overlayDescription, function(text) {
 					map.overlay.append(
-						'<h5 class="location-map-overlay-description">' + text + '</h5>'
+						'<h5 class="google-map-overlay-description">' + text + '</h5>'
 					);
 				});
 			}
@@ -68,11 +68,11 @@ $(function() {
 		// Wait for an animation frame so that we can allow the DOM to settle
 		// and avoid hitting it too hard during init
 		requestAnimationFrame(function() {
-			_.forEach(locationMaps, buildMap);
+			_.forEach(googleMaps, buildMap);
 		})
 	}
 
-	if (locationMaps.length) {
+	if (googleMaps.length) {
 		deferMaps();
 
 		// Lazily ensure that the maps are responsive

@@ -326,15 +326,15 @@ class GoogleMapMixin(models.Model):
 
     def render_map(self):
         """
-        Returns either the `map_embed_code` field or renders a container and
-        JSON that is picked up by `icekit/plugins/location/location_map.js`
-        which mounts a responsive static map with overlays and links
+        Renders a container and JSON that is picked up by
+        `static/icekit/js/google_map.js` which mounts a responsive static map
+        with overlays and links
         """
         return (
-            '<div id="{container_id}" class="location-map"></div>'
+            '<div id="{container_id}" class="google-map"></div>'
             '<script>'
-            '    gkLocationMaps = window.gkLocationMaps || [];'
-            '    gkLocationMaps.push({data});'
+            '    gkGoogleMaps = window.gkGoogleMaps || [];'
+            '    gkGoogleMaps.push({data});'
             '</script>'
         ).format(
             container_id=self.get_map_element_id(),
