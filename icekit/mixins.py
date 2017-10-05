@@ -368,6 +368,13 @@ class GoogleMapMixin(models.Model):
 
     def clean(self):
         super(GoogleMapMixin, self).clean()
+        # If the `map_center_description` field isn't shown in the
+        # CMS admin, automatically clear this field value if it exists
+        if (
+            self.map_center_description and
+            not getattr(settings, 'GOOGLE_MAP_PERMISSIVE_CENTER', True)
+        ):
+            self.map_center_description = ''
         # Validate center location
         if (
             not self.map_center_description and
