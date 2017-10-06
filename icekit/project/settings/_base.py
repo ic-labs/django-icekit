@@ -566,6 +566,11 @@ LINK_PLUGINS = [
 
 ]
 
+COLLECTIONS_LINK_PLUGINS = [
+    'WorkLinkPlugin',
+    'CreatorLinkPlugin',
+]
+
 SPONSOR_PLUGINS = [
     'BeginSponsorBlockPlugin',
     'EndSponsorBlockPlugin',
@@ -580,6 +585,7 @@ DEFAULT_PLUGINS = \
     NAVIGATION_PLUGINS + \
     EVENTS_PLUGINS + \
     LINK_PLUGINS + \
+    COLLECTIONS_LINK_PLUGINS + \
     SPONSOR_PLUGINS
 
 IK_NAVIGATION_PLUGINS = (
@@ -593,7 +599,7 @@ FLUENT_CONTENTS_PLACEHOLDER_CONFIG = {
         'plugins': DEFAULT_PLUGINS,
     },
     'related': {
-        'plugins': LINK_PLUGINS,
+        'plugins': LINK_PLUGINS + COLLECTIONS_LINK_PLUGINS,
     },
     'pressrelease_contacts': {
         'plugins': (
