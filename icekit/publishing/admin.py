@@ -393,7 +393,7 @@ class _PublishingHelpersMixin(object):
             q.unpublish()
 
 
-class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
+class PublishingAdmin(_PublishingHelpersMixin, ModelAdmin):
     form = PublishingAdminForm
     list_display = ('publishing_object_title', 'publishing_column', 'publishing_modified_at')
     list_display_links = ('publishing_object_title', ) # default, but makes it easier to extend
