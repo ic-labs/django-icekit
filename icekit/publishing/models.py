@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
@@ -856,3 +857,31 @@ def create_can_publish_and_can_republish_permissions(sender, **kwargs):
         permission, created = Permission.objects.get_or_create(
             content_type=content_type, codename='can_republish',
             defaults=dict(name='Can Republish %s' % model.__name__))
+
+
+@receiver(models.signals.post_save)
+def maybe_automatically_publish_drafts_on_save(sender, instance, **kwargs):
+    """
+    If automatic publishing is enabled, immediately publish a draft copy after
+    it has been saved.
+    """
+    # Skip processing if auto-publishing is not enabled
+    auto_publish_setting = getattr(
+        settings, 'PUBLISHING_ENABLE_AUTO_PUBLISH', None)
+    if not auto_publish_setting:
+        return
+    if isinstance(auto_publish_setting, (list, tuple)):
+        sender_dotpath = '.'.join([sender.__module__, sender.__name__])
+        if sender_dotpath not in auto_publish_setting:
+            return
+    # Skip missing or unpublishable instances
+    if not instance or not hasattr(instance, 'publishing_linked'):
+        return
+    # Ignore saves of published copies
+    if instance.is_published:
+        return
+    # Ignore saves of already-published draft copies
+    if not instance.is_dirty:
+        return
+    # Immediately publish saved draft copy
+    instance.publish()

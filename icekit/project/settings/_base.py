@@ -1116,3 +1116,11 @@ MIDDLEWARE_CLASSES = \
 
 DEFAULT_HOST = 'www'
 ROOT_HOSTCONF = 'icekit.project.hosts'
+
+# PUBLISHING ##################################################################
+
+# Enable auto-publishing to automatically and immediately publish items when
+# the draft copy is saved (e.g. in the CMS admin). Set to ``True`` to auto-
+# publish all publishable items, or to a tuple/list of model dot-paths to
+# selectively auto-publishing specific models.
+PUBLISHING_ENABLE_AUTO_PUBLISH = False
