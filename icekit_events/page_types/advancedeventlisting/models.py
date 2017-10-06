@@ -211,13 +211,13 @@ class AbstractAdvancedEventListingPage(AbstractListingPage):
 
     def get_items_to_mount(self, request):
         """ Return items that can be mounted, i.e. viewed as child pages """
-        return self._apply_constraints(request)
+        return self._apply_constraints(request).visible()
 
     def get_items_to_list(self, request):
         """
         Return items that can be seen on the listing page by current user
         """
-        return self._apply_constraints(request)
+        return self._apply_constraints(request).visible()
 
 
 class AdvancedEventListingPage(AbstractAdvancedEventListingPage):
