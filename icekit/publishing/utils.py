@@ -4,6 +4,7 @@ except ImportError:
 	from urllib import parse as urlparse
 
 from django.apps import apps
+from django.conf import settings
 from django.http import QueryDict, Http404
 from django.shortcuts import get_object_or_404, _get_queryset
 from django.utils.crypto import get_random_string, salted_hmac
@@ -110,3 +111,15 @@ def get_visible_object_or_404(klass, *args, **kwargs):
     except AttributeError:
         pass  # Ignore error calling `visible()` on unpublishable class
     return get_object_or_404(qs, *args, **kwargs)
+
+
+def is_automatic_publishing_enabled(klass):
+    auto_publish_setting = getattr(
+        settings, 'PUBLISHING_ENABLE_AUTO_PUBLISH', False)
+    if auto_publish_setting is True:
+        return True
+    if isinstance(auto_publish_setting, (list, tuple)):
+        klass_dotpath = '.'.join([klass.__module__, klass.__name__])
+        if klass_dotpath in auto_publish_setting:
+            return True
+    return False

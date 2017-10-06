@@ -20,6 +20,7 @@ from fluent_pages.adminui.pageadmin import _select_template_name
 from fluent_pages.adminui.urlnodeparentadmin import UrlNodeParentAdmin
 
 from .models import PublishingModel
+from .utils import is_automatic_publishing_enabled
 
 
 def make_published(modeladmin, request, queryset):
@@ -245,6 +246,14 @@ class _PublishingHelpersMixin(object):
         super(_PublishingHelpersMixin, self).__init__(*args, **kwargs)
         self.request = None
 
+    def get_actions(self, request):
+        actions = super(_PublishingHelpersMixin, self).get_actions(request)
+        # Disable publish/unpublish bulk actions if auto-publishing is enabled
+        if is_automatic_publishing_enabled(self.model):
+            actions.pop('publish', None)
+            actions.pop('unpublish', None)
+        return actions
+
     def is_admin_for_publishable_model(self):
         return hasattr(self, 'model') \
                 and issubclass(self.model, PublishingModel)
@@ -279,6 +288,10 @@ class _PublishingHelpersMixin(object):
         permissions to publish.
         :return: Boolean.
         """
+        # If auto-publishing is enabled, no user has "permission" to publish
+        # because it happens automatically
+        if is_automatic_publishing_enabled(self.model):
+            return False
         user_obj = request.user
         if not user_obj.is_active:
             return False
@@ -380,7 +393,7 @@ class _PublishingHelpersMixin(object):
             q.unpublish()
 
 
-class PublishingAdmin(ModelAdmin, _PublishingHelpersMixin):
+class PublishingAdmin(_PublishingHelpersMixin, ModelAdmin):
     form = PublishingAdminForm
     list_display = ('publishing_object_title', 'publishing_column', 'publishing_modified_at')
     list_display_links = ('publishing_object_title', ) # default, but makes it easier to extend

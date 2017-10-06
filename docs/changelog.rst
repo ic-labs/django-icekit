@@ -17,6 +17,26 @@ changes.
 In development
 --------------
 
+-  Add optional setting ``PUBLISHING_ENABLE_AUTO_PUBLISH`` to automatically
+   and immediately publish publishable items when they are saved in the
+   admin.
+
+   To automatically publish all publishable items in the system, set to
+   ``True``
+
+   .. code-block:: python
+
+      PUBLISHING_ENABLE_AUTO_PUBLISH = True
+
+   To automatically publish specific publishable models, provide a tuple or
+   list of model dot-paths. For example:
+
+   .. code-block:: python
+
+      PUBLISHING_ENABLE_AUTO_PUBLISH = [
+       'icekit.page_types.layout_page.models.LayoutPage',
+      ]
+
 -  Add API endpoints for GLAMkit Collection models Artwork, Film, Game,
    Moving Image, Organization, and Person.
 

@@ -15,7 +15,8 @@ from icekit.mixins import FluentFieldsMixin
 
 from .managers import PublishingManager, PublishingUrlNodeManager
 from .middleware import is_draft_request_context
-from .utils import PublishingException, assert_draft
+from .utils import PublishingException, assert_draft, \
+    is_automatic_publishing_enabled
 from . import signals as publishing_signals
 
 
@@ -856,3 +857,25 @@ def create_can_publish_and_can_republish_permissions(sender, **kwargs):
         permission, created = Permission.objects.get_or_create(
             content_type=content_type, codename='can_republish',
             defaults=dict(name='Can Republish %s' % model.__name__))
+
+
+@receiver(models.signals.post_save)
+def maybe_automatically_publish_drafts_on_save(sender, instance, **kwargs):
+    """
+    If automatic publishing is enabled, immediately publish a draft copy after
+    it has been saved.
+    """
+    # Skip processing if auto-publishing is not enabled
+    if not is_automatic_publishing_enabled(sender):
+        return
+    # Skip missing or unpublishable instances
+    if not instance or not hasattr(instance, 'publishing_linked'):
+        return
+    # Ignore saves of published copies
+    if instance.is_published:
+        return
+    # Ignore saves of already-published draft copies
+    if not instance.is_dirty:
+        return
+    # Immediately publish saved draft copy
+    instance.publish()
