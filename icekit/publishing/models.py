@@ -1,6 +1,5 @@
 from copy import deepcopy
 
-from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
@@ -16,7 +15,8 @@ from icekit.mixins import FluentFieldsMixin
 
 from .managers import PublishingManager, PublishingUrlNodeManager
 from .middleware import is_draft_request_context
-from .utils import PublishingException, assert_draft
+from .utils import PublishingException, assert_draft, \
+    is_automatic_publishing_enabled
 from . import signals as publishing_signals
 
 
@@ -866,14 +866,8 @@ def maybe_automatically_publish_drafts_on_save(sender, instance, **kwargs):
     it has been saved.
     """
     # Skip processing if auto-publishing is not enabled
-    auto_publish_setting = getattr(
-        settings, 'PUBLISHING_ENABLE_AUTO_PUBLISH', None)
-    if not auto_publish_setting:
+    if not is_automatic_publishing_enabled(sender):
         return
-    if isinstance(auto_publish_setting, (list, tuple)):
-        sender_dotpath = '.'.join([sender.__module__, sender.__name__])
-        if sender_dotpath not in auto_publish_setting:
-            return
     # Skip missing or unpublishable instances
     if not instance or not hasattr(instance, 'publishing_linked'):
         return
