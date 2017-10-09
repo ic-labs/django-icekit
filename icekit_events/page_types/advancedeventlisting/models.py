@@ -17,7 +17,7 @@ class AbstractAdvancedEventListingPage(AbstractListingPage):
         help_text="Leave empty to show all events.",
         blank=True,
         # Explicit `db_table` required to avoid errors creating FK constraints
-        db_table="advanced_event_listing_page_primary_types",
+        #db_table="advanced_event_listing_page_primary_types",
         related_name="+",
     )
     limit_to_secondary_types = models.ManyToManyField(
@@ -25,7 +25,7 @@ class AbstractAdvancedEventListingPage(AbstractListingPage):
         help_text="Leave empty to show all events.",
         blank=True,
         # Explicit `db_table` required to avoid errors creating FK constraints
-        db_table="advanced_event_listing_page_secondary_types",
+        #db_table="advanced_event_listing_page_secondary_types",
         related_name="+",
     )
     limit_to_locations = models.ManyToManyField(
@@ -34,7 +34,7 @@ class AbstractAdvancedEventListingPage(AbstractListingPage):
         help_text="Leave empty to show all events.",
         blank=True,
         # Explicit `db_table` required to avoid errors creating FK constraints
-        db_table="advanced_event_listing_page_locations",
+        #db_table="advanced_event_listing_page_locations",
     )
     limit_to_home_locations = models.BooleanField(
         default=False,
