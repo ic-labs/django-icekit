@@ -54,13 +54,26 @@ class S3StaticLocationMixin(object):
 # STORAGE CLASSES #############################################################
 
 
-class S3DefaultStorage(
+class S3DefaultPrivateStorage(
         # HashedMediaMixin,
         S3MediaLocationMixin,
         S3PrivateMixin,
         S3Boto3Storage):
 
     pass
+
+
+class S3DefaultPublicStorage(
+        # HashedMediaMixin,
+        S3MediaLocationMixin,
+        S3PublicMixin,
+        S3Boto3Storage):
+
+    pass
+
+
+# TODO Deprecated, use `S3DefaultPrivateStorage` instead of `S3DefaultStorage`
+S3DefaultStorage = S3DefaultPrivateStorage
 
 
 default_storage = get_storage_class(settings.DEFAULT_FILE_STORAGE)()
