@@ -1,12 +1,19 @@
 from django.conf import settings
-from django.conf.urls import include, patterns, url
+from django.conf.urls import include, url, patterns as non_i18n_patterns
+from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
 from django.core.urlresolvers import reverse_lazy
 from django.views.generic import RedirectView, TemplateView
 from fluent_pages.sitemaps import PageSitemap
 
+from icekit import is_multilingual_site
 from icekit.admin_tools.forms import PasswordResetForm
 from icekit.views import index
+
+if is_multilingual_site():
+    maybe_i18n_patterns = i18n_patterns
+else:
+    maybe_i18n_patterns = non_i18n_patterns
 
 admin.autodiscover()
 
@@ -16,7 +23,7 @@ sitemaps = {
 
 # Build Authentication URL patterns separately for re-use in standard web site
 # and API web frontend.
-auth_urlpatterns = patterns(
+auth_urlpatterns = non_i18n_patterns(
     '',
 
     # Authentication.
@@ -92,14 +99,8 @@ auth_urlpatterns = patterns(
     ),
 )
 
-urlpatterns = patterns(
+urlpatterns = non_i18n_patterns(
     '',
-
-    url(r'^$', index, name="home"),
-
-    # Test error templates.
-    url(r'^404/$', TemplateView.as_view(template_name='404.html')),
-    url(r'^500/$', TemplateView.as_view(template_name='500.html')),
 
     # Redirects for updated paths in the redactor package that don't match the
     # `django-wysiwyg` template.
@@ -111,12 +112,24 @@ urlpatterns = patterns(
         RedirectView.as_view(
             url=settings.STATIC_URL + 'redactor/redactor/redactor.min.js',
             permanent=True)),
+)
 
+urlpatterns = non_i18n_patterns(
+    '',
     # Sitemap.
     url(r'^sitemap\.xml$',
         'django.contrib.sitemaps.views.sitemap',
         {'sitemaps': sitemaps}),
 
+    url(r'^$', index, name="home"),
+
+    # Test error templates.
+    url(r'^404/$', TemplateView.as_view(template_name='404.html')),
+    url(r'^500/$', TemplateView.as_view(template_name='500.html')),
+)
+
+urlpatterns = maybe_i18n_patterns(
+    '',
     # Installed apps.
     url(r'^forms/', include('forms_builder.forms.urls')),
     # API is made available at api.HOSTNAME domain by `icekit.project.hosts`
@@ -124,7 +137,7 @@ urlpatterns = patterns(
 
     # Get admin URLs prefix from settings.
     # Handle admin and front-end authentication separately.
-    url(getattr(settings, 'ICEKIT_ADMIN_URL_PREFIX', r'^admin/'), include(patterns(
+    url(getattr(settings, 'ICEKIT_ADMIN_URL_PREFIX', r'^admin/'), include(non_i18n_patterns(
         '',
         url(r'^doc/', include('django.contrib.admindocs.urls')),
 
@@ -167,31 +180,31 @@ urlpatterns = patterns(
 )
 
 if 'icekit_events' in settings.INSTALLED_APPS:
-    urlpatterns += patterns(
+    urlpatterns += maybe_i18n_patterns(
         '',
         url(r'^events/', include('icekit_events.urls')),
     )
 
 if 'icekit.plugins.iiif' in settings.INSTALLED_APPS:
-    urlpatterns += patterns(
+    urlpatterns += non_i18n_patterns(
         '',
         url(r'^iiif/', include('icekit.plugins.iiif.urls')),
     )
 
 if 'glamkit_collections.contrib.work_creator' in settings.INSTALLED_APPS:
-    urlpatterns += patterns(
+    urlpatterns += non_i18n_patterns(
         '',
         url(r'^collection/', include('glamkit_collections.contrib.work_creator.urls')),
     )
 
 if 'icekit.plugins.location' in settings.INSTALLED_APPS:
-    urlpatterns += patterns(
+    urlpatterns += non_i18n_patterns(
         '',
         url(r'^location/', include('icekit.plugins.location.urls')),
     )
 
 # keep this last
-urlpatterns += patterns(
+urlpatterns += maybe_i18n_patterns(
     '',
     # Catch all, fluent page dispatcher.
     url(r'^', include('fluent_pages.urls')),
