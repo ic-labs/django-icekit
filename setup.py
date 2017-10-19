@@ -89,6 +89,7 @@ setuptools.setup(
         ],
         'django18': [
             'Django>=1.8,<1.9',  # LTS
+            'djangorestframework<3.7',  # Avoid JSONField errors with 1.8
         ],
         'forms': [
             'django-forms-builder',
