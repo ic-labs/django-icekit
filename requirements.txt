@@ -1,3 +1,5 @@
+djangorestframework<3.7  # Avoid JSONField errors with Django 1.8
+
 -e .[api,brightcove,dev,docs,django18,forms,project,search,test,events,collections]
 
 -e git+https://github.com/ixc/django-dynamic-fixture.git@caeb3427399edd3b0d589516993c7da55e0de560#egg=django-dynamic-fixture
