@@ -70,6 +70,3 @@ class S3PublicStorage(
         S3Boto3Storage):
 
     pass
-
-
-default_storage = get_storage_class(settings.DEFAULT_FILE_STORAGE)()
