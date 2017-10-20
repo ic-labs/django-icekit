@@ -68,6 +68,13 @@ setuptools.setup(
         'requests',
         'unidecode',
         'bleach<2',  # Bleach 2 adds a dependency on html5lib>=0.99999999, which breaks our above requirement of html5lib==0.999
+
+        # Django 1.8-specific version dependencies that must be here to be
+        # respected. Ideally these restrictions would go below in the
+        # 'django18' section but setuptools does not respect them there.
+        # TODO Remove these once GLAMkit uses Django > 1.8 by default.
+        'djangorestframework<3.7'  # Avoid JSONField errors with Django 1.8
+        'django-filter<1.1',  # Avoid get_filter_name() errors with Django 1.8
     ],
     extras_require={
         'api': [

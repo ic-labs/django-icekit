@@ -1,4 +1,5 @@
 djangorestframework<3.7  # Avoid JSONField errors with Django 1.8
+django-filter<1.1  # Avoid get_filter_name() errors with Django 1.8
 
 -e .[api,brightcove,dev,docs,django18,forms,project,search,test,events,collections]
 
