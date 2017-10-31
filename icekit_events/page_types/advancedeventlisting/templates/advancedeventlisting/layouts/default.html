@@ -6,7 +6,7 @@
 
 {% block css %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static 'jquery-ui/themes/base/jquery-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'icekit/bower_components/jquery-ui/themes/base/jquery-ui.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -74,7 +74,7 @@
 {% block js %}
     {{ block.super }}
     <script src="{% static 'icekit_events/js/jquery-querystring.js' %}"></script>
-    <script src="{% static 'jquery-ui/jquery-ui.min.js' %}"></script>
+    <script src="{% static 'icekit/bower_components/jquery-ui/jquery-ui.min.js' %}"></script>
 
     {# Configure behaviour of start/end field datepicker widgets #}
     <script>
