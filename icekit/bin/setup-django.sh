@@ -26,8 +26,11 @@ fi
 # Install Node modules.
 waitlock.sh npm-install.sh "$ICEKIT_PROJECT_DIR"
 
-# Install Bower components.
+# Install Bower components for the project.
 waitlock.sh bower-install.sh "$ICEKIT_PROJECT_DIR"
+
+# Install Bower components for icekit.
+waitlock.sh bower-install.sh "$ICEKIT_DIR"
 
 # Install Python requirements.
 waitlock.sh pip-install.sh "$ICEKIT_PROJECT_DIR"
