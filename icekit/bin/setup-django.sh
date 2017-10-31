@@ -23,11 +23,14 @@ if [[ -n "$WAITLOCK_ENABLE" ]]; then
 EOF
 fi
 
+if [[ -f yarn.lock ]]; then
+	waitlock.sh yarn.sh "$ICEKIT_PROJECT_DIR"
 # Install Node modules.
 waitlock.sh npm-install.sh "$ICEKIT_PROJECT_DIR"
 
 # Install Bower components.
 waitlock.sh bower-install.sh "$ICEKIT_PROJECT_DIR"
+fi
 
 # Install Python requirements.
 waitlock.sh pip-install.sh "$ICEKIT_PROJECT_DIR"
