@@ -57,11 +57,14 @@ COPY project_template/bower.json /opt/django-icekit/project_template/
 RUN bower install --allow-root && rm -rf /root/.cache/bower
 RUN md5sum bower.json > bower.json.md5
 
-WORKDIR /opt/django-icekit/
+WORKDIR /opt/django-icekit/icekit
 
-COPY icekit/bower.json /opt/django-icekit/
+COPY icekit/.bowerrc /opt/django-icekit/icekit/
+COPY icekit/bower.json /opt/django-icekit/icekit/
 RUN bower install --allow-root
 RUN md5sum bower.json > bower.json.md5
+
+WORKDIR /opt/django-icekit/
 
 COPY README.rst requirements.txt setup.py /opt/django-icekit/
 RUN bash -c 'pip install --no-cache-dir -r <(grep -v setuptools requirements.txt)'  # Unpin setuptools dependencies. See: https://github.com/pypa/pip/issues/4264
