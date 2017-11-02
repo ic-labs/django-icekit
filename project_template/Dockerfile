@@ -3,7 +3,7 @@ FROM interaction/icekit:local
 WORKDIR /opt/project_template/
 
 COPY package.json /opt/project_template/
-RUN npm-install.sh && rm -rf /root/.npm
+RUN yarn.sh && yarn cache clean
 ENV PATH=/opt/project_template/node_modules/.bin:$PATH
 
 COPY bower.json /opt/project_template/
