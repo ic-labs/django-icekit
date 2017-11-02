@@ -513,7 +513,7 @@ INSTALLED_APPS += ('flat', )
 # DJANGO_WYSIWYG_MEDIA_URL = '/'  # See redirects in `icekit.project.urls`
 
 DJANGO_WYSIWYG_FLAVOR = 'alloyeditor'
-DJANGO_WYSIWYG_MEDIA_URL = STATIC_URL + 'alloyeditor/dist/alloy-editor/'
+DJANGO_WYSIWYG_MEDIA_URL = STATIC_URL + 'icekit/bower_components/alloyeditor/dist/alloy-editor/'
 
 BASIC_PLUGINS = [
     'RawHtmlPlugin',

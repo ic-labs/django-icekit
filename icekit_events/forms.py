@@ -26,9 +26,9 @@ class RecurrenceRuleWidget(forms.MultiWidget):
             'all': ('icekit_events/css/recurrence_rule_widget.css', ),
         }
         js = (
-            'lodash/lodash.js',
-            'skveege-rrule/lib/rrule.js',
-            'skveege-rrule/lib/nlp.js',
+            'icekit/bower_components/lodash/lodash.js',
+            'icekit/bower_components/skveege-rrule/lib/rrule.js',
+            'icekit/bower_components/skveege-rrule/lib/nlp.js',
         )
 
     def __init__(self, *args, **kwargs):
