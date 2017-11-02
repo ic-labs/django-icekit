@@ -43,8 +43,8 @@
 				{# Base CSS files #}
 				{% compress css file %}
                     {% block icekit_css %}
-						<link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.css' %}">
-						<link rel="stylesheet" href="{% static 'font-awesome/css/font-awesome.css' %}">
+						<link rel="stylesheet" href="{% static 'icekit/bower_components/bootstrap/dist/css/bootstrap.css' %}">
+						<link rel="stylesheet" href="{% static 'icekit/bower_components/font-awesome/css/font-awesome.css' %}">
 						<link rel="stylesheet" type="text/x-scss" href="{% static 'icekit/styles/icekit.scss' %}">
 					{% endblock %}
                     {# Default styling for a project, designed to be overridden once a build is underway #}
@@ -86,7 +86,7 @@
 			{# Base JS files #}
 			{% compress js file %}
 				{% block base_js %}
-					<script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+					<script src="{% static 'icekit/bower_components/jquery/dist/jquery.min.js' %}"></script>
 					<script src="{% static 'icekit/js/link_share.js' %}"></script>
 				{% endblock %}
 			{% endcompress %}
