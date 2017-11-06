@@ -24,14 +24,14 @@ ENV LC_ALL=en_US.UTF-8
 ENV DOCKERIZE_VERSION=0.4.0
 RUN wget -nv -O - "https://github.com/jwilder/dockerize/releases/download/v${DOCKERIZE_VERSION}/dockerize-linux-amd64-v${DOCKERIZE_VERSION}.tar.gz" | tar -xz -C /usr/local/bin/ -f -
 
-ENV NODE_VERSION=4.4.2
+ENV NODE_VERSION=4.8.0
 RUN wget -nv -O - "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" | tar -Jx -C /opt/ -f -
 RUN ln -s "/opt/node-v${NODE_VERSION}-linux-x64/bin/node" /usr/local/bin/
 RUN ln -s "/opt/node-v${NODE_VERSION}-linux-x64/bin/npm" /usr/local/bin/
 
 ENV YARN_VERSION=1.2.1
-RUN wget -nv -O - "https://yarnpkg.com/downloads/${YARN_VERSION}/yarn-v${YARN_VERSION}.tar.gz" | tar -Jx -C /opt/ -f -
-RUN ln -s "/opt/yarn-v${YARN_VERSION}/bin/yarn" /usrl/local/bin/
+RUN wget -nv -O - "https://yarnpkg.com/downloads/${YARN_VERSION}/yarn-v${YARN_VERSION}.tar.gz" | tar -xz -C /opt/ -f -
+RUN ln -s "/opt/yarn-v${YARN_VERSION}/bin/yarn" /usr/local/bin/
 
 ENV PYTHON_PIP_VERSION=9.0.1
 RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python - "pip==${PYTHON_PIP_VERSION}"
