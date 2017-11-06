@@ -28,7 +28,7 @@ ENV NODE_VERSION=4.4.2
 RUN wget -nv -O - "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" | tar -Jx -C /opt/ -f -
 RUN ln -s "/opt/node-v${NODE_VERSION}-linux-x64/bin/node" /usr/local/bin/
 RUN ln -s "/opt/node-v${NODE_VERSION}-linux-x64/bin/npm" /usr/local/bin/
-RUN wget -nv -O - "https://yarnpgk.com/latest/.tar.gz" | tar -Jx -C /opt/ -f -
+RUN npm install --global yarn && rm -rf /root/.npm
 
 ENV PYTHON_PIP_VERSION=9.0.1
 RUN wget -nv -O - https://bootstrap.pypa.io/get-pip.py | python - "pip==${PYTHON_PIP_VERSION}"
