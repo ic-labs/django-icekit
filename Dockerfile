@@ -50,7 +50,7 @@ RUN git clone https://github.com/sobolevn/git-secret.git /opt/git-secret/ \
 WORKDIR /opt/django-icekit/project_template/
 
 COPY project_template/package.json /opt/django-icekit/project_template/
-RUN npm install && rm -rf /root/.npm
+RUN yarn && yarn cache clean
 RUN md5sum package.json > package.json.md5
 ENV PATH=/opt/django-icekit/project_template/node_modules/.bin:$PATH
 
