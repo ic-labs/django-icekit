@@ -73,7 +73,7 @@ setuptools.setup(
         # respected. Ideally these restrictions would go below in the
         # 'django18' section but setuptools does not respect them there.
         # TODO Remove these once GLAMkit uses Django > 1.8 by default.
-        'djangorestframework<3.7'  # Avoid JSONField errors with Django 1.8
+        'djangorestframework<3.7',  # Avoid JSONField errors with Django 1.8
         'django-filter<1.1',  # Avoid get_filter_name() errors with Django 1.8
     ],
     extras_require={
