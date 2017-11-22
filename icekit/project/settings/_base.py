@@ -534,6 +534,7 @@ ASSETS_PLUGINS = [
     'SharedContentPlugin',
     'ContactPersonPlugin',
     'ContentListingPlugin',
+    'FormPlugin',
 ]
 
 EMBED_PLUGINS = [
