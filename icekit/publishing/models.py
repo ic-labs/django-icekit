@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -420,39 +421,74 @@ class PublishingModel(models.Model):
         See unit tests in ``TestPublishingOfM2MRelationships``.
         """
 
-        def clone_through_model_relationship(src_manager, through_entry,
-                                             dst_obj, rel_obj):
-            if src_manager.through.objects.filter(**{
-                src_manager.source_field_name: dst_obj,
-                src_manager.target_field_name: rel_obj,
-            }).exists():
+        def clone_through_model_relationship(
+                src_manager, through_entry,
+                source_field_name, source_field_filter,
+                target_field_name, target_field_filter,
+                dst_obj, rel_obj
+        ):
+            if src_manager.through.objects \
+                    .filter(**source_field_filter) \
+                    .filter(**target_field_filter) \
+                    .exists():
                 return
             through_entry.pk = None
-            setattr(through_entry, src_manager.source_field_name, dst_obj)
-            setattr(through_entry, src_manager.target_field_name, rel_obj)
+            setattr(through_entry, source_field_name, dst_obj)
+            setattr(through_entry, target_field_name, rel_obj)
             through_entry.save()
 
-        def delete_through_model_relationship(src_manager, rel_obj):
-            src_manager.through.objects.filter(**{
-                src_manager.source_field_name: src_obj,
-                src_manager.target_field_name: rel_obj,
-            }).delete()
+        def delete_through_model_relationship(
+            src_manager, source_field_filter, target_field_filter
+        ):
+            src_manager.through.objects \
+                .filter(**source_field_filter) \
+                .filter(**target_field_filter) \
+                .delete()
+
+        def build_filter_for_through_field(manager, field_name, obj):
+            # If the field is a `GenericForeignKey` we need to build
+            # a compatible filter dict against the field target's content type
+            # and PK...
+            field = getattr(manager.through, field_name)
+            if isinstance(field, GenericForeignKey):
+                field_filter = {
+                    getattr(field, 'fk_field'): obj.pk,
+                    getattr(field, 'ct_field'):
+                        ContentType.objects.get_for_model(obj)
+                }
+            # ...otherwise standard FK fields can be handled simply
+            else:
+                field_filter = {field_name: obj}
+            return field_filter
 
         def clone(src_manager):
+            # Look up the through model's source and target field names.
+            source_field_name = src_manager.source_field_name
+            target_field_name = src_manager.target_field_name
+
+            src_obj_source_field_filter = build_filter_for_through_field(
+                src_manager, source_field_name, src_obj)
             through_qs = src_manager.through.objects \
-                .filter(**{src_manager.source_field_name: src_obj})
+                .filter(**src_obj_source_field_filter)
             published_rel_objs_maybe_obsolete = []
             current_draft_rel_pks = set()
             for through_entry in through_qs:
-                rel_obj = getattr(
-                    through_entry, src_manager.target_field_name)
+                rel_obj = getattr(through_entry, target_field_name)
                 # If the object referenced by the M2M is publishable we only
                 # clone the relationship if it is to a draft copy, not if it is
                 # to a published copy. If it is not a publishable object at
                 # all then we always clone the relationship (True by default).
                 if getattr(rel_obj, 'publishing_is_draft', True):
+                    self_source_field_filter = build_filter_for_through_field(
+                        src_manager, source_field_name, self)
+                    rel_obj_target_field_filter = \
+                        build_filter_for_through_field(
+                            src_manager, target_field_name, rel_obj)
                     clone_through_model_relationship(
-                        src_manager, through_entry, self, rel_obj)
+                        src_manager, through_entry,
+                        source_field_name, self_source_field_filter,
+                        target_field_name, rel_obj_target_field_filter,
+                        self, rel_obj)
                     # If the related draft object also has a published copy,
                     # we need to make sure the published copy also knows about
                     # this newly-published draft.
@@ -463,9 +499,16 @@ class PublishingModel(models.Model):
                         pass  # Related item has no published copy
                     else:
                         if rel_obj_published:
+                            rel_obj_published_target_field_filter = \
+                                build_filter_for_through_field(
+                                    src_manager, target_field_name,
+                                    rel_obj_published)
                             clone_through_model_relationship(
-                                src_manager, through_entry, src_obj,
-                                rel_obj_published)
+                                src_manager, through_entry,
+                                source_field_name, src_obj_source_field_filter,
+                                target_field_name,
+                                rel_obj_published_target_field_filter,
+                                src_obj, rel_obj_published)
                     # Track IDs of related draft copies, so we can tell later
                     # whether relationshps with published copies are obsolete
                     current_draft_rel_pks.add(rel_obj.pk)
@@ -479,8 +522,12 @@ class PublishingModel(models.Model):
             for published_rel_obj in published_rel_objs_maybe_obsolete:
                 draft = published_rel_obj.get_draft()
                 if not draft or draft.pk not in current_draft_rel_pks:
+                    published_rel_obj_target_field_filter = \
+                        build_filter_for_through_field(
+                            src_manager, target_field_name, published_rel_obj)
                     delete_through_model_relationship(
-                        src_manager, published_rel_obj)
+                        src_manager, src_obj_source_field_filter,
+                        published_rel_obj_target_field_filter)
 
         # Track the relationship through-tables we have processed to avoid
         # processing the same relationships in both forward and reverse
