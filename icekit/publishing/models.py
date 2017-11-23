@@ -465,6 +465,19 @@ class PublishingModel(models.Model):
             return field_filter
 
         def clone(src_manager):
+            if (
+                not hasattr(src_manager, 'source_field_name') or
+                not hasattr(src_manager, 'target_field_name')
+            ):
+                raise PublishingException(
+                    "Publishing requires many-to-many managers to have"
+                    " 'source_field_name' and 'target_field_name' attributes"
+                    " with the source and target field names that relate the"
+                    " through model to the ends of the M2M relationship."
+                    " If a non-standard manager does not provide these"
+                    " attributes you must add them."
+                )
+
             src_obj_source_field_filter = build_filter_for_through_field(
                 src_manager, src_manager.source_field_name, src_obj)
             through_qs = src_manager.through.objects \
