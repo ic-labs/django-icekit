@@ -45,8 +45,19 @@ class AppConfig(AppConfig):
         # with `base_fieldsets` to avoid infinitie recursion bug when using
         # django-polymorphic versions >= 0.8 and < 1.1, see:
         # https://github.com/django-fluent/django-fluent-pages/issues/110
+        from distutils.version import StrictVersion as SV
         from django.conf import settings
-        if 'fluent_pages.pagetypes.redirectnode' in settings.INSTALLED_APPS:
+        import polymorphic
+        import fluent_pages
+        if (
+            (SV('0.8') <= SV(polymorphic.__version__) < SV('1.1')) and
+            # Don't apply for Fluent Pages versions >= 1.1 to avoid problems
+            # with re-registering `RedirectNodeAdmin` in 1.1.3 and because it
+            # isn't necessary anyway since 1.1, per
+            # github.com/django-fluent/django-fluent-pages/pull/123
+            (SV(fluent_pages.__version__) < SV('1.1.3')) and
+            'fluent_pages.pagetypes.redirectnode' in settings.INSTALLED_APPS
+        ):
             from fluent_pages.pagetypes.redirectnode.admin \
                 import RedirectNodeAdmin
             if getattr(RedirectNodeAdmin, 'fieldsets', None):
