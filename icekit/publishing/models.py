@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -420,32 +421,71 @@ class PublishingModel(models.Model):
         See unit tests in ``TestPublishingOfM2MRelationships``.
         """
 
-        def clone_through_model_relationship(src_manager, through_entry,
-                                             dst_obj, rel_obj):
-            if src_manager.through.objects.filter(**{
-                src_manager.source_field_name: dst_obj,
-                src_manager.target_field_name: rel_obj,
-            }).exists():
+        def clone_through_model_relationship(
+                manager, through_entry, dst_obj, rel_obj
+        ):
+            dst_obj_filter = build_filter_for_through_field(
+                manager, manager.source_field_name, dst_obj)
+            rel_obj_filter = build_filter_for_through_field(
+                manager, manager.target_field_name, rel_obj)
+            if manager.through.objects \
+                    .filter(**dst_obj_filter) \
+                    .filter(**rel_obj_filter) \
+                    .exists():
                 return
             through_entry.pk = None
-            setattr(through_entry, src_manager.source_field_name, dst_obj)
-            setattr(through_entry, src_manager.target_field_name, rel_obj)
+            setattr(through_entry, manager.source_field_name, dst_obj)
+            setattr(through_entry, manager.target_field_name, rel_obj)
             through_entry.save()
 
-        def delete_through_model_relationship(src_manager, rel_obj):
-            src_manager.through.objects.filter(**{
-                src_manager.source_field_name: src_obj,
-                src_manager.target_field_name: rel_obj,
-            }).delete()
+        def delete_through_model_relationship(manager, src_obj, dst_obj):
+            src_obj_filter = build_filter_for_through_field(
+                manager, manager.source_field_name, src_obj)
+            dst_obj_filter = build_filter_for_through_field(
+                manager, manager.target_field_name, dst_obj)
+            manager.through.objects \
+                .filter(**src_obj_filter) \
+                .filter(**dst_obj_filter) \
+                .delete()
+
+        def build_filter_for_through_field(manager, field_name, obj):
+            # If the field is a `GenericForeignKey` we need to build
+            # a compatible filter dict against the field target's content type
+            # and PK...
+            field = getattr(manager.through, field_name)
+            if isinstance(field, GenericForeignKey):
+                field_filter = {
+                    getattr(field, 'fk_field'): obj.pk,
+                    getattr(field, 'ct_field'):
+                        ContentType.objects.get_for_model(obj)
+                }
+            # ...otherwise standard FK fields can be handled simply
+            else:
+                field_filter = {field_name: obj}
+            return field_filter
 
         def clone(src_manager):
+            if (
+                not hasattr(src_manager, 'source_field_name') or
+                not hasattr(src_manager, 'target_field_name')
+            ):
+                raise PublishingException(
+                    "Publishing requires many-to-many managers to have"
+                    " 'source_field_name' and 'target_field_name' attributes"
+                    " with the source and target field names that relate the"
+                    " through model to the ends of the M2M relationship."
+                    " If a non-standard manager does not provide these"
+                    " attributes you must add them."
+                )
+
+            src_obj_source_field_filter = build_filter_for_through_field(
+                src_manager, src_manager.source_field_name, src_obj)
             through_qs = src_manager.through.objects \
-                .filter(**{src_manager.source_field_name: src_obj})
+                .filter(**src_obj_source_field_filter)
             published_rel_objs_maybe_obsolete = []
             current_draft_rel_pks = set()
             for through_entry in through_qs:
-                rel_obj = getattr(
-                    through_entry, src_manager.target_field_name)
+                rel_obj = getattr(through_entry, src_manager.target_field_name)
                 # If the object referenced by the M2M is publishable we only
                 # clone the relationship if it is to a draft copy, not if it is
                 # to a published copy. If it is not a publishable object at
@@ -464,8 +504,8 @@ class PublishingModel(models.Model):
                     else:
                         if rel_obj_published:
                             clone_through_model_relationship(
-                                src_manager, through_entry, src_obj,
-                                rel_obj_published)
+                                src_manager, through_entry,
+                                src_obj, rel_obj_published)
                     # Track IDs of related draft copies, so we can tell later
                     # whether relationshps with published copies are obsolete
                     current_draft_rel_pks.add(rel_obj.pk)
@@ -480,7 +520,7 @@ class PublishingModel(models.Model):
                 draft = published_rel_obj.get_draft()
                 if not draft or draft.pk not in current_draft_rel_pks:
                     delete_through_model_relationship(
-                        src_manager, published_rel_obj)
+                        src_manager, src_obj, published_rel_obj)
 
         # Track the relationship through-tables we have processed to avoid
         # processing the same relationships in both forward and reverse
