@@ -1388,12 +1388,8 @@ class TestPublishingAdminForLayoutPage(BaseAdminTest):
 
         # Confirm we cannot create a different item via admin with same slug
         response = self.app.get(
-            self.admin_add_page_url,
+            self.admin_add_page_url + "?ct_id=%d" % self.ct.pk,
             user=self.super_user)
-        form = response.forms['page_form']
-        form['ct_id'].select(self.ct.pk)  # Choose LayoutPage page type
-        response = form.submit(user=self.super_user).follow()
-        self.assertFalse('error' in response.content)
         form = response.forms['layoutpage_form']
         form['layout'].select(self.layout.pk)
         form['title'] = 'Another Page'
@@ -1446,12 +1442,8 @@ class TestPublishingAdminForLayoutPage(BaseAdminTest):
         # Confirm we cannot create a different item via admin with same
         # override URL
         response = self.app.get(
-            self.admin_add_page_url,
+            self.admin_add_page_url + "?ct_id=%d" % self.ct.pk,
             user=self.super_user)
-        form = response.forms['page_form']
-        form['ct_id'].select(self.ct.pk)  # Choose LayoutPage page type
-        response = form.submit(user=self.super_user).follow()
-        self.assertFalse('error' in response.content)
         form = response.forms['layoutpage_form']
         form['layout'].select(self.layout.pk)
         form['title'] = 'Another Page'
