@@ -23,3 +23,14 @@ def check_settings(required_settings):
                 set(required_settings) - set(defined_settings)
             )
         )
+
+def get_swappable_model(SWAPPABLE_MODEL_SETTING):
+    app_label, model_name = SWAPPABLE_MODEL_SETTING.split('.')
+    import django
+    if django.get_version() >= '1.9':
+        from django.apps import apps
+        get_model =  apps.get_model
+    else:
+        from django.db.models.loading import get_model
+    Location = get_model(app_label, model_name)
+    return Location

@@ -693,8 +693,6 @@ INSTALLED_APPS += ('haystack', )
 
 # ICEKIT ######################################################################
 
-ICEKIT_LOCATION_MODEL = 'icekit_plugins_location.Location'
-
 ICEKIT_CONTEXT_PROCESSOR_SETTINGS = ()
 
 ICEKIT = {
@@ -864,7 +862,7 @@ INSTALLED_APPS += (
     'icekit.plugins.image_gallery',
     'icekit.plugins.twitter_embed',
     'icekit.plugins.text',
-    'icekit.plugins.location',
+    'icekit.plugins.location', # swappable via ICEKIT_LOCATION_MODEL setting
 
     # Events
     'icekit_events',
@@ -902,6 +900,8 @@ INSTALLED_APPS += (
     'rest_framework_swagger',  # Required for automatic API documentation
     'django_filters',  # Find djangorestframework-filters templates
 )
+
+ICEKIT_LOCATION_MODEL = 'icekit_plugins_location.Location'
 
 MIDDLEWARE_CLASSES += ('icekit.publishing.middleware.PublishingMiddleware', )
 

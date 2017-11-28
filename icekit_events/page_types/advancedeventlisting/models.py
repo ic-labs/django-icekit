@@ -2,12 +2,13 @@ from datetime import timedelta
 from timezone import timezone as djtz  # django-timezone
 
 from django.db import models
+from django.conf import settings
 
 from icekit.content_collections.abstract_models import AbstractListingPage
+from icekit.utils.implementation import get_swappable_model
 
 from icekit_events.models import Occurrence, EventType
 from icekit_events import appsettings
-from icekit.plugins.location.models import Location
 
 
 class AbstractAdvancedEventListingPage(AbstractListingPage):
@@ -29,7 +30,7 @@ class AbstractAdvancedEventListingPage(AbstractListingPage):
         related_name="+",
     )
     limit_to_locations = models.ManyToManyField(
-        'icekit_plugins_location.Location',
+        settings.ICEKIT_LOCATIONS_MODEL,
         limit_choices_to={'publishing_is_draft': True},
         help_text="Leave empty to show all events.",
         blank=True,
@@ -199,7 +200,8 @@ class AbstractAdvancedEventListingPage(AbstractListingPage):
         nearby_locations_constraint = self.parse_is_nearby(request)
         if nearby_locations_constraint:
             lat, lng, distance = nearby_locations_constraint
-            self.nearby_locations = Location.objects \
+            self.nearby_locations = get_swappable_model(settings.ICEKIT_LOCATION_MODEL) \
+                .objects \
                 .nearby(lat, lng, distance) \
                 .visible()
             qs = qs.filter(event__location__in=self.nearby_locations)
