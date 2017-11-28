@@ -260,7 +260,7 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
                     ' by purchasing tickets or RSVPing.')
     )
     location = models.ForeignKey(
-        'icekit_plugins_location.Location',
+        settings.ICEKIT_LOCATION_MODEL,
         limit_choices_to={'publishing_is_draft': True},
         blank=True, null=True,
         related_name='events',
@@ -447,8 +447,8 @@ class EventBase(PolymorphicModel, AbstractBaseModel, ICEkitContentsMixin,
         The value is returned as a list, to emphasise its cached/resolved nature.
         Manipulating a queryset would lose the benefit of caching.
 
-        :return: A list of occurrences directly attached to the event. Used to 
-        fall back to `part_of` occurrences.         
+        :return: A list of occurrences directly attached to the event. Used to
+        fall back to `part_of` occurrences.
         """
         return list(self.occurrences.all())
 

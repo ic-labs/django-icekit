@@ -693,6 +693,8 @@ INSTALLED_APPS += ('haystack', )
 
 # ICEKIT ######################################################################
 
+ICEKIT_LOCATION_MODEL = 'icekit_plugins_location.Location'
+
 ICEKIT_CONTEXT_PROCESSOR_SETTINGS = ()
 
 ICEKIT = {
