@@ -12,4 +12,4 @@ except ImportError:
     from .icekit import *
 
 # Allows for swappable models to be added to icekit
-from icekit.project.settings import swappable
+from icekit.project.settings.swappable import *

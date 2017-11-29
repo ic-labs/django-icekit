@@ -30,7 +30,7 @@ class AbstractAdvancedEventListingPage(AbstractListingPage):
         related_name="+",
     )
     limit_to_locations = models.ManyToManyField(
-        settings.ICEKIT_LOCATIONS_MODEL,
+        settings.ICEKIT_LOCATION_MODEL,
         limit_choices_to={'publishing_is_draft': True},
         help_text="Leave empty to show all events.",
         blank=True,

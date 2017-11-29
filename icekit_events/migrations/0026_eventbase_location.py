@@ -7,8 +7,9 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
+    from django.conf import settings
     dependencies = [
-        ('icekit_plugins_location', '0001_initial'),
+        (settings.ICEKIT_LOCATION_MODEL.split('.')[0], '0001_initial'),
         ('icekit_events', '0025_auto_20170519_1327'),
     ]
 
