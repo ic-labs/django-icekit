@@ -95,7 +95,7 @@ setuptools.setup(
             'Werkzeug',
         ],
         'django18': [
-            'Django>=1.11,<1.12',  # LTS
+            'Django>=2.0,<2.1',  # LTS
         ],
         'forms': [
             'django-forms-builder',
