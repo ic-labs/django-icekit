@@ -61,7 +61,7 @@ setuptools.setup(
         'django-polymorphic>=0.8,!=1,!=1.0.1',
         'django-wysiwyg',
         'django_extensions',
-        'html5lib==0.999999999',  # See: https://github.com/html5lib/html5lib-python/issues/189 and https://github.com/pydanny-archive/django-wysiwyg/issues/61
+        'html5lib==1.0',  # See: https://github.com/html5lib/html5lib-python/issues/189 and https://github.com/pydanny-archive/django-wysiwyg/issues/61
         'nltk',
         'Pillow>=4',  # See: https://github.com/python-pillow/Pillow/issues/2206
         'pip-tools',
