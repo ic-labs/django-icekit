@@ -623,14 +623,25 @@ class PublishingModel(models.Model):
         content items are maintained for the published (dst) page's content
         items.
         """
-        # NOTE: We assume here that src & dst content item set is the same
-        # number and in the same order: we don't really have a better way
-        # to figure out which destination content item corresponds to which
-        # source content item. Hopefully this assumption holds...
         if not hasattr(self, 'contentitem_set'):
             return
-        for src_ci, dst_ci in zip(self.contentitem_set.all(),
-                                  dst_obj.contentitem_set.all()):
+        # We must explicitly and reliably order both the src and dst content
+        # items here to ensure that we are processing the same logical item for
+        # the draft and published copies. The default `ContentItem` ordering of
+        # ('placeholder', 'sort_order') is not sufficient because it relies on
+        # the placeholder PK remaining static, whereas we clone placeholders to
+        # the published copy and may sometimes clone them with PKs in a
+        # different order.
+        reliable_ordering = [
+            # Group items by owning placeholder using slot name, not PK
+            'placeholder__slot',
+            # Order items correctly within the placeholder grouping
+            'sort_order'
+        ]
+        for src_ci, dst_ci in zip(
+            self.contentitem_set.order_by(*reliable_ordering),
+            dst_obj.contentitem_set.order_by(*reliable_ordering)
+        ):
             for field, __ in src_ci._meta.get_m2m_with_model():
                 field_name = field.name
                 src_m2m = getattr(src_ci, field_name)
