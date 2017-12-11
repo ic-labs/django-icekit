@@ -910,7 +910,7 @@ def create_can_publish_and_can_republish_permissions(sender, **kwargs):
             defaults=dict(name='Can Republish %s' % model.__name__))
 
 
-@receiver(models.signals.post_save)
+@receiver(publishing_signals.publishing_post_save_related)
 def maybe_automatically_publish_drafts_on_save(sender, instance, **kwargs):
     """
     If automatic publishing is enabled, immediately publish a draft copy after

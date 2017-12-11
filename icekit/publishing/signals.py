@@ -30,3 +30,7 @@ publishing_pre_unpublish = Signal(providing_args=['instance'])
 
 # Sent when a model is unpublished (the draft is sent).
 publishing_post_unpublish = Signal(providing_args=['instance'])
+
+
+# Sent when a model is saved and all relationships finalised (draft is sent).
+publishing_post_save_related = Signal(providing_args=['instance'])

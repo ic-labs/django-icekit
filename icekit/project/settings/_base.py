@@ -1121,7 +1121,7 @@ ROOT_HOSTCONF = 'icekit.project.hosts'
 # PUBLISHING ##################################################################
 
 # Enable auto-publishing to automatically and immediately publish items when
-# the draft copy is saved (e.g. in the CMS admin). Set to ``True`` to auto-
-# publish all publishable items, or to a tuple/list of model dot-paths to
-# selectively auto-publishing specific models.
+# the draft copy is saved in the CMS admin. Set to ``True`` to auto-publish
+# all publishable items, or to a tuple/list of model dot-paths to selectively
+# auto-publish specific models.
 PUBLISHING_ENABLE_AUTO_PUBLISH = False

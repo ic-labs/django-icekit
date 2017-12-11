@@ -21,6 +21,7 @@ from fluent_pages.adminui.urlnodeparentadmin import UrlNodeParentAdmin
 
 from .models import PublishingModel
 from .utils import is_automatic_publishing_enabled
+from . import signals as publishing_signals
 
 
 def make_published(modeladmin, request, queryset):
@@ -572,6 +573,19 @@ class PublishingAdmin(_PublishingHelpersMixin, ModelAdmin):
             return HttpResponseRedirect(reverse(self.changelist_reverse))
 
         return http_json_response({'success': True})
+
+    def save_related(self, request, form, *args, **kwargs):
+        """
+        Send the signal `publishing_post_save_related` when a draft copy is
+        saved and all its relationships have also been created.
+        """
+        result = super(PublishingAdmin, self) \
+            .save_related(request, form, *args, **kwargs)
+        # Send signal that draft has been saved and all relationships created
+        if form.instance:
+            publishing_signals.publishing_post_save_related.send(
+                sender=type(self), instance=form.instance)
+        return result
 
     def render_change_form(self, request, context, add=False, change=False,
                            form_url='', obj=None):
