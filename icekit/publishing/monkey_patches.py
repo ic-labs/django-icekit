@@ -30,6 +30,10 @@ def patch_urlnodeadminform_clean_for_publishable_items(self):
 
     other_translations = UrlNode_Translation.objects.all()
 
+    # Ignore other translations without a `master`, which we cannot reason
+    # about in any way and are most likely just orphaned bad data.
+    other_translations = other_translations.exclude(master=None)
+
     # If a duplicate slug error is reported, make sure it is *really*
     # a duplicate slug instead of just a slug value shared between the
     # published and draft versions of a publishable item. This section
