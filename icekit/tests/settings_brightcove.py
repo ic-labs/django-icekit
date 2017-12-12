@@ -10,7 +10,10 @@ INSTALLED_APPS += (
 
 # BRIGHTCOVE ##################################################################
 
-BRIGHTCOVE_TOKEN = ''
+BRIGHTCOVE_ACCOUNT_ID = ''
+BRIGHTCOVE_CLIENT_ID = ''
+BRIGHTCOVE_CLIENT_SECRET = ''
+
 BRIGHTCOVE_PLAYER = {
     'default': {
         'PLAYERID': 'a_default_player_id',

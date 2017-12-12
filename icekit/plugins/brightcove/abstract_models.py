@@ -14,7 +14,12 @@ except ImportError:
     )
 
 # Ensure required settings for django-brightcove have been defined.
-implementation.check_settings(['BRIGHTCOVE_TOKEN', 'BRIGHTCOVE_PLAYER', ])
+implementation.check_settings([
+    'BRIGHTCOVE_ACCOUNT_ID',
+    'BRIGHTCOVE_CLIENT_ID',
+    'BRIGHTCOVE_CLIENT_SECRET',
+    'BRIGHTCOVE_PLAYER',
+])
 
 
 @python_2_unicode_compatible
