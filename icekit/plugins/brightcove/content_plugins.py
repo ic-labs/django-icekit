@@ -16,5 +16,5 @@ class BrightcovePlugin(ContentPlugin):
     class FrontendMedia:
         js = (
             # currently breaks on compression - include in base.html instead
-            # '//admin.brightcove.com/js/BrightcoveExperiences.js',
+            # 'https://sadmin.brightcove.com/js/BrightcoveExperiences.js',
         )
