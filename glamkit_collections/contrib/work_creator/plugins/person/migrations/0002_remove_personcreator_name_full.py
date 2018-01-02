@@ -11,8 +11,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='personcreator',
-            name='name_full',
-        ),
+        #  No-op, see migrations 0001 for explanation
+#         migrations.RemoveField(
+#             model_name='personcreator',
+#             name='name_full',
+#         ),
     ]

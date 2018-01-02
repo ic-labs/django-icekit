@@ -15,7 +15,12 @@ class Migration(migrations.Migration):
             name='PersonCreator',
             fields=[
                 ('creatorbase_ptr', models.OneToOneField(serialize=False, to='gk_collections_work_creator.CreatorBase', auto_created=True, primary_key=True, parent_link=True)),
-                ('name_full', models.CharField(max_length=255, help_text=b'A public "label" composed of the Prefix, First Names, Last Name Prefix, Last Name, Suffix, and Variant Name fields')),
+                #  Removed because WorkCreator migration 0025 needs to run AFTER this
+                #  but we can't specify reverse dependencies, and
+                #  gk_collections_work_creator may be installed
+                #  while gk_collections_person is not
+                #  so we can't put the dependency in gk_collections_work_creator
+                #  ('name_full', models.CharField(max_length=255, help_text=b'A public "label" composed of the Prefix, First Names, Last Name Prefix, Last Name, Suffix, and Variant Name fields')),
                 ('name_given', models.CharField(max_length=255, blank=True, help_text=b'All the names that precede the last name and last name prefix, e.g., "Jan Davidszoon" (de Heem) or "George Wesley" (Bellows)')),
                 ('name_family', models.CharField(max_length=255, blank=True, help_text=b'The name you would look up in a standard reference work, e.g., "Rijn," Rembrandt Harmenszoon van or "Sanzio," Raphael')),
                 ('gender', models.CharField(max_length=255, blank=True, help_text=b'This field identifies the gender of the creator for rapid retrieval and categorization, e.g., "male" or "female". Use lowercase.')),
