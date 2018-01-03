@@ -13,7 +13,7 @@ before_script:
   - docker --version
   - docker-compose --version
   - docker-compose -f docker-compose.travis.yml config
-  - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
   - docker pull "interaction/icekit:$TAG" || true
   - docker build --cache-from "interaction/icekit:$TAG" -t "interaction/icekit:$TAG" .
 
