@@ -895,7 +895,7 @@ def delete_published_copy_when_draft_deleted(sender, **kwargs):
 @receiver(models.signals.post_migrate)
 def create_can_publish_and_can_republish_permissions(sender, **kwargs):
     """
-    Add `can_publish` and `ca_nrepublish` permissions for each publishable
+    Add `can_publish` and `can_republish` permissions for each publishable
     model in the system.
     """
     for model in sender.get_models():
