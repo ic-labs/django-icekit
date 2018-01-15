@@ -456,7 +456,7 @@ class Views(WebTest):
         response = self.app.get(reverse('admin:index'), user=self.super_user_1)
         self.assertEqual(response.status_code, 200)
         admin_app_list = (
-            ('icekit_plugins_image_image', self.image_1),
+            # ('icekit_plugins_image_image', self.image_1),
             ('fluent_pages_pagelayout', self.page_layout_1),
             ('icekit_layout', self.layout_1),
             ('icekit_mediacategory', self.media_category_1),
