@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django.template import Context
 from django.template import Template
 from django.utils.safestring import mark_safe
+from django_thumbor import generate_url as thumbor_generate_url
 from icekit.content_collections.admin import TitleSlugAdmin
 from icekit.plugins.image.models import ImageRepurposeConfig
 
@@ -95,6 +96,21 @@ class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
             return mark_safe('<br>'.join(links))
         else:
             return 'Derivatives are available once an image has been saved'
+
+    def preview(self, obj, request=None):
+        """
+        Generate the HTML to display for the image.
+
+        :param obj: An object with a thumbnail_field defined.
+        :return: HTML for image display.
+        """
+        source = self.get_thumbnail_source(obj)
+        if source:
+            thumbnail_url = thumbor_generate_url(source, width=150, height=150)
+            return '<img class="thumbnail" src="{0}" />'.format(
+                thumbnail_url)
+        return ''
+    preview.allow_tags = True
 
 
 admin.site.register(models.ImageRepurposeConfig, TitleSlugAdmin)
