@@ -4,7 +4,6 @@ from django.core.urlresolvers import reverse
 from django.template import Context
 from django.template import Template
 from django.utils.safestring import mark_safe
-from django_thumbor import generate_url as thumbor_generate_url
 from icekit.content_collections.admin import TitleSlugAdmin
 from icekit.plugins.image.models import ImageRepurposeConfig
 
@@ -104,6 +103,9 @@ class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
         :param obj: An object with a thumbnail_field defined.
         :return: HTML for image display.
         """
+        # Inline import to avoid having to ship thumbor with icekit
+        from django_thumbor import generate_url as thumbor_generate_url
+
         source = self.get_thumbnail_source(obj)
         if source:
             thumbnail_url = thumbor_generate_url(source, width=150, height=150)
