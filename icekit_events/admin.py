@@ -193,7 +193,7 @@ class EventAdmin(ChildModelPluginPolymorphicParentModelAdmin,
 
     class Media:
         css = {
-            'all': ('font-awesome/css/font-awesome.css',),
+            'all': ('icekit/bower_components/font-awesome/css/font-awesome.css',),
         }
 
     def get_queryset(self, request):
