@@ -233,7 +233,7 @@ class CreatorBase(
             self.slug = slugify(self.name_display or self.name_full)
 
     def get_absolute_url(self):
-        return reverse("gk_collections_creator", kwargs={'slug': self.slug})
+        return reverse("agsa_collection_artist_detail", kwargs={'artist_slug': self.slug})
 
     def get_works(self):
         """
@@ -426,7 +426,7 @@ class WorkBase(
             self.slug = slugify(self.title)
 
     def get_absolute_url(self):
-        return reverse("gk_collections_work", kwargs={'slug': self.slug})
+        return reverse("agsa_collection_artwork_detail", kwargs={'artwork_slug': self.slug})
 
     def get_images(self, **kwargs):
         # order images by the order given in WorkImage.
