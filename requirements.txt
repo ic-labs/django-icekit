@@ -5,3 +5,6 @@ django-filter<1.1  # Avoid get_filter_name() errors with Django 1.8
 
 -e git+https://github.com/ixc/django-dynamic-fixture.git@caeb3427399edd3b0d589516993c7da55e0de560#egg=django-dynamic-fixture
 -e git+https://github.com/ixc/python-edtf.git@develop#egg=edtf
+
+-e git+https://github.com/ixc/libthumbor.git@d5f44bbd6cd7c19f61f47d941213d1de52209521#egg=libthumbor
+-e git+https://github.com/ixc/django-thumbor.git@1b76020f889cff410c8f08680bc32a541739c2d2#egg=django-thumbor
