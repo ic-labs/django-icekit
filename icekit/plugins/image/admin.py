@@ -96,24 +96,6 @@ class ImageAdmin(ThumbnailAdminMixin, admin.ModelAdmin):
         else:
             return 'Derivatives are available once an image has been saved'
 
-    def preview(self, obj, request=None):
-        """
-        Generate the HTML to display for the image.
-
-        :param obj: An object with a thumbnail_field defined.
-        :return: HTML for image display.
-        """
-        # Inline import to avoid having to ship thumbor with icekit
-        from django_thumbor import generate_url as thumbor_generate_url
-
-        source = self.get_thumbnail_source(obj)
-        if source:
-            thumbnail_url = thumbor_generate_url(source, width=150, height=150)
-            return '<img class="thumbnail" src="{0}" />'.format(
-                thumbnail_url)
-        return ''
-    preview.allow_tags = True
-
 
 admin.site.register(models.ImageRepurposeConfig, TitleSlugAdmin)
 admin.site.register(models.Image, ImageAdmin)

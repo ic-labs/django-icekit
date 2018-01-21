@@ -155,30 +155,16 @@ class ThumbnailAdminMixin(PreviewAdminMixin):
         :param obj: An object with a thumbnail_field defined.
         :return: HTML for image display.
         """
+        # Inline import to avoid having to ship thumbor with icekit
+        from django_thumbor import generate_url as thumbor_generate_url
+
         source = self.get_thumbnail_source(obj)
         if source:
-            try:
-                from easy_thumbnails.files import get_thumbnailer
-            except ImportError:
-                logger.warning(
-                    _(
-                        '`easy_thumbnails` is not installed and required for '
-                        'icekit.admin_tools.mixins.ThumbnailAdminMixin'
-                    )
-                )
-                return ''
-            try:
-                thumbnailer = get_thumbnailer(source)
-                thumbnail = thumbnailer.get_thumbnail(self.thumbnail_options)
-                return '<img class="thumbnail" src="{0}" />'.format(
-                    thumbnail.url)
-            except Exception as ex:
-                logger.warning(
-                    _(u'`easy_thumbnails` failed to generate a thumbnail image'
-                      u' for {0}'.format(source)))
-                if self.thumbnail_show_exceptions:
-                    return 'Thumbnail exception: {0}'.format(ex)
+            thumbnail_url = thumbor_generate_url(source, width=150, height=150)
+            return '<img class="thumbnail" src="{0}" />'.format(
+                thumbnail_url)
         return ''
+
     preview.allow_tags = True
 
     def thumbnail(self, *args, **kwargs):
