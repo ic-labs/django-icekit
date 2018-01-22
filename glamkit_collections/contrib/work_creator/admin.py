@@ -294,6 +294,7 @@ class CreatorBaseAdmin(
         PolymorphicChildModelFilter,
         'workcreator__role',
     )
+    list_per_page = 20
 
     def get_queryset(self, request):
         return super(CreatorBaseAdmin, self).get_queryset(request)\
@@ -352,7 +353,7 @@ class WorkBaseAdmin(
         CountryFilter,
     )
 
-    list_filter = ()
+    list_per_page = 20
 
     def get_queryset(self, request):
         return super(WorkBaseAdmin, self).get_queryset(request).prefetch_related('origin_locations__country')
