@@ -547,7 +547,7 @@ class TestValidators(WebTest):
         self.assertEqual(admin_mixin.get_thumbnail_source(None), None)
         admin_mixin.thumbnail_field = 'test'
         self.assertEqual(admin_mixin.get_thumbnail_source(TestThumbnail()), 'test-result')
-        self.assertEqual(admin_mixin.thumbnail(TestThumbnail()), '')
+        self.assertIn('<img class="thumbnail" src="', admin_mixin.thumbnail(TestThumbnail()))
 
 
 class TestIceKitTags(WebTest):
