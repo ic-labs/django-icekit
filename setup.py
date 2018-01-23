@@ -51,7 +51,7 @@ setuptools.setup(
         'django-compressor',
         'django-el-pagination',
         'django-fluent-contents>=1.2',  # 1.2+ has fix for placeholders in admin: https://github.com/django-fluent/django-fluent-contents/pull/89
-        'django-fluent-pages!=1.1',  # Avoid 1.1 with missing import: https://github.com/django-fluent/django-fluent-pages/issues/125
+        'django-fluent-pages!=1.1,<2',  # Avoid 1.1 with missing import: https://github.com/django-fluent/django-fluent-pages/issues/125
         'django-model-settings',
         'django-mptt',
         'django-multiurl',
