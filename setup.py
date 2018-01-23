@@ -58,7 +58,7 @@ setuptools.setup(
         # import pattern changed in 0.8; version 1 to 1.0.1 has bug with parent
         # admins: github.com/django-polymorphic/django-polymorphic/pull/246
         'django-object-actions>=0.7',  # See: https://github.com/crccheck/django-object-actions/issues/45
-        'django-polymorphic>=0.8,!=1,!=1.0.1',
+        'django-polymorphic>=0.8,!=1,!=1.0.1,<2',
         'django-wysiwyg',
         'django_extensions',
         'html5lib==0.999',  # See: https://github.com/html5lib/html5lib-python/issues/189 and https://github.com/pydanny-archive/django-wysiwyg/issues/61
