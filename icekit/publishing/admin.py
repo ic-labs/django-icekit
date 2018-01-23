@@ -6,7 +6,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.conf.urls import patterns, url
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db.models import F
 from django.http import Http404, HttpResponseRedirect, HttpResponse
@@ -214,8 +214,11 @@ class PublishingAdminForm(forms.ModelForm):
                 if field.editable and unique_field in cleaned_data:
                     unique_filter[unique_field] = cleaned_data[unique_field]
                 else:
-                    unique_filter[unique_field] = \
-                        getattr(instance, unique_field)
+                    try:
+                        unique_filter[unique_field] = \
+                            getattr(instance, unique_field)
+                    except ObjectDoesNotExist:
+                        pass
 
             # try to find if any models already exist in the db; I find all
             # models and then exclude those matching the current model.
