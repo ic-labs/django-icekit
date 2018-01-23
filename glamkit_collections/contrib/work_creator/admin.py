@@ -385,7 +385,7 @@ class WorkBaseAdmin(
     creators_admin_links.allow_tags = True
 
 
-# admin.site.register(models.CreatorBase, CreatorBaseAdmin)
-# admin.site.register(models.WorkBase, WorkBaseAdmin)
+admin.site.register(models.CreatorBase, CreatorBaseAdmin)
+admin.site.register(models.WorkBase, WorkBaseAdmin)
 admin.site.register(models.Role, TitleSlugAdmin)
 admin.site.register(models.WorkImageType, TitleSlugAdmin)

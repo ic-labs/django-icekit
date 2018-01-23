@@ -88,7 +88,7 @@ class PersonCreator(CreatorBase):
         max_length=255,)
 
     class Meta:
-        verbose_name = "artist"
+        verbose_name = "person"
 
     def derive_and_set_name_fields_and_slug(
         self, set_name_sort=True, set_slug=True
