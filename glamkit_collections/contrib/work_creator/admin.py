@@ -9,6 +9,7 @@ import models
 from icekit.content_collections.admin import TitleSlugAdmin
 from icekit.plugins.base import BaseChildModelPlugin, PluginMount
 from icekit.admin import ICEkitContentsAdmin
+from icekit.publishing.admin import PublishingAdmin
 from icekit.templatetags.icekit_tags import grammatical_join
 from icekit.admin_tools.mixins import ThumbnailAdminMixin, FluentLayoutsMixin
 from icekit.admin_tools.utils import admin_link, admin_url
@@ -286,23 +287,12 @@ class CreatorBaseAdmin(
         "id",
         "admin_notes",
     )
-    list_display = ('thumbnail',) + ICEkitContentsAdmin.list_display + (
-        'works_count',
-    )
+    list_display = ('thumbnail',) + PublishingAdmin.list_display
     list_display_links = list_display[:2]
     list_filter = ICEkitContentsAdmin.list_filter + (
         PolymorphicChildModelFilter,
         'workcreator__role',
     )
-    list_per_page = 20
-
-    def get_queryset(self, request):
-        return super(CreatorBaseAdmin, self).get_queryset(request)\
-            .annotate(works_count=Count('works'))
-
-    def works_count(self, inst):
-        return inst.works_count
-    works_count.admin_order_field = 'works_count'
 
 
 class CountryFilter(admin.SimpleListFilter):
@@ -333,10 +323,8 @@ class WorkBaseAdmin(
     child_model_plugin_class = WorkChildModelPlugin
     child_model_admin = WorkChildAdmin
 
-    list_display = ('thumbnail',) + ICEkitContentsAdmin.list_display + (
+    list_display = ('thumbnail',) + PublishingAdmin.list_display + (
         'child_type_name',
-        'creators_admin_links',
-        'country_flags',
     )
     list_display_links = list_display[:2]
     search_fields = (
@@ -352,37 +340,6 @@ class WorkBaseAdmin(
         'department',
         CountryFilter,
     )
-
-    list_per_page = 20
-
-    def get_queryset(self, request):
-        return super(WorkBaseAdmin, self).get_queryset(request).prefetch_related('origin_locations__country')
-
-    def country_flags(self, inst):
-        result = []
-        for loc in inst.origin_locations.all():
-            f = loc.flag()
-            if f:
-                result.append(f)
-        return mark_safe("&nbsp;".join(result))
-    country_flags.short_description = 'Countries'
-    country_flags.admin_order_field = 'origin_locations'
-
-    def creators_admin_links(self, inst):
-        r = []
-        od = inst.workcreator_set.filter(
-            work__publishing_is_draft=True
-        ).creators_grouped_by_role()
-        for role, creators in od:
-            if role:
-                line = "%s: " % role
-            else:
-                line = "Creator: "
-            line += grammatical_join([admin_link(x) for x in creators])
-            r.append(line)
-        return "; ".join(r)
-    creators_admin_links.short_description = "Creators"
-    creators_admin_links.allow_tags = True
 
 
 admin.site.register(models.CreatorBase, CreatorBaseAdmin)
