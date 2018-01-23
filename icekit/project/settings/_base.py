@@ -730,8 +730,8 @@ ICEKIT = {
             'name': 'Collection',
             'icon_html': '<i class="content-type-icon fa fa-diamond"></i>',
             'models': [
-                ('gk_collections_artwork.Artwork', {}),
-                ('gk_collections_person.PersonCreator', {}),
+                ('gk_collections_work_creator.WorkBase', {}),
+                ('gk_collections_work_creator.CreatorBase', {}),
             ],
         },
         {
@@ -772,8 +772,8 @@ ICEKIT = {
         {
             'name': 'Collection',
             'models': (
-                ('gk_collections_artwork.Artwork', {}),
-                ('gk_collections_person.PersonCreator', {}),
+                ('gk_collections_work_creator.CreatorBase', {}),
+                ('gk_collections_work_creator.WorkBase', {}),
                 ('gk_collections_work_creator.Role', {}),
                 ('gk_collections_work_creator.WorkImageType', {}),
             )
