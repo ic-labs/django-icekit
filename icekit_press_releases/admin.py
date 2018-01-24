@@ -17,5 +17,5 @@ class PressReleaseCategoryAdmin(admin.ModelAdmin):
     pass
 
 
-admin.site.register(models.PressRelease, PressReleaseAdmin)
-admin.site.register(models.PressReleaseCategory, PressReleaseCategoryAdmin)
+# admin.site.register(models.PressRelease, PressReleaseAdmin)
+# admin.site.register(models.PressReleaseCategory, PressReleaseCategoryAdmin)
