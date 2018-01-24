@@ -9,6 +9,7 @@ from glamkit_collections.contrib.work_creator.models import CreatorBase
 
 class PersonCreator(CreatorBase):
     name_given = models.CharField(
+        'given name',
         blank=True,
         max_length=255,
         help_text='All the names that precede the last name and last name '
@@ -16,6 +17,7 @@ class PersonCreator(CreatorBase):
                   '(Bellows)'
     )
     name_family = models.CharField(
+        'family name',
         blank=True,
         max_length=255,
         help_text='The name you would look up in a standard reference work, '
@@ -42,6 +44,7 @@ class PersonCreator(CreatorBase):
         help_text='The location of the creator\'s birth, e.g., "Utrecht"'
     )
     birth_place_historic = models.CharField(
+        'historic birth place',
         blank=True,
         max_length=255,
         help_text='The historical name of the place at the time of the '
@@ -55,6 +58,7 @@ class PersonCreator(CreatorBase):
 
     #cultural background
     background_ethnicity = models.CharField(
+        'ethnicity',
         blank=True,
         max_length=255,
         help_text='The affiliation of the creator with a group not based on '
@@ -64,6 +68,7 @@ class PersonCreator(CreatorBase):
                   #'displayed.
     )
     background_nationality = models.CharField(
+        'nationality',
         blank=True,
         max_length=255,
         help_text='This field contains information about the geopolitical '
@@ -72,18 +77,23 @@ class PersonCreator(CreatorBase):
     )
     #nat(-ive? -ional? -ural?) culture
     background_neighborhood = models.CharField(
+        'neighborhood',
         blank=True,
         max_length=255,)
     background_city = models.CharField(
+        'city',
         blank=True,
         max_length=255,)
     background_state_province = models.CharField(
+        'state province',
         blank=True,
         max_length=255,)
     background_country = models.CharField(
+        'country',
         blank=True,
         max_length=255,)
     background_continent = models.CharField(
+        'continent',
         blank=True,
         max_length=255,)
 
