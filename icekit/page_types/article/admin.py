@@ -26,4 +26,4 @@ class ArticleAdmin(
         ListableMixinAdmin.FIELDSETS
 
 
-admin.site.register(models.Article, ArticleAdmin)
+# admin.site.register(models.Article, ArticleAdmin)

@@ -559,7 +559,7 @@ EVENTS_PLUGINS = [
 ]
 
 LINK_PLUGINS = [
-    'ArticleLinkPlugin',
+    # 'ArticleLinkPlugin',
     'PageLinkPlugin',
     'AuthorLinkPlugin',
     'EventLinkPlugin',
