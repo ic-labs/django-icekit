@@ -58,6 +58,7 @@ setuptools.setup(
         'django-multiurl==1.1.0',
         'django-object-actions==0.10.0',
         'django-polymorphic==1.3',
+        'django-polymorphic-tree==1.4',
         'django-wysiwyg==0.8.0',
         'django_extensions==1.9.9',
         'html5lib==0.99',
