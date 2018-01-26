@@ -1,6 +1,7 @@
 from glamkit_collections.contrib.work_creator.models import WorkBase
 from django.db import models
 
+
 class Artwork(WorkBase):
     medium_display = models.CharField(
         blank=True,
@@ -12,6 +13,7 @@ class Artwork(WorkBase):
         'gk_collections_work_creator.WorkCategory',
         blank=True,
         null=True,
+        related_name='artworks',
         help_text='A broad category that the work belongs to, e.g., "Painting", "Sculpture"'
     )
 
