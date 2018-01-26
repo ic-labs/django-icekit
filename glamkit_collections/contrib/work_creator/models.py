@@ -529,6 +529,11 @@ class WorkImageType(TitleSlugMixin):
         verbose_name = "Image type"
 
 
+class WorkCategory(TitleSlugMixin):
+    class Meta:
+        verbose_name = "Image type"
+
+
 class WorkImage(ImageLinkMixin):
     work = models.ForeignKey(WorkBase, on_delete=models.CASCADE)
     type = models.ForeignKey(WorkImageType, blank=True, null=True, on_delete=models.SET_NULL)

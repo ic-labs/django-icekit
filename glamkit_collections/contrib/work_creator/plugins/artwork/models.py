@@ -8,6 +8,12 @@ class Artwork(WorkBase):
         help_text='A display field for information concerning the '
                   'material/media & support of the object'
     )
+    category = models.ForeignKey(
+        'gk_collections_work_creator.WorkCategory',
+        blank=True,
+        null=True,
+        help_text='A broad category that the work belongs to, e.g., "Painting", "Sculpture"'
+    )
 
     # how big is it
     dimensions_is_two_dimensional = models.BooleanField(
@@ -56,3 +62,4 @@ class Artwork(WorkBase):
         null=True,
         help_text="The measurement of the object\'s weight, in kilograms"
     )
+    is_on_display = models.BooleanField(default=False, help_text='Is the object on display within the gallery?')

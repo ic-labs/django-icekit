@@ -3,7 +3,19 @@ from glamkit_collections.contrib.work_creator.admin import WorkChildAdmin
 
 
 class ArtworkAdmin(WorkChildAdmin):
-    fieldsets = WorkChildAdmin.fieldsets[0:3] + (
+    fieldsets = WorkChildAdmin.fieldsets[0:2] + (
+        ('Details', {
+            'fields': (
+                'credit_line',
+                'accession_number',
+                'is_on_display',
+                'category',
+                'department',
+                'list_image',
+                'boosted_search_terms',
+                'admin_notes',
+            ),
+        }),
         ('Medium', {
             'fields': (
                 'medium_display',
@@ -21,3 +33,5 @@ class ArtworkAdmin(WorkChildAdmin):
             )
         }),
     ) + WorkChildAdmin.fieldsets[3:]
+
+    raw_id_fields = WorkChildAdmin.raw_id_fields + ('category',)
