@@ -11,7 +11,7 @@ backports-abc==0.5        # via tornado
 certifi==2018.1.18        # via tornado
 commonmark==0.7.4         # via recommonmark
 docutils==0.14          # via recommonmark, sphinx
-imagesize==0.7.1          # via sphinx
+imagesize==1.0.0          # via sphinx
 Jinja2==2.10             # via sphinx
 livereload==2.5.1         # via sphinx-autobuild
 MarkupSafe==1.0           # via jinja2
