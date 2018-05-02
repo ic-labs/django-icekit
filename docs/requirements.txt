@@ -13,7 +13,7 @@ commonmark==0.7.5         # via recommonmark
 docutils==0.14          # via recommonmark, sphinx
 imagesize==1.0.0          # via sphinx
 Jinja2==2.10             # via sphinx
-livereload==2.5.1         # via sphinx-autobuild
+livereload==2.5.2         # via sphinx-autobuild
 MarkupSafe==1.0           # via jinja2
 pathtools==0.1.2          # via sphinx-autobuild, watchdog
 port-for==0.4           # via sphinx-autobuild
