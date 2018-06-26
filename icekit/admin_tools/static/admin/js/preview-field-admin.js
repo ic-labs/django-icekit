@@ -47,7 +47,7 @@
 			insertPreview(field, html);
 		} );
 		//trigger initial change to load preview on initial form load.
-		$(input_selector).change();
+		$(input_selector).not("p[class^='any_urlfield-url-'] *").change();
 
 
 		// HACK to override `dismissRelatedLookupPopup()` and
