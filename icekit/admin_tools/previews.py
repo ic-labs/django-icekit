@@ -1,13 +1,16 @@
-from django.contrib.contenttypes.models import ContentType
-from icekit.admin_tools.utils import admin_link
-
-from django import http
-from django.conf.urls import patterns, url
-from django.contrib import admin
 try:
     import json
 except ImportError:
     from django.utils import simplejson as json
+
+from django import http
+from django.conf.urls import patterns, url
+from django.contrib import admin
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import FieldDoesNotExist
+
+from icekit.admin_tools.utils import admin_link
+
 
 class RawIdPreviewAdminMixin(admin.ModelAdmin):
     """
@@ -155,9 +158,14 @@ class RawIdPreviewAdminMixin(admin.ModelAdmin):
                     content_type = ContentType.objects.get_for_model(inline.model)
                     if inline_model_name == content_type.model:
                         # this is our guy
-                        target_model_admin = self.admin_site._registry.get(
-                            inline.model._meta.get_field(sub_field_name).rel.to
-                        )
+                        try:
+                            target_model_admin = self.admin_site._registry.get(
+                                inline.model._meta.get_field(sub_field_name).rel.to
+                            )
+                        except (AttributeError, FieldDoesNotExist):
+                            # For lookups on non-existent fields or fields that
+                            # aren't relation fields, 404 instead of 500
+                            raise http.Http404
                         break
 
             # make a simplified field name for preview_FOO override
