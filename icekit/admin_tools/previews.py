@@ -128,6 +128,12 @@ class RawIdPreviewAdminMixin(admin.ModelAdmin):
             else:
                 model = self.model
 
+        # Get the model admin for the real model to use instead of self when
+        # getting inline instances
+        model_admin = self
+        if model != self.model:
+            model_admin = self.admin_site._registry.get(model, self)
+
         try:
             ids = map(int, raw_ids.split(','))
         except ValueError:
@@ -153,7 +159,7 @@ class RawIdPreviewAdminMixin(admin.ModelAdmin):
                 )
             else:
                 # look in (injected) inlines for the inline model
-                inlines = self.get_inline_instances(request)
+                inlines = model_admin.get_inline_instances(request)
                 for inline in inlines:
                     content_type = ContentType.objects.get_for_model(inline.model)
                     if inline_model_name == content_type.model:
