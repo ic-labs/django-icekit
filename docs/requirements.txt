@@ -12,7 +12,7 @@ certifi==2019.3.9        # via tornado
 commonmark==0.8.1         # via recommonmark
 docutils==0.14          # via recommonmark, sphinx
 imagesize==1.1.0          # via sphinx
-Jinja2==2.10             # via sphinx
+Jinja2==2.10.1             # via sphinx
 livereload==2.6.0         # via sphinx-autobuild
 MarkupSafe==1.1.1           # via jinja2
 pathtools==0.1.2          # via sphinx-autobuild, watchdog
