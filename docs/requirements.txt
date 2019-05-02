@@ -9,7 +9,7 @@ argh==0.26.2              # via sphinx-autobuild, watchdog
 babel==2.6.0              # via sphinx
 backports-abc==0.5        # via tornado
 certifi==2019.3.9        # via tornado
-commonmark==0.8.1         # via recommonmark
+commonmark==0.9.0         # via recommonmark
 docutils==0.14          # via recommonmark, sphinx
 imagesize==1.1.0          # via sphinx
 Jinja2==2.10.1             # via sphinx
