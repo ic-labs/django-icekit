@@ -172,7 +172,7 @@ setuptools.setup(
             'pyparsing',
             'unidecode',
             'edtf>=2.5',
-            'webcolors==1.9',
+            'webcolors==1.9.1',
             'colormath==3.0.0',
             # Disable as it's devpi-only
             # 'colorweave==0.1+0.ce27c83b4e06a8185531538fa11c18c5ea2c1aba.ixc',
