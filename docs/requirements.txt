@@ -23,7 +23,7 @@ PyYAML==5.3              # via sphinx-autobuild, watchdog
 recommonmark==0.6.0
 requests==2.22.0          # via sphinx
 singledispatch==3.4.0.3   # via tornado
-six==1.13.0               # via livereload, singledispatch, sphinx
+six==1.14.0               # via livereload, singledispatch, sphinx
 snowballstemmer==2.0.0    # via sphinx
 sphinx-autobuild==0.7.1
 sphinx==2.3.1
