@@ -26,6 +26,6 @@ singledispatch==3.4.0.3   # via tornado
 six==1.14.0               # via livereload, singledispatch, sphinx
 snowballstemmer==2.0.0    # via sphinx
 sphinx-autobuild==0.7.1
-sphinx==3.0.0
+sphinx==3.0.1
 tornado==6.0.4            # via livereload, sphinx-autobuild
 watchdog==0.10.2           # via sphinx-autobuild
