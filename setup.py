@@ -142,7 +142,7 @@ setuptools.setup(
             'elasticstack',
         ],
         'test': [
-            'celery[redis]==4.4.4',
+            'celery[redis]==4.4.5',
             'coverage',
             'coveralls',
             'django-dynamic-fixture',
