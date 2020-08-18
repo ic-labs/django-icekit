@@ -138,7 +138,7 @@ setuptools.setup(
         'search': [
             'django-fluent-pages[flatpage,fluentpage]',
             'django-haystack',
-            'elasticsearch>=7.8,<7.9',
+            'elasticsearch>=7.9,<7.10',
             'elasticstack',
         ],
         'test': [
