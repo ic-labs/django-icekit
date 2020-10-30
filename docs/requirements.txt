@@ -27,5 +27,5 @@ six==1.15.0               # via livereload, singledispatch, sphinx
 snowballstemmer==2.0.0    # via sphinx
 sphinx-autobuild==2020.9.1
 sphinx==3.2.1
-tornado==6.0.4            # via livereload, sphinx-autobuild
+tornado==6.1            # via livereload, sphinx-autobuild
 watchdog==0.10.3           # via sphinx-autobuild
