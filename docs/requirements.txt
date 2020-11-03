@@ -18,7 +18,7 @@ MarkupSafe==1.1.1           # via jinja2
 pathtools==0.1.2          # via sphinx-autobuild, watchdog
 port-for==0.4           # via sphinx-autobuild
 Pygments==2.7.2           # via sphinx
-pytz==2020.1              # via babel
+pytz==2020.4              # via babel
 PyYAML==5.3.1              # via sphinx-autobuild, watchdog
 recommonmark==0.6.0
 requests==2.24.0          # via sphinx
@@ -26,6 +26,6 @@ singledispatch==3.4.0.3   # via tornado
 six==1.15.0               # via livereload, singledispatch, sphinx
 snowballstemmer==2.0.0    # via sphinx
 sphinx-autobuild==2020.9.1
-sphinx==3.2.1
+sphinx==3.3.0
 tornado==6.1            # via livereload, sphinx-autobuild
 watchdog==0.10.3           # via sphinx-autobuild
