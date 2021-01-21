@@ -24,7 +24,7 @@ recommonmark==0.7.1
 requests==2.25.1          # via sphinx
 singledispatch==3.4.0.3   # via tornado
 six==1.15.0               # via livereload, singledispatch, sphinx
-snowballstemmer==2.0.0    # via sphinx
+snowballstemmer==2.1.0    # via sphinx
 sphinx-autobuild==2020.9.1
 sphinx==3.4.3
 tornado==6.1            # via livereload, sphinx-autobuild
