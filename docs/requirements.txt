@@ -22,7 +22,7 @@ pytz==2021.1              # via babel
 PyYAML==5.4.1              # via sphinx-autobuild, watchdog
 recommonmark==0.7.1
 requests==2.25.1          # via sphinx
-singledispatch==3.4.0.3   # via tornado
+singledispatch==3.4.0.4   # via tornado
 six==1.15.0               # via livereload, singledispatch, sphinx
 snowballstemmer==2.1.0    # via sphinx
 sphinx-autobuild==2020.9.1
