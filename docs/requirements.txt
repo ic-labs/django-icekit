@@ -10,7 +10,7 @@ babel==2.9.0              # via sphinx
 backports-abc==0.5        # via tornado
 certifi==2020.12.5        # via tornado
 commonmark==0.9.1         # via recommonmark
-docutils==0.17          # via recommonmark, sphinx
+docutils==0.17.1          # via recommonmark, sphinx
 imagesize==1.2.0          # via sphinx
 Jinja2==2.11.3             # via sphinx
 livereload==2.6.3         # via sphinx-autobuild
