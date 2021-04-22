@@ -28,4 +28,4 @@ snowballstemmer==2.1.0    # via sphinx
 sphinx-autobuild==2021.3.14
 sphinx==3.5.4
 tornado==6.1            # via livereload, sphinx-autobuild
-watchdog==2.0.2           # via sphinx-autobuild
+watchdog==2.0.3           # via sphinx-autobuild
