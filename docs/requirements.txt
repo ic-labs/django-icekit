@@ -14,7 +14,7 @@ docutils==0.17.1          # via recommonmark, sphinx
 imagesize==1.2.0          # via sphinx
 Jinja2==2.11.3             # via sphinx
 livereload==2.6.3         # via sphinx-autobuild
-MarkupSafe==1.1.1           # via jinja2
+MarkupSafe==2.0.0           # via jinja2
 pathtools==0.1.2          # via sphinx-autobuild, watchdog
 port-for==0.5.0           # via sphinx-autobuild
 Pygments==2.9.0           # via sphinx
