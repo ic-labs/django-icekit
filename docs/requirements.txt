@@ -16,7 +16,7 @@ Jinja2==3.0.1             # via sphinx
 livereload==2.6.3         # via sphinx-autobuild
 MarkupSafe==2.0.1           # via jinja2
 pathtools==0.1.2          # via sphinx-autobuild, watchdog
-port-for==0.6.0           # via sphinx-autobuild
+port-for==0.6.1           # via sphinx-autobuild
 Pygments==2.9.0           # via sphinx
 pytz==2021.1              # via babel
 PyYAML==5.4.1              # via sphinx-autobuild, watchdog
