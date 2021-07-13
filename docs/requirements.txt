@@ -21,7 +21,7 @@ Pygments==2.9.0           # via sphinx
 pytz==2021.1              # via babel
 PyYAML==5.4.1              # via sphinx-autobuild, watchdog
 recommonmark==0.7.1
-requests==2.25.1          # via sphinx
+requests==2.26.0          # via sphinx
 singledispatch==3.6.2   # via tornado
 six==1.16.0               # via livereload, singledispatch, sphinx
 snowballstemmer==2.1.0    # via sphinx
