@@ -61,7 +61,7 @@ setuptools.setup(
         'django-polymorphic>=0.8,!=1,!=1.0.1',
         'django-wysiwyg',
         'django_extensions',
-        'html5lib==0.999',  # See: https://github.com/html5lib/html5lib-python/issues/189 and https://github.com/pydanny-archive/django-wysiwyg/issues/61
+        'html5lib==1.1',  # See: https://github.com/html5lib/html5lib-python/issues/189 and https://github.com/pydanny-archive/django-wysiwyg/issues/61
         'nltk',
         'Pillow>=4',  # See: https://github.com/python-pillow/Pillow/issues/2206
         'pip-tools',
@@ -95,7 +95,7 @@ setuptools.setup(
             'Werkzeug',
         ],
         'django18': [
-            'Django>=1.8,<1.9',  # LTS
+            'Django>=3.2,<3.3',  # LTS
         ],
         'forms': [
             'django-forms-builder',
@@ -117,7 +117,7 @@ setuptools.setup(
             'django-polymorphic-auth',
             'django-post-office',
             'django-redis',
-            'django-reversion>=1.9.3,<1.10',  # 1.9.3+ use DB transactions 1.10 has breaking changes for Django 1.9'
+            'django-reversion>=4.0,<4.1',  # 1.9.3+ use DB transactions 1.10 has breaking changes for Django 1.9'
             'django-storages<1.6', # 1.7 breaks s3 URLs - see https://github.com/jschneier/django-storages/issues/343
             'django-test-without-migrations',
             'django-timezone',
@@ -138,11 +138,11 @@ setuptools.setup(
         'search': [
             'django-fluent-pages[flatpage,fluentpage]',
             'django-haystack',
-            'elasticsearch>=1.0.0,<2.0.0',
+            'elasticsearch>=7.14,<7.15',
             'elasticstack',
         ],
         'test': [
-            'celery[redis]==3.1.24',
+            'celery[redis]==5.1.2',
             'coverage',
             'coveralls',
             'django-dynamic-fixture',
@@ -172,8 +172,8 @@ setuptools.setup(
             'pyparsing',
             'unidecode',
             'edtf>=2.5',
-            'webcolors==1.5',
-            'colormath==2.1.1',
+            'webcolors==1.11.1',
+            'colormath==3.0.0',
             # Disable as it's devpi-only
             # 'colorweave==0.1+0.ce27c83b4e06a8185531538fa11c18c5ea2c1aba.ixc',
         ]
