@@ -1,6 +1,7 @@
 from urlparse import urljoin
 
 from icekit.content_collections.abstract_models import TitleSlugMixin
+from icekit.fields import ICEkitURLField
 from icekit.plugins.iiif.utils import SUPPORTED_EXTENSIONS
 from icekit.plugins.iiif.utils import SUPPORTED_QUALITY
 from django.db import models
@@ -22,7 +23,16 @@ class ImageItem(abstract_models.AbstractImageItem):
     """
     An image from the Image model.
     """
-    pass
+    carousel_cta_url = ICEkitURLField(
+        "Carousel CTA URL",
+        blank=True,
+        null=True,
+    )
+    carousel_cta_text_label = models.CharField(
+        "Carousel CTA Text Label",
+        max_length=255,
+        blank=True,
+    )
 
 
 class ImageRepurposeConfig(TitleSlugMixin):

@@ -20,6 +20,12 @@ class ImagePlugin(ContentPlugin):
                 # 'rendered_caption',
             )
         }),
+        (None, {
+            'fields': (
+                'carousel_cta_url',
+                'carousel_cta_text_label',
+            )
+        }),
         ('Caption', {
             'classes': ('collapse',),
             'fields': (
