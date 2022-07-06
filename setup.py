@@ -61,13 +61,13 @@ setuptools.setup(
         'django-polymorphic>=0.8,!=1,!=1.0.1',
         'django-wysiwyg',
         'django_extensions',
-        'html5lib==0.999',  # See: https://github.com/html5lib/html5lib-python/issues/189 and https://github.com/pydanny-archive/django-wysiwyg/issues/61
+        'html5lib==0.999999999',  # See: https://github.com/html5lib/html5lib-python/issues/189 and https://github.com/pydanny-archive/django-wysiwyg/issues/61
         'nltk',
         'Pillow>=4',  # See: https://github.com/python-pillow/Pillow/issues/2206
         'pip-tools',
         'requests',
         'unidecode',
-        'bleach<2',  # Bleach 2 adds a dependency on html5lib>=0.99999999, which breaks our above requirement of html5lib==0.999
+        'bleach<2',  # Bleach 2 adds a dependency on html5lib>=0.99999999, which breaks our above requirement of html5lib==0.999999999
 
         # Django 1.8-specific version dependencies that must be here to be
         # respected. Ideally these restrictions would go below in the
